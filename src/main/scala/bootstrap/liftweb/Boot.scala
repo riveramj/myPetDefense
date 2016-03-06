@@ -33,7 +33,10 @@ class Boot {
       true,
       Schemifier.infoF _,
       Admin,
-      User
+      User,
+      Product,
+      Order,
+      Subscription
     )
 
     // where to search snippet
