@@ -8,6 +8,7 @@ import net.liftweb._
   import http._
 
 import com.fleaTick.util._
+import com.fleaTick.model._
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -30,7 +31,9 @@ class Boot {
 
     Schemifier.schemify(
       true,
-      Schemifier.infoF _
+      Schemifier.infoF _,
+      Admin,
+      User
     )
 
     // where to search snippet

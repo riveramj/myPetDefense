@@ -1,4 +1,4 @@
-package com.fleaTick
+package com.fleaTick.model
 
 import net.liftweb._
   import mapper._
@@ -23,10 +23,8 @@ class User extends LongKeyedMapper[User] with IdPK {
   object email extends MappedEmail(this, 50)
   object password extends MappedString(this, 100)
   object salt extends MappedString(this, 100)
-  object orgId extends MappedString(this, 100)
   object street extends MappedString(this, 100)
   object admin extends MappedLongForeignKey(this, Admin)
-  object company extends MappedLongForeignKey(this, Company)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -37,8 +35,7 @@ class User extends LongKeyedMapper[User] with IdPK {
     firstName: String,
     lastName: String,
     email: String,
-    password: String,
-    company: Box[Company] = None
+    password: String
   ): Box[User]  = {
     val user = Full(User.create
       ._id(generateLongId)
@@ -46,21 +43,7 @@ class User extends LongKeyedMapper[User] with IdPK {
       .lastName(lastName)
       .email(email))
 
-    val userWithCompany = (for {
-      user <- user
-      company <- company
-    } yield user.company(company)) or user
-
     user.map(setUserPassword(_, password))
-  }
-
-  def findAllByCompany(company: Company) = 
-    User.findAll(By(User.company, company))
-
-  def getByEmail(email: String): Box[User] = User.findAll(By(User.email, email)) match {
-    case user :: Nil => Full(user)
-    case Nil => Empty
-    case _ => Failure("More than one user was returned")
   }
 
   private def getSalt: String = generateStringId
