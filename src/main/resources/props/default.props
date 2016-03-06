@@ -1,0 +1,6 @@
+[Database]
+db.driver=org.postgresql.Driver
+db.url=jdbc:postgresql:fleaTick
+db.user=fleaTick
+db.password=fleaTick
+db.host=localhost
