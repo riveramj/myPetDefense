@@ -36,7 +36,9 @@ class Boot {
       User,
       Product,
       Order,
-      Subscription
+      Subscription,
+      Payment,
+      Shipment
     )
 
     // where to search snippet
