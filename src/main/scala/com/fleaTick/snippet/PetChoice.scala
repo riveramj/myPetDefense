@@ -1,7 +1,7 @@
 package com.fleaTick.snippet
 
 import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml
+import net.liftweb.http.{S, SHtml}
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
@@ -13,10 +13,12 @@ object PetChoice extends Loggable {
     import Loc._
 
   val menu = Menu.i("Pet Choice") / "pet-choice"
+
+  object petChoice extends SessionVar[Box[String]](Empty)
 }
 
 class PetChoice extends Loggable {
-  object petChoice extends SessionVar[Box[String]](Empty)
+  import PetChoice._
 
   var selectedPet = ""
 
@@ -25,6 +27,8 @@ class PetChoice extends Loggable {
   def render = {
     def choosePet() = {
       petChoice(Full(selectedPet))
+
+      S.redirectTo(PetSize.menu.loc.calcDefaultHref)
     }
 
     ClearClearable andThen

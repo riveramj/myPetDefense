@@ -9,6 +9,7 @@ object Paths {
   
   def siteMap = SiteMap(
     index,
-    PetChoice.menu
+    PetChoice.menu,
+    PetSize.menu
   )
 }

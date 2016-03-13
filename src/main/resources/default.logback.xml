@@ -5,6 +5,8 @@
     </encoder>
   </appender>
 
+  <logger name="net.liftweb.util.TimeHelpers" level="warn"/>
+
   <root level="info">
     <appender-ref ref="STDOUT" />
   </root>
