@@ -8,6 +8,7 @@ import net.liftweb.util.ClearClearable
 import net.liftweb.http._
 
 import com.fleaTick.snippet.PetChoice._
+import com.fleaTick.model._
 
 object PetSize extends Loggable {
   import net.liftweb.sitemap._
@@ -15,23 +16,31 @@ object PetSize extends Loggable {
 
   val menu = Menu.i("Pet Size") / "pet-size"
 
-  object petSize extends SessionVar[Box[String]](Empty)
+  object petSize extends SessionVar[Box[AnimalSize.Value]](Empty)
 }
 
 class PetSize extends Loggable {
   import PetSize._
 
-  var selectedSize = ""
+  var selectedSize: Box[AnimalSize.Value] = Empty
+
+  val possiblePetSizes = 
+    if (petChoice.is == Full(AnimalType.Cat))
+      AnimalSize.values.toList.filter(size => (size == AnimalSize.Small) || (size == AnimalSize.Large))
+    else
+      AnimalSize.values.toList
 
   val petSizes = 
-    if (petChoice.is == Full("Dog"))
-      SHtml.radio(Seq("Small", "Medium", "Large", "XLarge"), petSize.is, selectedSize = _).toForm
-    else
-      SHtml.radio(Seq("Small", "Large"), petSize.is, selectedSize = _).toForm
+    SHtml.radio(
+      possiblePetSizes.map(_.toString),
+      petSize.is.map(_.toString),
+      selected => selectedSize = Full(AnimalSize.withName(selected)) 
+    ).toForm
 
   def render = {
     def chooseSize() = {
-      petSize(Full(selectedSize))
+      petSize(selectedSize)
+      println(petSize.is)
 
       S.redirectTo(PetProduct.menu.loc.calcDefaultHref)
     }

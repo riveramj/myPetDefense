@@ -9,6 +9,7 @@ import net.liftweb.http._
 
 import com.fleaTick.snippet.PetChoice._
 import com.fleaTick.snippet.PetSize._
+import com.fleaTick.model._
 
 object PetProduct extends Loggable {
   import net.liftweb.sitemap._
@@ -25,7 +26,7 @@ class PetProduct extends Loggable {
   var selectedProduct = ""
 
   val petProducts = 
-    if (petChoice.is == Full("Dog"))
+    if (petChoice.is == Full(AnimalType.Dog))
       SHtml.radio(Seq("Adventure", "Urban", "Rural"), petProduct.is, selectedProduct = _).toForm
     else
       SHtml.radio(Seq("Indoor", "Outdoor"), petProduct.is, selectedProduct = _).toForm
