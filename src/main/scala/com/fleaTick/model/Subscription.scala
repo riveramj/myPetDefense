@@ -9,6 +9,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     override def dbIndexed_? = true
   }
   object user extends MappedLongForeignKey(this, User)
+  object pet extends MappedLongForeignKey(this, Pet)
   object order extends MappedLongForeignKey(this, Order)
   object product extends MappedLongForeignKey(this, Product)
   object subscriptionType extends MappedEnum(this, SubscriptionType)

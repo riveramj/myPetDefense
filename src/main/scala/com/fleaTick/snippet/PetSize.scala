@@ -25,18 +25,20 @@ class PetSize extends Loggable {
 
   val petSizes = 
     if (petChoice.is == Full("Dog"))
-      SHtml.radio(Seq("Small", "Medium", "Large", "X-Large"), petSize.is, selectedSize = _).toForm
+      SHtml.radio(Seq("Small", "Medium", "Large", "XLarge"), petSize.is, selectedSize = _).toForm
     else
       SHtml.radio(Seq("Small", "Large"), petSize.is, selectedSize = _).toForm
 
   def render = {
     def chooseSize() = {
       petSize(Full(selectedSize))
+
+      S.redirectTo(PetProduct.menu.loc.calcDefaultHref)
     }
 
     ClearClearable andThen
-    ".pet-size" #> petSizes.map { pet =>
-      "input" #> pet
+    ".pet-size" #> petSizes.map { size =>
+      "input" #> size
     } &
     "button" #> SHtml.onSubmitUnit(chooseSize)
   }

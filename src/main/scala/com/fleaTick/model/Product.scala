@@ -19,11 +19,3 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
 }
 
 object Product extends Product with LongKeyedMetaMapper[Product]
-
-object AnimalType extends Enumeration {
-  val Dog, Cat = Value
-}
-
-object AnimalSize extends Enumeration {
-  val Small, Medium, Large, XLarge = Value
-}
