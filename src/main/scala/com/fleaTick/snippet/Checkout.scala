@@ -10,6 +10,7 @@ import net.liftweb.http._
 import com.fleaTick.snippet.PetChoice._
 import com.fleaTick.snippet.PetSize._
 import com.fleaTick.snippet.PetProduct._
+import com.fleaTick.snippet.Plan._
 import com.fleaTick.model._
 
 object Checkout extends Loggable {
@@ -26,7 +27,8 @@ class Checkout extends Loggable {
   def render = {
     "#type span *" #> petChoice.is.map(_.toString) &
     "#size span *" #> petSize.is.map(_.toString) &
-    "#product span *" #> petProduct.is
+    "#product span *" #> petProduct.is &
+    "#plan span *" #> plan.is
   }
 }
 

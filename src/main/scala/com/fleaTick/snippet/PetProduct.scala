@@ -35,7 +35,7 @@ class PetProduct extends Loggable {
     def chooseProduct() = {
       petProduct(Full(selectedProduct))
 
-      S.redirectTo(Checkout.menu.loc.calcDefaultHref)
+      S.redirectTo(Plan.menu.loc.calcDefaultHref)
     }
 
     ClearClearable andThen
