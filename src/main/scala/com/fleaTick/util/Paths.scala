@@ -11,6 +11,7 @@ object Paths {
     index,
     PetChoice.menu,
     PetSize.menu,
-    PetProduct.menu
+    PetProduct.menu,
+    Checkout.menu
   )
 }

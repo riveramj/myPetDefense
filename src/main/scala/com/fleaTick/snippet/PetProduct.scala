@@ -27,13 +27,15 @@ class PetProduct extends Loggable {
 
   val petProducts = 
     if (petChoice.is == Full(AnimalType.Dog))
-      SHtml.radio(Seq("Adventure", "Urban", "Rural"), petProduct.is, selectedProduct = _).toForm
+      SHtml.radio(Seq("Adventure Product", "Urban Product", "Rural Product"), petProduct.is, selectedProduct = _).toForm
     else
-      SHtml.radio(Seq("Indoor", "Outdoor"), petProduct.is, selectedProduct = _).toForm
+      SHtml.radio(Seq("Indoor Product", "Outdoor Product"), petProduct.is, selectedProduct = _).toForm
 
   def render = {
     def chooseProduct() = {
       petProduct(Full(selectedProduct))
+
+      S.redirectTo(Checkout.menu.loc.calcDefaultHref)
     }
 
     ClearClearable andThen

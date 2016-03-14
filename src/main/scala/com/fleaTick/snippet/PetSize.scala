@@ -40,7 +40,6 @@ class PetSize extends Loggable {
   def render = {
     def chooseSize() = {
       petSize(selectedSize)
-      println(petSize.is)
 
       S.redirectTo(PetProduct.menu.loc.calcDefaultHref)
     }
