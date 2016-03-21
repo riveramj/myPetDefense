@@ -16,6 +16,15 @@ object DataLoader extends Loggable {
       )
 
       Product.createProduct(
+        "Urban Product",
+        "For the urban-chic dog",
+        5,
+        AnimalType.Dog,
+        AnimalSize.Medium,
+        SubscriptionType.Year
+      )
+
+      Product.createProduct(
         "Rural Product",
         "For the rural dog",
         5,
