@@ -114,7 +114,7 @@ class Checkout extends Loggable {
   def summary = {
     "#type span *" #> petChoice.is.map(_.toString) &
     "#size span *" #> petSize.is.map(_.toString) &
-    "#product span *" #> petProduct.is &
+    "#product span *" #> petProduct.is.map(_.name.get) &
     "#plan span *" #> plan.is.map(_.toString)
   }
 

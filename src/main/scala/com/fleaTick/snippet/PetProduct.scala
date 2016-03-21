@@ -6,6 +6,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.http._
+import net.liftweb.mapper.By
 
 import com.fleaTick.snippet.PetChoice._
 import com.fleaTick.snippet.PetSize._
@@ -17,23 +18,34 @@ object PetProduct extends Loggable {
 
   val menu = Menu.i("Pet Product") / "pet-product"
 
-  object petProduct extends SessionVar[Box[String]](Empty)
+  object petProduct extends SessionVar[Box[Product]](Empty)
 }
 
 class PetProduct extends Loggable {
   import PetProduct._
 
-  var selectedProduct = ""
+  var selectedProduct: Box[Product] = Empty
 
-  val petProducts = 
+  val products = 
     if (petChoice.is == Full(AnimalType.Dog))
-      SHtml.radio(Seq("Adventure Product", "Urban Product", "Rural Product"), petProduct.is, selectedProduct = _).toForm
+      Product.findAll(By(Product.animalType, AnimalType.Dog))
     else
-      SHtml.radio(Seq("Indoor Product", "Outdoor Product"), petProduct.is, selectedProduct = _).toForm
+      Product.findAll(By(Product.animalType, AnimalType.Cat))
+
+  val petProducts = SHtml.radioElem(
+    products.map(_.name), 
+    petProduct.is.map(_.name)
+  ){
+    selected => {
+      selectedProduct = products.filter { case product => 
+        Full(product.name) == selected
+      }.headOption
+    }
+  }.toForm
 
   def render = {
     def chooseProduct() = {
-      petProduct(Full(selectedProduct))
+      petProduct(selectedProduct)
 
       S.redirectTo(Plan.menu.loc.calcDefaultHref)
     }
@@ -45,5 +57,3 @@ class PetProduct extends Loggable {
     "button" #> SHtml.onSubmitUnit(chooseProduct)
   }
 }
-
-
