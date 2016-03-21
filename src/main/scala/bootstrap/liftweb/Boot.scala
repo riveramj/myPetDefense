@@ -34,8 +34,10 @@ class Boot {
       Schemifier.infoF _,
       Admin,
       User,
+      Pet,
       Product,
       Order,
+      OrderLineItem,
       Subscription,
       Payment,
       Shipment

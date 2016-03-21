@@ -1,11 +1,17 @@
 package com.fleaTick.model
 
-import net.liftweb.mapper._
+import net.liftweb._
+  import mapper._
+  import common._
+  import util._
+
+import com.fleaTick.util.RandomIdGenerator._
+
 import java.util.Date
 
-class Pet extends LongKeyedMapper[Pet] with IdPK with OneToMany[Long, Pet] {
+class Pet extends LongKeyedMapper[Pet] with IdPK {
   def getSingleton = Pet
-  object PetId extends MappedLong(this){
+  object petId extends MappedLong(this){
     override def dbIndexed_? = true
   }
   object user extends MappedLongForeignKey(this, User)
@@ -16,6 +22,21 @@ class Pet extends LongKeyedMapper[Pet] with IdPK with OneToMany[Long, Pet] {
   object birthday extends MappedDateTime(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
+  }
+
+  def createNewPet(
+    user: User,
+    name: String,
+    animalType: AnimalType.Value,
+    size: AnimalSize.Value
+  ) = {
+    Pet.create
+    .petId(generateLongId)
+    .user(user)
+    .name(name)
+    .animalType(animalType)
+    .size(size)
+    .saveMe
   }
 }
 

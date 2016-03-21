@@ -14,7 +14,7 @@ import java.util.Date
 
 class User extends LongKeyedMapper[User] with IdPK {
   def getSingleton = User
-  object _id extends MappedLong(this) {
+  object userId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
 
@@ -23,7 +23,12 @@ class User extends LongKeyedMapper[User] with IdPK {
   object email extends MappedEmail(this, 50)
   object password extends MappedString(this, 100)
   object salt extends MappedString(this, 100)
-  object street extends MappedString(this, 100)
+  object street1 extends MappedString(this, 100)
+  object street2 extends MappedString(this, 100)
+  object city extends MappedString(this, 100)
+  object state extends MappedString(this, 100)
+  object zip extends MappedString(this, 100)
+  object phone extends MappedString(this, 100)
   object admin extends MappedLongForeignKey(this, Admin)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
@@ -35,15 +40,28 @@ class User extends LongKeyedMapper[User] with IdPK {
     firstName: String,
     lastName: String,
     email: String,
-    password: String
-  ): Box[User]  = {
-    val user = Full(User.create
-      ._id(generateLongId)
+    password: String,
+    street1: String,
+    street2: String,
+    city: String,
+    state: String,
+    zip: String,
+    phone: String
+  ) = {
+    val user =
+      User.create
+      .userId(generateLongId)
       .firstName(firstName)
       .lastName(lastName)
-      .email(email))
-
-    user.map(setUserPassword(_, password))
+      .email(email)
+      .street1(street1)
+      .street2(street2)
+      .city(city)
+      .state(state)
+      .zip(zip)
+      .phone(phone)
+    
+    setUserPassword(user, password)
   }
 
   private def getSalt: String = generateStringId
