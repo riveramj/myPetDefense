@@ -43,6 +43,8 @@ class Boot {
       Shipment
     )
 
+    DataLoader.loadProducts
+
     // where to search snippet
     LiftRules.addToPackages("com.fleaTick")
     
