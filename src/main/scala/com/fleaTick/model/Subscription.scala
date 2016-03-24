@@ -42,7 +42,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
 object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]
 
 object SubscriptionType extends Enumeration {
-  val Month, Quarter, HalfYear, Year = Value
+  val Month, Year = Value
 }
 
 object Status extends Enumeration {
