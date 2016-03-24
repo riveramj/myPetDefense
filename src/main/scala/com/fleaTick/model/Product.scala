@@ -15,7 +15,6 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   object price extends MappedLong(this)
   object animalType extends MappedEnum(this, AnimalType)
   object size extends MappedEnum(this, AnimalSize)
-  object subscriptionType extends MappedEnum(this, SubscriptionType)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -35,11 +34,8 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     .price(price)
     .animalType(animalType)
     .size(animalSize)
-    .subscriptionType(subscriptionType)
     .saveMe
   }
-
-
 }
 
 object Product extends Product with LongKeyedMetaMapper[Product]
