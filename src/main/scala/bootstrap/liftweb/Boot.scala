@@ -33,7 +33,7 @@ class Boot {
       true,
       Schemifier.infoF _,
       Admin,
-      User,
+      Parent,
       Pet,
       Product,
       Order,

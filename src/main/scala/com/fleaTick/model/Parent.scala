@@ -12,9 +12,9 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator
 
 import java.util.Date
 
-class User extends LongKeyedMapper[User] with IdPK {
-  def getSingleton = User
-  object userId extends MappedLong(this) {
+class Parent extends LongKeyedMapper[Parent] with IdPK {
+  def getSingleton = Parent
+  object parentId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
 
@@ -36,7 +36,7 @@ class User extends LongKeyedMapper[User] with IdPK {
 
   def name = s"${firstName} ${lastName}"
 
-  def createNewUser(
+  def createNewParent(
     firstName: String,
     lastName: String,
     email: String,
@@ -48,9 +48,9 @@ class User extends LongKeyedMapper[User] with IdPK {
     zip: String,
     phone: String
   ) = {
-    val user =
-      User.create
-      .userId(generateLongId)
+    val parent =
+      Parent.create
+      .parentId(generateLongId)
       .firstName(firstName)
       .lastName(lastName)
       .email(email)
@@ -61,7 +61,7 @@ class User extends LongKeyedMapper[User] with IdPK {
       .zip(zip)
       .phone(phone)
     
-    setUserPassword(user, password)
+    setParentPassword(parent, password)
   }
 
   private def getSalt: String = generateStringId
@@ -70,15 +70,15 @@ class User extends LongKeyedMapper[User] with IdPK {
     new Sha256Hash(password, salt, 1024).toBase64
   }
 
-  def setUserPassword(user: User, password: String): User = {
+  def setParentPassword(Parent: Parent, password: String): Parent = {
     val salt = getSalt
     val hashedPassword = hashPassword(password, salt)
 
-    user
+    Parent
       .password(hashedPassword)
       .salt(salt)
       .saveMe
   }
 }
 
-object User extends User with LongKeyedMetaMapper[User]
+object Parent extends Parent with LongKeyedMetaMapper[Parent]

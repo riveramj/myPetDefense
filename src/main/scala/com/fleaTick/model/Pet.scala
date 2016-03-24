@@ -14,7 +14,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   object petId extends MappedLong(this){
     override def dbIndexed_? = true
   }
-  object user extends MappedLongForeignKey(this, User)
+  object parent extends MappedLongForeignKey(this, Parent)
   object name extends MappedString(this, 100)
   object breed extends MappedString(this, 100)
   object animalType extends MappedEnum(this, AnimalType)
@@ -25,14 +25,14 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   }
 
   def createNewPet(
-    user: User,
+    parent: Parent,
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value
   ) = {
     Pet.create
     .petId(generateLongId)
-    .user(user)
+    .parent(parent)
     .name(name)
     .animalType(animalType)
     .size(size)

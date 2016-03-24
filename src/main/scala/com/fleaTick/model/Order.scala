@@ -14,7 +14,7 @@ class Order extends LongKeyedMapper[Order] with IdPK with OneToMany[Long, Order]
   object orderId extends MappedLong(this){
     override def dbIndexed_? = true
   }
-  object user extends MappedLongForeignKey(this, User)
+  object parent extends MappedLongForeignKey(this, Parent)
   object subscription extends MappedLongForeignKey(this, Subscription)
   object products extends MappedOneToMany(OrderLineItem, OrderLineItem.order)
   object total extends MappedString(this, 100)
@@ -24,14 +24,14 @@ class Order extends LongKeyedMapper[Order] with IdPK with OneToMany[Long, Order]
   }
   
   def createNewOrder(
-    user: User,
+    parent: Parent,
     subscription: Subscription,
     products: List[Product],
     total: String
   ) = {
     Order.create
     .orderId(generateLongId)
-    .user(user)
+    .parent(parent)
     .subscription(subscription)
     .total(total)
     .orderDate(new Date())

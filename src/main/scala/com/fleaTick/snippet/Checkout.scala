@@ -39,8 +39,8 @@ class Checkout extends Loggable {
   var cvc = ""
   var expire = ""
 
-  def signupUser() = {
-    val user = User.createNewUser(
+  def signupParent() = {
+    val parent = Parent.createNewParent(
       firstName,
       lastName,
       email,
@@ -54,15 +54,15 @@ class Checkout extends Loggable {
     )
 
     println("===================")
-    println("user:")
-    println(user)
+    println("parent:")
+    println(parent)
 
     val pet = (
       for {
         petType <- petChoice.is
         petSize <- petSize.is
         pet = Pet.createNewPet(
-                user,
+                parent,
                 petName,
                 petType,
                 petSize
@@ -80,7 +80,7 @@ class Checkout extends Loggable {
         newPet <- pet
         newPlan <- plan.is
         newSubscription = Subscription.createNewSubscription(
-          user,
+          parent,
           newPet,
           newPlan
         )
@@ -96,7 +96,7 @@ class Checkout extends Loggable {
       for {
         newSubscription <- subscription
         newOrder = Order.createNewOrder(
-          user,
+          parent,
           newSubscription,
           List(),
           ""
@@ -130,9 +130,9 @@ class Checkout extends Loggable {
     "#card-number" #> SHtml.text(cardNumber, cardNumber = _) &
     "#cvc" #> SHtml.text(cvc, cvc = _) &
     "#expire" #> SHtml.text(expire, expire = _) &
-    "#email" #> SHtml.text(email, userEmail => email = userEmail.trim) &
+    "#email" #> SHtml.text(email, parentEmail => email = parentEmail.trim) &
     "#password" #> SHtml.password(password, password = _) &
     "#pet-name" #> SHtml.text(petName, petName = _) &
-    ".signup button" #> SHtml.onSubmitUnit(signupUser)
+    ".signup button" #> SHtml.onSubmitUnit(signupParent)
   }
 }

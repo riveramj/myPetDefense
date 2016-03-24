@@ -14,7 +14,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
   object subscriptionId extends MappedLong(this){
     override def dbIndexed_? = true
   }
-  object user extends MappedLongForeignKey(this, User)
+  object parent extends MappedLongForeignKey(this, Parent)
   object pet extends MappedLongForeignKey(this, Pet)
   object product extends MappedLongForeignKey(this, Product)
   object subscriptionType extends MappedEnum(this, SubscriptionType)
@@ -26,13 +26,13 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
   }
 
   def createNewSubscription(
-    user: User,
+    parent: Parent,
     pet: Pet,
     subscriptionType: SubscriptionType.Value
   ) = {
     Subscription.create
     .subscriptionId(generateLongId)
-    .user(user)
+    .parent(parent)
     .pet(pet)
     .subscriptionType(subscriptionType)
     .saveMe

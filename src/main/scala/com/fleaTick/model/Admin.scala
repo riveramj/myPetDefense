@@ -8,7 +8,7 @@ class Admin extends LongKeyedMapper[Admin] with IdPK with OneToMany[Long, Admin]
   object adminId extends MappedLong(this){
     override def dbIndexed_? = true
   }
-  object user extends MappedLongForeignKey(this, User)
+  object parent extends MappedLongForeignKey(this, Parent)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
