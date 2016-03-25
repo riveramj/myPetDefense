@@ -34,6 +34,7 @@ class Boot {
       Schemifier.infoF _,
       Admin,
       Parent,
+      Address,
       Pet,
       Product,
       Order,

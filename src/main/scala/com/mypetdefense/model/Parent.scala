@@ -23,11 +23,6 @@ class Parent extends LongKeyedMapper[Parent] with IdPK {
   object email extends MappedEmail(this, 50)
   object password extends MappedString(this, 100)
   object salt extends MappedString(this, 100)
-  object street1 extends MappedString(this, 100)
-  object street2 extends MappedString(this, 100)
-  object city extends MappedString(this, 100)
-  object state extends MappedString(this, 100)
-  object zip extends MappedString(this, 100)
   object phone extends MappedString(this, 100)
   object admin extends MappedLongForeignKey(this, Admin)
   object createdAt extends MappedDateTime(this) {
@@ -41,11 +36,6 @@ class Parent extends LongKeyedMapper[Parent] with IdPK {
     lastName: String,
     email: String,
     password: String,
-    street1: String,
-    street2: String,
-    city: String,
-    state: String,
-    zip: String,
     phone: String
   ) = {
     val parent =
@@ -54,11 +44,6 @@ class Parent extends LongKeyedMapper[Parent] with IdPK {
       .firstName(firstName)
       .lastName(lastName)
       .email(email)
-      .street1(street1)
-      .street2(street2)
-      .city(city)
-      .state(state)
-      .zip(zip)
       .phone(phone)
     
     setParentPassword(parent, password)

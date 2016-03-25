@@ -39,18 +39,23 @@ class Checkout extends Loggable {
   var cvc = ""
   var expire = ""
 
-  def signupParent() = {
+  def signup() = {
     val parent = Parent.createNewParent(
       firstName,
       lastName,
       email,
       password,
+      phone
+    )
+
+    val shippingAddress = Address.createNewAddress(
+      parent,
       street1,
       street2,
       city,
       state,
       zip,
-      phone
+      AddressType.Shipping
     )
 
     println("===================")
@@ -133,6 +138,6 @@ class Checkout extends Loggable {
     "#email" #> SHtml.text(email, parentEmail => email = parentEmail.trim) &
     "#password" #> SHtml.password(password, password = _) &
     "#pet-name" #> SHtml.text(petName, petName = _) &
-    ".signup button" #> SHtml.onSubmitUnit(signupParent)
+    ".signup button" #> SHtml.onSubmitUnit(signup)
   }
 }

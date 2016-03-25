@@ -26,11 +26,17 @@ class PetProduct extends Loggable {
 
   var selectedProduct: Box[Product] = Empty
 
-  val products = 
-    if (petChoice.is == Full(AnimalType.Dog))
-      Product.findAll(By(Product.animalType, AnimalType.Dog))
-    else
-      Product.findAll(By(Product.animalType, AnimalType.Cat))
+  val products = (
+    for {
+      petSize <- petSize.is
+      petType <- petChoice.is
+      products = Product.findAll(
+          By(Product.animalType, petType), 
+          By(Product.size, petSize)
+        )
+    } yield {
+      products
+    }).openOr(Nil)
 
   val petProducts = SHtml.radioElem(
     products.map(_.name), 
