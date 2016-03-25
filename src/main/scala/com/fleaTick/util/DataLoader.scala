@@ -1,6 +1,6 @@
-package com.fleaTick.util
+package com.mypetdefense.util
 
-import com.fleaTick.model._
+import com.mypetdefense.model._
 import net.liftweb.common._
 
 object DataLoader extends Loggable {

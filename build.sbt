@@ -3,11 +3,11 @@ import Keys._
 import com.earldouglas.xsbtwebplugin._
 import com.openstudy.sbt.ResourceManagementPlugin._
 
-name := "FleaTick"
+name := "My Pet Defense"
 
 version := "0.1-SNAPSHOT"
 
-organization := "com.fleaTick"
+organization := "com.mypetdefense"
 
 scalaVersion := "2.11.7"
 

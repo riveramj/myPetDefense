@@ -1,4 +1,4 @@
-package com.fleaTick.snippet
+package com.mypetdefense.snippet
 
 import net.liftweb.sitemap.Menu
 import net.liftweb.http.{S, SHtml}
@@ -7,7 +7,7 @@ import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.http._
 
-import com.fleaTick.model.AnimalType
+import com.mypetdefense.model.AnimalType
 
 object PetChoice extends Loggable {
   import net.liftweb.sitemap._

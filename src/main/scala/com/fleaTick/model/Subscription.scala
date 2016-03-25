@@ -1,4 +1,4 @@
-package com.fleaTick.model
+package com.mypetdefense.model
 
 import net.liftweb._
   import mapper._
@@ -7,7 +7,7 @@ import net.liftweb._
 
 import java.util.Date
 
-import com.fleaTick.util.RandomIdGenerator._
+import com.mypetdefense.util.RandomIdGenerator._
 
 class Subscription extends LongKeyedMapper[Subscription] with IdPK {
   def getSingleton = Subscription

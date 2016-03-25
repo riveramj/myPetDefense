@@ -1,4 +1,4 @@
-package com.fleaTick.model
+package com.mypetdefense.model
 
 import net.liftweb.mapper._
 import java.util.Date

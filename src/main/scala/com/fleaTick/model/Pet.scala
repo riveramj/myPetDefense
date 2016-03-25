@@ -1,11 +1,11 @@
-package com.fleaTick.model
+package com.mypetdefense.model
 
 import net.liftweb._
   import mapper._
   import common._
   import util._
 
-import com.fleaTick.util.RandomIdGenerator._
+import com.mypetdefense.util.RandomIdGenerator._
 
 import java.util.Date
 

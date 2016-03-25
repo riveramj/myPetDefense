@@ -1,4 +1,4 @@
-package com.fleaTick.util
+package com.mypetdefense.util
 
 import org.apache.shiro.crypto.SecureRandomNumberGenerator
 import net.liftweb.common.Loggable

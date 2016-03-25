@@ -1,7 +1,7 @@
-package com.fleaTick.util
+package com.mypetdefense.util
 
 import net.liftweb.sitemap._
-import com.fleaTick.snippet._
+import com.mypetdefense.snippet._
 
 object Paths {
 

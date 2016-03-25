@@ -7,8 +7,8 @@ import net.liftweb._
   import common._
   import http._
 
-import com.fleaTick.util._
-import com.fleaTick.model._
+import com.mypetdefense.util._
+import com.mypetdefense.model._
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -46,7 +46,7 @@ class Boot {
     DataLoader.loadProducts
 
     // where to search snippet
-    LiftRules.addToPackages("com.fleaTick")
+    LiftRules.addToPackages("com.mypetdefense")
     
     LiftRules.setSiteMap(Paths.siteMap)
 

@@ -1,9 +1,9 @@
-package com.fleaTick.model
+package com.mypetdefense.model
 
 import net.liftweb.mapper._
 import java.util.Date
 
-import com.fleaTick.util.RandomIdGenerator._
+import com.mypetdefense.util.RandomIdGenerator._
 
 class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Product] {
   def getSingleton = Product
