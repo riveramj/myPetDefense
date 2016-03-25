@@ -24,8 +24,7 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     description: String,
     price: Long,
     animalType: AnimalType.Value,
-    animalSize: AnimalSize.Value,
-    subscriptionType: SubscriptionType.Value
+    animalSize: AnimalSize.Value
   ) = {
     Product.create
     .productId(generateLongId)

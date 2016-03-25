@@ -11,17 +11,7 @@ object DataLoader extends Loggable {
         "For the urban-chic dog",
         5,
         AnimalType.Dog,
-        AnimalSize.Medium,
-        SubscriptionType.Month
-      )
-
-      Product.createProduct(
-        "Urban Product",
-        "For the urban-chic dog",
-        5,
-        AnimalType.Dog,
-        AnimalSize.Medium,
-        SubscriptionType.Year
+        AnimalSize.Medium
       )
 
       Product.createProduct(
@@ -29,8 +19,7 @@ object DataLoader extends Loggable {
         "For the rural dog",
         5,
         AnimalType.Dog,
-        AnimalSize.Small,
-        SubscriptionType.Month
+        AnimalSize.Small
       )
 
       Product.createProduct(
@@ -38,8 +27,7 @@ object DataLoader extends Loggable {
         "For the adventure-minded cat",
         4,
         AnimalType.Cat,
-        AnimalSize.Small,
-        SubscriptionType.Month
+        AnimalSize.Small
       )
 
       Product.createProduct(
@@ -47,8 +35,7 @@ object DataLoader extends Loggable {
         "For the homebody cat",
         4,
         AnimalType.Cat,
-        AnimalSize.Small,
-        SubscriptionType.Month
+        AnimalSize.Large
       )
     }
   }
