@@ -5,10 +5,10 @@ import java.util.Date
 
 class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, Shipment] {
   def getSingleton = Shipment
-  object ShipmentId extends MappedLong(this){
+  object shipmentId extends MappedLong(this){
     override def dbIndexed_? = true
   }
-  object order extends MappedLongForeignKey(this, Order)
+  object subscription extends MappedLongForeignKey(this, Subscription)
   object trackingNumber extends MappedString(this, 100)
   object dateProcessed extends MappedDateTime(this)
   object dateShipped extends MappedDateTime(this)
@@ -19,4 +19,13 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
 }
 
 object Shipment extends Shipment with LongKeyedMetaMapper[Shipment]
+
+class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
+  def getSingleton = ShipmentLineItem
+
+  object shipment extends MappedLongForeignKey(this, Shipment)
+  object product extends MappedLongForeignKey(this, Product)
+}
+
+object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem]
 

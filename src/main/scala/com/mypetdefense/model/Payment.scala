@@ -8,7 +8,7 @@ class Payment extends LongKeyedMapper[Payment] with IdPK with OneToMany[Long, Pa
   object PaymentId extends MappedLong(this){
     override def dbIndexed_? = true
   }
-  object order extends MappedLongForeignKey(this, Order)
+  object shipment extends MappedLongForeignKey(this, Shipment)
   object paymentToken extends MappedString(this, 100)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()

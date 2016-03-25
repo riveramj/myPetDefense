@@ -13,6 +13,8 @@ import com.mypetdefense.snippet.PetProduct._
 import com.mypetdefense.snippet.Plan._
 import com.mypetdefense.model._
 
+import java.util.Date
+
 object Checkout extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
@@ -48,6 +50,10 @@ class Checkout extends Loggable {
       phone
     )
 
+    println("===================")
+    println("parent:")
+    println(parent)
+
     val shippingAddress = Address.createNewAddress(
       parent,
       street1,
@@ -59,18 +65,20 @@ class Checkout extends Loggable {
     )
 
     println("===================")
-    println("parent:")
-    println(parent)
+    println("shippingAddress:")
+    println(shippingAddress)
 
     val pet = (
       for {
         petType <- petChoice.is
         petSize <- petSize.is
+        petProduct <- petProduct.is
         pet = Pet.createNewPet(
                 parent,
                 petName,
                 petType,
-                petSize
+                petSize,
+                petProduct
               )
       } yield {
         pet
@@ -82,12 +90,13 @@ class Checkout extends Loggable {
 
     val subscription = (
       for {
-        newPet <- pet
         newPlan <- plan.is
         newSubscription = Subscription.createNewSubscription(
           parent,
-          newPet,
-          newPlan
+          newPlan,
+          new Date(),
+          "",
+          new Date()
         )
       } yield {
         newSubscription
@@ -96,25 +105,7 @@ class Checkout extends Loggable {
     println("===================")
     println("subscription:")
     println(subscription)
-
-    val order = (
-      for {
-        newSubscription <- subscription
-        newOrder = Order.createNewOrder(
-          parent,
-          newSubscription,
-          List(),
-          ""
-        )
-      } yield {
-        newOrder
-      })
-
-    println("===================")
-    println("order:")
-    println(order)
-    println("===================")
- }
+  }
 
   def summary = {
     "#type span *" #> petChoice.is.map(_.toString) &

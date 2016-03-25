@@ -20,6 +20,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   object animalType extends MappedEnum(this, AnimalType)
   object size extends MappedEnum(this, AnimalSize)
   object birthday extends MappedDateTime(this)
+  object product extends MappedLongForeignKey(this, Product)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -28,7 +29,8 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     parent: Parent,
     name: String,
     animalType: AnimalType.Value,
-    size: AnimalSize.Value
+    size: AnimalSize.Value,
+    product: Product
   ) = {
     Pet.create
     .petId(generateLongId)
@@ -36,6 +38,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     .name(name)
     .animalType(animalType)
     .size(size)
+    .product(product)
     .saveMe
   }
 }

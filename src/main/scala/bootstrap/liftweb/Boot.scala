@@ -37,11 +37,10 @@ class Boot {
       Address,
       Pet,
       Product,
-      Order,
-      OrderLineItem,
+      Shipment,
+      ShipmentLineItem,
       Subscription,
-      Payment,
-      Shipment
+      Payment
     )
 
     DataLoader.loadProducts
