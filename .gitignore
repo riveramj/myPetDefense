@@ -4,3 +4,4 @@ target
 project/project
 project/target
 *.swo
+src/main/webapp/static/js/*

@@ -42,6 +42,7 @@ libraryDependencies ++= {
     "net.liftweb"         %% "lift-common"        % liftVersion % "compile",
     "net.liftweb"         %% "lift-webkit"        % liftVersion % "compile",
     "net.liftweb"         %% "lift-testkit"       % liftVersion % "test",
-    "net.liftweb"         %% "lift-mapper"        % liftVersion % "compile"
+    "net.liftweb"         %% "lift-mapper"        % liftVersion % "compile",
+    "me.frmr.stripe"      %% "streifen"           % "0.0.4-SNAPSHOT"
   )
 }

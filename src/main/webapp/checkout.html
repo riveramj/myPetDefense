@@ -7,7 +7,8 @@
     <li id="plan">Plan: <span>$10 month to month</span></li>
   </ul>
 
-  <form data-lift="Checkout.shipping">
+  <form data-lift="Checkout.shipping" id="checkout">
+    <input type="hidden" id="stripe-token">
     <fieldset>
       <legend>Shipping</legend>
       <label>
@@ -57,23 +58,23 @@
         <li>
           <label>
             <span>Card Number</span>
-            <span data-lift="Msg?id=card-number-error&noticeClass=notice&errorClass=error"></span>
-            <input placeholder="0000 0000 0000 0000" id="card-number" type="text">            
+            <input placeholder="0000 0000 0000 0000" size="20" id="card-number" type="text" data-stripe="number">            
           </label>
         </li>
         <li>
           <label>
             <span>CVC</span>
             <span data-lift="Msg?id=cvc-error&noticeClass=notice&errorClass=error"></span>
-            <input placeholder="000" id="cvc" type="text">            
+            <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc">            
           </label>
         </li>
         <li>
           <label>
-            <span>Expires</span>
-            <span data-lift="Msg?id=expire-date-error&noticeClass=notice&errorClass=error"></span>
-            <input placeholder="MM / YY" id="expire" type="text">            
+            <span>Expiration (MM/YYYY)</span>
+            <input type="text" size="2" id="card-month-expiry" data-stripe="exp-month">
           </label>
+          <span> / </span>
+          <input type="text" size="4" id="card-year-expiry" data-stripe="exp-year">
         </li>
       </ul>
     </fieldset>
@@ -104,7 +105,11 @@
       </ul>
     </fieldset>
     <div class="signup">
-      <button data-lift="Loc.parent-signup" class="signup">Sign Up</button>
+      <button data-lift="Loc.parent-signup" class="checkout">Sign Up</button>
     </div>
   </form>
+  <tail>
+    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    <script type="text/javascript" src="/static/js/stripe.js"></script>
+  </tail>
 </div>

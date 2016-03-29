@@ -1,7 +1,7 @@
 package com.mypetdefense.snippet
 
 import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml
+import net.liftweb.http.SHtml._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
@@ -14,6 +14,8 @@ import com.mypetdefense.snippet.Plan._
 import com.mypetdefense.model._
 
 import java.util.Date
+
+import me.frmr.stripe.{Subscription => StripeSubscription, _}
 
 object Checkout extends Loggable {
   import net.liftweb.sitemap._
@@ -37,11 +39,18 @@ class Checkout extends Loggable {
   var zip = ""
   var phone = ""
 
-  var cardNumber = ""
-  var cvc = ""
-  var expire = ""
+  var stripeToken = ""
 
   def signup() = {
+    
+    implicit val e = new StripeExecutor("sk_test_vvw6ZOLkVyQWYNEwVocSs27V")
+
+    Customer.create(
+      email = Some(email),
+      card = Some(stripeToken),
+      plan = Some("product")
+    )
+
     val parent = Parent.createNewParent(
       firstName,
       lastName,
@@ -115,20 +124,19 @@ class Checkout extends Loggable {
   }
 
   def shipping = {
-    "#first-name" #> SHtml.text(firstName, firstName = _) &
-    "#last-name" #> SHtml.text(lastName, lastName = _) &
-    "#street-1" #> SHtml.text(street1, street1 = _) &
-    "#street-2" #> SHtml.text(street2, street2 = _) &
-    "#city" #> SHtml.text(city, city = _) &
-    "#state" #> SHtml.text(state, state = _) &
-    "#zip" #> SHtml.text(zip, zip = _) &
-    "#phone" #> SHtml.text(phone, phone = _) &
-    "#card-number" #> SHtml.text(cardNumber, cardNumber = _) &
-    "#cvc" #> SHtml.text(cvc, cvc = _) &
-    "#expire" #> SHtml.text(expire, expire = _) &
-    "#email" #> SHtml.text(email, parentEmail => email = parentEmail.trim) &
+    SHtml.makeFormsAjax andThen
+    "#first-name" #> text(firstName, firstName = _) &
+    "#last-name" #> text(lastName, lastName = _) &
+    "#street-1" #> text(street1, street1 = _) &
+    "#street-2" #> text(street2, street2 = _) &
+    "#city" #> text(city, city = _) &
+    "#state" #> text(state, state = _) &
+    "#zip" #> text(zip, zip = _) &
+    "#phone" #> text(phone, phone = _) &
+    "#email" #> text(email, parentEmail => email = parentEmail.trim) &
     "#password" #> SHtml.password(password, password = _) &
-    "#pet-name" #> SHtml.text(petName, petName = _) &
-    ".signup button" #> SHtml.onSubmitUnit(signup)
+    "#pet-name" #> text(petName, petName = _) &
+    "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
+    ".checkout" #> ajaxSubmit("Checkout", () => signup)
   }
 }
