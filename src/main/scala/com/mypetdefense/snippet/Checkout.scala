@@ -17,6 +17,8 @@ import java.util.Date
 
 import me.frmr.stripe.{Subscription => StripeSubscription, _}
 
+import dispatch._, Defaults._
+
 object Checkout extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
@@ -45,15 +47,23 @@ class Checkout extends Loggable {
     
     implicit val e = new StripeExecutor("sk_test_vvw6ZOLkVyQWYNEwVocSs27V")
 
-    Customer.create(
+    val stripeCustomer = Customer.create(
       email = Some(email),
       card = Some(stripeToken),
       plan = Some("product")
     )
 
+    for (customer <- stripeCustomer)
+      newParentSetup(customer)
+  }
+
+    
+    def newParentSetup(customer: Box[Customer]) = {  
+      val stripeId = customer.map(_.id).openOr("")
     val parent = Parent.createNewParent(
       firstName,
       lastName,
+      stripeId,
       email,
       password,
       phone
@@ -114,6 +124,7 @@ class Checkout extends Loggable {
     println("===================")
     println("subscription:")
     println(subscription)
+    
   }
 
   def summary = {

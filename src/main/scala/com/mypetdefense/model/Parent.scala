@@ -20,6 +20,7 @@ class Parent extends LongKeyedMapper[Parent] with IdPK {
 
   object firstName extends MappedString(this, 100)
   object lastName extends MappedString(this, 100)
+  object stripeId extends MappedString(this, 100)
   object email extends MappedEmail(this, 50)
   object password extends MappedString(this, 100)
   object salt extends MappedString(this, 100)
@@ -34,6 +35,7 @@ class Parent extends LongKeyedMapper[Parent] with IdPK {
   def createNewParent(
     firstName: String,
     lastName: String,
+    stripeId: String,
     email: String,
     password: String,
     phone: String
@@ -43,6 +45,7 @@ class Parent extends LongKeyedMapper[Parent] with IdPK {
       .parentId(generateLongId)
       .firstName(firstName)
       .lastName(lastName)
+      .stripeId(stripeId)
       .email(email)
       .phone(phone)
     

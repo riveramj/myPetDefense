@@ -43,6 +43,8 @@ libraryDependencies ++= {
     "net.liftweb"         %% "lift-webkit"        % liftVersion % "compile",
     "net.liftweb"         %% "lift-testkit"       % liftVersion % "test",
     "net.liftweb"         %% "lift-mapper"        % liftVersion % "compile",
-    "me.frmr.stripe"      %% "streifen"           % "0.0.4-SNAPSHOT"
+    "me.frmr.stripe"      %% "streifen"           % "0.0.4-SNAPSHOT",
+    "net.databinder.dispatch"   %% "dispatch-core"        % "0.11.3",
+    "net.databinder.dispatch"   %% "dispatch-lift-json"   % "0.11.3"
   )
 }
