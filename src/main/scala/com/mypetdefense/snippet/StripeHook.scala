@@ -16,6 +16,11 @@ object StripeHook extends StripeHook
 
 trait StripeHook extends RestHelper with Loggable {
 
+  def paymentSucceeded = {
+    println("payment succeeded")
+    Full(OkResponse())
+  }
+
   serve {
     case req @ Req("stripe-hook" :: Nil, _, PostRequest) =>
       {
@@ -28,7 +33,7 @@ trait StripeHook extends RestHelper with Loggable {
           objectJson = (dataJson \ "object")
         } yield {
           val result: Box[LiftResponse] = eventType match {
-            case "invoice.payment_succeeded" => println("payment succeeded"); Empty
+            case "invoice.payment_succeeded" => paymentSucceeded
             case "invoice.payment_failed" => println("payment failed"); Empty
             case "customer.subscription.created" => println("subscription created"); Empty
             case "customer.subscription.updated" => println("subscription updated"); Empty
