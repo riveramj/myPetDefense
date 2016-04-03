@@ -9,6 +9,7 @@ import net.liftweb._
 
 import com.mypetdefense.util._
 import com.mypetdefense.model._
+import com.mypetdefense.snippet._
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -71,5 +72,6 @@ class Boot {
 
     // set DocType to HTML5
     LiftRules.htmlProperties.default.set((r: Req) =>new Html5Properties(r.userAgent))
+    LiftRules.statelessDispatch.append(StripeHook)
   }
 }
