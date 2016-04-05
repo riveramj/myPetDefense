@@ -44,7 +44,11 @@ class Checkout extends Loggable {
   var stripeToken = ""
 
   def signup() = {
-    
+    val selectedPetType = petChoice.is
+    val selectedPetSize =  petSize.is
+    val selectedPetProduct = petProduct.is
+    val selectedPetPlan = plan.is
+
     implicit val e = new StripeExecutor("sk_test_vvw6ZOLkVyQWYNEwVocSs27V")
 
     val stripeCustomer = Customer.create(
@@ -54,12 +58,17 @@ class Checkout extends Loggable {
     )
 
     for (customer <- stripeCustomer)
-      newParentSetup(customer)
+      newParentSetup(customer, selectedPetType, selectedPetSize, selectedPetProduct, selectedPetPlan)
   }
 
-    
-    def newParentSetup(customer: Box[Customer]) = {  
-      val stripeId = customer.map(_.id).openOr("")
+  def newParentSetup(
+    customer: Box[Customer], 
+    selectedPetType: Box[AnimalType.Value],
+    selectedPetSize: Box[AnimalSize.Value],
+    selectedPetProduct: Box[Product],
+    selectedPlan: Box[SubscriptionType.Value]
+  ) = {
+    val stripeId = customer.map(_.id).openOr("")
     val parent = Parent.createNewParent(
       firstName,
       lastName,
@@ -89,19 +98,19 @@ class Checkout extends Loggable {
 
     val pet = (
       for {
-        petType <- petChoice.is
-        petSize <- petSize.is
-        petProduct <- petProduct.is
-        pet = Pet.createNewPet(
-                parent,
-                petName,
-                petType,
-                petSize,
-                petProduct
-              )
+        petType <- selectedPetType
+        petSize <- selectedPetSize
+        petProduct <- selectedPetProduct
       } yield {
-        pet
-      })
+        Pet.createNewPet(
+          parent,
+          petName,
+          petType,
+          petSize,
+          petProduct
+        )
+    })
+
 
     println("===================")
     println("pet:")
@@ -109,22 +118,19 @@ class Checkout extends Loggable {
 
     val subscription = (
       for {
-        newPlan <- plan.is
-        newSubscription = Subscription.createNewSubscription(
+        newPlan <- selectedPlan
+      } yield {
+        Subscription.createNewSubscription(
           parent,
           newPlan,
           new Date(),
-          "",
           new Date()
         )
-      } yield {
-        newSubscription
-      })
+    })
 
     println("===================")
     println("subscription:")
     println(subscription)
-    
   }
 
   def summary = {

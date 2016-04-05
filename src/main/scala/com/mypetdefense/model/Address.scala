@@ -37,17 +37,16 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     zip: String,
     addressType: AddressType.Value
   ) = {
-    val address =
-      Address.create
-      .addressId(generateLongId)
-      .parent(parent)
-      .street1(street1)
-      .street2(street2)
-      .city(city)
-      .state(state)
-      .zip(zip)
-      .addressType(addressType)
-      .saveMe
+    Address.create
+    .addressId(generateLongId)
+    .parent(parent)
+    .street1(street1)
+    .street2(street2)
+    .city(city)
+    .state(state)
+    .zip(zip)
+    .addressType(addressType)
+    .saveMe
   }
 }
 

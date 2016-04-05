@@ -41,8 +41,7 @@ class Boot {
       Product,
       Shipment,
       ShipmentLineItem,
-      Subscription,
-      Payment
+      Subscription
     )
 
     DataLoader.loadProducts

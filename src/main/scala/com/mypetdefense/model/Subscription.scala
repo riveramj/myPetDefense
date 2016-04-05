@@ -19,7 +19,6 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
   object startDate extends MappedDateTime(this)
   object renewalDate extends MappedDateTime(this)
   object shipDate extends MappedDateTime(this)
-  object billingAmount extends MappedString(this, 100)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
   }
@@ -31,7 +30,6 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
     parent: Parent,
     subscriptionType: SubscriptionType.Value,
     startDate: Date,
-    billingAmount: String,
     shipDate: Date
   ) = {
     Subscription.create
@@ -40,7 +38,6 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
     .subscriptionType(subscriptionType)
     .startDate(startDate)
     .shipDate(shipDate)
-    .billingAmount(billingAmount)
     .saveMe
   }
 }
