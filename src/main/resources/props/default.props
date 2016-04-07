@@ -4,3 +4,6 @@ db.url=jdbc:postgresql:mypetdefense
 db.user=mypetdefense
 db.password=mypetdefense
 db.host=localhost
+
+[SparkPost]
+mail.smtp.host=localhost

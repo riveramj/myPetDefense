@@ -1,0 +1,14 @@
+[Database]
+db.driver=org.postgresql.Driver
+db.url=jdbc:postgresql:mypetdefense
+db.user=mypetdefense
+db.password=mypetdefense
+db.host=localhost
+
+[SparkPost]
+mail.smtp.host=smtp.sparkpostmail.com
+mail.smtp.port=587
+mail.smtp.auth=true
+mail.smtp.starttls.enable=true
+mail.user=SMTP_Injection
+mail.password=faba90765da66111aad9acc73a593f65ec083d30

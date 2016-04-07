@@ -18,6 +18,8 @@ import com.mypetdefense.snippet._
 class Boot {
   def boot {
 
+    MailConfig.init
+
     if (!DB.jndiJdbcConnAvailable_?) {
 
       val vendor = 

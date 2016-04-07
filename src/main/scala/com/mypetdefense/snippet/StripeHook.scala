@@ -12,14 +12,18 @@ import net.liftweb._
     import Extraction._
 
 import com.mypetdefense.model._
+import com.mypetdefense.actor._
 
 import me.frmr.stripe
 import org.joda.time._
 import scala.language.postfixOps
 
-object StripeHook extends StripeHook
+object StripeHook extends StripeHook {
+  override val emailActor = EmailActor  
+}
 
 trait StripeHook extends RestHelper with Loggable {
+  def emailActor: EmailActor
 
   def invoicePaymentSucceeded(objectJson: JValue) = {
     for {
@@ -39,7 +43,7 @@ trait StripeHook extends RestHelper with Loggable {
       val lines = shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
       println(lines)
 
-      //emailActor ! SendInvoicePaymentSucceededEmail(user, invoice)
+      emailActor ! SendInvoicePaymentSucceededEmail(parent, invoicePaymentId)
       OkResponse()
     }
   }
@@ -62,7 +66,7 @@ trait StripeHook extends RestHelper with Loggable {
 
       println(s"payment failed for ${parent}")
 
-      //emailActor ! SendInvoicePaymentFailedEmail(parent.email, amount, nextPaymentAttempt)
+      emailActor ! SendInvoicePaymentFailedEmail(parent.email, amount, nextPaymentAttempt)
       
       OkResponse()
     }
