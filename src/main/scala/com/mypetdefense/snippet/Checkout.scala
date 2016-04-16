@@ -14,6 +14,7 @@ import com.mypetdefense.snippet.Plan._
 import com.mypetdefense.model._
 
 import java.util.Date
+import java.time.MonthDay
 
 import me.frmr.stripe.{Subscription => StripeSubscription, _}
 
@@ -124,7 +125,7 @@ class Checkout extends Loggable {
           parent,
           newPlan,
           new Date(),
-          new Date()
+          MonthDay.now().getDayOfMonth()
         )
     })
 
