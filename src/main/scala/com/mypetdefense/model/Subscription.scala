@@ -18,13 +18,15 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
   object subscriptionType extends MappedEnum(this, SubscriptionType)
   object startDate extends MappedDateTime(this)
   object renewalDate extends MappedDateTime(this)
-  object shipDate extends MappedInt(this)
+  object shipDay extends MappedInt(this)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
   }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+
+  def getProducts = Pet.findAll(By(Pet.parent, parent.get)).flatMap(_.product.obj)
 
   def createNewSubscription(
     parent: Parent,
@@ -37,7 +39,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
     .parent(parent)
     .subscriptionType(subscriptionType)
     .startDate(startDate)
-    .shipDate(shipDate)
+    .shipDay(shipDate)
     .saveMe
   }
 }

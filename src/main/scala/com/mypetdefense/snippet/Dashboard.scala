@@ -9,6 +9,7 @@ import net.liftweb.http._
 import net.liftweb.mapper.{BySql, IHaveValidatedThisSQL}
 
 import java.time.MonthDay
+import java.time.format.DateTimeFormatter
 
 import com.mypetdefense.model._
 
@@ -22,7 +23,7 @@ object Dashboard extends Loggable {
 class Dashboard extends Loggable {
   val currentMonthDay = MonthDay.now().getDayOfMonth()
   val upcomingSubscriptions = Subscription.findAll(
-    BySql("shipDate between ? and ?", 
+    BySql("shipDay between ? and ?", 
       IHaveValidatedThisSQL("mike","2016-04-16"),
       currentMonthDay, 
       currentMonthDay + 3
@@ -31,8 +32,16 @@ class Dashboard extends Loggable {
 
   def render = {
     ".shipment" #> upcomingSubscriptions.map { subscription =>
-      ".ship-on *" #> subscription.shipDate &
-      ".name *" #> subscription.parent.obj.map(_.name)
+      val productNames = subscription.getProducts.groupBy(_.name)
+      val currentMonth = MonthDay.now().getMonthValue()
+      val shipDate = MonthDay.of(1, 31).withMonth(currentMonth)
+
+      ".ship-on *" #> shipDate.format(DateTimeFormatter.ofPattern("MMM dd")) &
+      ".name *" #> subscription.parent.obj.map(_.name) &
+      ".products" #> productNames.map { case (name, product) =>
+        ".amount *" #> product.size &
+        ".product-name *" #> name
+      }
     }
   }
 }
