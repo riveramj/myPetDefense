@@ -12,15 +12,20 @@ import java.time.MonthDay
 import java.time.format.DateTimeFormatter
 
 import com.mypetdefense.model._
+import com.mypetdefense.actor._
 
-object Dashboard extends Loggable {
+object Dashboard extends Loggable with Dashboard {
+  override val emailActor = EmailActor
+
   import net.liftweb.sitemap._
     import Loc._
 
   val menu = Menu.i("Dashboard") / "dashboard"
 }
 
-class Dashboard extends Loggable {
+trait Dashboard extends Loggable {
+  def emailActor: EmailActor
+
   val currentMonthDay = MonthDay.now().getDayOfMonth()
   val upcomingSubscriptions = Subscription.findAll(
     BySql("shipDay between ? and ?", 
@@ -29,6 +34,10 @@ class Dashboard extends Loggable {
       currentMonthDay + 3
     )
   )
+
+  def shipProduct(parent: Box[Parent])() = {
+    emailActor ! SendInvoicePaymentSucceededEmail(parent)
+  }
 
   def render = {
     ".shipment" #> upcomingSubscriptions.map { subscription =>
@@ -41,7 +50,8 @@ class Dashboard extends Loggable {
       ".products" #> productNames.map { case (name, product) =>
         ".amount *" #> product.size &
         ".product-name *" #> name
-      }
+      } &
+      ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription.parent.obj))
     }
   }
 }

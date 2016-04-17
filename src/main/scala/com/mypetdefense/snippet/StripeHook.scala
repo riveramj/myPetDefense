@@ -19,7 +19,7 @@ import org.joda.time._
 import scala.language.postfixOps
 
 object StripeHook extends StripeHook {
-  override val emailActor = EmailActor  
+  override val emailActor = EmailActor
 }
 
 trait StripeHook extends RestHelper with Loggable {
@@ -42,8 +42,7 @@ trait StripeHook extends RestHelper with Loggable {
 
       val lines = shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
       println(lines)
-
-      emailActor ! SendInvoicePaymentSucceededEmail(parent, invoicePaymentId)
+      
       OkResponse()
     }
   }

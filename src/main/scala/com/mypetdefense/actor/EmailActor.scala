@@ -24,7 +24,7 @@ import Mailer._
 sealed trait EmailActorMessage
 case class SendWelcomeEmail(parentEmail: String) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(parentEmail: String, amount: Double, nextPaymentAttempt: Option[DateTime]) extends EmailActorMessage
-case class SendInvoicePaymentSucceededEmail(parent: Parent, invoice: String) extends EmailActorMessage
+case class SendInvoicePaymentSucceededEmail(parent: Box[Parent]) extends EmailActorMessage
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
@@ -64,9 +64,9 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
 
   addHandler {
-    case SendInvoicePaymentSucceededEmail(parent, invoice) =>
+    case SendInvoicePaymentSucceededEmail(parent) =>
       val subject = "My Pet Defense Receipt"
-      sendEmail(subject, parent.email.get, "Bill Paid!")
+      sendEmail(subject, parent.map(_.email.get).openOr(""), "Bill paid & product in mail!")
   }
 }
 
