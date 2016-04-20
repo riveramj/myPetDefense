@@ -1,4 +1,6 @@
-## My Pet Defense / [MyPetDefense.com](mypetdefense.com)
+![](logo-horizontal.png)
+
+###[MyPetDefense.com](mypetdefense.com)
 
 ### Business Overview
 At the core My Pet Defense (MPD), is selling Flea & Tick (F&T) medicine one dose/month at a time and billing as such. This is a large change for the industry, as most purchases are for 3, 6, or 12 months at a time. 
