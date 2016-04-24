@@ -8,8 +8,8 @@ import net.liftweb.util.ClearClearable
 import net.liftweb.http._
 import net.liftweb.mapper.{BySql, IHaveValidatedThisSQL}
 
-import java.time.MonthDay
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Date
 
 import com.mypetdefense.model._
 import com.mypetdefense.actor._
@@ -26,26 +26,25 @@ object Dashboard extends Loggable with Dashboard {
 trait Dashboard extends Loggable {
   def emailActor: EmailActor
 
-  val currentMonthDay = MonthDay.now().getDayOfMonth()
-  val upcomingSubscriptions = Subscription.findAll(
-    BySql("shipDay between ? and ?", 
-      IHaveValidatedThisSQL("mike","2016-04-16"),
-      currentMonthDay, 
-      currentMonthDay + 3
+  def getUpcomingShipments = {
+    Subscription.findAll(
+      BySql(
+        "nextShipDate < CURRENT_DATE + interval '5 day' AND nextShipDate >= CURRENT_DATE", 
+        IHaveValidatedThisSQL("mike","2016-04-24")
+      )
     )
-  )
+  }
 
   def shipProduct(parent: Box[Parent])() = {
     emailActor ! SendInvoicePaymentSucceededEmail(parent)
   }
 
   def render = {
-    ".shipment" #> upcomingSubscriptions.map { subscription =>
+    ".shipment" #> getUpcomingShipments.map { subscription =>
       val productNames = subscription.getProducts.groupBy(_.name)
-      val currentMonth = MonthDay.now().getMonthValue()
-      val shipDate = MonthDay.of(1, 31).withMonth(currentMonth)
+      val dateFormat = new SimpleDateFormat("MMM dd")
 
-      ".ship-on *" #> shipDate.format(DateTimeFormatter.ofPattern("MMM dd")) &
+      ".ship-on *" #> dateFormat.format(subscription.nextShipDate.get) &
       ".name *" #> subscription.parent.obj.map(_.name) &
       ".products" #> productNames.map { case (name, product) =>
         ".amount *" #> product.size &

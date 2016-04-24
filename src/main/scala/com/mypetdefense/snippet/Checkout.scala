@@ -125,7 +125,7 @@ class Checkout extends Loggable {
           parent,
           newPlan,
           new Date(),
-          MonthDay.now().getDayOfMonth()
+          new Date()
         )
     })
 
