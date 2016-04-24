@@ -10,6 +10,7 @@ import net.liftweb.mapper.{BySql, IHaveValidatedThisSQL}
 
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
 import com.mypetdefense.actor._
@@ -35,7 +36,16 @@ trait Dashboard extends Loggable {
     )
   }
 
-  def shipProduct(parent: Box[Parent])() = {
+  def updateNextShipDate(subscription: Subscription) = {
+    val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+    val nextMonthDate = Date.from(nextMonthLocalDate)
+    val nextShipDate = subscription.nextShipDate(nextMonthDate)
+    println(nextShipDate)
+    nextShipDate.save
+  }
+
+  def shipProduct(subscription: Subscription, parent: Box[Parent])() = {
+    updateNextShipDate(subscription)
     emailActor ! SendInvoicePaymentSucceededEmail(parent)
   }
 
@@ -50,7 +60,7 @@ trait Dashboard extends Loggable {
         ".amount *" #> product.size &
         ".product-name *" #> name
       } &
-      ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription.parent.obj))
+      ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, subscription.parent.obj))
     }
   }
 }
