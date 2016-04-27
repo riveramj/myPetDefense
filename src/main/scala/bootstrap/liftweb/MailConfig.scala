@@ -10,6 +10,7 @@ object MailConfig extends Loggable {
 
   def init = {
     if (Props.mode == Props.RunModes.Development) {
+      println("in dev ========")
       Mailer.devModeSend.default.set((m: MimeMessage) => logger.info("Dev mode message:\n" + prettyPrintMime(m)))
     } else {
       println("in pilot ========")
