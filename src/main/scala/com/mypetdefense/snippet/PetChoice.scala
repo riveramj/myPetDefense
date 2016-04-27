@@ -9,6 +9,8 @@ import net.liftweb.http._
 
 import com.mypetdefense.model.AnimalType
 
+import java.time.LocalDate
+
 object PetChoice extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
@@ -31,6 +33,9 @@ class PetChoice extends Loggable {
     ).toForm
 
   def render = {
+
+    println(LocalDate.now())
+
     def choosePet() = {
       petChoice(selectedPet)
 
