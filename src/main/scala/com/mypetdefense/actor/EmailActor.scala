@@ -76,7 +76,7 @@ trait EmailActor extends EmailHandlerChain
                     with InvoicePaymentFailedEmailHandling
                     with InvoicePaymentSucceededEmailHandling {
 
-  val fromEmail = "hello@mypetdefense.com"
+  val fromEmail = "mike.rivera@mypetdefense.com"
   val fromName = "My Pet Defense"
 
   def sendEmail(subject: String, to: String, body: String) {

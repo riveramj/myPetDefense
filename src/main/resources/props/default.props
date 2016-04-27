@@ -5,5 +5,5 @@ db.user=mypetdefense
 db.password=mypetdefense
 db.host=localhost
 
-[SparkPost]
+[Postmark]
 mail.smtp.host=localhost
