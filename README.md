@@ -3,7 +3,7 @@
 ###[MyPetDefense.com](mypetdefense.com)
 
 ### Business Overview
-At the core My Pet Defense (MPD), is selling Flea & Tick (F&T) medicine one dose/month at a time and billing as such. This is a large change for the industry, as most purchases are for 3, 6, or 12 months at a time. 
+At the core My Pet Defense (MPD), is a service that provides Flea & Tick (F&T) medicine one dose/month at a time and billing as such. This is a large change for the industry, as most purchases are for 3, 6, or 12 months at a time. 
 
 Given this, MPD is an attempt to solve multiple problems, for both consumers and retailers. 
 
@@ -66,6 +66,6 @@ Once a new user signs up, we bill their card and send out the first product.
 The flow for existing users is the same minus the `Signup` portion. Stripe will charge them every month, notify us, and we ship. 
 
 #### Challenges
-Scale! The goal of the site and service is `set and forget`, so we dont expect them to visit the consumer site often. We do expect a large number of users though. 
+The goal of the site and service is `set and forget`, so we dont expect them to visit the consumer site often. We do expect a large number of users though. The industry is a $3B industry, so getting 1% would be $30M. So scale is a factor. 
 
 Our first large retailer is giving us access to 300,000+ past consumers as well as 42,000+ new consumers annually. This will lead to large tables that are the core of our business. We need to ensure we have dedundency setup correctly as well as the ability to handle growth. While this is the first retailer, hopefully it is not the last.
