@@ -6,7 +6,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.http._
-import net.liftweb.mapper.{BySql, IHaveValidatedThisSQL}
+import net.liftweb.mapper.{BySql, IHaveValidatedThisSQL, By}
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -36,6 +36,19 @@ trait Dashboard extends Loggable {
     )
   }
 
+  def paymentProcessed_?(subscription: Subscription) = {
+    val shipment = Shipment.find(
+      By(Shipment.subscription, subscription),
+      By(Shipment.expectedShipDate, subscription.nextShipDate.get)
+    )
+
+    val paymentId = shipment.map(_.stripePaymentId.get).openOr("")
+    if (paymentId.isEmpty)
+      "No"
+    else
+      "Yes"
+  }
+
   def updateNextShipDate(subscription: Subscription) = {
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
@@ -60,6 +73,7 @@ trait Dashboard extends Loggable {
         ".amount *" #> product.size &
         ".product-name *" #> name
       } &
+      ".payment-processed *" #> paymentProcessed_?(subscription) &
       ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, subscription.parent.obj))
     }
   }

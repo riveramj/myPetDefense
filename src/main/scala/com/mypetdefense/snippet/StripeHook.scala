@@ -65,7 +65,7 @@ trait StripeHook extends RestHelper with Loggable {
 
       println(s"payment failed for ${parent}")
 
-      emailActor ! SendInvoicePaymentFailedEmail(parent.email, amount, nextPaymentAttempt)
+      emailActor ! SendInvoicePaymentFailedEmail(parent.email.get, amount, nextPaymentAttempt)
       
       OkResponse()
     }

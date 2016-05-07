@@ -34,8 +34,6 @@ class PetChoice extends Loggable {
 
   def render = {
 
-    println(LocalDate.now())
-
     def choosePet() = {
       petChoice(selectedPet)
 

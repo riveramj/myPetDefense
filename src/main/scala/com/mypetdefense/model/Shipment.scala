@@ -14,6 +14,7 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object stripePaymentId extends MappedString(this, 100)
   object trackingNumber extends MappedString(this, 100)
   object dateProcessed extends MappedDateTime(this)
+  object expectedShipDate extends MappedDateTime(this)
   object dateShipped extends MappedDateTime(this)
   object dateReceived extends MappedDateTime(this)
   object createdAt extends MappedDateTime(this) {
@@ -31,6 +32,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
       .shipmentId(generateLongId)
       .stripePaymentId(stripePaymentId)
       .subscription(subscription)
+      .expectedShipDate(subscription.nextShipDate.get)
       .dateProcessed(dateProcessed)
       .saveMe
 
