@@ -52,7 +52,8 @@ class Checkout extends Loggable {
 
     val stripeCustomer = Customer.create(
       email = Some(email),
-      card = Some(stripeToken)
+      card = Some(stripeToken),
+      plan = Some("product")
     )
 
     for (customer <- stripeCustomer)
