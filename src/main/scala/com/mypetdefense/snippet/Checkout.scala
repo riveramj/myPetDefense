@@ -10,7 +10,6 @@ import net.liftweb.http._
 import com.mypetdefense.snippet.PetChoice._
 import com.mypetdefense.snippet.PetSize._
 import com.mypetdefense.snippet.PetProduct._
-import com.mypetdefense.snippet.Plan._
 import com.mypetdefense.model._
 
 import java.util.Date
@@ -48,26 +47,23 @@ class Checkout extends Loggable {
     val selectedPetType = petChoice.is
     val selectedPetSize =  petSize.is
     val selectedPetProduct = petProduct.is
-    val selectedPetPlan = plan.is
 
     implicit val e = new StripeExecutor("sk_test_vvw6ZOLkVyQWYNEwVocSs27V")
 
     val stripeCustomer = Customer.create(
       email = Some(email),
-      card = Some(stripeToken),
-      plan = Some("product")
+      card = Some(stripeToken)
     )
 
     for (customer <- stripeCustomer)
-      newParentSetup(customer, selectedPetType, selectedPetSize, selectedPetProduct, selectedPetPlan)
+      newParentSetup(customer, selectedPetType, selectedPetSize, selectedPetProduct)
   }
 
   def newParentSetup(
     customer: Box[Customer], 
     selectedPetType: Box[AnimalType.Value],
     selectedPetSize: Box[AnimalSize.Value],
-    selectedPetProduct: Box[Product],
-    selectedPlan: Box[SubscriptionType.Value]
+    selectedPetProduct: Box[Product]
   ) = {
     val stripeId = customer.map(_.id).openOr("")
     val parent = Parent.createNewParent(
@@ -117,17 +113,11 @@ class Checkout extends Loggable {
     println("pet:")
     println(pet)
 
-    val subscription = (
-      for {
-        newPlan <- selectedPlan
-      } yield {
-        Subscription.createNewSubscription(
-          parent,
-          newPlan,
-          new Date(),
-          new Date()
-        )
-    })
+    val subscription = Subscription.createNewSubscription(
+      parent,
+      new Date(),
+      new Date()
+    )
 
     println("===================")
     println("subscription:")
@@ -137,8 +127,7 @@ class Checkout extends Loggable {
   def summary = {
     "#type span *" #> petChoice.is.map(_.toString) &
     "#size span *" #> petSize.is.map(_.toString) &
-    "#product span *" #> petProduct.is.map(_.name.get) &
-    "#plan span *" #> plan.is.map(_.toString)
+    "#product span *" #> petProduct.is.map(_.name.get)
   }
 
   def shipping = {

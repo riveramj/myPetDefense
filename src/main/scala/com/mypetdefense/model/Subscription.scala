@@ -15,7 +15,6 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
     override def dbIndexed_? = true
   }
   object parent extends MappedLongForeignKey(this, Parent)
-  object subscriptionType extends MappedEnum(this, SubscriptionType)
   object startDate extends MappedDateTime(this)
   object renewalDate extends MappedDateTime(this)
   object nextShipDate extends MappedDateTime(this)
@@ -30,14 +29,12 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
 
   def createNewSubscription(
     parent: Parent,
-    subscriptionType: SubscriptionType.Value,
     startDate: Date,
     nextShipDate: Date
   ) = {
     Subscription.create
     .subscriptionId(generateLongId)
     .parent(parent)
-    .subscriptionType(subscriptionType)
     .startDate(startDate)
     .nextShipDate(nextShipDate)
     .saveMe
@@ -45,10 +42,6 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
 }
 
 object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]
-
-object SubscriptionType extends Enumeration {
-  val Month, Year = Value
-}
 
 object Status extends Enumeration {
   val Active, Inactive = Value
