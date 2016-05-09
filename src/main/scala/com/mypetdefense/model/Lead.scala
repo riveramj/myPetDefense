@@ -31,7 +31,8 @@ class Lead extends LongKeyedMapper[Lead] with IdPK {
     firstName: String,
     lastName: String,
     email: String,
-    phone: String
+    phone: String,
+    referer: Retailor
   ) = {
     Lead.create
     .leadId(generateLongId)
@@ -39,6 +40,7 @@ class Lead extends LongKeyedMapper[Lead] with IdPK {
     .lastName(lastName)
     .email(email)
     .phone(phone)
+    .referer(referer)
     .saveMe
   }
 }

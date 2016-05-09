@@ -48,6 +48,7 @@ class Boot {
     )
 
     DataLoader.loadProducts
+    DataLoader.loadUsers
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
