@@ -22,7 +22,7 @@ class Leads extends Loggable {
   val leads = Lead.findAll()
 
   def render = {
-    ".leads" #> leads.map { lead =>
+    ".lead" #> leads.map { lead =>
 
       ".name *" #> lead.name &
       ".email *" #> lead.email &
