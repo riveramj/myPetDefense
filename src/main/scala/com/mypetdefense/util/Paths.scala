@@ -14,6 +14,7 @@ object Paths {
     PetProduct.menu,
     Checkout.menu,
     Dashboard.menu,
-    Parents.menu
+    Parents.menu,
+    Leads.menu
   )
 }

@@ -34,7 +34,7 @@ class Parents extends Loggable {
       ".name *" #> parent.name &
       ".email *" #> parent.email &
       ".phone *" #> parent.phone &
-      ".referer *" #> parent.retailor.obj.map(_.name.get) &
+      ".referer *" #> parent.referer.obj.map(_.name.get) &
       ".ship-date *" #> nextShipDate.map(dateFormat.format(_))
     }
   }

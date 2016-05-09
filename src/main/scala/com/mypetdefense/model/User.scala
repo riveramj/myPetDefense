@@ -26,7 +26,7 @@ class User extends LongKeyedMapper[User] with IdPK {
   object salt extends MappedString(this, 100)
   object phone extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
-  object retailor extends MappedLongForeignKey(this, Retailor)
+  object referer extends MappedLongForeignKey(this, Retailor)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
