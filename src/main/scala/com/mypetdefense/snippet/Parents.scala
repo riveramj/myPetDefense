@@ -25,19 +25,17 @@ class Parents extends Loggable {
 
   val parents = User.findAll(By(User.userType, UserType.Parent))
 
-  def getNextShipDate(parent: User) = {
-    Subscription.find(By(Subscription.user, parent)).map(_.nextShipDate.get)
-  }
-
   def render = {
     ".parent" #> parents.map { parent =>
       val dateFormat = new SimpleDateFormat("MMM dd")
+
+      val nextShipDate = Subscription.find(By(Subscription.user, parent)).map(_.nextShipDate.get)
 
       ".name *" #> parent.name &
       ".email *" #> parent.email &
       ".phone *" #> parent.phone &
       ".referer *" #> parent.retailor.obj.map(_.name.get) &
-      ".ship-date *" #> getNextShipDate(parent).map(dateFormat.format(_))
+      ".ship-date *" #> nextShipDate.map(dateFormat.format(_))
     }
   }
 }
