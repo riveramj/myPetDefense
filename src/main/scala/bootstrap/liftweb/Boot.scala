@@ -36,14 +36,15 @@ class Boot {
     Schemifier.schemify(
       true,
       Schemifier.infoF _,
-      Admin,
-      Parent,
+      User,
       Address,
       Pet,
       Product,
       Shipment,
       ShipmentLineItem,
-      Subscription
+      Subscription,
+      Lead,
+      Retailor
     )
 
     DataLoader.loadProducts

@@ -12,9 +12,9 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator
 
 import java.util.Date
 
-class Parent extends LongKeyedMapper[Parent] with IdPK {
-  def getSingleton = Parent
-  object parentId extends MappedLong(this) {
+class User extends LongKeyedMapper[User] with IdPK {
+  def getSingleton = User
+  object userId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
 
@@ -25,14 +25,15 @@ class Parent extends LongKeyedMapper[Parent] with IdPK {
   object password extends MappedString(this, 100)
   object salt extends MappedString(this, 100)
   object phone extends MappedString(this, 100)
-  object admin extends MappedLongForeignKey(this, Admin)
+  object userType extends MappedEnum(this, UserType)
+  object retailor extends MappedLongForeignKey(this, Retailor)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
   def name = s"${firstName} ${lastName}"
 
-  def createNewParent(
+  def createNewUser(
     firstName: String,
     lastName: String,
     stripeId: String,
@@ -40,16 +41,16 @@ class Parent extends LongKeyedMapper[Parent] with IdPK {
     password: String,
     phone: String
   ) = {
-    val parent =
-      Parent.create
-      .parentId(generateLongId)
+    val user =
+      User.create
+      .userId(generateLongId)
       .firstName(firstName)
       .lastName(lastName)
       .stripeId(stripeId)
       .email(email)
       .phone(phone)
     
-    setParentPassword(parent, password)
+    setUserPassword(user, password)
   }
 
   private def getSalt: String = generateStringId
@@ -58,15 +59,19 @@ class Parent extends LongKeyedMapper[Parent] with IdPK {
     new Sha256Hash(password, salt, 1024).toBase64
   }
 
-  def setParentPassword(Parent: Parent, password: String): Parent = {
+  def setUserPassword(User: User, password: String): User = {
     val salt = getSalt
     val hashedPassword = hashPassword(password, salt)
 
-    Parent
+    User
       .password(hashedPassword)
       .salt(salt)
       .saveMe
   }
 }
 
-object Parent extends Parent with LongKeyedMetaMapper[Parent]
+object User extends User with LongKeyedMetaMapper[User]
+
+object UserType extends Enumeration {
+  val Agent, Parent, Retailor, Admin = Value
+}

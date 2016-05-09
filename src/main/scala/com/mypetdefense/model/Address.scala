@@ -17,7 +17,8 @@ class Address extends LongKeyedMapper[Address] with IdPK {
   object addressId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-  object parent extends MappedLongForeignKey(this, Parent)
+  object user extends MappedLongForeignKey(this, User)
+  object lead extends MappedLongForeignKey(this, Lead)
   object street1 extends MappedString(this, 100)
   object street2 extends MappedString(this, 100)
   object city extends MappedString(this, 100)
@@ -29,7 +30,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
   }
 
   def createNewAddress(
-    parent: Parent,
+    user: User,
     street1: String,
     street2: String,
     city: String,
@@ -39,7 +40,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
   ) = {
     Address.create
     .addressId(generateLongId)
-    .parent(parent)
+    .user(user)
     .street1(street1)
     .street2(street2)
     .city(city)

@@ -57,17 +57,17 @@ class Checkout extends Loggable {
     )
 
     for (customer <- stripeCustomer)
-      newParentSetup(customer, selectedPetType, selectedPetSize, selectedPetProduct)
+      newUserSetup(customer, selectedPetType, selectedPetSize, selectedPetProduct)
   }
 
-  def newParentSetup(
+  def newUserSetup(
     customer: Box[Customer], 
     selectedPetType: Box[AnimalType.Value],
     selectedPetSize: Box[AnimalSize.Value],
     selectedPetProduct: Box[Product]
   ) = {
     val stripeId = customer.map(_.id).openOr("")
-    val parent = Parent.createNewParent(
+    val user = User.createNewUser(
       firstName,
       lastName,
       stripeId,
@@ -77,11 +77,11 @@ class Checkout extends Loggable {
     )
 
     println("===================")
-    println("parent:")
-    println(parent)
+    println("user:")
+    println(user)
 
     val shippingAddress = Address.createNewAddress(
-      parent,
+      user,
       street1,
       street2,
       city,
@@ -101,7 +101,7 @@ class Checkout extends Loggable {
         petProduct <- selectedPetProduct
       } yield {
         Pet.createNewPet(
-          parent,
+          user,
           petName,
           petType,
           petSize,
@@ -115,7 +115,7 @@ class Checkout extends Loggable {
     println(pet)
 
     val subscription = Subscription.createNewSubscription(
-      parent,
+      user,
       new Date(),
       new Date()
     )
@@ -141,7 +141,7 @@ class Checkout extends Loggable {
     "#state" #> text(state, state = _) &
     "#zip" #> text(zip, zip = _) &
     "#phone" #> text(phone, phone = _) &
-    "#email" #> text(email, parentEmail => email = parentEmail.trim) &
+    "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#password" #> SHtml.password(password, password = _) &
     "#pet-name" #> text(petName, petName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &

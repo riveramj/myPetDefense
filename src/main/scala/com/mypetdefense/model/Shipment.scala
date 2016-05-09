@@ -23,9 +23,9 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
 }
 
 object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
-  def createShipment(parent: Parent, stripePaymentId: String) = {
+  def createShipment(user: User, stripePaymentId: String) = {
     (for {
-      subscription <- Subscription.find(By(Subscription.parent, parent))
+      subscription <- Subscription.find(By(Subscription.user, user))
       dateProcessed = new Date()
     } yield {
       val shipment = Shipment.create
@@ -36,7 +36,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
       .dateProcessed(dateProcessed)
       .saveMe
 
-      ShipmentLineItem.createShipmentItems(shipment, parent)
+      ShipmentLineItem.createShipmentItems(shipment, user)
 
       shipment
     })
@@ -53,8 +53,8 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
 }
 
 object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem] {
-  def createShipmentItems(shipment: Shipment, parent: Parent) = {
-    val pets = Pet.findAll(By(Pet.parent, parent))
+  def createShipmentItems(shipment: Shipment, user: User) = {
+    val pets = Pet.findAll(By(Pet.user, user))
     val products = pets.map(_.product.obj)
 
     products.map { product =>

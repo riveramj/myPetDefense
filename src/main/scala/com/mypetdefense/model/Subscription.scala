@@ -14,7 +14,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
   object subscriptionId extends MappedLong(this){
     override def dbIndexed_? = true
   }
-  object parent extends MappedLongForeignKey(this, Parent)
+  object user extends MappedLongForeignKey(this, User)
   object startDate extends MappedDateTime(this)
   object renewalDate extends MappedDateTime(this)
   object nextShipDate extends MappedDateTime(this)
@@ -25,16 +25,16 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
     override def defaultValue = new Date()
   }
 
-  def getProducts = Pet.findAll(By(Pet.parent, parent.get)).flatMap(_.product.obj)
+  def getProducts = Pet.findAll(By(Pet.user, user.get)).flatMap(_.product.obj)
 
   def createNewSubscription(
-    parent: Parent,
+    user: User,
     startDate: Date,
     nextShipDate: Date
   ) = {
     Subscription.create
     .subscriptionId(generateLongId)
-    .parent(parent)
+    .user(user)
     .startDate(startDate)
     .nextShipDate(nextShipDate)
     .saveMe

@@ -57,9 +57,9 @@ trait Dashboard extends Loggable {
     nextShipDate.save
   }
 
-  def shipProduct(subscription: Subscription, parent: Box[Parent])() = {
+  def shipProduct(subscription: Subscription, user: Box[User])() = {
     updateNextShipDate(subscription)
-    emailActor ! SendInvoicePaymentSucceededEmail(parent)
+    emailActor ! SendInvoicePaymentSucceededEmail(user)
   }
 
   def render = {
@@ -68,13 +68,13 @@ trait Dashboard extends Loggable {
       val dateFormat = new SimpleDateFormat("MMM dd")
 
       ".ship-on *" #> dateFormat.format(subscription.nextShipDate.get) &
-      ".name *" #> subscription.parent.obj.map(_.name) &
+      ".name *" #> subscription.user.obj.map(_.name) &
       ".products" #> productNames.map { case (name, product) =>
         ".amount *" #> product.size &
         ".product-name *" #> name
       } &
       ".payment-processed *" #> paymentProcessed_?(subscription) &
-      ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, subscription.parent.obj))
+      ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, subscription.user.obj))
     }
   }
 }

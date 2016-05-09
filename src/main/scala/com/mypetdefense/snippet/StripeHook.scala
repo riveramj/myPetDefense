@@ -28,10 +28,10 @@ trait StripeHook extends RestHelper with Loggable {
   def invoicePaymentSucceeded(objectJson: JValue) = {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
-      parent <- Parent.find(By(Parent.stripeId, stripeCustomerId))
+      user <- User.find(By(User.stripeId, stripeCustomerId))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
-      val shipment = Shipment.createShipment(parent, invoicePaymentId)
+      val shipment = Shipment.createShipment(user, invoicePaymentId)
       
       println("===================")
       println("shipment:")
@@ -50,7 +50,7 @@ trait StripeHook extends RestHelper with Loggable {
   def invoicePaymentFailed(objectJson: JValue) = {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
-      parent <- Parent.find("stripeCustomerId" -> stripeCustomerId)
+      user <- User.find("stripeCustomerId" -> stripeCustomerId)
       totalAmountInCents <- tryo((objectJson \ "total").extract[Long]) ?~! "No total."
     } yield {
       val nextPaymentAttemptSecs: Option[Long] =
@@ -63,9 +63,9 @@ trait StripeHook extends RestHelper with Loggable {
       }
       val amount = totalAmountInCents / 100d
 
-      println(s"payment failed for ${parent}")
+      println(s"payment failed for ${user}")
 
-      emailActor ! SendInvoicePaymentFailedEmail(parent.email.get, amount, nextPaymentAttempt)
+      emailActor ! SendInvoicePaymentFailedEmail(user.email.get, amount, nextPaymentAttempt)
       
       OkResponse()
     }
