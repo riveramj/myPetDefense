@@ -40,6 +40,7 @@ class User extends LongKeyedMapper[User] with IdPK {
     email: String,
     password: String,
     phone: String,
+    referer: Box[Retailor],
     userType: UserType.Value
   ) = {
     val user =
@@ -50,6 +51,7 @@ class User extends LongKeyedMapper[User] with IdPK {
       .stripeId(stripeId)
       .email(email)
       .phone(phone)
+      .referer(referer)
       .userType(userType)
     
     setUserPassword(user, password)

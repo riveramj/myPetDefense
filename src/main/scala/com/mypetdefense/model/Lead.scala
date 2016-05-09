@@ -20,6 +20,7 @@ class Lead extends LongKeyedMapper[Lead] with IdPK {
   object email extends MappedEmail(this, 50)
   object phone extends MappedString(this, 100)
   object referer extends MappedLongForeignKey(this, Retailor)
+  object parent extends MappedLongForeignKey(this, User)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }

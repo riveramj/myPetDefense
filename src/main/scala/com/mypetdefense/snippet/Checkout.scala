@@ -6,6 +6,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.http._
+import net.liftweb.mapper.{By, NullRef}
 
 import com.mypetdefense.snippet.PetChoice._
 import com.mypetdefense.snippet.PetSize._
@@ -67,6 +68,18 @@ class Checkout extends Loggable {
     selectedPetProduct: Box[Product]
   ) = {
     val stripeId = customer.map(_.id).openOr("")
+
+    val leads = Lead.findAll(
+      By(Lead.email, email),
+      NullRef(Lead.parent)
+    )
+    
+    println("===================")
+    println("leads:")
+    println(leads)
+
+    val referer = leads.headOption.flatMap(_.referer.obj)
+
     val user = User.createNewUser(
       firstName,
       lastName,
@@ -74,8 +87,13 @@ class Checkout extends Loggable {
       email,
       password,
       phone,
+      referer,
       UserType.Parent
     )
+
+    leads.map { lead => 
+      lead.parent(user).save
+    }
 
     println("===================")
     println("user:")
