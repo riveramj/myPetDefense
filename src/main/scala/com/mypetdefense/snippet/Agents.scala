@@ -10,26 +10,26 @@ import net.liftweb.mapper.By
 
 import com.mypetdefense.model._
 
-object Leads extends Loggable {
+object Agents extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
 
-  val menu = Menu.i("Leads") / "leads"
+  val menu = Menu.i("Agents") / "agents"
 }
 
-class Leads extends Loggable {
+class Agents extends Loggable {
 
-  val leads = Lead.findAll()
+  val agent = User.findAll(By(User.userType, UserType.Agent))
 
   def render = {
-    ".leads" #> leads.map { lead =>
+    ".agent" #> agent.map { agent =>
 
-      ".name *" #> lead.name &
-      ".email *" #> lead.email &
-      ".phone *" #> lead.phone &
-      ".referer *" #> lead.referer.obj.map(_.name.get)
+      ".name *" #> agent.name &
+      ".email *" #> agent.email &
+      ".phone *" #> agent.phone 
     }
   }
 }
+
 
 

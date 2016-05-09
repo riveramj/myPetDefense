@@ -15,6 +15,7 @@ object Paths {
     Checkout.menu,
     Dashboard.menu,
     Parents.menu,
-    Leads.menu
+    Leads.menu,
+    Agents.menu
   )
 }
