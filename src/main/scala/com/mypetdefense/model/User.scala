@@ -39,7 +39,8 @@ class User extends LongKeyedMapper[User] with IdPK {
     stripeId: String,
     email: String,
     password: String,
-    phone: String
+    phone: String,
+    userType: UserType.Value
   ) = {
     val user =
       User.create
@@ -49,6 +50,7 @@ class User extends LongKeyedMapper[User] with IdPK {
       .stripeId(stripeId)
       .email(email)
       .phone(phone)
+      .userType(userType)
     
     setUserPassword(user, password)
   }

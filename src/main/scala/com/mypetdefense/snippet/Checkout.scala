@@ -73,7 +73,8 @@ class Checkout extends Loggable {
       stripeId,
       email,
       password,
-      phone
+      phone,
+      UserType.Parent
     )
 
     println("===================")
