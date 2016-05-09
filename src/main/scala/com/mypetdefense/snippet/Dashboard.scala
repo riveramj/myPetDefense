@@ -70,7 +70,7 @@ trait Dashboard extends Loggable {
       ".ship-on *" #> dateFormat.format(subscription.nextShipDate.get) &
       ".name *" #> subscription.user.obj.map(_.name) &
       ".products" #> productNames.map { case (name, product) =>
-        ".amount *" #> product.size &
+        ".amount *"  #> product.size &
         ".product-name *" #> name
       } &
       ".payment-processed *" #> paymentProcessed_?(subscription) &

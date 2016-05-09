@@ -13,6 +13,7 @@ object Paths {
     PetSize.menu,
     PetProduct.menu,
     Checkout.menu,
-    Dashboard.menu
+    Dashboard.menu,
+    Parents.menu
   )
 }
