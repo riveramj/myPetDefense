@@ -5,3 +5,5 @@ project/project
 project/target
 *.swo
 src/main/webapp/static/js/*
+*.scssc
+src/main/webapp/static/css/*

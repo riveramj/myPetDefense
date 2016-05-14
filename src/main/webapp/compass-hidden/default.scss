@@ -1,0 +1,5 @@
+@import "base";
+
+.container {
+  @include outer-container;
+}
