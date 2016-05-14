@@ -33,6 +33,13 @@ seq(
   compressedTarget in ResourceCompile <<= (PluginKeys.webappResources in Compile) apply { resources => (resources / "static").get(0) }
 )
 
+seq(
+  PluginKeys.start in WebPlugin.container.Configuration <<= 
+    (compileSass in ResourceCompile)
+      .dependsOn(copyScripts in ResourceCompile)
+      .dependsOn(PluginKeys.start in WebPlugin.container.Configuration)
+)
+
 resolvers ++= Seq(
   "snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
   "releases"  at "https://oss.sonatype.org/content/repositories/releases"
