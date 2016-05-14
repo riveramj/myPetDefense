@@ -30,7 +30,8 @@ class Address extends LongKeyedMapper[Address] with IdPK {
   }
 
   def createNewAddress(
-    user: User,
+    user: Box[User],
+    lead: Box[Lead],
     street1: String,
     street2: String,
     city: String,
@@ -41,6 +42,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     Address.create
     .addressId(generateLongId)
     .user(user)
+    .lead(lead)
     .street1(street1)
     .street2(street2)
     .city(city)
