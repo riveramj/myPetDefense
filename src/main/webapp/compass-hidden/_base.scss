@@ -1,0 +1,28 @@
+@import "compass/reset";
+@import "compass/utilities/general/clearfix";
+
+@import "bourbon/bourbon";
+@import "neat/neat";
+
+/// Weights
+$light: 400;
+$normal: 600;
+$semibold: 600;
+$bold: 700;
+
+/// Colors
+// General
+$green: #259490;
+$gray: #949494;
+
+/// Breakpoints
+$bp-small: 24em;
+$bp-med: 46.8em;
+$bp-large: 50em;
+$bp-xl: 73em;
+
+$max-allowed-width: 1442px;
+
+*:focus {
+  outline: 0;
+}
