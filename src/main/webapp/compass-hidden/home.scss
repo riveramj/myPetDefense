@@ -43,12 +43,9 @@ nav {
 
   background-size: em(595px) em(380px);
   
-  width: em(595px);
-  height: em(380px);
   text-align: center;
-  background-image: url(/images/cat-dog-friends.jpg);
+  background-image: url(../../images/cat-dog-friends.jpg);
   background-repeat: no-repeat;
-  background-attachment: fixed;
 }
 
 #tag-line-container {

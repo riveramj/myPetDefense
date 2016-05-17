@@ -11,11 +11,11 @@ $semibold: 500;
 $bold: 700;
 
 ///Fonts
-@include font-face("Panton", "/fonts/Panton/light/panton-light-webfont", $weight: 300, $file-formats: eot ttf woff woff2);
+@include font-face("Panton", "../../fonts/Panton/light/panton-light-webfont", $weight: 300, $file-formats: eot ttf woff woff2);
 
-@include font-face("Panton", "/fonts/Panton/regular/panton-regular-webfont", $weight: 400, $file-formats: eot ttf woff woff2);
+@include font-face("Panton", "../../fonts/Panton/regular/panton-regular-webfont", $weight: 400, $file-formats: eot ttf woff woff2);
 
-@include font-face("Panton", "/fonts/Panton/semibold/panton-semibold-webfont", $weight: 500, $file-formats: eot ttf woff woff2);
+@include font-face("Panton", "../../fonts/Panton/semibold/panton-semibold-webfont", $weight: 500, $file-formats: eot ttf woff woff2);
 
 $text-font: "Panton", "Helvetica Neue", Helvetica, Arial, sans-serif;
 $text-color: #454343;
