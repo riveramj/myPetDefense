@@ -7,51 +7,56 @@
   display: inline-block;
 }
 
-#logo-name {
-  @include media($bp-large) {
-    padding-left: 251px;
-  }
+#logo-name-mobile {
+  padding: em(20px) 0 0 em(20px);
+  float: left;
 }
 
 nav {
-  display: inline-block;
+  margin: em(13px) em(13px) 0 0;
+  float: right;
 }
 
-.signup {
+#mobile-nav .signup {
+  display: block;
+  background-color: $green;
+  color: #ffffff;
+  
   text-decoration: none;
   text-transform: uppercase;
-  padding: 10px 12px;
-}
+  font-weight: $semibold;
+  font-size: em(14px);
 
-#mobile-nav {
-  @include media($bp-large) {
-    display: none;
-  }
-
-  .signup {
-    background-color: $green;
+  
+  padding: em(9px) em(13px);
+  border-radius: 2px;
+  
+  &:visited {
     color: #ffffff;
-    
-    &:visited {
-      color: #ffffff;
-    }
   }
 }
 
-#nav {
-  display: none;
+#hero-image {
+  @include span-columns(12);
+  margin-top: 14px;
+  overflow: hidden;
 
-  @include media($bp-large) {
-    display: block;
-  }
+  background-size: em(595px) em(380px);
+  
+  width: em(595px);
+  height: em(380px);
+  text-align: center;
+  background-image: url(/images/cat-dog-friends.jpg);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
 
-  .signup {
-    border: 1px solid #605F5F;
-    border-radius: 2px;
-    color: #605F5F;
+#tag-line-container {
+  margin-top: em(278px);
+  background-color: $gray;
+}
 
-    &:visited {
-      color: #605F5F;
-    }
-  }
+#tag-line {
+  font-size: em(26px);
+  font-weight: $light;
 }
