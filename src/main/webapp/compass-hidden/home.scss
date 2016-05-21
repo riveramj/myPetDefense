@@ -33,23 +33,27 @@ nav {
   }
 }
 
-#hero-image {
+#hero {
   @include span-columns(12);
-  overflow: hidden;
+  height: em(380px);
+}
 
-  background-size: em(595px) em(380px);
-  
-  text-align: center;
-  background-image: url(../../images/cat-dog-friends.jpg);
-  background-repeat: no-repeat;
+#hero-dog-cat {
+  width: 100%;
+  display: block;
 }
 
 #tag-line-container {
-  margin-top: em(278px);
-  background-color: $gray;
+  position: relative;
+  margin-top: em(-27px);
+  background-color: $hero-background;
 }
 
 #tag-line {
   font-size: em(26px);
   font-weight: $light;
+  
+  color: $hero-text;
+  padding: rem(31px) rem(54px) rem(22px);
+  text-align: center;
 }
