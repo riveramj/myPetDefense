@@ -25,7 +25,6 @@ nav {
   font-size: em(14px);
 }
 
-
 #mobile-nav .signup {
   display: block;
 
@@ -300,6 +299,15 @@ nav {
   ul {
     padding-top: rem(10px);
     line-height: rem(23px);
+  }
+  
+  a {
+    text-decoration: none;
+    color: #ffffff;
+
+    &:visited {
+      color: #ffffff;
+    }
   }
 }
 
