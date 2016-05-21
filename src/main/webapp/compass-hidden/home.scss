@@ -39,12 +39,12 @@ nav {
 
 #hero {
   @include span-columns(12);
-  height: em(380px);
 }
 
 #hero-dog-cat {
-  width: 100%;
-  display: block;
+  background: url(../../images/cat-dog-friends.jpg) no-repeat center;
+  background-size: cover;
+  height: em(278px);
 }
 
 #tag-line-container {
@@ -58,7 +58,7 @@ nav {
     border-radius: 5px;
 
     padding: rem(13px) rem(25px);    
-    margin-bottom: rem(46px);
+    margin-bottom: rem(43px);
   }
 }
 
@@ -67,6 +67,29 @@ nav {
   font-weight: $light;
   
   color: $hero-text;
-  padding: rem(31px) rem(54px) rem(22px);
+  padding: rem(31px) rem(54px) rem(25px);
   text-align: center;
+}
+
+.leaf-divider {
+  background: url(../../images/leaf-background.png) no-repeat left;
+  background-size: cover;
+  height: em(29px);
+}
+
+#how-it-works {
+  @include span-columns(12);
+  background-color: $how-it-works-background;
+  text-align: center;
+  
+  h2 {
+    padding: rem(35px) 0;
+    font-size: em(26px);
+    font-weight: $light;
+    color: #4F4E4E;
+  }
+}
+
+#identify-pet-image {
+  @include span-columns(5);
 }

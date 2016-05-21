@@ -28,6 +28,7 @@ $gray: #949494;
 $signup-button-background: #259490;
 $hero-background: #4F4E4E;
 $hero-text: #DCDBDB;
+$how-it-works-background: #DCDBDB;
 
 /// Breakpoints
 $bp-small: 24em;
@@ -46,7 +47,7 @@ $max-allowed-width: 1442px;
 html {
   font-size: $base-font-size;
   font-family: $text-font;
-  text-color: $text-color
+  color: $text-color
 }
 
 input, button, textarea {
