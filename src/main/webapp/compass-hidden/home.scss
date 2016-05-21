@@ -65,6 +65,8 @@ nav {
 #tag-line {
   font-size: em(26px);
   font-weight: $light;
+
+  line-height: rem(35px);
   
   color: $hero-text;
   padding: rem(31px) rem(54px) rem(25px);
@@ -81,15 +83,50 @@ nav {
   @include span-columns(12);
   background-color: $how-it-works-background;
   text-align: center;
+  padding-bottom: rem(90px);
   
   h2 {
-    padding: rem(35px) 0;
+    padding: rem(35px) 0 rem(35px);
     font-size: em(26px);
     font-weight: $light;
     color: #4F4E4E;
   }
 }
+.step {
+  @include fill-parent();
+  @include row(table);
+  margin-top: rem(60px);
 
-#identify-pet-image {
-  @include span-columns(5);
+  &:first-child {
+    margin-top: 0;
+  }
+
 }
+
+.step-image {
+  @include span-columns(5);
+  vertical-align: top;
+  text-align: right;
+  padding-right: rem(24px);
+}
+
+.step-instructions {
+  @include span-columns(7);
+  @include reset-display;
+  vertical-align: middle;
+  padding-right: rem(58px);
+  text-align: left;
+
+  h3 {
+    color: #605F5F;
+    font-size: em(20px);
+    padding-bottom:rem(5px);
+  }
+
+  div {
+    line-height: rem(22px);
+    
+  }
+}
+
+
