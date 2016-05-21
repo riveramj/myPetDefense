@@ -16,15 +16,19 @@ nav {
   float: right;
 }
 
-#mobile-nav .signup {
-  display: block;
-  background-color: $green;
+.signup {
+  background-color: $signup-button-background;
   color: #ffffff;
   
   text-decoration: none;
   text-transform: uppercase;
   font-weight: $semibold;
   font-size: em(14px);
+}
+
+
+#mobile-nav .signup {
+  display: block;
 
   padding: em(28px) em(25px);
   
@@ -47,6 +51,15 @@ nav {
   position: relative;
   margin-top: em(-27px);
   background-color: $hero-background;
+  text-align: center;
+
+  .signup {
+    display: inline-block;
+    border-radius: 5px;
+
+    padding: rem(13px) rem(25px);    
+    margin-bottom: rem(46px);
+  }
 }
 
 #tag-line {
