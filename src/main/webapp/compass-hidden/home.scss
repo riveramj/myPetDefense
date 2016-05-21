@@ -144,8 +144,75 @@ nav {
 
   div {
     line-height: rem(22px);
-    
   }
 }
 
+#why-mpd {
+  @include span-columns(12);
+  background-color: $why-mpd-background;
 
+  text-align: center;
+
+  h2 {
+    font-size: em(26px);
+    font-weight: $light;
+    line-height: rem(35px);
+
+    color: #FDFDFD;
+    padding: rem(50px) 0 rem(20px);
+    width: rem(215px);
+    display: inline-block;
+  }
+
+  .signup-container {
+    display: block;
+    margin-bottom: em(60px);
+  }
+  
+  .signup {
+    background-color: inherit;
+    padding: em(17px) em(26px);
+    border: 1px solid #ffffff;
+    display: inline-block;
+  }
+
+  ul {
+    padding-bottom: rem(85px);
+  }
+}
+
+.mpd-benefit {
+  text-align: center;
+  color: #ffffff;
+  line-height: rem(23px);
+  width: 81%;
+  margin: auto;
+  padding-top: rem(46px);
+
+  &:first-child {
+      padding-top: 0;
+  }
+
+  h4 {
+    margin: auto;
+    text-align: left;
+    color: #454343;
+    font-weight: $semibold;
+    text-transform: uppercase;
+    font-size: em(15px);
+  }
+  
+  h3 {
+    margin: auto auto auto 0;
+    text-align: left;
+    font-size: em(22px);
+    padding: rem(2px) 0 rem(16px);
+    width: 85%;
+  }
+  
+  div {
+    margin: auto;
+    text-align: left;
+  }
+
+}
