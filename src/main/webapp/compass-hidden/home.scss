@@ -3,7 +3,6 @@
 #top-bar {
   @include span-columns(12);
   background-color: #ffffff;
-
   display: inline-block;
 }
 
@@ -215,5 +214,59 @@ nav {
     margin: auto;
     text-align: left;
   }
+}
 
+#testimonials {
+  @include span-columns(12);
+  text-align: center;
+  background-color: #ffffff;
+
+  ul {
+    padding-top: em(49px);
+  }
+}
+
+.testimonial {
+  @include row(table);
+  @include fill-parent();
+  padding-bottom: em(60px);
+}
+
+.headshot-container {
+  @include span-columns(5);
+  vertical-align: top;
+  text-align: right;
+  padding-right: rem(24px);
+  display: inline-block;
+}
+
+.headshot {
+  border-radius: 50%;
+  width: 89px;
+  height: 89px;
+  background-color: #CECECE;
+  text-align: center;
+  display: inline-block;
+}
+
+.phrase {
+  @include span-columns(7);
+  @include reset-display;
+  
+  vertical-align: middle;
+  padding-right: rem(25px);
+  text-align: left;
+
+  color: $green;
+  font-size: em(21px);
+  font-weight: $light;
+  line-height: rem(27px);
+}
+
+.endorser-name {
+  text-transform: uppercase;
+  color: #706E6E;
+  font-size: em(14px);
+  padding-top: em(10px);
+  font-weight: $normal;
 }
