@@ -270,3 +270,42 @@ nav {
   padding-top: em(10px);
   font-weight: $normal;
 }
+
+#footer {
+  @include span-columns(12);
+  background-color: #454343;
+  padding-top: em(60px);
+
+  text-align: center;
+}
+
+.footer-section {
+  @include span-columns(3 of 12);
+  color: #ffffff;
+  margin-right: 0;
+  text-align: left;
+
+  &:first-child {
+    @include shift(3);
+    margin-right: rem(60px);
+  }
+
+  h4 {
+    text-transform: uppercase;
+    color: #B2B0B0;
+    font-size: em(15px);
+    font-weight: $semibold;
+  }
+
+  ul {
+    padding-top: rem(10px);
+    line-height: rem(23px);
+  }
+}
+
+.legal {
+  color: #949494;
+  padding: rem(57px) 0 rem(9px);
+  font-size: em(12px);
+  display: inline-block;
+}
