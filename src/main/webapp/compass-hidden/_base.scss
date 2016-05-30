@@ -5,15 +5,31 @@
 @import "neat/neat";
 
 /// Weights
-$light: 400;
-$normal: 600;
-$semibold: 600;
+$light: 300;
+$normal: 400;
+$semibold: 500;
 $bold: 700;
+
+///Fonts
+@include font-face("Panton", "../../fonts/Panton/light/panton-light-webfont", $weight: 300, $file-formats: eot ttf woff woff2);
+
+@include font-face("Panton", "../../fonts/Panton/regular/panton-regular-webfont", $weight: 400, $file-formats: eot ttf woff woff2);
+
+@include font-face("Panton", "../../fonts/Panton/semibold/panton-semibold-webfont", $weight: 500, $file-formats: eot ttf woff woff2);
+
+$text-font: "Panton", "Helvetica Neue", Helvetica, Arial, sans-serif;
+$text-color: #454343;
+$base-font-size: 16px;
 
 /// Colors
 // General
 $green: #259490;
 $gray: #949494;
+$signup-button-background: #259490;
+$hero-background: #4F4E4E;
+$hero-text: #DCDBDB;
+$how-it-works-background: #DCDBDB;
+$why-mpd-background: #57B8B4;
 
 /// Breakpoints
 $bp-small: 24em;
@@ -23,6 +39,25 @@ $bp-xl: 73em;
 
 $max-allowed-width: 1442px;
 
+
+// The focus halo that some browsers like Chrome put on all inputs.
 *:focus {
   outline: 0;
+}
+
+html {
+  font-size: $base-font-size;
+  font-family: $text-font;
+  color: $text-color
+}
+
+input, button, textarea {
+  font-family: $text-font;
+  color: $text-color;
+}
+
+// By default, drop both the space and the border on a focused button.
+button::-moz-focus-inner {
+    padding: 0;
+    border: 0;
 }
