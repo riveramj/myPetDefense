@@ -371,20 +371,35 @@ nav {
   }
 }
 
-#testimonials {
+#testimonials-container {
   @include span-columns(12);
   text-align: center;
   background-color: #ffffff;
 
-  ul {
+  #testimonials {
     padding-top: em(49px);
+
+    @media (min-width: $bp-med) {
+      display: inline-block;
+      padding: em(175px) 0 em(183);
+      @include shift(1);
+    }
   }
 }
 
 .testimonial {
-  @include row(table);
-  @include fill-parent();
-  padding-bottom: em(60px);
+  @media (max-width: $bp-med) {
+    @include row(table);
+    @include fill-parent();
+    padding-bottom: em(60px);
+  }
+
+  @media (min-width: $bp-med) {
+    @include reset-display;
+    @include span-columns(5);
+
+    display: inline-block;
+  }
 }
 
 .headshot-container {
@@ -407,7 +422,7 @@ nav {
 .phrase {
   @include span-columns(7);
   @include reset-display;
-  
+
   vertical-align: middle;
   padding-right: rem(25px);
   text-align: left;
@@ -440,9 +455,17 @@ nav {
   margin-right: 0;
   text-align: left;
 
+  @media (min-width: $bp-med) {
+     @include span-columns(1);
+  }
+
   &:first-child {
     @include shift(3);
     margin-right: rem(60px);
+
+    @media (min-width: $bp-med) {
+      @include shift(8);
+    }
   }
 
   h4 {
@@ -468,8 +491,15 @@ nav {
 }
 
 .legal {
+  @include span-columns(12);
+ 
+  background-color: #454343;
   color: #949494;
   padding: rem(57px) 0 rem(9px);
   font-size: em(12px);
-  display: inline-block;
+  text-align: center;
+
+  @media (min-width: $bp-med) {
+    padding: rem(51px) 0 rem(15px);
+  }
 }
