@@ -297,6 +297,10 @@ nav {
     padding: rem(50px) 0 rem(20px);
     width: rem(215px);
     display: inline-block;
+
+    @media (min-width: $bp-med) {
+      padding-top: 0;
+    }
   }
 
   .signup-container {
@@ -311,9 +315,24 @@ nav {
     display: inline-block;
     border-radius: 5px;
   }
+}
 
-  ul {
-    padding-bottom: rem(85px);
+#why-signup {
+  @media (min-width: $bp-med) {
+    @include span-columns(2);
+    @include shift(2);
+
+    padding-top: rem(177px);
+    text-align: left;
+  }
+}
+
+#benefits {
+  padding-bottom: rem(85px);
+
+  @media (min-width: $bp-med) {
+    @include span-columns(8);
+    padding: rem(183px) 0 rem(198);
   }
 }
 
