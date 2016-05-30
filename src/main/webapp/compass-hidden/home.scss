@@ -157,6 +157,11 @@ nav {
   background: url(../../images/leaf-background.png) no-repeat left;
   background-size: cover;
   height: em(29px);
+
+  @media (min-width: $bp-med) {
+    background: url(../../images/leaf-background-large.png) no-repeat left;
+    height: em(75px);
+  }
 }
 
 #how-it-works {
@@ -167,11 +172,12 @@ nav {
 
   @media (min-width: $bp-med) {
     margin-top: em(-42px);
-    padding-top: rem(58px);
+    padding-top: em(58px);
+    padding-bottom: em(32px);
 
     #steps {
       @include span-columns(8);
-      margin-top: rem(-100px);
+      margin-top: em(-100px);
       text-align: left;
     }
   }
