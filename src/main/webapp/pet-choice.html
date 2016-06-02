@@ -1,7 +1,11 @@
-<div id="main" data-lift="surround?with=default-template;at=content">
-  <div>
-    <form form data-lift="PetChoice">
-      <label class="pet-choice">
+<div id="choose-pet-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-step">
+    <div class="step-name">1. Pet</div>
+    <div class="arrow-up"></div>
+  </div>
+  <div id="choose-pet">
+  <form form data-lift="PetChoice">
+    <label class="pet-choice">
         <input type="radio" name="pet-choice" value="dog">
       </label>
       <label class="pet-choice clearable">
@@ -12,7 +16,7 @@
   </div>
 
   <head_merge>
-    <link rel="stylesheet" data-lift="style-bundle?name=home">
+    <link rel="stylesheet" data-lift="style-bundle?name=choose-pet">
   </head_merge>
 </div>
 
