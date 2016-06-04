@@ -1,0 +1,22 @@
+#top-bar {
+  @include span-columns(12);
+  background-color: #ffffff;
+  display: inline-block;
+
+  @media (min-width: $bp-med) {
+    padding: em(19px) 0;
+  }
+}
+
+#logo-name { 
+  @include span-columns(2);
+  @include shift(1);
+
+  padding-top: em(20px);
+  
+  @media (min-width: $bp-med) {
+    @include span-columns(3);
+    @include shift(2);
+    padding: 0;
+  }
+}

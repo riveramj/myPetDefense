@@ -1,14 +1,42 @@
-<div id="main" data-lift="surround?with=default-template;at=content">
-  <div>
-    <form form data-lift="PetChoice">
-      <label class="pet-choice">
-        <input type="radio" name="pet-choice" value="dog">
-      </label>
-      <label class="pet-choice clearable">
-        <input type="radio" name="pet-choice" value="cat">
-      </label>
-      <button class="btn btn-primary">Next</button>
-    </form>
+<div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-step">
+    <div class="step-name">1. Pet</div>
+    <div class="arrow-up"></div>
   </div>
+  <div id="choose-pet">
+    <h2>Is your pet a cat or a dog?</h2>
+
+    <div cat="choice-container">
+      <picture>
+        <source 
+          media="(min-width: 46.8em)" 
+          srcset="images/cat.png, images/cat@2x.png 2x">
+        <img class="pet-choice" src="images/cat-small.png" srcset="images/cat-small.png, images/cat-small@2x.png 2x">
+      </picture>
+      <a class="pet-choice" href="#">Select Cat</a>
+    </div>
+    <div cat="choice-container">
+      <picture>
+        <source 
+          media="(min-width: 46.8em)" 
+          srcset="images/dog.png, images/dog@2x.png 2x">
+        <img class="pet-choice" src="images/dog-small.png" srcset="images/dog-small.png, images/dog-small@2x.png 2x">
+      </picture>
+      <a class="pet-choice" href="#">Select Dog</a>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-name">2. Product</div>
+  </div>
+  <div class="flow-step">
+    <div class="step-name">3. Size</div>
+  </div>
+  <div class="flow-step">
+    <div class="step-name">4. Account</div>
+  </div>
+
+  <head_merge>
+   <link rel="stylesheet" data-lift="style-bundle?name=choose-pet">
+  </head_merge>
 </div>
 

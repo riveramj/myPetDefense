@@ -77,4 +77,7 @@ class Boot {
     LiftRules.htmlProperties.default.set((r: Req) =>new Html5Properties(r.userAgent))
     LiftRules.statelessDispatch.append(StripeHook)
   }
+
+  //Bundles
+  LiftRules.snippets.append(Bundles.snippetHandlers)
 }
