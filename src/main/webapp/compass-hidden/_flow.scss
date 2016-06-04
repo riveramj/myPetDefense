@@ -1,0 +1,60 @@
+#top-bar {
+  background-color: $green;
+  padding-bottom: em(20px);
+}
+
+#step-container {
+  @include span-columns(12);
+}
+
+.flow-step {
+  @include span-columns(12);
+  background-color: #57B8B4;
+  padding-top: em(33px);
+
+  border-top: 1px solid #137875;
+
+  .step-name {
+    text-align: center;
+
+    font-size: em(16);
+    color: #0E5552;
+    font-weight: $bold;
+
+    padding-bottom: rem(19px);
+  }
+}
+
+.arrow-up {
+  width: 0; 
+  height: 0;
+  margin-left: 48%;
+  
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-bottom: 10px solid #ffffff;
+}
+
+.footer {
+  @include span-columns(12);
+  background-color: #454343;
+  color: #B2B0B0;
+  font-weight: $semibold;
+
+  padding-top: em(82px);
+}
+
+#need-help {
+  text-align: center;
+  font-size: em(18);
+  line-height: rem(26);
+}
+
+.legal {
+  color: #949494;
+  font-size: em(12);
+  font-weight: $normal;
+
+  padding: rem(48px) 0 rem(9px);
+  text-align: center;
+}
