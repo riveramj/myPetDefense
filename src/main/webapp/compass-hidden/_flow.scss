@@ -7,10 +7,22 @@
   @include span-columns(12);
 }
 
+.current-step {
+  @include span-columns(9 of 11);
+  @include shift(1);
+  padding-top: em(30px);
+}
+
+.step-question {
+  font-size: em(24px);
+  font-weight: $light;
+  padding-bottom: rem(12px);
+}
+
 .flow-step {
   @include span-columns(12);
   background-color: #57B8B4;
-  padding-top: em(33px);
+  padding: em(33px) 0 em(19px);
 
   border-top: 1px solid #137875;
 
@@ -20,19 +32,41 @@
     font-size: em(16);
     color: #0E5552;
     font-weight: $bold;
-
-    padding-bottom: rem(19px);
   }
+}
+
+.step-choice {
+  color: #ffffff;
+  font-size: em(26);
+  padding-top: rem(2px);
+  text-align: center;
 }
 
 .arrow-up {
   width: 0; 
   height: 0;
   margin-left: 48%;
-  
+
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
   border-bottom: 10px solid #ffffff;
+  padding-top: em(19px);
+  margin-bottom: em(-19px);
+}
+
+a.select-choice {
+  display: inline-block;
+  padding: rem(13px) rem(72px) rem(12px) rem(73px);
+  text-decoration: none;
+  color: #ffffff;
+
+  font-weight: $semibold;
+  font-size: em(20px);
+
+  border-radius: 5px;
+
+  background-color: #259490;
+  text-transform: uppercase;
 }
 
 .footer {
