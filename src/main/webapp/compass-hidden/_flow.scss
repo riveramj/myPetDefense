@@ -54,7 +54,14 @@
   margin-bottom: em(-19px);
 }
 
-a.select-choice {
+.choice-container {
+  background-color: #E7E7E7;
+  padding: em(39px) 0 em(25px);
+  margin-bottom: em(40px);
+  text-align: center;
+}
+
+.select-choice {
   display: inline-block;
   padding: rem(13px) rem(72px) rem(12px) rem(73px);
   text-decoration: none;
