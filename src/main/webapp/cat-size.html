@@ -7,7 +7,7 @@
     <div class="step-name">2. Size</div>
     <div class="arrow-up"></div>
   </div>
-  <div class="current-step">
+  <div class="current-step" data-lift="CatSize">
     <h2 class="step-question">
       Please choose one of the two cat size ranges below:
     </h2>
@@ -18,11 +18,11 @@
           srcset="images/small-yarn.png, images/small-yarn@2x.png 2x">
         <img class="pet-choice" src="images/small-yarn-small.png" srcset="images/small-yarn-small.png, images/small-yarn-small@2x.png 2x">
       </picture>
-      <ul class="weight">
+      <ul class="weight small">
         <li class="cat-size">0 - 5</li>
         <li class="size-unit">pounds</li>
       </ul>
-      <a class="select-choice" href="#">Select</a>
+      <a class="select-choice" id="small-cat" href="#">Select</a>
     </div>
     <div class="choice-container">
       <picture>
@@ -35,7 +35,7 @@
         <li class="cat-size">5 - 9</li>
         <li class="size-unit">pounds</li>
       </ul>
-      <a class="select-choice" href="#">Select</a>
+      <a class="select-choice" id="medium-cat" href="#">Select</a>
     </div>
     <div class="choice-container">
       <picture>
@@ -48,7 +48,7 @@
         <li class="cat-size">9+</li>
         <li class="size-unit">pounds</li>
       </ul>
-      <a class="select-choice" href="#">Select</a>
+      <a class="select-choice" id="large-cat" href="#">Select</a>
     </div>
   </div>
   <div class="flow-step">
