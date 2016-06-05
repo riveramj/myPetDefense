@@ -1,0 +1,33 @@
+@import "base";
+@import "nav-bar";
+@import "flow";
+
+.weight {
+  display: inline-block;
+  padding-left: em(48px);
+  padding-bottom: em(28px);
+
+  &.large {
+    padding-left: rem(25px);
+    position: relative;
+    top: -40px;
+  }
+}
+
+.cat-size {
+  font-size: em(25px);
+}
+
+.size-unit {
+  font-size: em(20px);
+  font-weight: $light;
+}
+
+.select-choice {
+  width: 100%;
+}
+
+.choice-container {
+  padding-left: em(30px);
+  padding-right: em(30px);
+}
