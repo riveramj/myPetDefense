@@ -8,9 +8,7 @@ import net.liftweb.util.ClearClearable
 import net.liftweb.http._
 import net.liftweb.mapper.{By, NullRef}
 
-import com.mypetdefense.snippet.PetChoice._
-import com.mypetdefense.snippet.PetSize._
-import com.mypetdefense.snippet.PetProduct._
+import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.model._
 
 import java.util.Date

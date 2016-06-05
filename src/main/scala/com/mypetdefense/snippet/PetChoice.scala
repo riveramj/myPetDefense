@@ -1,49 +1,39 @@
 package com.mypetdefense.snippet
 
 import net.liftweb.sitemap.Menu
-import net.liftweb.http.{S, SHtml}
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
-import net.liftweb.util.ClearClearable
 import net.liftweb.http._
 
+import com.mypetdefense.service.PetFlowChoices
 import com.mypetdefense.model.AnimalType
-
-import java.time.LocalDate
 
 object PetChoice extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
 
   val menu = Menu.i("Pet Choice") / "pet-choice"
-
-  object petChoice extends SessionVar[Box[AnimalType.Value]](Empty)
 }
 
 class PetChoice extends Loggable {
-  import PetChoice._
+  import PetFlowChoices._
 
   var selectedPet: Box[AnimalType.Value] = Empty
 
-  val pets = 
-    SHtml.radio(
-      AnimalType.values.toList.map(_.toString), 
-      petChoice.is.map(_.toString),
-      selected => selectedPet = Full(AnimalType.withName(selected)) 
-    ).toForm
-
   def render = {
+    def dogFlow = {
+      petChoice(Full(AnimalType.Dog))
 
-    def choosePet() = {
-      petChoice(selectedPet)
-
-      S.redirectTo(PetSize.menu.loc.calcDefaultHref)
+      DogProduct.menu.loc.calcDefaultHref
     }
 
-    ClearClearable andThen
-    ".pet-choice" #> pets.map { pet =>
-      "input" #> pet
-    } &
-    "button" #> SHtml.onSubmitUnit(choosePet)
+    def catFlow = {
+      petChoice(Full(AnimalType.Cat))
+
+      CatSize.menu.loc.calcDefaultHref
+    }
+
+    "#dog [href]" #> dogFlow &
+    "#cat [href]" #> catFlow
   }
 }

@@ -7,27 +7,22 @@ import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.http._
 
-import com.mypetdefense.snippet.PetChoice._
+import com.mypetdefense.service.PetFlowChoices
 import com.mypetdefense.model._
 
-object PetSize extends Loggable {
+object DogSize extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
 
-  val menu = Menu.i("Pet Size") / "pet-size"
-
-  object petSize extends SessionVar[Box[AnimalSize.Value]](Empty)
+  val menu = Menu.i("Dog Size") / "dog-size"
 }
 
-class PetSize extends Loggable {
-  import PetSize._
+class DogSize extends Loggable {
+  import PetFlowChoices._
 
   var selectedSize: Box[AnimalSize.Value] = Empty
 
   val possiblePetSizes = 
-    if (petChoice.is == Full(AnimalType.Cat))
-      AnimalSize.values.toList.filter(size => (size == AnimalSize.Small) || (size == AnimalSize.Large))
-    else
       AnimalSize.values.toList
 
   val petSizes = 
@@ -41,7 +36,7 @@ class PetSize extends Loggable {
     def chooseSize() = {
       petSize(selectedSize)
 
-      S.redirectTo(PetProduct.menu.loc.calcDefaultHref)
+      S.redirectTo(Checkout.menu.loc.calcDefaultHref)
     }
 
     ClearClearable andThen
