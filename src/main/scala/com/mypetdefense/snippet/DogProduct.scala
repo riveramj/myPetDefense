@@ -8,21 +8,18 @@ import net.liftweb.util.ClearClearable
 import net.liftweb.http._
 import net.liftweb.mapper.By
 
-import com.mypetdefense.snippet.PetChoice._
-import com.mypetdefense.snippet.PetSize._
+import com.mypetdefense.service.PetFlowChoices
 import com.mypetdefense.model._
 
-object PetProduct extends Loggable {
+object DogProduct extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
 
-  val menu = Menu.i("Pet Product") / "pet-product"
-
-  object petProduct extends SessionVar[Box[Product]](Empty)
+  val menu = Menu.i("Dog Product") / "dog-product"
 }
 
-class PetProduct extends Loggable {
-  import PetProduct._
+class DogProduct extends Loggable {
+  import PetFlowChoices._
 
   var selectedProduct: Box[Product] = Empty
 
@@ -53,7 +50,7 @@ class PetProduct extends Loggable {
     def chooseProduct() = {
       petProduct(selectedProduct)
 
-      S.redirectTo(Checkout.menu.loc.calcDefaultHref)
+      S.redirectTo(DogSize.menu.loc.calcDefaultHref)
     }
 
     ClearClearable andThen

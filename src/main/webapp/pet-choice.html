@@ -3,7 +3,7 @@
     <div class="step-name">1. Pet</div>
     <div class="arrow-up"></div>
   </div>
-  <div class="current-step">
+  <div class="current-step" data-lift="PetChoice">
     <h2 class="step-question">Is your pet a cat or a dog?</h2>
 
     <div cat="choice-container">
@@ -13,7 +13,7 @@
           srcset="images/cat.png, images/cat@2x.png 2x">
         <img class="pet-choice" src="images/cat-small.png" srcset="images/cat-small.png, images/cat-small@2x.png 2x">
       </picture>
-      <a class="select-choice" href="cat-size">Select Cat</a>
+      <a class="select-choice" id="cat" href="cat-size">Select Cat</a>
     </div>
     <div cat="choice-container">
       <picture>
@@ -22,7 +22,7 @@
           srcset="images/dog.png, images/dog@2x.png 2x">
         <img class="pet-choice" src="images/dog-small.png" srcset="images/dog-small.png, images/dog-small@2x.png 2x">
       </picture>
-      <a class="select-choice" href="#">Select Dog</a>
+      <a class="select-choice" id="dog" href="#">Select Dog</a>
     </div>
   </div>
   <div class="flow-step">
