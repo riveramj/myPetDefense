@@ -4,9 +4,10 @@
     <div class="arrow-up"></div>
   </div>
   <div class="current-step" data-lift="PetChoice">
-    <h2 class="step-question">Is your pet a cat or a dog?</h2>
-
-    <div cat="choice-container">
+    <h2 class="step-question">
+      Hey there! First step: choose whether your furry best friend is a cat or a dog.
+    </h2>
+    <div class="cat-choice">
       <picture>
         <source 
           media="(min-width: 46.8em)" 
@@ -15,7 +16,7 @@
       </picture>
       <a class="select-choice" id="cat" href="cat-size">Select Cat</a>
     </div>
-    <div cat="choice-container">
+    <div class="dog-choice">
       <picture>
         <source 
           media="(min-width: 46.8em)" 
@@ -23,6 +24,9 @@
         <img class="pet-choice" src="images/dog-small.png" srcset="images/dog-small.png, images/dog-small@2x.png 2x">
       </picture>
       <a class="select-choice" id="dog" href="#">Select Dog</a>
+    </div>
+    <div class="multiple-pets">
+      <span class="multiple-pets">Multiple pets?</span> We’re hard at work to add a multiple pet option to this page. We’ll help you add one to your completed order for one pet if you email us at <a href="mailto:support@mpd.com?Subject=Multiple%20Pets">support@mypetdefense.com</a>.
     </div>
   </div>
   <div class="flow-step">

@@ -10,4 +10,32 @@ img.pet-choice {
   position: relative;
   top: rem(-58px);
   left: rem(30px);
+  
+  display: inline;
+}
+
+.dog-choice {
+  display: inline;
+}
+
+.multiple-pets {
+  font-size: em(12px);
+  line-height: rem(16);
+}
+
+div.multiple-pets {
+  color: #565555;
+
+  padding-bottom: em(31px);
+
+  a {
+    color: #259490;
+  }
+}
+
+span.multiple-pets {
+  font-size: rem(12px);
+  font-weight: $semibold;
+  color: #259490;
+  text-transform: uppercase;
 }
