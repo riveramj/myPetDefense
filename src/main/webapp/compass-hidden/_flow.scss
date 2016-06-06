@@ -13,10 +13,18 @@
   padding-top: em(30px);
 }
 
+.step-header {
+  color: #605F5F;
+  font-weight: $semibold;
+  font-size: em(27px);
+  padding-bottom: rem(8px);
+}
+
 .step-question {
   font-size: em(18px);
   font-weight: $normal;
   padding-bottom: rem(15px);
+  line-height: rem(24px);
 }
 
 .flow-step {
@@ -29,16 +37,16 @@
   .step-name {
     text-align: center;
 
-    font-size: em(16);
+    font-size: em(14);
     color: #0E5552;
-    font-weight: $bold;
+    font-weight: $semibold;
   }
 }
 
 .step-choice {
   color: #ffffff;
-  font-size: em(26);
-  padding-top: rem(2px);
+  font-size: em(22);
+  padding-top: rem(8px);
   text-align: center;
 }
 

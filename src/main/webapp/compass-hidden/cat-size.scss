@@ -4,23 +4,52 @@
 
 .weight {
   display: inline-block;
-  padding-left: em(48px);
-  padding-bottom: em(28px);
+  text-align: left;
+  line-height: 25px;
+
+  font-weight: $semibold;
+  position: relative;
+
+  &.small {
+    padding-left: em(63px);
+    top: em(-33px);
+  }
+
+  &.medium {
+  padding-left: em(51px);
+  top: em(-34px);
+}
 
   &.large {
-    padding-left: rem(25px);
-    position: relative;
-    top: -40px;
+    padding-left: em(35px);
+    top: em(-30px);
   }
 }
 
-.cat-size {
-  font-size: em(25px);
+.size-choice {
+  &.small {
+    padding-bottom: em(37px);
+  }
+
+  &.medium {
+    padding-bottom: em(27px);
+  }
+
+  &.large {
+    padding-bottom: em(8px);
+  }
+
 }
 
-.size-unit {
-  font-size: em(20px);
-  font-weight: $light;
+.weight-number {
+  font-size: em(27px);
+  color: #605F5F;
+}
+
+.weight-unit {
+  font-size: em(15px);
+  text-transform: uppercase;
+  color: #454343;
 }
 
 .select-choice {
@@ -30,4 +59,9 @@
 .choice-container {
   padding-left: em(30px);
   padding-right: em(30px);
+  margin-bottom: em(12px);
+}
+
+.current-step {
+  padding-bottom: em(29px);
 }
