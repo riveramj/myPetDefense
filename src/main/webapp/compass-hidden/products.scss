@@ -1,0 +1,120 @@
+@import "base";
+@import "nav-bar";
+@import "flow";
+
+.choice-container {
+  padding-top: 0;
+  display: inline-block;
+}
+
+.product-header {
+  @include span-columns(12);
+  margin-right: 0;
+  margin-bottom: rem(30px);
+}
+
+.header {
+  background-color: #605F5F;
+  padding: rem(16px) 0;
+
+  color: #E7E7E7;
+  text-transform: uppercase;
+  font-size: em(17px);
+  font-weight: $semibold;
+}
+
+.number {
+  border-radius: 50%;
+  width: rem(39px);
+  height: rem(39px);
+  line-height: rem(39px);
+  background-color: #949494;
+  text-align: center;
+  display: block;
+
+  color: #4F4E4E;
+  font-size: em(22);
+
+  position: relative;
+  top: 5px;
+  left: 7px;
+  float: left;
+}
+
+.product-ingredients {
+  @include span-columns(9 of 11);
+  @include shift(1);
+  margin-right: 0;
+
+  text-align: center;
+  margin-top: rem(25px);
+  line-height: rem(24px);
+}
+
+.key-point {
+  font-weight: $semibold;
+}
+
+.active-ingredients {
+  font-size: em(12px);
+  font-weight: $semibold;
+  padding-top: rem(3px);
+  margin-bottom: rem(27px);
+}
+
+.select-choice {
+  @include span-columns(10);
+  @include shift(1);
+
+  margin-bottom: rem(37px);
+  margin-right: 0;
+}
+
+.product-features {
+  @include span-columns(11);
+  @include shift(.5);
+}
+
+.feature {
+  width: 100%;
+  background-color: #F1F1F1;
+  padding: em(18px) 0 em(17px);
+
+  line-height: em(24px);
+  margin-bottom: rem(2px);
+
+  display: inline-block;
+
+  > div {
+    @include span-columns(11);
+    @include shift(.5);
+    text-align: left;
+  }
+}
+
+.product-note {
+  line-height: rem(16px);
+  font-size: em(12px);
+  font-weight: $semibold;
+  letter-spacing: rem(.4px);
+
+  span {
+    text-transform: uppercase;
+    color: #259490;
+  }
+}
+
+.product-description {
+  padding-top: em(25px);
+  text-align: left;
+  @include span-columns(11);
+  @include shift(.5);
+  line-height: em(24px);
+
+  h3 {
+    padding-bottom: rem(6px);
+    color: #454343;
+    font-weight: $semibold;
+    font-size: em(15);
+  }
+}

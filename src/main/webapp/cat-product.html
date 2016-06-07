@@ -1,0 +1,78 @@
+<div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-step">
+    <a href="/pet-choice">
+      <div class="step-name">1. Pet</div>
+      <div class="step-choice">Cat</div>
+    </a>
+  </div>
+  <div class="flow-step">
+    <a href="/cat-size">
+      <div class="step-name">2. Size</div>
+      <div class="step-choice">
+        <span id="chosen-size" data-lift="CatSize.chosenSize">5-9</span> pounds
+      </div>
+    </a>
+  </div>
+  <div class="flow-step unanswered">
+    <div class="step-name">3. Product</div>
+    <div class="arrow-up"></div>
+  </div>
+  <form class="current-step">
+    <h1 class="step-header">Choose Your Product</h1>
+    <h2 class="step-question">
+      All of the products we offer are made and packaged in the United States.
+    </h2>
+    <div class="choice-container">
+      <div class="product-header">
+        <div class="number">1.</div><div class="header">Best Flea Protection</div>
+      </div>
+      <picture>
+        <source 
+          media="(min-width: 46.8em)" 
+          srcset="images/Adventure-Plus.png, images/Adventure-Plus@2x.png 2x">
+        <img src="images/Adventure-Plus-small.png" srcset="images/Adventure-Plus-small.png, images/Adventure-Plus-small@2x.png 2x">
+      </picture>
+      <div class="product-ingredients">
+        Contains the same active ingredients* used in <span class="key-point">Advantage II for Cats.</span>
+        <div class="active-ingredients">*Imidacloprid and pyriproxyphen</div>
+      </div>
+      <button class="select-choice" id="adventure-plus">Select</button>
+      <ul class="product-features">
+        <li class="feature">
+          <div>
+            Kills adult <span class="key-point">fleas and chewing lice</span> on contact
+            <div class="product-note"><span>Note</span> Adventure Plus is not effective protection against ticks.
+            </div>
+          </div>
+        </li>
+        <li class="feature">
+          <div>
+            Kills adult fleas <span class="key-point">within 12 hours</span> of application
+          </div>
+        </li>
+        <li class="feature">
+          <div>
+            <span class="key-point">Prevents flea re-infestation</span> by killing flea eggs and larvae
+          </div>
+        </li>
+        <li class="feature">
+          <div>Waterproof</div>
+        </li>
+      </ul>
+      <div class="product-description">
+        <h3>More Info</h3>
+        Adventure Plus offers the fastest and most complete control of fleas. Contact with the active ingredient renders fleas unable to bite, making it a product of choice for pets with flea bite allergies. 
+        <br><br>
+        Adventure Plus is not effective protection against ticks.
+      </div>
+    </div>
+  </form>
+  <div class="flow-step unanswered">
+    <div class="step-name">4. Account</div>
+  </div>
+  
+  <head_merge>
+   <link rel="stylesheet" data-lift="style-bundle?name=products">
+  </head_merge>
+</div>
+
