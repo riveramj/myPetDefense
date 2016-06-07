@@ -24,16 +24,16 @@ class PetChoice extends Loggable {
     def dogFlow = {
       petChoice(Full(AnimalType.Dog))
 
-      DogProduct.menu.loc.calcDefaultHref
+      S.redirectTo(DogProduct.menu.loc.calcDefaultHref)
     }
 
     def catFlow = {
       petChoice(Full(AnimalType.Cat))
 
-      CatSize.menu.loc.calcDefaultHref
+      S.redirectTo(CatSize.menu.loc.calcDefaultHref)
     }
 
-    "#dog [href]" #> dogFlow &
-    "#cat [href]" #> catFlow
+    "#dog" #> SHtml.submit("Select", dogFlow _) &
+    "#cat" #> SHtml.submit("Select", catFlow _)
   }
 }

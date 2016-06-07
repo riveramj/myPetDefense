@@ -8,10 +8,12 @@ img.pet-choice {
 
 .select-choice {
   position: relative;
-  top: rem(-48px);
-  left: rem(30px);
+  top: rem(-63px); 
   
   display: inline;
+
+  @include span-columns(9 of 11);
+  @include shift(1);
 }
 
 .dog-choice {

@@ -30,7 +30,6 @@
 .flow-step {
   @include span-columns(12);
   background-color: #57B8B4;
-  padding: em(33px) 0 em(19px);
 
   border-top: 1px solid #137875;
 
@@ -44,6 +43,12 @@
 
   a {
     text-decoration: none;
+    padding: em(33px) 0 em(19px);
+    display: block;
+  }
+
+  &.unanswered {
+    padding: em(33px) 0 em(19px);
   }
 }
 
@@ -75,8 +80,9 @@
 
 .select-choice {
   display: inline-block;
-  padding: rem(13px) rem(72px) rem(12px) rem(73px);
+  padding: rem(13px) 0 rem(12px) 0;
   text-decoration: none;
+  border: none;
   color: #ffffff;
 
   font-weight: $semibold;
