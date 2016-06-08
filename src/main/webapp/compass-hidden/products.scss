@@ -5,6 +5,7 @@
 .choice-container {
   padding-top: 0;
   display: inline-block;
+  margin-bottom: em(30px);
 }
 
 .product-header {
@@ -118,3 +119,117 @@
     font-size: em(15);
   }
 }
+
+#promise {
+  @include span-columns(8);
+  @include shift(2);
+  
+  margin-right: 0;
+  margin-top: em(10px);
+  line-height: 22px;
+
+  text-align: center;
+
+  h3 {
+    font-size: em(22px);
+    color: $green;
+    margin-bottom: rem(8px);
+  }
+
+  div {
+    color: #818080;
+    margin-bottom: em(25px);
+  }
+}
+
+div.missing-product {
+  @include span-columns(9);
+  @include shift(1.5);
+  text-align: center;
+  margin-right: 0;
+  padding-bottom: em(56px);
+}
+
+button.missing-product{
+  width: 100%;
+  padding: rem(15px) 0;
+  text-decoration: none;
+  border: 1px solid #57B8B4;
+  color: $green;
+
+  background-color: initial;
+
+  font-weight: $semibold;
+  font-size: em(15px);
+
+  border-radius: 5px;
+  text-transform: uppercase;
+}
+
+#missing-product-overlay {
+  @include span-columns(12);
+  
+  background: rgb(69, 67, 67);
+  background: rgba(69, 67, 67, .9);
+
+  h2 {
+    @include span-columns(9);
+    @include shift(1.5);
+  
+    font-weight: $semibold;
+    font-size: em(27px);
+    margin-bottom: rem(20px);
+    color: #ffffff;
+    padding-right: 0;
+
+    line-height: rem(33px);
+  }
+  div {
+    @include span-columns(9);
+    @include shift(1.5);
+    
+    color: #F7F7F7;
+    line-height: em(22px);
+    margin-bottom: em(159px);
+  }
+}
+
+// slide up scss
+
+.sliding-panel-content {
+  $action-color: #477DCA !default;
+  $dark-gray: #333 !default;
+  $sliding-panel-border-color: $dark-gray;
+  $sliding-panel-background: lighten($sliding-panel-border-color, 5%);
+  $sliding-panel-color: #fff;
+  $sliding-panel-border: 1px solid $sliding-panel-border-color;
+  $sliding-panel-background-hover: $action-color;
+  $sliding-panel-color-hover: #fff;
+  $sliding-panel-background-focus: lighten($sliding-panel-background, 5%);
+
+  @include position(fixed, 0 auto 0 0);
+  @include size(220px 100%);
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+  transform: translateY(700px);
+  transition: all 0.25s linear;
+  z-index: 999999;
+
+  &.is-visible {
+    transform: translateY(100px);
+  }
+}
+
+.sliding-panel-fade-screen {
+  @include position(fixed, 0);
+  transition: all 0.2s ease-in-out;
+  visibility: hidden;
+  z-index: 999998;
+
+  &.is-visible {
+    visibility: visible;
+  }
+}
+
+// Based on code by Diego Eis
+
