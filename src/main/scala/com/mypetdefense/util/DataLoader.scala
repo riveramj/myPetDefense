@@ -46,7 +46,6 @@ object DataLoader extends Loggable {
         "smith",
         "",
         "rivera.mj+agent@gmail.com",
-        "password",
         "(404) 409-0724",
         None,
         UserType.Agent
@@ -84,7 +83,6 @@ object DataLoader extends Loggable {
         "Doe",
         "stripe1234",
         "rivera.mj@gmail.com",
-        "password",
         "(404) 409-0724",
         None,
         UserType.Parent
