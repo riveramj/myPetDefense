@@ -45,12 +45,12 @@
 
   a {
     text-decoration: none;
-    padding: em(33px) 0 em(19px);
+    padding: em(10px) 0;
     display: block;
   }
 
   &.unanswered {
-    padding: em(33px) 0 em(19px);
+    padding: em(24px) 0;
   }
 }
 
@@ -69,8 +69,8 @@
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
   border-bottom: 10px solid #f7f7f7;
-  padding-top: em(19px);
-  margin-bottom: em(-19px);
+  padding-top: em(12px);
+  margin-bottom: em(-24px);
 }
 
 .choice-container {
