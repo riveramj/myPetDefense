@@ -42,7 +42,7 @@ class CatProduct extends Loggable {
       S.redirectTo(Checkout.menu.loc.calcDefaultHref)
     }
 
-    ".zoguard-plus" #> ClearNodesIf(petSize.is == Full(AnimalSize.CatSmall)) &
+    ".zoguard-plus" #> ClearNodesIf(petSize.is == Full(AnimalSize.CatSmall)) andThen
     "#zoguard-plus" #> SHtml.submit("Select", () => chooseProduct("ZoGuard Plus for Cats")) &
     "#adventure-plus" #> SHtml.submit("Select", () => chooseProduct("Adventure Plus for Cats"))
   }
