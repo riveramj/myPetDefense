@@ -1,0 +1,93 @@
+@import "base";
+@import "nav-bar";
+@import "flow";
+
+.step-question {
+  padding-bottom: rem(25px);
+}
+
+legend {
+  color: $green;
+  font-size: em(22px);
+  line-height: rem(28px);
+  padding-bottom: rem(15px);
+}
+
+.field-label {
+  color: #818080;
+  font-weight: $semibold;
+  font-size: em(12);
+  display: block;
+  text-transform: uppercase;
+  padding-bottom: rem(2px);
+}
+
+fieldset label {
+  display: inline-block;
+  width: 100%;
+  padding-bottom: em(22px);
+
+  input {
+    width: 100%;
+    color: #4F4E4E;
+    font-size: em(22px);
+    background-color: #F1F1F1;
+    border: 1px solid #CECECE;
+    padding: rem(7px) rem(10px);
+    border-radius: 3px;
+
+    @include placeholder {
+      color: #949494;
+    }
+  }
+}
+
+.short-field {
+  width: 49%;
+  
+  &.first-name, &.state {
+    padding-right: em(13px);
+  }
+}
+
+.medium-field {
+  width: 69%;
+  &.expiration-date {
+    padding-right: em(13px);
+  }
+
+  input {
+    width: 49%;
+    display: inline-block;
+  }
+}
+
+.tiny-field {
+  width: 29%
+}
+
+.note-detail {
+  color: #4F4E4E;
+  font-size: em(12px);
+  padding-left: rem(4px);
+}
+
+.note {
+  display: inline-block;
+}
+
+#card-month-expiry {
+  margin-right: rem(4px);
+}
+
+#card-year-expiry {
+  margin-right: rem(-4px);
+}
+
+.select-choice {
+  @include span-columns(10);
+  @include shift(1);
+
+  margin-bottom: rem(37px);
+  margin-right: 0;
+}

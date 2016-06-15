@@ -28,7 +28,6 @@ object Checkout extends Loggable {
 class Checkout extends Loggable {
 
   var email = ""
-  var password = ""
   var petName = ""
   
   var firstName = ""
@@ -83,7 +82,6 @@ class Checkout extends Loggable {
       lastName,
       stripeId,
       email,
-      password,
       phone,
       referer,
       UserType.Parent
@@ -149,7 +147,7 @@ class Checkout extends Loggable {
     "#product span *" #> petProduct.is.map(_.name.get)
   }
 
-  def shipping = {
+  def render = {
     SHtml.makeFormsAjax andThen
     "#first-name" #> text(firstName, firstName = _) &
     "#last-name" #> text(lastName, lastName = _) &
@@ -160,7 +158,6 @@ class Checkout extends Loggable {
     "#zip" #> text(zip, zip = _) &
     "#phone" #> text(phone, phone = _) &
     "#email" #> text(email, userEmail => email = userEmail.trim) &
-    "#password" #> SHtml.password(password, password = _) &
     "#pet-name" #> text(petName, petName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
     ".checkout" #> ajaxSubmit("Checkout", () => signup)

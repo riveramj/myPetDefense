@@ -11,8 +11,6 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     override def dbIndexed_? = true
   }
   object name extends MappedString(this, 100)
-  object description extends MappedString(this, 100)
-  object price extends MappedLong(this)
   object animalType extends MappedEnum(this, AnimalType)
   object size extends MappedEnum(this, AnimalSize)
   object createdAt extends MappedDateTime(this) {
@@ -21,18 +19,14 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
 
   def createProduct(
     name: String,
-    description: String,
-    price: Long,
     animalType: AnimalType.Value,
-    animalSize: AnimalSize.Value
+    size: AnimalSize.Value
   ) = {
     Product.create
     .productId(generateLongId)
     .name(name)
-    .description(description)
-    .price(price)
     .animalType(animalType)
-    .size(animalSize)
+    .size(size)
     .saveMe
   }
 }

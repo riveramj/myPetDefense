@@ -10,6 +10,7 @@ import net.liftweb.mapper.By
 
 import com.mypetdefense.service.PetFlowChoices
 import com.mypetdefense.model._
+import com.mypetdefense.util.ClearNodesIf
 
 object CatProduct extends Loggable {
   import net.liftweb.sitemap._
@@ -21,42 +22,28 @@ object CatProduct extends Loggable {
 class CatProduct extends Loggable {
   import PetFlowChoices._
 
-  var selectedProduct: Box[Product] = Empty
-
-  val products = (
-    for {
-      petSize <- petSize.is
-      petType <- petChoice.is
-      products = Product.findAll(
-          By(Product.animalType, petType), 
-          By(Product.size, petSize)
-        )
-    } yield {
-      products
-    }).openOr(Nil)
-
-  val petProducts = SHtml.radioElem(
-    products.map(_.name), 
-    petProduct.is.map(_.name)
-  ){
-    selected => {
-      selectedProduct = products.filter { case product => 
-        Full(product.name) == selected
-      }.headOption
-    }
-  }.toForm
+  def chosenProduct = "#chosen-product *" #> {
+    petProduct.is.map(_.name.toString)
+  }
 
   def render = {
-    def chooseProduct() = {
+    def chooseProduct(name: String) = {
+      val selectedProduct = for {
+        petType <- petChoice.is
+        petSize <- petSize.is
+        product <- Product.find(
+          By(Product.animalType, petType), 
+          By(Product.size, petSize),
+          By(Product.name, name)
+        )} yield product
+
       petProduct(selectedProduct)
 
       S.redirectTo(Checkout.menu.loc.calcDefaultHref)
     }
 
-    ClearClearable andThen
-    ".pet-product" #> petProducts.map { product =>
-      "input" #> product
-    } &
-    "button" #> SHtml.onSubmitUnit(chooseProduct)
+    ".zoguard-plus" #> ClearNodesIf(petSize.is == Full(AnimalSize.CatSmall)) &
+    "#zoguard-plus" #> SHtml.submit("Select", () => chooseProduct("ZoGuard Plus for Cats")) &
+    "#adventure-plus" #> SHtml.submit("Select", () => chooseProduct("Adventure Plus for Cats"))
   }
 }

@@ -38,13 +38,11 @@ class User extends LongKeyedMapper[User] with IdPK {
     lastName: String,
     stripeId: String,
     email: String,
-    password: String,
     phone: String,
     referer: Box[Retailor],
     userType: UserType.Value
   ) = {
-    val user =
-      User.create
+    User.create
       .userId(generateLongId)
       .firstName(firstName)
       .lastName(lastName)
@@ -53,8 +51,7 @@ class User extends LongKeyedMapper[User] with IdPK {
       .phone(phone)
       .referer(referer)
       .userType(userType)
-    
-    setUserPassword(user, password)
+      .saveMe
   }
 
   private def getSalt: String = generateStringId

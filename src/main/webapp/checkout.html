@@ -1,117 +1,120 @@
-<div id="main" data-lift="surround?with=default-template;at=content">
-  <div>You Chose:</div>
-  <ul data-lift="Checkout.summary">
-    <li id="type">Type: <span>Dog</span></li>
-    <li id="size">Size: <span>Medium</span></li>
-    <li id="product">Product: <span>Urban</span></li>
-  </ul>
-
-  <form data-lift="Checkout.shipping" id="checkout">
+<div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-step">
+    <a href="/pet-choice">
+      <div class="step-name">1. Pet</div>
+      <div class="step-choice">Cat</div>
+    </a>
+  </div>
+  <div class="flow-step">
+    <a href="/cat-size">
+      <div class="step-name">2. Size</div>
+      <div class="step-choice">
+        <span id="chosen-size" data-lift="CatSize.chosenSize">5-9</span> pounds
+      </div>
+    </a>
+  </div>
+  <div class="flow-step">
+    <a href="/cat-product">
+      <div class="step-name">3. Product</div>
+      <div class="step-choice">
+        <span id="chosen-product" data-lift="CatProduct.chosenProduct">zoguard plus for cats</span>
+      </div>
+    </a>
+  </div>
+  <div class="flow-step unanswered">
+    <div class="step-name">4. Checkout</div>
+    <div class="arrow-up"></div>
+  </div>
+  <form class="current-step" data-lift="Checkout.render">
+    <h1 class="step-header">Checkout</h1>
+    <h2 class="step-question">
+      Almost there. Please take a moment to fill out your shipping and billing info.
+    </h2>
     <input type="hidden" id="stripe-token">
-    <fieldset>
-      <legend>Shipping</legend>
-      <label>
+    <fieldset class="shipping-info">
+      <legend>Shipping Info</legend>
+      <label class="short-field first-name">
         <span class="field-label">First name</span>
         <span data-lift="Msg?id=first-name-error&noticeClass=notice&errorClass=error"></span>
-        <input placeholder="First" id="first-name" type="text">            
+        <input id="first-name" type="text">            
       </label>
-      <label>
+      <label class="short-field">
         <span class="field-label">Last name</span>
         <span data-lift="Msg?id=last-name-error&noticeClass=notice&errorClass=error"></span>
-        <input placeholder="Last" id="last-name" type="text">
+        <input id="last-name" type="text">
       </label>
       <label>
         <span class="field-label">Street Address</span>
         <span data-lift="Msg?id=street-1-error&noticeClass=notice&errorClass=error"></span>
-        <input placeholder="Street Address" id="street-1" type="text">
+        <input id="street-1" type="text">
       </label>
       <label>
         <span class="field-label">Unit/Apt</span>
         <span data-lift="Msg?id=street-2-error&noticeClass=notice&errorClass=error"></span>
-        <input placeholder="Unit/Apt" id="street-2" type="text">
+        <input id="street-2" type="text">
       </label>
       <label>
         <span class="field-label">City</span>
         <span data-lift="Msg?id=city-error&noticeClass=notice&errorClass=error"></span>
-        <input placeholder="city" id="city" type="text">
+        <input id="city" type="text">
       </label>
-      <label>
+      <label class="short-field state">
         <span class="field-label">State</span>
         <span data-lift="Msg?id=state-error&noticeClass=notice&errorClass=error"></span>
-        <input placeholder="State" id="state" type="text">
+        <input id="state" type="text">
       </label>
-      <label>
+      <label class="short-field">
         <span class="field-label">Zip Code</span>
         <span data-lift="Msg?id=zip-error&noticeClass=notice&errorClass=error"></span>
-        <input placeholder="Zip Code" id="zip" type="text">
+        <input id="zip" type="text">
       </label>
       <label>
         <span class="field-label">Phone Number</span>
         <span data-lift="Msg?id=phone-error&noticeClass=notice&errorClass=error"></span>
         <input placeholder="(123) 123-456" id="phone" type="text">
       </label>
+      <label>
+        <div><span class="field-label note">Email</span><span class="note note-detail">For receipts and tracking info. We hate spam too!</span></div>
+        <span data-lift="Msg?id=email-error&noticeClass=notice&errorClass=error"></span>
+        <input id="email" type="text">
+      </label>
     </fieldset>
     <fieldset class="billing-info">
-      <legend>Billing Information</legend>
-      <ul class="billing-info">
-        <li>
-          <label>
-            <span>Card Number</span>
-            <input placeholder="0000 0000 0000 0000" size="20" id="card-number" type="text" data-stripe="number">            
-          </label>
-        </li>
-        <li>
-          <label>
-            <span>CVC</span>
-            <span data-lift="Msg?id=cvc-error&noticeClass=notice&errorClass=error"></span>
-            <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc">            
-          </label>
-        </li>
-        <li>
-          <label>
-            <span>Expiration (MM/YYYY)</span>
-            <input type="text" size="2" id="card-month-expiry" data-stripe="exp-month">
-          </label>
-          <span> / </span>
-          <input type="text" size="4" id="card-year-expiry" data-stripe="exp-year">
-        </li>
-      </ul>
-    </fieldset>
-    <fieldset>
-      <legend>Create Account</legend>
-      <ul>
-        <li class="email">
-          <label data-lift="Loc.general-email">
-            Email
-            <span data-lift="Msg?id=email-error&noticeClass=notice&errorClass=error"></span>
-            <input id="email" type="text" placeholder="Email" data-lift="Loc.general-email?attr=placeholder">
-          </label>
-        </li>
-        <li class="password">
-          <label data-lift="Loc.user-password">
-            Create a Password
-            <span data-lift="Msg?id=password-error&noticeClass=notice&errorClass=error"></span>
-            <input id="password" type="password" placeholder="Password" data-lift="Loc.user-password?attr=placeholder">
-          </label>
-        </li>
-        <li>
-          <label>
-            <span class="field-label">Pet name</span>
-            <span data-lift="Msg?id=pet-name-error&noticeClass=notice&errorClass=error"></span>
-            <input placeholder="Pet name" id="pet-name" type="text">            
-          </label>
-        </li>
-      </ul>
+      <legend>Billing Info</legend>
+      <label>
+        <div><span class="note field-label">Card Number</span><span class="note note-detail">Enter the full number with no spaces.</span></div>
+        <input size="20" id="card-number" type="text" data-stripe="number">
+      </label>
+      <label class="medium-field expiration-date">
+        <div><span class="field-label note">Expiration Date</span><span class="note note-detail">(MM/YYYY)</span></div>
+        <input type="text" size="2" id="card-month-expiry" data-stripe="exp-month">
+        <input type="text" size="4" id="card-year-expiry" data-stripe="exp-year">
+      </label>
+      <label class="tiny-field">
+        <span class="field-label">CVC</span>
+        <span data-lift="Msg?id=cvc-error&noticeClass=notice&errorClass=error"></span>
+        <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc">            
+      </label>
     </fieldset>
     <div class="signup">
-      <button data-lift="Loc.user-signup" class="checkout">Sign Up</button>
+      <button class="checkout select-choice">Place Order</button>
     </div>
   </form>
-  <tail>
+  <!--<div>
+    <div>You Chose:</div>
+    <ul data-lift="Checkout.summary">
+    <li id="type">Type: <span>Dog</span></li>
+    <li id="size">Size: <span>Medium</span></li>
+    <li id="product">Product: <span>Urban</span></li>
+    </ul>
+    </div>-->
+
+    <tail>
     <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
     <script type="text/javascript" src="/static/js/stripe.js"></script>
   </tail>
   <head_merge>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+   <link rel="stylesheet" data-lift="style-bundle?name=checkout">
   </head_merge>
 </div>

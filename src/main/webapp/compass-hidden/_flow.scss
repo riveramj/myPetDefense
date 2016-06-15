@@ -5,6 +5,7 @@
 
 #step-container {
   @include span-columns(12);
+  background-color: #f7f7f7;
 }
 
 .current-step {
@@ -67,7 +68,7 @@
 
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-bottom: 10px solid #ffffff;
+  border-bottom: 10px solid #f7f7f7;
   padding-top: em(19px);
   margin-bottom: em(-19px);
 }
