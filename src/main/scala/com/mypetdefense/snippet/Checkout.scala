@@ -7,6 +7,7 @@ import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.http._
 import net.liftweb.mapper.{By, NullRef}
+import net.liftweb.http.js.JsCmds.RedirectTo
 
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.model._
@@ -56,6 +57,8 @@ class Checkout extends Loggable {
 
     for (customer <- stripeCustomer)
       newUserSetup(customer, selectedPetType, selectedPetSize, selectedPetProduct)
+
+    RedirectTo(Success.menu.loc.calcDefaultHref)
   }
 
   def newUserSetup(
@@ -161,6 +164,6 @@ class Checkout extends Loggable {
     "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#pet-name" #> text(petName, petName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    ".checkout" #> ajaxSubmit("Place Order", () => signup)
+    ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup)
   }
 }

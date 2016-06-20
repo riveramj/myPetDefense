@@ -15,8 +15,6 @@ $(document).ready ->
 
   $("body").on "click", '#checkout .checkout', (event) ->
 
-    event.preventDefault()
-
     myPetDefenseSite.event("validate-stripe-form",
       stripeCallback: stripeCallback
     )

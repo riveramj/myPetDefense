@@ -1,0 +1,61 @@
+<div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-step">
+    <div class="step-info">
+      <div class="step-name">1. Pet</div>
+      <div class="step-choice">Cat</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-info">
+      <div class="step-name">2. Size</div>
+      <div class="step-choice">
+        <span id="chosen-size" data-lift="CatSize.chosenSize">5-9</span> pounds
+      </div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-info">
+      <div class="step-name">3. Product</div>
+      <div class="step-choice">
+        <span id="chosen-product" data-lift="CatProduct.chosenProduct">zoguard plus for cats</span>
+      </div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-info">
+      <div class="step-name">4. Checkout</div>
+      <div class="step-choice">Complete</div>
+    </div>
+  </div>
+  <div class="current-step" data-lift="Success.render">
+    <h1 class="step-header">Success!</h1>
+    <h2 class="step-question">
+      We’ve received your order. We‘ll send you an e-mail soon with your order details and a tracking number.
+      <br><br>
+      In the meantime, enjoy this GIF of the happiest dog on Earth: 
+    </h2>
+
+    <video preload="auto" autoplay="autoplay" loop="loop">
+      <source src="//i.imgur.com/J2K4Jkt.webm" type="video/webm"></source>
+    </video>
+    
+    <div id="order-summary">
+      <h2>Order Summary</h2>
+      <ul id="order-details">
+        <li id="type">Pet <span>Dog</span></li>
+        <li id="size">Size <span>11-20</span></li>
+        <li id="product">Product <span>Adventure Plus for Dogs</span></li>
+      </ul>
+      <div id="order-total">
+        <h3>Total Charge</h3>
+        <div id="monthly-charge"><span id="amount">$9.99</span> / A Month</div>
+      </div>
+    </div>
+  </div>
+      
+  <head_merge>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+   <link rel="stylesheet" data-lift="style-bundle?name=success">
+  </head_merge>
+</div>
+
