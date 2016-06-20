@@ -141,14 +141,15 @@ class Checkout extends Loggable {
     println(subscription)
   }
 
-  def summary = {
-    "#type span *" #> petChoice.is.map(_.toString) &
-    "#size span *" #> petSize.is.map(_.toString) &
-    "#product span *" #> petProduct.is.map(_.name.get)
-  }
-
   def render = {
+    val orderSummary = {
+      "#type span *" #> petChoice.is.map(_.toString) &
+      "#size span *" #> petSize.is.map(_.toString + " pounds") &
+      "#product span *" #> petProduct.is.map(_.name.get)
+    }
+
     SHtml.makeFormsAjax andThen
+    orderSummary &
     "#first-name" #> text(firstName, firstName = _) &
     "#last-name" #> text(lastName, lastName = _) &
     "#street-1" #> text(street1, street1 = _) &

@@ -87,8 +87,8 @@
       </label>
       <label class="medium-field expiration-date">
         <div><span class="field-label note">Expiration Date</span><span class="note note-detail">(MM/YYYY)</span></div>
-        <input type="text" size="2" id="card-month-expiry" data-stripe="exp-month">
-        <input type="text" size="4" id="card-year-expiry" data-stripe="exp-year">
+        <input type="text" size="2" id="card-month-expiry" placeholder="MM" data-stripe="exp-month">
+        <input type="text" size="4" id="card-year-expiry" placeholder="YYYY" data-stripe="exp-year">
       </label>
       <label class="tiny-field">
         <span class="field-label">CVC</span>
@@ -96,18 +96,25 @@
         <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc">            
       </label>
     </fieldset>
+
+    <div id="order-summary">
+      <h2>Order Summary</h2>
+      <ul id="order-details">
+        <li id="type">Pet <span>Dog</span></li>
+        <li id="size">Size <span>11-20</span></li>
+        <li id="product">Product <span>Adventure Plus for Dogs</span></li>
+      </ul>
+      <div id="order-total">
+        <h3>Total Charge</h3>
+        <div id="monthly-charge"><span id="amount">$9.99</span> / A Month</div>
+      </div>
+    </div>
+
+
     <div class="signup">
       <button class="checkout select-choice">Place Order</button>
     </div>
   </form>
-  <!--<div>
-    <div>You Chose:</div>
-    <ul data-lift="Checkout.summary">
-    <li id="type">Type: <span>Dog</span></li>
-    <li id="size">Size: <span>Medium</span></li>
-    <li id="product">Product: <span>Urban</span></li>
-    </ul>
-    </div>-->
 
     <tail>
     <script type="text/javascript" src="https://js.stripe.com/v2/"></script>

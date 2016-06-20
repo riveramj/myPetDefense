@@ -84,6 +84,76 @@ fieldset label {
   margin-right: rem(-4px);
 }
 
+#order-summary {
+  @include span-columns(12);
+  margin: em(50px) 0 em(30px);
+  border-radius: 4px;
+  background-color: #E7E7E7;
+
+  h2 {
+    background-color: #605F5F;
+    color: #E7E7E7;
+    font-size: em(17px);
+    padding: rem(16px) 0;
+    text-align: center;
+    @include border-top-radius(4px);
+    margin-bottom: rem(25px);
+    font-weight: $semibold;
+  }
+}
+
+#order-details {
+  @include shift(1);
+
+  color: #949494;
+  font-weight: $semibold;
+  font-size: em(14px);
+  text-transform: uppercase;
+
+  padding-bottom: rem(31px);
+
+  li {
+    margin-bottom: rem(20px);
+  }
+
+  span {
+    text-transform: initial;
+    color: #706E6E;
+    font-size: rem(22px);
+    font-weight: $regular;
+    margin-left: rem(10px);
+  }
+}
+
+#order-total {
+  border-top: dotted 1px #A3A2A2;
+  padding: em(26px) 0 em(30px);
+  text-align: center;
+  
+  h3 {
+    color: #949494;
+    font-size: em(14px);
+    font-weight: $semibold;
+    padding-bottom: rem(10px);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  #monthly-charge {
+    color: #454343;
+    font-size: rem(12px);
+    letter-spacing: 0.4px;
+    font-weight: $semibold;
+    text-transform: uppercase;
+  }
+
+  #amount {
+    color: #605F5F;
+    font-size: em(27px);
+    font-weight: $semibold;
+  }
+}
+
 .select-choice {
   @include span-columns(10);
   @include shift(1);
