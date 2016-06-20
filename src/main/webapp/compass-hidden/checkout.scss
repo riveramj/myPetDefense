@@ -154,10 +154,25 @@ fieldset label {
   }
 }
 
-.select-choice {
+.signup {
+  margin-bottom: rem(37px);
   @include span-columns(10);
   @include shift(1);
 
-  margin-bottom: rem(37px);
   margin-right: 0;
+}
+
+.select-choice {
+  width: 100%;
+  margin-bottom: rem(8px);
+}
+
+#agreement {
+  color: #4F4E4E;
+  font-size: em(12px);
+  line-height: rem(14px);
+
+  a {
+    color: $green;
+  }
 }

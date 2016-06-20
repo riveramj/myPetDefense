@@ -161,6 +161,6 @@ class Checkout extends Loggable {
     "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#pet-name" #> text(petName, petName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    ".checkout" #> ajaxSubmit("Checkout", () => signup)
+    ".checkout" #> ajaxSubmit("Place Order", () => signup)
   }
 }
