@@ -1,11 +1,9 @@
 package com.mypetdefense.snippet
 
 import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
-import net.liftweb.util.ClearClearable
-import net.liftweb.http._
+import net.liftweb.http.{S, SHtml}
 
 import com.mypetdefense.service.PetFlowChoices
 import com.mypetdefense.model._
@@ -20,30 +18,19 @@ object DogSize extends Loggable {
 class DogSize extends Loggable {
   import PetFlowChoices._
 
-  var selectedSize: Box[AnimalSize.Value] = Empty
-
-  val possiblePetSizes = 
-      AnimalSize.values.toList
-
-  val petSizes = 
-    SHtml.radio(
-      possiblePetSizes.map(_.toString),
-      petSize.is.map(_.toString),
-      selected => selectedSize = Full(AnimalSize.withName(selected)) 
-    ).toForm
-
+  def chosenSize = "#chosen-size *" #> {
+    petSize.is.map(_.toString)
+  }
+  
   def render = {
-    def chooseSize() = {
-      petSize(selectedSize)
+    def chooseSize(size: AnimalSize.Value) = {
+      petSize(Full(size))
 
-      S.redirectTo(Checkout.menu.loc.calcDefaultHref)
+      S.redirectTo(DogProduct.menu.loc.calcDefaultHref)
     }
 
-    ClearClearable andThen
-    ".pet-size" #> petSizes.map { size =>
-      "input" #> size
-    } &
-    "button" #> SHtml.onSubmitUnit(chooseSize)
+    "#small-dog" #> SHtml.submit("Select", () => chooseSize(AnimalSize.DogSmallZo)) &
+    "#medium-dog" #> SHtml.submit("Select", () => chooseSize(AnimalSize.DogMediumZo)) &
+    "#large-dog" #> SHtml.submit("Select", () => chooseSize(AnimalSize.DogLargeZo))
   }
 }
-

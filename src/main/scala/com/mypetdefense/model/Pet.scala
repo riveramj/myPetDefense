@@ -53,5 +53,19 @@ object AnimalSize extends Enumeration {
   val CatSmall = Value("1.5-5")
   val CatMedium = Value("5-9")
   val CatLarge = Value("9+")
-  val Small, Medium, Large, XLarge = Value
+  
+  val DogSmallAdv = Value("3-10")
+  val DogMediumAdv = Value("11-20")
+  val DogLargeAdv = Value("21-55")
+  val DogXLargeAdv = Value("55+")
+
+  val DogSmallZo = Value("4-22")
+  val DogMediumZo = Value("23-44")
+  val DogLargeZo = Value("45-88")
+  val DogXLargeZo = Value("89-132")
+
+  val DogSmallShld = Value("5-15")
+  val DogMediumShld = Value("16-33")
+  val DogLargeShld = Value("34-66")
+  val DogXLargeShld = Value("66+")
 }

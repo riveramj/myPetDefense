@@ -36,6 +36,69 @@ object DataLoader extends Loggable {
         animalType = AnimalType.Cat,
         size = AnimalSize.CatLarge
       )
+
+      Product.createProduct(
+        name = "Adventure Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogSmallAdv
+      )
+      Product.createProduct(
+        name = "Adventure Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogMediumAdv
+      )
+      Product.createProduct(
+        name = "Adventure Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogLargeAdv
+      )
+      Product.createProduct(
+        name = "Adventure Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogXLargeAdv
+      )
+
+      Product.createProduct(
+        name = "ZoGuard Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogSmallZo
+      )
+      Product.createProduct(
+        name = "ZoGuard Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogMediumZo
+      )
+      Product.createProduct(
+        name = "ZoGuard Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogSmallZo
+      )
+      Product.createProduct(
+        name = "ZoGuard Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogXLargeZo
+      )
+
+      Product.createProduct(
+        name = "ShieldTec Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogSmallShld
+      )
+      Product.createProduct(
+        name = "ShieldTec Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogMediumShld
+      )
+      Product.createProduct(
+        name = "ShieldTec Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogLargeShld
+      )
+      Product.createProduct(
+        name = "ShieldTec Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogXLargeShld
+      )
     }
   }
 

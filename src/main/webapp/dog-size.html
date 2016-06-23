@@ -1,0 +1,70 @@
+<div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-step">
+    <a href="/pet-choice">
+      <div class="step-name">1. Pet</div>
+      <div class="step-choice">Dog</div>
+    </a>
+  </div>
+  <div class="flow-step">
+    <a href="/dog-product">
+      <div class="step-name">2. Product</div>
+      <span id="chosen-product" data-lift="DogProduct.chosenProduct">ShieldTec Plus for Dogs</span>
+    </a>
+  </div>
+  <div class="flow-step unanswered">
+    <div class="step-name">3. Size</div>
+    <div class="arrow-up"></div>
+  </div>
+  <form class="current-step" data-lift="DogSize">
+    <h1 class="step-header">Choose A Size Range</h1>
+    <h2 class="step-question">
+      Flea and tick products have different dosage amounts based on pet size ranges. Choose the size range that best matches your dog.
+    </h2>
+    <div class="choice-container">
+      <picture>
+        <source 
+          media="(min-width: 46.8em)" 
+          srcset="images/small-yarn.png, images/small-yarn@2x.png 2x">
+        <img class="size-choice small" src="images/small-yarn-small.png" srcset="images/small-yarn-small.png, images/small-yarn-small@2x.png 2x">
+      </picture>
+      <ul class="weight small">
+        <li class="weight-number">1.5-5</li>
+        <li class="weight-unit">pounds</li>
+      </ul>
+      <button class="select-choice" id="small-dog">Select</button>
+    </div>
+    <div class="choice-container">
+      <picture>
+        <source 
+          media="(min-width: 46.8em)" 
+          srcset="images/medium-yarn.png, images/medium-yarn@2x.png 2x">
+        <img class="size-choice medium" src="images/medium-yarn-small.png" srcset="images/medium-yarn-small.png, images/medium-yarn-small@2x.png 2x">
+      </picture>
+      <ul class="weight medium">
+        <li class="weight-number">5-9</li>
+        <li class="weight-unit">pounds</li>
+      </ul>
+      <button class="select-choice" id="medium-dog">Select</button>
+    </div>
+    <div class="choice-container">
+      <picture>
+        <source 
+          media="(min-width: 46.8em)" 
+          srcset="images/large-yarn.png, images/large-yarn@2x.png 2x">
+        <img class="size-choice large" src="images/larg-yarn-small.png" srcset="images/large-yarn-small.png, images/large-yarn-small@2x.png 2x">
+      </picture>
+      <ul class="weight large">
+        <li class="weight-number">9+</li>
+        <li class="weight-unit">pounds</li>
+      </ul>
+      <button class="select-choice" id="large-dog">Select</button>
+    </div>
+  </form>
+  <div class="flow-step unanswered">
+    <div class="step-name">4. Account</div>
+  </div>
+  
+  <head_merge>
+   <link rel="stylesheet" data-lift="style-bundle?name=pet-size">
+  </head_merge>
+</div>
