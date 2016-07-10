@@ -15,8 +15,11 @@ import com.mypetdefense.util.ClearNodesIf
 object CatProduct extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
+  import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Cat Product") / "cat-product"
+  val menu = Menu.i("Cat Product") / "cat-product" >>
+    petChosen >>
+    sizeChosen
 }
 
 class CatProduct extends Loggable {

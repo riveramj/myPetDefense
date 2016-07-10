@@ -22,8 +22,12 @@ import dispatch._, Defaults._
 object Checkout extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
+  import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Checkout") / "checkout"
+  val menu = Menu.i("Checkout") / "checkout" >>
+    petChosen >>
+    productChosen >>
+    sizeChosen
 }
 
 class Checkout extends Loggable {

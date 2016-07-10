@@ -12,8 +12,11 @@ import com.mypetdefense.model._
 object DogSize extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
+  import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Dog Size") / "dog-size"
+  val menu = Menu.i("Dog Size") / "dog-size" >>
+    petChosen >>  
+    productChosen
 }
 
 class DogSize extends Loggable {

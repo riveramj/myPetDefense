@@ -1,11 +1,50 @@
 package com.mypetdefense.util
 
+import net.liftweb.common._
+import net.liftweb.http.RedirectResponse
 import net.liftweb.sitemap._
+  import Loc._
+
 import com.mypetdefense.snippet._
+import com.mypetdefense.model._
+import com.mypetdefense.service.PetFlowChoices._
 
 object Paths {
 
   val index = Menu.i("index") / "index"
+
+  val petChosen = If(
+    () => !petChoice.is.isEmpty,
+    RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
+  )
+
+  val productChosen = If(
+    () => !petProduct.is.isEmpty,
+    () => {
+      petChoice.is match {
+        case Full(AnimalType.Dog) => 
+          RedirectResponse(DogProduct.menu.loc.calcDefaultHref)
+        case Full(AnimalType.Cat) => 
+          RedirectResponse(CatProduct.menu.loc.calcDefaultHref)
+        case _ => 
+          RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
+      }
+    }
+  )
+
+  val sizeChosen = If(
+    () => !petSize.is.isEmpty,
+    () => {
+      petChoice.is match {
+        case Full(AnimalType.Dog) => 
+          RedirectResponse(DogSize.menu.loc.calcDefaultHref)
+        case Full(AnimalType.Cat) => 
+          RedirectResponse(CatSize.menu.loc.calcDefaultHref)
+        case _ => 
+          RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
+      }
+    }
+  )
 
   def siteMap = SiteMap(
     index,
