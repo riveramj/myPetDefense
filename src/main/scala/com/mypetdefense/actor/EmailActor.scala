@@ -33,7 +33,7 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
 
   addHandler {
     case SendWelcomeEmail(userEmail) =>
-      sendEmail(welcomeEmailSubject, userEmail, "Welcome!")
+      sendEmail(welcomeEmailSubject, userEmail, welcomeEmailTemplate)
   }
 }
 
@@ -55,7 +55,7 @@ trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
         }
       ).apply(invoicePaymentFailedEmailTemplate)
 
-      sendEmail(subject, userEmail, "Payment Failed!")
+      sendEmail(subject, userEmail, invoicePaymentFailedEmailTemplate)
   }
 }
 
@@ -66,7 +66,7 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   addHandler {
     case SendInvoicePaymentSucceededEmail(user) =>
       val subject = "My Pet Defense Receipt"
-      sendEmail(subject, user.map(_.email.get).openOr(""), "Bill paid & product in mail!")
+      sendEmail(subject, user.map(_.email.get).openOr(""), invoicePaymentSucceededEmailTemplate)
   }
 }
 
@@ -79,12 +79,16 @@ trait EmailActor extends EmailHandlerChain
   val fromEmail = "mike.rivera@mypetdefense.com"
   val fromName = "My Pet Defense"
 
-  def sendEmail(subject: String, to: String, body: String) {
+  def sendEmail(
+    subject: String, 
+    to: String, 
+    body: NodeSeq
+  ) {
     Mailer.sendMail(
       From(fromEmail),
       Subject(subject),
       To(to),
-      PlainMailBodyType(body)
+      XHTMLMailBodyType(body)
     ) 
   }
 }

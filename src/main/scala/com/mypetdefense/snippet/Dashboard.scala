@@ -15,17 +15,14 @@ import java.time.{LocalDate, ZoneId}
 import com.mypetdefense.model._
 import com.mypetdefense.actor._
 
-object Dashboard extends Loggable with Dashboard {
-  override val emailActor = EmailActor
-
+object Dashboard extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
 
   val menu = Menu.i("Dashboard") / "dashboard"
 }
 
-trait Dashboard extends Loggable {
-  def emailActor: EmailActor
+class Dashboard extends Loggable {
 
   def getUpcomingShipments = {
     Subscription.findAll(
@@ -59,7 +56,7 @@ trait Dashboard extends Loggable {
 
   def shipProduct(subscription: Subscription, user: Box[User])() = {
     updateNextShipDate(subscription)
-    emailActor ! SendInvoicePaymentSucceededEmail(user)
+    EmailActor ! SendInvoicePaymentSucceededEmail(user)
   }
 
   def render = {

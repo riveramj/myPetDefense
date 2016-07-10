@@ -11,6 +11,7 @@ import net.liftweb.http.js.JsCmds.RedirectTo
 
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.model._
+import com.mypetdefense.actor._
 
 import java.util.Date
 import java.time.MonthDay
@@ -146,6 +147,8 @@ class Checkout extends Loggable {
     println("===================")
     println("subscription:")
     println(subscription)
+
+    EmailActor ! SendWelcomeEmail(email)
   }
 
   def render = {
