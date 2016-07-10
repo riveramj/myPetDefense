@@ -25,12 +25,16 @@ class PetChoice extends Loggable {
   def render = {
     def dogFlow = {
       petChoice(Full(AnimalType.Dog))
+      petProduct(Empty)
+      petSize(Empty)
 
       S.redirectTo(DogProduct.menu.loc.calcDefaultHref)
     }
 
     def catFlow = {
       petChoice(Full(AnimalType.Cat))
+      petProduct(Empty)
+      petSize(Empty)
 
       S.redirectTo(CatSize.menu.loc.calcDefaultHref)
     }

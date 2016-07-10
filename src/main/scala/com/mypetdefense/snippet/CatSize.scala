@@ -27,6 +27,7 @@ class CatSize extends Loggable {
   def render = {
     def chooseSize(size: AnimalSize.Value) = {
       petSize(Full(size))
+      petProduct(Empty)
 
       S.redirectTo(CatProduct.menu.loc.calcDefaultHref)
     }

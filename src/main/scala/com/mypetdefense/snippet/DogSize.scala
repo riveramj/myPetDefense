@@ -16,7 +16,7 @@ object DogSize extends Loggable {
 
   val menu = Menu.i("Dog Size") / "dog-size" >>
     petChosen >>  
-    productChosen
+    dogProductChosen
 }
 
 class DogSize extends Loggable {

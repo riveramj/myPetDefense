@@ -36,9 +36,8 @@ class DogProduct extends Loggable {
           By(Product.name, name)
         )} yield product
 
-      println(selectedProduct + " selected")
-
       petProduct(selectedProduct)
+      petSize(Empty)
 
       S.redirectTo(DogSize.menu.loc.calcDefaultHref)
     }

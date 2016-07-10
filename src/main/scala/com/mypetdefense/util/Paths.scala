@@ -18,6 +18,26 @@ object Paths {
     RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
   )
 
+  val catProductChosen = If(
+    () => !petProduct.is.isEmpty,
+    RedirectResponse(CatProduct.menu.loc.calcDefaultHref)
+  )
+
+  val dogProductChosen = If(
+    () => !petProduct.is.isEmpty,
+    RedirectResponse(DogProduct.menu.loc.calcDefaultHref)
+  )
+
+  val catSizeChosen = If(
+    () => !petSize.is.isEmpty,
+    RedirectResponse(CatSize.menu.loc.calcDefaultHref)
+  )
+
+  val dogSizeChosen = If(
+    () => !petSize.is.isEmpty,
+    RedirectResponse(DogSize.menu.loc.calcDefaultHref)
+  )
+
   val productChosen = If(
     () => !petProduct.is.isEmpty,
     () => {
