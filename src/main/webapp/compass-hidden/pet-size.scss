@@ -10,18 +10,38 @@
   font-weight: $semibold;
   position: relative;
 
-  &.small {
+  &.cat.small {
     padding-left: em(63px);
     top: em(-33px);
   }
 
-  &.medium {
-  padding-left: em(51px);
-  top: em(-34px);
-}
+  &.cat.medium {
+    padding-left: em(51px);
+    top: em(-34px);
+  }
 
-  &.large {
+  &.cat.large {
     padding-left: em(35px);
+    top: em(-30px);
+  }
+
+  &.dog.small {
+    padding-left: em(63px);
+    top: em(-32px);
+  }
+
+  &.dog.medium {
+    padding-left: em(51px);
+    top: em(-31px);
+  }
+
+  &.dog.large {
+    padding-left: em(35px);
+    top: em(-33px);
+  }
+
+  &.dog.xlarge {
+    padding-left: em(12px);
     top: em(-30px);
   }
 }

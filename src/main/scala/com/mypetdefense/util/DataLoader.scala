@@ -71,7 +71,7 @@ object DataLoader extends Loggable {
       Product.createProduct(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogSmallZo
+        size = AnimalSize.DogLargeZo
       )
       Product.createProduct(
         name = "ZoGuard Plus for Dogs",

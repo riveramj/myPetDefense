@@ -30,11 +30,11 @@ class DogProduct extends Loggable {
     def chooseProduct(name: String) = {
       val selectedProduct = for {
         petType <- petChoice.is
-        petSize <- petSize.is
         product <- Product.find(
-          By(Product.animalType, petType), 
           By(Product.name, name)
         )} yield product
+
+      println(selectedProduct + " selected")
 
       petProduct(selectedProduct)
 

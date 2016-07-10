@@ -4,6 +4,7 @@ import net.liftweb.sitemap.Menu
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.http.{S, SHtml}
+import net.liftweb.mapper.By
 
 import com.mypetdefense.service.PetFlowChoices
 import com.mypetdefense.model._
@@ -23,14 +24,43 @@ class DogSize extends Loggable {
   }
   
   def render = {
-    def chooseSize(size: AnimalSize.Value) = {
-      petSize(Full(size))
+    def sortProductSize(size1: String, size2: String) = {
+      val size1Int = size1.replaceAll("[^\\d.]", "")
+    }
+    val petProductName = petProduct.is.map(_.name.toString)
 
-      S.redirectTo(DogProduct.menu.loc.calcDefaultHref)
+     val products = petProductName.map { name => 
+       Product.findAll(By(Product.name, name))
+     }.openOr(Nil)
+      
+    val productSizes = products.map(_.size.toString)
+   
+    def findMinRangeInt(size: String) = { 
+      val split = size.split("[-+]").headOption
+      split.map(_.toInt).getOrElse(0)
     }
 
-    "#small-dog" #> SHtml.submit("Select", () => chooseSize(AnimalSize.DogSmallZo)) &
-    "#medium-dog" #> SHtml.submit("Select", () => chooseSize(AnimalSize.DogMediumZo)) &
-    "#large-dog" #> SHtml.submit("Select", () => chooseSize(AnimalSize.DogLargeZo))
+    val sortedSizes: Array[String] = productSizes.sortWith(findMinRangeInt(_) < findMinRangeInt(_)).toArray
+
+    def chooseSize(size: String) = {
+
+      val productWithSize = products.filter(_.size.toString == size).headOption
+
+      productWithSize.map { product => 
+        petSize(Full(product.size.get))
+        petProduct(Full(product))
+      }
+
+      S.redirectTo(Checkout.menu.loc.calcDefaultHref)
+    }
+
+    ".small .weight-number *" #> sortedSizes(0) &
+    "#small-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(0))) &
+    ".medium .weight-number *" #> sortedSizes(1) &
+    "#medium-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(1))) &
+    ".large .weight-number *" #> sortedSizes(2) &
+    "#large-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(2))) &
+    ".xlarge .weight-number *" #> sortedSizes(3) &
+    "#xlarge-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(3)))
   }
 }

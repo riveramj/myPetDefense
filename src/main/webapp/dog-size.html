@@ -8,7 +8,9 @@
   <div class="flow-step">
     <a href="/dog-product">
       <div class="step-name">2. Product</div>
-      <span id="chosen-product" data-lift="DogProduct.chosenProduct">ShieldTec Plus for Dogs</span>
+      <div class="step-choice">
+        <span id="chosen-product" data-lift="DogProduct.chosenProduct">ShieldTec Plus for Dogs</span>
+      </div>
     </a>
   </div>
   <div class="flow-step unanswered">
@@ -24,11 +26,11 @@
       <picture>
         <source 
           media="(min-width: 46.8em)" 
-          srcset="images/small-yarn.png, images/small-yarn@2x.png 2x">
-        <img class="size-choice small" src="images/small-yarn-small.png" srcset="images/small-yarn-small.png, images/small-yarn-small@2x.png 2x">
+          srcset="images/small-bone.png, images/small-bone@2x.png 2x">
+        <img class="size-choice small" src="images/small-bone-small.png" srcset="images/small-bone-small.png, images/small-bone-small@2x.png 2x">
       </picture>
-      <ul class="weight small">
-        <li class="weight-number">1.5-5</li>
+      <ul class="weight dog small">
+        <li class="weight-number">1-2</li>
         <li class="weight-unit">pounds</li>
       </ul>
       <button class="select-choice" id="small-dog">Select</button>
@@ -37,11 +39,11 @@
       <picture>
         <source 
           media="(min-width: 46.8em)" 
-          srcset="images/medium-yarn.png, images/medium-yarn@2x.png 2x">
-        <img class="size-choice medium" src="images/medium-yarn-small.png" srcset="images/medium-yarn-small.png, images/medium-yarn-small@2x.png 2x">
+          srcset="images/medium-bone.png, images/medium-bone@2x.png 2x">
+        <img class="size-choice medium" src="images/medium-bone-small.png" srcset="images/medium-bone-small.png, images/medium-bone-small@2x.png 2x">
       </picture>
-      <ul class="weight medium">
-        <li class="weight-number">5-9</li>
+      <ul class="weight dog medium">
+        <li class="weight-number">4-15</li>
         <li class="weight-unit">pounds</li>
       </ul>
       <button class="select-choice" id="medium-dog">Select</button>
@@ -50,14 +52,27 @@
       <picture>
         <source 
           media="(min-width: 46.8em)" 
-          srcset="images/large-yarn.png, images/large-yarn@2x.png 2x">
-        <img class="size-choice large" src="images/larg-yarn-small.png" srcset="images/large-yarn-small.png, images/large-yarn-small@2x.png 2x">
+          srcset="images/large-bone.png, images/large-bone@2x.png 2x">
+        <img class="size-choice large" src="images/larg-bone-small.png" srcset="images/large-bone-small.png, images/large-bone-small@2x.png 2x">
       </picture>
-      <ul class="weight large">
-        <li class="weight-number">9+</li>
+      <ul class="weight dog large">
+        <li class="weight-number">17-30</li>
         <li class="weight-unit">pounds</li>
       </ul>
       <button class="select-choice" id="large-dog">Select</button>
+    </div>
+    <div class="choice-container">
+      <picture>
+        <source 
+          media="(min-width: 46.8em)" 
+          srcset="images/xlarge-bone.png, images/xlarge-bone@2x.png 2x">
+        <img class="size-choice large" src="images/xlarg-bone-small.png" srcset="images/xlarge-bone-small.png, images/xlarge-bone-small@2x.png 2x">
+      </picture>
+      <ul class="weight dog xlarge">
+        <li class="weight-number">40+</li>
+        <li class="weight-unit">pounds</li>
+      </ul>
+      <button class="select-choice" id="xlarge-dog">Select</button>
     </div>
   </form>
   <div class="flow-step unanswered">

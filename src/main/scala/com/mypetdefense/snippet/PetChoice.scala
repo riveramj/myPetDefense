@@ -18,7 +18,9 @@ object PetChoice extends Loggable {
 class PetChoice extends Loggable {
   import PetFlowChoices._
 
-  var selectedPet: Box[AnimalType.Value] = Empty
+  def chosenPet = "#chosen-pet *" #> {
+    petChoice.is.map(_.toString)
+  }
 
   def render = {
     def dogFlow = {
