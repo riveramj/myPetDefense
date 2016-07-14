@@ -34,6 +34,7 @@ object Checkout extends Loggable {
 class Checkout extends Loggable {
 
   var email = ""
+  var password = ""
   var petName = ""
   
   var firstName = ""
@@ -90,6 +91,7 @@ class Checkout extends Loggable {
       lastName,
       stripeId,
       email,
+      password,
       phone,
       referer,
       UserType.Parent
@@ -169,6 +171,7 @@ class Checkout extends Loggable {
     "#zip" #> text(zip, zip = _) &
     "#phone" #> text(phone, phone = _) &
     "#email" #> text(email, userEmail => email = userEmail.trim) &
+    "#password" #> text(password, userPassword => password = userPassword.trim) &
     "#pet-name" #> text(petName, petName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup)
