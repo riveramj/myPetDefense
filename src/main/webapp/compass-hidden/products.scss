@@ -72,9 +72,22 @@
     @include span-columns(11);
     @include shift(.5);
     text-align: left;
+
+    display: inline-flex;
+  }
+
+  .fa {
+    color: #B2B0B0;
+    font-size: em(25px);
+    display: inline-block;
+    padding-top: 4px;
   }
 }
 
+.feature-container {
+  display: inline-block;
+  margin-left: 16px;
+}
 .product-note {
   line-height: rem(16px);
   font-size: em(12px);
