@@ -35,6 +35,23 @@
 
   border-top: 1px solid #137875;
 
+  a {
+    @include span-columns(12);
+  }
+
+  .fa-check {
+    @include span-columns(2);
+    @include shift(0.5);
+    color: #1D8884;
+    font-size: em(25px);
+    padding-top: 7px;
+    margin-right: 0;
+  }
+
+  .step-container {
+    @include span-columns(7.5);
+  }
+
   .step-name {
     text-align: center;
 
