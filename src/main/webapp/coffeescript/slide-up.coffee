@@ -1,6 +1,8 @@
 $(document).ready ->
-  $('button.missing-product, .sliding-panel-fade-screen, .sliding-panel-close, .sliding-panel-content').on 'click touchstart', (e) ->
-    $('.sliding-panel-content,.sliding-panel-fade-screen').toggleClass 'is-visible'
-    e.preventDefault()
-    return
-  return
+  $message = $('.sliding-panel-content, .sliding-panel-fade-screen')
+
+  $('button.missing-product').on 'click touchstart', (e) ->
+    $message.addClass 'is-visible'
+
+  $message.on 'click touchstart', (e) ->
+    $message.removeClass 'is-visible'

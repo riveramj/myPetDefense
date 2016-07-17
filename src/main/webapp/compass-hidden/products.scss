@@ -176,17 +176,20 @@ button.missing-product{
     @include shift(1.5);
   
     font-weight: $semibold;
-    font-size: em(27px);
+    font-size: rem(27px);
     margin-bottom: rem(20px);
     color: #ffffff;
     padding-right: 0;
+    padding-top: rem(40px); 
 
     line-height: rem(33px);
   }
+
   div {
     @include span-columns(9);
     @include shift(1.5);
     
+    font-size: rem(16px);
     color: #F7F7F7;
     line-height: em(22px);
     margin-bottom: em(159px);
