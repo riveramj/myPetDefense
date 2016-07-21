@@ -13,6 +13,11 @@
   @include shift(1);
   padding-top: em(30px);
   margin-right: 0;
+
+  @media (min-width: $bp-med) {
+    @include span-columns(9 of 11);
+    @include shift(2);
+  }
 }
 
 .step-header {
@@ -121,12 +126,20 @@
   font-weight: $semibold;
 
   padding-top: em(82px);
+
+  @media (min-width: $bp-med) {
+    padding-top: em(55px);
+  }
 }
 
 #need-help {
   text-align: center;
   font-size: em(18);
   line-height: rem(26);
+
+  @media (min-width: $bp-med) {
+    font-size: em(15);
+  }
 }
 
 .legal {
@@ -136,4 +149,8 @@
 
   padding: rem(48px) 0 rem(9px);
   text-align: center;
+
+  @media (min-width: $bp-med) {
+    padding: 0 0 rem(15px);
+  }
 }

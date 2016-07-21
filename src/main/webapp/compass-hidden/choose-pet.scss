@@ -4,6 +4,10 @@
 
 img.pet-choice {
   width: 100%;
+
+  @media (min-width: $bp-med) {
+    width: 450px;
+  }
 }
 
 .select-choice {
@@ -14,10 +18,26 @@ img.pet-choice {
 
   @include span-columns(9 of 11);
   @include shift(1);
+
+  @media (min-width: $bp-med) {
+    @include shift(2);
+    @include span-columns(6 of 11);
+    top: rem(-73px);
+  }
+}
+
+.cat-choice, .dog-choice {
+  @media (min-width: $bp-med) {
+    display: inline-block;
+  }
 }
 
 .dog-choice {
   display: inline;
+
+  @media (min-width: $bp-med) {
+    display: inline-block;
+  }
 }
 
 .multiple-pets {
