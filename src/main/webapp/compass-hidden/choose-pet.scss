@@ -6,7 +6,6 @@ img.pet-choice {
   width: 100%;
 
   @media (min-width: $bp-med) {
-    width: 450px;
   }
 }
 
@@ -21,22 +20,30 @@ img.pet-choice {
 
   @media (min-width: $bp-med) {
     @include shift(2);
-    @include span-columns(6 of 11);
+    @include span-columns(8);
     top: rem(-73px);
   }
 }
 
 .cat-choice, .dog-choice {
   @media (min-width: $bp-med) {
-    display: inline-block;
+    @include span-columns(6 of 12);
   }
 }
+
+.arrow-up {
+  @media (min-width: $bp-med) {
+    margin-left: 1%;
+  }
+}
+  
 
 .dog-choice {
   display: inline;
 
   @media (min-width: $bp-med) {
-    display: inline-block;
+    display: block;
+    margin-right: 0;
   }
 }
 

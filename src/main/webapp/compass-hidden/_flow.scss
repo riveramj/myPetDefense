@@ -15,8 +15,10 @@
   margin-right: 0;
 
   @media (min-width: $bp-med) {
-    @include span-columns(9 of 11);
+    @include span-columns(8);
     @include shift(2);
+    margin-right: 0;
+    padding-top: rem(52px);
   }
 }
 
@@ -32,6 +34,10 @@
   font-weight: $normal;
   padding-bottom: rem(15px);
   line-height: rem(24px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(56px);
+  }
 }
 
 .flow-step {
@@ -74,6 +80,32 @@
   &.unanswered {
     padding: em(24px) 0;
   }
+
+  @media (min-width: $bp-med) {
+    display: none;
+  }
+}
+
+.flow-progress-bar {
+  @media (max-width: $bp-small) {
+    display: none;
+  }
+
+  @include span-columns(12);
+  background-color: #57B8B4;
+
+  ul {
+    @include span-columns(9.5);
+    @include shift(2);
+  }
+
+  li {
+    @include span-columns(2 of 8);
+    display: inline-block;
+    padding: rem(27px) 0;
+    color: #0E5552;
+    font-size: em(14px);
+  }
 }
 
 .step-choice {
@@ -93,6 +125,14 @@
   border-bottom: 10px solid #f7f7f7;
   padding-top: em(12px);
   margin-bottom: em(-24px);
+
+  @media (min-width: $bp-med) {
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 16px solid #f7f7f7;
+    margin-bottom: rem(-27px);
+    margin-left: 0;
+  }
 }
 
 .choice-container {
