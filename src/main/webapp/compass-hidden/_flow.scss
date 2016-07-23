@@ -9,6 +9,12 @@ html, body {
   }
 }
 
+.header-container {
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+  }
+}
+
 #step-container {
   @media (min-width: $bp-med) {
     overflow: auto;
@@ -75,6 +81,7 @@ html, body {
 
   @media (min-width: $bp-med) {
     padding-bottom: rem(56px);
+    max-width: 352px;
   }
 }
 

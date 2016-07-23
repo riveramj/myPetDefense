@@ -4,8 +4,11 @@
 
 img.pet-choice {
   width: 100%;
+}
 
+.current-step {
   @media (min-width: $bp-med) {
+    padding-bottom: em(20px);
   }
 }
 
@@ -47,12 +50,20 @@ img.pet-choice {
   }
 }
 
+.multiple-pets-container {
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+    margin-right: 0;
+    font-size: rem(12px);
+  }
+}
+
 .multiple-pets {
   font-size: em(12px);
   line-height: rem(16);
 }
 
-div.multiple-pets {
+div.multiple-pets, div.multiple-pets-container {
   color: #565555;
 
   padding-bottom: em(31px);
@@ -62,9 +73,19 @@ div.multiple-pets {
   }
 }
 
+div.multiple-pets {
+  @media (min-width: $bp-med) {
+    display: none;
+  }
+}
+
 span.multiple-pets {
   font-size: rem(12px);
   font-weight: $semibold;
   color: #259490;
   text-transform: uppercase;
+
+  @media (min-width: $bp-med) {
+    font-weight: $bold;
+  }
 }
