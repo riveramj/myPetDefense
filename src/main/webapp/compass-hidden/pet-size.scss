@@ -2,6 +2,14 @@
 @import "nav-bar";
 @import "flow";
 
+
+.step-question {
+  @media (min-width: $bp-med) {
+    max-width: 100%;
+    padding-bottom: rem(34px);
+  }
+}
+
 .weight {
   display: inline-block;
   text-align: left;
@@ -80,6 +88,24 @@
   padding-left: em(30px);
   padding-right: em(30px);
   margin-bottom: em(12px);
+  
+  @media (min-width: $bp-med) {
+    @include span-columns(5);
+    margin-bottom: rem(22px);
+    padding-bottom: rem(20px);
+
+    &.small {
+      padding-top: rem(37px);
+    }
+
+    &.medium {
+      padding-top: rem(23px);
+    }
+
+    &.large {
+      padding-top: rem(10px);
+    }
+  }
 }
 
 .current-step {
