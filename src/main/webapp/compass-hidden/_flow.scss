@@ -147,13 +147,27 @@ html, body {
   li {
     @include span-columns(2 of 8);
     display: inline-block;
-    padding: rem(27px) 0;
+    padding: rem(27px) 0 rem(26px);
     color: #0E5552;
     font-size: em(14px);
   }
 
   .fa-check {
     font-size: em(14px);
+  }
+}
+
+li.complete {
+  padding: rem(15px) 0 rem(12px);
+  display: flex;
+  margin-left: -15px;
+
+  .fa-check {
+    padding-right: rem(5px);
+  }
+  
+  .step-choice {
+    padding: rem(7px) 0 0 rem(1px);
   }
 }
 

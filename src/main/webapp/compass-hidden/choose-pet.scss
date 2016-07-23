@@ -51,6 +51,9 @@ img.pet-choice {
 }
 
 .multiple-pets-container {
+  @media (max-width: $bp-med) {
+    display: none;
+  }
   @media (min-width: $bp-med) {
     @include span-columns(6);
     margin-right: 0;
