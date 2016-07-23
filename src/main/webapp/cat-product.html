@@ -1,4 +1,31 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-progress-bar">
+    <ul>
+      <li class="complete">
+        <i class="fa fa-check"></i>
+        <div class="step-container">
+          <div class="step-name">1. Pet</div>
+          <div class="step-choice">Cat</div>
+        </div>
+      </li>
+      <li class="complete">
+        <i class="fa fa-check"></i>
+        <div class="step-container">
+          <div class="step-name">2. Size</div>
+          <div class="step-choice">
+            <span id="chosen-size" data-lift="CatSize.chosenSize">5-9</span> pounds
+          </div>
+        </div>
+      </li>
+      <li>
+        3. Product
+        <div class="arrow-up"></div>
+      </li>
+      <li>
+        4. Account
+      </li>
+    </ul>
+  </div>
   <div class="flow-step">
     <a href="/pet-choice">
       <i class="fa fa-check"></i>
@@ -24,10 +51,20 @@
     <div class="arrow-up"></div>
   </div>
   <form class="current-step" data-lift="CatProduct">
-    <h1 class="step-header">Choose Your Product</h1>
-    <h2 class="step-question">
-      All of the products we offer are made and packaged in the United States.
-    </h2>
+    <div class="header-container">
+      <h1 class="step-header">Choose Your Product</h1>
+      <h2 class="step-question">
+        All of the products we offer are made and packaged in the United States.
+      </h2>
+    </div>
+    <div class="promise-container">
+      <div class="promise">
+        <h3><i class="fa fa-trophy"></i>Our Promise</h3>
+        <div>
+          The products offered by My Pet Defense have been researched and tested to ensure maximum efficacy while maintaining the highest level of quality and safety.
+        </div>
+      </div>
+    </div>
     <div class="choice-container adventure-plus">
       <div class="product-header">
         <div class="header">1. Best Flea Protection</div>
@@ -143,7 +180,7 @@
       </div>
     </div>
   </form>
-  <div id="promise">
+  <div class="promise" id="promise-mobile">
     <h3><i class="fa fa-trophy"></i>Our Promise</h3>
     <div>
       The products offered by My Pet Defense have been researched and tested to ensure maximum efficacy while maintaining the highest level of quality and safety.

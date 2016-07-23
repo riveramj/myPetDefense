@@ -2,6 +2,9 @@
 @import "nav-bar";
 @import "flow";
 
+.arrow-up {
+  margin-left: em(4px);
+}
 
 .step-question {
   @media (min-width: $bp-med) {

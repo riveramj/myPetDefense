@@ -2,16 +2,30 @@
 @import "nav-bar";
 @import "flow";
 
+.arrow-up {
+  margin-left: em(15px);
+}
+
 .choice-container {
   padding-top: 0;
   display: inline-block;
   margin-bottom: em(30px);
+
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+  }
 }
 
 .product-header {
   @include span-columns(12);
   margin-right: 0;
   margin-bottom: rem(30px);
+}
+
+.header-container {
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(70px);
+  }
 }
 
 .header {
@@ -22,6 +36,25 @@
   text-transform: uppercase;
   font-size: em(17px);
   font-weight: $semibold;
+}
+
+.step-question {
+  @media (min-width: $bp-med) {
+    padding-bottom: 0;
+  }
+}
+
+.promise-container {
+  @media (max-width: $bp-med) {
+    display: none;
+  }
+
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+    margin-right: 0;
+    font-size: rem(12px);
+    padding-bottom: rem(54px);
+  }
 }
 
 .product-ingredients {
@@ -115,7 +148,13 @@
   }
 }
 
-#promise {
+#promise-mobile {
+  @media (min-width: $bp-med) {
+    display: none;
+  }
+}
+
+.promise {
   @include span-columns(8);
   @include shift(2);
   
@@ -125,19 +164,42 @@
 
   text-align: center;
 
+  @media (min-width: $bp-med) {
+    @include span-columns(12);
+    @include shift(0);
+    text-align: left;
+
+    border-left: 1px solid #57B8B4;
+    margin: 0 rem(25px) 0 0;
+    padding-left: rem(20px);
+  }
+
   .fa-trophy {
     padding-right: em(6px);
+
+    @media (min-width: $bp-med) {
+      font-size: rem(25px);
+    }
   }
 
   h3 {
-    font-size: em(22px);
+    font-size: rem(22px);
     color: $green;
     margin-bottom: rem(8px);
+
+    @media (min-width: $bp-med) {
+      font-size: rem(27px);
+    }
   }
 
   div {
     color: #818080;
     margin-bottom: em(25px);
+
+    @media (min-width: $bp-med) {
+      font-size: rem(16px);
+      margin-bottom: 0;
+    }
   }
 }
 
