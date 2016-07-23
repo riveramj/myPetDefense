@@ -55,18 +55,23 @@
 }
 
 .size-choice {
-  &.small {
-    padding-bottom: em(37px);
-  }
+  @media (min-width: $bp-med) {
+    &.small, &.medium, &.large {
+      margin-bottom: -8px;
+    }
 
-  &.medium {
-    padding-bottom: em(27px);
-  }
+    &.small {
+      padding-bottom: em(37px);
+    }
 
-  &.large {
-    padding-bottom: em(8px);
-  }
+    &.medium {
+      padding-bottom: em(27px);
+    }
 
+    &.large {
+      padding-bottom: em(8px);
+    }
+  }
 }
 
 .weight-number {
@@ -104,6 +109,7 @@
 
     &.large {
       padding-top: rem(10px);
+      margin-bottom: 0;
     }
   }
 }
