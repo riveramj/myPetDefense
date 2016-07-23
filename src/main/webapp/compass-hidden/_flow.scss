@@ -197,6 +197,7 @@ html, body {
 }
 
 .select-choice {
+  cursor: pointer;
   -webkit-appearance: none; 
   display: inline-block;
   padding: rem(13px) 0 rem(12px) 0;
@@ -217,6 +218,10 @@ html, body {
   text-align: center;
   font-size: em(18);
   line-height: rem(26);
+
+  a {
+    color: #B2B0B0;
+  }
 
   @media (min-width: $bp-med) {
     font-size: em(15);
