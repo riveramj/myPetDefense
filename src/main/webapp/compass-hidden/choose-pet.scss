@@ -54,10 +54,12 @@ img.pet-choice {
   @media (max-width: $bp-med) {
     display: none;
   }
+
   @media (min-width: $bp-med) {
     @include span-columns(6);
     margin-right: 0;
     font-size: rem(12px);
+    line-height: rem(17px);
   }
 }
 
