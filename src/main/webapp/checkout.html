@@ -1,4 +1,39 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
+<div class="flow-progress-bar">
+    <ul>
+      <li class="complete">
+        <i class="fa fa-check"></i>
+        <div class="step-container">
+          <div class="step-name">1. Pet</div>
+          <div class="step-choice">Cat</div>
+        </div>
+      </li>
+      <li class="complete">
+        <i class="fa fa-check"></i>
+        <div class="step-container">
+          <div class="step-name">2. Size</div>
+          <div class="step-choice">
+            <span id="chosen-size" data-lift="CatSize.chosenSize">5-9</span> pounds
+          </div>
+        </div>
+      </li>
+      <li>
+        <i class="fa fa-check"></i>
+        <div class="step-container">
+          <div class="step-name">3. Product</div>
+          <div class="step-choice">
+            <span id="chosen-product" data-lift="CatProduct.chosenProduct">
+              zoguard plus for cats
+            </span>
+          </div>
+        </div>
+      </li>
+      <li>
+        4. Account
+        <div class="arrow-up"></div>
+      </li>
+    </ul>
+  </div>
   <div class="flow-step">
     <a href="/pet-choice">
       <i class="fa fa-check"></i>
