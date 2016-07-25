@@ -45,6 +45,10 @@ html, body {
 #top-bar {
   background-color: $green;
   padding-bottom: em(20px);
+
+  @media (min-width: $bp-med) {
+    padding: em(15px) 0;
+  }
 }
 
 #step-container {
