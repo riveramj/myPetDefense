@@ -273,6 +273,13 @@ button.missing-product{
   background: rgb(69, 67, 67);
   background: rgba(69, 67, 67, .9);
 
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+    margin-right: 0;
+    background: rgba(80, 78, 78, 1);
+    background: rgb(80, 78, 78);
+  }
+
   h2 {
     @include span-columns(9);
     @include shift(1.5);
@@ -282,9 +289,14 @@ button.missing-product{
     margin-bottom: rem(20px);
     color: #ffffff;
     padding-right: 0;
-    padding-top: rem(40px); 
+    padding-top: rem(40px);
 
     line-height: rem(33px);
+
+    @media (min-width: $bp-med) {
+      padding-top: rem(65px);
+      @include span-columns(5);
+    }
   }
 
   div {
@@ -295,6 +307,11 @@ button.missing-product{
     color: #F7F7F7;
     line-height: em(22px);
     margin-bottom: em(159px);
+    
+    @media (min-width: $bp-med) {
+      @include span-columns(7);
+      margin-bottom: em(90px);
+    }
   }
 }
 
@@ -311,13 +328,18 @@ button.missing-product{
   $sliding-panel-color-hover: #fff;
   $sliding-panel-background-focus: lighten($sliding-panel-background, 5%);
 
-  @include position(fixed, 0 auto 0 0);
+  @include position(fixed, auto 0 auto auto);
   @include size(220px 100%);
   -webkit-overflow-scrolling: touch;
   overflow-y: auto;
   transform: translateY(700px);
   transition: all 0.25s linear;
   z-index: 999999;
+
+  @media (min-width: $bp-med) {
+    transform: translateX(700px);
+    height: initial;
+  }
 
   &.is-visible {
     transform: translateY(100px);
