@@ -60,12 +60,10 @@ html, body {
   @include span-columns(9 of 11);
   @include shift(1);
   padding-top: em(30px);
-  margin-right: 0;
 
   @media (min-width: $bp-med) {
     @include span-columns(8);
     @include shift(2);
-    margin-right: 0;
     padding-top: rem(52px);
   }
 }

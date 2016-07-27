@@ -56,9 +56,9 @@
 
   @media (min-width: $bp-med) {
     @include span-columns(6);
-    margin-right: 0;
     font-size: rem(12px);
     padding-bottom: rem(54px);
+    @include omega();
   }
 }
 
@@ -247,13 +247,14 @@ div.missing-product {
   @include span-columns(9);
   @include shift(1.5);
   text-align: center;
-  margin-right: 0;
+  @include omega();
   padding-bottom: em(56px);
 
   @media (min-width: $bp-med) {
     @include span-columns(2);
     @include shift(0);
-    margin-right: 0;
+    @include omega();
+    padding-top: rem(205px);
   }
 }
 
@@ -271,6 +272,17 @@ button.missing-product{
 
   border-radius: 5px;
   text-transform: uppercase;
+
+  @media (min-width: $bp-med) {
+    background-color: #605F5F;
+    border: none;
+    border-radius: 0;
+    color: #ffffff;
+
+    -webkit-box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
+    -moz-box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
+  }
 }
 
 #missing-product-overlay {
@@ -345,10 +357,15 @@ button.missing-product{
   @media (min-width: $bp-med) {
     transform: translateX(700px);
     height: initial;
+    margin-top: rem(205px);
   }
 
   &.is-visible {
     transform: translateY(100px);
+
+    @media (min-width: $bp-med) {
+      transform: none;
+    }
   }
 }
 
