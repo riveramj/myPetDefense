@@ -249,6 +249,12 @@ div.missing-product {
   text-align: center;
   margin-right: 0;
   padding-bottom: em(56px);
+
+  @media (min-width: $bp-med) {
+    @include span-columns(2);
+    @include shift(0);
+    margin-right: 0;
+  }
 }
 
 button.missing-product{
