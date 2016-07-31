@@ -134,7 +134,7 @@ html, body {
 }
 
 .flow-progress-bar {
-  @media (max-width: $bp-small) {
+  @media (max-width: $bp-med) {
     display: none;
   }
 

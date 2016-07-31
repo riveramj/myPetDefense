@@ -254,7 +254,7 @@ div.missing-product {
     @include span-columns(2);
     @include shift(0);
     @include omega();
-    padding-top: rem(205px);
+    margin-top: rem(205px);
   }
 }
 
@@ -273,16 +273,40 @@ button.missing-product{
   border-radius: 5px;
   text-transform: uppercase;
 
-  @media (min-width: $bp-med) {
-    background-color: #605F5F;
-    border: none;
-    border-radius: 0;
-    color: #ffffff;
-
-    -webkit-box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
-    -moz-box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
-    box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
+  &.mobile {
+    @media (min-width: $bp-med) {
+      display: none;
+    }
   }
+
+  &.desktop {
+    @media (max-width: $bp-med) {
+      display: none;
+    }
+
+    @media (min-width: $bp-med) {
+      background-color: #605F5F;
+      border: none;
+      border-radius: 0;
+      color: #ffffff;
+
+      -webkit-box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
+      -moz-box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
+      box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
+
+      padding: rem(25px) rem(0) rem(25px) rem(20px);
+      text-align: left;
+      font-size: rem(17px);
+      line-height: rem(24px);
+      font-weight: $regular;
+    }
+  }
+}
+
+button.missing-product.desktop div {
+  padding-top: rem(6px);
+  font-size: rem(15px);
+  font-weight: $bold;
 }
 
 #missing-product-overlay {
