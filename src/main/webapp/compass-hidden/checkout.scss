@@ -2,8 +2,26 @@
 @import "nav-bar";
 @import "flow";
 
+#left-column {
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+    @include pad(0 rem(82px) 0 0);
+  }
+}
+
+#right-column {
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+    @include omega;
+  }
+}
+
 .step-question {
   padding-bottom: rem(25px);
+
+  @media (min-width: $bp-med) {
+    max-width: 100%;
+  }
 }
 
 legend {
