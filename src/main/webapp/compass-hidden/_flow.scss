@@ -138,6 +138,12 @@ html, body {
     display: none;
   }
 
+  a {
+    display: inherit;
+    text-decoration: none;
+    color: inherit;
+  }
+
   @include span-columns(12);
   background-color: #57B8B4;
 
