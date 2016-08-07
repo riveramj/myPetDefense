@@ -3,7 +3,9 @@
 @import "flow";
 
 .arrow-up {
-  margin-left: em(4px);
+  @media (min-width: $bp-med) {
+    margin-left: em(4px);
+  }
 }
 
 .step-question {
