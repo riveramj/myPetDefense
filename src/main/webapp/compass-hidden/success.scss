@@ -4,6 +4,16 @@
 
 video {
   width: 100%;
+
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+  }
+}
+
+.step-question {
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+  }
 }
 
 #order-summary {

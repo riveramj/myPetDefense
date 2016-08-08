@@ -1,4 +1,45 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
+<div class="flow-progress-bar">
+    <ul>
+      <li class="complete">
+        <a href="/pet-choice">
+          <i class="fa fa-check"></i>
+          <dl class="step-container">
+            <dt class="step-name">1. Pet</dt>
+            <dd class="step-choice" id="chosen-pet" data-lift="PetChoice.chosenPet">Cat</dd>
+          </dl>
+        </a>
+      </li>
+      <li class="complete">
+        <a href="/pet-choice">
+          <i class="fa fa-check"></i>
+          <dl class="step-container">
+            <dt class="step-name">2. Size</dt>
+            <dd class="step-choice">
+              <span id="chosen-size" data-lift="CatSize.chosenSize">5-9</span> pounds
+            </dd>
+          </dl>
+        </a>
+      </li>
+      <li class="complete">
+        <a href="/pet-choice">
+          <i class="fa fa-check"></i>
+          <dl class="step-container">
+            <dt class="step-name">3. Product</dt>
+            <dd class="step-choice">
+              <span id="chosen-product" data-lift="CatProduct.chosenProduct">
+                zoguard plus for cats
+              </span>
+            </dd>
+          </dl>
+        </a>
+      </li>
+      <li>
+        4. Account
+        <div class="arrow-up"></div>
+      </li>
+    </ul>
+  </div>
   <div class="flow-step">
     <a href="/pet-choice">
       <i class="fa fa-check"></i>
@@ -11,23 +52,23 @@
   <div class="flow-step">
     <a href="/cat-size">
       <i class="fa fa-check"></i>
-      <div class="step-container">
-        <div class="step-name">2. Size</div>
-        <div class="step-choice">
+      <dl class="step-container">
+        <dt class="step-name">2. Size</dt>
+        <dd class="step-choice">
           <span id="chosen-size" data-lift="CatSize.chosenSize">5-9</span> pounds
-        </div>
-      </div>
+        </dd>
+      </dl>
     </a>
   </div>
   <div class="flow-step">
     <a href="/cat-product">
       <i class="fa fa-check"></i>
-      <div class="step-container">
-        <div class="step-name">3. Product</div>
-        <div class="step-choice">
+      <dl class="step-container">
+        <dt class="step-name">3. Product</dt>
+        <dd class="step-choice">
           <span id="chosen-product" data-lift="CatProduct.chosenProduct">zoguard plus for cats</span>
-        </div>
-      </div>
+        </dd>
+      </dl>
     </a>
   </div>
   <div class="flow-step unanswered">
@@ -40,94 +81,105 @@
       Almost there. Please take a moment to fill out your shipping and billing info.
     </h2>
     <input type="hidden" id="stripe-token">
-    <fieldset class="shipping-info">
-      <legend>Shipping Info</legend>
-      <label class="short-field first-name">
-        <span class="field-label">First name</span>
-        <span data-lift="Msg?id=first-name-error&noticeClass=notice&errorClass=error"></span>
-        <input id="first-name" type="text">            
-      </label>
-      <label class="short-field">
-        <span class="field-label">Last name</span>
-        <span data-lift="Msg?id=last-name-error&noticeClass=notice&errorClass=error"></span>
-        <input id="last-name" type="text">
-      </label>
-      <label>
-        <span class="field-label">Street Address</span>
-        <span data-lift="Msg?id=street-1-error&noticeClass=notice&errorClass=error"></span>
-        <input id="street-1" type="text">
-      </label>
-      <label>
-        <span class="field-label">Unit/Apt</span>
-        <span data-lift="Msg?id=street-2-error&noticeClass=notice&errorClass=error"></span>
-        <input id="street-2" type="text">
-      </label>
-      <label>
-        <span class="field-label">City</span>
-        <span data-lift="Msg?id=city-error&noticeClass=notice&errorClass=error"></span>
-        <input id="city" type="text">
-      </label>
-      <label class="short-field state">
-        <span class="field-label">State</span>
-        <span data-lift="Msg?id=state-error&noticeClass=notice&errorClass=error"></span>
-        <input id="state" type="text">
-      </label>
-      <label class="short-field">
-        <span class="field-label">Zip Code</span>
-        <span data-lift="Msg?id=zip-error&noticeClass=notice&errorClass=error"></span>
-        <input id="zip" type="text">
-      </label>
-      <label>
-        <span class="field-label">Phone Number</span>
-        <span data-lift="Msg?id=phone-error&noticeClass=notice&errorClass=error"></span>
-        <input placeholder="(123) 123-456" id="phone" type="text">
-      </label>
-      <label>
-        <div><span class="field-label note">Email</span><span class="note note-detail">For receipts and tracking info. We hate spam too!</span></div>
-        <span data-lift="Msg?id=email-error&noticeClass=notice&errorClass=error"></span>
-        <input id="email" type="text">
-      </label>
-      <label>
-        <div><span class="field-label note">Password</span></div>
-        <span data-lift="Msg?id=password-error&noticeClass=notice&errorClass=error"></span>
-        <input id="password" type="password">
-      </label>
-    </fieldset>
-    <fieldset class="billing-info">
-      <legend>Billing Info</legend>
-      <label>
-        <div><span class="note field-label">Card Number</span><span class="note note-detail">Enter the full number with no spaces.</span></div>
-        <input size="20" id="card-number" type="text" data-stripe="number">
-      </label>
-      <label class="medium-field expiration-date">
-        <div><span class="field-label note">Expiration Date</span><span class="note note-detail">(MM/YYYY)</span></div>
-        <input type="text" size="2" id="card-month-expiry" placeholder="MM" data-stripe="exp-month">
-        <input type="text" size="4" id="card-year-expiry" placeholder="YYYY" data-stripe="exp-year">
-      </label>
-      <label class="tiny-field">
-        <span class="field-label">CVC</span>
-        <span data-lift="Msg?id=cvc-error&noticeClass=notice&errorClass=error"></span>
-        <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc">            
-      </label>
-    </fieldset>
-
-    <div id="order-summary">
-      <h2>Order Summary</h2>
-      <ul id="order-details">
-        <li id="type">Pet <span>Dog</span></li>
-        <li id="size">Size <span>11-20</span></li>
-        <li id="product">Product <span>Adventure Plus for Dogs</span></li>
-      </ul>
-      <div id="order-total">
-        <h3>Total Charge</h3>
-        <div id="monthly-charge"><span id="amount">$9.99</span> / A Month</div>
-      </div>
+    <div id="left-column">
+     <fieldset class="account-info">
+        <legend>Account Info</legend>
+        <label>
+          <div><span class="field-label">Pet Name</span></div>
+          <input size="20" id="pet-name" type="text">
+        </label>
+        <label>
+          <div><span class="field-label">Email</span></div>
+          <span data-lift="Msg?id=email-error&noticeClass=notice&errorClass=error"></span>
+          <input id="email" type="text">
+        </label>
+        <label>
+          <div><span class="field-label note">Password</span></div>
+          <span data-lift="Msg?id=password-error&noticeClass=notice&errorClass=error"></span>
+          <input id="password" type="password">
+        </label>
+      </fieldset>
+      <fieldset class="shipping-info">
+        <legend>Shipping Info</legend>
+        <label class="short-field first-name">
+          <span class="field-label">First name</span>
+          <span data-lift="Msg?id=first-name-error&noticeClass=notice&errorClass=error"></span>
+          <input id="first-name" type="text">            
+        </label>
+        <label class="short-field">
+          <span class="field-label">Last name</span>
+          <span data-lift="Msg?id=last-name-error&noticeClass=notice&errorClass=error"></span>
+          <input id="last-name" type="text">
+        </label>
+        <label>
+          <span class="field-label">Street Address</span>
+          <span data-lift="Msg?id=street-1-error&noticeClass=notice&errorClass=error"></span>
+          <input id="street-1" type="text">
+        </label>
+        <label>
+          <span class="field-label">Unit/Apt</span>
+          <span data-lift="Msg?id=street-2-error&noticeClass=notice&errorClass=error"></span>
+          <input id="street-2" type="text">
+        </label>
+        <label>
+          <span class="field-label">City</span>
+          <span data-lift="Msg?id=city-error&noticeClass=notice&errorClass=error"></span>
+          <input id="city" type="text">
+        </label>
+        <label class="short-field state">
+          <span class="field-label">State</span>
+          <span data-lift="Msg?id=state-error&noticeClass=notice&errorClass=error"></span>
+          <input id="state" type="text">
+        </label>
+        <label class="short-field">
+          <span class="field-label">Zip Code</span>
+          <span data-lift="Msg?id=zip-error&noticeClass=notice&errorClass=error"></span>
+          <input id="zip" type="text">
+        </label>
+        <label>
+          <span class="field-label">Phone Number</span>
+          <span data-lift="Msg?id=phone-error&noticeClass=notice&errorClass=error"></span>
+          <input placeholder="(123) 123-456" id="phone" type="text">
+        </label>
+      </fieldset>
     </div>
+    <div id="right-column">
+      <fieldset class="billing-info">
+        <legend>Billing Info</legend>
+        <label>
+          <div><span class="note field-label">Card Number</span><span class="note note-detail">Enter the full number with no spaces.</span></div>
+          <input size="20" id="card-number" type="text" data-stripe="number">
+        </label>
+        <label class="medium-field expiration-date">
+          <div><span class="field-label note">Expiration Date</span><span class="note note-detail">(MM/YYYY)</span></div>
+          <input type="text" size="2" id="card-month-expiry" placeholder="MM" data-stripe="exp-month">
+          <input type="text" size="4" id="card-year-expiry" placeholder="YYYY" data-stripe="exp-year">
+        </label>
+        <label class="tiny-field">
+          <span class="field-label">CVC</span>
+          <span data-lift="Msg?id=cvc-error&noticeClass=notice&errorClass=error"></span>
+          <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc">            
+        </label>
+      </fieldset>
 
-    <div class="signup">
-      <button class="checkout select-choice">Place Order</button>
-      <div id="agreement">
+      <div id="order-summary">
+        <h2>Order Summary</h2>
+        <ul id="order-details">
+          <li id="type">Pet <span>Dog</span></li>
+          <li id="size">Size <span>11-20</span></li>
+          <li id="product">Product <span>Adventure Plus for Dogs</span></li>
+        </ul>
+        <div id="order-total">
+          <h3>Total Charge</h3>
+          <div id="monthly-charge"><span id="amount">$9.99</span> / A Month</div>
+        </div>
+      </div>
+
+      <div class="signup">
+        <button class="checkout select-choice">Place Order</button>
+        <div id="agreement">
         Clicking “Place Order” will charge your card for the first month. We’ll bill this card each month. You can cancel at any time by emailing us at <a href="mailto:support@mpd.com">support@mypetdefense.com</a>
+        </div>
       </div>
     </div>
   </form>

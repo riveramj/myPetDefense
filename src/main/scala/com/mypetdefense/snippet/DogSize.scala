@@ -58,12 +58,12 @@ class DogSize extends Loggable {
     }
 
     ".small .weight-number *" #> sortedSizes(0) &
-    "#small-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(0))) &
+    ".small #small-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(0))) &
     ".medium .weight-number *" #> sortedSizes(1) &
-    "#medium-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(1))) &
+    ".medium #medium-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(1))) &
     ".large .weight-number *" #> sortedSizes(2) &
-    "#large-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(2))) &
+    ".large #large-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(2))) &
     ".xlarge .weight-number *" #> sortedSizes(3) &
-    "#xlarge-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(3)))
+    ".xlarge #xlarge-dog" #> SHtml.submit("Select", () => chooseSize(sortedSizes(3)))
   }
 }

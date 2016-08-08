@@ -2,8 +2,33 @@
 @import "nav-bar";
 @import "flow";
 
+#left-column {
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+    @include pad(0 rem(82px) 0 0);
+  }
+}
+
+#right-column {
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+    @include omega;
+  }
+}
+
+.account-info {
+  @media (min-width: $bp-med) {
+    margin-bottom: rem(40px);
+  }
+}
+
 .step-question {
   padding-bottom: rem(25px);
+
+  @media (min-width: $bp-med) {
+    max-width: 100%;
+    padding-bottom: rem(33px);
+  }
 }
 
 legend {
@@ -11,6 +36,10 @@ legend {
   font-size: em(22px);
   line-height: rem(28px);
   padding-bottom: rem(15px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(10px);
+  }
 }
 
 .field-label {
@@ -20,6 +49,11 @@ legend {
   display: block;
   text-transform: uppercase;
   padding-bottom: rem(2px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(3px);
+  }
+
 }
 
 fieldset label {
@@ -90,6 +124,10 @@ fieldset label {
   border-radius: 4px;
   background-color: #E7E7E7;
 
+  @media (min-width: $bp-med) {
+    margin-top: rem(43px);
+  }
+
   h2 {
     background-color: #605F5F;
     color: #E7E7E7;
@@ -99,6 +137,10 @@ fieldset label {
     @include border-top-radius(4px);
     margin-bottom: rem(25px);
     font-weight: $semibold;
+
+    @media (min-width: $bp-med) {
+      text-transform: uppercase;
+    }
   }
 }
 
@@ -111,6 +153,10 @@ fieldset label {
   text-transform: uppercase;
 
   padding-bottom: rem(31px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(29px);
+  }
 
   li {
     margin-bottom: rem(20px);
@@ -129,6 +175,11 @@ fieldset label {
   border-top: dotted 1px #A3A2A2;
   padding: em(26px) 0 em(30px);
   text-align: center;
+
+  @media (min-width: $bp-med) {
+    padding: em(23px) em(40px) em(32px) 0;
+    text-align: right;
+  }
   
   h3 {
     color: #949494;
@@ -137,6 +188,10 @@ fieldset label {
     padding-bottom: rem(10px);
     text-transform: uppercase;
     letter-spacing: 0.4px;
+
+    @media (min-width: $bp-med) {
+      display: inline-block;
+    }
   }
 
   #monthly-charge {
@@ -145,11 +200,16 @@ fieldset label {
     letter-spacing: 0.4px;
     font-weight: $semibold;
     text-transform: uppercase;
+
+    @media (min-width: $bp-med) {
+      display: inline-block;
+      padding-left: rem(10px);
+    }
   }
 
   #amount {
     color: #605F5F;
-    font-size: em(27px);
+    font-size: rem(27px);
     font-weight: $semibold;
   }
 }
@@ -160,11 +220,21 @@ fieldset label {
   @include shift(1);
 
   margin-right: 0;
+
+  @media (min-width: $bp-med) {
+    @include span-columns(8);
+    @include shift(2);
+  }
 }
 
 .select-choice {
   width: 100%;
   margin-bottom: rem(8px);
+
+  @media (min-width: $bp-med) {
+    font-size: rem(22px);
+    letter-spacing: 0.4px;
+  }
 }
 
 #agreement {
@@ -174,5 +244,11 @@ fieldset label {
 
   a {
     color: $green;
+  }
+}
+
+#step-container {
+  @media (min-width: $bp-med) {
+    margin-bottom: rem(113px);
   }
 }

@@ -1,6 +1,54 @@
+html, body {
+  height: 100%;
+}
+
+#content-container {
+  @media (min-width: $bp-med) {
+    min-height: 100%;
+    background-color: #f7f7f7;
+  }
+}
+
+.header-container {
+  @media (min-width: $bp-med) {
+    @include span-columns(6);
+  }
+}
+
+#step-container {
+  @media (min-width: $bp-med) {
+    overflow: auto;
+	  padding-bottom: 110px; /* must be same height as the footer */
+  }
+}
+
+.footer {
+  @media (min-width: $bp-med) {
+    position: relative;
+	  margin-top: -110px; /* negative value of footer height */
+  	height: 110px;
+	  clear: both;
+  }
+
+  @include span-columns(12);
+  background-color: #454343;
+  color: #B2B0B0;
+  font-weight: $semibold;
+
+  padding-top: em(82px);
+
+  @media (min-width: $bp-med) {
+    padding-top: em(55px);
+  }
+}
+
 #top-bar {
   background-color: $green;
   padding-bottom: em(20px);
+
+  @media (min-width: $bp-med) {
+    padding: em(15px) 0;
+  }
 }
 
 #step-container {
@@ -12,7 +60,12 @@
   @include span-columns(9 of 11);
   @include shift(1);
   padding-top: em(30px);
-  margin-right: 0;
+
+  @media (min-width: $bp-med) {
+    @include span-columns(8);
+    @include shift(2);
+    padding-top: rem(52px);
+  }
 }
 
 .step-header {
@@ -27,6 +80,11 @@
   font-weight: $normal;
   padding-bottom: rem(15px);
   line-height: rem(24px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(56px);
+    max-width: 352px;
+  }
 }
 
 .flow-step {
@@ -69,6 +127,56 @@
   &.unanswered {
     padding: em(24px) 0;
   }
+
+  @media (min-width: $bp-med) {
+    display: none;
+  }
+}
+
+.flow-progress-bar {
+  @media (max-width: $bp-med) {
+    display: none;
+  }
+
+  a {
+    display: inherit;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  @include span-columns(12);
+  background-color: #57B8B4;
+
+  ul {
+    @include span-columns(9.5);
+    @include shift(2);
+  }
+
+  li {
+    @include span-columns(2 of 8);
+    display: inline-block;
+    padding: rem(27px) 0 rem(26px);
+    color: #0E5552;
+    font-size: em(14px);
+  }
+
+  .fa-check {
+    font-size: em(14px);
+  }
+}
+
+li.complete {
+  padding: rem(15px) 0 rem(12px);
+  display: flex;
+  margin-left: -15px;
+
+  .fa-check {
+    padding-right: rem(5px);
+  }
+  
+  .step-choice {
+    padding: rem(7px) 0 0 rem(1px);
+  }
 }
 
 .step-choice {
@@ -76,6 +184,11 @@
   font-size: em(22);
   padding-top: rem(8px);
   text-align: center;
+
+  @media (min-width: $bp-med) {
+    padding-top: 0;
+    text-align: left;
+  }
 }
 
 .arrow-up {
@@ -88,6 +201,14 @@
   border-bottom: 10px solid #f7f7f7;
   padding-top: em(12px);
   margin-bottom: em(-24px);
+
+  @media (min-width: $bp-med) {
+    border-left: 16px solid transparent;
+    border-right: 16px solid transparent;
+    border-bottom: 16px solid #f7f7f7;
+    margin-bottom: rem(-27px);
+    margin-left: 0;
+  }
 }
 
 .choice-container {
@@ -98,6 +219,7 @@
 }
 
 .select-choice {
+  cursor: pointer;
   -webkit-appearance: none; 
   display: inline-block;
   padding: rem(13px) 0 rem(12px) 0;
@@ -114,19 +236,18 @@
   text-transform: uppercase;
 }
 
-.footer {
-  @include span-columns(12);
-  background-color: #454343;
-  color: #B2B0B0;
-  font-weight: $semibold;
-
-  padding-top: em(82px);
-}
-
 #need-help {
   text-align: center;
   font-size: em(18);
   line-height: rem(26);
+
+  a {
+    color: #B2B0B0;
+  }
+
+  @media (min-width: $bp-med) {
+    font-size: em(15);
+  }
 }
 
 .legal {
@@ -136,4 +257,8 @@
 
   padding: rem(48px) 0 rem(9px);
   text-align: center;
+
+  @media (min-width: $bp-med) {
+    padding: 0 0 rem(15px);
+  }
 }

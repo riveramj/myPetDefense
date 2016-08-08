@@ -1,4 +1,35 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-progress-bar">
+    <ul>
+      <li class="complete">
+        <a href="/pet-choice">
+          <i class="fa fa-check"></i>
+          <dl class="step-container">
+            <dt class="step-name">1. Pet</dt>
+            <dd class="step-choice">Dog</dd>
+          </dl>
+        </a>
+      </li>
+      <li class="complete">
+        <a href="/pet-choice">
+          <i class="fa fa-check"></i>
+          <dl class="step-container">
+            <dt class="step-name">2. Product</dt>
+            <dd class="step-choice">
+              <span id="chosen-size" data-lift="DogProduct.chosenProduct">ShieldTec Plus for Dogs</span>
+            </dd>
+          </dl>
+        </a>
+      </li>
+      <li>
+        3. Size
+        <div class="arrow-up"></div>
+      </li>
+      <li>
+        4. Account
+      </li>
+    </ul>
+  </div>
   <div class="flow-step">
     <a href="/pet-choice">
       <i class="fa fa-check"></i>
@@ -28,12 +59,12 @@
     <h2 class="step-question">
       Flea and tick products have different dosage amounts based on pet size ranges. Choose the size range that best matches your dog.
     </h2>
-    <div class="choice-container">
+    <div class="choice-container dog small">
       <picture>
         <source 
           media="(min-width: 46.8em)" 
           srcset="images/small-bone.png, images/small-bone@2x.png 2x">
-        <img class="size-choice small" src="images/small-bone-small.png" srcset="images/small-bone-small.png, images/small-bone-small@2x.png 2x">
+        <img class="size-choice dog small" src="images/small-bone-small.png" srcset="images/small-bone-small.png, images/small-bone-small@2x.png 2x">
       </picture>
       <ul class="weight dog small">
         <li class="weight-number">1-2</li>
@@ -41,12 +72,12 @@
       </ul>
       <button class="select-choice" id="small-dog">Select</button>
     </div>
-    <div class="choice-container">
+    <div class="choice-container dog medium">
       <picture>
         <source 
           media="(min-width: 46.8em)" 
           srcset="images/medium-bone.png, images/medium-bone@2x.png 2x">
-        <img class="size-choice medium" src="images/medium-bone-small.png" srcset="images/medium-bone-small.png, images/medium-bone-small@2x.png 2x">
+        <img class="size-choice dog medium" src="images/medium-bone-small.png" srcset="images/medium-bone-small.png, images/medium-bone-small@2x.png 2x">
       </picture>
       <ul class="weight dog medium">
         <li class="weight-number">4-15</li>
@@ -54,12 +85,12 @@
       </ul>
       <button class="select-choice" id="medium-dog">Select</button>
     </div>
-    <div class="choice-container">
+    <div class="choice-container dog large">
       <picture>
         <source 
           media="(min-width: 46.8em)" 
           srcset="images/large-bone.png, images/large-bone@2x.png 2x">
-        <img class="size-choice large" src="images/larg-bone-small.png" srcset="images/large-bone-small.png, images/large-bone-small@2x.png 2x">
+        <img class="size-choice dog large" src="images/larg-bone-small.png" srcset="images/large-bone-small.png, images/large-bone-small@2x.png 2x">
       </picture>
       <ul class="weight dog large">
         <li class="weight-number">17-30</li>
@@ -67,12 +98,12 @@
       </ul>
       <button class="select-choice" id="large-dog">Select</button>
     </div>
-    <div class="choice-container">
+    <div class="choice-container dog xlarge">
       <picture>
         <source 
           media="(min-width: 46.8em)" 
           srcset="images/xlarge-bone.png, images/xlarge-bone@2x.png 2x">
-        <img class="size-choice large" src="images/xlarg-bone-small.png" srcset="images/xlarge-bone-small.png, images/xlarge-bone-small@2x.png 2x">
+        <img class="size-choice dog xlarge" src="images/xlarge-bone-small.png" srcset="images/xlarge-bone-small.png, images/xlarge-bone-small@2x.png 2x">
       </picture>
       <ul class="weight dog xlarge">
         <li class="weight-number">40+</li>

@@ -1,4 +1,35 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-progress-bar">
+    <ul>
+      <li class="complete">
+        <a href="/pet-choice">
+          <i class="fa fa-check"></i>
+          <dl class="step-container">
+            <dt class="step-name">1. Pet</dt>
+            <dd class="step-choice">Cat</dd>
+          </dl>
+        </a>
+      </li>
+      <li class="complete">
+        <a href="/pet-choice">
+          <i class="fa fa-check"></i>
+          <dl class="step-container">
+            <dt class="step-name">2. Size</dt>
+            <dd class="step-choice">
+              <span id="chosen-size" data-lift="CatSize.chosenSize">5-9</span> pounds
+            </dd>
+          </dl>
+        </a>
+      </li>
+      <li>
+        3. Product
+        <div class="arrow-up"></div>
+      </li>
+      <li>
+        4. Account
+      </li>
+    </ul>
+  </div>
   <div class="flow-step">
     <a href="/pet-choice">
       <i class="fa fa-check"></i>
@@ -24,10 +55,20 @@
     <div class="arrow-up"></div>
   </div>
   <form class="current-step" data-lift="CatProduct">
-    <h1 class="step-header">Choose Your Product</h1>
-    <h2 class="step-question">
-      All of the products we offer are made and packaged in the United States.
-    </h2>
+    <div class="header-container">
+      <h1 class="step-header">Choose Your Product</h1>
+      <h2 class="step-question">
+        All of the products we offer are made and packaged in the United States.
+      </h2>
+    </div>
+    <div class="promise-container">
+      <div class="promise">
+        <h3><i class="fa fa-trophy"></i>Our Promise</h3>
+        <div>
+          The products offered by My Pet Defense have been researched and tested to ensure maximum efficacy while maintaining the highest level of quality and safety.
+        </div>
+      </div>
+    </div>
     <div class="choice-container adventure-plus">
       <div class="product-header">
         <div class="header">1. Best Flea Protection</div>
@@ -93,7 +134,7 @@
       <picture>
         <source 
           media="(min-width: 46.8em)" 
-          srcset="images/products/ZoGuard-Plus_Cats-small.png, images/products/ZoGuard-Plus_Cats@2x.png 2x">
+          srcset="images/products/ZoGuard-Plus_Cats.png, images/products/ZoGuard-Plus_Cats@2x.png 2x">
         <img src="images/products/ZoGuard-Plus_Cats-small.png" srcset="images/products/ZoGuard-Plus_Cats-small.png, images/products/ZoGuard-Plus_Cats-small@2x.png 2x">
       </picture>
       <div class="product-ingredients">
@@ -143,14 +184,19 @@
       </div>
     </div>
   </form>
-  <div id="promise">
+  <div class="promise" id="promise-mobile">
     <h3><i class="fa fa-trophy"></i>Our Promise</h3>
     <div>
       The products offered by My Pet Defense have been researched and tested to ensure maximum efficacy while maintaining the highest level of quality and safety.
     </div>
   </div>
   <div class="missing-product">
-    <button type="button" class="missing-product js-menu-trigger">
+    <button type="button" class="missing-product js-menu-trigger desktop">
+      Don’t see your product listed?
+      <br>
+      <div><i class="fa fa-caret-left"></i> Here's why</div>
+    </button>
+    <button type="button" class="missing-product js-menu-trigger mobile">
       Don't See Your Product?
     </button>
   </div>
@@ -161,15 +207,13 @@
   <div id="missing-product-overlay" class="js-menu sliding-panel-content">
     <h2>Why don’t I see my product listed?</h2>
     <div>
-      Now that we know who you are, I know who I am. I'm not a mistake! It all makes sense! In a comic, you know how you can tell who the arch-villain's going to be? He's the exact opposite of the hero. And most times they're friends, like you and me! I should've known way back when... You know why, David? Because of the kids. They called me Mr Glass.
-      <br><br>
-      You see? It's curious. Ted did figure it out - time travel. And when we get back, we gonna tell everyone. How it's possible, how it's done, what the dangers are. But then why fifty years in the future when the spacecraft encounters a black hole does the computer call it an unknown entry. 
+      While there are many brands of flea and tick products available, most of these brands use the same set of ingredients to solve the same problems – fleas, ticks and mosquitos. My Pet Defense has chosen to focus on solutions, not brands. My Pet Defense has identified a selection of products that we feel best meets these needs. These products have been researched and tested to ensure quality, safety and performance.
     </div>
   </div>
   <div class="js-menu-screen sliding-panel-fade-screen"></div>
   
   <head_merge>
-   <link rel="stylesheet" data-lift="style-bundle?name=products">
+    <link rel="stylesheet" data-lift="style-bundle?name=products">
   </head_merge>
 
   <tail>
