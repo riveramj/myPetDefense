@@ -283,9 +283,10 @@ button.missing-product{
     }
   }
 
-  &.desktop {
+  &.desktop,  {
     @media (max-width: $bp-med) {
       display: none;
+      
     }
 
     @media (min-width: $bp-med) {
@@ -304,6 +305,7 @@ button.missing-product{
       font-size: rem(18px);
       line-height: rem(24px);
       font-weight: $regular;
+      cursor: pointer;
     }
   }
 }
@@ -327,6 +329,21 @@ button.missing-product.desktop div {
     background: rgb(80, 78, 78);
   }
 
+  .fa-close {
+    display: none;
+
+    @media (min-width: $bp-med) {
+      @include span-columns(1);
+      @include shift(10.5);
+
+      color: #F7F7F7;
+      font-size: rem(25px);
+
+      margin-top: 45px;
+      cursor: pointer;
+    }
+  }
+
   h2 {
     @include span-columns(9);
     @include shift(1.5);
@@ -341,7 +358,7 @@ button.missing-product.desktop div {
     line-height: rem(33px);
 
     @media (min-width: $bp-med) {
-      padding-top: rem(65px);
+      padding-top: 0;
       @include span-columns(5);
     }
   }
