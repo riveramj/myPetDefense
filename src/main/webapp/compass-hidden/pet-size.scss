@@ -76,6 +76,11 @@
 }
 
 .size-choice {
+
+  &.dog.xlarge {
+    margin: 0 rem(8px) 0 rem(-29px);
+  }
+
   @media (min-width: $bp-med) {
     &.small, &.medium, &.large {
       margin-bottom: -8px;
@@ -107,6 +112,7 @@
 
     &.dog.xlarge {
       padding-bottom: 0;
+      margin: 0 rem(14px) 0 rem(-40px);
     }
   }
 }
