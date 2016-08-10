@@ -84,40 +84,43 @@
     <div id="left-column">
      <fieldset class="account-info">
         <legend>Account Info</legend>
-        <label>
-          <div><span class="field-label">Pet Name</span></div>
-          <input size="20" id="pet-name" type="text">
-        </label>
-        <label>
-          <div><span class="field-label">Email</span></div>
-          <span data-lift="Msg?id=email-error&noticeClass=notice&errorClass=error"></span>
-          <input id="email" type="text">
-        </label>
-        <label>
-          <div><span class="field-label note">Password</span></div>
-          <span data-lift="Msg?id=password-error&noticeClass=notice&errorClass=error"></span>
-          <input id="password" type="password">
-        </label>
-      </fieldset>
-      <fieldset class="shipping-info">
-        <legend>Shipping Info</legend>
-        <label class="short-field first-name">
-          <span class="field-label">First name</span>
-          <span data-lift="Msg?id=first-name-error&noticeClass=notice&errorClass=error"></span>
-          <input id="first-name" type="text">            
-        </label>
-        <label class="short-field">
-          <span class="field-label">Last name</span>
-          <span data-lift="Msg?id=last-name-error&noticeClass=notice&errorClass=error"></span>
-          <input id="last-name" type="text">
-        </label>
-        <label>
-          <span class="field-label">Street Address</span>
-          <span data-lift="Msg?id=street-1-error&noticeClass=notice&errorClass=error"></span>
-          <input id="street-1" type="text">
-        </label>
-        <label>
-          <span class="field-label">Unit/Apt</span>
+        <div>
+          <label>
+            <div><span class="field-label">Pet Name</span></div>
+            <input size="20" id="pet-name" type="text">
+          </label>
+          <label>
+            <div><span class="field-label">Email</span></div>
+            <span data-lift="Msg?id=email-error&noticeClass=notice&errorClass=error"></span>
+            <input id="email" type="text">
+          </label>
+          <label>
+            <div><span class="field-label note">Password</span></div>
+            <span data-lift="Msg?id=password-error&noticeClass=notice&errorClass=error"></span>
+            <input id="password" type="password">
+          </label>
+        </div>
+     </fieldset>
+     <fieldset class="shipping-info">
+       <legend>Shipping Info</legend>
+       <div>
+         <label class="short-field first-name">
+           <span class="field-label">First name</span>
+           <span data-lift="Msg?id=first-name-error&noticeClass=notice&errorClass=error"></span>
+           <input id="first-name" type="text">            
+         </label>
+         <label class="short-field">
+           <span class="field-label">Last name</span>
+           <span data-lift="Msg?id=last-name-error&noticeClass=notice&errorClass=error"></span>
+           <input id="last-name" type="text">
+         </label>
+         <label>
+           <span class="field-label">Street Address</span>
+           <span data-lift="Msg?id=street-1-error&noticeClass=notice&errorClass=error"></span>
+           <input id="street-1" type="text">
+         </label>
+         <label>
+           <span class="field-label">Unit/Apt</span>
           <span data-lift="Msg?id=street-2-error&noticeClass=notice&errorClass=error"></span>
           <input id="street-2" type="text">
         </label>
@@ -141,25 +144,28 @@
           <span data-lift="Msg?id=phone-error&noticeClass=notice&errorClass=error"></span>
           <input placeholder="(123) 123-456" id="phone" type="text">
         </label>
+       </div>
       </fieldset>
     </div>
     <div id="right-column">
       <fieldset class="billing-info">
         <legend>Billing Info</legend>
-        <label>
-          <div><span class="note field-label">Card Number</span><span class="note note-detail">Enter the full number with no spaces.</span></div>
-          <input size="20" id="card-number" type="text" data-stripe="number">
-        </label>
-        <label class="medium-field expiration-date">
-          <div><span class="field-label note">Expiration Date</span><span class="note note-detail">(MM/YYYY)</span></div>
-          <input type="text" size="2" id="card-month-expiry" placeholder="MM" data-stripe="exp-month">
-          <input type="text" size="4" id="card-year-expiry" placeholder="YYYY" data-stripe="exp-year">
-        </label>
-        <label class="tiny-field">
-          <span class="field-label">CVC</span>
-          <span data-lift="Msg?id=cvc-error&noticeClass=notice&errorClass=error"></span>
-          <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc">            
-        </label>
+        <div>
+          <label>
+            <div><span class="note field-label">Card Number</span><span class="note note-detail">Enter the full number with no spaces.</span></div>
+            <input size="20" id="card-number" type="text" data-stripe="number">
+          </label>
+          <label class="medium-field expiration-date">
+            <div><span class="field-label note">Expiration Date</span><span class="note note-detail">(MM/YYYY)</span></div>
+            <input type="text" size="2" id="card-month-expiry" placeholder="MM" data-stripe="exp-month">
+            <input type="text" size="4" id="card-year-expiry" placeholder="YYYY" data-stripe="exp-year">
+          </label>
+          <label class="tiny-field">
+            <span class="field-label">CVC</span>
+            <span data-lift="Msg?id=cvc-error&noticeClass=notice&errorClass=error"></span>
+            <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc">            
+          </label>
+        </div>
       </fieldset>
 
       <div id="order-summary">

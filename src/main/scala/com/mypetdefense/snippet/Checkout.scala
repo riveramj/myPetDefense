@@ -1,13 +1,15 @@
 package com.mypetdefense.snippet
 
 import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml._
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.util.ClearClearable
-import net.liftweb.http._
-import net.liftweb.mapper.{By, NullRef}
-import net.liftweb.http.js.JsCmds.RedirectTo
+import net.liftweb._
+  import http.SHtml._
+  import util._
+  import util.Helpers._
+  import common._
+  import util.ClearClearable
+  import http._
+  import mapper.{By, NullRef}
+  import http.js.JsCmds.RedirectTo
 
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.model._
@@ -32,6 +34,8 @@ object Checkout extends Loggable {
 }
 
 class Checkout extends Loggable {
+  val stripeSecretKey = Props.get("secret.key") openOr ""
+  implicit val e = new StripeExecutor(stripeSecretKey)
 
   var email = ""
   var password = ""
@@ -47,13 +51,12 @@ class Checkout extends Loggable {
   var phone = ""
 
   var stripeToken = ""
+  var couponCode = ""
 
   def signup() = {
     val selectedPetType = petChoice.is
     val selectedPetSize =  petSize.is
     val selectedPetProduct = petProduct.is
-
-    implicit val e = new StripeExecutor("sk_test_vvw6ZOLkVyQWYNEwVocSs27V")
 
     val stripeCustomer = Customer.create(
       email = Some(email),
@@ -160,6 +163,11 @@ class Checkout extends Loggable {
       "#product span *" #> petProduct.is.map(_.name.get)
     }
 
+    val allCoupons = Coupon.list
+
+    for (coupons <- allCoupons)
+      println(coupons)
+
     SHtml.makeFormsAjax andThen
     orderSummary &
     "#first-name" #> text(firstName, firstName = _) &
@@ -174,6 +182,7 @@ class Checkout extends Loggable {
     "#password" #> text(password, userPassword => password = userPassword.trim) &
     "#pet-name" #> text(petName, petName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
+    "#coupon-code" #> text(couponCode, couponCode = _) &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup)
   }
 }

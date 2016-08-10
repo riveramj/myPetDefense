@@ -35,7 +35,7 @@ legend {
   color: $green;
   font-size: em(22px);
   line-height: rem(28px);
-  padding-bottom: rem(15px);
+  padding-bottom: rem(6px);
 
   @media (min-width: $bp-med) {
     padding-bottom: rem(10px);
@@ -47,7 +47,6 @@ legend {
   font-weight: $semibold;
   font-size: em(12);
   display: block;
-  text-transform: uppercase;
   padding-bottom: rem(2px);
 
   @media (min-width: $bp-med) {
@@ -56,16 +55,28 @@ legend {
 
 }
 
+fieldset {
+  padding-bottom: rem(24px);
+}
+
+fieldset > div {
+  background-color: #F1F1F1;
+  padding: rem(12px) rem(10px) rem(14px);
+}
+
 fieldset label {
   display: inline-block;
   width: 100%;
   padding-bottom: em(22px);
 
+  &:last-child {
+    padding-bottom: 0;
+  }
+
   input {
     width: 100%;
     color: #4F4E4E;
     font-size: em(22px);
-    background-color: #F1F1F1;
     border: 1px solid #CECECE;
     padding: rem(7px) rem(10px);
     border-radius: 3px;
@@ -111,7 +122,7 @@ fieldset label {
 }
 
 #card-month-expiry {
-  margin-right: rem(4px);
+  margin-right: rem(2px);
 }
 
 #card-year-expiry {
