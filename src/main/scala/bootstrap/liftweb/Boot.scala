@@ -44,11 +44,13 @@ class Boot {
       ShipmentLineItem,
       Subscription,
       Lead,
-      Retailor
+      Retailor,
+      Coupon
     )
 
     DataLoader.loadProducts
     DataLoader.loadUsers
+    DataLoader.loadCoupons
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")

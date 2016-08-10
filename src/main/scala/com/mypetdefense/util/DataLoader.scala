@@ -1,8 +1,12 @@
 package com.mypetdefense.util
 
 import com.mypetdefense.model._
-import net.liftweb.common._
+import net.liftweb._
+  import common._
+  import util._
 import net.liftweb.mapper.By
+import me.frmr.stripe.{Coupon => StripeCoupon, _}
+import dispatch._, Defaults._
 
 object DataLoader extends Loggable {
   def loadProducts = {
@@ -152,6 +156,26 @@ object DataLoader extends Loggable {
         None,
         UserType.Parent
       )
+    }
+  }
+
+  def loadCoupons = {
+    def populateCouponsLocally(coupons: List[StripeCoupon]) = {
+      for {
+        coupon <- coupons
+      } yield {
+        Coupon.createCoupon(coupon.id)
+      }
+    }
+
+    if(Coupon.findAll().isEmpty) {
+      val stripeSecretKey = Props.get("secret.key") openOr ""
+      implicit val e = new StripeExecutor(stripeSecretKey)
+
+      val allCoupons = StripeCoupon.list
+
+      for (coupons <- allCoupons)
+        populateCouponsLocally(coupons.map(_.data).openOr(Nil))
     }
   }
 }

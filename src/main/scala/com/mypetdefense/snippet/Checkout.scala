@@ -18,7 +18,7 @@ import com.mypetdefense.actor._
 import java.util.Date
 import java.time.MonthDay
 
-import me.frmr.stripe.{Subscription => StripeSubscription, _}
+import me.frmr.stripe.{Subscription => StripeSubscription, Coupon => StripeCoupon, _}
 
 import dispatch._, Defaults._
 
@@ -163,10 +163,8 @@ class Checkout extends Loggable {
       "#product span *" #> petProduct.is.map(_.name.get)
     }
 
-    val allCoupons = Coupon.list
-
-    for (coupons <- allCoupons)
-      println(coupons)
+    val allCoupons = Coupon.findAll()
+    println(allCoupons)
 
     SHtml.makeFormsAjax andThen
     orderSummary &
