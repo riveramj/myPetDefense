@@ -3,7 +3,10 @@ db.driver=org.postgresql.Driver
 db.url=jdbc:postgresql:mypetdefense
 db.user=mypetdefense
 db.password=mypetdefense
-db.host=localhost
 
 [Postmark]
 mail.smtp.host=localhost
+
+[Stripe]
+secret.key=sk_test_vvw6ZOLkVyQWYNEwVocSs27V
+public.key=pk_test_JLczczIy7T5qGL8DOmwTc2O0

@@ -1,9 +1,8 @@
 [Database]
 db.driver=org.postgresql.Driver
-db.url=jdbc:postgresql:mypetdefense
+db.url=jdbc:postgresql://dev-mypetdefense.cega431oqn39.us-west-2.rds.amazonaws.com:5432/mypetdefense
 db.user=mypetdefense
-db.password=mypetdefense
-db.host=localhost
+db.password=mypet101
 
 [Postmark]
 mail.smtp.host=smtp.postmarkapp.com
@@ -12,3 +11,7 @@ mail.smtp.auth=true
 mail.smtp.starttls.enable=true
 mail.user=13ec9dab-4e70-4250-827e-2352c672c9c7
 mail.password=13ec9dab-4e70-4250-827e-2352c672c9c7
+
+[Stripe]
+secret.key=sk_test_REo8GgSa41Vj3gc9g2J5Ne03
+public.key=pk_test_tlQUPJdasEEdNTcUsbcsHmG7
