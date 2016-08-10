@@ -164,7 +164,7 @@ object DataLoader extends Loggable {
       for {
         coupon <- coupons
       } yield {
-        Coupon.createCoupon(coupon.id)
+        Coupon.createCoupon(coupon.id.toLowerCase(), coupon.durationInMonths.getOrElse(0))
       }
     }
 

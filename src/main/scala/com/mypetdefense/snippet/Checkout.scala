@@ -8,8 +8,8 @@ import net.liftweb._
   import common._
   import util.ClearClearable
   import http._
-  import mapper.{By, NullRef}
-  import http.js.JsCmds.RedirectTo
+  import mapper.{By, NullRef, Like}
+  import http.js.JsCmds.{Noop, RedirectTo}
 
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.model._
@@ -18,7 +18,7 @@ import com.mypetdefense.actor._
 import java.util.Date
 import java.time.MonthDay
 
-import me.frmr.stripe.{Subscription => StripeSubscription, Coupon => StripeCoupon, _}
+import me.frmr.stripe.{StripeExecutor, Customer}
 
 import dispatch._, Defaults._
 
@@ -52,6 +52,19 @@ class Checkout extends Loggable {
 
   var stripeToken = ""
   var couponCode = ""
+  var coupon:Box[Coupon] = None
+
+  def validateCouponCode(possileCouponCode: String) = {
+    val possibleCoupon = Coupon.find(By(Coupon.couponCode, possileCouponCode.toLowerCase()))
+
+    if (possibleCoupon.isEmpty) {
+      S.error("coupon-error", "no match")
+    } else {
+      couponCode = possileCouponCode
+      coupon = possibleCoupon
+      S.error("coupon-error", "")
+    }
+  }
 
   def signup() = {
     val selectedPetType = petChoice.is
@@ -163,9 +176,6 @@ class Checkout extends Loggable {
       "#product span *" #> petProduct.is.map(_.name.get)
     }
 
-    val allCoupons = Coupon.findAll()
-    println(allCoupons)
-
     SHtml.makeFormsAjax andThen
     orderSummary &
     "#first-name" #> text(firstName, firstName = _) &
@@ -180,7 +190,7 @@ class Checkout extends Loggable {
     "#password" #> text(password, userPassword => password = userPassword.trim) &
     "#pet-name" #> text(petName, petName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    "#coupon-code" #> text(couponCode, couponCode = _) &
+    "#coupon-code" #> ajaxText(couponCode, possibleCode => validateCouponCode(possibleCode)) &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup)
   }
 }
