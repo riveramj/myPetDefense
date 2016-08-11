@@ -18,7 +18,7 @@ import com.mypetdefense.actor._
 import java.util.Date
 import java.time.MonthDay
 
-import me.frmr.stripe.{StripeExecutor, Customer}
+import me.frmr.stripe.{StripeExecutor, Discount, Customer, Coupon => StripeCoupon}
 
 import dispatch._, Defaults._
 
@@ -52,7 +52,7 @@ class Checkout extends Loggable {
 
   var stripeToken = ""
   var couponCode = ""
-  var coupon:Box[Coupon] = None
+  var coupon: Box[Coupon] = None
 
   def validateCouponCode(possileCouponCode: String) = {
     val possibleCoupon = Coupon.find(By(Coupon.couponCode, possileCouponCode.toLowerCase()))
@@ -71,10 +71,15 @@ class Checkout extends Loggable {
     val selectedPetSize =  petSize.is
     val selectedPetProduct = petProduct.is
 
+    val couponId: String = coupon.map(_.couponCode.get).openOr("")
+    val stripeCoupon = StripeCoupon.get(couponId)
+    println(stripeCoupon + " _____")
+    
     val stripeCustomer = Customer.create(
       email = Some(email),
       card = Some(stripeToken),
-      plan = Some("product")
+      plan = Some("product"),
+      coupon = Some("oneMonthFree")
     )
 
     for (customer <- stripeCustomer)
