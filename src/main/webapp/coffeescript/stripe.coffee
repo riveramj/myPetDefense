@@ -13,14 +13,13 @@ stripeCallback = (status, response) ->
 $(document).ready ->
   Stripe?.setPublishableKey? 'pk_test_JLczczIy7T5qGL8DOmwTc2O0'
 
-  $("body").on "click", '#checkout .checkout', (event) ->
+  $("body").on "click", '.checkout', (event) ->
 
     myPetDefenseSite.event("validate-stripe-form",
       stripeCallback: stripeCallback
     )
 
 $(document).on "validate-stripe-form", (event) ->
-
   Stripe.createToken
     number: $('#card-number').val(),
     cvc: $('#card-cvc').val(),
