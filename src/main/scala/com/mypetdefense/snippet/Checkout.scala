@@ -9,9 +9,9 @@ import net.liftweb._
   import util.ClearClearable
   import http._
   import mapper.{By, NullRef, Like}
-  import http.js.JsCmds.{Noop, RedirectTo}
 
 import com.mypetdefense.service.PetFlowChoices._
+import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.model._
 import com.mypetdefense.actor._
 
@@ -71,20 +71,44 @@ class Checkout extends Loggable {
     val selectedPetSize =  petSize.is
     val selectedPetProduct = petProduct.is
 
-    val couponId: String = coupon.map(_.couponCode.get).openOr("")
+    val validateFields = List(
+        checkEmail(email, "email-error"),
+        checkEmpty(petName, "pet-name-error"),
+        checkEmpty(firstName, "first-name-error"),
+        checkEmpty(lastName, "last-name-error"),
+        checkEmpty(password, "password-error"),
+        checkEmpty(phone, "phone-number-error"),
+        checkEmpty(street1, "street-1-error"),
+        checkEmpty(city, "city-error"),
+        checkEmpty(state, "state-error"),
+        checkEmpty(zip, "zip-error")
+      ).flatten
 
-  
-   val stripeCustomer = Customer.create(
-     email = Some(email),
-     card = Some(stripeToken),
-     plan = Some("Product"),
-     coupon = Some(couponId)
-   )
+    if(validateFields.isEmpty) {
+      val couponId: String = coupon.map(_.couponCode.get).openOr("")
 
-   for (customer <- stripeCustomer) 
-     newUserSetup(customer, selectedPetType, selectedPetSize, selectedPetProduct)
+      val stripeCustomer = Customer.create(
+        email = Some(email),
+        card = Some(stripeToken),
+        plan = Some("Product"),
+        coupon = Some(couponId)
+      )
 
-    RedirectTo(Success.menu.loc.calcDefaultHref)
+      for (customer <- stripeCustomer) {
+        newUserSetup(
+          customer, 
+          selectedPetType, 
+          selectedPetSize, 
+          selectedPetProduct
+        )
+      }
+
+      S.redirectTo(Success.menu.loc.calcDefaultHref)
+    } else {
+      for (error <- validateFields) {
+        S.error(error.id, error.message)
+      }
+    }
   }
 
   def newUserSetup(
