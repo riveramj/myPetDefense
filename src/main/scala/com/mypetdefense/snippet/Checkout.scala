@@ -48,7 +48,6 @@ class Checkout extends Loggable {
   var city = ""
   var state = ""
   var zip = ""
-  var phone = ""
 
   var stripeToken = ""
   var couponCode = ""
@@ -77,7 +76,6 @@ class Checkout extends Loggable {
         checkEmpty(firstName, "first-name-error"),
         checkEmpty(lastName, "last-name-error"),
         checkEmpty(password, "password-error"),
-        checkEmpty(phone, "phone-number-error"),
         checkEmpty(street1, "street-1-error"),
         checkEmpty(city, "city-error"),
         checkEmpty(state, "state-error"),
@@ -125,7 +123,7 @@ class Checkout extends Loggable {
       stripeId,
       email,
       password,
-      phone,
+      "",
       coupon.flatMap(_.referer.obj),
       UserType.Parent
     )
@@ -197,7 +195,6 @@ class Checkout extends Loggable {
     "#city" #> text(city, city = _) &
     "#state" #> text(state, state = _) &
     "#zip" #> text(zip, zip = _) &
-    "#phone" #> text(phone, phone = _) &
     "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#password" #> text(password, userPassword => password = userPassword.trim) &
     "#pet-name" #> text(petName, petName = _) &
