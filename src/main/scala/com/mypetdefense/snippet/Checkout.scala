@@ -78,7 +78,7 @@ class Checkout extends Loggable {
      email = Some(email),
      card = Some(stripeToken),
      plan = Some("Product"),
-     coupon = Some("oneMonthFree")
+     coupon = Some(couponId)
    )
 
    for (customer <- stripeCustomer) 
@@ -95,17 +95,6 @@ class Checkout extends Loggable {
   ) = {
     val stripeId = customer.map(_.id).openOr("")
 
-    val leads = Lead.findAll(
-      By(Lead.email, email),
-      NullRef(Lead.parent)
-    )
-    
-    println("===================")
-    println("leads:")
-    println(leads)
-
-    val referer = leads.headOption.flatMap(_.referer.obj)
-
     val user = User.createNewUser(
       firstName,
       lastName,
@@ -113,13 +102,9 @@ class Checkout extends Loggable {
       email,
       password,
       phone,
-      referer,
+      coupon.flatMap(_.referer.obj),
       UserType.Parent
     )
-
-    leads.map { lead => 
-      lead.parent(user).save
-    }
 
     println("===================")
     println("user:")
@@ -154,7 +139,6 @@ class Checkout extends Loggable {
           petProduct
         )
     })
-
 
     println("===================")
     println("pet:")

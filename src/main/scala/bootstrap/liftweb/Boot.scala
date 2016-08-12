@@ -44,7 +44,7 @@ class Boot {
       ShipmentLineItem,
       Subscription,
       Lead,
-      Retailor,
+      Agent,
       Coupon
     )
 

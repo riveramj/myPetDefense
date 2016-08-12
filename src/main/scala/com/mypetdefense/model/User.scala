@@ -26,7 +26,7 @@ class User extends LongKeyedMapper[User] with IdPK {
   object salt extends MappedString(this, 100)
   object phone extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
-  object referer extends MappedLongForeignKey(this, Retailor)
+  object referer extends MappedLongForeignKey(this, Agent)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -40,7 +40,7 @@ class User extends LongKeyedMapper[User] with IdPK {
     email: String,
     password: String,
     phone: String,
-    referer: Box[Retailor],
+    referer: Box[Agent],
     userType: UserType.Value
   ) = {
     val user = User.create
@@ -76,5 +76,5 @@ class User extends LongKeyedMapper[User] with IdPK {
 object User extends User with LongKeyedMetaMapper[User]
 
 object UserType extends Enumeration {
-  val Agent, Parent, Retailor, Admin = Value
+  val Agent, Parent, Admin = Value
 }

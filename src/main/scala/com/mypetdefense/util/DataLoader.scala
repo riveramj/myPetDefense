@@ -120,11 +120,11 @@ object DataLoader extends Loggable {
       )
     }
 
-    if (Retailor.findAll().isEmpty) {
+    if (Agent.findAll().isEmpty) {
       val possibleAgent = User.find(By(User.email, "rivera.mj+agent@gmail.com"))
 
       possibleAgent.map { agent =>
-        Retailor.createNewRetailor(
+        Agent.createNewAgent(
           "Big Pets",
           agent  
         )
@@ -132,15 +132,15 @@ object DataLoader extends Loggable {
     }
     
     if (Lead.findAll().isEmpty) {
-      val possibleRetailor = Retailor.find(By(Retailor.name, "Big Pets"))
+      val possibleAgent = Agent.find(By(Agent.name, "Big Pets"))
       
-      possibleRetailor.map { retailor =>
+      possibleAgent.map { agent =>
         Lead.createNewLead(
           "Jane",
           "Doe",
           "rivera.mj+lead@gmail.com",
           "(404) 409-0724",
-          retailor
+          agent
         )
       }
     }
@@ -164,7 +164,7 @@ object DataLoader extends Loggable {
       for {
         coupon <- coupons
       } yield {
-        Coupon.createCoupon(coupon.id.toLowerCase(), coupon.durationInMonths.getOrElse(0))
+        Coupon.createCoupon(coupon.id.toLowerCase(), coupon.durationInMonths.getOrElse(0), None)
       }
     }
 
