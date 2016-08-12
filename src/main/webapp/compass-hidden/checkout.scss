@@ -155,6 +155,32 @@ fieldset label {
   }
 }
 
+#promo-code, .apply-promo {
+  display: inline-block;
+}
+
+#promo-code {
+  @include span-columns(9);
+}
+
+.apply-promo {
+  @include span-columns(3);
+  @include omega;
+  text-align: center;
+
+  button {
+    padding: rem(7px) rem(10px);
+    font-size: rem(22px);
+    border: none;
+    background-color: #605F5F;
+    color: #ffffff;
+
+    border-radius: 5px;
+
+    cursor: pointer;
+  }
+}
+
 #order-details {
   @include shift(1);
 

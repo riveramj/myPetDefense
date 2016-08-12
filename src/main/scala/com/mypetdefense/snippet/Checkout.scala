@@ -53,15 +53,14 @@ class Checkout extends Loggable {
   var couponCode = ""
   var coupon: Box[Coupon] = None
 
-  def validateCouponCode(possileCouponCode: String) = {
-    val possibleCoupon = Coupon.find(By(Coupon.couponCode, possileCouponCode.toLowerCase()))
+  def validateCouponCode() = {
+    val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
 
     if (possibleCoupon.isEmpty) {
       S.error("coupon-error", "no match")
     } else {
-      couponCode = possileCouponCode
       coupon = possibleCoupon
-      S.error("coupon-error", "")
+      S.notice("coupon-error", "Valid Coupon")
     }
   }
 
@@ -199,7 +198,8 @@ class Checkout extends Loggable {
     "#password" #> text(password, userPassword => password = userPassword.trim) &
     "#pet-name" #> text(petName, petName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    "#coupon-code" #> ajaxText(couponCode, possibleCode => validateCouponCode(possibleCode)) &
+    "#promo-code" #> ajaxText(couponCode, couponCode = _) &
+    "#apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup)
   }
 }
