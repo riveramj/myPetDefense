@@ -195,7 +195,7 @@ class Checkout extends Loggable {
     "#state" #> text(state, state = _) &
     "#zip" #> text(zip, zip = _) &
     "#email" #> text(email, userEmail => email = userEmail.trim) &
-    "#password" #> text(password, userPassword => password = userPassword.trim) &
+    "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
     "#pet-name" #> text(petName, petName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
     "#promo-code" #> ajaxText(couponCode, couponCode = _) &
