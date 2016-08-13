@@ -22,7 +22,7 @@ object DogSize extends Loggable {
 class DogSize extends Loggable {
   import PetFlowChoices._
 
-  def chosenSize = "#chosen-size *" #> {
+  def chosenSize = ".chosen-size *" #> {
     petSize.is.map(_.toString)
   }
   

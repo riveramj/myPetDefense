@@ -25,7 +25,7 @@ object CatProduct extends Loggable {
 class CatProduct extends Loggable {
   import PetFlowChoices._
 
-  def chosenProduct = "#chosen-product *" #> {
+  def chosenProduct = ".chosen-product *" #> {
     petProduct.is.map(_.name.toString)
   }
 
