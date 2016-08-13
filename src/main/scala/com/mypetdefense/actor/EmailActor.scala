@@ -22,7 +22,7 @@ import net.liftweb.util.Mailer
 import Mailer._
 
 sealed trait EmailActorMessage
-case class SendWelcomeEmail(userEmail: String) extends EmailActorMessage
+case class SendWelcomeEmail(user: User) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(userEmail: String, amount: Double, nextPaymentAttempt: Option[DateTime]) extends EmailActorMessage
 case class SendInvoicePaymentSucceededEmail(user: Box[User]) extends EmailActorMessage
 
@@ -30,10 +30,18 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
   val welcomeEmailTemplate = 
     Templates("emails-hidden" :: "welcome-email" :: Nil) openOr NodeSeq.Empty
+  
+  val hostUrl = Paths.serverUrl
 
   addHandler {
-    case SendWelcomeEmail(userEmail) =>
-      sendEmail(welcomeEmailSubject, userEmail, welcomeEmailTemplate)
+    case SendWelcomeEmail(user) => 
+      val transform = {
+        "#logo [src]" #> (hostUrl + "/images/logo-name-white.png") &
+        "#first-name" #> user.firstName.get &
+        "#user-email" #> user.email.get
+      }
+
+      sendEmail(welcomeEmailSubject, user.email.get, transform(welcomeEmailTemplate))
   }
 }
 

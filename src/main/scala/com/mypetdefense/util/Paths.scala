@@ -4,6 +4,7 @@ import net.liftweb.common._
 import net.liftweb.http.RedirectResponse
 import net.liftweb.sitemap._
   import Loc._
+import net.liftweb.util.Props
 
 import com.mypetdefense.snippet._
 import com.mypetdefense.model._
@@ -65,6 +66,15 @@ object Paths {
       }
     }
   )
+
+  def serverUrl = {
+    val hostUrl = Props.get("server.url") openOr "http://localhost:8080/"
+
+    if (hostUrl.endsWith("/"))
+      hostUrl.dropRight(1)
+    else
+      hostUrl
+  }
 
   def siteMap = SiteMap(
     index,

@@ -15,3 +15,5 @@ mail.password=13ec9dab-4e70-4250-827e-2352c672c9c7
 [Stripe]
 secret.key=sk_test_REo8GgSa41Vj3gc9g2J5Ne03
 public.key=pk_test_tlQUPJdasEEdNTcUsbcsHmG7
+
+server.url=http://dev.mypetdefense.com/

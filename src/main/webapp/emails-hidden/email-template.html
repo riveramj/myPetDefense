@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- So that mobile will display zoomed in -->
   <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- enable media queries for windows phone 8 -->
   <meta name="format-detection" content="telephone=no"> <!-- disable auto telephone linking in iOS -->
-  <title>Welcome To My Pet Defense</title>
+  <title>Single Column</title>
   
   <style type="text/css">
 body {
@@ -88,38 +88,37 @@ img {
       <!-- 600px container (white background) -->
       <table border="0" width="600" cellpadding="0" cellspacing="0" class="container" style="width:600px;max-width:600px">
         <tr>
-          <td class="container-padding content" align="center" style="padding-top:25px;padding-bottom:40px;background-color:#ffffff">
-            <div class="title" style="font-family:Helvetica, Arial, sans-serif;font-size:30px;font-weight:600;color:#454343;">Welcome <span id="first-name">Mike</span></div>
-            <div class="title" style="font-family:Helvetica, Arial, sans-serif;font-size:20px;font-weight:400;color:#454343;">Thanks for signing up.</div>
-          </td>
-        </tr>
-        <tr>
-          <td class="container-padding content" align="left" style="padding-left:45px;padding-right:45px;padding-bottom:35px;background-color:#ffffff">
-            <div class="body-text" style="font-family:Helvetica, Arial, sans-serif;font-size:17px;line-height:20px;text-align:left;color:#4F4E4E">
-              We are putting together your first My Pet Defense shipment. We’ll be in touch in the next 24 hours with a tracking number for your order.
+          <td class="container-padding content" align="left" style="padding-left:24px;padding-right:24px;padding-top:12px;padding-bottom:12px;background-color:#ffffff">
+            <br>
+
+            <div class="title" style="font-family:Helvetica, Arial, sans-serif;font-size:18px;font-weight:600;color:#374550">Single Column Fluid Layout</div>
+            <br>
+
+            <div class="body-text" style="font-family:Helvetica, Arial, sans-serif;font-size:14px;line-height:20px;text-align:left;color:#333333">
+              This is an example of a single column fluid layout. There are no columns. Because the container table width is set to 100%, it automatically resizes itself to all devices. The magic of good old fashioned HTML.
               <br><br>
 
-              My Pet Defense is here to scratch flea and tick control off your list of worries. If you have any questions, please contact us at help@mypetdefense.com.
+              The media query change we make is to decrease the content margin from 24px to 12px for devices up to max width of 400px.
               <br><br>
-
-              Sincerely,
-              <br>
-              <span style="color:#626161;"><strong>The My Pet Defense Team</strong></span>
             </div>
 
           </td>
         </tr>
         <tr>
-          <td class="container-padding footer-text" align="center" style="font-family:Helvetica, Arial, sans-serif;font-size:12px;line-height:18px;color:#A3A2A2;">
+          <td class="container-padding footer-text" align="left" style="font-family:Helvetica, Arial, sans-serif;font-size:12px;line-height:16px;color:#aaaaaa;padding-left:24px;padding-right:24px">
             <br><br>
-            You are registered as <span id="user-email" style="color:#1D8883">useremail@gmail.com</span>
+            Sample Footer text: © 2015 Acme, Inc.
             <br><br>
 
-            <div class="ios-footer" style="font-size:12px;">
-              &copy; 2016 <a href="http://mypetdefense.com" style="color:#1D8883 !important;">MyPetDefense.com</a>
-              <br>
-              All Rights Reserved
-            </div>
+            You are receiving this email because you opted in on our website. Update your <a href="#" style="color:#aaaaaa">email preferences</a> or <a href="#" style="color:#aaaaaa">unsubscribe</a>.
+            <br><br>
+
+            <strong>Acme, Inc.</strong><br>
+            <span class="ios-footer">
+              123 Main St.<br>
+              Springfield, MA 12345<br>
+            </span>
+            <a href="http://www.acme-inc.com" style="color:#aaaaaa">www.acme-inc.com</a><br>
 
             <br><br>
 
@@ -127,6 +126,8 @@ img {
         </tr>
       </table>
 <!--/600px container -->
+
+
     </td>
   </tr>
 </table>
@@ -134,3 +135,4 @@ img {
 
 </body>
 </html>
+

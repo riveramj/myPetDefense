@@ -175,7 +175,7 @@ class Checkout extends Loggable {
     println("subscription:")
     println(subscription)
 
-    EmailActor ! SendWelcomeEmail(email)
+    EmailActor ! SendWelcomeEmail(user)
   }
 
   def render = {
