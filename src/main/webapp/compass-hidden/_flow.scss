@@ -198,14 +198,14 @@ li.complete {
 
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
-  border-bottom: 10px solid #f7f7f7;
+  border-bottom: 10px solid #ffffff;
   padding-top: em(12px);
   margin-bottom: em(-24px);
 
   @media (min-width: $bp-med) {
     border-left: 16px solid transparent;
     border-right: 16px solid transparent;
-    border-bottom: 16px solid #f7f7f7;
+    border-bottom: 16px solid #ffffff;
     margin-bottom: rem(-27px);
     margin-left: 0;
   }
