@@ -100,7 +100,6 @@ class Checkout extends Loggable {
         )
       }
 
-      println("ummmmm")
       S.redirectTo(Success.menu.loc.calcDefaultHref)
     } else {
       for (error <- validateFields) {
