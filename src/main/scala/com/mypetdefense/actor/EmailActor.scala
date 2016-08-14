@@ -30,15 +30,15 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
   val welcomeEmailTemplate = 
     Templates("emails-hidden" :: "welcome-email" :: Nil) openOr NodeSeq.Empty
+  val baseEmailTemplate = 
+    Templates("emails-hidden" :: "email-template" :: Nil) openOr NodeSeq.Empty
   
   val hostUrl = Paths.serverUrl
 
   addHandler {
     case SendWelcomeEmail(user) => 
       val transform = {
-        "#logo [src]" #> (hostUrl + "/images/logo-name-white.png") &
-        "#first-name" #> user.firstName.get &
-        "#user-email" #> user.email.get
+        "#first-name" #> user.firstName.get 
       }
 
       sendEmail(welcomeEmailSubject, user.email.get, transform(welcomeEmailTemplate))
@@ -90,8 +90,16 @@ trait EmailActor extends EmailHandlerChain
   def sendEmail(
     subject: String, 
     to: String, 
-    body: NodeSeq
+    message: NodeSeq
   ) {
+    val emailTransform = {
+      "#content *" #> message &
+      "#logo [src]" #> (hostUrl + "/images/logo-name-white.png") &
+      "#user-email" #> to
+    }
+    
+    val body = emailTransform(baseEmailTemplate)
+
     Mailer.sendMail(
       From(fromEmail),
       Subject(subject),
