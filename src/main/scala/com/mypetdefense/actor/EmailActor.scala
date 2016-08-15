@@ -89,6 +89,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
+      val products = Subscription.find(By(Subscription.user, user)).map(_.getProducts).openOr(Nil)
+
       val transform = {
         "#ship-date" #> dateFormatter.format(new Date()) &
         "#parent-name" #> user.firstName &
@@ -116,7 +118,13 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
         "#bill-address-2-content" #> billAddress.map(_.street2.get) &
         "#bill-city" #> billAddress.map(_.city.get) &
         "#bill-state" #> billAddress.map(_.state.get) &
-        "#bill-zip" #> billAddress.map(_.zip.get)
+        "#bill-zip" #> billAddress.map(_.zip.get) &
+        ".ordered-product" #> products.map { product =>
+          val amountDue = products.size * 9.99
+
+          ".product *" #> s"${product.name.get}, ${product.size.get.toString} pounds" &
+          ".amount-due *" #> s"$$${amountDue}"
+        }
       }
       
       sendEmail(subject, user.email.get, transform(invoicePaymentSucceededEmailTemplate))
