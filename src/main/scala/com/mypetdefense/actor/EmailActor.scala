@@ -11,12 +11,15 @@ import net.liftweb._
   import util.Helpers._
   import util._
   import http._
+  import mapper.{By}
 
 import dispatch._
 import org.joda.time._
 
 import com.mypetdefense.model._
 import com.mypetdefense.util._
+
+import java.util.Date
 
 import net.liftweb.util.Mailer
 import Mailer._
@@ -72,9 +75,51 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
 
   addHandler {
-    case SendInvoicePaymentSucceededEmail(user) =>
+    case SendInvoicePaymentSucceededEmail(Full(user)) =>
       val subject = "My Pet Defense Receipt"
-      sendEmail(subject, user.map(_.email.get).openOr(""), invoicePaymentSucceededEmailTemplate)
+      val shipAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
+        val possibleBillAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Billing))
+
+      val billAddress = {
+        if (possibleBillAddress.isEmpty)
+          shipAddress
+        else
+          possibleBillAddress
+      }
+
+      val dateFormatter = new SimpleDateFormat("MMM dd")
+
+      val transform = {
+        "#ship-date" #> dateFormatter.format(new Date()) &
+        "#parent-name" #> user.firstName &
+        ".name" #> user.name &
+        "#ship-address-1" #> shipAddress.map(_.street1.get) &
+        "#ship-address-2" #> { 
+          if (shipAddress.map(_.street2.get).getOrElse("") == "") {
+            ClearNodes
+          } else {
+            PassThru
+          }
+        } andThen
+        "#ship-address-2-content" #> shipAddress.map(_.street2.get) &
+        "#ship-city" #> shipAddress.map(_.city.get) &
+        "#ship-state" #> shipAddress.map(_.state.get) &
+        "#ship-zip" #> shipAddress.map(_.zip.get) &
+        "#bill-address-1" #> billAddress.map(_.street1.get) &
+        "#bill-address-2" #> {
+          if (billAddress.map(_.street2.get).getOrElse("") == "") {
+            ClearNodes
+          } else {
+            PassThru
+          }
+        } andThen
+        "#bill-address-2-content" #> billAddress.map(_.street2.get) &
+        "#bill-city" #> billAddress.map(_.city.get) &
+        "#bill-state" #> billAddress.map(_.state.get) &
+        "#bill-zip" #> billAddress.map(_.zip.get)
+      }
+      
+      sendEmail(subject, user.email.get, transform(invoicePaymentSucceededEmailTemplate))
   }
 }
 

@@ -8,7 +8,7 @@ import net.liftweb._
   import common._
   import util.ClearClearable
   import http._
-  import mapper.{By, NullRef, Like}
+  import mapper.{By, NullRef}
 
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
