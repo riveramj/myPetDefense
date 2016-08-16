@@ -18,7 +18,7 @@ stripeCallback = (status, response) ->
     $("#checkout").submit()
 
 $(document).ready ->
-  Stripe?.setPublishableKey? 'pk_test_JLczczIy7T5qGL8DOmwTc2O0'
+  Stripe?.setPublishableKey? 'pk_test_tlQUPJdasEEdNTcUsbcsHmG7'
 
   myPetDefenseSite.event("stripe-form-ready")
 
