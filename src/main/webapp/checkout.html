@@ -153,9 +153,8 @@
             <input size="20" id="card-number" type="text" data-stripe="number">
           </label>
           <label class="medium-field expiration-date">
-            <div><span class="field-label note">Expiration Date</span><span class="note note-detail">(MM/YYYY)</span></div>
-            <input type="text" size="2" id="card-month-expiry" placeholder="MM" data-stripe="exp-month">
-            <input type="text" size="4" id="card-year-expiry" placeholder="YYYY" data-stripe="exp-year">
+            <div><span class="field-label note">Expiration Date</span><span class="note note-detail">(MM/YY)</span></div>
+            <input type="text" id="card-expiry" placeholder="MM / YY">
           </label>
           <label class="tiny-field">
             <span class="field-label">CVC</span>
@@ -193,7 +192,7 @@
       </div>
 
       <div class="signup">
-        <button class="checkout select-choice">Place Order</button>
+        <button type="submit" class="checkout select-choice">Place Order</button>
         <div id="agreement">
         Clicking “Place Order” will charge your card for the first month. We’ll bill this card each month. You can cancel at any time by emailing us at <a href="mailto:support@mpd.com">support@mypetdefense.com</a>
         </div>
@@ -201,9 +200,10 @@
     </div>
   </form>
 
-    <tail>
+  <tail>
     <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
     <script type="text/javascript" src="/static/js/stripe.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.payment.js"></script>
   </tail>
   <head_merge>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
