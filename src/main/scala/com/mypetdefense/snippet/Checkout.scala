@@ -9,6 +9,8 @@ import net.liftweb._
   import util.ClearClearable
   import http._
   import mapper.{By, NullRef}
+  import js._
+      import JsCmds._
 
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
@@ -57,7 +59,7 @@ class Checkout extends Loggable {
     val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
 
     if (possibleCoupon.isEmpty) {
-      S.error("coupon-error", "no match")
+      ValidationError("promo-code", "Did not find that code. Please try again.")
     } else {
       coupon = possibleCoupon
       S.notice("coupon-error", "Valid Coupon")
@@ -70,15 +72,15 @@ class Checkout extends Loggable {
     val selectedPetProduct = petProduct.is
 
     val validateFields = List(
-        checkEmail(email, "email-error"),
-        checkEmpty(petName, "pet-name-error"),
-        checkEmpty(firstName, "first-name-error"),
-        checkEmpty(lastName, "last-name-error"),
-        checkEmpty(password, "password-error"),
-        checkEmpty(street1, "street-1-error"),
-        checkEmpty(city, "city-error"),
-        checkEmpty(state, "state-error"),
-        checkEmpty(zip, "zip-error")
+        checkEmail(email, "#email"),
+        checkEmpty(petName, "#pet-name"),
+        checkEmpty(firstName, "#first-name"),
+        checkEmpty(lastName, "#last-name"),
+        checkEmpty(password, "#password"),
+        checkEmpty(street1, "#street-1"),
+        checkEmpty(city, "#city"),
+        checkEmpty(state, "#state"),
+        checkEmpty(zip, "#zip")
       ).flatten
 
     if(validateFields.isEmpty) {
@@ -102,9 +104,7 @@ class Checkout extends Loggable {
 
       S.redirectTo(Success.menu.loc.calcDefaultHref)
     } else {
-      for (error <- validateFields) {
-        S.error(error.id, error.message)
-      }
+      validateFields.foldLeft(Noop)(_ & _)
     }
   }
 

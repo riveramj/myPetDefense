@@ -43,16 +43,15 @@ legend {
 }
 
 .field-label {
-  color: #818080;
+  color: #4F4E4E;
   font-weight: $semibold;
-  font-size: em(12);
-  display: block;
+  font-size: rem(14px);
+  display: inline-block;
   padding-bottom: rem(2px);
 
   @media (min-width: $bp-med) {
     padding-bottom: rem(3px);
   }
-
 }
 
 fieldset {
@@ -93,6 +92,13 @@ fieldset label {
   &.first-name, &.state {
     padding-right: em(13px);
   }
+}
+
+#city, #first-name, #last-name, #street-1, #street-2, #pet-name {
+  text-transform: capitalize;
+}
+#state {
+  text-transform: uppercase;
 }
 
 .medium-field {
@@ -288,4 +294,15 @@ fieldset label {
   @media (min-width: $bp-med) {
     margin-bottom: rem(113px);
   }
+}
+
+.validation-error {
+  display: inline-block;
+  padding-left: 7px;
+  color: #E52323;
+  font-size: rem(12px);
+}
+
+.error {
+  border: 1px solid #FF9295;
 }

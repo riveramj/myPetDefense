@@ -7,6 +7,7 @@ import net.liftweb._
   import mapper.By
 
 import com.mypetdefense.model._
+import com.mypetdefense.snippet._
 
 object ValidationService extends Loggable {
  val emailRegex = """^([^@]+)@([^@]+\.([^@].?)+)$""".r
@@ -19,7 +20,7 @@ object ValidationService extends Loggable {
     if (fieldValue.nonEmpty) {
       Empty
     } else {
-      Full(ValidationError(fieldId, S ? "Field Required"))
+      Full(ValidationError(fieldId, "Required"))
     }
   }
 
@@ -61,4 +62,4 @@ object ValidationService extends Loggable {
   }
 }
 
-case class ValidationError(id: String, message: String)
+case class ValidationError(fieldSelector: String, error: String) extends MyPetDefenseEvent("form-validation-error")
