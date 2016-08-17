@@ -12,8 +12,10 @@ import net.liftweb._
   import js._
       import JsCmds._
 
-import com.mypetdefense.service.PetFlowChoices._
-import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.service._
+  import ValidationService._
+  import PetFlowChoices._
+
 import com.mypetdefense.model._
 import com.mypetdefense.actor._
 
@@ -62,7 +64,7 @@ class Checkout extends Loggable {
       ValidationError("promo-code", "Did not find that code. Please try again.")
     } else {
       coupon = possibleCoupon
-      S.notice("coupon-error", "Valid Coupon")
+      Noop
     }
   }
 
