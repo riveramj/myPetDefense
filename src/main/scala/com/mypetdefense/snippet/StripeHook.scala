@@ -12,6 +12,7 @@ import net.liftweb._
     import Extraction._
 
 import com.mypetdefense.model._
+import com.mypetdefense.service.TaxJarService
 import com.mypetdefense.actor._
 
 import me.frmr.stripe
@@ -28,9 +29,27 @@ trait StripeHook extends RestHelper with Loggable {
   def invoicePaymentSucceeded(objectJson: JValue) = {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
+      subtotal <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
+      taxPaid <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
+      date <- tryo((objectJson \ "date").extract[String]) ?~! "No date found"
       user <- User.find(By(User.stripeId, stripeCustomerId))
+      shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
+      val city = shippingAddress.city.get
+      val state = shippingAddress.state.get
+      val zip = shippingAddress.zip.get
+      
+      TaxJarService.createTaxOrder(
+        invoicePaymentId, 
+        city, 
+        state, 
+        zip, 
+        subtotal, 
+        taxPaid, 
+        date
+      )
+
       val shipment = Shipment.createShipment(user, invoicePaymentId)
       
       println("===================")

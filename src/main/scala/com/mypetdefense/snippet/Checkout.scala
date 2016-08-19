@@ -75,7 +75,7 @@ class Checkout extends Loggable {
     zip = possibleZip
 
     if ((zip.length() > 4) && (state.toLowerCase() == "ga")) {
-      taxDue = TaxJarService.findTaxAmout(state, zip, "9.99")
+      taxDue = TaxJarService.findTaxAmout(city, state, zip, 9.99)
       println(taxDue + " is due")
     } else {
       taxDue = 0D
@@ -229,7 +229,7 @@ class Checkout extends Loggable {
     "#last-name" #> text(lastName, lastName = _) &
     "#street-1" #> text(street1, street1 = _) &
     "#street-2" #> text(street2, street2 = _) &
-    "#city" #> text(city, city = _) &
+    "#city" #> ajaxText(city, city = _) &
     "#state" #> ajaxText(state, state = _) &
     "#zip" #> ajaxText(zip, possibleZip => calculateTax(possibleZip)) &
     "#email" #> text(email, userEmail => email = userEmail.trim) &

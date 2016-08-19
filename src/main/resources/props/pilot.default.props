@@ -17,3 +17,6 @@ secret.key=sk_test_REo8GgSa41Vj3gc9g2J5Ne03
 public.key=pk_test_tlQUPJdasEEdNTcUsbcsHmG7
 
 server.url=http://dev.mypetdefense.com/
+
+[TaxJar]
+api.key=41169ab583e69469e0612dee1586ce79

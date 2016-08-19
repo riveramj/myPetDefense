@@ -12,3 +12,6 @@ secret.key=sk_test_vvw6ZOLkVyQWYNEwVocSs27V
 public.key=pk_test_JLczczIy7T5qGL8DOmwTc2O0
 
 server.url=http://localhost:8080/
+
+[TaxJar]
+taxjar.api.key=41169ab583e69469e0612dee1586ce79
