@@ -214,7 +214,7 @@ class Checkout extends Loggable {
         } &
         {
           if(coupon.isEmpty) {
-            "#order-total .monthly-charge .amount *" #> "$18.98"
+            "#order-total .monthly-charge .amount *" #> "$9.99"
           } else {
             "#order-total .monthly-charge *" #> s"${coupon.map(_.freeMonths).openOr(0)} free!"
           }
