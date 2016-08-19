@@ -16,6 +16,7 @@ import com.mypetdefense.service._
   import ValidationService._
   import PetFlowChoices._
 
+import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.model._
 import com.mypetdefense.actor._
 
@@ -52,6 +53,8 @@ class Checkout extends Loggable {
   var city = ""
   var state = ""
   var zip = ""
+  var taxDue = 0D
+  var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
 
   var stripeToken = ""
   var couponCode = ""
@@ -64,8 +67,21 @@ class Checkout extends Loggable {
       ValidationError("promo-code", "Did not find that code. Please try again.")
     } else {
       coupon = possibleCoupon
-      Noop
+      priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
     }
+  }
+
+  def calculateTax(possibleZip: String) = {
+    zip = possibleZip
+
+    if ((zip.length() > 4) && (state.toLowerCase() == "ga")) {
+      taxDue = TaxJarService.findTaxAmout(state, zip, "9.99")
+      println(taxDue + " is due")
+    } else {
+      taxDue = 0D
+    }
+
+    priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def signup() = {
@@ -187,15 +203,35 @@ class Checkout extends Loggable {
       "#product span *" #> petProduct.is.map(_.name.get)
     }
 
+    val orderTotal = {
+      "#order" #> SHtml.idMemoize { renderer =>
+        priceAdditionsRenderer = Full(renderer)
+
+        "#price-additions" #> {
+          "#tax" #> ClearNodesIf(taxDue == 0D) &
+          "#promo-discount" #> ClearNodesIf(coupon.isEmpty) &
+          "#tax #tax-amount" #> f"$taxDue%2.2f"
+        } &
+        {
+          if(coupon.isEmpty) {
+            "#order-total .monthly-charge .amount *" #> "$18.98"
+          } else {
+            "#order-total .monthly-charge *" #> s"${coupon.map(_.freeMonths).openOr(0)} free!"
+          }
+        }
+      }
+    }
+
     SHtml.makeFormsAjax andThen
     orderSummary &
+    orderTotal &
     "#first-name" #> text(firstName, firstName = _) &
     "#last-name" #> text(lastName, lastName = _) &
     "#street-1" #> text(street1, street1 = _) &
     "#street-2" #> text(street2, street2 = _) &
     "#city" #> text(city, city = _) &
-    "#state" #> text(state, state = _) &
-    "#zip" #> text(zip, zip = _) &
+    "#state" #> ajaxText(state, state = _) &
+    "#zip" #> ajaxText(zip, possibleZip => calculateTax(possibleZip)) &
     "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
     "#pet-name" #> text(petName, petName = _) &

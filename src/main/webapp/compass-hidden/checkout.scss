@@ -237,7 +237,7 @@ fieldset label {
     }
   }
 
-  #monthly-charge {
+  .monthly-charge {
     color: #454343;
     font-size: rem(12px);
     letter-spacing: 0.4px;
@@ -250,7 +250,7 @@ fieldset label {
     }
   }
 
-  #amount {
+  .amount {
     color: #605F5F;
     font-size: rem(27px);
     font-weight: $semibold;

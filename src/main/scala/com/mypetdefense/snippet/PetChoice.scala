@@ -5,7 +5,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.http._
 
-import com.mypetdefense.service.PetFlowChoices
+import com.mypetdefense.service._
 import com.mypetdefense.model.AnimalType
 
 object PetChoice extends Loggable {
