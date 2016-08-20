@@ -49,6 +49,7 @@ class Checkout extends Loggable {
   var petName = ""
   
   var firstName = ""
+  var cardholderName = ""
   var lastName = ""
   var street1 = ""
   var street2 = ""
@@ -83,7 +84,8 @@ class Checkout extends Loggable {
     }
   }
 
-  def calculateTax(possibleZip: String) = {
+  def calculateTax(possibleState: String, possibleZip: String) = {
+    state = possibleState
     zip = possibleZip
 
     if ((zip.length() > 4) && (state.toLowerCase() == "ga")) {
@@ -116,6 +118,7 @@ class Checkout extends Loggable {
         checkEmail(email, "#email"),
         checkEmpty(petName, "#pet-name"),
         checkEmpty(firstName, "#first-name"),
+        checkEmpty(cardholderName, "#cardholder-name"),
         checkEmpty(lastName, "#last-name"),
         checkEmpty(password, "#password"),
         checkEmpty(street1, "#street-1"),
@@ -145,7 +148,6 @@ class Checkout extends Loggable {
           )
         }
       }
-
 
       for (customer <- stripeCustomer) {
         println(customer + " --------") 
@@ -244,17 +246,31 @@ class Checkout extends Loggable {
       "#order" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
 
+        val total = 9.99 + taxDue
+
+        "#price-additions" #> ClearNodesIf((taxDue == 0D) && (coupon.isEmpty)) &
         "#price-additions" #> {
           "#tax" #> ClearNodesIf(taxDue == 0D) &
           "#promo-discount" #> ClearNodesIf(coupon.isEmpty) &
+          "#promo-discount-note" #> ClearNodesIf(coupon.isEmpty) &
           "#tax #tax-amount" #> f"$taxDue%2.2f"
         } &
         {
           if(coupon.isEmpty) {
-            val total = 9.99 + taxDue
+            "#order-total h3 [class!]" #> "promo" &
+            "#order-total .monthly-charge [class!]" #> "promo" &
             "#order-total .monthly-charge .amount *" #> f"$$$total%2.2f"
           } else {
-            "#order-total .monthly-charge *" #> s"${coupon.map(_.freeMonths).openOr(0)} free!"
+            "#order-total h3 [class+]" #> "promo" &
+            "#order-total .monthly-charge [class+]" #> "promo" &
+            "#order-total .monthly-charge *" #> {
+              val freeMonths = coupon.map(_.freeMonths).openOr(0)
+              if (freeMonth > 1) {
+                s"FREE for first ${freeMonths} months"
+              } else {
+                s"FREE for first ${freeMonths} months"
+              }
+            }
           }
         }
       }
@@ -268,11 +284,12 @@ class Checkout extends Loggable {
     "#street-1" #> text(street1, street1 = _) &
     "#street-2" #> text(street2, street2 = _) &
     "#city" #> ajaxText(city, city = _) &
-    "#state" #> ajaxText(state, state = _) &
-    "#zip" #> ajaxText(zip, possibleZip => calculateTax(possibleZip)) &
+    "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
+    "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
     "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
     "#pet-name" #> text(petName, petName = _) &
+    "#cardholder-name" #> text(cardholderName, cardholderName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
     "#promo-code" #> ajaxText(couponCode, couponCode = _) &
     "#apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &

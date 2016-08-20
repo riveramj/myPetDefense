@@ -124,7 +124,7 @@
           <input id="state" type="text" maxlength="2">
         </label>
         <label class="short-field zip">
-          <span class="field-label">Zip Code</span>
+          <span class="field-label">Zip</span>
           <input id="zip" type="tel" maxlength="5">
         </label>
        </div>
@@ -135,7 +135,7 @@
         <legend>Billing Info</legend>
         <div>
           <label>
-            <div><span class="field-label">Cardholder Name</span></div>
+            <div><span class="field-label" id="cardholder-name">Cardholder Name</span></div>
             <input type="text" id="name">
           </label>
           <label class="short-field card-number">
@@ -160,7 +160,7 @@
             <div>
               <span class="field-label">Promotion Code</span>
               <span id="promo-error" class="hidden">Invalid code. Please try another code.</span>
-              <i class="fa fa-check"></i>
+              <span id="promo-success" class="hidden"><i class="fa fa-check"></i> Promotion applied.</span>
             </div>
             <div class="apply-promo">
               <input size="20" id="promo-code" type="text">
@@ -172,26 +172,28 @@
       </fieldset>
 
       <div id="order-summary">
-        <h2>Order Summary</h2>
+        <div id="summary">
+          <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+          <h2>Order Summary</h2>
+        </div>
         <ul id="order-details">
+          <li id="selected-note">Your selected items:</li>
           <li id="type">Pet <span>Dog</span></li>
           <li id="size">Size <span>11-20</span></li>
           <li id="product">Product <span>Adventure Plus for Dogs</span></li>
         </ul>
         <div id="order">
-          <div id="price-additions" class="empty">
+          <div id="price-additions">
+            <div class="monthly-charge">
+              <span class="amount">$9.99</span> / A Month
+            </div>
             <div id="tax">
               + GA Tax $<span id="tax-amount">0.99</span>
             </div>
-            <div id="promo-discount">
-              <div class="monthly-charge">
-                <span class="amount">$9.99</span> / A Month
-                <div>+ Promotion Discount</div>
-              </div>
-            </div>
+            <div id="promo-discount-note">+ Promotion Discount</div>
           </div>
           <div id="order-total">
-            <h3>Total Charge</h3>
+            <h3>Order Total</h3>
             <div class="monthly-charge">
               <span class="amount">$1.11</span> / A Month
             </div>
@@ -202,7 +204,7 @@
       <div class="signup">
         <button type="submit" class="checkout select-choice">Place Order</button>
         <div id="agreement">
-          Clicking “Place Order” will charge your card $9.99 for the first month. We’ll bill this card each month.
+          Clicking "Place Order" will charge your card each above for the above amount after discounts are applied.
         </div>
       </div>
     </div>
