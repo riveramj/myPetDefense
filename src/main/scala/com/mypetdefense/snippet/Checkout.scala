@@ -98,9 +98,6 @@ class Checkout extends Loggable {
 
       taxDue = taxInfo._1
       taxRate = taxInfo._2
-
-      println(taxRate + " is rate")
-      println(taxDue + " is due")
     } else {
       taxDue = 0D
       taxRate = 0D
@@ -265,7 +262,7 @@ class Checkout extends Loggable {
             "#order-total .monthly-charge [class+]" #> "promo" &
             "#order-total .monthly-charge *" #> {
               val freeMonths = coupon.map(_.freeMonths).openOr(0)
-              if (freeMonth > 1) {
+              if (freeMonths > 1) {
                 s"FREE for first ${freeMonths} months"
               } else {
                 s"FREE for first ${freeMonths} months"
