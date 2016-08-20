@@ -24,6 +24,12 @@ $(document).on 'form-validation-error', (event) ->
   $target.addClass "error"
   $targetContainer.append $("<div />").addClass("validation-error").text(event.error)
 
+$(document).on 'promotion-code-message', (event) ->
+  if event.status == "success"
+    $('.promotion-info').removeClass("promo-error").addClass("promo-success")
+  else
+    $('.promotion-info').removeClass("promo-success").addClass("promo-error")
+
 $(document).on 'stripe-form-ready', (event) ->
   $('#card-number').payment('formatCardNumber')
   $('#card-expiry').payment('formatCardExpiry')

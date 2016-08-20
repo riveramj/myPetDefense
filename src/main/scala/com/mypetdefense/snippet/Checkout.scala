@@ -38,6 +38,8 @@ object Checkout extends Loggable {
     sizeChosen
 }
 
+case class PromoCodeMessage(status: String) extends MyPetDefenseEvent("promotion-code-message")
+
 class Checkout extends Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
@@ -65,10 +67,19 @@ class Checkout extends Loggable {
     val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
 
     if (possibleCoupon.isEmpty) {
-      ValidationError("promo-code", "Did not find that code. Please try again.")
+      coupon = None
+      
+      (
+        PromoCodeMessage("error") &
+        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+      )
     } else {
       coupon = possibleCoupon
-      priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+
+      (
+        PromoCodeMessage("success") &
+        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+      )
     }
   }
 
