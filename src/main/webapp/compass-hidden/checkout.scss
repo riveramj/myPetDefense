@@ -5,7 +5,7 @@
 #left-column {
   @media (min-width: $bp-med) {
     @include span-columns(6);
-    @include pad(0 rem(82px) 0 0);
+    /*@include pad(0 rem(84px) 0 0);*/
   }
 }
 
@@ -26,7 +26,6 @@
   padding-bottom: rem(25px);
 
   @media (min-width: $bp-med) {
-    max-width: 100%;
     padding-bottom: rem(33px);
   }
 }
@@ -87,34 +86,47 @@ fieldset label {
 }
 
 .short-field {
-  width: 49%;
-  
-  &.first-name, &.state {
-    padding-right: em(13px);
+  @media (min-width: $bp-med) {
+    padding-bottom: 0;
+
+    &.city {
+      padding-right: em(15px);
+      width: 52%;
+    }
+
+    &.state {
+      padding-right: em(14px);
+      width: 20%;
+    }
+
+    &.zip {
+      width: 25%;
+    }
+
+    &.card-number {
+      width: 55%;
+    }
+
+    &.expiration-date {
+      width: 25%;
+    }
+
+    &.cvc {
+      width: 17%;
+    }
   }
 }
 
 #city, #first-name, #last-name, #street-1, #street-2, #pet-name {
   text-transform: capitalize;
 }
+
+#street-2 {
+  margin-top: rem(5px);
+}
+
 #state {
   text-transform: uppercase;
-}
-
-.medium-field {
-  width: 69%;
-  &.expiration-date {
-    padding-right: em(13px);
-  }
-
-  input {
-    width: 49%;
-    display: inline-block;
-  }
-}
-
-.tiny-field {
-  width: 29%
 }
 
 .note-detail {

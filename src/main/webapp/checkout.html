@@ -78,7 +78,7 @@
   <form class="current-step" data-lift="Checkout.render">
     <h1 class="step-header">Checkout</h1>
     <h2 class="step-question">
-      Almost there. Please take a moment to fill out your shipping and billing info.
+      Please take a moment to fill out the following information.
     </h2>
     <input type="hidden" id="stripe-token">
     <div id="left-column">
@@ -102,23 +102,20 @@
      <fieldset class="shipping-info">
        <legend>Shipping Info</legend>
        <div>
-         <label class="short-field first-name">
+         <label>
            <span class="field-label">First name</span>
            <input id="first-name" type="text">            
          </label>
-         <label class="short-field">
+         <label>
            <span class="field-label">Last name</span>
            <input id="last-name" type="text">
          </label>
          <label>
            <span class="field-label">Street Address</span>
            <input id="street-1" type="text">
+           <input id="street-2" type="text">
          </label>
-         <label>
-           <span class="field-label">Unit/Apt</span>
-          <input id="street-2" type="text">
-        </label>
-        <label>
+        <label class="short-field city">
           <span class="field-label">City</span>
           <input id="city" type="text">
         </label>
@@ -126,7 +123,7 @@
           <span class="field-label">State</span>
           <input id="state" type="text" maxlength="2">
         </label>
-        <label class="short-field">
+        <label class="short-field zip">
           <span class="field-label">Zip Code</span>
           <input id="zip" type="tel" maxlength="5">
         </label>
@@ -138,14 +135,18 @@
         <legend>Billing Info</legend>
         <div>
           <label>
+            <div><span class="field-label">Cardholder Name</span></div>
+            <input type="text" id="name">
+          </label>
+          <label class="short-field card-number">
             <div><span class="field-label">Card Number</span></div>
             <input id="card-number" type="tel" data-stripe="number" autocomplete="cc-number" placeholder="•••• •••• •••• ••••">
           </label>
-          <label class="medium-field expiration-date">
-            <div><span class="field-label">Expiration Date</span></div>
+          <label class="short-field expiration-date">
+            <div><span class="field-label">Expires</span></div>
             <input type="tel" id="card-expiry" placeholder="MM / YY" autocomplete="cc-exp">
           </label>
-          <label class="tiny-field">
+          <label class="short-field cvc">
             <span class="field-label">CVC</span>
             <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc" autocomplete="off">            
           </label>
