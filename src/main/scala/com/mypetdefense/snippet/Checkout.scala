@@ -53,6 +53,7 @@ class Checkout extends Loggable {
   var city = ""
   var state = ""
   var zip = ""
+  var taxRate = 0D
   var taxDue = 0D
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
 
@@ -75,10 +76,21 @@ class Checkout extends Loggable {
     zip = possibleZip
 
     if ((zip.length() > 4) && (state.toLowerCase() == "ga")) {
-      taxDue = TaxJarService.findTaxAmout(city, state, zip, 9.99)
+      val taxInfo = TaxJarService.findTaxAmoutAndRate(
+        city,
+        state,
+        zip,
+        9.99
+      )
+
+      taxDue = taxInfo._1
+      taxRate = taxInfo._2
+
+      println(taxRate + " is rate")
       println(taxDue + " is due")
     } else {
       taxDue = 0D
+      taxRate = 0D
     }
 
     priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
@@ -102,16 +114,30 @@ class Checkout extends Loggable {
       ).flatten
 
     if(validateFields.isEmpty) {
-      val couponId: String = coupon.map(_.couponCode.get).openOr("")
+      val couponId = coupon.map(_.couponCode.get)
 
-      val stripeCustomer = Customer.create(
-        email = Some(email),
-        card = Some(stripeToken),
-        plan = Some("Product"),
-        coupon = Some(couponId)
-      )
+      val stripeCustomer = {
+        if (couponId.isEmpty) {
+          Customer.create(
+            email = Some(email),
+            card = Some(stripeToken),
+            plan = Some("Product"),
+            taxPercent = Some(taxRate)
+          )
+        } else {
+          Customer.create(
+            email = Some(email),
+            card = Some(stripeToken),
+            plan = Some("Product"),
+            taxPercent = Some(taxDue),
+            coupon = couponId
+          )
+        }
+      }
+
 
       for (customer <- stripeCustomer) {
+        println(customer + " --------") 
         newUserSetup(
           customer, 
           selectedPetType, 

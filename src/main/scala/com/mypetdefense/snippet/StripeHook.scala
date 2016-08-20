@@ -31,7 +31,6 @@ trait StripeHook extends RestHelper with Loggable {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
       subtotal <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
       taxPaid <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
-      date <- tryo((objectJson \ "date").extract[String]) ?~! "No date found"
       user <- User.find(By(User.stripeId, stripeCustomerId))
       shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
@@ -40,14 +39,13 @@ trait StripeHook extends RestHelper with Loggable {
       val state = shippingAddress.state.get
       val zip = shippingAddress.zip.get
       
-      TaxJarService.createTaxOrder(
-        invoicePaymentId, 
-        city, 
-        state, 
-        zip, 
-        subtotal, 
-        taxPaid, 
-        date
+      TaxJarService.processTaxesCharged(
+        invoicePaymentId,
+        city,
+        state,
+        zip,
+        subtotal,
+        taxPaid
       )
 
       val shipment = Shipment.createShipment(user, invoicePaymentId)

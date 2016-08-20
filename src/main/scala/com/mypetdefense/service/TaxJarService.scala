@@ -11,13 +11,15 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
+import java.util.Date
+
 object TaxJarService extends Loggable {
   val calculateTaxUrl = url("https://api.taxjar.com/v2/taxes")
   val createOrderTaxUrl = url("https://api.taxjar.com/v2/transactions/orders")
 
   val authKey = Props.get("taxjar.api.key") openOr ""
   
-  def findTaxAmout(city: String, state: String, zip: String, amount: Double): Double = {
+  def findTaxAmoutAndRate(city: String, state: String, zip: String, amount: Double): (Double, Double) = {
     val taxResponse = Http(calculateTaxUrl.secure << Map(
       "to_country" -> "US",
       "to_zip" -> zip,
@@ -38,10 +40,29 @@ object TaxJarService extends Loggable {
 
     (for {
       JField("amount_to_collect", JDouble(taxDue)) <- parsedTax
+      JField("rate", JDouble(taxRate)) <- parsedTax
       amount <- tryo(taxDue.toDouble).toList
+      rate <- tryo(taxRate.toDouble).toList
     } yield {
-      amount
-    }).headOption.getOrElse(0D)
+      (amount, rate * 100)
+    }).headOption.getOrElse((0D, 0D))
+  }
+
+  def processTaxesCharged(orderIdentifier: String, city: String, state: String, zip: String, amount: String, rawTax: String) = {
+    if (rawTax != "0") {
+      val subtotal = tryo(amount.toDouble/100.0).openOr(0D)
+      val tax = tryo(rawTax.toDouble/100.0).openOr(0D)
+
+      createTaxOrder(
+        orderIdentifier,
+        city,
+        state,
+        zip,
+        subtotal.toString(),
+        tax.toString(),
+        new Date().toString
+      )
+    }
   }
 
   def createTaxOrder(orderIdentifier: String, city: String, state: String, zip: String, amount: String, tax: String, date: String) = {
@@ -66,7 +87,6 @@ object TaxJarService extends Loggable {
     val rawOrder = Await.result(orderResponse, 3 seconds)
 
     println(rawOrder)
-
     rawOrder
   }
 }
