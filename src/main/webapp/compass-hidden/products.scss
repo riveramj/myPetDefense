@@ -318,13 +318,13 @@ button.missing-product.desktop div {
 
 #missing-product-overlay {
   @include span-columns(12);
+  margin-right: 0;
   
   background: rgb(69, 67, 67);
   background: rgba(69, 67, 67, .9);
 
   @media (min-width: $bp-med) {
     @include span-columns(6);
-    margin-right: 0;
     background: rgba(80, 78, 78, 1);
     background: rgb(80, 78, 78);
   }
