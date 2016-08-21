@@ -12,4 +12,5 @@ object PetFlowChoices extends Loggable {
   object petChoice extends SessionVar[Box[AnimalType.Value]](Empty)
   object petSize extends SessionVar[Box[AnimalSize.Value]](Empty)
   object petProduct extends SessionVar[Box[Product]](Empty)
+  object total extends SessionVar[Box[Double]](Empty)
 }

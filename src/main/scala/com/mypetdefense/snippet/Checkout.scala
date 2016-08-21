@@ -23,6 +23,11 @@ import com.mypetdefense.actor._
 import java.util.Date
 import java.time.MonthDay
 
+import scala.util.{Failure => TryFail, Success => TrySuccess, _}
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
 import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon}
 
 import dispatch._, Defaults._
@@ -146,17 +151,26 @@ class Checkout extends Loggable {
         }
       }
 
-      for (customer <- stripeCustomer) {
-        println(customer + " --------") 
-        newUserSetup(
-          customer, 
-          selectedPetType, 
-          selectedPetSize, 
-          selectedPetProduct
-        )
-      }
+      Try(Await.result(stripeCustomer, new DurationInt(3).seconds)) match {
+        case TrySuccess(customer) =>
+          println(customer + " --------") 
 
-      S.redirectTo(Success.menu.loc.calcDefaultHref)
+          newUserSetup(
+            customer, 
+            selectedPetType, 
+            selectedPetSize, 
+            selectedPetProduct
+          )
+
+          val total = 9.99 + taxDue
+          PetFlowChoices.total(Full(total))
+
+          S.redirectTo(Success.menu.loc.calcDefaultHref)
+
+        case TryFail(throwable: Throwable) =>
+          logger.error("create customer failed with" + throwable)
+          Alert("An error has occurued. Please try again.")
+      }
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }

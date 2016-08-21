@@ -1,4 +1,46 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-progress-bar">
+    <ul>
+      <li class="complete">
+        <i class="fa fa-check"></i>
+        <dl class="step-container">
+          <dt class="step-name">1. Pet</dt>
+          <dd class="step-choice" class="chosen-pet" data-lift="PetChoice.chosenPet">Cat</dd>
+        </dl>
+      </li>
+      <li class="complete" data-lift="NavBar.size">
+        <i class="fa fa-check"></i>
+        <dl class="step-container">
+          <dt class="step-name">2. Size</dt>
+          <dd class="step-choice">
+          <span class="chosen-size">5-9</span> pounds
+          </dd>
+        </dl>
+      </li>
+      <li class="complete" data-lift="NavBar.product">
+        <i class="fa fa-check"></i>
+        <dl class="step-container">
+          <dt class="step-name">3. Product</dt>
+          <dd class="step-choice">
+          <span class="chosen-product">
+            zoguard plus for cats
+          </span>
+          </dd>
+        </dl>
+      </li>
+      <li class="complete">
+        <i class="fa fa-check"></i>
+        <dl class="step-container">
+            <dt class="step-name">4. Account</dt>
+            <dd class="step-choice">
+              <span class="chosen-product">
+                Complete
+              </span>
+            </dd>
+          </dl>
+      </li>
+    </ul>
+  </div>
   <div class="flow-step">
     <div class="step-info">
       <div class="step-name">1. Pet</div>
@@ -28,27 +70,28 @@
     </div>
   </div>
   <div class="current-step" data-lift="Success.render">
-    <h1 class="step-header">Success!</h1>
+    <h1 class="step-header">Your order is placed!</h1>
     <h2 class="step-question">
-      We’ve received your order. We‘ll send you an e-mail soon with your order details and a tracking number.
-      <br><br>
-      In the meantime, enjoy this GIF of the happiest dog on Earth: 
+      We'll send you an email soon with your order details. In the meantime, enjoy this GIF of the happiest dog on Earth.
     </h2>
 
-    <video preload="auto" autoplay="autoplay" loop="loop">
-      <source src="//i.imgur.com/J2K4Jkt.webm" type="video/webm"></source>
-    </video>
-    
+    <div id="happy-dog">
+      <video preload="auto" autoplay="autoplay" loop="loop">
+        <source src="//i.imgur.com/J2K4Jkt.webm" type="video/webm"></source>
+      </video>
+    </div>
+
     <div id="order-summary">
-      <h2>Order Summary</h2>
+      <h2>Completed Order</h2>
       <ul id="order-details">
+        <li id="selected-note">Your selected items:</li>
         <li id="type">Pet <span>Dog</span></li>
         <li id="size">Size <span>11-20</span></li>
         <li id="product">Product <span>Adventure Plus for Dogs</span></li>
       </ul>
       <div id="order-total">
         <h3>Total Charge</h3>
-        <div id="monthly-charge"><span id="amount">$9.99</span> / A Month</div>
+        <div id="monthly-charge"><span id="amount">$1.99</span> / A Month</div>
       </div>
     </div>
   </div>

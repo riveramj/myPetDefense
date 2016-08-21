@@ -67,6 +67,11 @@ object Paths {
     }
   )
 
+  val finishedCheckout = If(
+    () => !total.is.isEmpty,
+    RedirectResponse(Checkout.menu.loc.calcDefaultHref)
+  )
+
   def serverUrl = {
     val hostUrl = Props.get("server.url") openOr "http://localhost:8080/"
 

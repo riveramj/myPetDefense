@@ -14,8 +14,13 @@ import com.mypetdefense.model._
 object Success extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
+  import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Success") / "success"
+    val menu = Menu.i("Success") / "success" >>
+      petChosen >>
+      productChosen >>
+      sizeChosen >>
+      finishedCheckout
 }
 
 class Success extends Loggable {
@@ -27,6 +32,7 @@ class Success extends Loggable {
 
     "#type span *" #> petChoice.is.map(_.toString) &
     "#size span *" #> petSize.is.map(_.toString + " pounds") &
-    "#product span *" #> petProduct.is.map(_.name.get)
+    "#product span *" #> petProduct.is.map(_.name.get) &
+    "#monthly-charge #amount *" #> total.is.map(_.toString)
   }
 }
