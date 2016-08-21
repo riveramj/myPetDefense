@@ -147,12 +147,20 @@ html, body {
   background-color: #57B8B4;
 
   ul {
-    @include span-columns(9.5);
+    @include span-columns(10);
     @include shift(2);
+
+    @media (max-width: $bp-med-large) {
+      @include span-columns(12);
+      @include shift(0.5);
+    }
   }
 
   li {
-    @include span-columns(2 of 8);
+    @media (max-width: $bp-med-large) {
+    }
+
+    @include span-columns(3);
     display: inline-block;
     padding: rem(27px) 0 rem(26px);
     color: #0E5552;

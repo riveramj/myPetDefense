@@ -33,6 +33,6 @@ class Success extends Loggable {
     "#type span *" #> petChoice.is.map(_.toString) &
     "#size span *" #> petSize.is.map(_.toString + " pounds") &
     "#product span *" #> petProduct.is.map(_.name.get) &
-    "#monthly-charge #amount *" #> total.is.map(_.toString)
+    "#monthly-charge #amount *" #> total.is.map(paid=> f"$$$paid%2.2f")
   }
 }

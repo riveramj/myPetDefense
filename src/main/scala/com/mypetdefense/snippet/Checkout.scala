@@ -162,7 +162,7 @@ class Checkout extends Loggable {
             selectedPetProduct
           )
 
-          val total = 9.99 + taxDue
+          val total = 9.99D + taxDue
           PetFlowChoices.total(Full(total))
 
           S.redirectTo(Success.menu.loc.calcDefaultHref)
