@@ -327,6 +327,7 @@ button.missing-product.desktop div {
     @include span-columns(6);
     background: rgba(80, 78, 78, 1);
     background: rgb(80, 78, 78);
+    @include omega;
   }
 
   .fa-close {
