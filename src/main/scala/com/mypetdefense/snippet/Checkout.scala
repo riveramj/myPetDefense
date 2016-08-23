@@ -247,6 +247,10 @@ class Checkout extends Loggable {
     println("subscription:")
     println(subscription)
 
+    if (Props.mode == Props.RunModes.Production) {
+      EmailActor ! NewSaleEmail()
+    }
+
     EmailActor ! SendWelcomeEmail(user)
   }
 
