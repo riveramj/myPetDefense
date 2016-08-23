@@ -27,7 +27,12 @@ import Mailer._
 sealed trait EmailActorMessage
 case class SendWelcomeEmail(user: User) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(userEmail: String, amount: Double, nextPaymentAttempt: Option[DateTime]) extends EmailActorMessage
-case class SendInvoicePaymentSucceededEmail(user: Box[User]) extends EmailActorMessage
+case class SendInvoicePaymentSucceededEmail(
+  user: Box[User], 
+  subscription: Subscription,
+  taxPaid: String,
+  amountPaid: String
+) extends EmailActorMessage
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
@@ -75,7 +80,12 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
 
   addHandler {
-    case SendInvoicePaymentSucceededEmail(Full(user)) =>
+    case SendInvoicePaymentSucceededEmail(
+      Full(user),
+      subscription,
+      taxPaid,
+      amountPaid
+    ) =>
       val subject = "My Pet Defense Receipt"
       val shipAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
         val possibleBillAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Billing))
@@ -89,42 +99,30 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val products = Subscription.find(By(Subscription.user, user)).map(_.getProducts).openOr(Nil)
+      val products = subscription.getProducts
 
       val transform = {
         "#ship-date" #> dateFormatter.format(new Date()) &
         "#parent-name" #> user.firstName &
         ".name" #> user.name &
         "#ship-address-1" #> shipAddress.map(_.street1.get) &
-        "#ship-address-2" #> { 
-          if (shipAddress.map(_.street2.get).getOrElse("") == "") {
-            ClearNodes
-          } else {
-            PassThru
-          }
-        } andThen
+        "#ship-address-2" #> ClearNodesIf(shipAddress.map(_.street2.get).getOrElse("") == "") andThen
         "#ship-address-2-content" #> shipAddress.map(_.street2.get) &
         "#ship-city" #> shipAddress.map(_.city.get) &
         "#ship-state" #> shipAddress.map(_.state.get) &
         "#ship-zip" #> shipAddress.map(_.zip.get) &
         "#bill-address-1" #> billAddress.map(_.street1.get) &
-        "#bill-address-2" #> {
-          if (billAddress.map(_.street2.get).getOrElse("") == "") {
-            ClearNodes
-          } else {
-            PassThru
-          }
-        } andThen
+        "#bill-address-2" #> ClearNodesIf(billAddress.map(_.street2.get).getOrElse("") == "") andThen
         "#bill-address-2-content" #> billAddress.map(_.street2.get) &
         "#bill-city" #> billAddress.map(_.city.get) &
         "#bill-state" #> billAddress.map(_.state.get) &
         "#bill-zip" #> billAddress.map(_.zip.get) &
+        "#tax" #> ClearNodesIf(taxPaid.isEmpty) andThen
         ".ordered-product" #> products.map { product =>
-          val amountDue = products.size * 9.99
-
-          ".product *" #> s"${product.name.get}, ${product.size.get.toString} pounds" &
-          ".amount-due *" #> s"$$${amountDue}"
-        }
+          ".product *" #> s"${product.name.get}, ${product.size.get.toString} pounds" 
+        } &
+        "#tax #tax-due *" #> s"$$${taxPaid}" &
+        "#total *" #> s"$$${amountPaid}"
       }
       
       sendEmail(subject, user.email.get, transform(invoicePaymentSucceededEmailTemplate))

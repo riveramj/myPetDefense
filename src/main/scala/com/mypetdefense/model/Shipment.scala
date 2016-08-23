@@ -17,13 +17,15 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object expectedShipDate extends MappedDateTime(this)
   object dateShipped extends MappedDateTime(this)
   object dateReceived extends MappedDateTime(this)
+  object taxPaid extends MappedString(this, 100)
+  object amountPaid extends MappedString(this, 100)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 }
 
 object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
-  def createShipment(user: User, stripePaymentId: String) = {
+  def createShipment(user: User, stripePaymentId: String, amountPaid: String, taxPaid: String) = {
     (for {
       subscription <- Subscription.find(By(Subscription.user, user))
       dateProcessed = new Date()
@@ -34,6 +36,8 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
       .subscription(subscription)
       .expectedShipDate(subscription.nextShipDate.get)
       .dateProcessed(dateProcessed)
+      .amountPaid(amountPaid)
+      .taxPaid(taxPaid)
       .saveMe
 
       ShipmentLineItem.createShipmentItems(shipment, user)

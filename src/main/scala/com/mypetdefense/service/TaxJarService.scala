@@ -69,18 +69,15 @@ object TaxJarService extends Loggable {
     }).headOption.getOrElse((0D, 0D))
   }
 
-  def processTaxesCharged(orderIdentifier: String, city: String, state: String, zip: String, amount: String, rawTax: String) = {
-    if (rawTax != "0") {
-      val subtotal = tryo(amount.toDouble/100.0).openOr(0D)
-      val tax = tryo(rawTax.toDouble/100.0).openOr(0D)
-
+  def processTaxesCharged(orderIdentifier: String, city: String, state: String, zip: String, subtotal: String, tax: String) = {
+    if (tax != "0") {
       createTaxOrder(
         orderIdentifier,
         city,
         state,
         zip,
-        subtotal.toString(),
-        tax.toString(),
+        subtotal,
+        tax,
         new Date().toString
       )
     }

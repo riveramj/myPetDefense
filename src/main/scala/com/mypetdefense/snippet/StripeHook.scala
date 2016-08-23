@@ -30,7 +30,8 @@ trait StripeHook extends RestHelper with Loggable {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
       subtotal <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
-      taxPaid <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
+      tax <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
+      amountPaid <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
       user <- User.find(By(User.stripeId, stripeCustomerId))
       shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
@@ -39,16 +40,30 @@ trait StripeHook extends RestHelper with Loggable {
       val state = shippingAddress.state.get
       val zip = shippingAddress.zip.get
       
+      def formatAmount(possibleAmount: String) = {
+        val formattedAmount = tryo(possibleAmount.toDouble/100.0).openOr(0D)
+
+        if (formattedAmount == 0D)
+          0.toString
+        else
+          f"$formattedAmount%2.2f"
+      }
+
       TaxJarService.processTaxesCharged(
         invoicePaymentId,
         city,
         state,
         zip,
-        subtotal,
-        taxPaid
+        formatAmount(subtotal),
+        formatAmount(tax)
       )
 
-      val shipment = Shipment.createShipment(user, invoicePaymentId)
+      val shipment = Shipment.createShipment(
+        user,
+        invoicePaymentId,
+        formatAmount(amountPaid),
+        formatAmount(tax)
+      )
       
       println("===================")
       println("shipment:")

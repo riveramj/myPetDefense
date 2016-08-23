@@ -33,12 +33,7 @@ class Dashboard extends Loggable {
     )
   }
 
-  def paymentProcessed_?(subscription: Subscription) = {
-    val shipment = Shipment.find(
-      By(Shipment.subscription, subscription),
-      By(Shipment.expectedShipDate, subscription.nextShipDate.get)
-    )
-
+  def paymentProcessed_?(shipment: Box[Shipment]) = {
     val paymentId = shipment.map(_.stripePaymentId.get).openOr("")
     if (paymentId.isEmpty)
       "No"
@@ -54,13 +49,23 @@ class Dashboard extends Loggable {
     nextShipDate.save
   }
 
-  def shipProduct(subscription: Subscription, user: Box[User])() = {
+  def shipProduct(subscription: Subscription, user: Box[User], shipment: Box[Shipment])() = {
     updateNextShipDate(subscription)
-    EmailActor ! SendInvoicePaymentSucceededEmail(user)
+    EmailActor ! SendInvoicePaymentSucceededEmail(
+      user,
+      subscription,
+      shipment.map(_.taxPaid.get).openOr(""),
+      shipment.map(_.amountPaid.get).openOr("")
+    )
   }
 
   def render = {
     ".shipment" #> getUpcomingShipments.map { subscription =>
+      val shipment = Shipment.find(
+        By(Shipment.subscription, subscription),
+        By(Shipment.expectedShipDate, subscription.nextShipDate.get)
+      )
+
       val productNames = subscription.getProducts.groupBy(_.name)
       val dateFormat = new SimpleDateFormat("MMM dd")
 
@@ -70,8 +75,8 @@ class Dashboard extends Loggable {
         ".amount *"  #> product.size &
         ".product-name *" #> name
       } &
-      ".payment-processed *" #> paymentProcessed_?(subscription) &
-      ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, subscription.user.obj))
+      ".payment-processed *" #> paymentProcessed_?(shipment) &
+      ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, subscription.user.obj, shipment))
     }
   }
 }
