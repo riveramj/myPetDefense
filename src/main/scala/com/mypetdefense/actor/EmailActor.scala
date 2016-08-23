@@ -26,6 +26,7 @@ import Mailer._
 
 sealed trait EmailActorMessage
 case class SendWelcomeEmail(user: User) extends EmailActorMessage
+case class NewSaleEmail() extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(userEmail: String, amount: Double, nextPaymentAttempt: Option[DateTime]) extends EmailActorMessage
 case class SendInvoicePaymentSucceededEmail(
   user: Box[User], 
@@ -38,8 +39,6 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
   val welcomeEmailTemplate = 
     Templates("emails-hidden" :: "welcome-email" :: Nil) openOr NodeSeq.Empty
-  val baseEmailTemplate = 
-    Templates("emails-hidden" :: "email-template" :: Nil) openOr NodeSeq.Empty
   
   val hostUrl = Paths.serverUrl
 
@@ -72,6 +71,18 @@ trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
       ).apply(invoicePaymentFailedEmailTemplate)
 
       sendEmail(subject, userEmail, invoicePaymentFailedEmailTemplate)
+  }
+}
+
+trait NewSaleEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case NewSaleEmail() =>
+      val welcomeEmailTemplate = 
+        Templates("emails-hidden" :: "sale-email" :: Nil) openOr NodeSeq.Empty
+      
+      val subject = "New Sale! Check dashboard!!"
+      
+      sendEmail(subject, "sales@mypetdefense.com", welcomeEmailTemplate)
   }
 }
 
@@ -133,9 +144,13 @@ object EmailActor extends EmailActor
 trait EmailActor extends EmailHandlerChain
                     with WelcomeEmailHandling
                     with InvoicePaymentFailedEmailHandling
-                    with InvoicePaymentSucceededEmailHandling {
+                    with InvoicePaymentSucceededEmailHandling 
+                    with NewSaleEmailHandling {
 
-  val fromEmail = "mike.rivera@mypetdefense.com"
+  val baseEmailTemplate = 
+    Templates("emails-hidden" :: "email-template" :: Nil) openOr NodeSeq.Empty
+
+  val fromEmail = "sales@mypetdefense.com"
   val fromName = "My Pet Defense"
 
   def sendEmail(
