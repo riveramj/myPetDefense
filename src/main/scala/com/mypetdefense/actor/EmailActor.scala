@@ -117,7 +117,7 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
         "#bill-city" #> billAddress.map(_.city.get) &
         "#bill-state" #> billAddress.map(_.state.get) &
         "#bill-zip" #> billAddress.map(_.zip.get) &
-        "#tax" #> ClearNodesIf(taxPaid.isEmpty) andThen
+        "#tax" #> ClearNodesIf(taxPaid == "0") andThen
         ".ordered-product" #> products.map { product =>
           ".product *" #> s"${product.name.get}, ${product.size.get.toString} pounds" 
         } &

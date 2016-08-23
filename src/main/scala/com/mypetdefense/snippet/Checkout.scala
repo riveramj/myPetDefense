@@ -152,7 +152,7 @@ class Checkout extends Loggable {
       }
 
       Try(Await.result(stripeCustomer, new DurationInt(3).seconds)) match {
-        case TrySuccess(customer) =>
+        case TrySuccess(Full(customer)) =>
           println(customer + " --------") 
 
           newUserSetup(
@@ -167,8 +167,12 @@ class Checkout extends Loggable {
 
           S.redirectTo(Success.menu.loc.calcDefaultHref)
 
+        case TrySuccess(stripeFailure) =>
+          logger.error("create customer failed with: " + stripeFailure)
+          Alert("An error has occurued. Please try again.")
+        
         case TryFail(throwable: Throwable) =>
-          logger.error("create customer failed with" + throwable)
+          logger.error("create customer failed with: " + throwable)
           Alert("An error has occurued. Please try again.")
       }
     } else {
@@ -177,12 +181,12 @@ class Checkout extends Loggable {
   }
 
   def newUserSetup(
-    customer: Box[Customer], 
+    customer: Customer, 
     selectedPetType: Box[AnimalType.Value],
     selectedPetSize: Box[AnimalSize.Value],
     selectedPetProduct: Box[Product]
   ) = {
-    val stripeId = customer.map(_.id).openOr("")
+    val stripeId = customer.id
 
     val user = User.createNewUser(
       firstName,
