@@ -138,12 +138,11 @@ nav {
 }
 
 .leaf-divider {
-  background: url(../../images/leaf-background.jpg) no-repeat left;
+  background: url(../../images/leaf-background-large.jpg) no-repeat left;
   background-size: cover;
   height: em(29px);
 
   @media (min-width: $bp-med) {
-    background: url(../../images/leaf-background-large.jpg) no-repeat left;
     height: em(75px);
   }
 }
