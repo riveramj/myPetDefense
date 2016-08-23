@@ -12,7 +12,7 @@ import com.mypetdefense.service.PetFlowChoices._
 
 object Paths {
 
-  val index = Menu.i("index") / "index"
+  val index = Menu.i("Home") / "index"
 
   val petChosen = If(
     () => !petChoice.is.isEmpty,
