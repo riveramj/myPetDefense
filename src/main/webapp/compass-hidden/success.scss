@@ -2,11 +2,19 @@
 @import "nav-bar";
 @import "flow";
 
+.step-info {
+  float: left;
+  width: 100%;
+}
+
 #happy-dog {
+  display: none;
+
   @media (min-width: $bp-med) {
     @include span-columns(5);
     @include shift(1);
     @include omega;
+    display: block;
   }
 
   video {
@@ -21,15 +29,27 @@
 }
 
 .step-question {
+  &.desktop {
+    display: none;
+  }
+
   @media (min-width: $bp-med) {
     @include span-columns(6);
     padding-bottom: rem(40px);
+
+    &.mobile {
+    display: none;
+   }
+
+   &.desktop {
+    display: block;
+  }
   }
 }
 
 #order-summary {
   @include span-columns(12);
-  margin: em(50px) 0 em(30px);
+  margin: 0 0 em(30px);
   border-radius: 4px;
   background-color: #E7E7E7;
 

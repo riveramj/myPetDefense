@@ -161,12 +161,13 @@
           <label>
             <div>
               <span class="field-label">Promotion Code</span>
-              <span id="promo-error" class="hidden">Invalid code. Please try another code.</span>
+              <span id="promo-error" class="hidden">Invalid. Please try another code.</span>
               <span id="promo-success" class="hidden"><i class="fa fa-check"></i> Promotion applied.</span>
             </div>
-            <div class="apply-promo">
+            <div class="apply-promo-container">
               <input size="20" id="promo-code" type="text">
-              <button id="apply-promo" type="button">Apply Code</button>
+              <button class="apply-promo mobile" type="button">Apply</button>
+              <button class="apply-promo desktop" type="button">Apply Code</button>
             </div>
             
           </label>

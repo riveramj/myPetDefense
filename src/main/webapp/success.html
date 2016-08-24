@@ -43,36 +43,54 @@
   </div>
   <div class="flow-step">
     <div class="step-info">
-      <div class="step-name">1. Pet</div>
-      <div class="step-choice">Cat</div>
+      <i class="fa fa-check"></i>
+      <dl class="step-container">
+        <dt class="step-name">1. Pet</dt>
+        <dd class="step-choice">
+          <span class="chosen-pet" data-lift="PetChoice.chosenPet">cat</span>
+        </dd>
+      </dl>
     </div>
   </div>
-  <div class="flow-step">
+  <div class="flow-step" data-lift="NavBar.size">
     <div class="step-info">
-      <div class="step-name">2. Size</div>
-      <div class="step-choice">
-        <span id="chosen-size" data-lift="CatSize.chosenSize">5-9</span> pounds
-      </div>
+      <i class="fa fa-check"></i>
+      <dl class="step-container">
+        <dt class="step-name">2. Size</dt>
+        <dd class="step-choice">
+          <span class="chosen-size">5-9</span> pounds
+        </dd>
+      </dl>
     </div>
   </div>
-  <div class="flow-step">
+  <div class="flow-step" data-lift="NavBar.product">
     <div class="step-info">
-      <div class="step-name">3. Product</div>
-      <div class="step-choice">
-        <span id="chosen-product" data-lift="CatProduct.chosenProduct">zoguard plus for cats</span>
-      </div>
+      <i class="fa fa-check"></i>
+      <dl class="step-container">
+        <dt class="step-name">3. Product</dt>
+        <dd class="step-choice">
+          <span class="chosen-product">zoguard plus for cats</span>
+        </dd>
+      </dl>
     </div>
   </div>
-  <div class="flow-step">
+  <div class="flow-step" data-lift="NavBar.product">
     <div class="step-info">
-      <div class="step-name">4. Checkout</div>
-      <div class="step-choice">Complete</div>
+      <i class="fa fa-check"></i>
+      <dl class="step-container">
+        <dt class="step-name">4. Checkout</dt>
+        <dd class="step-choice">Complete</dd>
+      </dl>
     </div>
   </div>
   <div class="current-step" data-lift="Success.render">
     <h1 class="step-header">Your order is placed!</h1>
-    <h2 class="step-question">
+    <h2 class="step-question desktop">
       We'll send you an email soon with your order details. In the meantime, enjoy this GIF of the happiest dog on Earth.
+    </h2>
+
+    <h2 class="step-question mobile">
+      We'll send you an email soon with your order details.
     </h2>
 
     <div id="happy-dog">
