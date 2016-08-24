@@ -284,7 +284,7 @@ class Checkout extends Loggable {
             "#order-total .monthly-charge [class+]" #> "promo" &
             "#order-total .monthly-charge *" #> {
               val freeMonths = coupon.map(_.freeMonths).openOr("0")
-              if (freeMonths == "1") {
+              if (freeMonths == 1) {
                 s"FREE for first ${freeMonths} month"
               } else {
                 s"FREE for first ${freeMonths} months"
@@ -311,7 +311,7 @@ class Checkout extends Loggable {
     "#cardholder-name" #> text(cardholderName, cardholderName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
     "#promo-code" #> ajaxText(couponCode, couponCode = _) &
-    "#apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
+    ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup)
   }
 }

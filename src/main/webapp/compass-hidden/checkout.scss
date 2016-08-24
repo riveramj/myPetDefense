@@ -209,7 +209,7 @@ fieldset label {
       display: inline-block;
     }
 
-    #apply-promo {
+    .apply-promo {
       background-color: #5BB8B3;
     }
   }
@@ -223,11 +223,11 @@ fieldset label {
 }
 
 
-.apply-promo {
+.apply-promo-container {
   display: flex;
 }
 
-#apply-promo {
+.apply-promo {
   padding: rem(9px) rem(15px);
   font-size: rem(14px);
   border: none;
@@ -242,6 +242,20 @@ fieldset label {
 
   margin-left: 8px;
   white-space: nowrap;
+
+  &.desktop {
+    display: none;
+  }
+
+  @media (min-width: $bp-med) {
+    &.mobile {
+      display: none;
+    }
+   
+    &.desktop {
+      display: block;
+    }
+  }
 }
 
 #selected-note {
