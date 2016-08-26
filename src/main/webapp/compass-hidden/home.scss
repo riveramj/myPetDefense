@@ -475,11 +475,30 @@ nav {
  
   background-color: #454343;
   color: #949494;
-  padding: rem(57px) 0 rem(9px);
+  padding: rem(26px) 0 rem(9px);
   font-size: em(12px);
   text-align: center;
 
   @media (min-width: $bp-med) {
-    padding: rem(51px) 0 rem(15px);
+    padding: rem(26px) 0 rem(15px);
+  }
+}
+
+#need-help {
+  @include span-columns(12);
+  text-align: center;
+  background-color: #454343;
+  color: #B2B0B0;
+
+  padding: rem(57px) 0 0;
+  font-size: rem(18px);
+
+  @media (min-width: $bp-med) {
+    padding: rem(51px) 0 0;
+    font-size: rem(15px);
+  }
+
+  a {
+    color: #B2B0B0;
   }
 }
