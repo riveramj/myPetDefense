@@ -15,7 +15,6 @@
 
   @media (min-width: $bp-med) {
     @include span-columns(6);
-    min-height: 1030px;
   }
 
   &:nth-child(2n) {
@@ -112,6 +111,19 @@
     @include shift(2);
     @include span-columns(8);
     margin-bottom: rem(20px);
+  }
+}
+
+.product-label {
+  color: #259490;
+  @include span-columns(10);
+  @include shift(1);
+
+  margin-right: 0;
+
+  @media (min-width: $bp-med) {
+    @include shift(2);
+    @include span-columns(8);
   }
 }
 
