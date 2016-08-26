@@ -25,12 +25,7 @@ object Dashboard extends Loggable {
 class Dashboard extends Loggable {
 
   def getUpcomingShipments = {
-    Subscription.findAll(
-      BySql(
-        "nextShipDate < CURRENT_DATE + interval '5 day' AND nextShipDate >= CURRENT_DATE", 
-        IHaveValidatedThisSQL("mike","2016-04-24")
-      )
-    )
+    Subscription.findAll()
   }
 
   def paymentProcessed_?(shipment: Box[Shipment]) = {
