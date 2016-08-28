@@ -1,0 +1,85 @@
+@import "base";
+@import "nav-bar";
+
+#page-container {
+  @include span-columns(12);
+  background-color: #DCDBDB;
+  padding-top: em(28px);
+}
+
+#login-container {
+  @include shift(0.5);
+
+  h2 {
+    color: #605F5F;
+    font-size: rem(27px);
+    font-weight: $semibold;
+    padding-bottom: rem(9px);
+  }
+
+  h3 {
+    color: #4F4E4E;
+    font-size: rem(23px);
+    font-weight: $regular;
+    padding-bottom: rem(25px);
+  }
+}
+
+label {
+  @include span-columns(11.5);
+  @include omega;
+
+  padding-bottom: rem(20px);
+
+  &:last-child {
+    padding-bottom: rem(25px);
+  }
+
+  .field-label {
+    color: #4F4E4E;
+    font-weight: $semibold;
+    font-size: rem(14px);
+    display: inline-block;
+    padding-bottom: rem(2px);
+
+    @media (min-width: $bp-med) {
+      padding-bottom: rem(3px);
+    }
+  }
+
+  input {
+    width: 100%;
+    color: #4F4E4E;
+    font-size: em(22px);
+    border: 1px solid #CECECE;
+    padding: rem(7px) rem(10px);
+    border-radius: 3px;
+
+    @include placeholder {
+      color: #949494;
+    }
+  }
+}
+
+#login-button-container{
+  @include span-columns(11.5);
+  @include omega;
+  text-align: right;
+
+  padding-bottom: rem(35px);
+}
+
+#login {
+  background-color: #818080;
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+
+  font-size: rem(18px);
+  padding: rem(9px) rem(26px) rem(9px) rem(27px);
+}
+
+div.incognito-dog {
+  @include span-columns(12);
+  height: 100%;
+}
