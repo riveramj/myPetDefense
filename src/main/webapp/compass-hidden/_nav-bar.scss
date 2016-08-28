@@ -4,7 +4,7 @@
   display: inline-block;
 
   @media (min-width: $bp-med) {
-    padding: em(19px) 0;
+    padding: 0;
   }
 }
 
@@ -17,7 +17,7 @@
   @media (min-width: $bp-med) {
     @include span-columns(3);
     @include shift(2);
-    padding: 0;
+    padding-top: rem(19px);
   }
 }
 
@@ -63,11 +63,11 @@ nav {
   @media (min-width: $bp-med) {
     display: inline-block;
 
-    &.mobile {
+    .mobile {
       display: none;
     }
 
-    &.desktop {
+    .desktop {
       display: inline-block;
     }
   }
