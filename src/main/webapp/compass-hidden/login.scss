@@ -66,7 +66,7 @@ label {
   @include omega;
   text-align: right;
 
-  padding-bottom: rem(35px);
+  padding-bottom: rem(40px);
 }
 
 #login {
@@ -82,4 +82,10 @@ label {
 div.incognito-dog {
   @include span-columns(12);
   height: 100%;
+  background-color: #DCDBDB;
+}
+
+img.incognito-dog {
+  display: block;
+  width: 100%;
 }
