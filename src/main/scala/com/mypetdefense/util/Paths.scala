@@ -67,6 +67,16 @@ object Paths {
     }
   )
 
+  val loggedIn = If(
+    () => SecurityContext.loggedIn_?,
+    RedirectResponse("/")
+  )
+
+  val notLoggedIn = If(
+    () => ! SecurityContext.loggedIn_?,
+    RedirectResponse("/")
+  )
+
   val finishedCheckout = If(
     () => !total.is.isEmpty,
     RedirectResponse(Checkout.menu.loc.calcDefaultHref)
@@ -83,7 +93,6 @@ object Paths {
 
   def siteMap = SiteMap(
     index,
-    Login.menu,
     PetChoice.menu,
     DogSize.menu,
     CatSize.menu,
@@ -94,6 +103,8 @@ object Paths {
     Dashboard.menu,
     Parents.menu,
     Leads.menu,
-    Agents.menu
+    Agents.menu,
+    Login.menu,
+    Login.logoutMenu
   )
 }

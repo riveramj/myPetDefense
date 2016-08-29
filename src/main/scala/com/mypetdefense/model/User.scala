@@ -71,6 +71,14 @@ class User extends LongKeyedMapper[User] with IdPK {
       .salt(salt)
       .saveMe
   }
+
+  def findByEmail(email: String): Box[User] = {
+    User.find(By(User.email, email))
+  }
+
+  def isCorrectPassword_?(password: String, user: User) = {
+    user.password.get == hashPassword(password, user.salt.get)
+  }
 }
 
 object User extends User with LongKeyedMetaMapper[User]
