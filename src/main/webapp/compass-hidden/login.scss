@@ -83,7 +83,7 @@ label {
   padding-bottom: rem(40px);
 }
 
-#login {
+input#login {
   background-color: #818080;
   color: #ffffff;
   border: none;
@@ -91,6 +91,8 @@ label {
 
   font-size: rem(18px);
   padding: rem(9px) rem(26px) rem(9px) rem(27px);
+
+  cursor: pointer;
 }
 
 div.incognito-dog {

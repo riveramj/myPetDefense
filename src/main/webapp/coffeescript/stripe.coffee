@@ -6,7 +6,7 @@ stripeCallback = (status, response) ->
     $(".checkout").submit()
 
 $(document).ready ->
-  Stripe?.setPublishableKey? 'pk_test_tlQUPJdasEEdNTcUsbcsHmG7'
+  Stripe?.setPublishableKey? 'pk_test_JLczczIy7T5qGL8DOmwTc2O0'
 
   myPetDefenseSite.event("stripe-form-ready")
 
@@ -19,13 +19,6 @@ $(document).ready ->
     myPetDefenseSite.event("validate-stripe-form",
       stripeCallback: stripeCallback
     )
-
-$(document).on 'form-validation-error', (event) ->
-  $target = $(event.fieldSelector)
-  $targetContainer = $target.closest('label').find('.field-label')
-
-  $target.addClass "error"
-  $targetContainer.append $("<div />").addClass("validation-error").text(event.error)
 
 $(document).on 'promotion-code-message', (event) ->
   if event.status == "success"
