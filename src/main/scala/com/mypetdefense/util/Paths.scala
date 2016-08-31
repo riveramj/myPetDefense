@@ -72,6 +72,16 @@ object Paths {
     RedirectResponse("/")
   )
 
+  val adminUser = If(
+    () => SecurityContext.admin_?,
+    RedirectResponse("/")
+  )
+
+  val agentOrAdmin = If(
+    () => (SecurityContext.admin_? || SecurityContext.agent_?),
+    RedirectResponse("/")
+  )
+
   val notLoggedIn = If(
     () => ! SecurityContext.loggedIn_?,
     RedirectResponse("/")
@@ -100,10 +110,12 @@ object Paths {
     CatProduct.menu,
     Checkout.menu,
     Success.menu,
-    Dashboard.menu,
-    Parents.menu,
-    Leads.menu,
-    Agents.menu,
+    admin.Dashboard.menu,
+    admin.Parents.menu,
+    admin.Users.menu,
+    admin.Coupons.menu,
+    admin.Leads.menu,
+    admin.Agents.menu,
     Login.menu,
     Login.logoutMenu
   )

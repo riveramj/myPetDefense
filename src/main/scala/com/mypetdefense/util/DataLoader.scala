@@ -116,19 +116,13 @@ object DataLoader extends Loggable {
         "password",
         "(404) 409-0724",
         None,
+        None,
         UserType.Agent
       )
     }
 
     if (Agent.findAll().isEmpty) {
-      val possibleAgent = User.find(By(User.email, "rivera.mj+agent@gmail.com"))
-
-      possibleAgent.map { agent =>
-        Agent.createNewAgent(
-          "Big Pets",
-          agent  
-        )
-      }
+      Agent.createNewAgent("Big Pets")
     }
     
     if (Lead.findAll().isEmpty) {
@@ -150,11 +144,26 @@ object DataLoader extends Loggable {
         "Jane",
         "Doe",
         "stripe1234",
+        "rivera.mj+parent@gmail.com",
+        "password",
+        "(404) 409-0724",
+        None,
+        None,
+        UserType.Parent
+      )
+    }
+
+    if (User.findAll(By(User.userType, UserType.Admin)).isEmpty) {
+      User.createNewUser(
+        "Mike",
+        "Rivera",
+        "",
         "rivera.mj@gmail.com",
         "password",
         "(404) 409-0724",
         None,
-        UserType.Parent
+        None,
+        UserType.Admin
       )
     }
   }

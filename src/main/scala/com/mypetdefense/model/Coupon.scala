@@ -9,7 +9,7 @@ import com.mypetdefense.util.RandomIdGenerator._
 
 import java.util.Date
 
-class Coupon extends LongKeyedMapper[Coupon] with IdPK {
+class Coupon extends LongKeyedMapper[Coupon] with IdPK with OneToMany[Long, Coupon] {
   def getSingleton = Coupon
   object couponId extends MappedLong(this) {
     override def dbIndexed_? = true

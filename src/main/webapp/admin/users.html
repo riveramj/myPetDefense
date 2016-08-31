@@ -1,23 +1,25 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
-  <div data-lift="Agents">
-    <table >
+  <div data-lift="admin.Users.render">
+    <table>
       <thead>
         <tr>
           <td>Name
           <td>Email
-          <td>Phone
+          <td>Parent
         </tr>
       </thead>
       <tbody>
-        <tr class="agent">
+        <tr class="user">
           <td class="name">Mike Rivera
           <td class="email">email@email.com
-          <td class="phone">123-123-1234
+          <td class="type">admin
         </tr>
       </tbody>
     </table>
   </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=admin">
+  </head_merge>
 </div>
-
 
 

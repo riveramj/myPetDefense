@@ -1,4 +1,5 @@
 package com.mypetdefense.snippet
+package admin
 
 import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml
@@ -17,12 +18,14 @@ import com.mypetdefense.model._
 object Parents extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
+  import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Parents") / "parents"
+  val menu = Menu.i("Parents") / "admin" / "parents" >>
+    adminUser >>
+    loggedIn
 }
 
 class Parents extends Loggable {
-
   val parents = User.findAll(By(User.userType, UserType.Parent))
 
   def render = {

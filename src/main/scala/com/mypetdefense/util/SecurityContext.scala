@@ -9,13 +9,16 @@ import com.mypetdefense.model._
 object SecurityContext extends Loggable {
 
   private object loggedInUserId extends SessionVar[Box[Long]](Empty)
-  private object loggedInUser extends RequestVar[Box[User]](Empty)
+  private object loggedInUser extends SessionVar[Box[User]](Empty)
 
-  def logIn(user: User) {
+  def logIn(user: User) = {
     loggedInUserId(Full(user.userId.get))
+    loggedInUserId.is
+    
     loggedInUser(Full(user))
+    loggedInUser.is
 
-    logger.info(s"Logged user in [ ${user.email} ]")
+    logger.info(s"Logged user in [ ${loggedInUser.is.map(_.email.get).openOr("")} ]")
   }
 
   def logCurrentUserOut() = {
@@ -23,7 +26,7 @@ object SecurityContext extends Loggable {
     loggedInUser(Empty)
   }
 
-  def currentUser = loggedInUser.is
+  def currentUser: Box[User] = loggedInUser.is
   def currentUserId = loggedInUserId.is.openOr(0)
 
   def loggedIn_? : Boolean = {

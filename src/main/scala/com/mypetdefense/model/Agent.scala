@@ -7,28 +7,27 @@ import net.liftweb._
 
 import com.mypetdefense.util.RandomIdGenerator._
 
-import java.util.Date
+import java.util.Date 
 
-class Agent extends LongKeyedMapper[Agent] with IdPK {
+class Agent extends LongKeyedMapper[Agent] with IdPK with OneToMany[Long, Agent] {
   def getSingleton = Agent
   object agentId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
 
   object name extends MappedString(this, 100)
-  object member extends MappedLongForeignKey(this, User)
+  object customers extends MappedOneToMany(User, User.referer)
+  object members extends MappedOneToMany(User, User.agency)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
   def createNewAgent(
-    name: String, 
-    agent: User
+    name: String
   ) = {
     Agent.create
     .agentId(generateLongId)
     .name(name)
-    .member(agent)
     .saveMe
   }
 }

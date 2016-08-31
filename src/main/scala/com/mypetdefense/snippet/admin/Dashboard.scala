@@ -1,4 +1,5 @@
 package com.mypetdefense.snippet
+package admin
 
 import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml
@@ -13,13 +14,17 @@ import java.util.Date
 import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
+import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
 
 object Dashboard extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
+  import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Dashboard") / "dashboard"
+    val menu = Menu.i("Dashboard") / "admin" / "dashboard" >> 
+      adminUser >>
+      loggedIn
 }
 
 class Dashboard extends Loggable {

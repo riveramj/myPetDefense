@@ -12,7 +12,7 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator
 
 import java.util.Date
 
-class User extends LongKeyedMapper[User] with IdPK {
+class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def getSingleton = User
   object userId extends MappedLong(this) {
     override def dbIndexed_? = true
@@ -27,6 +27,7 @@ class User extends LongKeyedMapper[User] with IdPK {
   object phone extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
   object referer extends MappedLongForeignKey(this, Agent)
+  object agency extends MappedLongForeignKey(this, Agent)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -41,6 +42,7 @@ class User extends LongKeyedMapper[User] with IdPK {
     password: String,
     phone: String,
     referer: Box[Agent],
+    agency: Box[Agent],
     userType: UserType.Value
   ) = {
     val user = User.create
@@ -51,6 +53,7 @@ class User extends LongKeyedMapper[User] with IdPK {
       .email(email)
       .phone(phone)
       .referer(referer)
+      .agency(agency)
       .userType(userType)
 
     setUserPassword(user, password)

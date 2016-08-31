@@ -61,7 +61,7 @@ class Login extends Loggable {
 
     def login() = {
       val validateFields = List(
-        checkEmail(email, "#email"),
+        checkEmpty(email, "#email"),
         checkEmpty(email, "#password")
       ).flatten
 
