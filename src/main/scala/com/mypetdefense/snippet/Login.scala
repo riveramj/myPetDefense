@@ -11,7 +11,9 @@ import net.liftweb._
 import com.mypetdefense.service._
     import ValidationService._
 
-import com.mypetdefense.model.User
+import com.mypetdefense._
+  import model.{User, UserType}
+  import snippet.admin.Dashboard
 import com.mypetdefense.util.SecurityContext
 
 object Login extends Loggable {
@@ -56,7 +58,12 @@ class Login extends Loggable {
 
     def redirectUser(user: User) = {
       SecurityContext.logIn(user)
-      S.redirectTo("/")
+      user.userType match {
+        case admin if admin == UserType.Admin => 
+          S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
+        case _ =>
+          S.redirectTo("/")
+      }
     }
 
     def login() = {

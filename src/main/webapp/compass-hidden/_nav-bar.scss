@@ -2,10 +2,6 @@
   @include span-columns(12);
   background-color: #ffffff;
   display: inline-block;
-
-  @media (min-width: $bp-med) {
-    padding: 0;
-  }
 }
 
 #logo-name { 
@@ -48,8 +44,21 @@ nav {
 }
 
 #menu-entries {
-  .login {
+  .login, .entry {
     padding: em(28px) em(25px);
+  }
+
+  .entry a {
+    font-weight: $regular;
+    text-transform: uppercase;
+  }
+
+  .current {
+    a {
+      border-bottom: 2px solid #2E9F9B;
+      padding-bottom: rem(3px);
+      font-weight: $bold;
+    }
   }
 
   li {
@@ -62,6 +71,10 @@ nav {
 
   @media (min-width: $bp-med) {
     display: inline-block;
+
+    .logout {
+      padding-right: 0;
+    }
 
     .mobile {
       display: none;

@@ -29,6 +29,7 @@ class Parents extends Loggable {
   val parents = User.findAll(By(User.userType, UserType.Parent))
 
   def render = {
+    ".parents [class+]" #> "current" &
     ".parent" #> parents.map { parent =>
       val dateFormat = new SimpleDateFormat("MMM dd")
 

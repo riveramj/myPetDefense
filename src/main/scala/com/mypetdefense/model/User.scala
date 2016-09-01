@@ -75,6 +75,23 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .saveMe
   }
 
+  def createNewPendingUser(
+    firstName: String,
+    lastName: String,
+    email: String,
+    userType: UserType.Value,
+    agency: Box[Agent]
+  ) = {
+    User.create
+      .userId(generateLongId)
+      .firstName(firstName)
+      .lastName(lastName)
+      .email(email)
+      .agency(agency)
+      .userType(userType)
+      .saveMe
+  }
+  
   def findByEmail(email: String): Box[User] = {
     User.find(By(User.email, email))
   }

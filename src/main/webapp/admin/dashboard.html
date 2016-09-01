@@ -1,6 +1,9 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
-  <div data-lift="admin.Dashboard.render">
-    <table >
+<div data-lift="admin.Dashboard.render?eager_eval=true">
+  <div data-lift="embed?what=admin/admin-nav-bar"></div>
+  <div id="item-container">
+    <h2>Dashboard</h2>
+    <table>
       <thead>
         <tr>
           <td>Ship On
@@ -33,6 +36,7 @@
       </tbody>
     </table>
   </div>
+</div>
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=admin">
   </head_merge>

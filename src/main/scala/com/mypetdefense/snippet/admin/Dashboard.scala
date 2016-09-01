@@ -65,6 +65,7 @@ class Dashboard extends Loggable {
   }
 
   def render = {
+    ".dashboard [class+]" #> "current" &
     ".shipment" #> getUpcomingShipments.map { subscription =>
       val shipment = Shipment.find(
         By(Shipment.subscription, subscription),

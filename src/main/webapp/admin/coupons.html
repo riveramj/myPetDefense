@@ -1,5 +1,31 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
-  <div data-lift="admin.Coupons.render">
+<div data-lift="admin.Coupons.render?eager_eval=true">
+  <div data-lift="embed?what=admin/admin-nav-bar"></div>
+  <div id="item-container">
+    <h2>Coupons</h2>
+    <form>
+      <fieldset class="create">
+        <legend>Create Promotion</legend>
+          <label class="tiny-field promo">
+            <span class="field-label">Promo Code</span>
+            <input id="code-name" type="text">            
+          </label>
+          <label class="tiny-field free-months">
+            <span class="field-label">Free Months</span>
+            <input id="free-months" type="text">
+          </label>
+          <div class="tiny-field" id="agent-container">
+            <span class="field-label">Company</span>
+            <select id="agent-select">
+              <option value="123456">big pets</option>
+              <option value="099221">pets-r-us</option>
+            </select>
+          </div>
+          <div class="create-item tiny-field">
+            <button type="submit" id="create-item">Create</button>
+          </div>
+      </fieldset>
+    </form>
     <table>
       <thead>
         <tr>
@@ -17,7 +43,11 @@
       </tbody>
     </table>
   </div>
+</div>
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=admin">
   </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+  </tail>
 </div>

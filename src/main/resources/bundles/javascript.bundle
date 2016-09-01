@@ -1,9 +1,12 @@
 checkout
-checkout.css
 stripe.js
 jquery.payment.js
 base.js
 
 login
 login.js
+base.js
+
+admin
+admin.js
 base.js
