@@ -18,6 +18,7 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
   object name extends MappedString(this, 100)
   object customers extends MappedOneToMany(User, User.referer)
   object members extends MappedOneToMany(User, User.agency)
+  object coupons extends MappedOneToMany(Coupon, Coupon.agency)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }

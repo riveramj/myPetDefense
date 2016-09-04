@@ -17,19 +17,20 @@ class Coupon extends LongKeyedMapper[Coupon] with IdPK with OneToMany[Long, Coup
 
   object couponCode extends MappedString(this, 100)
   object freeMonths extends MappedInt(this)
-  object referer extends MappedLongForeignKey(this, Agency)
+  object users extends MappedOneToMany(User, User.coupon)
+  object agency extends MappedLongForeignKey(this, Agency)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 }
 
 object Coupon extends Coupon with LongKeyedMetaMapper[Coupon] {
-  def createCoupon(couponCode: String, freeMonths: Int, referer: Box[Agency]) = {
+  def createCoupon(couponCode: String, freeMonths: Int, agency: Box[Agency]) = {
     Coupon.create
       .couponId(generateLongId)
       .couponCode(couponCode.toLowerCase)
       .freeMonths(freeMonths)
-      .referer(referer)
+      .agency(agency)
       .saveMe
   }
 }

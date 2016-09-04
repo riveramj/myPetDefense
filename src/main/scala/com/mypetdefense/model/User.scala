@@ -27,6 +27,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object phone extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
   object referer extends MappedLongForeignKey(this, Agency)
+  object coupon extends MappedLongForeignKey(this, Coupon)
   object agency extends MappedLongForeignKey(this, Agency)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
@@ -41,6 +42,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     email: String,
     password: String,
     phone: String,
+    coupon: Box[Coupon],
     referer: Box[Agency],
     agency: Box[Agency],
     userType: UserType.Value
@@ -52,6 +54,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .stripeId(stripeId)
       .email(email)
       .phone(phone)
+      .coupon(coupon)
       .referer(referer)
       .agency(agency)
       .userType(userType)

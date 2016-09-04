@@ -71,7 +71,8 @@ class Coupons extends Loggable {
     ".coupon" #> coupons.map { coupon =>
       ".code *" #> coupon.couponCode &
       ".months *" #> coupon.freeMonths &
-      ".agency *" #> coupon.referer.obj.map(_.name.get)
+      ".usage-count *" #> coupon.users.size &
+      ".agency *" #> coupon.agency.obj.map(_.name.get)
     }
   }
 }

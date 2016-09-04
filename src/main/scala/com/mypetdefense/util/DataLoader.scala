@@ -117,6 +117,7 @@ object DataLoader extends Loggable {
         "(404) 409-0724",
         None,
         None,
+        None,
         UserType.Agent
       )
     }
@@ -135,6 +136,7 @@ object DataLoader extends Loggable {
         "(404) 409-0724",
         None,
         None,
+        None,
         UserType.Parent
       )
     }
@@ -147,6 +149,7 @@ object DataLoader extends Loggable {
         "rivera.mj@gmail.com",
         "password",
         "(404) 409-0724",
+        None,
         None,
         None,
         UserType.Admin

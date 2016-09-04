@@ -195,7 +195,8 @@ class Checkout extends Loggable {
       email,
       password,
       "",
-      coupon.flatMap(_.referer.obj),
+      coupon,
+      coupon.flatMap(_.agency.obj),
       None,
       UserType.Parent
     )
