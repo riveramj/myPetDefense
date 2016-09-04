@@ -99,7 +99,7 @@ fieldset label {
   @include span-columns(6);
   display: inline-block;
 
-  &.last-name, &#agent-container {
+  &.last-name, &#agency-container {
     @include omega;
   }
 }

@@ -26,8 +26,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object salt extends MappedString(this, 100)
   object phone extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
-  object referer extends MappedLongForeignKey(this, Agent)
-  object agency extends MappedLongForeignKey(this, Agent)
+  object referer extends MappedLongForeignKey(this, Agency)
+  object agency extends MappedLongForeignKey(this, Agency)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -41,8 +41,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     email: String,
     password: String,
     phone: String,
-    referer: Box[Agent],
-    agency: Box[Agent],
+    referer: Box[Agency],
+    agency: Box[Agency],
     userType: UserType.Value
   ) = {
     val user = User.create
@@ -80,7 +80,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     lastName: String,
     email: String,
     userType: UserType.Value,
-    agency: Box[Agent]
+    agency: Box[Agency]
   ) = {
     User.create
       .userId(generateLongId)

@@ -9,9 +9,9 @@ import com.mypetdefense.util.RandomIdGenerator._
 
 import java.util.Date 
 
-class Agent extends LongKeyedMapper[Agent] with IdPK with OneToMany[Long, Agent] {
-  def getSingleton = Agent
-  object agentId extends MappedLong(this) {
+class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agency] {
+  def getSingleton = Agency
+  object agencyId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
 
@@ -22,16 +22,16 @@ class Agent extends LongKeyedMapper[Agent] with IdPK with OneToMany[Long, Agent]
     override def defaultValue = new Date()
   }
 
-  def createNewAgent(
+  def createNewAgency(
     name: String
   ) = {
-    Agent.create
-    .agentId(generateLongId)
+    Agency.create
+    .agencyId(generateLongId)
     .name(name)
     .saveMe
   }
 }
 
-object Agent extends Agent with LongKeyedMetaMapper[Agent]
+object Agency extends Agency with LongKeyedMetaMapper[Agency]
 
 

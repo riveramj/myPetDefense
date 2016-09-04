@@ -29,17 +29,17 @@ object Coupons extends Loggable {
 
 class Coupons extends Loggable {
   val coupons = Coupon.findAll()
-  val allAgents = Agent.findAll()
+  val allAgencies = Agency.findAll()
 
   var codeName = ""
   var freeMonths = ""
-  var agency: Box[Agent] = Empty
+  var chosenAgency: Box[Agency] = Empty
 
-  def agentDropdown = {
+  def agencyDropdown = {
     SHtml.selectObj(
-        allAgents.map(agent => (agent, agent.name.get)),
-        Empty,
-        (agent: Agent) => agency = Full(agent)
+        allAgencies.map(agency => (agency, agency.name.get)),
+        chosenAgency,
+        (agency: Agency) => chosenAgency = Full(agency)
       )
   }
 
@@ -53,7 +53,7 @@ class Coupons extends Loggable {
       Coupon.createCoupon(
         codeName.toLowerCase().trim(),
         tryo(freeMonths.trim().toInt).openOr(0),
-        agency
+        chosenAgency
       )
       S.redirectTo(Coupons.menu.loc.calcDefaultHref)
     } else {
@@ -66,12 +66,12 @@ class Coupons extends Loggable {
     ".coupons [class+]" #> "current" &
     "#code-name" #> text(codeName, codeName = _) &
     "#free-months" #> text(freeMonths, freeMonths = _) &
-    "#agent-container #agent-select" #> agentDropdown &
+    "#agency-container #agency-select" #> agencyDropdown &
     "#create-item" #> SHtml.ajaxSubmit("Create Coupon", () => createCoupon) &
     ".coupon" #> coupons.map { coupon =>
       ".code *" #> coupon.couponCode &
       ".months *" #> coupon.freeMonths &
-      ".agent *" #> coupon.referer.obj.map(_.name.get)
+      ".agency *" #> coupon.referer.obj.map(_.name.get)
     }
   }
 }

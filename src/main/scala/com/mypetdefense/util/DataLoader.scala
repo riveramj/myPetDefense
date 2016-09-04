@@ -121,24 +121,10 @@ object DataLoader extends Loggable {
       )
     }
 
-    if (Agent.findAll().isEmpty) {
-      Agent.createNewAgent("Big Pets")
+    if (Agency.findAll().isEmpty) {
+      Agency.createNewAgency("Big Pets")
     }
     
-    if (Lead.findAll().isEmpty) {
-      val possibleAgent = Agent.find(By(Agent.name, "Big Pets"))
-      
-      possibleAgent.map { agent =>
-        Lead.createNewLead(
-          "Jane",
-          "Doe",
-          "rivera.mj+lead@gmail.com",
-          "(404) 409-0724",
-          agent
-        )
-      }
-    }
-
     if (User.findAll(By(User.userType, UserType.Parent)).isEmpty) {
       User.createNewUser(
         "Jane",

@@ -30,20 +30,20 @@ object Users extends Loggable {
 
 class Users extends Loggable {
   val users = User.findAll()
-  val allAgents = Agent.findAll()
+  val allAgencies = Agency.findAll()
 
   var firstName = ""
   var lastName = ""
   var email = ""
   var userType: Box[UserType.Value] = Full(UserType.Agent)
-  var agency: Box[Agent] = Empty
+  var chosenAgency: Box[Agency] = Empty
   var admin_? = false
   
-  def agentDropdown = {
+  def agencyDropdown = {
     SHtml.selectObj(
-        allAgents.map(agent => (agent, agent.name.get)),
-        Empty,
-        (agent: Agent) => agency = Full(agent)
+        allAgencies.map(agency => (agency, agency.name.get)),
+        chosenAgency,
+        (agency: Agency) => chosenAgency = Full(agency)
       )
   }
 
@@ -60,7 +60,7 @@ class Users extends Loggable {
         lastName,
         email,
         UserType.Admin,
-        agency
+        chosenAgency
       )
       S.redirectTo(Users.menu.loc.calcDefaultHref)
     } else {
@@ -93,8 +93,8 @@ class Users extends Loggable {
       "#last-name" #> ajaxText(lastName, lastName = _) &
       "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
       "#user-type-select" #> userTypeRadio(renderer) &
-      "#agent-container" #> ClearNodesIf(admin_?) &
-      "#agent-container #agent-select" #> agentDropdown &
+      "#agency-container" #> ClearNodesIf(admin_?) &
+      "#agency-container #agency-select" #> agencyDropdown &
       "#create-item" #> SHtml.ajaxSubmit("Create User", () => createUser)
     } &
     ".user" #> users.map { user =>
@@ -102,7 +102,7 @@ class Users extends Loggable {
       ".email *" #> user.email &
       ".email *" #> user.email &
       ".type *" #> user.userType &
-      ".agent *" #> user.agency.obj.map(_.name.get)
+      ".agency *" #> user.agency.obj.map(_.name.get)
     }
   }
 }

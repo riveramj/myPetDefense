@@ -206,7 +206,6 @@ class Checkout extends Loggable {
 
     val shippingAddress = Address.createNewAddress(
       Full(user),
-      None,
       street1,
       street2,
       city,
