@@ -37,7 +37,7 @@ class Agencies extends Loggable {
       Agency.createNewAgency(
         name.trim()
       )
-      S.redirectTo(Coupons.menu.loc.calcDefaultHref)
+      S.redirectTo(Agencies.menu.loc.calcDefaultHref)
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }

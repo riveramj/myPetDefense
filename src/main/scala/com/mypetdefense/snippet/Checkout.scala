@@ -169,11 +169,11 @@ class Checkout extends Loggable {
 
         case TrySuccess(stripeFailure) =>
           logger.error("create customer failed with: " + stripeFailure)
-          Alert("An error has occurued. Please try again.")
+          Alert("An error has occured. Please try again.")
         
         case TryFail(throwable: Throwable) =>
           logger.error("create customer failed with: " + throwable)
-          Alert("An error has occurued. Please try again.")
+          Alert("An error has occured. Please try again.")
       }
     } else {
       validateFields.foldLeft(Noop)(_ & _)
