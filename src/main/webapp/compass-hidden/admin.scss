@@ -19,12 +19,16 @@ nav {
   }
 }
 
-#user-container span {
+#user-container span, .pet-container span, .product-container span {
   display: inline-block;
   padding-right: 10px;
   
   color: #4F4E4E;
   font-size: em(16px);
+}
+
+.pet-container span, .product-container span {
+  display: block;
 }
 
 body {
@@ -50,7 +54,7 @@ fieldset {
   legend {
     padding-top: rem(20px);
     color: #4F4E4E;
-    font-size: em(18px);
+    font-size: rem(18px);
   }
 }
 
@@ -108,16 +112,28 @@ fieldset label {
   @include span-columns(3);
 }
 
+.tiny-field.pet-container {
+  @include span-columns(2);
+}
+
+.tiny-field.product-container {
+  @include span-columns(3);
+}
+
 .tiny-field#agency-container {
   @include span-columns(2);
 }
 
-div.create-item {
+.tiny-field.pet-name-container {
+  @include span-columns(4);
+}
+
+div.create-item, div.create-item-container {
   @include span-columns(12);
   padding-top: rem(18px);
 }
 
-input#create-item {
+input#create-item, input.create-item, button.create-item {
   background: #259490;
   border: none;
   border-radius: 4px;
@@ -129,7 +145,7 @@ input#create-item {
 
 thead {
   background-color: #2E9F9B;
-  font-size: em(12px);
+  font-size: rem(12px);
   color: #FFFFFF;
   font-weight: $semibold;
   text-transform: uppercase;
@@ -148,7 +164,7 @@ tbody {
   }
 
   td {
-    font-size: em(13px);
+    font-size: rem(13px);
     padding: rem(10px) rem(14px);
   }
 }
@@ -176,6 +192,19 @@ table {
   cursor: pointer;
 }
 
-td form {
+td.ship-it form {
   background-color: inherit;
 }
+
+td table {
+  margin-bottom: 0;
+}
+
+.parent {
+  cursor: pointer;
+}
+
+.collapsed {
+  display: none;
+}
+

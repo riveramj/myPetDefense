@@ -29,6 +29,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object referer extends MappedLongForeignKey(this, Agency)
   object coupon extends MappedLongForeignKey(this, Coupon)
   object agency extends MappedLongForeignKey(this, Agency)
+  object pets extends MappedOneToMany(Pet, Pet.user)
+  object addresses extends MappedOneToMany(Address, Address.user)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
