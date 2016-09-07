@@ -329,6 +329,13 @@ button.missing-product.desktop div {
   font-weight: $bold;
 }
 
+#missing-product-container {
+  @media (min-width: $bp-med) {
+    position: fixed;
+    right: 0;
+  }
+}
+
 #missing-product-overlay {
   @include span-columns(12);
   margin-right: 0;
@@ -337,10 +344,17 @@ button.missing-product.desktop div {
   background: rgba(69, 67, 67, .9);
 
   @media (min-width: $bp-med) {
-    @include span-columns(6);
+    position: fixed;
+    right: -700px;
+    width: 700px;
+
     background: rgba(80, 78, 78, 1);
     background: rgb(80, 78, 78);
     @include omega;
+
+    &.is-visible {
+      right: 0;
+    }
   }
 
   .fa-close {
@@ -393,7 +407,7 @@ button.missing-product.desktop div {
   }
 }
 
-// slide up scss
+// slide out scss
 
 .sliding-panel-content {
   $action-color: #477DCA !default;
@@ -418,6 +432,7 @@ button.missing-product.desktop div {
     transform: translateX(700px);
     height: initial;
     margin-top: rem(150px);
+    transition: all 0.4s linear;
   }
 
   &.is-visible {
