@@ -82,6 +82,7 @@ nav {
 
     .desktop {
       display: inline-block;
+      padding: rem(19px) 0;
     }
   }
 
@@ -101,6 +102,7 @@ nav {
     display: block;
     font-weight: $semibold;
     font-size: rem(14px);
+    color: #ffffff;
   
     &:visited {
       color: #ffffff;
