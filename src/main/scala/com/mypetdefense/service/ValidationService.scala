@@ -55,6 +55,18 @@ object ValidationService extends Loggable {
     }
   }
 
+  def validNumber(number: String, errorId: String): Box[ValidationError] = {
+    tryo(number.toInt) match {
+      case Full(realInt) => Empty
+      case _ => Full(ValidationError(errorId, "Not a number"))
+    }
+  }
+
+  def checkNumber(number: String, errorId: String): Box[ValidationError] = {
+    checkEmpty(number, errorId) or
+    validNumber(number, errorId)
+  }
+
   def checkEmail(email: String, errorId: String): Box[ValidationError] = {
     checkDuplicateEmail(email, errorId) or
     checkEmpty(email, errorId) or

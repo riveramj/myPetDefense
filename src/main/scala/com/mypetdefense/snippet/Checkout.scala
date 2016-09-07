@@ -169,11 +169,11 @@ class Checkout extends Loggable {
 
         case TrySuccess(stripeFailure) =>
           logger.error("create customer failed with: " + stripeFailure)
-          Alert("An error has occurued. Please try again.")
+          Alert("An error has occured. Please try again.")
         
         case TryFail(throwable: Throwable) =>
           logger.error("create customer failed with: " + throwable)
-          Alert("An error has occurued. Please try again.")
+          Alert("An error has occured. Please try again.")
       }
     } else {
       validateFields.foldLeft(Noop)(_ & _)
@@ -195,7 +195,9 @@ class Checkout extends Loggable {
       email,
       password,
       "",
-      coupon.flatMap(_.referer.obj),
+      coupon,
+      coupon.flatMap(_.agency.obj),
+      None,
       UserType.Parent
     )
 
@@ -205,7 +207,6 @@ class Checkout extends Loggable {
 
     val shippingAddress = Address.createNewAddress(
       Full(user),
-      None,
       street1,
       street2,
       city,

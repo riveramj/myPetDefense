@@ -43,8 +43,7 @@ class Boot {
       Shipment,
       ShipmentLineItem,
       Subscription,
-      Lead,
-      Agent,
+      Agency,
       Coupon
     )
 

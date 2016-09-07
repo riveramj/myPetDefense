@@ -12,7 +12,7 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator
 
 import java.util.Date
 
-class User extends LongKeyedMapper[User] with IdPK {
+class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def getSingleton = User
   object userId extends MappedLong(this) {
     override def dbIndexed_? = true
@@ -26,7 +26,11 @@ class User extends LongKeyedMapper[User] with IdPK {
   object salt extends MappedString(this, 100)
   object phone extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
-  object referer extends MappedLongForeignKey(this, Agent)
+  object referer extends MappedLongForeignKey(this, Agency)
+  object coupon extends MappedLongForeignKey(this, Coupon)
+  object agency extends MappedLongForeignKey(this, Agency)
+  object pets extends MappedOneToMany(Pet, Pet.user)
+  object addresses extends MappedOneToMany(Address, Address.user)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -40,7 +44,9 @@ class User extends LongKeyedMapper[User] with IdPK {
     email: String,
     password: String,
     phone: String,
-    referer: Box[Agent],
+    coupon: Box[Coupon],
+    referer: Box[Agency],
+    agency: Box[Agency],
     userType: UserType.Value
   ) = {
     val user = User.create
@@ -50,7 +56,9 @@ class User extends LongKeyedMapper[User] with IdPK {
       .stripeId(stripeId)
       .email(email)
       .phone(phone)
+      .coupon(coupon)
       .referer(referer)
+      .agency(agency)
       .userType(userType)
 
     setUserPassword(user, password)
@@ -70,6 +78,31 @@ class User extends LongKeyedMapper[User] with IdPK {
       .password(hashedPassword)
       .salt(salt)
       .saveMe
+  }
+
+  def createNewPendingUser(
+    firstName: String,
+    lastName: String,
+    email: String,
+    userType: UserType.Value,
+    agency: Box[Agency]
+  ) = {
+    User.create
+      .userId(generateLongId)
+      .firstName(firstName)
+      .lastName(lastName)
+      .email(email)
+      .agency(agency)
+      .userType(userType)
+      .saveMe
+  }
+  
+  def findByEmail(email: String): Box[User] = {
+    User.find(By(User.email, email))
+  }
+
+  def isCorrectPassword_?(password: String, user: User) = {
+    user.password.get == hashPassword(password, user.salt.get)
   }
 }
 

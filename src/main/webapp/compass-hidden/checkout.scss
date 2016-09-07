@@ -374,7 +374,7 @@ fieldset label {
   }
 }
 
-.signup {
+.signup-container {
   margin-bottom: rem(37px);
   @include span-columns(10);
   @include shift(1);
@@ -411,15 +411,4 @@ fieldset label {
   @media (min-width: $bp-med) {
     margin-bottom: rem(113px);
   }
-}
-
-.validation-error {
-  display: inline-block;
-  padding-left: 7px;
-  color: #E52323;
-  font-size: rem(12px);
-}
-
-.error {
-  border: 1px solid #FF9295;
 }

@@ -1,4 +1,5 @@
 package com.mypetdefense.snippet
+package admin
 
 import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml
@@ -13,13 +14,17 @@ import java.util.Date
 import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
+import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
 
 object Dashboard extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
+  import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Dashboard") / "dashboard"
+    val menu = Menu.i("Dashboard") / "admin" / "dashboard" >> 
+      adminUser >>
+      loggedIn
 }
 
 class Dashboard extends Loggable {
@@ -27,8 +32,8 @@ class Dashboard extends Loggable {
   def getUpcomingShipments = {
     Subscription.findAll(
       BySql(
-        "nextShipDate < CURRENT_DATE + interval '5 day' AND nextShipDate >= CURRENT_DATE", 
-        IHaveValidatedThisSQL("mike","2016-04-24")
+        "nextShipDate < CURRENT_DATE + interval '5 day'",
+        IHaveValidatedThisSQL("mike","2016-09-04")
       )
     )
   }
@@ -60,6 +65,7 @@ class Dashboard extends Loggable {
   }
 
   def render = {
+    ".dashboard [class+]" #> "current" &
     ".shipment" #> getUpcomingShipments.map { subscription =>
       val shipment = Shipment.find(
         By(Shipment.subscription, subscription),
@@ -68,7 +74,7 @@ class Dashboard extends Loggable {
 
       val user = subscription.user.obj
 
-      val productNames = subscription.getProducts.groupBy(_.name)
+      val products = subscription.getProducts
       val dateFormat = new SimpleDateFormat("MMM dd")
 
       val shipAddressRaw = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
@@ -80,9 +86,9 @@ class Dashboard extends Loggable {
       ".ship-on *" #> dateFormat.format(subscription.nextShipDate.get) &
       ".name *" #> user.map(_.name) &
       ".address *" #> address &
-      ".products" #> productNames.map { case (name, product) =>
-        ".amount *"  #> product.size &
-        ".product-name *" #> name
+      ".products" #> products.map { product =>
+        ".product-name *" #> product.name.get
+        ".product-size *" #> product.size.get.toString
       } &
       ".payment-processed *" #> paymentProcessed_?(shipment) &
       ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, user, shipment))

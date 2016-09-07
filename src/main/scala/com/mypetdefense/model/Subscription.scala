@@ -9,7 +9,7 @@ import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
 
-class Subscription extends LongKeyedMapper[Subscription] with IdPK {
+class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMany[Long, Subscription] {
   def getSingleton = Subscription
   object subscriptionId extends MappedLong(this){
     override def dbIndexed_? = true
@@ -18,6 +18,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK {
   object startDate extends MappedDateTime(this)
   object renewalDate extends MappedDateTime(this)
   object nextShipDate extends MappedDateTime(this)
+  object shipments extends MappedOneToMany(Shipment, Shipment.subscription)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
   }

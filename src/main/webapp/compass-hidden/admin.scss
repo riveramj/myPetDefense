@@ -1,0 +1,210 @@
+@import "base";
+@import "nav-bar";
+
+#logo-name { 
+  @media (min-width: $bp-med) {
+    @include span-columns(2);
+    @include shift(1);
+    padding-top: rem(19px);
+  }
+}
+
+nav {
+  @media (min-width: $bp-large) {
+    @include span-columns(8);
+    @include shift(0);
+    @include omega;
+
+    text-align: right;
+  }
+}
+
+#user-container span, .pet-container span, .product-container span {
+  display: inline-block;
+  padding-right: 10px;
+  
+  color: #4F4E4E;
+  font-size: em(16px);
+}
+
+.pet-container span, .product-container span {
+  display: block;
+}
+
+body {
+  background-color: #DCDBDB;
+}
+
+#item-container {
+  @include span-columns(10);
+  @include shift(1);
+}
+
+h2 {
+  padding: rem(43px) 0 rem(15px);
+  color: #605F5F;
+  font-size: em(27px);
+  font-weight: $semibold;
+}
+
+fieldset {
+  @include span-columns(12);
+  padding: em(20px) em(35px) em(40px);
+
+  legend {
+    padding-top: rem(20px);
+    color: #4F4E4E;
+    font-size: rem(18px);
+  }
+}
+
+form {
+  @include span-columns(12);
+  background-color: #F1F1F1;
+  @include omega;
+}
+
+fieldset label {
+  display: inline-block;
+  width: 100%;
+  padding-bottom: em(22px);
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  input {
+    width: 100%;
+    color: #4F4E4E;
+    font-size: em(22px);
+    border: 1px solid #CECECE;
+    padding: rem(7px) rem(10px);
+    border-radius: 3px;
+
+    @include placeholder {
+      color: #949494;
+    }
+  }
+}
+
+.field-label {
+  display: block;
+  color: #4F4E4E;
+  font-weight: $semibold;
+  font-size: rem(14px);
+  padding-bottom: rem(2px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(3px);
+  }
+}
+
+.short-field {
+  @include span-columns(6);
+  display: inline-block;
+
+  &.last-name, &#agency-container {
+    @include omega;
+  }
+}
+
+.tiny-field, .create-item.tiny-field {
+  @include span-columns(3);
+}
+
+.tiny-field.pet-container {
+  @include span-columns(2);
+}
+
+.tiny-field.product-container {
+  @include span-columns(3);
+}
+
+.tiny-field#agency-container {
+  @include span-columns(2);
+}
+
+.tiny-field.pet-name-container {
+  @include span-columns(4);
+}
+
+div.create-item, div.create-item-container {
+  @include span-columns(12);
+  padding-top: rem(18px);
+}
+
+input#create-item, input.create-item, button.create-item {
+  background: #259490;
+  border: none;
+  border-radius: 4px;
+  padding: rem(11px) rem(20px);
+  color: #ffffff;
+  font-size: em(16px);
+  cursor: pointer;
+}
+
+thead {
+  background-color: #2E9F9B;
+  font-size: rem(12px);
+  color: #FFFFFF;
+  font-weight: $semibold;
+  text-transform: uppercase;
+
+  td {
+    letter-spacing: 0.4px;
+    padding: rem(11px) rem(14px) rem(13px);
+  }
+}
+
+tbody {
+  background-color: #ffffff;
+
+  tr {
+    border-bottom: 1px solid #DCDBDB;
+  }
+
+  td {
+    font-size: rem(13px);
+    padding: rem(10px) rem(14px);
+  }
+}
+
+select {
+  font-size: em(22px);
+}
+
+table {
+  width: 100%;
+  margin-bottom: em(50px);
+}
+
+#code-name {
+  text-transform: lowercase;
+}
+
+.ship {
+  background: #259490;
+  border: none;
+  border-radius: 4px;
+  padding: rem(10px) rem(20px);
+  color: #ffffff;
+  font-size: em(16px);
+  cursor: pointer;
+}
+
+td.ship-it form {
+  background-color: inherit;
+}
+
+td table {
+  margin-bottom: 0;
+}
+
+.parent {
+  cursor: pointer;
+}
+
+.collapsed {
+  display: none;
+}
+

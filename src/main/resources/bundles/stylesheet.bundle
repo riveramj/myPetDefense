@@ -1,6 +1,9 @@
 home
 home.css
 
+login
+login.css
+
 choose-pet
 choose-pet.css
 
@@ -16,5 +19,5 @@ checkout.css
 success
 success.css
 
-dashboard
-dashboard.css
+admin
+admin.css

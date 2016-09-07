@@ -1,0 +1,68 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+<div data-lift="admin.Users.render?eager_eval=true">
+  <div data-lift="embed?what=admin/admin-nav-bar"></div>
+  <div id="item-container">
+    <h2>Users</h2>
+    <form>
+      <fieldset class="create">
+        <legend>Create User</legend>
+          <label class="short-field">
+            <span class="field-label">First name</span>
+            <input id="first-name" type="text">            
+          </label>
+          <label class="short-field last-name">
+            <span class="field-label">Last name</span>
+            <input id="last-name" type="text">
+          </label>
+          <label>
+            <span class="field-label">Email</span>
+            <input id="email" type="text">
+          </label>
+          <div class="short-field" id="user-container">
+            <div class="field-label">User Type</div>
+            <span id="user-type-select">
+              <input type="radio" value="agency">agency
+              <input type="radio" value="agency">admin
+            </span>
+          </div>
+          <div class="short-field" id="agency-container">
+            <span class="field-label">Agency</span>
+            <select id="agency-select">
+              <option value="123456">big pets</option>
+              <option value="099221">pets-r-us</option>
+            </select>
+          </div>
+          <div class="create-item">
+            <button type="submit" id="create-item">Create</button>
+          </div>
+      </fieldset>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td>Email</td>
+          <td>Parent</td>
+          <td>Agency</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="user">
+          <td class="name">Mike Rivera</td>
+          <td class="email">email@email.com</td>
+          <td class="type">admin</td>
+          <td class="agency">big pets</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=admin">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+  </tail>
+</div>
+
+

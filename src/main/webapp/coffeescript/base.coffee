@@ -7,3 +7,10 @@ window.myPetDefenseSite =
     myPetDefenseSite.event 'form-validation-error',
       fieldSelector: fieldSelector,
       error: error
+
+$(document).on 'form-validation-error', (event) ->
+  $target = $(event.fieldSelector)
+  $targetContainer = $target.closest('label').find('.field-label')
+
+  $target.addClass "error"
+  $targetContainer.append $("<div />").addClass("validation-error").text(event.error)
