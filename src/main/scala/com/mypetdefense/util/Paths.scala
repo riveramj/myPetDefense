@@ -115,6 +115,7 @@ object Paths {
     admin.Users.menu,
     admin.Coupons.menu,
     admin.Agencies.menu,
+    admin.PhonePortal.menu,
     Login.menu,
     Login.logoutMenu
   )
