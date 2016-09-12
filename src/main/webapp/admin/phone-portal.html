@@ -1,0 +1,149 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div data-lift="admin.PhonePortal.render?eager_eval=true">
+    <div data-lift="embed?what=admin/phone-nav-bar"></div>
+    <form>
+      <fieldset class="account-info">
+        <legend>Account Info</legend>
+        <div>
+          <label>
+            <div><span class="field-label">Pet Name</span></div>
+            <input size="20" id="pet-name" type="text">
+          </label>
+          <div class="tiny-field pet-container">
+            <div class="field-label">Pet Type</div>
+            <span class="pet-type-select">
+              <input type="radio" value="cat">cat
+              <input type="radio" value="dog">dog
+            </span>
+          </div>
+          <div class="tiny-field product-container">
+            <span class="field-label">Product</span>
+            <select class="product-select">
+              <option value="123456">adventure 5-10</option>
+              <option value="099221">zoguard 6-9</option>
+            </select>
+          </div>
+          <label>
+            <div><span class="field-label">Email</span></div>
+            <input id="email" type="text">
+          </label>
+        </div>
+      </fieldset>
+      <fieldset class="shipping-info">
+        <legend>Shipping Info</legend>
+        <div>
+          <label>
+            <span class="field-label">First name</span>
+            <input id="first-name" type="text">            
+          </label>
+          <label>
+            <span class="field-label">Last name</span>
+            <input id="last-name" type="text">
+          </label>
+          <label>
+            <span class="field-label">Street Address</span>
+            <input id="street-1" type="text">
+            <input id="street-2" type="text">
+          </label>
+          <label class="short-field city">
+            <span class="field-label">City</span>
+            <input id="city" type="text">
+          </label>
+          <label class="short-field state">
+            <span class="field-label">State</span>
+            <input id="state" type="text" maxlength="2">
+          </label>
+          <label class="short-field zip">
+            <span class="field-label">Zip</span>
+            <input id="zip" type="tel" maxlength="5">
+          </label>
+        </div>
+      </fieldset>
+      <fieldset class="billing-info">
+        <legend>Billing Info</legend>
+        <div>
+          <label>
+            <div><span class="field-label cardholder-name">Cardholder Name</span></div>
+            <input type="text" id="cardholder-name">
+          </label>
+          <label class="short-field card-number">
+            <div><span class="field-label">Card Number</span></div>
+            <input id="card-number" type="tel" data-stripe="number" autocomplete="cc-number" placeholder="•••• •••• •••• ••••">
+          </label>
+          <label class="short-field expiration-date">
+            <div><span class="field-label">Expires</span></div>
+            <input type="tel" id="card-expiry" placeholder="MM/YY" autocomplete="cc-exp">
+          </label>
+          <label class="short-field cvc">
+            <span class="field-label">CVC</span>
+            <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc" autocomplete="off">            
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="promotion-info">
+        <legend>Promotion Code</legend>
+        <div>
+          <label>
+            <div>
+              <span class="field-label">Promotion Code</span>
+              <span id="promo-error" class="hidden">Invalid. Please try another code.</span>
+              <span id="promo-success" class="hidden"><i class="fa fa-check"></i> Promotion applied.</span>
+            </div>
+            <div class="apply-promo-container">
+              <input size="20" id="promo-code" type="text">
+              <button class="apply-promo mobile" type="button">Apply</button>
+              <button class="apply-promo desktop" type="button">Apply Code</button>
+            </div>
+
+          </label>
+        </div>
+      </fieldset>
+
+      <div id="order-summary">
+        <div id="summary">
+          <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+          <h2>Order Summary</h2>
+        </div>
+        <ul id="order-details">
+          <li id="selected-note">Your selected items:</li>
+          <li id="type">Pet <span>Dog</span></li>
+          <li id="size">Size <span>11-20</span></li>
+          <li id="product">Product <span>Adventure Plus for Dogs</span></li>
+        </ul>
+        <div id="order">
+          <div id="price-additions">
+            <div class="monthly-charge">
+              <span class="amount">$9.99</span> / A Month
+            </div>
+            <div id="tax">
+              + GA Tax $<span id="tax-amount">0.99</span>
+            </div>
+            <div id="promo-discount-note">+ Promotion Discount</div>
+          </div>
+          <div id="order-total">
+            <h3>Order Total</h3>
+            <div class="monthly-charge">
+              <span class="amount">$1.11</span> / A Month
+            </div>
+          </div>
+
+          <div class="signup-container">
+            <button type="submit" class="checkout select-choice">Place Order</button>
+            <div id="agreement">
+              By clicking "Place Order" you agree to pay the full monthly amount shown above after promotions have completed.
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=phone-portal">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    <script type="text/javascript" data-lift="script-bundle?name=phone-portal"></script>
+  </tail>
+</div>
