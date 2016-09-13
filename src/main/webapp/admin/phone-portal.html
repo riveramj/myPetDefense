@@ -2,34 +2,44 @@
   <div data-lift="admin.PhonePortal.render?eager_eval=true">
     <div data-lift="embed?what=admin/phone-nav-bar"></div>
     <h2>Users</h2>
+    <form class="create-item">
     <div id="left-column">
      <fieldset class="account-info">
-        <div>
+        <div class="account-container">
           <legend>Account Info</legend>
           <label>
             <div><span class="field-label">Email</span></div>
             <input id="email" type="text">
           </label>
           <label>
-            <div class="tiny-field pet-container">
-              <div class="field-label">Pet Type</div>
-              <span class="pet-type-select">
-                <input type="radio" value="cat">cat
-                <input type="radio" value="dog">dog
-              </span>
-            </div>
             <div><span class="field-label">Pet Name</span></div>
-            <input size="20" id="pet-name" type="text">
+            <input size="20" class="pet-name" type="text">
           </label>
-          <label>
-            <div><span class="field-label">Email</span></div>
-            <input id="email" type="text">
+          <div class="pet-container">
+            <div class="field-label">Pet Type</div>
+            <span class="pet-type-select">
+              <input type="radio" value="dog">dog
+              <input type="radio" value="cat">cat
+            </span>
+          </div>
+          <label class="short-field expiration-date">
+            <div><span class="field-label">Birth Month</span></div>
+            <input type="tel" class="birth-month" placeholder="MM/YY">
           </label>
-          <div class="tiny-field product-container">
+          <div class="product-container">
             <span class="field-label">Product</span>
             <select class="product-select">
               <option value="123456">adventure 5-10</option>
               <option value="099221">zoguard 6-9</option>
+            </select>
+          </div>
+          <div class="size-container">
+            <span class="field-label">Expected Adult Size</span>
+            <select class="size-select">
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+              <option value="xlarge">XLarge</option>
             </select>
           </div>
         </div>
@@ -88,12 +98,12 @@
         </div>
       </fieldset>
 
-      <fieldset class="promotion-info">
+      <fieldset class="agent-info">
         <div>
-          <legend>Promotion Code</legend>
+          <legend>Agent Code</legend>
           <label>
             <div>
-              <span class="field-label">Promotion Code</span>
+              <span class="field-label">Agent Code</span>
               <span id="promo-error" class="hidden">Invalid. Please try another code.</span>
               <span id="promo-success" class="hidden"><i class="fa fa-check"></i> Promotion applied.</span>
             </div>

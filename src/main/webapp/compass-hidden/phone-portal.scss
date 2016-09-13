@@ -10,6 +10,10 @@ h2 {
   font-weight: $semibold;
 }
 
+.create-item {
+  background-color: #DCDBDB;
+}
+
 #left-column {
   @media (min-width: $bp-med) {
     @include span-columns(5);
@@ -417,3 +421,36 @@ fieldset label {
     margin-bottom: rem(113px);
   }
 }
+
+.pet-container {
+  @include span-columns(7);
+  display: inline-block;
+ 
+  input {
+    width: inherit;
+  }
+}
+
+.product-container, .size-container {
+  display: inline-block;
+  margin-top: rem(22px);
+}
+
+.product-container {
+  @include span-columns(7);
+}
+
+.size-container {
+  @include span-columns(5);
+
+  span {
+    display: block;
+  }
+
+
+}
+
+.account-container, .account-container label {
+  @include span-columns(12);
+}
+

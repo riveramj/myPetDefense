@@ -30,14 +30,40 @@ object PhonePortal extends Loggable {
 
 class PhonePortal extends Loggable {
 
+  var petType: Box[AnimalType.Value] = Full(AnimalType.Dog)
+  var chosenProduct: Box[Product] = Empty
+  var petName = ""
+
+  def petTypeRadio(renderer: IdMemoizeTransform) = {
+    ajaxRadio(
+      List(AnimalType.Dog, AnimalType.Cat),
+      petType,
+      (petSelected: AnimalType.Value) => {
+        petType = Full(petSelected)
+        renderer.setHtml
+      }
+    ).toForm
+  }
+
+  def productDropdown = {
+    val products = petType.map { animal =>
+      Product.findAll(By(Product.animalType, animal))
+    }.openOr(Nil)
+
+    SHtml.selectObj(
+      products.map(product => (product, product.getNameAndSize)),
+      chosenProduct,
+      (possibleProduct: Product) => chosenProduct = Full(possibleProduct)
+    )
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
-    ".phone-portal [class+]" #> "current" 
-    //".create" #> {
-      //".new-pet-name" #> ajaxText(petName, petName = _) &
-      //".pet-type-select" #> petTypeRadio(renderer) &
-      //".product-container .product-select" #> productDropdown &
-      //".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent))
-    //}
+    ".phone-portal [class+]" #> "current" &
+    ".account-info" #> idMemoize { renderer =>
+      ".pet-name" #> ajaxText(petName, petName = _) &
+      ".pet-type-select" #> petTypeRadio(renderer) &
+      ".product-container .product-select" #> productDropdown
+    }
   }
 }
