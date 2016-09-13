@@ -155,12 +155,14 @@ fieldset label {
 
 .fa-shopping-cart {
   display: inline-block;
+  float: left;
   color: #1D8884;
   font-size: rem(18px);
   padding-left: rem(14px); 
 }
 
 #summary {
+  @include span-columns(12);
   margin-bottom: rem(25px);
   @media (min-width: $bp-med) {
     border-bottom: 1px solid #70C9C6;
@@ -185,6 +187,7 @@ fieldset label {
     text-align: left;
     @include border-top-radius(4px);
     font-weight: $semibold;
+    margin-left: 0;
     
     display: inline-block;
   }
@@ -453,4 +456,3 @@ fieldset label {
 .account-container, .account-container label {
   @include span-columns(12);
 }
-
