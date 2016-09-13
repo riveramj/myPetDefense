@@ -22,9 +22,7 @@ object Dashboard extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-    val menu = Menu.i("Dashboard") / "admin" / "dashboard" >> 
-      adminUser >>
-      loggedIn
+    val menu = Menu.i("Dashboard") / "admin" / "dashboard" 
 }
 
 class Dashboard extends Loggable {

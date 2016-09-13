@@ -18,9 +18,7 @@ object Agencies extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-    val menu = Menu.i("Agencies") / "admin" / "agencies" >>
-    adminUser >>
-    loggedIn
+    val menu = Menu.i("Agencies") / "admin" / "agencies" 
 }
 
 class Agencies extends Loggable {
