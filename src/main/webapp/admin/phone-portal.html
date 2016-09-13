@@ -1,21 +1,30 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
   <div data-lift="admin.PhonePortal.render?eager_eval=true">
     <div data-lift="embed?what=admin/phone-nav-bar"></div>
-    <form>
-      <fieldset class="account-info">
-        <legend>Account Info</legend>
+    <h2>Users</h2>
+    <div id="left-column">
+     <fieldset class="account-info">
         <div>
+          <legend>Account Info</legend>
           <label>
+            <div><span class="field-label">Email</span></div>
+            <input id="email" type="text">
+          </label>
+          <label>
+            <div class="tiny-field pet-container">
+              <div class="field-label">Pet Type</div>
+              <span class="pet-type-select">
+                <input type="radio" value="cat">cat
+                <input type="radio" value="dog">dog
+              </span>
+            </div>
             <div><span class="field-label">Pet Name</span></div>
             <input size="20" id="pet-name" type="text">
           </label>
-          <div class="tiny-field pet-container">
-            <div class="field-label">Pet Type</div>
-            <span class="pet-type-select">
-              <input type="radio" value="cat">cat
-              <input type="radio" value="dog">dog
-            </span>
-          </div>
+          <label>
+            <div><span class="field-label">Email</span></div>
+            <input id="email" type="text">
+          </label>
           <div class="tiny-field product-container">
             <span class="field-label">Product</span>
             <select class="product-select">
@@ -23,45 +32,43 @@
               <option value="099221">zoguard 6-9</option>
             </select>
           </div>
-          <label>
-            <div><span class="field-label">Email</span></div>
-            <input id="email" type="text">
-          </label>
         </div>
+     </fieldset>
+     <fieldset class="shipping-info">
+       <div>
+         <legend>Shipping Info</legend>
+         <label>
+           <span class="field-label">First name</span>
+           <input id="first-name" type="text">            
+         </label>
+         <label>
+           <span class="field-label">Last name</span>
+           <input id="last-name" type="text">
+         </label>
+         <label>
+           <span class="field-label">Street Address</span>
+           <input id="street-1" type="text">
+           <input id="street-2" type="text">
+         </label>
+        <label class="short-field city">
+          <span class="field-label">City</span>
+          <input id="city" type="text">
+        </label>
+        <label class="short-field state">
+          <span class="field-label">State</span>
+          <input id="state" type="text" maxlength="2">
+        </label>
+        <label class="short-field zip">
+          <span class="field-label">Zip</span>
+          <input id="zip" type="tel" maxlength="5">
+        </label>
+       </div>
       </fieldset>
-      <fieldset class="shipping-info">
-        <legend>Shipping Info</legend>
-        <div>
-          <label>
-            <span class="field-label">First name</span>
-            <input id="first-name" type="text">            
-          </label>
-          <label>
-            <span class="field-label">Last name</span>
-            <input id="last-name" type="text">
-          </label>
-          <label>
-            <span class="field-label">Street Address</span>
-            <input id="street-1" type="text">
-            <input id="street-2" type="text">
-          </label>
-          <label class="short-field city">
-            <span class="field-label">City</span>
-            <input id="city" type="text">
-          </label>
-          <label class="short-field state">
-            <span class="field-label">State</span>
-            <input id="state" type="text" maxlength="2">
-          </label>
-          <label class="short-field zip">
-            <span class="field-label">Zip</span>
-            <input id="zip" type="tel" maxlength="5">
-          </label>
-        </div>
-      </fieldset>
+    </div>
+    <div id="right-column">
       <fieldset class="billing-info">
-        <legend>Billing Info</legend>
         <div>
+          <legend>Billing Info</legend>
           <label>
             <div><span class="field-label cardholder-name">Cardholder Name</span></div>
             <input type="text" id="cardholder-name">
@@ -82,8 +89,8 @@
       </fieldset>
 
       <fieldset class="promotion-info">
-        <legend>Promotion Code</legend>
         <div>
+          <legend>Promotion Code</legend>
           <label>
             <div>
               <span class="field-label">Promotion Code</span>
@@ -95,7 +102,7 @@
               <button class="apply-promo mobile" type="button">Apply</button>
               <button class="apply-promo desktop" type="button">Apply Code</button>
             </div>
-
+            
           </label>
         </div>
       </fieldset>
@@ -127,16 +134,17 @@
               <span class="amount">$1.11</span> / A Month
             </div>
           </div>
-
-          <div class="signup-container">
-            <button type="submit" class="checkout select-choice">Place Order</button>
-            <div id="agreement">
-              By clicking "Place Order" you agree to pay the full monthly amount shown above after promotions have completed.
-            </div>
-          </div>
         </div>
       </div>
-    </form>
+
+      <div class="signup-container">
+        <button type="submit" class="checkout select-choice">Place Order</button>
+        <div id="agreement">
+          By clicking "Place Order" you agree to pay the full monthly amount shown above after promotions have completed.
+        </div>
+      </div>
+    </div>
+  </form>
 
   </div>
   <head_merge>
