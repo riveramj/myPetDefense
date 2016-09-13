@@ -156,6 +156,7 @@ fieldset label {
 .fa-shopping-cart {
   display: inline-block;
   float: left;
+  margin-top: 17px;
   color: #1D8884;
   font-size: rem(18px);
   padding-left: rem(14px); 
@@ -455,4 +456,24 @@ fieldset label {
 
 .account-container, .account-container label {
   @include span-columns(12);
+}
+
+.select-choice {
+  @include span-columns(8);
+  @include shift(2);
+  cursor: pointer;
+  -webkit-appearance: none; 
+  display: inline-block;
+  padding: rem(13px) 0 rem(12px) 0;
+  text-decoration: none;
+  border: none;
+  color: #ffffff;
+
+  font-weight: $semibold;
+  font-size: em(20px);
+
+  border-radius: 5px;
+
+  background-color: #259490;
+  text-transform: uppercase;
 }
