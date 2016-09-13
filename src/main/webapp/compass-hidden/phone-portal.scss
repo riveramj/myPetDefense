@@ -1,0 +1,509 @@
+@import "base";
+
+h2 {
+  @include span-columns(10);
+  @include shift(1);
+
+  padding: rem(43px) 0 rem(15px);
+  color: #605F5F;
+  font-size: em(27px);
+  font-weight: $semibold;
+}
+
+.create-item {
+  background-color: #DCDBDB;
+}
+
+#left-column {
+  @media (min-width: $bp-med) {
+    @include span-columns(5);
+    @include shift(1);
+  }
+}
+
+#right-column {
+  @media (min-width: $bp-med) {
+    @include span-columns(5);
+    @include omega;
+  }
+}
+
+.step-question {
+  padding-bottom: rem(25px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(33px);
+  }
+}
+
+fieldset legend {
+  color: $green;
+  font-size: em(22px);
+  line-height: rem(28px);
+  padding-bottom: rem(6px);
+
+  @media (min-width: $bp-med) {
+    padding-top: 0;
+    padding-bottom: rem(10px);
+  }
+}
+
+.field-label {
+  color: #4F4E4E;
+  font-weight: $semibold;
+  font-size: rem(14px);
+  display: inline-block;
+  padding-bottom: rem(2px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(3px);
+  }
+}
+
+fieldset {
+  padding-bottom: rem(24px);
+}
+
+fieldset > div {
+  background-color: #F1F1F1;
+  padding: rem(14px) rem(15px) rem(14px);
+}
+
+fieldset label {
+  display: inline-block;
+  width: 100%;
+  padding-bottom: em(22px);
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  input {
+    width: 100%;
+    color: #4F4E4E;
+    font-size: em(22px);
+    border: 1px solid #CECECE;
+    padding: rem(7px) rem(10px);
+    border-radius: 3px;
+
+    @include placeholder {
+      color: #949494;
+    }
+  }
+}
+
+.add-pet-container {
+  @include span-columns(12);
+  margin-top: rem(22px);
+
+  div {
+    @include span-columns(4);
+    font-size: rem(14px);
+    line-height: 16px;
+    display: inline-block;
+    margin-top: 6px;
+  }
+}
+
+.add-pet {
+  @include span-columns(3);
+  background-color: #818080;
+  cursor: pointer;
+  -webkit-appearance: none; 
+  display: inline-block;
+  padding: rem(10px) 0 rem(9px) 0;
+  text-decoration: none;
+  border: none;
+  color: #ffffff;
+
+  font-weight: $normal;
+  font-size: rem(19px);
+
+  border-radius: 5px;
+}
+.short-field {
+  @media (min-width: $bp-med) {
+    float: none;
+    padding-bottom: 0;
+
+    &.city {
+      width: 60%;
+    }
+
+    &.state {
+      width: 13%;
+    }
+
+    &.zip {
+      width: 20%;
+    }
+
+    &.card-number {
+      width: 56%;
+    }
+
+    &.expiration-date {
+      width: 23%;
+    }
+
+    &.cvc {
+      width: 14%;
+    }
+  }
+}
+
+#city, #first-name, #last-name, #street-1, #street-2, #pet-name {
+  text-transform: capitalize;
+}
+
+#street-2 {
+  margin-top: rem(5px);
+}
+
+#state {
+  text-transform: uppercase;
+}
+
+.note-detail {
+  color: #4F4E4E;
+  font-size: em(12px);
+  padding-left: rem(4px);
+}
+
+.note {
+  display: inline-block;
+}
+
+#card-month-expiry {
+  margin-right: rem(2px);
+}
+
+#card-year-expiry {
+  margin-right: rem(-4px);
+}
+
+.fa-shopping-cart {
+  display: inline-block;
+  float: left;
+  margin-top: 17px;
+  color: #1D8884;
+  font-size: rem(18px);
+  padding-left: rem(14px); 
+}
+
+#summary {
+  @include span-columns(12);
+  margin-bottom: rem(25px);
+  @media (min-width: $bp-med) {
+    border-bottom: 1px solid #70C9C6;
+  }
+}
+
+#order-summary {
+  @include span-columns(12);
+  margin: em(50px) 0 em(30px);
+  border-radius: 4px;
+  background-color: #CDF5F4;
+
+  @media (min-width: $bp-med) {
+    margin-top: 0;
+  }
+
+  h2 {
+    background-color: #CDF5F4;
+    color: #1D8884;
+    font-size: rem(22px);
+    padding: rem(16px) 0 rem(16px) rem(14px);
+    text-align: left;
+    @include border-top-radius(4px);
+    font-weight: $semibold;
+    margin-left: 0;
+    
+    display: inline-block;
+  }
+}
+
+.promotion-info {
+  #promo-success {
+    color: #259490;
+    font-size: rem(12px);
+    display: none;
+    font-weight: $semibold;
+  }
+
+  .fa-check {
+    font-size: rem(15px);
+    color: #259490;
+  }
+
+  &.promo-error {
+    #promo-code {
+      border: 1px solid #FF9295;
+    }
+
+    #promo-error {
+      display: inline-block;
+    }
+  }
+
+  &.promo-success {
+    #promo-success {
+      display: inline-block;
+    }
+
+    .apply-promo {
+      background-color: #5BB8B3;
+    }
+  }
+}
+
+#promo-error {
+  font-size: rem(12px);
+  display: none;
+  color: #E52323;
+  font-weight: $semibold;
+}
+
+
+.apply-promo-container {
+  display: flex;
+}
+
+.apply-promo {
+  padding: rem(9px) rem(15px);
+  font-size: rem(14px);
+  border: none;
+  background-color: #818080;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+
+  border-radius: 5px;
+
+  cursor: pointer;
+
+  margin-left: 8px;
+  white-space: nowrap;
+
+  &.desktop {
+    display: none;
+  }
+
+  @media (min-width: $bp-med) {
+    &.mobile {
+      display: none;
+    }
+   
+    &.desktop {
+      display: block;
+    }
+  }
+}
+
+#selected-note {
+  font-size: rem(15px);
+}
+
+#order-details {
+  @include shift(1);
+
+  color: #1D8884;
+  font-weight: $semibold;
+  font-size: em(14px);
+  text-transform: uppercase;
+
+  padding-bottom: rem(31px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(29px);
+  }
+
+  li {
+    margin-bottom: rem(20px);
+  }
+
+  span {
+    text-transform: initial;
+    color: #0E5552;
+    font-size: rem(22px);
+    font-weight: $regular;
+    margin-left: rem(10px);
+  }
+}
+
+#order {
+  background-color: #137875;
+}
+
+#price-additions {
+  border-bottom: dotted 1px #CDF5F4;
+  margin: 0px rem(14px);
+  padding: rem(15px) 0 rem(8px);
+  color: #B3E7E6;
+  font-weight: $semibold;
+  font-size: rem(15px);
+  text-align: right;
+
+  text-align: right;
+  &.empty {
+    display: none;
+  }
+
+  .monthly-charge {
+    padding-bottom: rem(5px);
+    font-size: rem(12px);
+  }
+
+  .amount {
+    font-size: rem(18px);
+  }
+}
+
+#tax {
+  padding-bottom: rem(5px);
+}
+
+#order-total {
+  padding: em(26px) 0 em(30px);
+  text-align: center;
+
+  @media (min-width: $bp-med) {
+    padding: rem(11px) rem(14px) rem(12px);
+    text-align: right;
+  }
+  
+  h3 {
+    color: #ffffff;
+    font-size: em(14px);
+    font-weight: $semibold;
+    padding-bottom: rem(10px);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+
+    @media (min-width: $bp-med) {
+      float: left;
+      margin-top: rem(8px);
+      padding-bottom: 0;
+
+      &.promo {
+        margin-top: 0;
+      }
+    }
+  }
+
+  .monthly-charge {
+    color: #ffffff;
+    font-size: rem(12px);
+    letter-spacing: 0.4px;
+    font-weight: $semibold;
+    text-transform: uppercase;
+
+    @media (min-width: $bp-med) {
+      display: inline-block;
+      padding-left: rem(10px);
+    }
+
+    &.promo {
+      font-size: rem(16px);
+      text-transform: none;
+    }
+  }
+
+  .amount {
+    color: #ffffff;
+    font-size: rem(27px);
+    font-weight: $semibold;
+  }
+}
+
+.signup-container {
+  margin-bottom: rem(37px);
+  @include span-columns(10);
+  @include shift(1);
+
+  margin-right: 0;
+
+  @media (min-width: $bp-med) {
+    @include span-columns(8);
+    @include shift(2);
+  }
+}
+
+.select-choice {
+  width: 100%;
+  margin-bottom: rem(8px);
+
+  @media (min-width: $bp-med) {
+    font-size: rem(22px);
+    letter-spacing: 0.4px;
+  }
+}
+
+#agreement {
+  color: #4F4E4E;
+  font-size: em(12px);
+  line-height: rem(14px);
+
+  a {
+    color: $green;
+  }
+}
+
+#step-container {
+  @media (min-width: $bp-med) {
+    margin-bottom: rem(113px);
+  }
+}
+
+.pet-container {
+  @include span-columns(7);
+  display: inline-block;
+ 
+  input {
+    width: inherit;
+  }
+}
+
+.product-container, .size-container {
+  display: inline-block;
+  margin-top: rem(22px);
+}
+
+.product-container {
+  @include span-columns(7);
+}
+
+.size-container {
+  @include span-columns(5);
+  @include omega;
+
+  span {
+    display: block;
+  }
+
+
+}
+
+.account-container, .account-container label {
+  @include span-columns(12);
+}
+
+.select-choice {
+  @include span-columns(8);
+  @include shift(2);
+  cursor: pointer;
+  -webkit-appearance: none; 
+  display: inline-block;
+  padding: rem(13px) 0 rem(12px) 0;
+  text-decoration: none;
+  border: none;
+  color: #ffffff;
+
+  font-weight: $semibold;
+  font-size: em(20px);
+
+  border-radius: 5px;
+
+  background-color: #259490;
+  text-transform: uppercase;
+}
