@@ -6,6 +6,7 @@ import net.liftweb._
   import util._
 
 import com.mypetdefense.util.RandomIdGenerator._
+import com.mypetdefense.service.AccessKeyService._
 
 import org.apache.shiro.crypto.hash.Sha256Hash
 import org.apache.shiro.crypto.SecureRandomNumberGenerator
@@ -25,6 +26,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object password extends MappedString(this, 100)
   object salt extends MappedString(this, 100)
   object phone extends MappedString(this, 100)
+  object accessKey extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
   object referer extends MappedLongForeignKey(this, Agency)
   object coupon extends MappedLongForeignKey(this, Coupon)
@@ -92,6 +94,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .firstName(firstName)
       .lastName(lastName)
       .email(email)
+      .accessKey(createAccessKey)
       .agency(agency)
       .userType(userType)
       .saveMe
