@@ -72,11 +72,11 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     new Sha256Hash(password, salt, 1024).toBase64
   }
 
-  def setUserPassword(User: User, password: String): User = {
+  def setUserPassword(user: User, password: String): User = {
     val salt = getSalt
     val hashedPassword = hashPassword(password, salt)
 
-    User
+    user
       .password(hashedPassword)
       .salt(salt)
       .saveMe
@@ -98,6 +98,17 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .agency(agency)
       .userType(userType)
       .saveMe
+  }
+
+  def updatePendingUser(
+    user: User,
+    firstName: String,
+    lastName: String,
+    password: String
+  ) = {
+    val updateduser = user.firstName(firstName).lastName(lastName)
+
+    setUserPassword(updateduser, password)
   }
   
   def findByEmail(email: String): Box[User] = {

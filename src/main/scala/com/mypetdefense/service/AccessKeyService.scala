@@ -38,19 +38,15 @@ object AccessKeyService extends Loggable {
     }
   }
 
-  def removeAccessKey(key: String) {
-    findUserByKey(key) match {
-      case Full(user) =>
-        user.accessKey("").saveMe
-      case error => logger.error(s"could not remove key {${key}}. Error: ${error}")
-    }
+  def removeAccessKey(user: User) {
+    user.accessKey("").saveMe
   }
 
   def findUserByKey(key: String): Box[User] = {
     User.find(By(User.accessKey, key)) match {
       case Full(user) => Full(user)
       case error =>
-        logger.error(s"Error: ${error}. Key is s{key}")
+        logger.error(s"Error: ${error}. Key is ${key}")
         Empty
     }
   }

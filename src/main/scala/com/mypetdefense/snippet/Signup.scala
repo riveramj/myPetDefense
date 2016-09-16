@@ -21,11 +21,16 @@ object Signup extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.param[User](
-    "Signup", "Signup",
-    accessKey => AccessKeyService.findUserByKey(accessKey),
-    user => user.accessKey.get
-  ) / "signup" 
+  val menu = 
+    Menu.param[User](
+      "Signup", "Signup",
+      accessKey => AccessKeyService.findUserByKey(accessKey),
+      user => user.accessKey.get
+    ) / "signup" >>
+    MatchWithoutCurrentValue >>
+    IfValue(_.isDefined, ()=> {
+      RedirectResponse(Login.menu.loc.calcDefaultHref)
+    })
 
 }
 
@@ -60,8 +65,12 @@ class Signup extends Loggable {
       if (SecurityContext.loggedIn_?) {
         SecurityContext.logCurrentUserOut()
       }
-
-      newUser.map(redirectUser(_)).openOr(Noop)
+      
+      newUser.map { user =>
+        AccessKeyService.removeAccessKey(user)
+        User.updatePendingUser(user, firstName, lastName, password)
+        redirectUser(user)
+      }.openOr(Noop)
 
     } else {
       validateFields.foldLeft(Noop)(_ & _)
