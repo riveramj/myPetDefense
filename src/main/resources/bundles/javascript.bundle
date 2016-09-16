@@ -8,6 +8,10 @@ login
 login.js
 base.js
 
+login
+signup.js
+base.js
+
 admin
 admin.js
 base.js

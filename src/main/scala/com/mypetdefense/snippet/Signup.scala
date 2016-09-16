@@ -33,11 +33,51 @@ class Signup extends Loggable {
   import Signup._
 
   val newUser = Signup.menu.currentValue
+  val email = newUser.map(_.email.get).openOr("")
+  
+  var password = ""
+  var firstName = newUser.map(_.firstName.get).openOr("")
+  var lastName = newUser.map(_.lastName.get).openOr("")
 
-  println(newUser)
+  def redirectUser(user: User) = {
+    SecurityContext.logIn(user)
+    user.userType match {
+      case admin if admin == UserType.Admin => 
+        S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
+      case _ =>
+        S.redirectTo("/")
+    }
+  }
+
+  def signup() = {
+    val validateFields = List(
+      checkEmpty(email, "#first-name"),
+      checkEmpty(email, "#last-name"),
+      checkEmpty(email, "#password")
+    ).flatten
+
+    if (validateFields.isEmpty) {
+      if (SecurityContext.loggedIn_?) {
+        SecurityContext.logCurrentUserOut()
+      }
+
+      newUser.map(redirectUser(_)).openOr(Noop)
+
+    } else {
+      validateFields.foldLeft(Noop)(_ & _)
+    }
+  }
+
 
   def render = {
-    "#foo" #> ""
+    SHtml.makeFormsAjax andThen
+    "#signup-container" #> {
+      "#first-name" #> SHtml.text(firstName, firstName = _) &
+      "#last-name" #> SHtml.text(lastName, lastName = _) &
+      "#email [value]" #> email &
+      "#password" #> SHtml.password(password, password = _) &
+      "#signup" #> SHtml.ajaxSubmit("Sign Up", () => signup)
+    }
   }
 }
 
