@@ -1,4 +1,4 @@
 $(document).ready ->
-  $("body").on "click", '#login', (event) ->
+  $("body").on "click", '#signup', (event) ->
     $(".validation-error").remove()
     $("input.error").removeClass("error")

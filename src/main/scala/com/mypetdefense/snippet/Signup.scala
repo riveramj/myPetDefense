@@ -51,9 +51,9 @@ class Signup extends Loggable {
 
   def signup() = {
     val validateFields = List(
-      checkEmpty(email, "#first-name"),
-      checkEmpty(email, "#last-name"),
-      checkEmpty(email, "#password")
+      checkEmpty(firstName, "#first-name"),
+      checkEmpty(lastName, "#last-name"),
+      checkEmpty(password, "#password")
     ).flatten
 
     if (validateFields.isEmpty) {
