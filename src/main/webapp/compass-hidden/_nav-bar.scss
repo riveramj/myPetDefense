@@ -44,7 +44,7 @@ nav {
 }
 
 #menu-entries {
-  .login, .entry {
+  .login, .new-user-signup, .entry {
     padding: em(28px) em(25px);
   }
 
@@ -53,13 +53,12 @@ nav {
     text-transform: uppercase;
   }
 
-  .current {
-    a {
-      border-bottom: 2px solid #2E9F9B;
-      padding-bottom: rem(3px);
-      font-weight: $bold;
-    }
+  .current a, .new-user-signup a {
+    border-bottom: 2px solid #2E9F9B;
+    padding-bottom: rem(3px);
+    font-weight: $bold;
   }
+  
 
   li {
     display: inline-block;
