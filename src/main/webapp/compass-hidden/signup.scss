@@ -7,12 +7,11 @@
   padding-top: em(28px);
 
   @media (min-width: $bp-med) {
-    @include span-columns(3.5);
-    @include shift(6.5);
-
-    position: absolute;
-    margin-top: rem(202px);
-    padding-top: rem(28px);
+    @include span-columns(12);
+    @include omega;
+    background: url(../../images/dog-incognito.jpg) no-repeat center;
+    background-size: cover;
+    height: 750px;
   }
 }
 
@@ -24,8 +23,10 @@
   background-color: #DCDBDB;
 
   @media (min-width: $bp-med) {
-    @include span-columns(10);
-    @include shift(1);
+    width: 390px;
+    margin-left: 60%;
+
+    padding: rem(35px) rem(28px);
   }
 
   h2 {
@@ -81,6 +82,10 @@ label {
   text-align: right;
 
   padding-bottom: rem(40px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: 0;
+  }
 }
 
 input#signup {
@@ -104,6 +109,10 @@ div.incognito-dog {
 img.incognito-dog {
   display: block;
   width: 100%;
+  
+  @media (min-width: $bp-med) {
+    display: none;
+  }
 }
 
 #footer {
