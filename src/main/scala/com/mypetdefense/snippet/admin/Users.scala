@@ -89,6 +89,13 @@ class Users extends Loggable {
     ).toForm
   }
 
+  def deleteUser(user: User)() = {
+    if (user.delete_!)
+      S.redirectTo(Users.menu.loc.calcDefaultHref)
+    else
+      Noop
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".users [class+]" #> "current" &
@@ -106,7 +113,11 @@ class Users extends Loggable {
       ".email *" #> user.email &
       ".email *" #> user.email &
       ".type *" #> user.userType &
-      ".agency *" #> user.agency.obj.map(_.name.get)
+      ".agency *" #> user.agency.obj.map(_.name.get) &
+      ".actions .delete" #> ClearNodesIf(user.userType == UserType.Parent) &
+      ".actions .delete [onclick]" #> Confirm(s"Delete ${user.name}?",
+        ajaxInvoke(deleteUser(user))
+      )
     }
   }
 }
