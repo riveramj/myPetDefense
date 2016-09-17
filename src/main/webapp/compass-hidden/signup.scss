@@ -9,6 +9,9 @@
   @media (min-width: $bp-med) {
     @include span-columns(12);
     @include omega;
+
+    padding-top: em(134px);
+
     background: url(../../images/dog-incognito.jpg) no-repeat center;
     background-size: cover;
     height: 750px;
