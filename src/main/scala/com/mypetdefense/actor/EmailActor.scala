@@ -185,7 +185,7 @@ trait EmailActor extends EmailHandlerChain
   ) {
     val emailTransform = {
       "#content *" #> message &
-      "#logo [src]" #> (hostUrl + "/images/logo-name-white.png") &
+      "#logo [src]" #> (hostUrl + "/images/logo-name-white@2x.png") &
       "#user-email" #> to
     }
     
