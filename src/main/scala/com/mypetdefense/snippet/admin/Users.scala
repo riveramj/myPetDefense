@@ -93,7 +93,7 @@ class Users extends Loggable {
     if (user.delete_!)
       S.redirectTo(Users.menu.loc.calcDefaultHref)
     else
-      Noop
+      Alert("An error has occured. Please try again.")
   }
 
   def render = {

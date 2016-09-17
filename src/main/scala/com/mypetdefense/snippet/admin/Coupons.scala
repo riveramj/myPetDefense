@@ -17,6 +17,7 @@ import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.util.ClearNodesIf
 
 import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon}
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
@@ -69,6 +70,7 @@ class Coupons extends Loggable {
   def createCoupon = {
     val validateFields = List(
       checkEmpty(codeName, "#code-name"),
+      checkDuplicateCoupon(codeName, "#code-name"),
       checkNumber(freeMonths.trim(), "#free-months")
     ).flatten
 
@@ -98,6 +100,13 @@ class Coupons extends Loggable {
     }
   }
 
+  def deleteCoupon(coupon: Coupon)() = {
+    if (coupon.delete_!)
+      S.redirectTo(Coupons.menu.loc.calcDefaultHref)
+    else
+      Alert("An error has occured. Please try again.")
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".coupons [class+]" #> "current" &
@@ -109,7 +118,11 @@ class Coupons extends Loggable {
       ".code *" #> coupon.couponCode &
       ".months *" #> coupon.freeMonths &
       ".usage-count *" #> coupon.users.size &
-      ".agency *" #> coupon.agency.obj.map(_.name.get)
+      ".agency *" #> coupon.agency.obj.map(_.name.get) &
+      ".actions .delete" #> ClearNodesIf(coupon.users.size > 0) &
+      ".actions .delete [onclick]" #> Confirm(s"Delete ${coupon.couponCode}?",
+        ajaxInvoke(deleteCoupon(coupon))
+      )
     }
   }
 }

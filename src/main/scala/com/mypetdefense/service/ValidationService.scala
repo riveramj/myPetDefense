@@ -35,6 +35,17 @@ object ValidationService extends Loggable {
     }
   }
 
+  def checkDuplicateCoupon(coupon: String, errorId: String): Box[ValidationError] = {
+    if (coupon.nonEmpty) {
+      Coupon.find(By(Coupon.couponCode, coupon)) match {
+        case Full(coupon)  => Full(ValidationError(errorId, S ? "Code already exists"))
+        case _ => Empty
+      }
+    } else {
+      Empty
+    }
+  }
+
   def validEmailFormat(email: String, errorId: String): Box[ValidationError] = {
     val badEmail = Full(ValidationError(errorId, S ? "Not valid email address"))
     if (email.nonEmpty) {
