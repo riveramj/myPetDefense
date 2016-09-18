@@ -4,10 +4,11 @@ import net.liftweb._
   import mapper._
   import common._
   import util._
-
-import com.mypetdefense.util.RandomIdGenerator._
+    import Helpers._
 
 import java.util.Date
+
+import com.mypetdefense.util.RandomIdGenerator._
 
 class Coupon extends LongKeyedMapper[Coupon] with IdPK with OneToMany[Long, Coupon] {
   def getSingleton = Coupon
@@ -25,7 +26,7 @@ class Coupon extends LongKeyedMapper[Coupon] with IdPK with OneToMany[Long, Coup
 }
 
 object Coupon extends Coupon with LongKeyedMetaMapper[Coupon] {
-  def createCoupon(couponCode: String, freeMonths: Int, agency: Box[Agency]) = {
+  def createNewCoupon(couponCode: String, freeMonths: Int, agency: Box[Agency]) = {
     Coupon.create
       .couponId(generateLongId)
       .couponCode(couponCode.toLowerCase)

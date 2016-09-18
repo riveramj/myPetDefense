@@ -12,6 +12,8 @@ import net.liftweb.mapper.By
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.service.CouponService
+import com.mypetdefense.util.ClearNodesIf
 
 object Agencies extends Loggable {
   import net.liftweb.sitemap._
@@ -41,6 +43,26 @@ class Agencies extends Loggable {
     }
   }
 
+  def deleteAgency(agency: Agency)() = {
+
+    val possibleAgency = Agency.find(By(Agency.agencyId, agency.agencyId.get))
+
+    for {
+      refreshedAgency <- possibleAgency.toList
+      member <- refreshedAgency.members
+    } yield member.delete_!
+
+    for {
+      refreshedAgency <- possibleAgency.toList
+      coupon <- refreshedAgency.coupons
+    } yield CouponService.deleteCoupon(coupon)
+    
+    if (agency.delete_!)
+      S.redirectTo(Agencies.menu.loc.calcDefaultHref)
+    else
+      Alert("An error has occured. Please try again.")
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".agencies [class+]" #> "current" &
@@ -49,7 +71,11 @@ class Agencies extends Loggable {
     ".agency" #> agencies.map { agency =>
       ".name *" #> agency.name &
       ".customer-count *" #> agency.customers.size &
-      ".coupon-count *" #> agency.coupons.size
+      ".coupon-count *" #> agency.coupons.size &
+      ".actions .delete" #> ClearNodesIf(agency.customers.size > 0) &
+      ".actions .delete [onclick]" #> Confirm(s"Delete ${agency.name}? This will delete all members and coupons.",
+        ajaxInvoke(deleteAgency(agency))
+      )
     }
   }
 }
