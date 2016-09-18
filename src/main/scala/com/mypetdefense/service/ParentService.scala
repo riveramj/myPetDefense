@@ -31,6 +31,10 @@ object ParentService extends Loggable {
     )
   }
 
+  def deleteStripeCustomer(customerId: String) = {
+    Customer.delete(customerId)
+  }
+
   def addNewPet(
     user: User,
     name: String,
@@ -104,6 +108,48 @@ object ParentService extends Loggable {
 
       case TryFail(throwable: Throwable) =>
         logger.error(s"update (remove) subscription failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
+  def removeParent(oldUser: User): Box[User] = {
+    val user = User.find(By(User.userId, oldUser.userId.get))
+
+    val removeCustomer = deleteStripeCustomer(user.map(_.stripeId.get).openOr(""))
+
+    Try(Await.result(removeCustomer, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(stripeSub)) =>
+        val subscription = user.flatMap(_.getSubscription)
+
+
+        val shipments = subscription.map(_.shipments.toList).openOr(Nil)
+        val addresses = user.map(_.addresses.toList).openOr(Nil)
+
+        shipments.map(_.delete_!)
+        addresses.map(_.delete_!)
+        subscription.map(_.delete_!)
+        user.map(_.delete_!)
+
+        user
+
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"remove customer failed with stipe error: ${stripeFailure}")
+        logger.error(s"trying to delete ${user} anyways")
+        logger.error(s"no promises this works. Check data tables")
+
+        val subscription = user.flatMap(_.getSubscription)
+        val shipments = subscription.map(_.shipments.toList).openOr(Nil)
+        val addresses = user.map(_.addresses.toList).openOr(Nil)
+
+        shipments.map(_.delete_!)
+        addresses.map(_.delete_!)
+        subscription.map(_.delete_!)
+        user.map(_.delete_!)
+
+        user
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"remove customer failed with other error: ${throwable}")
         Empty
     }
   }

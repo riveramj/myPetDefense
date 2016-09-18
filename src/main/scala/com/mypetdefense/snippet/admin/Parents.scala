@@ -102,6 +102,15 @@ class Parents extends Loggable {
     }
   }
 
+  def deleteParent(parent: User)() = {
+    ParentService.removeParent(parent) match {
+      case Full(_) =>
+        S.redirectTo(Parents.menu.loc.calcDefaultHref)
+      case _ =>
+        Alert("An error has occured. Please try again.")
+    }
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".parents [class+]" #> "current" &
@@ -116,7 +125,11 @@ class Parents extends Loggable {
         ".phone *" #> parent.phone &
         ".coupon *" #> parent.coupon.obj.map(_.couponCode.get) &
         ".referer *" #> parent.referer.obj.map(_.name.get) &
-        ".ship-date *" #> nextShipDate.map(dateFormat.format(_))
+        ".ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
+        ".actions .delete" #> ClearNodesIf(parent.pets.size > 0) &
+        ".actions .delete [onclick]" #> Confirm(s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
+          ajaxInvoke(deleteParent(parent))
+        )
       } &
       ".pets" #> idMemoize { renderer =>
         ".create" #> {
