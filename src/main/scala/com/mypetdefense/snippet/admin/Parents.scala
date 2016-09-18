@@ -93,6 +93,15 @@ class Parents extends Loggable {
     }
   }
 
+  def deletePet(parent: User, pet: Pet, renderer: IdMemoizeTransform)() = {
+    ParentService.removePet(parent, pet) match {
+      case Full(_) =>
+        renderer.setHtml
+      case _ =>
+        Alert("An error has occured. Please try again.")
+    }
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".parents [class+]" #> "current" &
@@ -122,7 +131,10 @@ class Parents extends Loggable {
           ".pet" #> pets.map { pet =>
             ".pet-name *" #> pet.name &
             ".pet-type *" #> pet.animalType.toString &
-            ".pet-product *" #> pet.product.obj.map(_.getNameAndSize)
+            ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
+            ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
+              ajaxInvoke(deletePet(parent, pet, renderer))
+            )
           }
         }
       }

@@ -58,11 +58,41 @@ object ParentService extends Loggable {
         ))
 
       case TrySuccess(stripeFailure) =>
-        logger.error("update subscription failed with stipe error: " + stripeFailure)
+        logger.error(s"update (add) subscription failed with stipe error: ${stripeFailure}")
         Empty
 
       case TryFail(throwable: Throwable) =>
-        logger.error("update subscription failed with other error: " + throwable)
+        logger.error(s"update (add) subscription failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
+  def removePet(user: User, pet: Pet): Box[Pet] = {
+    val updateSubscription = (
+      updateStripeSubscriptionQuantity(
+        user.stripeId.get,
+        user.getSubscription.map(_.stripeSubscriptionId.get).getOrElse(""),
+        user.pets.size - 1
+      )
+    )
+
+    Try(Await.result(updateSubscription, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(stripeSub)) =>
+        if (pet.delete_!)
+          Full(pet)
+        else
+          Empty
+
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"update (remove) subscription failed with stipe error: ${stripeFailure}")
+        logger.error(s"trying to delete ${pet} anyways")
+        if (pet.delete_!)
+          Full(pet)
+        else
+          Empty
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"update (remove) subscription failed with other error: ${throwable}")
         Empty
     }
   }
