@@ -84,10 +84,18 @@ object ParentService extends Loggable {
         }
       ).openOr("")
 
+      val updatePetCount = {
+        val currentPets = user.map(_.pets.size).openOr(0)
+        if (currentPets > 0)
+          currentPets - 1
+        else
+          0
+      }
+
       updateStripeSubscriptionQuantity(
         user.map(_.stripeId.get).openOr(""),
         subscriptionId,
-        user.map(_.pets.size - 1).openOr(0)
+        updatePetCount
       )
     }
 
