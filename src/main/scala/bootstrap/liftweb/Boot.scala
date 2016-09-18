@@ -20,6 +20,14 @@ class Boot {
 
     MailConfig.init
 
+    import net.liftweb.util.Props.RunModes._
+    Props.mode match {
+      case Development => println("[LCL] ======")
+      case Staging => println("[DEMO]  ======")
+      case Pilot => println("[DEV] =========")
+      case _ => ""
+    }
+
     if (!DB.jndiJdbcConnAvailable_?) {
 
       val vendor = 
