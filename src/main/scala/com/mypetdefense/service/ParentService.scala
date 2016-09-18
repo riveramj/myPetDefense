@@ -67,14 +67,25 @@ object ParentService extends Loggable {
     }
   }
 
-  def removePet(user: User, pet: Pet): Box[Pet] = {
-    val updateSubscription = (
+  def removePet(oldUser: User, pet: Pet): Box[Pet] = {
+    val user = User.find(By(User.userId, oldUser.userId.get))
+
+    val updateSubscription = {
+      val subscriptionId = (
+        for {
+          updatedUser <- user
+          subscription <- updatedUser.getSubscription
+        } yield {
+          subscription.stripeSubscriptionId.get
+        }
+      ).openOr("")
+
       updateStripeSubscriptionQuantity(
-        user.stripeId.get,
-        user.getSubscription.map(_.stripeSubscriptionId.get).getOrElse(""),
-        user.pets.size - 1
+        user.map(_.stripeId.get).openOr(""),
+        subscriptionId,
+        user.map(_.pets.size - 1).openOr(0)
       )
-    )
+    }
 
     Try(Await.result(updateSubscription, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(stripeSub)) =>
