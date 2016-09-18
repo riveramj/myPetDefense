@@ -23,6 +23,7 @@ object ParentService extends Loggable {
   implicit val e = new StripeExecutor(stripeSecretKey)
 
   def updateStripeSubscriptionQuantity(customerId: String, subscriptionId: String, quantity: Int) = {
+    println("quantity is ${quantity} ==========")
     StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
