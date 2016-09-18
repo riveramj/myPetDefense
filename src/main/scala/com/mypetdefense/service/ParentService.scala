@@ -23,7 +23,6 @@ object ParentService extends Loggable {
   implicit val e = new StripeExecutor(stripeSecretKey)
 
   def updateStripeSubscriptionQuantity(customerId: String, subscriptionId: String, quantity: Int) = {
-    println(s"quantity is ${quantity} ==========")
     StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
@@ -85,18 +84,10 @@ object ParentService extends Loggable {
         }
       ).openOr("")
 
-      val updatePetCount = {
-        val currentPets = user.map(_.pets.size).openOr(0)
-        if (currentPets > 0)
-          currentPets - 1
-        else
-          0
-      }
-
       updateStripeSubscriptionQuantity(
         user.map(_.stripeId.get).openOr(""),
         subscriptionId,
-        updatePetCount
+        user.map(_.pets.size - 1).openOr(0)
       )
     }
 
