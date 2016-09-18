@@ -80,7 +80,11 @@ class Parents extends Loggable {
         )
       }).flatMap(identity) match {
         case Full(pet) =>
-          S.redirectTo(Parents.menu.loc.calcDefaultHref)
+          petName = ""
+          petType = Empty
+          chosenProduct = Empty
+
+          renderer.setHtml
         case other =>
           Alert("An error has occured. Please try again.")
       }
@@ -111,11 +115,15 @@ class Parents extends Loggable {
           ".pet-type-select" #> petTypeRadio(renderer) &
           ".product-container .product-select" #> productDropdown &
           ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent, renderer))
-        } &
-        ".pet" #> parent.pets.map { pet =>
-          ".pet-name *" #> pet.name &
-          ".pet-type *" #> pet.animalType.toString &
-          ".pet-product *" #> pet.product.obj.map(_.getNameAndSize)
+        } & 
+        {
+          val pets = Pet.findAll(By(Pet.user, parent))
+
+          ".pet" #> pets.map { pet =>
+            ".pet-name *" #> pet.name &
+            ".pet-type *" #> pet.animalType.toString &
+            ".pet-product *" #> pet.product.obj.map(_.getNameAndSize)
+          }
         }
       }
     }

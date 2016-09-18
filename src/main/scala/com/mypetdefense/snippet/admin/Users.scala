@@ -119,6 +119,7 @@ class Users extends Loggable {
       ".email *" #> user.email &
       ".type *" #> user.userType &
       ".agency *" #> user.agency.obj.map(_.name.get) &
+      ".actions .delete" #> ClearNodesIf(user.userType == UserType.Parent) &
       ".actions .delete [onclick]" #> Confirm(s"Delete ${user.name}?",
         ajaxInvoke(deleteUser(user))
       )
