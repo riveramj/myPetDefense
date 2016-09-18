@@ -24,10 +24,9 @@ object Parents extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Parents") / "admin" / "parents" 
-    //>>
-    //adminUser >>
-    //loggedIn
+  val menu = Menu.i("Parents") / "admin" / "parents" >>
+    adminUser >>
+    loggedIn
 }
 
 class Parents extends Loggable {
@@ -94,8 +93,8 @@ class Parents extends Loggable {
   }
 
   def deletePet(parent: User, pet: Pet, renderer: IdMemoizeTransform)() = {
-    pet.delete_! match {
-      case true =>
+    ParentService.removePet(parent, pet) match {
+      case Full(_) =>
         renderer.setHtml
       case _ =>
         Alert("An error has occured. Please try again.")
