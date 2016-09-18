@@ -16,6 +16,7 @@ import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.service.ParentService
 import com.mypetdefense.util.ClearNodesIf
 
 object Parents extends Loggable {
@@ -52,14 +53,14 @@ class Parents extends Loggable {
       Product.findAll(By(Product.animalType, animal))
     }.openOr(Nil)
 
-    SHtml.selectObj(
+    SHtml.ajaxSelectObj(
       products.map(product => (product, product.getNameAndSize)),
       chosenProduct,
       (possibleProduct: Product) => chosenProduct = Full(possibleProduct)
     )
   }
 
-  def addPet(parent: User) = {
+  def addPet(parent: User, renderer: IdMemoizeTransform) = {
     val validateFields = List(
       checkEmpty(petName, ".new-pet-name")
     ).flatten
@@ -70,17 +71,43 @@ class Parents extends Loggable {
         product <- chosenProduct
         size = product.size.get
       } yield {
-        Pet.createNewPet(
+        ParentService.addNewPet(
           user = parent,
           name = petName,
           animalType = pet,
           size = size,
           product = product
         )
-      })
-      Noop
+      }).flatMap(identity) match {
+        case Full(pet) =>
+          petName = ""
+          petType = Empty
+          chosenProduct = Empty
+
+          renderer.setHtml
+        case other =>
+          Alert("An error has occured. Please try again.")
+      }
     } else {
       validateFields.foldLeft(Noop)(_ & _)
+    }
+  }
+
+  def deletePet(parent: User, pet: Pet, renderer: IdMemoizeTransform)() = {
+    ParentService.removePet(parent, pet) match {
+      case Full(_) =>
+        renderer.setHtml
+      case _ =>
+        Alert("An error has occured. Please try again.")
+    }
+  }
+
+  def deleteParent(parent: User)() = {
+    ParentService.removeParent(parent) match {
+      case Full(_) =>
+        S.redirectTo(Parents.menu.loc.calcDefaultHref)
+      case _ =>
+        Alert("An error has occured. Please try again.")
     }
   }
 
@@ -98,19 +125,30 @@ class Parents extends Loggable {
         ".phone *" #> parent.phone &
         ".coupon *" #> parent.coupon.obj.map(_.couponCode.get) &
         ".referer *" #> parent.referer.obj.map(_.name.get) &
-        ".ship-date *" #> nextShipDate.map(dateFormat.format(_))
+        ".ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
+        ".actions .delete" #> ClearNodesIf(parent.pets.size > 0) &
+        ".actions .delete [onclick]" #> Confirm(s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
+          ajaxInvoke(deleteParent(parent))
+        )
       } &
       ".pets" #> idMemoize { renderer =>
         ".create" #> {
           ".new-pet-name" #> ajaxText(petName, petName = _) &
           ".pet-type-select" #> petTypeRadio(renderer) &
           ".product-container .product-select" #> productDropdown &
-          ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent))
-        } &
-        ".pet" #> parent.pets.map { pet =>
-          ".pet-name *" #> pet.name &
-          ".pet-type *" #> pet.animalType.toString &
-          ".pet-product *" #> pet.product.obj.map(_.getNameAndSize)
+          ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent, renderer))
+        } & 
+        {
+          val pets = Pet.findAll(By(Pet.user, parent))
+
+          ".pet" #> pets.map { pet =>
+            ".pet-name *" #> pet.name &
+            ".pet-type *" #> pet.animalType.toString &
+            ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
+            ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
+              ajaxInvoke(deletePet(parent, pet, renderer))
+            )
+          }
         }
       }
     }

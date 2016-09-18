@@ -90,10 +90,15 @@ class Users extends Loggable {
   }
 
   def deleteUser(user: User)() = {
-    if (user.delete_!)
-      S.redirectTo(Users.menu.loc.calcDefaultHref)
-    else
-      Alert("An error has occured. Please try again.")
+    user.userType match {
+      case parent if (parent == UserType.Parent) =>
+        Noop
+      case _ =>
+        if (user.delete_!)
+          S.redirectTo(Users.menu.loc.calcDefaultHref)
+        else
+          Alert("An error has occured. Please try again.")
+    }
   }
 
   def render = {
