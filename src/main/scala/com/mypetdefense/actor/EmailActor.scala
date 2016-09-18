@@ -178,6 +178,16 @@ trait EmailActor extends EmailHandlerChain
   val fromEmail = "sales@mypetdefense.com"
   val fromName = "My Pet Defense"
 
+  val envTag = {
+    import net.liftweb.util.Props.RunModes._
+    Props.mode match {
+      case Development => "[LCL] "
+      case Staging => "[DEMO] "
+      case Pilot => "[DEV] "
+      case _ => ""
+    }
+  }
+
   def sendEmail(
     subject: String, 
     to: String, 
@@ -191,9 +201,11 @@ trait EmailActor extends EmailHandlerChain
     
     val body = emailTransform(baseEmailTemplate)
 
+    val envSubj = envTag + subject
+
     Mailer.sendMail(
       From(fromEmail),
-      Subject(subject),
+      Subject(envSubj),
       To(to),
       XHTMLMailBodyType(body)
     ) 
