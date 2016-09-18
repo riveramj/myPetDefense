@@ -24,10 +24,9 @@ object Parents extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Parents") / "admin" / "parents" 
-    //>>
-    //adminUser >>
-    //loggedIn
+  val menu = Menu.i("Parents") / "admin" / "parents" >>
+    adminUser >>
+    loggedIn
 }
 
 class Parents extends Loggable {
