@@ -19,6 +19,7 @@ import java.time.{LocalDate, ZoneId}
 import com.mypetdefense.model._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.actor._
 
 object Users extends Loggable {
   import net.liftweb.sitemap._
@@ -55,13 +56,16 @@ class Users extends Loggable {
     ).flatten
 
     if(validateFields.isEmpty) {
-      User.createNewPendingUser(
+      val newUser = User.createNewPendingUser(
         firstName,
         lastName,
         email,
         UserType.Admin,
         chosenAgency
       )
+      
+      EmailActor ! SendNewUserEmail(newUser)
+
       S.redirectTo(Users.menu.loc.calcDefaultHref)
     } else {
       validateFields.foldLeft(Noop)(_ & _)
@@ -85,6 +89,13 @@ class Users extends Loggable {
     ).toForm
   }
 
+  def deleteUser(user: User)() = {
+    if (user.delete_!)
+      S.redirectTo(Users.menu.loc.calcDefaultHref)
+    else
+      Alert("An error has occured. Please try again.")
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".users [class+]" #> "current" &
@@ -102,7 +113,11 @@ class Users extends Loggable {
       ".email *" #> user.email &
       ".email *" #> user.email &
       ".type *" #> user.userType &
-      ".agency *" #> user.agency.obj.map(_.name.get)
+      ".agency *" #> user.agency.obj.map(_.name.get) &
+      ".actions .delete" #> ClearNodesIf(user.userType == UserType.Parent) &
+      ".actions .delete [onclick]" #> Confirm(s"Delete ${user.name}?",
+        ajaxInvoke(deleteUser(user))
+      )
     }
   }
 }

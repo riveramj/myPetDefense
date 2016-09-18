@@ -17,6 +17,7 @@ import dispatch._
 import org.joda.time._
 
 import com.mypetdefense.model._
+import com.mypetdefense.snippet.Signup
 import com.mypetdefense.util._
 
 import java.util.Date
@@ -26,8 +27,13 @@ import Mailer._
 
 sealed trait EmailActorMessage
 case class SendWelcomeEmail(user: User) extends EmailActorMessage
+case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class NewSaleEmail() extends EmailActorMessage
-case class SendInvoicePaymentFailedEmail(userEmail: String, amount: Double, nextPaymentAttempt: Option[DateTime]) extends EmailActorMessage
+case class SendInvoicePaymentFailedEmail(
+  userEmail: String,
+  amount: Double,
+  nextPaymentAttempt: Option[DateTime]
+) extends EmailActorMessage
 case class SendInvoicePaymentSucceededEmail(
   user: Box[User], 
   subscription: Subscription,
@@ -49,6 +55,24 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
       }
 
       sendEmail(welcomeEmailSubject, user.email.get, transform(welcomeEmailTemplate))
+  }
+}
+
+trait SendNewUserEmailHandling extends EmailHandlerChain {
+  val newUserSubject = "Your Account on My Pet Defense!"
+  val newUserTemplate = 
+    Templates("emails-hidden" :: "new-user-email" :: Nil) openOr NodeSeq.Empty
+  
+  addHandler {
+    case SendNewUserEmail(user) =>
+      val signupLink = Paths.serverUrl + Signup.menu.toLoc.calcHref(user)
+
+      val transform = {
+        "#first-name" #> user.firstName.get &
+        "#signup [href]" #> signupLink
+      }
+
+      sendEmail(newUserSubject, user.email.get, transform(newUserTemplate))
   }
 }
 
@@ -143,6 +167,7 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
 object EmailActor extends EmailActor
 trait EmailActor extends EmailHandlerChain
                     with WelcomeEmailHandling
+                    with SendNewUserEmailHandling
                     with InvoicePaymentFailedEmailHandling
                     with InvoicePaymentSucceededEmailHandling 
                     with NewSaleEmailHandling {
@@ -160,7 +185,7 @@ trait EmailActor extends EmailHandlerChain
   ) {
     val emailTransform = {
       "#content *" #> message &
-      "#logo [src]" #> (hostUrl + "/images/logo-name-white.png") &
+      "#logo [src]" #> (hostUrl + "/images/logo-name-white@2x.png") &
       "#user-email" #> to
     }
     

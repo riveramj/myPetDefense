@@ -106,45 +106,11 @@ object DataLoader extends Loggable {
     }
   }
 
-  def loadUsers = {
-    if (User.findAll(By(User.userType, UserType.Agent)).isEmpty) {
+  def loadAdmin = {
+    if (User.findAll(By(User.userType, UserType.Admin)).isEmpty) {
       User.createNewUser(
         "John",
         "smith",
-        "",
-        "rivera.mj+agent@gmail.com",
-        "password",
-        "(404) 409-0724",
-        None,
-        None,
-        None,
-        UserType.Agent
-      )
-    }
-
-    if (Agency.findAll().isEmpty) {
-      Agency.createNewAgency("Big Pets")
-    }
-    
-    if (User.findAll(By(User.userType, UserType.Parent)).isEmpty) {
-      User.createNewUser(
-        "Jane",
-        "Doe",
-        "stripe1234",
-        "rivera.mj+parent@gmail.com",
-        "password",
-        "(404) 409-0724",
-        None,
-        None,
-        None,
-        UserType.Parent
-      )
-    }
-
-    if (User.findAll(By(User.userType, UserType.Admin)).isEmpty) {
-      User.createNewUser(
-        "Mike",
-        "Rivera",
         "",
         "rivera.mj@gmail.com",
         "password",
@@ -154,26 +120,6 @@ object DataLoader extends Loggable {
         None,
         UserType.Admin
       )
-    }
-  }
-
-  def loadCoupons = {
-    def populateCouponsLocally(coupons: List[StripeCoupon]) = {
-      for {
-        coupon <- coupons
-      } yield {
-        Coupon.createCoupon(coupon.id.toLowerCase(), coupon.durationInMonths.getOrElse(0), None)
-      }
-    }
-
-    if(Coupon.findAll().isEmpty) {
-      val stripeSecretKey = Props.get("secret.key") openOr ""
-      implicit val e = new StripeExecutor(stripeSecretKey)
-
-      val allCoupons = StripeCoupon.list
-
-      for (coupons <- allCoupons)
-        populateCouponsLocally(coupons.map(_.data).openOr(Nil))
     }
   }
 }

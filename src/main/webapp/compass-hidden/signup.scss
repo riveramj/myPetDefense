@@ -18,7 +18,7 @@
   }
 }
 
-#login-container {
+#signup-container {
   @include span-columns(11);
   @include shift(0.5);
   @include omega;
@@ -81,7 +81,7 @@ label {
   }
 }
 
-#login-button-container{
+#signup-button-container{
   text-align: right;
 
   padding-bottom: rem(40px);
@@ -91,7 +91,7 @@ label {
   }
 }
 
-input#login {
+input#signup {
   background-color: #818080;
   color: #ffffff;
   border: none;
@@ -112,7 +112,7 @@ div.incognito-dog {
 img.incognito-dog {
   display: block;
   width: 100%;
-
+  
   @media (min-width: $bp-med) {
     display: none;
   }
@@ -199,3 +199,4 @@ img.incognito-dog {
     color: #B2B0B0;
   }
 }
+
