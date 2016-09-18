@@ -93,8 +93,8 @@ class Parents extends Loggable {
   }
 
   def deletePet(parent: User, pet: Pet, renderer: IdMemoizeTransform)() = {
-    pet.delete_! match {
-      case true =>
+    ParentService.removePet(parent, pet) match {
+      case Full(_) =>
         renderer.setHtml
       case _ =>
         Alert("An error has occured. Please try again.")
