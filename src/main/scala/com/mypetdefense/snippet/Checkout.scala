@@ -153,8 +153,6 @@ class Checkout extends Loggable {
 
       Try(Await.result(stripeCustomer, new DurationInt(3).seconds)) match {
         case TrySuccess(Full(customer)) =>
-          println(customer + " --------") 
-
           newUserSetup(
             customer, 
             selectedPetType, 
@@ -201,11 +199,7 @@ class Checkout extends Loggable {
       UserType.Parent
     )
 
-    println("===================")
-    println("user:")
-    println(user)
-
-    val shippingAddress = Address.createNewAddress(
+    Address.createNewAddress(
       Full(user),
       street1,
       street2,
@@ -215,38 +209,38 @@ class Checkout extends Loggable {
       AddressType.Shipping
     )
 
-    println("===================")
-    println("shippingAddress:")
-    println(shippingAddress)
+    for {
+      petType <- selectedPetType
+      petSize <- selectedPetSize
+      petProduct <- selectedPetProduct
+    } yield {
+      Pet.createNewPet(
+        user,
+        petName,
+        petType,
+        petSize,
+        petProduct
+      )
+    }
 
-    val pet = (
+
+    println(customer.subscriptions + " sub")
+
+    val subscriptionId = (
       for {
-        petType <- selectedPetType
-        petSize <- selectedPetSize
-        petProduct <- selectedPetProduct
+        rawSubscriptions <- customer.subscriptions
+        subscription <- rawSubscriptions.data.headOption
       } yield {
-        Pet.createNewPet(
-          user,
-          petName,
-          petType,
-          petSize,
-          petProduct
-        )
-    })
+        println(subscription.id + " is the id?")
+        subscription.id
+      }).flatMap(identity).getOrElse("")
 
-    println("===================")
-    println("pet:")
-    println(pet)
-
-    val subscription = Subscription.createNewSubscription(
+    Subscription.createNewSubscription(
       user,
+      subscriptionId,
       new Date(),
       new Date()
     )
-
-    println("===================")
-    println("subscription:")
-    println(subscription)
 
     if (Props.mode == Props.RunModes.Production) {
       EmailActor ! NewSaleEmail()

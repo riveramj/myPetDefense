@@ -34,19 +34,18 @@ object CouponService extends Loggable {
   }
 
   def createCoupon(couponCode: String, freeMonths: String, agency: Box[Agency]): Box[Coupon] = {
-
     val newStripeCoupon = createStripeCoupon(couponCode, freeMonths, agency)
 
-    Try(Await.result(newStripeCoupon, new DurationInt(5).seconds)) match {
+    Try(Await.result(newStripeCoupon, new DurationInt(3).seconds)) match {
       case TrySuccess(Full(newCoupon)) =>
         Full(Coupon.createNewCoupon(couponCode, freeMonthsConverted(freeMonths), agency))
 
       case TrySuccess(stripeFailure) =>
-        logger.error("create coupon failed with 1: " + stripeFailure)
+        logger.error("create coupon failed with stipe error: " + stripeFailure)
         Empty
 
       case TryFail(throwable: Throwable) =>
-        logger.error("create coupon failed with 2: " + throwable)
+        logger.error("create coupon failed with other error: " + throwable)
         Empty
     }
   }

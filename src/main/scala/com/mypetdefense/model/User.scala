@@ -32,12 +32,15 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object coupon extends MappedLongForeignKey(this, Coupon)
   object agency extends MappedLongForeignKey(this, Agency)
   object pets extends MappedOneToMany(Pet, Pet.user)
+  object subscription extends MappedOneToMany(Subscription, Subscription.user)
   object addresses extends MappedOneToMany(Address, Address.user)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
   def name = s"${firstName} ${lastName}"
+
+  def getSubscription = subscription.headOption
 
   def createNewUser(
     firstName: String,

@@ -16,6 +16,7 @@ import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.service.ParentService
 import com.mypetdefense.util.ClearNodesIf
 
 object Parents extends Loggable {
@@ -52,14 +53,14 @@ class Parents extends Loggable {
       Product.findAll(By(Product.animalType, animal))
     }.openOr(Nil)
 
-    SHtml.selectObj(
+    SHtml.ajaxSelectObj(
       products.map(product => (product, product.getNameAndSize)),
       chosenProduct,
       (possibleProduct: Product) => chosenProduct = Full(possibleProduct)
     )
   }
 
-  def addPet(parent: User) = {
+  def addPet(parent: User, renderer: IdMemoizeTransform) = {
     val validateFields = List(
       checkEmpty(petName, ".new-pet-name")
     ).flatten
@@ -70,15 +71,19 @@ class Parents extends Loggable {
         product <- chosenProduct
         size = product.size.get
       } yield {
-        Pet.createNewPet(
+        ParentService.addNewPet(
           user = parent,
           name = petName,
           animalType = pet,
           size = size,
           product = product
         )
-      })
-      Noop
+      }).flatMap(identity) match {
+        case Full(pet) =>
+          S.redirectTo(Parents.menu.loc.calcDefaultHref)
+        case other =>
+          Alert("An error has occured. Please try again.")
+      }
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
@@ -105,7 +110,7 @@ class Parents extends Loggable {
           ".new-pet-name" #> ajaxText(petName, petName = _) &
           ".pet-type-select" #> petTypeRadio(renderer) &
           ".product-container .product-select" #> productDropdown &
-          ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent))
+          ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent, renderer))
         } &
         ".pet" #> parent.pets.map { pet =>
           ".pet-name *" #> pet.name &

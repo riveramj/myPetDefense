@@ -15,6 +15,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     override def dbIndexed_? = true
   }
   object user extends MappedLongForeignKey(this, User)
+  object stripeSubscriptionId extends MappedString(this, 100)
   object startDate extends MappedDateTime(this)
   object renewalDate extends MappedDateTime(this)
   object nextShipDate extends MappedDateTime(this)
@@ -30,12 +31,14 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
 
   def createNewSubscription(
     user: User,
+    stripeSubscriptionId: String,
     startDate: Date,
     nextShipDate: Date
   ) = {
     Subscription.create
     .subscriptionId(generateLongId)
     .user(user)
+    .stripeSubscriptionId(stripeSubscriptionId)
     .startDate(startDate)
     .nextShipDate(nextShipDate)
     .saveMe
