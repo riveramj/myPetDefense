@@ -29,6 +29,7 @@ sealed trait EmailActorMessage
 case class SendWelcomeEmail(user: User) extends EmailActorMessage
 case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class NewSaleEmail() extends EmailActorMessage
+case class PaymentReceivedEmail() extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
   userEmail: String,
   amount: Double,
@@ -110,6 +111,18 @@ trait NewSaleEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait ShipmentReadyEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case PaymentReceivedEmail() =>
+      val welcomeEmailTemplate = 
+        Templates("emails-hidden" :: "sale-email" :: Nil) openOr NodeSeq.Empty
+      
+      val subject = "We got paid - time to ship product"
+      
+      sendEmail(subject, "sales@mypetdefense.com", welcomeEmailTemplate)
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -170,7 +183,8 @@ trait EmailActor extends EmailHandlerChain
                     with SendNewUserEmailHandling
                     with InvoicePaymentFailedEmailHandling
                     with InvoicePaymentSucceededEmailHandling 
-                    with NewSaleEmailHandling {
+                    with NewSaleEmailHandling 
+                    with ShipmentReadyEmailHandling {
 
   val baseEmailTemplate = 
     Templates("emails-hidden" :: "email-template" :: Nil) openOr NodeSeq.Empty

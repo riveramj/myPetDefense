@@ -65,16 +65,12 @@ trait StripeHook extends RestHelper with Loggable {
         formatAmount(tax)
       )
       
-      println("===================")
-      println("shipment:")
-      println(shipment)
+      shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
 
-      println("===================")
-      println("lines:")
+      if (Props.mode == Props.RunModes.Production) {
+        emailActor ! PaymentReceivedEmail()
+      }
 
-      val lines = shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
-      println(lines)
-      
       OkResponse()
     }
   }
@@ -94,8 +90,6 @@ trait StripeHook extends RestHelper with Loggable {
         _ isAfterNow
       }
       val amount = totalAmountInCents / 100d
-
-      println(s"payment failed for ${user}")
 
       emailActor ! SendInvoicePaymentFailedEmail(user.email.get, amount, nextPaymentAttempt)
       
