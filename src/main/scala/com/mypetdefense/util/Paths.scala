@@ -67,6 +67,26 @@ object Paths {
     }
   )
 
+  val loggedIn = If(
+    () => SecurityContext.loggedIn_?,
+    RedirectResponse("/")
+  )
+
+  val adminUser = If(
+    () => SecurityContext.admin_?,
+    RedirectResponse("/")
+  )
+
+  val agentOrAdmin = If(
+    () => (SecurityContext.admin_? || SecurityContext.agent_?),
+    RedirectResponse("/")
+  )
+
+  val notLoggedIn = If(
+    () => ! SecurityContext.loggedIn_?,
+    RedirectResponse("/")
+  )
+
   val finishedCheckout = If(
     () => !total.is.isEmpty,
     RedirectResponse(Checkout.menu.loc.calcDefaultHref)
@@ -90,9 +110,14 @@ object Paths {
     CatProduct.menu,
     Checkout.menu,
     Success.menu,
-    Dashboard.menu,
-    Parents.menu,
-    Leads.menu,
-    Agents.menu
+    admin.Dashboard.menu,
+    admin.Parents.menu,
+    admin.Users.menu,
+    admin.Coupons.menu,
+    admin.Agencies.menu,
+    admin.PhonePortal.menu,
+    Login.menu,
+    Signup.menu,
+    Login.logoutMenu
   )
 }

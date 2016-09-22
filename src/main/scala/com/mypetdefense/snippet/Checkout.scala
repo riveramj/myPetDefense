@@ -153,8 +153,6 @@ class Checkout extends Loggable {
 
       Try(Await.result(stripeCustomer, new DurationInt(3).seconds)) match {
         case TrySuccess(Full(customer)) =>
-          println(customer + " --------") 
-
           newUserSetup(
             customer, 
             selectedPetType, 
@@ -169,11 +167,11 @@ class Checkout extends Loggable {
 
         case TrySuccess(stripeFailure) =>
           logger.error("create customer failed with: " + stripeFailure)
-          Alert("An error has occurued. Please try again.")
+          Alert("An error has occured. Please try again.")
         
         case TryFail(throwable: Throwable) =>
           logger.error("create customer failed with: " + throwable)
-          Alert("An error has occurued. Please try again.")
+          Alert("An error has occured. Please try again.")
       }
     } else {
       validateFields.foldLeft(Noop)(_ & _)
@@ -195,17 +193,14 @@ class Checkout extends Loggable {
       email,
       password,
       "",
-      coupon.flatMap(_.referer.obj),
+      coupon,
+      coupon.flatMap(_.agency.obj),
+      None,
       UserType.Parent
     )
 
-    println("===================")
-    println("user:")
-    println(user)
-
-    val shippingAddress = Address.createNewAddress(
+    Address.createNewAddress(
       Full(user),
-      None,
       street1,
       street2,
       city,
@@ -214,38 +209,38 @@ class Checkout extends Loggable {
       AddressType.Shipping
     )
 
-    println("===================")
-    println("shippingAddress:")
-    println(shippingAddress)
+    for {
+      petType <- selectedPetType
+      petSize <- selectedPetSize
+      petProduct <- selectedPetProduct
+    } yield {
+      Pet.createNewPet(
+        user,
+        petName,
+        petType,
+        petSize,
+        petProduct
+      )
+    }
 
-    val pet = (
+
+    println(customer.subscriptions + " sub")
+
+    val subscriptionId = (
       for {
-        petType <- selectedPetType
-        petSize <- selectedPetSize
-        petProduct <- selectedPetProduct
+        rawSubscriptions <- customer.subscriptions
+        subscription <- rawSubscriptions.data.headOption
       } yield {
-        Pet.createNewPet(
-          user,
-          petName,
-          petType,
-          petSize,
-          petProduct
-        )
-    })
+        println(subscription.id + " is the id?")
+        subscription.id
+      }).flatMap(identity).getOrElse("")
 
-    println("===================")
-    println("pet:")
-    println(pet)
-
-    val subscription = Subscription.createNewSubscription(
+    Subscription.createNewSubscription(
       user,
+      subscriptionId,
       new Date(),
       new Date()
     )
-
-    println("===================")
-    println("subscription:")
-    println(subscription)
 
     if (Props.mode == Props.RunModes.Production) {
       EmailActor ! NewSaleEmail()

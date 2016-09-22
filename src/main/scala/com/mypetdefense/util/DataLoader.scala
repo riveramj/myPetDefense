@@ -106,76 +106,20 @@ object DataLoader extends Loggable {
     }
   }
 
-  def loadUsers = {
-    if (User.findAll(By(User.userType, UserType.Agent)).isEmpty) {
+  def loadAdmin = {
+    if (User.findAll(By(User.userType, UserType.Admin)).isEmpty) {
       User.createNewUser(
         "John",
         "smith",
         "",
-        "rivera.mj+agent@gmail.com",
-        "password",
-        "(404) 409-0724",
-        None,
-        UserType.Agent
-      )
-    }
-
-    if (Agent.findAll().isEmpty) {
-      val possibleAgent = User.find(By(User.email, "rivera.mj+agent@gmail.com"))
-
-      possibleAgent.map { agent =>
-        Agent.createNewAgent(
-          "Big Pets",
-          agent  
-        )
-      }
-    }
-    
-    if (Lead.findAll().isEmpty) {
-      val possibleAgent = Agent.find(By(Agent.name, "Big Pets"))
-      
-      possibleAgent.map { agent =>
-        Lead.createNewLead(
-          "Jane",
-          "Doe",
-          "rivera.mj+lead@gmail.com",
-          "(404) 409-0724",
-          agent
-        )
-      }
-    }
-
-    if (User.findAll(By(User.userType, UserType.Parent)).isEmpty) {
-      User.createNewUser(
-        "Jane",
-        "Doe",
-        "stripe1234",
         "rivera.mj@gmail.com",
         "password",
         "(404) 409-0724",
         None,
-        UserType.Parent
+        None,
+        None,
+        UserType.Admin
       )
-    }
-  }
-
-  def loadCoupons = {
-    def populateCouponsLocally(coupons: List[StripeCoupon]) = {
-      for {
-        coupon <- coupons
-      } yield {
-        Coupon.createCoupon(coupon.id.toLowerCase(), coupon.durationInMonths.getOrElse(0), None)
-      }
-    }
-
-    if(Coupon.findAll().isEmpty) {
-      val stripeSecretKey = Props.get("secret.key") openOr ""
-      implicit val e = new StripeExecutor(stripeSecretKey)
-
-      val allCoupons = StripeCoupon.list
-
-      for (coupons <- allCoupons)
-        populateCouponsLocally(coupons.map(_.data).openOr(Nil))
     }
   }
 }

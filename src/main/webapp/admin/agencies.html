@@ -1,0 +1,45 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+<div data-lift="admin.Agencies.render?eager_eval=true">
+  <div data-lift="embed?what=admin/admin-nav-bar"></div>
+  <div id="item-container">
+    <h2>Agencies</h2>
+    <form>
+      <fieldset class="create">
+        <legend>Create Agency</legend>
+        <label class="tiny-field promo">
+          <span class="field-label">Name</span>
+          <input id="name" type="text">            
+        </label>
+        <div class="create-item tiny-field">
+          <button type="submit" id="create-item">Create</button>
+        </div>
+      </fieldset>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <td>Name
+          <td>Customers
+          <td>Coupons
+          <td>Actions
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="agency">
+          <td class="name">Mike Rivera
+          <td class="customer-count">10
+          <td class="coupon-count">10
+          <td class="actions">
+            <button class="delete">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=admin">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+  </tail>
+</div>

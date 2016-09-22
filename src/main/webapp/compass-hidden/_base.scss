@@ -11,13 +11,6 @@ $regular: 400;
 $semibold: 500;
 $bold: 700;
 
-///Fonts
-/*@include font-face("Panton", "../../fonts/Panton/light/panton-light-webfont", $weight: 300, $file-formats: eot ttf woff woff2);*/
-
-/*@include font-face("Panton", "../../fonts/Panton/regular/panton-regular-webfont", $weight: 400, $file-formats: eot ttf woff woff2);*/
-
-/*@include font-face("Panton", "../../fonts/Panton/semibold/panton-semibold-webfont", $weight: 500, $file-formats: eot ttf woff woff2);*/
-
 $text-font: Helvetica, Arial, sans-serif;
 $text-color: #454343;
 $base-font-size: 16px;
@@ -61,6 +54,18 @@ input, button, textarea {
 button::-moz-focus-inner {
     padding: 0;
     border: 0;
+}
+
+// Default error stylings
+.validation-error {
+  display: inline-block;
+  padding-left: 7px;
+  color: #E52323;
+  font-size: rem(12px);
+}
+
+.error {
+  border: 1px solid #FF9295;
 }
 
 /****************************

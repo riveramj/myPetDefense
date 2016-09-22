@@ -1,0 +1,164 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div data-lift="admin.PhonePortal.render?eager_eval=true">
+    <div data-lift="embed?what=admin/phone-nav-bar"></div>
+    <h2>Users</h2>
+    <form class="create-item">
+    <div id="left-column">
+     <fieldset class="account-info">
+        <div class="account-container">
+          <legend>Account Info</legend>
+          <label>
+            <div><span class="field-label">Email</span></div>
+            <input id="email" type="text">
+          </label>
+          <label>
+            <div><span class="field-label">Pet Name</span></div>
+            <input size="20" class="pet-name" type="text">
+          </label>
+          <div class="pet-container">
+            <div class="field-label">Pet Type</div>
+            <span class="pet-type-select">
+              <input type="radio" value="dog">dog
+              <input type="radio" value="cat">cat
+            </span>
+          </div>
+          <label class="short-field expiration-date">
+            <div><span class="field-label">Birth Month</span></div>
+            <input type="tel" class="birth-month" placeholder="MM/YY">
+          </label>
+          <div class="product-container">
+            <span class="field-label">Product</span>
+            <select class="product-select">
+              <option value="123456">adventure 5-10</option>
+              <option value="099221">zoguard 6-9</option>
+            </select>
+          </div>
+          <div class="size-container">
+            <span class="field-label">Expected Adult Size</span>
+            <select class="size-select">
+              <option value="small">Small</option>
+              <option value="medium">Medium</option>
+              <option value="large">Large</option>
+              <option value="xlarge">XLarge</option>
+            </select>
+          </div>
+          <div class="add-pet-container">
+            <button class="add-pet">Add Pet</button>
+            <div>Click if you want to add additional pets</div>
+          </div>
+        </div>
+     </fieldset>
+     <fieldset class="shipping-info">
+       <div>
+         <legend>Shipping Info</legend>
+         <label>
+           <span class="field-label">First name</span>
+           <input id="first-name" type="text">            
+         </label>
+         <label>
+           <span class="field-label">Last name</span>
+           <input id="last-name" type="text">
+         </label>
+         <label>
+           <span class="field-label">Street Address</span>
+           <input id="street-1" type="text">
+           <input id="street-2" type="text">
+         </label>
+        <label class="short-field city">
+          <span class="field-label">City</span>
+          <input id="city" type="text">
+        </label>
+        <label class="short-field state">
+          <span class="field-label">State</span>
+          <input id="state" type="text" maxlength="2">
+        </label>
+        <label class="short-field zip">
+          <span class="field-label">Zip</span>
+          <input id="zip" type="tel" maxlength="5">
+        </label>
+       </div>
+      </fieldset>
+    </div>
+    <div id="right-column">
+      <fieldset class="billing-info">
+        <div>
+          <legend>Billing Info</legend>
+          <label>
+            <div><span class="field-label cardholder-name">Cardholder Name</span></div>
+            <input type="text" id="cardholder-name">
+          </label>
+          <label class="short-field card-number">
+            <div><span class="field-label">Card Number</span></div>
+            <input id="card-number" type="tel" data-stripe="number" autocomplete="cc-number" placeholder="•••• •••• •••• ••••">
+          </label>
+          <label class="short-field expiration-date">
+            <div><span class="field-label">Expires</span></div>
+            <input type="tel" id="card-expiry" placeholder="MM/YY" autocomplete="cc-exp">
+          </label>
+          <label class="short-field cvc">
+            <span class="field-label">CVC</span>
+            <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc" autocomplete="off">            
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="agent-info">
+        <div>
+          <legend>Agent Code</legend>
+          <label>
+            <div>
+              <span class="field-label">Agent Code</span>
+            </div>
+            <div class="apply-promo-container">
+              <input size="20" id="promo-code" type="text">
+            </div>
+            
+          </label>
+        </div>
+      </fieldset>
+
+      <div id="order-summary">
+        <div id="summary">
+          <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+          <h2>Order Summary</h2>
+        </div>
+        <ul id="order-details">
+          <li id="selected-note">Your selected items:</li>
+          <li id="type">Pet <span>Dog</span></li>
+          <li id="size">Size <span>11-20</span></li>
+          <li id="product">Product <span>Adventure Plus for Dogs</span></li>
+        </ul>
+        <div id="order">
+          <div id="price-additions">
+            <div class="monthly-charge">
+              <span class="amount">$9.99</span> / A Month
+            </div>
+            <div id="tax">
+              + GA Tax $<span id="tax-amount">0.99</span>
+            </div>
+            <div id="promo-discount-statement">+ Promotion Discount</div>
+          </div>
+          <div id="order-total">
+            <h3>Order Total</h3>
+            <div class="monthly-charge">
+              <span class="amount">$1.11</span> / A Month
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="signup-container">
+        <button type="submit" class="checkout select-choice">Place Order</button>
+      </div>
+    </div>
+  </form>
+
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=phone-portal">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    <script type="text/javascript" data-lift="script-bundle?name=phone-portal"></script>
+  </tail>
+</div>
