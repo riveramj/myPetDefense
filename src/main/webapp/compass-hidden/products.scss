@@ -194,6 +194,14 @@
   }
 }
 
+.product-features {
+  display: block;
+
+  &.hidden {
+    display: none
+  }
+}
+
 .feature {
   width: 100%;
   background-color: #F1F1F1;
@@ -243,20 +251,18 @@
     padding-left: 9px;
   }
 
-  &.expanded {
-    .fa-caret-right {
-      display: none;
-    }
-    .fa-caret-down {
-      display: inline-block;
-    }
+  .fa-caret-right {
+    display: inline-block;
+  }
+  .fa-caret-down {
+    display: none;
   }
 
-  &.closed {
-    .fa-caret-right {
+  &.expanded {
+    .fa-caret-down {
       display: inline-block;
     }
-    .fa-caret-down {
+    .fa-caret-right {
       display: none;
     }
   }
