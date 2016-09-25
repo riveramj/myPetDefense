@@ -17,7 +17,7 @@
 .choice-container {
   padding-top: 0;
   display: inline-block;
-  margin-bottom: em(30px);
+  margin-bottom: em(40px);
   padding-bottom: em(5px);
 
   @media (min-width: $bp-med) {
@@ -350,7 +350,7 @@
   @include shift(2);
   
   margin-right: 0;
-  margin-top: em(10px);
+  margin-top: em(5px);
   line-height: 22px;
 
   text-align: center;
@@ -361,14 +361,6 @@
     text-align: left;
 
     margin: 0 rem(25px) 0 0;
-  }
-
-  .fa-trophy {
-    padding-right: em(6px);
-
-    @media (min-width: $bp-med) {
-      font-size: rem(25px);
-    }
   }
 
   h3 {
@@ -383,7 +375,7 @@
 
   div {
     color: #818080;
-    margin-bottom: em(25px);
+    margin-bottom: em(40px);
 
     @media (min-width: $bp-med) {
       font-size: rem(16px);
