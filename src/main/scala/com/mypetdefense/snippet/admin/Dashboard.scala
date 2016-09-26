@@ -87,7 +87,7 @@ class Dashboard extends Loggable {
       ".name *" #> user.map(_.name) &
       ".address *" #> address &
       ".products" #> products.map { product =>
-        ".product-name *" #> product.name.get
+        ".product-name *" #> product.name.get &
         ".product-size *" #> product.size.get.toString
       } &
       ".payment-processed *" #> paymentProcessed_?(shipment) &
