@@ -5,6 +5,7 @@
 .current-step {
   @include span-columns(11);
   @include shift(0.5);
+  text-align: center;
 
   @media (min-width: $bp-medium) {
     @include span-columns(9);
@@ -27,10 +28,16 @@
   display: inline-block;
   margin-bottom: em(40px);
   padding-bottom: em(5px);
+  max-width: 340px;
+
+  @media (min-width: $bp-medium) {
+    max-width: 530px;
+  }
 
   @media (min-width: $bp-large) {
     @include span-columns(6);
   }
+
 
   &:nth-child(2n) {
     @include omega();
@@ -41,6 +48,10 @@
 
     @media (min-width: $bp-medium) {
       display: initial;
+      @include span-columns(7);
+      @include shift(1);
+
+      padding-top: rem(35px);
     }
   }
 
@@ -53,26 +64,62 @@
     padding-left: 5px;
 
     line-height: 20px;
+
+    @media (min-width: $bp-medium) {
+      max-width: 153px;
+      padding-left: 22px;
+    }
+  }
+
+  &.adventure-plus {
+    @media (min-width: $bp-medium) {
+      img.ribbon {
+        margin-top: -82px;
+      }
+      div.compare-to {
+        max-width: 152px;
+        padding-left: 29px;
+      }
+    }
   }
 
   &.shieldtec-plus {
     div.compare-to {
       padding-top: 14px;
+      
+      @media (min-width: $bp-medium) {
+        padding-top: 16px;
+        padding-left: 30px;
+      }
     }
 
     img.ribbon {
       margin-top: -84px;
+      @media (min-width: $bp-medium) {
+        margin-top: -94px;
+      }
     }
   }
 
   div.ribbon {
     @include span-columns(4.5);
     @include omega;
+
+    @media (min-width: $bp-medium) {
+      @include span-columns(4);
+      @include omega;
+      text-align: right;
+    }
   }
 
   img.ribbon {
     margin-top: -74px;
     max-width: 125px;
+
+    @media (min-width: $bp-medium) {
+      margin-top: -77px;
+      max-width: 145px;
+    }
   }
 
   .product-name {
@@ -147,9 +194,7 @@
 }
 
 .header-container {
-  @media (min-width: $bp-med) {
-    padding-bottom: rem(70px);
-  }
+  text-align: left;
 }
 
 .header {
