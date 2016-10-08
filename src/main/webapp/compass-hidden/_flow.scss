@@ -167,8 +167,8 @@ html, body {
     margin-left: em(89px);
 
     @media (min-width: $bp-large) {
-      @include span-columns(12);
-      @include shift(0.5);
+      @include span-columns(10);
+      @include shift(2);
     }
   }
 

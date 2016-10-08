@@ -11,6 +11,11 @@
     @include span-columns(9);
     @include shift(1.5);
   }
+
+  @media (min-width: $bp-large) {
+    @include span-columns(12);
+    @include shift(0);
+  }
 }
 
 .arrow-up {
@@ -35,12 +40,9 @@
   }
 
   @media (min-width: $bp-large) {
-    @include span-columns(6);
-  }
-
-
-  &:nth-child(2n) {
-    @include omega();
+    max-width: 410px;
+    min-height: 353px;
+    margin-right: rem(20px);
   }
 
   img.product {
@@ -52,6 +54,10 @@
       @include shift(1);
 
       padding-top: rem(35px);
+    }
+
+    @media (min-width: $bp-large) {
+      @include span-columns(6.5);
     }
   }
 
@@ -76,9 +82,16 @@
       img.ribbon {
         margin-top: -82px;
       }
+
       div.compare-to {
         max-width: 152px;
         padding-left: 29px;
+      }
+    }
+
+    @media (min-width: $bp-large) {
+      img.ribbon {
+        margin-top: -81px;
       }
     }
   }
@@ -91,12 +104,20 @@
         padding-top: 16px;
         padding-left: 30px;
       }
+
+      @media (min-width: $bp-large) {
+        padding-top: 4px;
+      }
     }
 
     img.ribbon {
       margin-top: -84px;
       @media (min-width: $bp-medium) {
         margin-top: -94px;
+      }
+
+      @media (min-width: $bp-large) {
+        margin-top: -81px;
       }
     }
   }
@@ -110,6 +131,10 @@
       @include omega;
       text-align: right;
     }
+
+    @media (min-width: $bp-large) {
+      @include span-columns(4.5);
+    }
   }
 
   img.ribbon {
@@ -119,6 +144,11 @@
     @media (min-width: $bp-medium) {
       margin-top: -77px;
       max-width: 145px;
+    }
+
+    @media (min-width: $bp-large) {
+      max-width: 135px;
+      margin-top: -76px;
     }
   }
 
@@ -197,6 +227,13 @@
   text-align: left;
 }
 
+.header-container {
+  @media (min-width: $bp-large) {
+    @include span-columns(4);
+    @include shift(2);
+  }
+}
+
 .header {
   background-color: #605F5F;
   padding: rem(16px) 0;
@@ -248,6 +285,12 @@
     padding-bottom: rem(54px);
     @include omega();
   }
+
+  @media (min-width: $bp-large) {
+    @include span-columns(4);
+    @include shift(1);
+  }
+
 }
 
 .product-statement {
