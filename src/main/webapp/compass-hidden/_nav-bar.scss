@@ -10,7 +10,13 @@
 
   padding-top: em(20px);
   
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
+    @include shift(0);
+    margin-left: em(89px);
+    padding-top: em(16px);
+  }
+
+  @media (min-width: $bp-large) {
     @include span-columns(3);
     @include shift(2);
     padding-top: rem(19px);
