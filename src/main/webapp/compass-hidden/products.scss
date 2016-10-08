@@ -10,11 +10,15 @@
   @media (min-width: $bp-medium) {
     @include span-columns(9);
     @include shift(1.5);
+    
+    padding-bottom: 150px;
   }
 
   @media (min-width: $bp-large) {
     @include span-columns(12);
     @include shift(0);
+    
+    padding-bottom: 200px;
   }
 }
 
@@ -92,6 +96,10 @@
     @media (min-width: $bp-large) {
       img.ribbon {
         margin-top: -81px;
+      }
+      
+      img.ribbon.cat {
+        margin-top: -76px;
       }
     }
   }
