@@ -46,7 +46,11 @@ html, body {
   background-color: $green;
   padding-bottom: em(20px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
+    padding-bottom: em(16px);
+  }
+
+  @media (min-width: $bp-large) {
     padding: em(15px) 0;
   }
 }
@@ -61,7 +65,11 @@ html, body {
   @include shift(1);
   padding-top: em(30px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
+    padding-top: rem(51px);
+  }
+
+  @media (min-width: $bp-large) {
     @include span-columns(8);
     @include shift(2);
     padding-top: rem(52px);
@@ -78,10 +86,14 @@ html, body {
 .step-question {
   font-size: em(18px);
   font-weight: $normal;
-  padding-bottom: rem(15px);
+  padding-bottom: rem(40px);
   line-height: rem(24px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
+    padding-bottom: rem(56px);
+  }
+
+  @media (min-width: $bp-large) {
     padding-bottom: rem(56px);
   }
 }
@@ -127,14 +139,16 @@ html, body {
     padding: em(24px) 0;
   }
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     display: none;
   }
 }
 
 .flow-progress-bar {
-  @media (max-width: $bp-med) {
-    display: none;
+  display: none;
+
+  @media (min-width: $bp-medium) {
+    @include span-columns(12);
   }
 
   a {
@@ -143,28 +157,29 @@ html, body {
     color: inherit;
   }
 
-  @include span-columns(12);
   background-color: #57B8B4;
 
-  ul {
-    @include span-columns(10);
-    @include shift(2);
+  .step-choice {
+    text-transform: none;
+  }
 
-    @media (max-width: $bp-med-large) {
-      @include span-columns(12);
-      @include shift(0.5);
+  ul {
+    margin-left: em(89px);
+
+    @media (min-width: $bp-large) {
+      @include span-columns(10);
+      @include shift(2);
     }
   }
 
   li {
-    @media (max-width: $bp-med-large) {
-    }
-
     @include span-columns(3);
     display: inline-block;
     padding: rem(27px) 0 rem(26px);
     color: #0E5552;
     font-size: em(14px);
+
+    text-transform: uppercase;
   }
 
   .fa-check {
@@ -206,10 +221,10 @@ li.complete {
   border-left: 10px solid transparent;
   border-right: 10px solid transparent;
   border-bottom: 10px solid #ffffff;
-  padding-top: em(12px);
-  margin-bottom: em(-24px);
+  padding-top: rem(16px);
+  margin-bottom: rem(-26px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-large) {
     border-left: 16px solid transparent;
     border-right: 16px solid transparent;
     border-bottom: 16px solid #ffffff;

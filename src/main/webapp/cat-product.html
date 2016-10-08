@@ -58,7 +58,7 @@
     <div class="header-container">
       <h1 class="step-header">Choose Your Product</h1>
       <h2 class="step-question">
-        All of the products we offer are made and packaged in the United States.
+        <span id="select-a-product">Please select one of the <span id="product-count">two products below</span>. </span>All of the products we offer are made and packaged in the <span id="products-usa">United States</span>.
       </h2>
     </div>
     <div class="promise-container">
@@ -69,39 +69,148 @@
         </div>
       </div>
     </div>
-    <div class="choice-container adventure-plus">
-      <div class="product-header">
-        <div class="header">Best Flea Protection</div>
-      </div>
+    <div class="choice-container collapsed adventure-plus">
+      <div class="product-name"><h2>Adventure Plus<br>for Cats</h2></div>
       <picture>
         <source 
-          media="(min-width: 46.8em)" 
+          media="(min-width: 48em)" 
           srcset="images/products/Adventure-Plus_Cats.png, images/products/Adventure-Plus_Cats@2x.png 2x">
-        <img src="images/products/Adventure-Plus_Cats-small.png" srcset="images/products/Adventure-Plus_Cats-small.png, images/products/Adventure-Plus_Cats-small@2x.png 2x">
+        <img class="product" src="images/products/Adventure-Plus_Cats-small.png" srcset="images/products/Adventure-Plus_Cats-small.png, images/products/Adventure-Plus_Cats-small@2x.png 2x">
       </picture>
-      <div class="product-ingredients">
-        Contains the same active ingredients* used in <span class="key-point">Advantage II for Cats.</span>
-        <div class="active-ingredients">*Imidacloprid and pyriproxyphen</div>
+      <div><div class="compare-to">Compare to Advantage II</div></div>
+      <div class="ribbon">
+        <picture>
+          <source 
+            media="(min-width: 48em)" 
+            srcset="images/ribbon/tablet.png, images/ribbon/tablet@2x.png 2x">
+          <img class="ribbon cat" src="images/ribbon/mobile.png" srcset="images/ribbon/mobile.png, images/ribbon/mobile@2x.png 2x">
+        </picture>
       </div>
+
+      <div class="product-statement">Superior flea control.</div>
       <button class="select-choice" id="adventure-plus">Select</button>
-     <a class="product-label" target="_blank" href="images/labels/Adventure_Plus_Cats_Specimen_Label.pdf">View Label</a> 
-    </div>
-    <div class="choice-container zoguard-plus">
-      <div class="product-header">
-        <div class="header">Complete Flea &amp; Tick Protection</div>
+
+     <div class="expand-details-container">
+        <button type="button" class="expand-details">
+          View product details
+          <i class="fa fa-caret-right"></i>
+          <i class="fa fa-caret-down"></i>
+        </button>
       </div>
+      <ul class="product-features">
+         <li class="feature">
+           <div>
+             <i class="fa fa-bug"></i>
+             <div class="feature-container">
+               Kills adult <span class="key-point">fleas and chewing lice</span> on contact
+               <div class="product-note"><span>Note</span> Adventure Plus is not effective protection against ticks.
+               </div>
+             </div>
+           </div>
+         </li>
+         <li class="feature">
+           <div>
+             <i class="fa fa-clock-o"></i>
+             <div class="feature-container">
+               Kills adult fleas <span class="key-point">within 12 hours</span> of application
+             </div>
+           </div>
+         </li>
+         <li class="feature">
+           <div>
+             <i class="fa fa-ban"></i>
+             <div class="feature-container">
+               <span class="key-point">Prevents flea re-infestation</span> by killing flea eggs and larvae
+             </div>
+           </div>
+         </li>
+         <li class="feature">
+           <div>
+             <i class="fa fa-umbrella"></i>
+             <div class="feature-container">
+               Waterproof
+             </div>
+           </div>
+         </li>
+       </ul>
+       <div class="product-description">
+         <div class="product-description-header">
+           <h3>More Info</h3>
+           <a class="product-label" target="_blank" href="images/labels/Adventure_Plus_Cats_Specimen_Label.pdf">View Label</a>
+         </div>
+         Adventure Plus offers the fastest and most complete control of fleas. Contact with the active ingredient renders fleas unable to bite within 5 minutes, making it a product of choice for pets with flea bite allergies.
+       </div>
+    </div>
+
+    <div class="choice-container collapsed zoguard-plus">
+      <div class="product-name"><h2>Zoguard Plus<br>for Cats</h2></div>
       <picture>
         <source 
-          media="(min-width: 46.8em)" 
+          media="(min-width: 48em)" 
           srcset="images/products/ZoGuard-Plus_Cats.png, images/products/ZoGuard-Plus_Cats@2x.png 2x">
-        <img src="images/products/ZoGuard-Plus_Cats-small.png" srcset="images/products/ZoGuard-Plus_Cats-small.png, images/products/ZoGuard-Plus_Cats-small@2x.png 2x">
+        <img class="product" src="images/products/ZoGuard-Plus_Cats-small.png" srcset="images/products/ZoGuard-Plus_Cats-small.png, images/products/ZoGuard-Plus_Cats-small@2x.png 2x">
       </picture>
-      <div class="product-ingredients">
-        Contains the same active ingredients* used in <span class="key-point">Frontline Plus for Cats.</span>
-        <div class="active-ingredients">*Fipronil &amp; (s)-methoprene</div>
+      <div><div class="compare-to">Compare to Frontline Plus</div></div>
+      <div class="ribbon">
+        <picture>
+          <source 
+            media="(min-width: 48em)" 
+            srcset="images/ribbon/tablet.png, images/ribbon/tablet@2x.png 2x">
+          <img class="ribbon" src="images/ribbon/mobile.png" srcset="images/ribbon/mobile.png, images/ribbon/mobile@2x.png 2x">
+        </picture>
       </div>
+
+      <div class="product-statement">Complete flea and tick control.</div>
       <button class="select-choice" id="zoguard-plus">Select</button>
-      <a class="product-label" target="_blank" href="images/labels/ZoGuard_Specimen_Label_Cats.pdf">View Label</a>
+
+      <div class="expand-details-container">
+        <button type="button" class="expand-details">
+          View product details
+          <i class="fa fa-caret-right"></i>
+          <i class="fa fa-caret-down"></i>
+        </button>
+      </div>
+      <ul class="product-features">
+        <li class="feature">
+          <div>
+            <i class="fa fa-bug"></i>
+            <div class="feature-container">
+              Kills adult <span class="key-point">fleas, ticks, and chewing lice</span> on contact
+            </div>
+          </div>
+        </li>
+        <li class="feature">
+          <div>
+            <i class="fa fa-ban"></i>
+            <div class="feature-container">
+              <span class="key-point">Protects against sarcoptic mange</span> by controlling mites
+            </div>
+          </div>
+        </li>
+        <li class="feature">
+          <div>
+            <i class="fa fa-ban"></i>
+            <div class="feature-container">
+              <span class="key-point">Prevents flea re-infestation</span> by killing flea eggs and larvae
+            </div>
+          </div>
+        </li>
+        <li class="feature">
+          <div>
+            <i class="fa fa-umbrella"></i>
+            <div class="feature-container">
+              Waterproof
+             </div>
+           </div>
+         </li>
+       </ul>
+       <div class="product-description">
+         <div class="product-description-header">
+           <h3>More Info</h3>
+           <a class="product-label" target="_blank" href="images/labels/ZoGuard_Specimen_Label_Cats.pdf">View Label</a>
+         </div>
+         ZoGuard Plus provides total control of both fleas and ticks. Classified as a "non-repellent," fleas and ticks cannot detect the presence of the active ingredients, ensuring a lethal dose is achieved.
+       </div>
     </div>
   </form>
   <div class="promise" id="promise-mobile">
@@ -110,37 +219,17 @@
       The products offered by My Pet Defense have been researched and tested to ensure maximum efficacy while maintaining the highest level of quality and safety.
     </div>
   </div>
-  <div class="missing-product">
-    <button type="button" class="missing-product js-menu-trigger desktop">
-      Don’t see your product listed?
-      <br>
-      <div><i class="fa fa-caret-left"></i> Here's why</div>
-    </button>
-    <button type="button" class="missing-product js-menu-trigger mobile">
-      Don't See Your Product?
-    </button>
-  </div>
+  
   <div class="flow-step unanswered">
     <div class="step-name">4. Account</div>
   </div>
 
-  <div id="missing-product-overlay" class="js-menu sliding-panel-content">
-    <i class="fa fa-close"></i>
-    <h2>Why don’t I see my product listed?</h2>
-    <div>
-      While there are many brands of flea and tick products available, most of these brands use the same set of ingredients to solve the same problems – fleas, ticks and mosquitos. 
-      <br><br>
-            My Pet Defense has chosen to focus on solutions, not brands. My Pet Defense has identified a selection of products that we feel best meets these needs. These products have been researched and tested to ensure they meet the highest levels of quality, safety and performance. That's Our Promise.
-    </div>
-  </div>
-  <div class="js-menu-screen sliding-panel-fade-screen"></div>
-  
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=products">
   </head_merge>
 
   <tail>
-    <script type="text/javascript" src="/static/js/slide-up.js"></script>
+    <script type="text/javascript" data-lift="script-bundle?name=products"></script>
   </tail>
 </div>
 
