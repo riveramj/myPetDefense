@@ -1,0 +1,67 @@
+#logo-sign-out {
+  padding: em(18px) 0;
+}
+
+#logo-sign-out li {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#logo-name { 
+  padding-left: em(15px);
+}
+
+.sign-out {
+  float: right;
+  padding: rem(7px) rem(16px) 0 0;
+
+  a {
+    color: #4F4E4E;
+    font-weight: $semibold;
+    font-size: 14px;
+    text-decoration: none;
+  }
+}
+
+#account-nav {
+  background-color: #605F5F;
+  padding: em(15px) em(25px) em(9px);
+}
+
+#account-header {
+  font-weight: $semibold;
+  color: #CECECE;
+  font-size: em(12px);
+  line-height: 14px;
+}
+
+#user-email {
+  color: #F6F6F6;
+  font-size: em(17px);
+  line-height: 20px;
+}
+
+#navigation {
+  margin-top: em(12px);
+  border-top: #454343 solid 2px;
+  padding-top: em(9px);
+
+  li {
+    color: #ffffff;
+    line-height: 13px;
+    font-size: rem(11px);
+    font-weight: $semibold;
+    display: inline-block;
+    margin-right: rem(16px);
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
+  li.current {
+    background-color: #454343;
+    padding: rem(6px) rem(7px);
+    margin-right: rem(9px);
+  }
+}
