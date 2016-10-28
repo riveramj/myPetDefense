@@ -1,5 +1,5 @@
 package com.mypetdefense.snippet
-package admin
+package admin 
 
 import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml

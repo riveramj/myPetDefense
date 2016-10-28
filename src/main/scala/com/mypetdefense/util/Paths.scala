@@ -77,6 +77,11 @@ object Paths {
     RedirectResponse("/")
   )
 
+  val parent = If(
+    () => SecurityContext.parent_?,
+    RedirectResponse("/")
+  )
+
   val agentOrAdmin = If(
     () => (SecurityContext.admin_? || SecurityContext.agent_?),
     RedirectResponse("/")
@@ -110,6 +115,7 @@ object Paths {
     CatProduct.menu,
     Checkout.menu,
     Success.menu,
+    AccountOverview.menu,
     admin.Dashboard.menu,
     admin.Parents.menu,
     admin.Users.menu,

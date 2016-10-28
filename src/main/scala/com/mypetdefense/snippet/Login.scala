@@ -61,8 +61,8 @@ class Login extends Loggable {
       user.userType match {
         case admin if admin == UserType.Admin => 
           S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
-        case _ =>
-          S.redirectTo("/")
+        case parent if parent == UserType.Parent =>
+          S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
       }
     }
 
