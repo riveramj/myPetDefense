@@ -117,6 +117,8 @@ object Paths {
     admin.Agencies.menu,
     admin.PhonePortal.menu,
     Login.menu,
+    ForgotPassword.menu,
+    ResetPassword.menu,
     Signup.menu,
     Login.logoutMenu
   )

@@ -15,12 +15,8 @@ import org.joda.time.DateTime
 import com.mypetdefense.model.User
 import net.liftweb.util.StringHelpers
 
-object AccessKeyService extends Loggable {
+object ResetKeyService extends Loggable {
   private val rng = new Random(new SecureRandom)
-
-  def createAccessKey() = {
-    StringHelpers.randomString(16)
-  }
 
   def createResetKey(user: User): User = {
     val key = StringHelpers.randomString(16)
@@ -28,12 +24,12 @@ object AccessKeyService extends Loggable {
     user.resetKey(key).saveMe
   }
 
-  def verifyAccessKey(userId: Long, key: String): Boolean = {
+  def verifyResetKey(userId: Long, key: String): Boolean = {
     User.find(By(User.userId, userId)) match {
       case Full(user) =>
         logger.debug(s"key is ${key}")
         
-        user.accessKey.get match {
+        user.resetKey.get match {
           case possibleKey if possibleKey == key => true
           case _ => false
         }
@@ -44,12 +40,12 @@ object AccessKeyService extends Loggable {
     }
   }
 
-  def removeAccessKey(user: User) {
-    user.accessKey("").saveMe
+  def removeResetKey(user: User) = {
+    user.resetKey("").saveMe
   }
 
   def findUserByKey(key: String): Box[User] = {
-    User.find(By(User.accessKey, key)) match {
+    User.find(By(User.resetKey, key)) match {
       case Full(user) => Full(user)
       case error =>
         logger.error(s"Error: ${error}. Key is ${key}")

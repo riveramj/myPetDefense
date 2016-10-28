@@ -4,6 +4,12 @@ home.css
 login
 login.css
 
+forgot-password
+forgot-password.css
+
+reset-password
+reset-password.css
+
 signup
 signup.css
 
