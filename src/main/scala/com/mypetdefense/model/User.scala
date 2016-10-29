@@ -27,7 +27,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object salt extends MappedString(this, 100)
   object phone extends MappedString(this, 100)
   object accessKey extends MappedString(this, 100)
-  object resetKey extends MappedString(this, 100)
+  object resetPasswordKey extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
   object referer extends MappedLongForeignKey(this, Agency)
   object coupon extends MappedLongForeignKey(this, Coupon)

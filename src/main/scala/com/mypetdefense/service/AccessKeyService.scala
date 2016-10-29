@@ -22,12 +22,6 @@ object AccessKeyService extends Loggable {
     StringHelpers.randomString(16)
   }
 
-  def createResetKey(user: User): User = {
-    val key = StringHelpers.randomString(16)
-    val curTime = new DateTime()
-    user.resetKey(key).saveMe
-  }
-
   def verifyAccessKey(userId: Long, key: String): Boolean = {
     User.find(By(User.userId, userId)) match {
       case Full(user) =>

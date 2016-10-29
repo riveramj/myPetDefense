@@ -24,7 +24,7 @@ object ResetPassword extends Loggable {
   val menu = Menu.param[User](
     "Reset Password", "Reset Password",
     accessKey => ResetKeyService.findUserByKey(accessKey),
-    user => user.resetKey.get
+    user => user.resetPasswordKey.get
   ) / "reset-password" >> 
     Hidden
 }
@@ -34,7 +34,7 @@ class ResetPassword {
   var password = ""
   def resetPassword() = user match {
     case Full(user) => 
-      User.setUserPassword(user, password).resetKey("").saveMe
+      User.setUserPassword(user, password).resetPasswordKey("").saveMe
       S.redirectTo(Login.menu.loc.calcDefaultHref)
     case _ =>
       println("no user associated to this reset key")
