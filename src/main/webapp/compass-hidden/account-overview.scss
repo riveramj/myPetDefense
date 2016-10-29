@@ -5,6 +5,10 @@
   background-color: #DCDBDB;
   padding: em(14px) em(25px) em(85px);
 
+  @media (min-width: $bp-medium) {
+    @include span-columns(8, table);
+  }
+
   h2 {
     color: #2E9F9B;
     font-size: em(24px);

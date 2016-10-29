@@ -11,7 +11,7 @@
   padding-left: em(15px);
 }
 
-.sign-out {
+#logo-sign-out li.sign-out {
   float: right;
   padding: rem(7px) rem(16px) 0 0;
 
@@ -21,11 +21,19 @@
     font-size: 14px;
     text-decoration: none;
   }
+
+  @media (min-width: $bp-medium) {
+    display: none;
+  }
 }
 
 #account-nav {
   background-color: #605F5F;
   padding: em(15px) em(25px) em(9px);
+
+  @media (min-width: $bp-medium) {
+    @include span-columns(4, table);
+  }
 }
 
 #account-header {
