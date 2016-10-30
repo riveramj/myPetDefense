@@ -50,7 +50,6 @@ class Dashboard extends Loggable {
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
     val nextShipDate = subscription.nextShipDate(nextMonthDate)
-    println(nextShipDate)
     nextShipDate.save
   }
 

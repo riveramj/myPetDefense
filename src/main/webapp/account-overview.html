@@ -7,18 +7,20 @@
       <h2>Upcoming Order</h2>
 
       <dl class="account-block arrival-date">
-        <dt class="block-header">Arrival Date</dt>
-        <dd class="block-details">Feb 29, 2016</dd>
+        <dt class="block-header">Ship Date</dt>
+        <dd class="block-details next-ship-date">Feb 29, 2016</dd>
       </dl>
 
       <dl class="account-block">
         <dt class="block-header">Shipping Address</dt>
         <dd class="block-details">
-          <ul>
-            <li>Mike Rivera</li>
-            <li>123 Main Street</li>
-            <li>#132</li>
-            <li>Atlanta, GA 30342</li>
+          <ul id="user-address">
+            <li id="name">Mike Rivera</li>
+            <li id="address-one">123 Main Street</li>
+            <li id="address-two">#132</li>
+            <li>
+              <span id="city">Atlanta</span>, <span id="state>"GA</span> </span id="zip">30342</span>
+            </li>
           </ul>
         </dd>
         <dt>
@@ -28,7 +30,7 @@
 
       <dl class="account-block" id="invoice">
         <dt class="block-header">Invoice</dt>
-        <dt id="invoice-order-name">Order for 20 October 2016</dt>
+        <dt id="invoice-order-name">Order for <span class="next-ship-date">February 29, 2016</dt>
         <dd>
           <ul class="invoice-details invoice-item mobile-invoice-list">
             <li>
