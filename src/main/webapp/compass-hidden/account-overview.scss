@@ -69,6 +69,7 @@
 .arrival-date {
   @media (min-width: $bp-medium) {
     float: right;
+    margin-right: rem(121px);
   }
 }
 
@@ -87,6 +88,11 @@ a.block-action {
   display: block;
 
   border-radius: 4px;
+
+  @media (min-width: $bp-medium) {
+    width: 187px;
+    margin: rem(15px) 0 rem(52px);;
+  }
 }
 
 #invoice-order-name {
@@ -113,8 +119,22 @@ a.block-action {
 .invoice-item {
   border-bottom: #818080 1px dashed;
 
+  @media (min-width: $bp-medium) {
+    border: none;
+  }
+
   &.last-item {
     border-bottom: none;
+
+    @media (min-width: $bp-medium) {
+      border-bottom: #DCDBDB 1px solid;
+    }
+  }
+}
+
+.mobile-invoice-list {
+  @media (min-width: $bp-medium) {
+    display: none;
   }
 }
 
@@ -126,16 +146,45 @@ a.block-action {
   text-transform: uppercase;
 }
 
+.invoice-list {
+  @media (max-width: $bp-small) {
+    display: none;
+  }
+  @media (min-width: $bp-medium) {
+    width: 100%;
+    margin-bottom: rem(16px);
+  }
+
+  th {
+    color: #2E9F9B;
+    font-size: rem(14px);
+    padding-bottom: 7px;
+  }
+
+  td {
+    padding-bottom: 7px;
+  }
+}
+
 .value {
   float: right;
   color: #454343;
   font-size: rem(14px);
+
+  @media (min-width: $bp-medium) {
+    float: none;
+    font-size: rem(16px);
+  }
 }
 
 li.order-total {
   color: #393939;
   font-weight: $bold;
   margin-bottom: 0;
+
+  & .key {
+    font-weight: $bold;
+  }
 }
 
 .invoice-totals {
@@ -149,5 +198,13 @@ li.order-total {
     font-size: rem(16px);
     text-transform: none;
     padding-left: rem(60px);
+
+    @media (min-width: $bp-medium) {
+      padding-left: 302px;
+    }
+  }
+
+  .value {
+    float: right;
   }
 }
