@@ -10,6 +10,10 @@
     display: flex;
     margin: em(25px) auto em(136px);
     justify-content: center;
+
+    @media (min-width: $bp-large) {
+      margin-top: em(50px);
+    }
   }
 }
 
@@ -22,6 +26,10 @@
     background-color: #ffffff;
 
     padding-top: em(25px);
+  }
+
+  @media (min-width: $bp-large) {
+    width: 950px;
   }
 
   h2 {
@@ -44,6 +52,12 @@
   @media (min-width: $bp-medium) {
     margin: 0;
     padding: 0;
+  }
+}
+
+#invoice {
+  @media (min-width: $bp-large) {
+    width: 537px;
   }
 }
 
@@ -70,6 +84,10 @@
   @media (min-width: $bp-medium) {
     float: right;
     margin-right: rem(121px);
+  }
+  
+  @media (min-width: $bp-large) {
+    margin-right: 478px;
   }
 }
 
