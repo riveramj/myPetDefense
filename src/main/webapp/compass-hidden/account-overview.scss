@@ -1,83 +1,11 @@
 @import "base";
 @import "parent-nav-bar";
-
-@media (min-width: $bp-medium) {
-  body {
-    background-color: #DCDBDB;
-  }
-
-  #page-body-container {
-    display: flex;
-    margin: em(25px) auto em(136px);
-    justify-content: center;
-
-    @media (min-width: $bp-large) {
-      margin-top: em(50px);
-    }
-  }
-}
-
-#upcoming-order {
-  background-color: #DCDBDB;
-  padding: em(14px) em(25px) em(85px);
-
-  @media (min-width: $bp-medium) {
-    width: 569px;
-    background-color: #ffffff;
-
-    padding-top: em(25px);
-  }
-
-  @media (min-width: $bp-large) {
-    width: 950px;
-  }
-
-  h2 {
-    color: #2E9F9B;
-    font-size: em(24px);
-    line-height: 34px;
-
-    @media (min-width: $bp-medium) {
-      font-size: em(27px);
-      padding-bottom: rem(39px);
-    }
-  }
-}
-
-.account-block {
-  margin-top: rem(8px);
-  padding: rem(20px) rem(18px);
-  background-color: #ffffff;
-
-  @media (min-width: $bp-medium) {
-    margin: 0;
-    padding: 0;
-  }
-}
+@import "parent-account";
 
 #invoice {
   @media (min-width: $bp-large) {
     width: 537px;
   }
-}
-
-.block-header {
-  font-size: rem(15px);
-  letter-spacing: 0.4px;
-  color: #949494;
-  font-weight: $semibold;
-  padding-bottom: rem(5px);
-  text-transform: uppercase;
-
-  @media (min-width: $bp-medium) {
-    font-size: rem(14px);
-  }
-}
-
-.block-details {
-  font-size: rem(16px);
-  color: #454343;
-  line-height: 22px;
 }
 
 .arrival-date {
@@ -88,28 +16,6 @@
   
   @media (min-width: $bp-large) {
     margin-right: 478px;
-  }
-}
-
-a.block-action {
-  text-align: center;
-  text-decoration: none;
-  font-size: rem(16px);
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-  
-  background-color: #45ADA9;
-  color: #ffffff;
-
-  margin-top: rem(20px);
-  padding: rem(13px) 0;
-  display: block;
-
-  border-radius: 4px;
-
-  @media (min-width: $bp-medium) {
-    width: 187px;
-    margin: rem(15px) 0 rem(52px);;
   }
 }
 
@@ -156,14 +62,6 @@ a.block-action {
   }
 }
 
-.key { 
-  color: #2E9F9B;
-  font-weight: $semibold;
-  font-size: rem(14px);
-  letter-spacing: 0.4px;
-  text-transform: uppercase;
-}
-
 .invoice-list {
   @media (max-width: $bp-small) {
     display: none;
@@ -181,17 +79,6 @@ a.block-action {
 
   td {
     padding-bottom: 7px;
-  }
-}
-
-.value {
-  float: right;
-  color: #454343;
-  font-size: rem(14px);
-
-  @media (min-width: $bp-medium) {
-    float: none;
-    font-size: rem(16px);
   }
 }
 
