@@ -99,10 +99,16 @@
       font-size: rem(18px);
       font-weight: $semibold;
       line-height: rem(22px);
-      padding: 0 rem(12) rem(32px);
+      padding: rem(16px) rem(12) rem(16px);
       color: #EFEFEF;
       margin-right: 0;
+      margin-bottom: rem(4px);
     }
+  }
+
+  li:hover {
+    background-color: #4F4E4E;
+    cursor: pointer;
   }
 
   li.current {
@@ -113,7 +119,6 @@
     @media (min-width: $bp-medium) {
       padding: rem(14px) rem(12px);
       margin-right: 0;
-      margin-bottom: rem(18px);
       color: #ffffff;
     }
   }
