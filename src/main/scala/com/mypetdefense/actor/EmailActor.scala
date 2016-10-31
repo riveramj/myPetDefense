@@ -80,7 +80,7 @@ trait SendNewUserEmailHandling extends EmailHandlerChain {
 }
 
 trait ResetPasswordHandling extends EmailHandlerChain {
-  val resetSubject = "Reset your My Pet Defense password."
+  val resetSubject = "Reset your My Pet Defense password"
   val resetPasswordTemplate = 
     Templates("emails-hidden" :: "reset-password-email" :: Nil) openOr NodeSeq.Empty
 
