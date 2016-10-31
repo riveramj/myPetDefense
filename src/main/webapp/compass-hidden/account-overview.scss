@@ -28,8 +28,7 @@
 }
 
 .invoice-details {
-  margin-top: rem(14px);
-  padding-bottom: rem(4px);
+  padding: rem(14px) 0 rem(4px);
 
   li {
     margin-bottom: rem(10px);
@@ -38,22 +37,29 @@
   li div {
     display: inline-block;
   }
+
+  @media (min-width: $bp-medium) {
+    padding-top: 0;
+    margin-top: rem(14px);
+  }
 }
 
 .invoice-item {
-  border-bottom: #818080 1px dashed;
+  border-top: #818080 1px dashed;
 
   @media (min-width: $bp-medium) {
     border: none;
   }
 
-  &.last-item {
-    border-bottom: none;
-
+  &:last-child {
     @media (min-width: $bp-medium) {
       border-bottom: #DCDBDB 1px solid;
     }
   }
+}
+
+.mobile-invoice-list:first-child {
+  border-top: none;
 }
 
 .mobile-invoice-list {
