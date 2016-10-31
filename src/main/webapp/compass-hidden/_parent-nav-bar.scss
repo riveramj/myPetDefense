@@ -1,0 +1,125 @@
+#logo-sign-out {
+  padding: em(18px) 0;
+  background-color: #ffffff;
+}
+
+#logo-sign-out li {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+#logo-name { 
+  padding-left: em(15px);
+}
+
+#logo-sign-out li.sign-out {
+  float: right;
+  padding: rem(7px) rem(16px) 0 0;
+
+  a {
+    color: #4F4E4E;
+    font-weight: $semibold;
+    font-size: 14px;
+    text-decoration: none;
+  }
+
+  @media (min-width: $bp-medium) {
+    display: none;
+  }
+}
+
+#account-nav {
+  background-color: #605F5F;
+  padding: em(15px) em(25px) em(9px);
+
+  @media (min-width: $bp-medium) {
+    width: 179px;
+    padding: 0;
+  }
+
+  @media (min-width: $bp-large) {
+    width: 270px;
+  }
+}
+
+#user-account {
+  @media (min-width: $bp-medium) {
+    margin: rem(30px) rem(12px) 0 rem(12px);
+    padding-bottom: rem(10px);
+    border-bottom: #454343 solid 2px;
+  }
+}
+
+#account-header {
+  font-weight: $semibold;
+  color: #CECECE;
+  font-size: em(12px);
+  line-height: 14px;
+
+  @media (min-width: $bp-medium) {
+    margin-bottom: rem(4px);
+  }
+}
+
+#user-email {
+  color: #F6F6F6;
+  font-size: em(17px);
+  line-height: 20px;
+
+  @media (min-width: $bp-medium) {
+    font-size: em(14px);
+  }
+}
+
+#navigation {
+  margin-top: em(12px);
+  border-top: #454343 solid 2px;
+  padding-top: em(9px);
+
+  @media (min-width: $bp-medium) {
+    padding-top: em(32px);
+    border-top: none;
+    margin-top: 0;
+  }
+
+  li {
+    color: #ffffff;
+    line-height: 13px;
+    font-size: rem(11px);
+    font-weight: $semibold;
+    display: inline-block;
+    margin-right: rem(16px);
+
+    &:last-child {
+      margin-right: 0;
+    }
+
+    @media (min-width: $bp-medium) {
+      display: block;
+      font-size: rem(18px);
+      font-weight: $semibold;
+      line-height: rem(22px);
+      padding: rem(16px) rem(12) rem(16px);
+      color: #EFEFEF;
+      margin-right: 0;
+      margin-bottom: rem(4px);
+    }
+  }
+
+  li:hover {
+    background-color: #4F4E4E;
+    cursor: pointer;
+  }
+
+  li.current {
+    background-color: #454343;
+    padding: rem(6px) rem(7px);
+    margin-right: rem(9px);
+
+    @media (min-width: $bp-medium) {
+      padding: rem(14px) rem(12px);
+      margin-right: 0;
+      color: #ffffff;
+    }
+  }
+}
