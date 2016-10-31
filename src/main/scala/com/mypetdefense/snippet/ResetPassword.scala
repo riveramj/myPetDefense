@@ -15,6 +15,7 @@ import com.mypetdefense._
   import model.{User, UserType}
   import snippet.admin.Dashboard
 import com.mypetdefense.util.SecurityContext
+import com.mypetdefense.actor._
 
 object ResetPassword extends Loggable {
   import net.liftweb.sitemap._
@@ -35,6 +36,7 @@ class ResetPassword {
   def resetPassword() = user match {
     case Full(user) => 
       User.setUserPassword(user, password).resetPasswordKey("").saveMe
+      EmailActor ! SendPasswordUpdatedEmail(user)
       S.redirectTo(Login.menu.loc.calcDefaultHref)
     case _ =>
       println("no user associated to this reset key")

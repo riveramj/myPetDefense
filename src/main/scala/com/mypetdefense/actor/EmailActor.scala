@@ -95,6 +95,17 @@ trait ResetPasswordHandling extends EmailHandlerChain {
   }
 }
 
+trait CompleteResetPasswordHandling extends EmailHandlerChain {
+  val completeResetPasswordSubject = "My Pet Defense Password Changed"
+  val completeResetPasswordTemplate = 
+    Templates("emails-hidden" :: "complete-reset-password-email" :: Nil) openOr NodeSeq.Empty
+
+  addHandler {
+    case SendPasswordUpdatedEmail(user) => 
+      sendEmail(completeResetPasswordSubject, user.email.get, completeResetPasswordTemplate)
+  }
+}
+
 trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
   val invoicePaymentFailedEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-failed-email" :: Nil) openOr NodeSeq.Empty
@@ -203,6 +214,7 @@ trait EmailActor extends EmailHandlerChain
                     with InvoicePaymentSucceededEmailHandling 
                     with NewSaleEmailHandling 
                     with ResetPasswordHandling 
+                    with CompleteResetPasswordHandling 
                     with ShipmentReadyEmailHandling {
 
   val baseEmailTemplate = 
