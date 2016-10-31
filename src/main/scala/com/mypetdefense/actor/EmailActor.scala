@@ -91,7 +91,7 @@ trait ResetPasswordHandling extends EmailHandlerChain {
         "#reset-link *" #> passwordResetLink andThen
         "#reset-link [href]" #> passwordResetLink
 
-      sendEmail("your reset password", userWithKey.email.get, transform(resetPasswordTemplate))
+      sendEmail(resetSubject, userWithKey.email.get, transform(resetPasswordTemplate))
   }
 }
 
