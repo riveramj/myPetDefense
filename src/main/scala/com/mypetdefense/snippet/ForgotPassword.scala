@@ -34,12 +34,14 @@ class ForgotPassword extends Loggable {
       case Full(user) => 
         val userWithResetKey = ResetKeyService.createResetKey(user)
         EmailActor ! SendPasswordResetEmail(userWithResetKey)
+        S.redirectTo(ResetPasswordSent.menu.toLoc.calcHref(userWithResetKey))
       case _ => 
         println(userEmail)
     }
   }
   def render = {
-    "#email" #> text(userEmail, email => userEmail = email.trim) &
-    "type=submit" #> onSubmitUnit(submitPasswordReset)
+    SHtml.makeFormsAjax andThen
+    "#email" #> SHtml.text(userEmail, email => userEmail = email.trim) &
+    "type=submit" #> SHtml.ajaxSubmit("Send Email", submitPasswordReset)
   }
 }

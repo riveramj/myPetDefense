@@ -119,6 +119,7 @@ object Paths {
     Login.menu,
     ForgotPassword.menu,
     ResetPassword.menu,
+    ResetPasswordSent.menu,
     Signup.menu,
     Login.logoutMenu
   )
