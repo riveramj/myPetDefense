@@ -37,7 +37,8 @@ class ResetPassword {
     case Full(user) => 
       User.setUserPassword(user, password).resetPasswordKey("").saveMe
       EmailActor ! SendPasswordUpdatedEmail(user)
-      S.redirectTo(Login.menu.loc.calcDefaultHref)
+
+      SecurityContext.loginRedirectUser(user)
     case _ =>
       println("no user associated to this reset key")
       S.redirectTo(Login.menu.loc.calcDefaultHref)
