@@ -21,7 +21,9 @@ object AccountOverview extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Account Overview") / "account-overview"
+  val menu = Menu.i("Account Overview") / "account-overview" >>
+    loggedIn >>
+    parent
 }
 
 class AccountOverview extends Loggable {
