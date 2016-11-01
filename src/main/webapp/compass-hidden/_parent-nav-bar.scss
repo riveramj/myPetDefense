@@ -8,6 +8,20 @@
   vertical-align: middle;
 }
 
+.mobile-navigation {
+  @media (min-width: $bp-medium) {
+    display: none;
+  }
+}
+
+.desktop-navigation {
+  display: none;
+
+  @media (min-width: $bp-medium) {
+    display: inline;
+  }
+}
+
 #logo-name { 
   padding-left: em(15px);
 }
