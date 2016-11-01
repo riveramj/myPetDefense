@@ -17,8 +17,8 @@ import scala.util.{Failure => TryFail, _}
 import java.util.Date
 
 object TaxJarService extends Loggable {
-  val calculateTaxUrl = url("https://api.taxjar.com/v2/taxes")
-  val createOrderTaxUrl = url("https://api.taxjar.com/v2/transactions/orders")
+  val calculateTaxUrl = url("http://api.taxjar.com/v2/taxes")
+  val createOrderTaxUrl = url("http://api.taxjar.com/v2/transactions/orders")
 
   val authKey = Props.get("taxjar.api.key") openOr ""
 
@@ -26,7 +26,7 @@ object TaxJarService extends Loggable {
   
   def findTaxAmoutAndRate(city: String, state: String, zip: String, amount: Double): (Double, Double) = {
     def taxResponse = {
-      Http(calculateTaxUrl.secure << Map(
+      Http(calculateTaxUrl << Map(
         "to_country" -> "US",
         "to_zip" -> zip,
         "to_state" -> state,
@@ -37,8 +37,8 @@ object TaxJarService extends Loggable {
         case Left(throwable) =>
           logger.error(s"taxjar error: ${throwable}")
           Failure("Error occured while talking to taxJar.", Full(throwable), Empty)
-        case Right(possibleTaxReseponse) =>
-          Full(possibleTaxReseponse)
+        case Right(possibleTaxResponse) =>
+          Full(possibleTaxResponse)
       }
     }
 
@@ -85,7 +85,7 @@ object TaxJarService extends Loggable {
 
   def createTaxOrder(orderIdentifier: String, city: String, state: String, zip: String, amount: String, tax: String, date: String) = {
     def orderResponse = {
-      Http(createOrderTaxUrl.secure << Map(
+      Http(createOrderTaxUrl << Map(
         "transaction_id" -> orderIdentifier,
         "transaction_date" -> date,
         "to_country" -> "US",
@@ -99,8 +99,8 @@ object TaxJarService extends Loggable {
         case Left(throwable) =>
           logger.error(s"taxjar error: ${throwable}")
           Failure("Error occured while talking to taxJar.", Full(throwable), Empty)
-        case Right(possibleOrderReseponse) =>
-          Full(possibleOrderReseponse)
+        case Right(possibleOrderResponse) =>
+          Full(possibleOrderResponse)
       }
     }
 
