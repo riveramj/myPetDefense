@@ -108,3 +108,22 @@ a.block-action {
     font-size: rem(16px);
   }
 }
+
+
+input {
+  width: 100%;
+  color: #4F4E4E;
+  font-size: em(16px);
+  border: 1px solid #CECECE;
+  padding: rem(7px) rem(10px);
+  border-radius: 3px;
+  margin-bottom: 14px;
+
+  @include placeholder {
+    color: #949494;
+  }
+}
+
+.field-label {
+  font-family: $text-font;
+}
