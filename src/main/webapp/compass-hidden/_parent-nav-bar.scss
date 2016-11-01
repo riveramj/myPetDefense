@@ -28,6 +28,14 @@
   }
 }
 
+#navigation .signout {
+  display: none;
+
+  @media (min-width: $bp-medium) {
+    display: block;
+  }
+}
+
 #account-nav {
   background-color: #605F5F;
   padding: em(15px) em(25px) em(9px);
@@ -90,17 +98,25 @@
     display: inline-block;
     margin-right: rem(16px);
 
-    &:last-child {
+    &.pets-products {
       margin-right: 0;
     }
 
-    @media (min-width: $bp-medium) {
+    a {
+      color: #ffffff;
+      text-decoration: none;
+
+      @media (min-width: $bp-medium) {
+        color: #EFEFEF;
+      }
+    }
+
+   @media (min-width: $bp-medium) {
       display: block;
       font-size: rem(18px);
       font-weight: $semibold;
       line-height: rem(22px);
       padding: rem(16px) rem(12) rem(16px);
-      color: #EFEFEF;
       margin-right: 0;
       margin-bottom: rem(4px);
     }
@@ -120,6 +136,12 @@
       padding: rem(14px) rem(12px);
       margin-right: 0;
       color: #ffffff;
+    }
+
+    a {
+      @media (min-width: $bp-medium) {
+        color: #ffffff;
+      }
     }
   }
 }
