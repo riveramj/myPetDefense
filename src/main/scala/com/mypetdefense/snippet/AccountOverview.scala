@@ -93,7 +93,7 @@ class AccountOverview extends Loggable {
         ".subtotal *" #> f"$$$productSubtotal%2.2f" &
         ".multipet-discount" #> ClearNodesIf(pets.size == 1) &
         ".tax-charge" #> ClearNodesIf(taxDue == 0D) &
-        ".tax *" #> f"$taxDue%2.2f" &
+        ".tax-charge .tax *" #> f"$taxDue%2.2f" &
         ".total *" #> f"$$$totalDue%2.2f"
       }
     }
