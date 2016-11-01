@@ -1,4 +1,4 @@
-![](logo-horizontal.png)
+<img src="mpd-logo-shield-and-text-copy.png" alt="MPD Logo" width="450px;"/>
 
 ###[MyPetDefense.com](mypetdefense.com)
 

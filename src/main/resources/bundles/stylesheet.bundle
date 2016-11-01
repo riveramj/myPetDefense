@@ -4,6 +4,15 @@ home.css
 login
 login.css
 
+forgot-password
+forgot-password.css
+
+reset-password
+reset-password.css
+
+reset-password-sent
+reset-password-sent.css
+
 signup
 signup.css
 

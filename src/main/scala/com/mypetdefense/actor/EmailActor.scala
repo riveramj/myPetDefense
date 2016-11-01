@@ -17,7 +17,7 @@ import dispatch._
 import org.joda.time._
 
 import com.mypetdefense.model._
-import com.mypetdefense.snippet.Signup
+import com.mypetdefense.snippet._
 import com.mypetdefense.util._
 
 import java.util.Date
@@ -28,6 +28,8 @@ import Mailer._
 sealed trait EmailActorMessage
 case class SendWelcomeEmail(user: User) extends EmailActorMessage
 case class SendNewUserEmail(user: User) extends EmailActorMessage
+case class SendPasswordResetEmail(user: User) extends EmailActorMessage
+case class SendPasswordUpdatedEmail(user: User) extends EmailActorMessage
 case class NewSaleEmail() extends EmailActorMessage
 case class PaymentReceivedEmail() extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
@@ -74,6 +76,33 @@ trait SendNewUserEmailHandling extends EmailHandlerChain {
       }
 
       sendEmail(newUserSubject, user.email.get, transform(newUserTemplate))
+  }
+}
+
+trait ResetPasswordHandling extends EmailHandlerChain {
+  val resetSubject = "Reset your My Pet Defense password"
+  val resetPasswordTemplate = 
+    Templates("emails-hidden" :: "reset-password-email" :: Nil) openOr NodeSeq.Empty
+
+  addHandler {
+    case SendPasswordResetEmail(userWithKey) => 
+      val passwordResetLink = Paths.serverUrl + ResetPassword.menu.toLoc.calcHref(userWithKey)
+      val transform = 
+        "#reset-link *" #> passwordResetLink andThen
+        "#reset-link [href]" #> passwordResetLink
+
+      sendEmail(resetSubject, userWithKey.email.get, transform(resetPasswordTemplate))
+  }
+}
+
+trait CompleteResetPasswordHandling extends EmailHandlerChain {
+  val completeResetPasswordSubject = "My Pet Defense Password Changed"
+  val completeResetPasswordTemplate = 
+    Templates("emails-hidden" :: "complete-reset-password-email" :: Nil) openOr NodeSeq.Empty
+
+  addHandler {
+    case SendPasswordUpdatedEmail(user) => 
+      sendEmail(completeResetPasswordSubject, user.email.get, completeResetPasswordTemplate)
   }
 }
 
@@ -184,6 +213,8 @@ trait EmailActor extends EmailHandlerChain
                     with InvoicePaymentFailedEmailHandling
                     with InvoicePaymentSucceededEmailHandling 
                     with NewSaleEmailHandling 
+                    with ResetPasswordHandling 
+                    with CompleteResetPasswordHandling 
                     with ShipmentReadyEmailHandling {
 
   val baseEmailTemplate = 
