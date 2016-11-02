@@ -110,7 +110,7 @@
     font-size: rem(11px);
     font-weight: $semibold;
     display: inline-block;
-    margin-right: rem(16px);
+    margin-right: rem(14px);
 
     &.pets-products {
       margin-right: 0;
@@ -145,6 +145,10 @@
     background-color: #454343;
     padding: rem(6px) rem(7px);
     margin-right: rem(9px);
+
+    &.pets-products {
+      margin-right: 0;
+    }
 
     @media (min-width: $bp-medium) {
       padding: rem(14px) rem(12px);

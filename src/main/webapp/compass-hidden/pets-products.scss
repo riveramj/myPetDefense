@@ -3,7 +3,7 @@
 @import "parent-account";
 
 
-.product-price div {
+.product-price div, .pet-status div {
   display: inline-block;
 }
 
@@ -43,10 +43,11 @@
   margin-bottom: 0;
 }
 
-.product-price {
+.product-price, .pet-status {
   .key {
     padding-right: rem(10px);
   }
+
   .value {
     float: none;
   }
@@ -113,6 +114,10 @@
   }
 }
 
+.pet-list .pet-name {
+  max-width: 150px;
+}
+
 .pet-details {
   @media (min-width: $bp-large) {
     display: none;
@@ -120,11 +125,16 @@
 }
 
 .pet-list-save {
-  padding: 13px 22px;
-  font-weight: $semibold;
-  width: initial;
+  display: none;
 
-  margin-bottom: 59px;
+  @media (min-width: $bp-large) {
+    padding: 13px 22px;
+    font-weight: $semibold;
+    width: initial;
+
+    margin-bottom: 59px;
+    display: block;
+  }
 }
 
 .add-pet {

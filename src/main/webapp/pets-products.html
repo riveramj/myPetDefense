@@ -1,5 +1,5 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
-<div>
+<div data-lift="PetsAndProducts.render?eager_eval=true">
   <div data-lift="embed?what=parent-logo-bar"></div>
   <div id="page-body-container">
     <div data-lift="embed?what=parent-nav-bar"></div>
@@ -10,7 +10,8 @@
         <dt class="block-header">Pets</dt>
         <dt class="block-banner">Your Monthly Shipments</dt>
         <dd>
-          <ul class="pet pet-details">
+          <form class="pet">
+          <ul class="pet-details">
             <li>
               <label>
                 <div class="key">Pet</div>
@@ -36,6 +37,9 @@
             <li class="product-price">
               <div class="key">Price</div><div class="value">$9.99</div>
             </li>
+            <li class="pet-status">
+              <div class="key">Status</div><div class="value">suspense</div>
+            </li>
             <li>
               <button class="pet-action suspend">Suspend</button><button class="pet-action cancel">Cancel</button>
             </li>
@@ -43,7 +47,9 @@
               <button class="block-action save-changes">Save Changes</button>
             </li>
           </ul>
+          </form>
 
+          <form>
           <table class="pet-list">
             <tr>
               <th>Pet</th>
@@ -54,7 +60,9 @@
               <th></th>
             </tr>
             <tr class="pet">
-              <td class="value pet-name">Peter</td>
+              <td class="value pet-name">
+                <input type="text" class="pet-name" value="Peter">
+              </td>
               <td class="value pet-product">
                 <select>
                   <option value="adventure plus for rabbits">adventure plus for rabbits</option>
@@ -73,6 +81,7 @@
               </td>
             </tr>
           </table>
+          </form>
 
           <button class="block-action pet-list-save save-changes">Save Changes</button>
 
@@ -82,17 +91,18 @@
       <dl class="account-block add-pet">
         <dt class="block-header">Add A Pet</dt>
         <dd>
-          <ul class="new-pet">
+          <form id="new-pet">
+          <ul>
             <li>
               <label>
                 <div class="field-label">Pet Name</div>
-                <input type="text" class="new-pet-name" value="">
+                <input type="text" id="new-pet-name" value="">
               </label>
             </li>
             <li>
               <label>
                 <div class="field-label">Pet Type</div>
-                <select>
+                <select id="pet-type-select">
                   <option value="rabbit">rabbit</option>
                 </select>
               </label>
@@ -100,7 +110,7 @@
             <li>
               <label>
                 <div class="field-label">Pet Product &amp; Size</div>
-                <select>
+                <select id="new-pet-product-select">
                   <option value="r12">rabbit, 1-2 pounds</option>
                 </select>
               </label>
@@ -109,6 +119,7 @@
               <button class="block-action save-changes" id="add-pet">Add Pet</button>
             </li>
           </ul>
+          </form>
         </dd>
 
       </dl>
