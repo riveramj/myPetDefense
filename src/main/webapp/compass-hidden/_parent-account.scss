@@ -98,6 +98,13 @@ a.block-action {
   }
 }
 
+.key {
+  color: #2E9F9B;
+  font-weight: $normal;
+  font-size: rem(16px);
+  text-transform: none;
+}
+
 .value {
   float: right;
   color: #454343;
@@ -106,5 +113,58 @@ a.block-action {
   @media (min-width: $bp-medium) {
     float: none;
     font-size: rem(16px);
+  }
+}
+
+.block-banner {
+  margin: rem(5px) 0 rem(14px);
+  background-color: #F7F7F7;
+  font-size: rem(18px);
+  color: #454343;
+  padding: rem(8px) rem(13px); 
+}
+
+select {
+  color: #454343;
+  border: #CECECE 1px solid;
+  border-radius: 3px;
+  padding: rem(5px) rem(10px);
+  background-color: #FFFFFF;
+  margin: 2px 0 14px;
+  font-size: em(16px);
+  width: 100%;
+}
+
+input {
+  width: 100%;
+  color: #4F4E4E;
+  font-size: em(16px);
+  border: 1px solid #CECECE;
+  padding: rem(7px) rem(10px);
+  border-radius: 3px;
+  margin: 2px 0 14px;
+
+  @include placeholder {
+    color: #949494;
+  }
+}
+
+.field-label {
+  font-family: $text-font;
+}
+
+.save-changes {
+  background-color: #45ADA9;
+  border: none;
+  font-family: $text-font;
+  text-transform: uppercase;
+  font-size: rem(16px);
+  color: white;
+  border-radius: 4px;
+  height: 45px;
+  @include span-columns(12);
+
+  @media(min-width: $bp-large) {
+    @include span-columns(4);
   }
 }

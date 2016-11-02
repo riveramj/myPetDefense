@@ -2,3 +2,133 @@
 @import "parent-nav-bar";
 @import "parent-account";
 
+
+.product-price div {
+  display: inline-block;
+}
+
+.key {
+  font-size: rem(14px);
+  font-weight: $semibold;
+  margin-bottom: rem(2px);
+  text-transform: uppercase;
+}
+
+.pet {
+  border-top: #818080 1px dashed;
+  margin-top: 20px;
+  padding-top: 22px;
+
+  @media (min-width: $bp-medium) {
+    border: none;
+  }
+
+  &:first-child {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  li {
+    padding: 0 rem(13px);
+    margin-bottom: rem(14px);
+
+    &.save-pet {
+      padding: rem(18px) 0 0 0;
+    }
+  }
+}
+
+.pet-name {
+  margin-bottom: 0;
+}
+
+.product-price {
+  .key {
+    padding-right: rem(10px);
+  }
+  .value {
+    float: none;
+  }
+}
+
+.pet-action {
+  background-color: #818080;
+  font-size: rem(15);
+  color: #ffffff;
+  border-radius: 4px;
+  border: none;
+  
+  padding: rem(8px) rem(35px);
+  cursor: pointer;
+
+  @media (min-width: $bp-large) {
+    padding: rem(8px) rem(10px);
+  }
+}
+
+.suspend {
+  margin-right: rem(19px);
+  padding: rem(8px) rem(34px);
+
+  @media (min-width: $bp-large) {
+    padding: rem(8px) rem(11px);
+  }
+}
+
+.save-changes {
+  @include span-columns(0);
+  float: none;
+}
+
+.block-header {
+  margin-bottom: 10px;
+}
+
+#add-pet {
+  margin-top: 6px;
+}
+
+.pet-list {
+  display: none;
+
+  @media (min-width: $bp-large) {
+    display: table;
+    width: 100%;
+  }
+
+  th {
+    color: #2E9F9B;
+    font-size: rem(14px);
+    padding-bottom: 7px;
+  }
+
+  td {
+    padding: 0 26px 7px 0;
+    vertical-align: baseline;
+    
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+}
+
+.pet-details {
+  @media (min-width: $bp-large) {
+    display: none;
+  }
+}
+
+.pet-list-save {
+  padding: 13px 22px;
+  font-weight: $semibold;
+  width: initial;
+
+  margin-bottom: 59px;
+}
+
+.add-pet {
+  @media (min-width: $bp-large) {
+    width: 350px;
+  }
+}
