@@ -10,41 +10,31 @@
         <dt class="block-header">Pets</dt>
         <dt class="block-banner">Your Monthly Shipments</dt>
         <dd>
-          <form class="pet">
-          <ul class="pet-details">
+          <form>
+          <ul class="pet-details pet">
             <li>
               <label>
                 <div class="key">Pet</div>
-                <input type="text" class="pet-name" value="peter">
+                <input type="text" class="pet-name" value="peter"> 
               </label>
             </li>
             <li>
               <label>
                 <div class="key">Product</div>
-                <select>
+                <select class="pet-product">
                   <option value="adventure plus for rabbits">adventure plus for rabbits</option>
-                </select>
-              </label>
-            </li>
-            <li>
-              <label>
-                <div class="key">Size</div>
-                <select>
-                  <option value="1-2 pounds">1-2 pounds</option>
                 </select>
               </label>
             </li>
             <li class="product-price">
               <div class="key">Price</div><div class="value">$9.99</div>
             </li>
-            <li class="pet-status">
-              <div class="key">Status</div><div class="value">suspense</div>
+            <li class="pet-status-container">
+              <div class="key">Status</div><div class="value pet-status">suspense</div>
             </li>
             <li>
-              <button class="pet-action suspend">Suspend</button><button class="pet-action cancel">Cancel</button>
-            </li>
-            <li class="save-pet">
-              <button class="block-action save-changes">Save Changes</button>
+              <button class="pet-action cancel">Remove</button>
+              <button class="pet-action save">Save Changes</button>
             </li>
           </ul>
           </form>
@@ -54,36 +44,28 @@
             <tr>
               <th>Pet</th>
               <th>Product</th>
-              <th>Size</th>
               <th>Price</th>
               <th>Status</th>
               <th></th>
             </tr>
             <tr class="pet">
-              <td class="value pet-name">
+              <td class="value">
                 <input type="text" class="pet-name" value="Peter">
               </td>
-              <td class="value pet-product">
-                <select>
+              <td class="value">
+                <select class="pet-product">
                   <option value="adventure plus for rabbits">adventure plus for rabbits</option>
                 </select>
               </td>
-              <td class="value">
-                <select>
-                  <option value="1-2">1-2 pounds</option>
-                </select>
-              </td>
               <td class="value">$9.99</td>
-              <td class="value status">suspense</td>
+              <td class="value pet-status">suspense</td>
               <td>
-                <button class="pet-action suspend">Suspend</button>
-                <button class="pet-action cancel">Cancel</button>
+                <button class="pet-action cancel">Remove</button>
+                <button class="pet-action save">Update</button>
               </td>
             </tr>
           </table>
           </form>
-
-          <button class="block-action pet-list-save save-changes">Save Changes</button>
 
         </dd>
       </dl>
@@ -119,7 +101,6 @@
               <button class="block-action save-changes" id="add-pet">Add Pet</button>
             </li>
           </ul>
-          </form>
         </dd>
 
       </dl>

@@ -3,7 +3,7 @@
 @import "parent-account";
 
 
-.product-price div, .pet-status div {
+.product-price div, .pet-status-container div {
   display: inline-block;
 }
 
@@ -43,7 +43,7 @@
   margin-bottom: 0;
 }
 
-.product-price, .pet-status {
+.product-price, .pet-status-container {
   .key {
     padding-right: rem(10px);
   }
@@ -59,6 +59,7 @@
   color: #ffffff;
   border-radius: 4px;
   border: none;
+  margin-right: rem(19px);
   
   padding: rem(8px) rem(35px);
   cursor: pointer;
@@ -68,9 +69,11 @@
   }
 }
 
-.suspend {
-  margin-right: rem(19px);
+.save {
+  margin-right: 0;
   padding: rem(8px) rem(34px);
+  background-color: #45ADA9;
+  width: auto;
 
   @media (min-width: $bp-large) {
     padding: rem(8px) rem(11px);
@@ -142,4 +145,8 @@
   @media (min-width: $bp-large) {
     width: 350px;
   }
+}
+
+#new-pet select {
+  margin-top: 5px;
 }

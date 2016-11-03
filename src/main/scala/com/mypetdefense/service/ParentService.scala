@@ -1,4 +1,4 @@
-package com.mypetdefense.service
+package com.mypetdefense.service 
 
 import net.liftweb._
   import common._
@@ -33,83 +33,6 @@ object ParentService extends Loggable {
 
   def deleteStripeCustomer(customerId: String) = {
     Customer.delete(customerId)
-  }
-
-  def addNewPet(
-    user: User,
-    name: String,
-    animalType: AnimalType.Value,
-    size: AnimalSize.Value,
-    product: Product
-  ): Box[Pet] = {
-
-    val updateSubscription = (
-      updateStripeSubscriptionQuantity(
-        user.stripeId.get,
-        user.getSubscription.map(_.stripeSubscriptionId.get).getOrElse(""),
-        user.pets.size + 1
-      )
-    )
-
-    Try(Await.result(updateSubscription, new DurationInt(10).seconds)) match {
-      case TrySuccess(Full(stripeSub)) =>
-        Full(Pet.createNewPet(
-          user = user,
-          name = name,
-          animalType = animalType,
-          size = size,
-          product = product
-        ))
-
-      case TrySuccess(stripeFailure) =>
-        logger.error(s"update (add) subscription failed with stipe error: ${stripeFailure}")
-        Empty
-
-      case TryFail(throwable: Throwable) =>
-        logger.error(s"update (add) subscription failed with other error: ${throwable}")
-        Empty
-    }
-  }
-
-  def removePet(oldUser: User, pet: Pet): Box[Pet] = {
-    val user = User.find(By(User.userId, oldUser.userId.get))
-
-    val updateSubscription = {
-      val subscriptionId = (
-        for {
-          updatedUser <- user
-          subscription <- updatedUser.getSubscription
-        } yield {
-          subscription.stripeSubscriptionId.get
-        }
-      ).openOr("")
-
-      updateStripeSubscriptionQuantity(
-        user.map(_.stripeId.get).openOr(""),
-        subscriptionId,
-        user.map(_.pets.size - 1).openOr(0)
-      )
-    }
-
-    Try(Await.result(updateSubscription, new DurationInt(10).seconds)) match {
-      case TrySuccess(Full(stripeSub)) =>
-        if (pet.delete_!)
-          Full(pet)
-        else
-          Empty
-
-      case TrySuccess(stripeFailure) =>
-        logger.error(s"update (remove) subscription failed with stipe error: ${stripeFailure}")
-        logger.error(s"trying to delete ${pet} anyways")
-        if (pet.delete_!)
-          Full(pet)
-        else
-          Empty
-
-      case TryFail(throwable: Throwable) =>
-        logger.error(s"update (remove) subscription failed with other error: ${throwable}")
-        Empty
-    }
   }
 
   def removeParent(oldUser: User): Box[User] = {

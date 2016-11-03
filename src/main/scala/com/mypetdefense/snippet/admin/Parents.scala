@@ -16,7 +16,7 @@ import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.service.ParentService
+import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
 
 object Parents extends Loggable {
@@ -70,7 +70,7 @@ class Parents extends Loggable {
         product <- chosenProduct
         size = product.size.get
       } yield {
-        ParentService.addNewPet(
+        PetService.addNewPet(
           user = parent,
           name = petName,
           animalType = pet,
@@ -93,7 +93,7 @@ class Parents extends Loggable {
   }
 
   def deletePet(parent: User, pet: Pet, renderer: IdMemoizeTransform)() = {
-    ParentService.removePet(parent, pet) match {
+    PetService.removePet(parent, pet) match {
       case Full(_) =>
         renderer.setHtml
       case _ =>

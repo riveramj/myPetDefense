@@ -19,7 +19,7 @@ import com.mypetdefense.actor._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.SecurityContext._
 import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.service.ParentService
+import com.mypetdefense.service._
 
 
 object PetsAndProducts extends Loggable {
@@ -42,7 +42,7 @@ class PetsAndProducts extends Loggable {
   def petTypeDropdown(renderer: IdMemoizeTransform) = {
     SHtml.ajaxSelectObj(
       List(
-        (Empty, ""),
+        (Empty, "Choose Pet"),
         (Full(AnimalType.Dog), AnimalType.Dog.toString),
         (Full(AnimalType.Cat), AnimalType.Cat.toString)
       ),
@@ -60,7 +60,7 @@ class PetsAndProducts extends Loggable {
     }.openOr(Nil)
 
     SHtml.ajaxSelectObj(
-      (Empty, "") +: products.map(product => (Full(product), product.getNameAndSize)),
+      (Empty, "Choose Product") +: products.map(product => (Full(product), product.getNameAndSize)),
       Full(newPetChosenProduct),
       (possibleProduct: Box[Product]) => newPetChosenProduct = possibleProduct
     )
@@ -83,7 +83,7 @@ class PetsAndProducts extends Loggable {
         product <- newPetChosenProduct
         size = product.size.get
       } yield {
-        ParentService.addNewPet(
+        PetService.addNewPet(
           user = parent,
           name = newPetName,
           animalType = pet,
@@ -101,14 +101,70 @@ class PetsAndProducts extends Loggable {
     }
   }
 
+  def deletePet(pet: Pet)() = {
+    PetService.removePet(user, pet) match {
+      case Full(_) =>
+        S.redirectTo(PetsAndProducts.menu.loc.calcDefaultHref)
+      case _ =>
+        Alert("An error has occured. Please try again.")
+    }
+  }
+
+  def savePet(pet: Pet, name: String, updatedProduct: Box[Product]) = {
+    println(name + " name ====")
+    println(updatedProduct + " prod ====")
+
+    (
+      for {
+        product <- updatedProduct
+        size = product.size.get
+        updatedPet = pet.product(product).name(name).size(size).saveMe
+      } yield {
+        updatedPet 
+      }
+    ) match {
+      case Full(pet) =>
+        println(pet)
+        S.redirectTo(PetsAndProducts.menu.loc.calcDefaultHref)
+      case _ =>
+        Alert("An error has occured. Please try again.")
+    }
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".pets-products [class+]" #> "current" &
+    "#user-email *" #> user.map(_.email.get) &
     "#new-pet" #> idMemoize { renderer =>
       "#new-pet-name" #> ajaxText(newPetName, newPetName = _) &
       "#pet-type-select" #> petTypeDropdown(renderer) &
       "#new-pet-product-select" #> productDropdown() &
       "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
+    } &
+    ".pet" #> pets.toSeq.sortWith(_.name.get < _.name.get).map { pet =>
+      var currentProduct = pet.product.obj
+      var currentPetName = pet.name.get
+
+      val currentProductDropdown = {
+        val products = Product.findAll(By(Product.animalType, pet.animalType.get))
+
+        SHtml.ajaxSelectObj(
+          products.map(product => (product, product.getNameAndSize)),
+          currentProduct,
+          (possibleProduct: Product) => currentProduct = {
+            println(possibleProduct)
+            Full(possibleProduct)
+          }
+        )
+      }
+
+      ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
+      ".pet-product" #> currentProductDropdown &
+      ".pet-status *" #> pet.status.get.toString &
+      ".cancel [onclick]" #> Confirm(s"Remove ${pet.name} and cancel future shipments?",
+        ajaxInvoke(deletePet(pet))
+      ) &
+      ".save" #> ajaxSubmit("Update", () => savePet(pet, currentPetName, currentProduct))
     }
   }
 }
