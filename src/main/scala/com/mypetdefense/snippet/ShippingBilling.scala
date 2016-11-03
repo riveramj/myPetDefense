@@ -1,12 +1,16 @@
 package com.mypetdefense.snippet
 
 import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.util.ClearClearable
-import net.liftweb.http._
-import net.liftweb.mapper.By
+import net.liftweb._
+  import http.SHtml._
+  import util._
+  import util.Helpers._
+  import common._
+  import util.ClearClearable
+  import http._
+  import mapper.{By, NullRef}
+  import js._
+  import JsCmds._
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -31,70 +35,62 @@ object ShippingBilling extends Loggable {
 
 class ShippingBilling extends Loggable {
   val user = currentUser
-  val shippingAddress = Address.find(
-    By(Address.user, user),
-    By(Address.addressType, AddressType.Shipping)
-  )
 
-  val pets = user.map { parent => 
-    Pet.findAll(By(Pet.user, parent))
-  }.openOr(Nil)
+  var firstName = ""
+  var lastName = ""
+  var street1 = ""
+  var street2 = ""
+  var city = ""
+  var state = ""
+  var zip = ""
 
-  val productSubtotal = pets.size * 9.99
+  def saveChanges() = {
+    for {
+      user <- user
+      shippingAddress <- user.addresses.find(_.addressType == AddressType.Shipping)
+    } {
+      user
+        .firstName(firstName)
+        .lastName(lastName)
+        .saveMe
 
+      shippingAddress
+        .street1(street1)
+        .street2(street2)
+        .city(city)
+        .state(state)
+        .zip(zip)
+        .saveMe
+
+    }
+    S.redirectTo(ShippingBilling.menu.loc.calcDefaultHref)
+  }
   def render = {
     val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
-
-    val taxDue = {
-      if (shippingAddress.map(_.state.get.toLowerCase) == Full("ga")) {
-        shippingAddress.map { address =>
-          val taxInfo = TaxJarService.findTaxAmoutAndRate(
-            address.city.get,
-            address.state.get,
-            address.zip.get,
-            (pets.size * 9.99)
-          )
-
-          taxInfo._1
-        }.openOr(0D)
-      } else {
-        0D
-      }
-    }
-
-    val totalDue = productSubtotal + taxDue
-
     "#page-body-container" #> {
-      user.map { parent =>
-        val subscription = parent.getSubscription
-        val nextShipDate = subscription.map(_.nextShipDate.get)
+      for {
+        user <- user
+        shippingAddress <- user.addresses.find(_.addressType == AddressType.Shipping)
+      } yield {
+        firstName = user.firstName.get
+        lastName = user.lastName.get
+        street1 = shippingAddress.street1.get
+        street2 = shippingAddress.street2.get
+        city = shippingAddress.city.get
+        state = shippingAddress.state.get
+        zip = shippingAddress.zip.get
 
-        val petBindings = {
-          ".pet" #> pets.map { pet =>
-            ".pet-name *" #> pet.name &
-            ".pet-product *" #> pet.product.obj.map(_.name.get) & 
-            ".pet-size *" #> pet.product.obj.map(_.size.get.toString)
-          }
-        }
-
+        SHtml.makeFormsAjax andThen
         "#shipping-billing-nav [class+]" #> "current" &
-        "#user-email *" #> parent.email &
-        ".next-ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
-        "#user-address" #> shippingAddress.map { address =>
-          "#name *" #> parent.name &
-          "#address-one *" #> address.street1.get &
-          "#address-two *" #> ClearNodesIf(address.street2.get == "") &
-          "#address-two *" #> address.street2.get &
-          "#city *" #> address.city.get &
-          "#state *" #> address.state.get &
-          "#zip *" #> address.zip.get
-        } &
-        petBindings &
-        ".subtotal *" #> f"$$$productSubtotal%2.2f" &
-        ".multipet-discount" #> ClearNodesIf(pets.size == 1) &
-        ".tax-charge" #> ClearNodesIf(taxDue == 0D) &
-        ".tax-charge .tax *" #> f"$taxDue%2.2f" &
-        ".total *" #> f"$$$totalDue%2.2f"
+        "#user-email *" #> user.email & 
+        "#first-name" #> text(firstName, firstName = _) &
+        "#last-name" #> text(lastName, lastName = _) &
+        "#street-1" #> text(street1, street1 = _) &
+        "#street-2" #> text(street2, street2 = _) &
+        "#city" #> text(city, city = _) &
+        "#state" #> text(state, state = _) &
+        "#zip" #> text(zip, zip = _) &
+        ".save-changes" #> SHtml.ajaxSubmit("Save Changes", saveChanges)
       }
     }
   }
