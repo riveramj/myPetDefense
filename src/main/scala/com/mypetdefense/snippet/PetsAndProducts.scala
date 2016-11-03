@@ -111,9 +111,6 @@ class PetsAndProducts extends Loggable {
   }
 
   def savePet(pet: Pet, name: String, updatedProduct: Box[Product]) = {
-    println(name + " name ====")
-    println(updatedProduct + " prod ====")
-
     (
       for {
         product <- updatedProduct
@@ -124,7 +121,6 @@ class PetsAndProducts extends Loggable {
       }
     ) match {
       case Full(pet) =>
-        println(pet)
         S.redirectTo(PetsAndProducts.menu.loc.calcDefaultHref)
       case _ =>
         Alert("An error has occured. Please try again.")
@@ -152,7 +148,6 @@ class PetsAndProducts extends Loggable {
           products.map(product => (product, product.getNameAndSize)),
           currentProduct,
           (possibleProduct: Product) => currentProduct = {
-            println(possibleProduct)
             Full(possibleProduct)
           }
         )
