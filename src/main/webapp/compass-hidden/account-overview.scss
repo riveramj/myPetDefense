@@ -19,14 +19,6 @@
   }
 }
 
-#invoice-order-name {
-  margin-top: rem(5px);
-  background-color: #F7F7F7;
-  font-size: rem(18px);
-  color: #454343;
-  padding: rem(8px) rem(13px); 
-}
-
 .invoice-details {
   padding: rem(14px) 0 rem(4px);
 
@@ -63,6 +55,10 @@
 }
 
 .mobile-invoice-list {
+  .key {
+    text-transform: uppercase;
+  }
+
   @media (min-width: $bp-medium) {
     display: none;
   }
@@ -81,6 +77,7 @@
     color: #2E9F9B;
     font-size: rem(14px);
     padding-bottom: 7px;
+    text-transform: uppercase;
   }
 
   td {
@@ -104,11 +101,8 @@ li.order-total {
   padding: rem(15px) 0 0;
 
   .key {
-    color: #454343;
-    font-weight: $normal;
-    font-size: rem(16px);
-    text-transform: none;
     padding-left: rem(60px);
+    color: #454343;
 
     @media (min-width: $bp-medium) {
       padding-left: 302px;
