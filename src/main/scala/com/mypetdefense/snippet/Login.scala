@@ -55,17 +55,7 @@ class Login extends Loggable {
         Full(true)
       }
     }
-
-    def redirectUser(user: User) = {
-      SecurityContext.logIn(user)
-      user.userType match {
-        case admin if admin == UserType.Admin => 
-          S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
-        case _ =>
-          S.redirectTo("/")
-      }
-    }
-
+    
     def login() = {
       val validateFields = List(
         checkEmpty(email, "#email"),
@@ -73,10 +63,6 @@ class Login extends Loggable {
       ).flatten
 
       if(validateFields.isEmpty) {
-        if (SecurityContext.loggedIn_?) {
-          SecurityContext.logCurrentUserOut()
-        }
-
         User.findByEmail(email) match {
           case Full(user) =>
             userCanLogIn_?(user, password) match {
@@ -93,7 +79,7 @@ class Login extends Loggable {
                   ValidationError("#password", "Invalid"))
 
               case _ =>
-               redirectUser(user)
+               SecurityContext.loginRedirectUser(user)
             }
 
           case err =>

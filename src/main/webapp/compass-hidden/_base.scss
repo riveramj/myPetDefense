@@ -8,10 +8,10 @@
 $light: 300;
 $normal: 400;
 $regular: 400;
-$semibold: 500;
-$bold: 700;
+$semibold: 700;
+$bold: 900;
 
-$text-font: Helvetica, Arial, sans-serif;
+$text-font: 'Lato', Helvetica, Arial, sans-serif;
 $text-color: #454343;
 $base-font-size: 16px;
 
@@ -53,8 +53,8 @@ input, button, textarea {
 
 // By default, drop both the space and the border on a focused button.
 button::-moz-focus-inner {
-    padding: 0;
-    border: 0;
+  padding: 0;
+  border: 0;
 }
 
 // Default error stylings
