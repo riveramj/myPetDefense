@@ -162,6 +162,7 @@ input {
   border-radius: 4px;
   height: 45px;
   @include span-columns(12);
+  cursor: pointer;
 
   @media(min-width: $bp-large) {
     @include span-columns(4);
