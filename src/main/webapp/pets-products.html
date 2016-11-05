@@ -1,0 +1,113 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+<div data-lift="PetsAndProducts.render?eager_eval=true">
+  <div data-lift="embed?what=parent-logo-bar"></div>
+  <div id="page-body-container">
+    <div data-lift="embed?what=parent-nav-bar"></div>
+    <div class="account-section">
+      <h2>Pets &amp; Products</h2>
+
+      <dl class="account-block">
+        <dt class="block-header">Pets</dt>
+        <dt class="block-banner">Your Monthly Shipments</dt>
+        <dd>
+          <form>
+          <ul class="pet-details pet">
+            <li>
+              <label>
+                <div class="key">Pet</div>
+                <input type="text" class="pet-name" value="peter"> 
+              </label>
+            </li>
+            <li>
+              <label>
+                <div class="key">Product</div>
+                <select class="pet-product">
+                  <option value="adventure plus for rabbits">adventure plus for rabbits</option>
+                </select>
+              </label>
+            </li>
+            <li class="product-price">
+              <div class="key">Price</div><div class="value">$9.99</div>
+            </li>
+            <li class="pet-status-container">
+              <div class="key">Status</div><div class="value pet-status">suspense</div>
+            </li>
+            <li>
+              <button class="pet-action cancel">Remove</button>
+              <button class="pet-action save">Save Changes</button>
+            </li>
+          </ul>
+          </form>
+
+          <form>
+          <table class="pet-list">
+            <tr>
+              <th>Pet</th>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+            <tr class="pet">
+              <td class="value">
+                <input type="text" class="pet-name" value="Peter">
+              </td>
+              <td class="value">
+                <select class="pet-product">
+                  <option value="adventure plus for rabbits">adventure plus for rabbits</option>
+                </select>
+              </td>
+              <td class="value">$9.99</td>
+              <td class="value pet-status">suspense</td>
+              <td>
+                <button class="pet-action cancel">Remove</button>
+                <button class="pet-action save">Update</button>
+              </td>
+            </tr>
+          </table>
+          </form>
+
+        </dd>
+      </dl>
+
+      <dl class="account-block add-pet">
+        <dt class="block-header">Add A Pet</dt>
+        <dd>
+          <form id="new-pet">
+          <ul>
+            <li>
+              <label>
+                <div class="field-label">Pet Name</div>
+                <input type="text" id="new-pet-name" value="">
+              </label>
+            </li>
+            <li>
+              <label>
+                <div class="field-label">Pet Type</div>
+                <select id="pet-type-select">
+                  <option value="rabbit">rabbit</option>
+                </select>
+              </label>
+            </li>
+            <li>
+              <label>
+                <div class="field-label">Pet Product &amp; Size</div>
+                <select id="new-pet-product-select">
+                  <option value="r12">rabbit, 1-2 pounds</option>
+                </select>
+              </label>
+            </li>
+            <li class="save-pet">
+              <button class="block-action save-changes" id="add-pet">Add Pet</button>
+            </li>
+          </ul>
+        </dd>
+
+      </dl>
+    </div>
+  </div>
+
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=pets-products">
+  </head_merge>
+</div>

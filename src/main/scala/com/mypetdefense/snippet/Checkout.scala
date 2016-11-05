@@ -151,7 +151,7 @@ class Checkout extends Loggable {
         }
       }
 
-      Try(Await.result(stripeCustomer, new DurationInt(3).seconds)) match {
+      Try(Await.result(stripeCustomer, new DurationInt(5).seconds)) match {
         case TrySuccess(Full(customer)) =>
           newUserSetup(
             customer, 
@@ -167,8 +167,8 @@ class Checkout extends Loggable {
 
         case TrySuccess(stripeFailure) =>
           logger.error("create customer failed with: " + stripeFailure)
-          Alert("An error has occured. Please try again.")
-        
+          Alert(s"An error has occurred ${stripeFailure}. Please Try again.")
+
         case TryFail(throwable: Throwable) =>
           logger.error("create customer failed with: " + throwable)
           Alert("An error has occured. Please try again.")
