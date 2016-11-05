@@ -1,95 +1,4 @@
-@import "base";
-@import "nav-bar";
-
-#page-container {
-  @include span-columns(12);
-  background-color: #DCDBDB;
-  padding-top: em(28px);
-
-  @media (min-width: $bp-med) {
-    @include span-columns(12);
-    @include omega;
-
-    padding-top: em(134px);
-
-    background: url(../../images/dog-incognito.jpg) no-repeat center;
-    background-size: cover;
-    height: 750px;
-  }
-}
-
-#login-container {
-  @include span-columns(11);
-  @include shift(0.5);
-  @include omega;
-
-  background-color: #DCDBDB;
-
-  @media (min-width: $bp-med) {
-    width: 390px;
-    margin-left: 60%;
-
-    padding: rem(35px) rem(28px);
-  }
-
-  h2 {
-    color: #605F5F;
-    font-size: rem(27px);
-    font-weight: $semibold;
-    padding-bottom: rem(9px);
-  }
-
-  h3 {
-    color: #4F4E4E;
-    font-size: rem(23px);
-    font-weight: $regular;
-    padding-bottom: rem(25px);
-  }
-}
-
-label {
-  display: block;
-  padding-bottom: rem(20px);
-
-  &:last-child {
-    padding-bottom: rem(25px);
-  }
-
-  .field-label {
-    color: #4F4E4E;
-    font-weight: $semibold;
-    font-size: rem(14px);
-    display: inline-block;
-    padding-bottom: rem(2px);
-
-    @media (min-width: $bp-med) {
-      padding-bottom: rem(3px);
-    }
-  }
-
-  input {
-    width: 100%;
-    color: #4F4E4E;
-    font-size: em(22px);
-    border: 1px solid #CECECE;
-    padding: rem(7px) rem(10px);
-    border-radius: 3px;
-
-    @include placeholder {
-      color: #949494;
-    }
-  }
-}
-
-#login-button-container{
-  text-align: right;
-
-  padding-bottom: rem(40px);
-
-  @media (min-width: $bp-med) {
-    padding-bottom: 0;
-  }
-}
+@import "login-base";
 
 input#login {
   background-color: #818080;
@@ -103,99 +12,21 @@ input#login {
   cursor: pointer;
 }
 
-div.incognito-dog {
-  @include span-columns(12);
-  height: 100%;
-  background-color: #DCDBDB;
-}
 
-img.incognito-dog {
-  display: block;
-  width: 100%;
-
-  @media (min-width: $bp-med) {
-    display: none;
-  }
-}
-
-#footer {
-  @include span-columns(12);
-  background-color: #454343;
-  padding-top: em(60px);
-
-  text-align: center;
-}
-
-.footer-section {
-  @include span-columns(3 of 12);
-  color: #ffffff;
-  margin-right: 0;
-  text-align: left;
-
-  @media (min-width: $bp-med) {
-     @include span-columns(1);
-  }
-
-  &:first-child {
-    @include shift(3);
-    margin-right: rem(60px);
-
-    @media (min-width: $bp-med) {
-      @include shift(8);
-    }
-  }
-
-  h4 {
-    text-transform: uppercase;
-    color: #B2B0B0;
-    font-size: em(15px);
-    font-weight: $semibold;
-  }
-
-  ul {
-    padding-top: rem(10px);
-    line-height: rem(23px);
-  }
-  
+#forgot-password-container {
+  @include span-columns(6);
   a {
-    text-decoration: none;
-    color: #ffffff;
-
-    &:visited {
-      color: #ffffff;
-    }
+    color: #259490;
   }
 }
 
-.legal {
-  @include span-columns(12);
- 
-  background-color: #454343;
-  color: #949494;
-  padding: rem(26px) 0 rem(9px);
-  font-size: em(12px);
-  text-align: center;
+#login-button-container {
+  text-align: right;
+  @include span-columns(6);
+
+  padding-bottom: rem(40px);
 
   @media (min-width: $bp-med) {
-    padding: rem(26px) 0 rem(15px);
-  }
-}
-
-#need-help {
-  @include span-columns(12);
-  text-align: center;
-  background-color: #454343;
-  color: #B2B0B0;
-
-  padding: rem(57px) 0 0;
-  font-size: rem(18px);
-
-  @media (min-width: $bp-med) {
-    padding: rem(51px) 0 0;
-    font-size: rem(15px);
-  }
-
-  a {
-    color: #B2B0B0;
+    padding-bottom: 0;
   }
 }

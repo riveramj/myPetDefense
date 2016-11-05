@@ -5,6 +5,8 @@ import net.liftweb.common._
 import net.liftweb.util.Helpers._
 
 import com.mypetdefense.model._
+import com.mypetdefense.snippet._
+import com.mypetdefense.snippet.admin._
 
 object SecurityContext extends Loggable {
 
@@ -19,6 +21,21 @@ object SecurityContext extends Loggable {
     loggedInUser.is
 
     logger.info(s"Logged user in [ ${loggedInUser.is.map(_.email.get).openOr("")} ]")
+  }
+
+  def loginRedirectUser(user: User) = {
+    if (loggedIn_?) {
+      logCurrentUserOut()
+    }
+
+    logIn(user)
+
+    user.userType match {
+      case admin if admin == UserType.Admin => 
+        S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
+      case parent if parent == UserType.Parent =>
+        S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
+    }
   }
 
   def logCurrentUserOut() = {

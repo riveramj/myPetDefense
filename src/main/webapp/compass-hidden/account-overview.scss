@@ -1,0 +1,115 @@
+@import "base";
+@import "parent-nav-bar";
+@import "parent-account";
+
+#invoice {
+  @media (min-width: $bp-large) {
+    width: 537px;
+  }
+}
+
+.arrival-date {
+  @media (min-width: $bp-medium) {
+    float: right;
+    margin-right: rem(121px);
+  }
+  
+  @media (min-width: $bp-large) {
+    margin-right: 478px;
+  }
+}
+
+.invoice-details {
+  padding: rem(14px) 0 rem(4px);
+
+  li {
+    margin-bottom: rem(10px);
+  }
+  
+  li div {
+    display: inline-block;
+  }
+
+  @media (min-width: $bp-medium) {
+    padding-top: 0;
+    margin-top: rem(14px);
+  }
+}
+
+.invoice-item {
+  border-top: #818080 1px dashed;
+
+  @media (min-width: $bp-medium) {
+    border: none;
+  }
+
+  &:last-child {
+    @media (min-width: $bp-medium) {
+      border-bottom: #DCDBDB 1px solid;
+    }
+  }
+}
+
+.mobile-invoice-list:first-child {
+  border-top: none;
+}
+
+.mobile-invoice-list {
+  .key {
+    text-transform: uppercase;
+  }
+
+  @media (min-width: $bp-medium) {
+    display: none;
+  }
+}
+
+.invoice-list {
+  @media (max-width: $bp-small) {
+    display: none;
+  }
+  @media (min-width: $bp-medium) {
+    width: 100%;
+    margin-bottom: rem(16px);
+  }
+
+  th {
+    color: #2E9F9B;
+    font-size: rem(14px);
+    padding-bottom: 7px;
+    text-transform: uppercase;
+  }
+
+  td {
+    padding-bottom: 7px;
+  }
+}
+
+li.order-total {
+  color: #393939;
+  font-weight: $bold;
+  margin-bottom: 0;
+
+  & .key {
+    font-weight: $bold;
+  }
+}
+
+.invoice-totals {
+  border-top: #DCDBDB solid 1px;
+  margin-top: 0;
+  padding: rem(15px) 0 0;
+
+  .key {
+    padding-left: rem(60px);
+    color: #454343;
+
+    @media (min-width: $bp-medium) {
+      padding-left: 302px;
+    }
+  }
+
+  .value {
+    float: right;
+  }
+}

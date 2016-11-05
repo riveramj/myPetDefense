@@ -1,0 +1,56 @@
+<div id="main" data-lift="surround?with=default-template;at=content"> 
+
+<div data-lift="ShippingBilling.render?eager_eval=true">
+  <div data-lift="embed?what=parent-logo-bar"></div>
+  <div id="page-body-container">
+    <div data-lift="embed?what=parent-nav-bar"></div>
+    <div class="account-section">
+      <h2>Shipping / Billing</h2>
+      <form>
+        <dl class="account-block">
+          <dt class="block-header">Shipping Address</dt>
+          <dd class="block-details">
+            <div>
+              <label>
+                <div class="field-label">First name</div>
+                <input id="first-name" type="text">            
+              </label>
+              <label>
+                <span class="field-label">Last name</span>
+                <input id="last-name" type="text">
+              </label>
+              <label>
+                <span class="field-label">Street Address</span>
+                <input id="street-1" type="text">
+                <input id="street-2" type="text">
+              </label>
+              <div class="short-field-container">
+                <label class="short-field city">
+                  <span class="field-label">City</span>
+                  <input id="city" type="text">
+                </label>
+                <label class="short-field state">
+                  <span class="field-label">State</span>
+                  <input id="state" type="text" maxlength="2">
+                </label>
+                <label class="short-field zip">
+                  <span class="field-label">Zip</span>
+                  <input id="zip" type="tel" maxlength="5">
+                </label>
+              </div>
+            </div>
+          </dd>
+          <dt class="save-container">
+            <button class="save-changes">Save Changes</button>
+          </dt>
+        </dl>
+      </form>
+    </div>
+  </div>
+</div>
+
+<head_merge>
+<link rel="stylesheet" data-lift="style-bundle?name=shipping-billing">
+</head_merge>
+</div>
+
