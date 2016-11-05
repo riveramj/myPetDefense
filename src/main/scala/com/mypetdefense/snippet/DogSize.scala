@@ -54,7 +54,7 @@ class DogSize extends Loggable {
         petProduct(Full(product))
       }
 
-      S.redirectTo(Checkout.menu.loc.calcDefaultHref)
+      S.redirectTo(PetDetails.menu.loc.calcDefaultHref)
     }
 
     ".small .weight-number *" #> sortedSizes(0) &

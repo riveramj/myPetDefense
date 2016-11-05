@@ -1,0 +1,94 @@
+@import "base";
+@import "nav-bar";
+@import "flow";
+
+.account-info {
+  background-color: #F1F1F1;
+  padding-bottom: 0px;
+  @include outer-container;
+  @media (min-width: $bp-med) {
+    margin-bottom: rem(40px);
+  }
+}
+
+.field-label {
+  color: #4F4E4E;
+  font-weight: $semibold;
+  font-size: rem(14px);
+  display: inline-block;
+  padding-bottom: rem(2px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(3px);
+  }
+}
+
+fieldset {
+  padding-bottom: rem(24px);
+}
+
+fieldset > div {
+  background-color: #F1F1F1;
+  padding: rem(12px) rem(10px) rem(14px);
+}
+
+fieldset label {
+  display: inline-block;
+  width: 100%;
+  padding-bottom: em(22px);
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  input {
+    width: 100%;
+    color: #4F4E4E;
+    font-size: em(22px);
+    border: 1px solid #CECECE;
+    padding: rem(7px) rem(10px);
+    border-radius: 3px;
+
+    @include placeholder {
+      color: #949494;
+    }
+  }
+}
+
+.name-and-birth {
+  @include span-columns(6);
+}
+
+.purchase-details {
+  @include span-columns(5);
+  @include shift(1);
+  padding-top: 45px;
+  li {
+    font-size: rem(16px);
+    color: #1D8884;
+    padding-bottom: 20px;
+    span {
+      padding-left: 12px;
+      color: #0E5552;
+      font-size: rem(20px);
+    }
+  }
+}
+
+#to-checkout {
+  background-color: #45ADA9;
+  border: none;
+  font-family: $text-font;
+  text-transform: uppercase;
+  font-size: rem(16px);
+  color: white;
+  border-radius: 4px;
+  height: 45px;
+  @include span-columns(12);
+  cursor: pointer;
+
+  @media(min-width: $bp-large) {
+    @include span-columns(4);
+    @include shift(8);
+  }
+}

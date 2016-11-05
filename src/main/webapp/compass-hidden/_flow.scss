@@ -167,19 +167,19 @@ html, body {
     margin-left: em(89px);
 
     @media (min-width: $bp-large) {
-      @include span-columns(10);
+      @include span-columns(8);
       @include shift(2);
     }
   }
 
   li {
-    @include span-columns(3);
-    display: inline-block;
     padding: rem(27px) 0 rem(26px);
     color: #0E5552;
     font-size: em(14px);
-
     text-transform: uppercase;
+    @media(min-width: $bp-large) {
+      @include span-columns(1.6 of 8);
+    }
   }
 
   .fa-check {
@@ -189,8 +189,6 @@ html, body {
 
 li.complete {
   padding: rem(15px) 0 rem(12px);
-  display: flex;
-  margin-left: -15px;
 
   .fa-check {
     padding-right: rem(5px);
@@ -282,5 +280,15 @@ li.complete {
 
   @media (min-width: $bp-med) {
     padding: 0 0 rem(15px);
+  }
+}
+
+.flow-step-complete {
+  position: relative;
+  
+  .fa-check {
+    position: absolute;
+    top: 1px;
+    left: -15px;
   }
 }

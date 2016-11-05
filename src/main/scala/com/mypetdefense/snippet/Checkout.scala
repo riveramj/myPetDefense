@@ -51,7 +51,6 @@ class Checkout extends Loggable {
 
   var email = ""
   var password = ""
-  var petName = ""
   
   var firstName = ""
   var cardholderName = ""
@@ -118,7 +117,6 @@ class Checkout extends Loggable {
 
     val validateFields = List(
         checkEmail(email, "#email"),
-        checkEmpty(petName, "#pet-name"),
         checkEmpty(firstName, "#first-name"),
         checkEmpty(cardholderName, "#cardholder-name"),
         checkEmpty(lastName, "#last-name"),
@@ -155,6 +153,7 @@ class Checkout extends Loggable {
         case TrySuccess(Full(customer)) =>
           newUserSetup(
             customer, 
+            petName.is,
             selectedPetType, 
             selectedPetSize, 
             selectedPetProduct
@@ -180,6 +179,7 @@ class Checkout extends Loggable {
 
   def newUserSetup(
     customer: Customer, 
+    petName: Box[String],
     selectedPetType: Box[AnimalType.Value],
     selectedPetSize: Box[AnimalSize.Value],
     selectedPetProduct: Box[Product]
@@ -213,6 +213,7 @@ class Checkout extends Loggable {
       petType <- selectedPetType
       petSize <- selectedPetSize
       petProduct <- selectedPetProduct
+      petName <- petName
     } yield {
       Pet.createNewPet(
         user,
@@ -302,7 +303,6 @@ class Checkout extends Loggable {
     "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
     "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
-    "#pet-name" #> text(petName, petName = _) &
     "#cardholder-name" #> text(cardholderName, cardholderName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
     "#promo-code" #> ajaxText(couponCode, couponCode = _) &
