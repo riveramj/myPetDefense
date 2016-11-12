@@ -8,7 +8,7 @@ import net.liftweb._
 
 import com.mypetdefense.model._
 
-import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription}
+import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription, Discount}
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
 import com.mypetdefense.model._
@@ -73,6 +73,54 @@ object ParentService extends Loggable {
 
       case TryFail(throwable: Throwable) =>
         logger.error(s"remove customer failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
+  def getStripeCustomer(customerId: String): Box[Customer] = {
+    Try(
+      Await.result(Customer.get(customerId), new DurationInt(10).seconds)
+    ) match {
+      case TrySuccess(Full(stripeCustomer)) =>
+        Full(stripeCustomer)
+      
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"get customer failed with stripe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"get customer failed with other error: ${throwable}")
+        Empty
+    }
+    
+  }
+
+  def getStripeCustomerDiscount(customerId: String): Box[Discount] = {
+    val stripeCustomer = getStripeCustomer(customerId)
+
+    stripeCustomer match { 
+      case Full(customer) =>
+        customer.discount
+
+      case Failure(message, _, _) =>
+        Failure(message)
+
+      case Empty =>
+        Empty
+    }
+  }
+
+  def getDiscount(customerId: String): Box[Int] = {
+    val stripeDiscount = getStripeCustomerDiscount(customerId)
+
+    stripeDiscount match { 
+      case Full(discount) =>
+        discount.coupon.percentOff
+
+      case Failure(message, _, _) =>
+        Failure(message)
+
+      case Empty =>
         Empty
     }
   }
