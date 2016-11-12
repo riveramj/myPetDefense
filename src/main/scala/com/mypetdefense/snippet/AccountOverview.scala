@@ -17,7 +17,9 @@ import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.SecurityContext._
-import com.mypetdefense.service.TaxJarService
+import com.mypetdefense.service.{ParentService, TaxJarService}
+
+import me.frmr.stripe.Discount
 
 object AccountOverview extends Loggable {
   import net.liftweb.sitemap._
@@ -40,7 +42,24 @@ class AccountOverview extends Loggable {
     Pet.findAll(By(Pet.user, parent))
   }.openOr(Nil)
 
+  val stripeCustomerId = user.map(_.stripeId.get).openOr("")
+
+  val discount = ParentService.getDiscount(stripeCustomerId)
+
   val productSubtotal = pets.size * 9.99
+
+  val discountAmountRaw = productSubtotal * (discount.openOr(0)/100.0)
+  
+  val discountAmount = discount match {
+    case Full(_) =>
+      f"-$$$discountAmountRaw%2.2f"
+    
+    case Failure(_, _, _) =>
+      "Failed to retrieve discount."
+
+    case other =>
+      "-$0.00"
+  }
 
   def render = {
     val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
@@ -52,7 +71,7 @@ class AccountOverview extends Loggable {
             address.city.get,
             address.state.get,
             address.zip.get,
-            (pets.size * 9.99)
+            (productSubtotal - discountAmountRaw)
           )
 
           taxInfo._1
@@ -62,7 +81,7 @@ class AccountOverview extends Loggable {
       }
     }
 
-    val totalDue = productSubtotal + taxDue
+    val totalDue = productSubtotal - discountAmountRaw + taxDue
 
     "#page-body-container" #> {
       user.map { parent =>
@@ -91,6 +110,7 @@ class AccountOverview extends Loggable {
         } &
         petBindings &
         ".subtotal *" #> f"$$$productSubtotal%2.2f" &
+        ".discount *" #> discountAmount &
         ".multipet-discount" #> ClearNodesIf(pets.size == 1) &
         ".tax-charge" #> ClearNodesIf(taxDue == 0D) &
         ".tax-charge .tax *" #> f"$taxDue%2.2f" &
