@@ -1,0 +1,24 @@
+Had incorrect sizes for Adventure Plus. Needed to change small size to ZoGuard Plus.
+
+Steps:
+
+Open rules to allow for psql access remotely via network & security -> security groups.
+
+Connect to sql w/command similar to 
+
+psql \
+> --host=dev-mypetdefense.cega431oqn39.us-west-2.rds.amazonaws.com \
+> --port=5432 \
+> --username mypetdefense \
+> --password \
+> --dbname=mypetdefense
+
+select * from product where size_c = 0;
+
+update product set name='ZoGuard Plus for Cats' where size_c=0;
+
+select * from product where size_c = 0;
+
+size_c=0 should be the smallest cat size of 1.5
+
+verification is going through flow and ensuring if you click on 1.5 that it selects zoguard plus
