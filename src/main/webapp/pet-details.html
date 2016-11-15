@@ -2,11 +2,13 @@
   <div class="flow-progress-bar">
     <ul>
       <li class="complete">
-        <a href="/pet-choice" class="flow-step-complete">
+        <a href="/pet-choice">
           <i class="fa fa-check"></i>
           <dl class="step-container">
             <dt class="step-name">1. Pet</dt>
-            <dd class="step-choice"><span class="chosen-pet" data-lift="PetChoice.chosenPet">catdog</span></dd>
+            <dd class="step-choice">
+              <span class="chosen-pet" data-lift="PetChoice.chosenPet">catdog</span>
+            </dd>
           </dl>
         </a>
       </li>
@@ -80,33 +82,42 @@
     <div class="step-name">4. Pet Details</div>
     <div class="arrow-up"></div>
   </div>
+  
   <form class="current-step" data-lift="PetDetails.render">
     <h1 class="step-header">Pet Details</h1>
     <fieldset class="account-info">
-      <div class="name-and-birth">
-        <label>
-          <div><span class="field-label">Pet Name</span></div>
-          <input size="20" id="pet-name" type="text">
-        </label>
-        <label>
-          <div><span class="field-label">Birth Month (MM/YY)</span></div>
-          <input id="birthday" type="text">
-        </label>
-      </div>
+      <ul class="name-birth">
+        <li>
+          <label>
+            <div><span class="field-label">Pet Name</span></div>
+            <input id="pet-name" type="text">
+          </label>
+        </li>
+        <li>
+          <label>
+            <div><span class="field-label">Birth Month (MM/YY)</span></div>
+            <input id="birthday" type="text">
+          </label>
+        </li>
+      </ul>
+
       <ul class="purchase-details">
-        <li>Pet <span id="details-pet">dog</span></li>
-        <li>Product <span id="details-product">dog</span></li>
-        <li>Size <span id="details-size">dog</span></li>
+        <li>Pet <span class="details-pet">dog</span></li>
+        <li>Product <span class="details-product">dog</span></li>
+        <li>Size <span class="details-size">dog</span></li>
       </ul>
     </fieldset>
-    <button id="to-checkout">Proceed To Checkout</button>
+    <div id="checkout-container">
+      <button id="checkout" class="select-choice">Checkout</button>
+    </div>
   </form>
+  
   <div class="flow-step unanswered">
     <div class="step-name">5. Account</div>
   </div>
+
   <tail>
-    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
-    <script type="text/javascript" data-lift="script-bundle?name=checkout"></script>
+    <script type="text/javascript" data-lift="script-bundle?name=pet-details"></script>
   </tail>
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=pet-details">

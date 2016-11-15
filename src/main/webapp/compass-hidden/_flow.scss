@@ -148,7 +148,7 @@ html, body {
   display: none;
 
   @media (min-width: $bp-medium) {
-    @include span-columns(12);
+    display: block;
   }
 
   a {
@@ -163,23 +163,11 @@ html, body {
     text-transform: none;
   }
 
-  ul {
-    margin-left: em(89px);
-
-    @media (min-width: $bp-large) {
-      @include span-columns(8);
-      @include shift(2);
-    }
-  }
-
   li {
     padding: rem(27px) 0 rem(26px);
     color: #0E5552;
     font-size: em(14px);
     text-transform: uppercase;
-    @media(min-width: $bp-large) {
-      @include span-columns(1.6 of 8);
-    }
   }
 
   .fa-check {
