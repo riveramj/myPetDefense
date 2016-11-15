@@ -110,6 +110,7 @@ object Paths {
     index,
     PetChoice.menu,
     DogSize.menu,
+    PetDetails.menu,
     CatSize.menu,
     DogProduct.menu,
     CatProduct.menu,

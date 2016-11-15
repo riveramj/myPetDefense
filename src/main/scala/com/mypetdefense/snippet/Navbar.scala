@@ -34,4 +34,9 @@ class NavBar extends Loggable {
     } &
     ".chosen-product *" #> petProduct.is.map(_.name.toString)
   }
+
+  def petName = {
+    "a [href]" #> PetDetails.menu.loc.calcDefaultHref &
+    ".pet-count *" #> "1 pet"
+  }
 }
