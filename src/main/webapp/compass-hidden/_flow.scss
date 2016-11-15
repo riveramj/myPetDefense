@@ -149,6 +149,11 @@ html, body {
 
   @media (min-width: $bp-medium) {
     display: block;
+    text-align: center;
+  }
+
+  .step-container {
+    float: left;
   }
 
   a {
@@ -163,20 +168,39 @@ html, body {
     text-transform: none;
   }
 
+  .step-name {
+    display: flex;
+  }
+
   li {
-    padding: rem(27px) 0 rem(26px);
+    display: inline-block;
+    padding: rem(27px) rem(30px) rem(26px) 0;
     color: #0E5552;
     font-size: em(14px);
     text-transform: uppercase;
+    vertical-align: middle;
+
+    @media (min-width: $bp-large) {
+      padding: rem(15px) rem(70px) rem(12px) 0;
+    }
+
+    &:last-child {
+      padding-right: 0;
+    }
   }
 
   .fa-check {
     font-size: em(14px);
+    float: left;
   }
 }
 
 li.complete {
-  padding: rem(15px) 0 rem(12px);
+  padding: rem(15px) rem(30px) rem(12px) 0;
+
+  @media (min-width: $bp-large) {
+    padding: rem(15px) rem(70px) rem(12px) 0;
+  }
 
   .fa-check {
     padding-right: rem(5px);
@@ -208,7 +232,7 @@ li.complete {
   border-right: 10px solid transparent;
   border-bottom: 10px solid #ffffff;
   padding-top: rem(16px);
-  margin-bottom: rem(-26px);
+  margin-bottom: rem(-27px);
 
   @media (min-width: $bp-large) {
     border-left: 16px solid transparent;
