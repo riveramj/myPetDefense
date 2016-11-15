@@ -34,8 +34,20 @@
           </dl>
         </a>
       </li>
+      <li class="complete">
+        <a href="/pet-choice">
+          <i class="fa fa-check"></i>
+          <dl class="step-container">
+            <dt class="step-name">4. Pet Details</dt>
+            <dd class="step-choice">
+              Reviewed
+              </span>
+            </dd>
+          </dl>
+        </a>
+      </li>
       <li>
-        4. Account
+        5. Checkout
         <div class="arrow-up"></div>
       </li>
     </ul>
@@ -73,8 +85,19 @@
       </dl>
     </a>
   </div>
+  <div class="flow-step" data-lift="NavBar.petName">
+    <a href="/pet-details">
+      <i class="fa fa-check"></i>
+      <dl class="step-container">
+        <dt class="step-name">4. Pet Details</dt>
+        <dd class="step-choice">
+          <span class="chosen-product">Reviewed</span>
+        </dd>
+      </dl>
+    </a>
+  </div>
   <div class="flow-step unanswered">
-    <div class="step-name">4. Checkout</div>
+    <div class="step-name">5. Checkout</div>
     <div class="arrow-up"></div>
   </div>
   <form class="current-step" data-lift="Checkout.render">
@@ -87,10 +110,6 @@
      <fieldset class="account-info">
         <legend>Account Info</legend>
         <div>
-          <label>
-            <div><span class="field-label">Pet Name</span></div>
-            <input size="20" id="pet-name" type="text">
-          </label>
           <label>
             <div><span class="field-label">Email</span></div>
             <input id="email" type="text">

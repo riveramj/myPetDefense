@@ -1,0 +1,104 @@
+@import "base";
+@import "nav-bar";
+@import "flow";
+
+.account-info {
+  background-color: #F1F1F1;
+  
+  padding: rem(15px);
+
+  @media (min-width: $bp-med) {
+    margin-bottom: rem(40px);
+  }
+}
+
+.field-label {
+  color: #4F4E4E;
+  font-weight: $semibold;
+  font-size: rem(14px);
+  display: inline-block;
+  padding-bottom: rem(2px);
+
+  @media (min-width: $bp-med) {
+    padding-bottom: rem(3px);
+  }
+}
+
+fieldset {
+  padding-bottom: rem(24px);
+}
+
+fieldset > div {
+  background-color: #F1F1F1;
+  padding: rem(12px) rem(10px) rem(14px);
+}
+
+fieldset label {
+  display: inline-block;
+  padding-bottom: rem(14px);
+  width: 100%;
+
+  input {
+    width: 100%;
+    color: #4F4E4E;
+    font-size: em(22px);
+    border: 1px solid #CECECE;
+    padding: rem(7px) rem(10px);
+    border-radius: 3px;
+
+    @include placeholder {
+      color: #949494;
+    }
+  }
+}
+
+.name-birth {
+  @media (min-width: $bp-large) {
+    @include span-columns(6);
+  }
+}
+
+.purchase-details {
+  padding-top: rem(8px);
+
+  @media (min-width: $bp-large) {
+    @include span-columns(5);
+    @include shift(1);
+    padding-top: 25px;
+  }
+
+  li {
+    font-size: rem(16px);
+    color: #1D8884;
+    padding-bottom: rem(13px);
+    font-weight: $semibold;
+    
+    @media (min-width: $bp-large) {
+      padding-bottom: 20px;
+    }
+  
+    span {
+      padding-left: 2px;
+      color: #0E5552;
+      font-size: rem(20px);
+      font-weight: $normal;
+    }
+  }
+}
+
+#checkout-container {
+  width: 100%;
+  text-align: center;
+  margin: rem(35px) 0 rem(44px);
+
+  @media (min-width: $bp-medium) {
+    text-align: right;
+  }
+}
+
+
+#checkout {
+  font-size: rem(17px);
+  color: #F7F7F7;
+  width: 260px;
+}
