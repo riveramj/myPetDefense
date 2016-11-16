@@ -98,6 +98,8 @@ object ParentService extends Loggable {
   def getStripeCustomerDiscount(customerId: String): Box[Discount] = {
     val stripeCustomer = getStripeCustomer(customerId)
 
+    println(stripeCustomer + "scustomer")
+
     stripeCustomer match { 
       case Full(customer) =>
         customer.discount
@@ -112,6 +114,8 @@ object ParentService extends Loggable {
 
   def getDiscount(customerId: String): Box[Int] = {
     val stripeDiscount = getStripeCustomerDiscount(customerId)
+
+    println(stripeDiscount + "sdicsount")
 
     stripeDiscount match { 
       case Full(discount) =>

@@ -46,6 +46,8 @@ class AccountOverview extends Loggable {
 
   val discount = ParentService.getDiscount(stripeCustomerId)
 
+  println(discount)
+
   val productSubtotal = pets.size * 9.99
 
   val discountAmountRaw = productSubtotal * (discount.openOr(0)/100.0)
@@ -111,7 +113,6 @@ class AccountOverview extends Loggable {
         petBindings &
         ".subtotal *" #> f"$$$productSubtotal%2.2f" &
         ".discount *" #> discountAmount &
-        ".multipet-discount" #> ClearNodesIf(pets.size == 1) &
         ".tax-charge" #> ClearNodesIf(taxDue == 0D) &
         ".tax-charge .tax *" #> f"$taxDue%2.2f" &
         ".total *" #> f"$$$totalDue%2.2f"

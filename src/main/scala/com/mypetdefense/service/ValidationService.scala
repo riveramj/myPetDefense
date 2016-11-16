@@ -83,6 +83,28 @@ object ValidationService extends Loggable {
     checkEmpty(email, errorId) or
     validEmailFormat(email, errorId)
   }
+
+  def checkMonthAndPercent(months: (String, String), percent: (String, String)) = {
+    val hasMonths_? = months._1.nonEmpty
+    val hasPercent_? = percent._1.nonEmpty
+
+    (hasMonths_?, hasPercent_?) match {
+      case (false, false) =>
+        List(
+          Full(ValidationError(months._2, S ? "One of these is required")),
+          Full(ValidationError(percent._2, S ? "One of these is required"))
+        )
+
+      case (false, true) =>
+        List(Empty)
+
+      case (true, false) =>
+        List(Full(ValidationError(percent._2, S ? "Need a percent with months")))
+
+      case (true, true) =>
+        List(Empty)
+    }
+  }
 }
 
 case class ValidationError(fieldSelector: String, error: String) extends MyPetDefenseEvent("form-validation-error")
