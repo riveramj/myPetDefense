@@ -88,7 +88,6 @@ trait ResetPasswordHandling extends EmailHandlerChain {
     case SendPasswordResetEmail(userWithKey) => 
       val passwordResetLink = Paths.serverUrl + ResetPassword.menu.toLoc.calcHref(userWithKey)
       val transform = 
-        "#reset-link *" #> passwordResetLink andThen
         "#reset-link [href]" #> passwordResetLink
 
       sendEmail(resetSubject, userWithKey.email.get, transform(resetPasswordTemplate))
