@@ -46,8 +46,6 @@ class AccountOverview extends Loggable {
 
   val discount = ParentService.getDiscount(stripeCustomerId)
 
-  println(discount)
-
   val productSubtotal = pets.size * 9.99
 
   val discountAmountRaw = productSubtotal * (discount.openOr(0)/100.0)

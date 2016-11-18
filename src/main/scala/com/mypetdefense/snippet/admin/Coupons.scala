@@ -51,6 +51,8 @@ class Coupons extends Loggable {
     val validateFields = (
       List(
         checkEmpty(codeName, "#code-name"),
+        checkCouponValue(percentOff.trim(), "#percent-off"),
+        checkCouponValue(monthCount.trim(), "#month-count"),
         checkDuplicateCoupon(codeName, "#code-name")
       ) ++ checkMonthAndPercent(
         (monthCount.trim(), "#month-count"), (percentOff.trim(), "#percent-off")

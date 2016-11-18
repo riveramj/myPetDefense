@@ -87,6 +87,14 @@ object ValidationService extends Loggable {
     validEmailFormat(email, errorId)
   }
 
+  def checkCouponValue(value: String, errorId: String) = {
+    if (value.trim() == "0") {
+      Full(ValidationError(errorId, "Cannot be 0"))
+    } else {
+      Empty
+    }
+  }
+
   def checkMonthAndPercent(months: (String, String), percent: (String, String)) = {
     val hasMonths_? = months._1.nonEmpty
     val hasPercent_? = percent._1.nonEmpty
