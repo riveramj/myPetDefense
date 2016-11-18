@@ -9,6 +9,9 @@ import net.liftweb._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 
+import java.util.Date
+import java.text.SimpleDateFormat
+
 object ValidationService extends Loggable {
  val emailRegex = """^([^@]+)@([^@]+\.([^@].?)+)$""".r
 
@@ -104,6 +107,20 @@ object ValidationService extends Loggable {
       case (true, true) =>
         List(Empty)
     }
+  }
+  
+  def checkBirthdayFormat(birthday: String, dateFormat: SimpleDateFormat, errorId: String) = {
+    dateFormat.setLenient(false)
+
+    tryo(dateFormat.parse(birthday)) match {
+      case Full(_) => Empty
+      case _ => Full(ValidationError(errorId, "Not a validate date format."))
+    }
+  }
+
+  def checkBirthday(birthday: String, dateFormat: SimpleDateFormat, errorId: String): Box[ValidationError] = {
+    checkEmpty(birthday, errorId) or
+    checkBirthdayFormat(birthday, dateFormat, errorId)
   }
 }
 
