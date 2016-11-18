@@ -56,6 +56,12 @@ fieldset {
     color: #4F4E4E;
     font-size: rem(18px);
   }
+
+  &.coupon legend {
+    float: left;
+    padding-top: 13px;
+    margin-right: 45px;
+  }
 }
 
 form {
@@ -208,3 +214,13 @@ td table {
   display: none;
 }
 
+
+div.create-coupon-container {
+  float: left;
+  width: auto;
+  padding-top: 3px;
+}
+
+.tiny-field.coupon-container {
+  @include span-columns(2);
+}

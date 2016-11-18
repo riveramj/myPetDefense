@@ -28,7 +28,7 @@
         <tr class="pets collapsed">
           <td colspan=7>
             <form>
-              <fieldset class="create">
+              <fieldset class="create add-pet">
                 <legend>Add Pet</legend>
                 <label class="tiny-field pet-name-container">
                   <span class="field-label">Pet name</span>
@@ -50,6 +50,21 @@
                 </div>
                 <div class="create-item-container">
                   <button type="submit" class="create-item">add pet</button>
+                </div>
+              </fieldset>
+            </form>
+            <form>
+              <fieldset class="create add-coupon">
+                <legend>Add Coupon</legend>
+                <div class="tiny-field coupon-container">
+                  <span class="field-label">Coupon</span>
+                  <select class="coupon-select">
+                    <option value="123456">one month free</option>
+                    <option value="099221">nope</option>
+                  </select>
+                </div>
+                <div class="create-item-container create-coupon-container">
+                  <button type="submit" class="create-item create-coupon">add coupon</button>
                 </div>
               </fieldset>
             </form>

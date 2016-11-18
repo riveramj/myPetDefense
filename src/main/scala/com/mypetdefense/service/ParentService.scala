@@ -31,6 +31,18 @@ object ParentService extends Loggable {
     )
   }
 
+  def updateCoupon(customerId: String, couponCode: Box[String]) = {
+
+    if (couponCode.isEmpty) {
+      Customer.deleteDiscount(customerId)
+    } else {
+      Customer.update(
+        id = customerId,
+        coupon = couponCode
+      )
+    }
+  }
+
   def deleteStripeCustomer(customerId: String) = {
     Customer.delete(customerId)
   }
@@ -98,8 +110,6 @@ object ParentService extends Loggable {
   def getStripeCustomerDiscount(customerId: String): Box[Discount] = {
     val stripeCustomer = getStripeCustomer(customerId)
 
-    println(stripeCustomer + "scustomer")
-
     stripeCustomer match { 
       case Full(customer) =>
         customer.discount
@@ -114,8 +124,6 @@ object ParentService extends Loggable {
 
   def getDiscount(customerId: String): Box[Int] = {
     val stripeDiscount = getStripeCustomerDiscount(customerId)
-
-    println(stripeDiscount + "sdicsount")
 
     stripeDiscount match { 
       case Full(discount) =>
