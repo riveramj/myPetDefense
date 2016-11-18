@@ -31,6 +31,18 @@ object ParentService extends Loggable {
     )
   }
 
+  def updateCoupon(customerId: String, couponCode: Box[String]) = {
+
+    if (couponCode.isEmpty) {
+      Customer.deleteDiscount(customerId)
+    } else {
+      Customer.update(
+        id = customerId,
+        coupon = couponCode
+      )
+    }
+  }
+
   def deleteStripeCustomer(customerId: String) = {
     Customer.delete(customerId)
   }

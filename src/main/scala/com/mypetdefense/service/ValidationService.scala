@@ -9,6 +9,9 @@ import net.liftweb._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 
+import java.util.Date
+import java.text.SimpleDateFormat
+
 object ValidationService extends Loggable {
  val emailRegex = """^([^@]+)@([^@]+\.([^@].?)+)$""".r
 
@@ -82,6 +85,50 @@ object ValidationService extends Loggable {
     checkDuplicateEmail(email, errorId) or
     checkEmpty(email, errorId) or
     validEmailFormat(email, errorId)
+  }
+
+  def checkCouponValue(value: String, errorId: String) = {
+    if (value.trim() == "0") {
+      Full(ValidationError(errorId, "Cannot be 0"))
+    } else {
+      Empty
+    }
+  }
+
+  def checkMonthAndPercent(months: (String, String), percent: (String, String)) = {
+    val hasMonths_? = months._1.nonEmpty
+    val hasPercent_? = percent._1.nonEmpty
+
+    (hasMonths_?, hasPercent_?) match {
+      case (false, false) =>
+        List(
+          Full(ValidationError(months._2, S ? "One of these is required")),
+          Full(ValidationError(percent._2, S ? "One of these is required"))
+        )
+
+      case (false, true) =>
+        List(Empty)
+
+      case (true, false) =>
+        List(Full(ValidationError(percent._2, S ? "Need a percent with months")))
+
+      case (true, true) =>
+        List(Empty)
+    }
+  }
+  
+  def checkBirthdayFormat(birthday: String, dateFormat: SimpleDateFormat, errorId: String) = {
+    dateFormat.setLenient(false)
+
+    tryo(dateFormat.parse(birthday)) match {
+      case Full(_) => Empty
+      case _ => Full(ValidationError(errorId, "Not a validate date format."))
+    }
+  }
+
+  def checkBirthday(birthday: String, dateFormat: SimpleDateFormat, errorId: String): Box[ValidationError] = {
+    checkEmpty(birthday, errorId) or
+    checkBirthdayFormat(birthday, dateFormat, errorId)
   }
 }
 
