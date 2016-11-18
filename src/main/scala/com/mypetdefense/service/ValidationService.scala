@@ -125,7 +125,7 @@ object ValidationService extends Loggable {
     } else {
       tryo(dateFormat.parse(birthday)) match {
         case Full(_) => Empty
-        case _ => Full(ValidationError(errorId, "Not a validate date format."))
+        case _ => Full(ValidationError(errorId, "Not a valid date format."))
       }
     }
   }
