@@ -132,7 +132,7 @@ class Parents extends Loggable {
 
       def couponDropdown = {
         SHtml.ajaxSelectObj(
-          (Empty, "") +: coupons.map(coupon => (Full(coupon), coupon.couponCode.get)),
+          (Empty, "No Coupon") +: coupons.map(coupon => (Full(coupon), coupon.couponCode.get)),
           Full(chosenCoupon),
           (possibleCoupon: Box[Coupon]) => chosenCoupon = possibleCoupon
         )
