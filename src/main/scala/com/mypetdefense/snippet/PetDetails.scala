@@ -38,9 +38,9 @@ class PetDetails extends Loggable {
   val formatter = new SimpleDateFormat("MM/yy")
 
   def goToCheckout() = {
-
     val validateFields = List(
-      checkEmpty(petName, "#pet-name")
+      checkEmpty(petName, "#pet-name"),
+      checkBirthday(birthday, formatter, "#birthday")
     ).flatten
 
     if(validateFields.isEmpty) {

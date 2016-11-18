@@ -20,25 +20,47 @@ object CouponService extends Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
 
-  def freeMonthsConverted(freeMonths: String) = {
-    tryo(freeMonths.trim().toInt).openOr(0)
+  def convertedString(possibleNumber: String) = {
+    tryo(possibleNumber.trim().toInt).openOr(0)
   }
 
-  def createStripeCoupon(couponCode: String, freeMonths: String, agency: Box[Agency]) = {
+  def createStripeCoupon(couponCode: String, agency: Box[Agency], freeMonths: Int, percentOff: Int) = {
+
+    val (durationType, durationMonths) = {
+      if (freeMonths == 0)
+        ("forever", None)
+      else
+        ("repeating", Some(freeMonths))
+    }
+
     StripeCoupon.create(
       id = Some(couponCode),
-      duration = "repeating",
-      percentOff = Some(100),
-      durationInMonths = Some(freeMonthsConverted(freeMonths))
+      duration = durationType,
+      percentOff = Some(percentOff),
+      durationInMonths = durationMonths
     )
   }
 
-  def createCoupon(couponCode: String, freeMonths: String, agency: Box[Agency]): Box[Coupon] = {
-    val newStripeCoupon = createStripeCoupon(couponCode, freeMonths, agency)
+  def createCoupon(couponCode: String, agency: Box[Agency], rawFreeMonths: String, rawPercentOff: String): Box[Coupon] = {
+
+    val freeMonths = convertedString(rawFreeMonths)
+    val percentOff = convertedString(rawPercentOff)
+
+    val newStripeCoupon = createStripeCoupon(
+      couponCode,
+      agency,
+      freeMonths,
+      percentOff
+    )
 
     Try(Await.result(newStripeCoupon, new DurationInt(3).seconds)) match {
       case TrySuccess(Full(newCoupon)) =>
-        Full(Coupon.createNewCoupon(couponCode, freeMonthsConverted(freeMonths), agency))
+        Full(Coupon.createNewCoupon(
+          couponCode,
+          agency,
+          freeMonths,
+          percentOff
+        ))
 
       case TrySuccess(stripeFailure) =>
         logger.error("create coupon failed with stipe error: " + stripeFailure)
