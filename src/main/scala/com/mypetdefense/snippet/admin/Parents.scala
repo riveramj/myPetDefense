@@ -159,7 +159,7 @@ class Parents extends Loggable {
         } & 
         ".add-coupon" #> {
           ".coupon-container .coupon-select" #> couponDropdown &
-          ".create-coupon-container .create-coupon" #> SHtml.ajaxSubmit("Add Coupon", () => addCoupon(parent, chosenCoupon))
+          ".create-coupon-container .create-coupon" #> SHtml.ajaxSubmit("Change Coupon", () => addCoupon(parent, chosenCoupon))
         } & 
         {
           val pets = Pet.findAll(By(Pet.user, parent))
