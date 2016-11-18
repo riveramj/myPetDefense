@@ -117,18 +117,17 @@ object ValidationService extends Loggable {
     }
   }
   
-  def checkBirthdayFormat(birthday: String, dateFormat: SimpleDateFormat, errorId: String) = {
+  def checkBirthday(birthday: String, dateFormat: SimpleDateFormat, errorId: String): Box[ValidationError] = {
     dateFormat.setLenient(false)
 
-    tryo(dateFormat.parse(birthday)) match {
-      case Full(_) => Empty
-      case _ => Full(ValidationError(errorId, "Not a validate date format."))
+    if (birthday.isEmpty) {
+      Empty
+    } else {
+      tryo(dateFormat.parse(birthday)) match {
+        case Full(_) => Empty
+        case _ => Full(ValidationError(errorId, "Not a validate date format."))
+      }
     }
-  }
-
-  def checkBirthday(birthday: String, dateFormat: SimpleDateFormat, errorId: String): Box[ValidationError] = {
-    checkEmpty(birthday, errorId) or
-    checkBirthdayFormat(birthday, dateFormat, errorId)
   }
 }
 
