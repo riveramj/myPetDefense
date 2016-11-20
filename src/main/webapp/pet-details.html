@@ -2,7 +2,6 @@
   <div class="flow-progress-bar">
     <ul>
       <li class="complete">
-        <a href="/pet-choice">
           <i class="fa fa-check"></i>
           <dl class="step-container">
             <dt class="step-name">1. Pet</dt>
@@ -10,10 +9,8 @@
               <span class="chosen-pet" data-lift="PetChoice.chosenPet">catdog</span>
             </dd>
           </dl>
-        </a>
       </li>
       <li class="complete" data-lift="NavBar.size">
-        <a href="/pet-choice" class="flow-step-complete">
           <i class="fa fa-check"></i>
           <dl class="step-container">
             <dt class="step-name">2. Size</dt>
@@ -21,10 +18,8 @@
               <span class="chosen-size">5-9</span> pounds
             </dd>
           </dl>
-        </a>
       </li>
       <li class="complete" data-lift="NavBar.product">
-        <a href="/pet-choice" class="flow-step-complete">
           <i class="fa fa-check"></i>
           <dl class="step-container">
             <dt class="step-name">3. Product</dt>
@@ -34,7 +29,6 @@
               </span>
             </dd>
           </dl>
-        </a>
       </li>
       <li>
         <div>4. Pet Details</div>
@@ -46,7 +40,6 @@
     </ul>
   </div>
   <div class="flow-step">
-    <a href="/pet-choice">
       <i class="fa fa-check"></i>
       <dl class="step-container">
         <dt class="step-name">1. Pet</dt>
@@ -54,10 +47,8 @@
           <span class="chosen-pet" data-lift="PetChoice.chosenPet">cat</span>
         </dd>
       </dl>
-    </a>
   </div>
   <div class="flow-step" data-lift="NavBar.size">
-    <a href="/cat-size">
       <i class="fa fa-check"></i>
       <dl class="step-container">
         <dt class="step-name">2. Size</dt>
@@ -65,10 +56,8 @@
           <span class="chosen-size">5-9</span> pounds
         </dd>
       </dl>
-    </a>
   </div>
   <div class="flow-step" data-lift="NavBar.product">
-    <a href="/cat-product">
       <i class="fa fa-check"></i>
       <dl class="step-container">
         <dt class="step-name">3. Product</dt>
@@ -76,7 +65,6 @@
           <span class="chosen-product">zoguard plus for cats</span>
         </dd>
       </dl>
-    </a>
   </div>
   <div class="flow-step unanswered">
     <div class="step-name">4. Pet Details</div>
@@ -85,18 +73,18 @@
   
   <form class="current-step" data-lift="PetDetails.render">
     <h1 class="step-header">Pet Details</h1>
-    <fieldset class="account-info">
+    <fieldset class="account-info pet">
       <ul class="name-birth">
         <li>
           <label>
             <div><span class="field-label">Pet Name</span></div>
-            <input id="pet-name" type="text">
+            <input class="pet-name" type="text">
           </label>
         </li>
         <li>
           <label>
             <div><span class="field-label">Birth Month (MM/YY)</span></div>
-            <input id="birthday" type="text">
+            <input class="birthday" type="text">
           </label>
         </li>
       </ul>
@@ -107,6 +95,9 @@
         <li>Size <span class="details-size">dog</span> <span>pounds</span></li>
       </ul>
     </fieldset>
+    <div id="checkout-container">
+      <button id="add-pet" class="select-choice submit">Add Pet</button>
+    </div>
     <div id="checkout-container">
       <button id="checkout" class="select-choice submit">Checkout</button>
     </div>

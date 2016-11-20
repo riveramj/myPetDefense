@@ -16,6 +16,8 @@ import com.mypetdefense.service._
   import PetFlowChoices._
 
 import com.mypetdefense.model._
+import com.mypetdefense.util.RandomIdGenerator._
+
 import java.util.Date
 import java.text.SimpleDateFormat
 
@@ -30,35 +32,59 @@ object PetDetails extends Loggable {
 }
 
 class PetDetails extends Loggable {
-  val isDog_? = PetFlowChoices.petChoice.is == Full(AnimalType.Dog)
-  
-  var petName = ""
-  var birthday = ""
-
   val formatter = new SimpleDateFormat("MM/yy")
 
+  var currentPets = completedPets.is
+
   def goToCheckout() = {
-    val validateFields = List(
-      checkEmpty(petName, "#pet-name"),
-      checkBirthday(birthday, formatter, "#birthday")
-    ).flatten
+    val validateFields = Nil
 
     if(validateFields.isEmpty) {
-      PetFlowChoices.petName(Full(petName))
-      PetFlowChoices.birthday(tryo(formatter.parse(birthday)))
       S.redirectTo(Checkout.menu.loc.calcDefaultHref)
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
   }
 
+  def addNewPet() = {
+    petChoice(Empty)
+    petProduct(Empty)
+    petSize(Empty)
+
+    PetFlowChoices.completedPets(currentPets)
+
+    S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
+  }
+
   def render = {
+    val currentPet = {
+      for {
+        petType <- petChoice.is
+        size <- petSize.is
+        product <- petProduct.is
+      } yield {
+        Pet.create
+          .petId(generateLongId)
+          .animalType(petType)
+          .size(size)
+          .product(product)
+      }
+    }
+
+    currentPets ++= currentPet.toList 
+
     SHtml.makeFormsAjax andThen
-    ".details-pet *" #> PetFlowChoices.petChoice.is.map(_.toString) &
-    ".details-product *" #> PetFlowChoices.petProduct.is.map(_.name.toString) &
-    ".details-size *" #> PetFlowChoices.petSize.is.map(_.toString) &
-    "#pet-name" #> text(petName, petName = _) &
-    "#birthday" #> text(birthday, birthday = _) &
+    ".pet" #> currentPets.map { pet =>
+      var name = pet.name.get
+      var birthday = tryo(pet.birthday.get.toString).openOr("") 
+
+      ".details-pet *" #> pet.animalType.toString &
+      ".details-product *" #> pet.product.obj.map(_.name.get) &
+      ".details-size *" #> pet.size.toString &
+      ".pet-name" #> ajaxText(name, name = _) &
+      ".birthday" #> ajaxText(birthday, birthday = _)
+    } &
+    "#add-pet" #> SHtml.ajaxSubmit("Add Pet", addNewPet) &
     "#checkout" #> SHtml.ajaxSubmit("Checkout", goToCheckout)
   }
 }

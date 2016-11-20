@@ -152,11 +152,7 @@ class Checkout extends Loggable {
       Try(Await.result(stripeCustomer, new DurationInt(5).seconds)) match {
         case TrySuccess(Full(customer)) =>
           newUserSetup(
-            customer, 
-            petName.is,
-            selectedPetType, 
-            selectedPetSize, 
-            selectedPetProduct
+            customer
           )
 
           val total = 9.99D + taxDue
@@ -177,13 +173,7 @@ class Checkout extends Loggable {
     }
   }
 
-  def newUserSetup(
-    customer: Customer, 
-    petName: Box[String],
-    selectedPetType: Box[AnimalType.Value],
-    selectedPetSize: Box[AnimalSize.Value],
-    selectedPetProduct: Box[Product]
-  ) = {
+  def newUserSetup(customer: Customer) = {
     val stripeId = customer.id
 
     val user = User.createNewUser(
@@ -208,22 +198,10 @@ class Checkout extends Loggable {
       zip,
       AddressType.Shipping
     )
+    
+    val pets = PetFlowChoices.completedPets.is
 
-    for {
-      petType <- selectedPetType
-      petSize <- selectedPetSize
-      petProduct <- selectedPetProduct
-      petName <- petName
-    } yield {
-      Pet.createNewPet(
-        user,
-        petName,
-        petType,
-        petSize,
-        petProduct
-      )
-    }
-
+    pets.map(Pet.createNewPet(_, user))
 
     println(customer.subscriptions + " sub")
 
