@@ -16,7 +16,6 @@ import com.mypetdefense.service._
   import PetFlowChoices._
 
 import com.mypetdefense.model._
-import com.mypetdefense.util.RandomIdGenerator._
 
 import java.util.Date
 import java.text.SimpleDateFormat
@@ -50,10 +49,29 @@ class PetDetails extends Loggable {
     petChoice(Empty)
     petProduct(Empty)
     petSize(Empty)
+    petId(Empty)
 
-    PetFlowChoices.completedPets(currentPets)
+    completedPets(currentPets)
 
     S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
+  }
+
+  def updatePetName(name: String, pet: Pet) = {
+    val updatedPet = pet.name(name)
+
+    currentPets(pet.petId.get) = updatedPet
+    completedPets(currentPets)
+    
+    Noop
+  }
+
+  def updatePetBirthday(birthday: String, pet: Pet) = {
+    val updatedPet = tryo(formatter.parse(birthday)).map(pet.birthday(_))
+
+    updatedPet.map( pet => currentPets(pet.petId.get) = pet)
+    completedPets(currentPets)
+    
+    Noop
   }
 
   def render = {
@@ -64,25 +82,30 @@ class PetDetails extends Loggable {
         product <- petProduct.is
       } yield {
         Pet.create
-          .petId(generateLongId)
+          .petId(petId.is.openOr(0L))
           .animalType(petType)
           .size(size)
           .product(product)
       }
     }
 
-    currentPets ++= currentPet.toList 
+    currentPet.map { pet => 
+      if (currentPets.get(pet.petId.get).isEmpty)
+        currentPets(pet.petId.get) = pet
+    }
+
+    completedPets(currentPets)
 
     SHtml.makeFormsAjax andThen
-    ".pet" #> currentPets.map { pet =>
+    ".pet" #> currentPets.values.map { pet =>
       var name = pet.name.get
-      var birthday = tryo(pet.birthday.get.toString).openOr("") 
+      var birthday = tryo(formatter.format(pet.birthday.get).toString).openOr("")
 
       ".details-pet *" #> pet.animalType.toString &
       ".details-product *" #> pet.product.obj.map(_.name.get) &
       ".details-size *" #> pet.size.toString &
-      ".pet-name" #> ajaxText(name, name = _) &
-      ".birthday" #> ajaxText(birthday, birthday = _)
+      ".pet-name" #> ajaxText(name, possibleName => updatePetName(possibleName, pet)) &
+      ".birthday" #> ajaxText(birthday, possibleBirthday => updatePetBirthday(possibleBirthday, pet))
     } &
     "#add-pet" #> SHtml.ajaxSubmit("Add Pet", addNewPet) &
     "#checkout" #> SHtml.ajaxSubmit("Checkout", goToCheckout)

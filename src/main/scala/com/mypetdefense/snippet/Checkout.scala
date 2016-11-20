@@ -201,7 +201,7 @@ class Checkout extends Loggable {
     
     val pets = PetFlowChoices.completedPets.is
 
-    pets.map(Pet.createNewPet(_, user))
+    pets.values.map(Pet.createNewPet(_, user))
 
     println(customer.subscriptions + " sub")
 
