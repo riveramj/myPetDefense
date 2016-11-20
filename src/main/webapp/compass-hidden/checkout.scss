@@ -2,6 +2,24 @@
 @import "nav-bar";
 @import "flow";
 
+.pet-count {
+  @media (min-width: $bp-medium) {
+    left: 9px;
+    padding: 4px 8px;
+    margin-top: -9px;
+  }
+}
+
+.step-choice.checkout {
+  @media (min-width: $bp-medium) {
+    margin-left: -40px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin-left: 0;
+  }
+}
+
 #left-column {
   @media (min-width: $bp-med) {
     @include span-columns(6);

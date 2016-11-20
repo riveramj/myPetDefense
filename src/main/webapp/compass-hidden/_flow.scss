@@ -104,6 +104,8 @@ html, body {
 
   border-top: 1px solid #137875;
 
+  padding: 10px 0;
+
   a {
     @include span-columns(12);
   }
@@ -180,8 +182,8 @@ html, body {
     text-transform: uppercase;
     vertical-align: middle;
 
-    @media (min-width: $bp-large) {
-      padding: rem(15px) rem(70px) rem(12px) 0;
+    @media (min-width: $bp-medium) {
+      padding: rem(27px) rem(70px) rem(26px) 0;
     }
 
     &:last-child {
@@ -302,5 +304,28 @@ li.complete {
     position: absolute;
     top: 1px;
     left: -15px;
+  }
+}
+
+.pet-count {
+  background-color: #0D5552;
+  color: #FFFFFF;
+  font-weight: $bold;
+  
+  font-size: rem(14px);
+
+  padding: 3px 8px;
+
+  border-radius: 50%;
+	width: 23px;
+	height: 23px;
+
+  position: relative;
+  left: 8px;
+
+  @media (min-width: $bp-medium) {
+    left: 101px;
+    margin-top: -21px;
+    padding: 5px 6px;
   }
 }

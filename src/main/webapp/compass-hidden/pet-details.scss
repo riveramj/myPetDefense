@@ -2,10 +2,19 @@
 @import "nav-bar";
 @import "flow";
 
+.pet-count {
+  @media (min-width: $bp-medium) {
+    left: 66px;
+    padding: 4px 8px;
+  }
+}
+
 .account-info {
   background-color: #F1F1F1;
   
   padding: rem(15px);
+
+  margin-bottom: rem(10px);
 
   @media (min-width: $bp-med) {
     margin-bottom: rem(40px);
