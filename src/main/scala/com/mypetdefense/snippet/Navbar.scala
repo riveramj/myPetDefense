@@ -37,8 +37,13 @@ class NavBar extends Loggable {
   }
 
   def petCount = {
+    val currentPage = S.uri
+
     val petCount = {
-      if (completedPets.is.get(petId.is.openOr(0L)).isEmpty)
+      if (
+          completedPets.is.get(petId.is.openOr(0L)).isEmpty && 
+          currentPage == PetDetails.menu.loc.calcDefaultHref
+      )
         completedPets.is.size + 1
       else
         completedPets.is.size
@@ -48,9 +53,5 @@ class NavBar extends Loggable {
 
     ".pet-count" #> ClearNodesIf(firstTimeFlow_?) &
     ".pet-count *" #> petCount
-  }
-
-  def petName = {
-    "a [href]" #> PetDetails.menu.loc.calcDefaultHref
   }
 }
