@@ -26,8 +26,7 @@ object PetDetails extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Pet Details") / "pet-details" >>
-    petChosen >>  
-    dogProductChosen
+    completedPetOrFlow
 }
 
 class PetDetails extends Loggable {
@@ -74,6 +73,23 @@ class PetDetails extends Loggable {
     Noop
   }
 
+  def removePet(pet: Pet)() = {
+    currentPets.remove(pet.petId.get)
+    completedPets(currentPets)
+
+    if (petId.is == Full(pet.petId.get)) {
+      petChoice(Empty)
+      petProduct(Empty)
+      petSize(Empty)
+      petId(Empty)
+    }
+    
+    if (completedPets.size == 0 && petId.isEmpty)
+      S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
+    else
+      S.redirectTo(PetDetails.menu.loc.calcDefaultHref)
+  }
+
   def render = {
     val currentPet = {
       for {
@@ -101,13 +117,14 @@ class PetDetails extends Loggable {
       var name = pet.name.get
       var birthday = tryo(formatter.format(pet.birthday.get).toString).openOr("")
 
+      ".remove-pet [onclick]" #> ajaxInvoke(removePet(pet)) &
       ".details-pet *" #> pet.animalType.toString &
       ".details-product *" #> pet.product.obj.map(_.name.get) &
       ".details-size *" #> pet.size.toString &
       ".pet-name" #> ajaxText(name, possibleName => updatePetName(possibleName, pet)) &
       ".birthday" #> ajaxText(birthday, possibleBirthday => updatePetBirthday(possibleBirthday, pet))
     } &
-    "#add-pet" #> SHtml.ajaxSubmit("Add Pet", addNewPet) &
-    "#checkout" #> SHtml.ajaxSubmit("Checkout", goToCheckout)
+    "#add-pet" #> ajaxSubmit("Add Pet", addNewPet) &
+    "#checkout" #> ajaxSubmit("Checkout", goToCheckout)
   }
 }

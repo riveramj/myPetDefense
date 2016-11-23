@@ -62,18 +62,18 @@ fieldset label {
 }
 
 .name-birth {
-  @media (min-width: $bp-large) {
-    @include span-columns(6);
+  @media (min-width: $bp-medium) {
+    @include span-columns(5);
   }
 }
 
 .purchase-details {
   padding-top: rem(8px);
 
-  @media (min-width: $bp-large) {
-    @include span-columns(5);
+  @media (min-width: $bp-medium) {
+    @include span-columns(6);
     @include shift(1);
-    padding-top: 25px;
+    padding-top: 1px;
   }
 
   li {
@@ -82,7 +82,7 @@ fieldset label {
     padding-bottom: rem(13px);
     font-weight: $semibold;
     
-    @media (min-width: $bp-large) {
+    @media (min-width: $bp-medium) {
       padding-bottom: 20px;
     }
   
@@ -169,5 +169,23 @@ fieldset label {
       font-size: rem(30px);
       margin-bottom: 10px;
     }
+  }
+}
+
+
+
+.remove-pet {
+  background: none;
+  border: none;
+  font-size: rem(16px);
+  cursor: pointer;
+
+  float: right;
+  margin: -3px 0 -6px;
+
+  color: #706E6E;
+
+  @media (min-width: $bp-medium) {
+    margin: 1px 1px -6px 0;
   }
 }

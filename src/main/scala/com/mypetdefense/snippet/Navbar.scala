@@ -22,7 +22,7 @@ class NavBar extends Loggable {
         CatSize.menu.loc.calcDefaultHref
       }
     } &
-    ".chosen-size *" #> petSize.is.map(_.toString)
+    ".chosen-size *" #> petSize.is.map(_.toString + " pounds")
   }
 
   def product = {
@@ -42,7 +42,8 @@ class NavBar extends Loggable {
     val petCount = {
       if (
           completedPets.is.get(petId.is.openOr(0L)).isEmpty && 
-          currentPage == PetDetails.menu.loc.calcDefaultHref
+          currentPage == PetDetails.menu.loc.calcDefaultHref &&
+          !petId.is.isEmpty
       )
         completedPets.is.size + 1
       else
