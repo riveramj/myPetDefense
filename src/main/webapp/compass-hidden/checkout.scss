@@ -171,29 +171,27 @@ fieldset label {
 
 #summary {
   margin-bottom: rem(25px);
-  @media (min-width: $bp-med) {
-    border-bottom: 1px solid #70C9C6;
-  }
+  border-bottom: 1px solid #70C9C6;
 }
 
 #order-summary {
   @include span-columns(12);
-  margin: em(50px) 0 em(30px);
+  margin: em(6px) 0 em(30px);
   border-radius: 4px;
-  background-color: #CDF5F4;
+  background-color: #FAFAFA;
 
   @media (min-width: $bp-med) {
     margin-top: rem(43px);
   }
 
   h2 {
-    background-color: #CDF5F4;
+    background-color: initial;
     color: #1D8884;
     font-size: rem(22px);
     padding: rem(16px) 0 rem(16px) rem(14px);
     text-align: left;
     @include border-top-radius(4px);
-    font-weight: $semibold;
+    font-weight: $normal;
     
     display: inline-block;
   }
@@ -300,7 +298,7 @@ fieldset label {
 
   span {
     text-transform: initial;
-    color: #0E5552;
+    color: #454343;
     font-size: rem(22px);
     font-weight: $regular;
     margin-left: rem(10px);
@@ -339,56 +337,27 @@ fieldset label {
   padding-bottom: rem(5px);
 }
 
-#order-total {
-  padding: em(26px) 0 em(30px);
-  text-align: center;
+#order {
+  padding: rem(16px) rem(14px) rem(17px);
+  text-align: left;
+
+  color: #ffffff;
+  font-size: rem(14px);
+  font-weight: $semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 
   @media (min-width: $bp-med) {
     padding: rem(11px) rem(14px) rem(12px);
-    text-align: right;
-  }
-  
-  h3 {
-    color: #ffffff;
-    font-size: em(14px);
-    font-weight: $semibold;
-    padding-bottom: rem(10px);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-
-    @media (min-width: $bp-med) {
-      float: left;
-      margin-top: rem(8px);
-      padding-bottom: 0;
-
-      &.promo {
-        margin-top: 0;
-      }
-    }
+    float: left;
+    margin-top: rem(8px);
+    padding-bottom: 0;
   }
 
-  .monthly-charge {
-    color: #ffffff;
-    font-size: rem(12px);
-    letter-spacing: 0.4px;
-    font-weight: $semibold;
-    text-transform: uppercase;
-
-    @media (min-width: $bp-med) {
-      display: inline-block;
-      padding-left: rem(10px);
-    }
-
-    &.promo {
-      font-size: rem(16px);
-      text-transform: none;
-    }
-  }
-
-  .amount {
-    color: #ffffff;
-    font-size: rem(27px);
-    font-weight: $semibold;
+  span {
+    font-weight: $regular;
+    text-transform: none;
+    margin-left: 10px;
   }
 }
 

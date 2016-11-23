@@ -66,6 +66,16 @@ class Checkout extends Loggable {
   var couponCode = ""
   var coupon: Box[Coupon] = None
 
+  val petCount = completedPets.is.size
+  val subtotal = petCount * 9.99
+  val multiPetDiscount = petCount match {
+    case 0 | 1 => 0
+    case 2 => subtotal * 0.05
+    case _ => subtotal * 0.1
+  }
+
+  val subtotalWithDiscount = subtotal - multiPetDiscount
+
   def validateCouponCode() = {
     val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
 
@@ -95,7 +105,7 @@ class Checkout extends Loggable {
         city,
         state,
         zip,
-        9.99
+        subtotalWithDiscount
       )
 
       taxDue = taxInfo._1
@@ -153,8 +163,9 @@ class Checkout extends Loggable {
             customer
           )
 
-          val total = 9.99D + taxDue
+          val total = subtotalWithDiscount + taxDue
           PetFlowChoices.total(Full(total))
+          PetFlowChoices.freeMonths(coupon.map(_.freeMonths.get))
 
           S.redirectTo(Success.menu.loc.calcDefaultHref)
 
@@ -228,38 +239,29 @@ class Checkout extends Loggable {
 
   def render = {
     val orderSummary = {
-      "#type span *" #> petChoice.is.map(_.toString) &
-      "#size span *" #> petSize.is.map(_.toString + " pounds") &
-      "#product span *" #> petProduct.is.map(_.name.get)
-    }
-
-    val orderTotal = {
-      "#order" #> SHtml.idMemoize { renderer =>
+      "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
 
-        val total = 9.99 + taxDue
+        val monthlyTotal = subtotal - multiPetDiscount + taxDue
 
-        "#price-additions" #> ClearNodesIf((taxDue == 0D) && (coupon.isEmpty)) &
-        "#price-additions" #> {
-          "#tax" #> ClearNodesIf(taxDue == 0D) &
-          "#promo-discount" #> ClearNodesIf(coupon.isEmpty) &
-          "#promo-discount-note" #> ClearNodesIf(coupon.isEmpty) &
-          "#tax #tax-amount" #> f"$taxDue%2.2f"
-        } &
+        "#count span *" #> petCount &
+        "#subtotal span *" #> f"$$$subtotal%2.2f" &
+        "#multi-pet-discount" #> ClearNodesIf(multiPetDiscount == 0) &
+        "#multi-pet-discount span *" #> f"$$$multiPetDiscount%2.2f" &
+        "#tax" #> ClearNodesIf(taxDue == 0D) &
+        "#tax span *" #> f"$$$taxDue%2.2f" &
+        "#monthly-total span *" #> f"$$$monthlyTotal%2.2f" &
         {
           if(coupon.isEmpty) {
-            "#order-total h3 [class!]" #> "promo" &
-            "#order-total .monthly-charge [class!]" #> "promo" &
-            "#order-total .monthly-charge .amount *" #> f"$$$total%2.2f"
+            "#order span *" #> f"$$$monthlyTotal%2.2f"
           } else {
-            "#order-total h3 [class+]" #> "promo" &
-            "#order-total .monthly-charge [class+]" #> "promo" &
-            "#order-total .monthly-charge *" #> {
-              val freeMonths = coupon.map(_.freeMonths).openOr("0")
+            "#order span *" #> {
+              val freeMonths = coupon.map(_.freeMonths.get).openOr(0)
+
               if (freeMonths == 1) {
-                s"FREE for first ${freeMonths} month"
+                s"First Month Free"
               } else {
-                s"FREE for first ${freeMonths} months"
+                s"First ${freeMonths} months free"
               }
             }
           }
@@ -269,7 +271,6 @@ class Checkout extends Loggable {
 
     SHtml.makeFormsAjax andThen
     orderSummary &
-    orderTotal &
     "#first-name" #> text(firstName, firstName = _) &
     "#last-name" #> text(lastName, lastName = _) &
     "#street-1" #> text(street1, street1 = _) &
@@ -284,5 +285,5 @@ class Checkout extends Loggable {
     "#promo-code" #> ajaxText(couponCode, couponCode = _) &
     ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup)
+    }
   }
-}
