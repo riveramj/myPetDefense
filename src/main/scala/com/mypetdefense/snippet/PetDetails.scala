@@ -33,11 +33,25 @@ class PetDetails extends Loggable {
   val formatter = new SimpleDateFormat("MM/yy")
 
   var currentPets = completedPets.is
+  var birthdayErrors: List[String] = Nil
+  var nameErrors: List[String] = Nil
+
+  def validateNameBirthday = {
+    (
+      currentPets.values.map { pet =>
+      checkEmpty(pet.name.get, s"#${pet.petId.get}-name")
+      }.flatten ++
+      birthdayErrors.map( birthdayId => ValidationError(birthdayId, "Not a validate date format.")) ++
+      nameErrors.map( birthdayId => ValidationError(birthdayId, "Required."))
+    ).toList.distinct
+  }
 
   def goToCheckout() = {
-    val validateFields = Nil
+    val validateFields = validateNameBirthday
 
     if(validateFields.isEmpty) {
+      completedPets(currentPets)
+
       S.redirectTo(Checkout.menu.loc.calcDefaultHref)
     } else {
       validateFields.foldLeft(Noop)(_ & _)
@@ -45,32 +59,56 @@ class PetDetails extends Loggable {
   }
 
   def addNewPet() = {
-    petChoice(Empty)
-    petProduct(Empty)
-    petSize(Empty)
-    petId(Empty)
+    val validateFields = validateNameBirthday
 
-    completedPets(currentPets)
+    if(validateFields.isEmpty) {
+      petChoice(Empty)
+      petProduct(Empty)
+      petSize(Empty)
+      petId(Empty)
 
-    S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
+      completedPets(currentPets)
+
+      S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
+    } else {
+      validateFields.foldLeft(Noop)(_ & _)
+    }
   }
 
   def updatePetName(name: String, pet: Pet) = {
-    val updatedPet = pet.name(name)
+    val nameId = s"#${pet.petId.get}-name"
+    val nameError = checkEmpty(name, nameId)
 
-    currentPets(pet.petId.get) = updatedPet
-    completedPets(currentPets)
-    
-    Noop
+    if (nameError.isEmpty) {
+      val updatedPet = pet.name(name)
+      currentPets(pet.petId.get) = updatedPet
+      completedPets(currentPets)
+
+      nameErrors = nameErrors.filter(_ != nameId)
+
+      Noop
+    } else {
+      nameErrors = (nameErrors :+ nameId).distinct
+      nameError.foldLeft(Noop)(_ & _)
+    }
   }
 
   def updatePetBirthday(birthday: String, pet: Pet) = {
-    val updatedPet = tryo(formatter.parse(birthday)).map(pet.birthday(_))
+    val birthdayId = s"#${pet.petId.get}-birthday"
+    val birthdayError = checkBirthday(birthday, formatter, birthdayId)
 
-    updatedPet.map( pet => currentPets(pet.petId.get) = pet)
-    completedPets(currentPets)
-    
-    Noop
+    if (birthdayError.isEmpty) {
+      val updatedPet = tryo(formatter.parse(birthday)).map(pet.birthday(_))
+      updatedPet.map( pet => currentPets(pet.petId.get) = pet)
+      completedPets(currentPets)
+
+      birthdayErrors = birthdayErrors.filter(_ != birthdayId)
+
+      Noop
+    } else {
+      birthdayErrors = (birthdayErrors :+ birthdayId).distinct
+      birthdayError.foldLeft(Noop)(_ & _)
+    }
   }
 
   def removePet(pet: Pet)() = {
@@ -121,8 +159,16 @@ class PetDetails extends Loggable {
       ".details-pet *" #> pet.animalType.toString &
       ".details-product *" #> pet.product.obj.map(_.name.get) &
       ".details-size *" #> pet.size.toString &
-      ".pet-name" #> ajaxText(name, possibleName => updatePetName(possibleName, pet)) &
-      ".birthday" #> ajaxText(birthday, possibleBirthday => updatePetBirthday(possibleBirthday, pet))
+      ".pet-name" #> ajaxText(
+        name,
+        possibleName => updatePetName(possibleName, pet),
+        "id" -> s"${pet.petId.get}-name"
+      ) &
+      ".birthday" #> ajaxText(
+        birthday,
+        possibleBirthday => updatePetBirthday(possibleBirthday, pet),
+        "id" -> s"${pet.petId.get}-birthday"
+      )
     } &
     "#add-pet" #> ajaxSubmit("Add Pet", addNewPet) &
     "#checkout" #> ajaxSubmit("Checkout", goToCheckout)

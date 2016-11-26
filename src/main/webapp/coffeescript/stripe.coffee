@@ -13,9 +13,6 @@ $(document).ready ->
   $("body").on "click", '.checkout', (event) ->
     event.preventDefault()
 
-    $(".validation-error").remove()
-    $("input.error").removeClass("error")
-
     myPetDefenseSite.event("validate-stripe-form",
       stripeCallback: stripeCallback
     )
