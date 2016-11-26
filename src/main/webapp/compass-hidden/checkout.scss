@@ -162,15 +162,8 @@ fieldset label {
   margin-right: rem(-4px);
 }
 
-.fa-shopping-cart {
-  display: inline-block;
-  color: #1D8884;
-  font-size: rem(18px);
-  padding-left: rem(14px); 
-}
-
 #summary {
-  margin-bottom: rem(25px);
+  margin-bottom: rem(15px);
   border-bottom: 1px solid #70C9C6;
 }
 
@@ -184,11 +177,18 @@ fieldset label {
     margin-top: rem(43px);
   }
 
+  .fa-shopping-cart {
+    display: inline-block;
+    color: #1D8884;
+    font-size: rem(18px);
+    padding-left: rem(14px); 
+  }
+
   h2 {
     background-color: initial;
     color: #1D8884;
     font-size: rem(22px);
-    padding: rem(16px) 0 rem(16px) rem(14px);
+    padding: rem(12px) 0 rem(11px) rem(11px);
     text-align: left;
     @include border-top-radius(4px);
     font-weight: $normal;
@@ -279,14 +279,14 @@ fieldset label {
 }
 
 #order-details {
-  @include shift(1);
+  padding: 0 rem(14px);
 
   color: #1D8884;
   font-weight: $semibold;
   font-size: em(14px);
   text-transform: uppercase;
 
-  padding-bottom: rem(31px);
+  padding-bottom: rem(2px);
 
   @media (min-width: $bp-med) {
     padding-bottom: rem(29px);
@@ -299,14 +299,10 @@ fieldset label {
   span {
     text-transform: initial;
     color: #454343;
-    font-size: rem(22px);
+    font-size: rem(16px);
     font-weight: $regular;
     margin-left: rem(10px);
   }
-}
-
-#order {
-  background-color: #137875;
 }
 
 #price-additions {
@@ -347,6 +343,8 @@ fieldset label {
   text-transform: uppercase;
   letter-spacing: 0.4px;
 
+  background-color: #137875;
+
   @media (min-width: $bp-med) {
     padding: rem(11px) rem(14px) rem(12px);
     float: left;
@@ -357,7 +355,8 @@ fieldset label {
   span {
     font-weight: $regular;
     text-transform: none;
-    margin-left: 10px;
+    font-size: rem(16px);
+    float: right;
   }
 }
 
