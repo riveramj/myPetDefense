@@ -19,6 +19,10 @@ $("body").on "click", '.submit', (event) ->
   $(".validation-error").remove()
   $("input.error").removeClass("error")
 
+$('html').bind 'keypress', (event) ->
+  if (event.keyCode == 13)
+    false
+
 $(document).ready ->
   $("input").on "focus", (event) ->
     $target = $(event.target)
