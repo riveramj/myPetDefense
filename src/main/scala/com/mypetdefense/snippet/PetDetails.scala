@@ -144,8 +144,7 @@ class PetDetails extends Loggable {
     }
 
     currentPet.map { pet => 
-      if (currentPets.get(pet.petId.get).isEmpty)
-        currentPets(pet.petId.get) = pet
+      currentPets(pet.petId.get) = pet
     }
 
     completedPets(currentPets)
