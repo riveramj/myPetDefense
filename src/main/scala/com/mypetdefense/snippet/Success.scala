@@ -12,15 +12,15 @@ import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.model._
 
+import scala.collection.mutable.HashMap
+
 object Success extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
     val menu = Menu.i("Success") / "success" >>
-      petChosen >>
-      productChosen >>
-      sizeChosen >>
+      completedPetOrFlow >>
       finishedCheckout
 }
 
@@ -29,6 +29,14 @@ class Success extends Loggable {
     val pets = completedPets.is
     val monthylTotal = total.is
     val freeMonthCount = freeMonths.is.openOr(0)
+
+    petId(Empty)
+    petChoice(Empty)
+    petSize(Empty)
+    petProduct(Empty)
+    total(Empty)
+    freeMonths(Empty)
+    completedPets(HashMap.empty)
 
     "#count span *" #> pets.size &
     "#monthly-total" #> ClearNodesIf(freeMonthCount == 0) &

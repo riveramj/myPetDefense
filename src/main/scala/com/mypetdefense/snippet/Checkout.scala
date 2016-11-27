@@ -132,6 +132,16 @@ class Checkout extends Loggable {
       ).flatten
 
     if(validateFields.isEmpty) {
+      (coupon, petCount) match {
+        case (Full(_), _) =>
+        case (Empty, 1) => 
+        case (Empty, 2) => 
+          coupon = Coupon.find(By(Coupon.couponCode, "twopets"))
+        case (Empty, manyPets) if manyPets > 2 => 
+          coupon = Coupon.find(By(Coupon.couponCode, "threepets"))
+        case (_, _) => 
+      }
+
       val couponId = coupon.map(_.couponCode.get)
 
       val stripeCustomer = {
@@ -140,6 +150,7 @@ class Checkout extends Loggable {
             email = Some(email),
             card = Some(stripeToken),
             plan = Some("Product"),
+            quantity = Some(petCount),
             taxPercent = Some(taxRate)
           )
         } else {
@@ -147,7 +158,8 @@ class Checkout extends Loggable {
             email = Some(email),
             card = Some(stripeToken),
             plan = Some("Product"),
-            taxPercent = Some(taxDue),
+            quantity = Some(petCount),
+            taxPercent = Some(taxRate),
             coupon = couponId
           )
         }
@@ -208,14 +220,11 @@ class Checkout extends Loggable {
 
     pets.values.map(Pet.createNewPet(_, user))
 
-    println(customer.subscriptions + " sub")
-
     val subscriptionId = (
       for {
         rawSubscriptions <- customer.subscriptions
         subscription <- rawSubscriptions.data.headOption
       } yield {
-        println(subscription.id + " is the id?")
         subscription.id
       }).flatMap(identity).getOrElse("")
 
