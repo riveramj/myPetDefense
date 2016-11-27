@@ -14,6 +14,8 @@ object Paths {
 
   val index = Menu.i("Home") / "index"
 
+  def flowComplete_? = (!petChoice.is.isEmpty && !petSize.is.isEmpty && !petProduct.is.isEmpty)
+
   val petChosen = If(
     () => !petChoice.is.isEmpty,
     RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
@@ -54,7 +56,7 @@ object Paths {
   )
 
   val sizeChosen = If(
-    () => !petSize.is.isEmpty,
+    () => !petSize.is.isEmpty, 
     () => {
       petChoice.is match {
         case Full(AnimalType.Dog) => 
@@ -65,6 +67,11 @@ object Paths {
           RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
       }
     }
+  )
+
+  val completedPetOrFlow = If(
+    () => (!completedPets.isEmpty || flowComplete_?),
+    () => RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
   )
 
   val loggedIn = If(

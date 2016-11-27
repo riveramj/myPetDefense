@@ -7,6 +7,7 @@ import net.liftweb.http._
 
 import com.mypetdefense.service._
 import com.mypetdefense.model.AnimalType
+import com.mypetdefense.util.RandomIdGenerator._
 
 object PetChoice extends Loggable {
   import net.liftweb.sitemap._
@@ -25,6 +26,7 @@ class PetChoice extends Loggable {
   def render = {
     def dogFlow = {
       petChoice(Full(AnimalType.Dog))
+      petId(Full(generateLongId))
       petProduct(Empty)
       petSize(Empty)
 
@@ -33,6 +35,7 @@ class PetChoice extends Loggable {
 
     def catFlow = {
       petChoice(Full(AnimalType.Cat))
+      petId(Full(generateLongId))
       petProduct(Empty)
       petSize(Empty)
 
