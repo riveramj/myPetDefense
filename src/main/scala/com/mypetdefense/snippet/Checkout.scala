@@ -119,10 +119,6 @@ class Checkout extends Loggable {
   }
 
   def signup() = {
-    val selectedPetType = petChoice.is
-    val selectedPetSize =  petSize.is
-    val selectedPetProduct = petProduct.is
-
     val validateFields = List(
         checkEmail(email, "#email"),
         checkEmpty(firstName, "#first-name"),
