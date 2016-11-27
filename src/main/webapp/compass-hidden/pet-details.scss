@@ -2,10 +2,19 @@
 @import "nav-bar";
 @import "flow";
 
+.pet-count {
+  @media (min-width: $bp-medium) {
+    left: 66px;
+    padding: 4px 8px;
+  }
+}
+
 .account-info {
   background-color: #F1F1F1;
   
   padding: rem(15px);
+
+  margin-bottom: rem(10px);
 
   @media (min-width: $bp-med) {
     margin-bottom: rem(40px);
@@ -53,18 +62,18 @@ fieldset label {
 }
 
 .name-birth {
-  @media (min-width: $bp-large) {
-    @include span-columns(6);
+  @media (min-width: $bp-medium) {
+    @include span-columns(5);
   }
 }
 
 .purchase-details {
   padding-top: rem(8px);
 
-  @media (min-width: $bp-large) {
-    @include span-columns(5);
+  @media (min-width: $bp-medium) {
+    @include span-columns(6);
     @include shift(1);
-    padding-top: 25px;
+    padding-top: 1px;
   }
 
   li {
@@ -73,7 +82,7 @@ fieldset label {
     padding-bottom: rem(13px);
     font-weight: $semibold;
     
-    @media (min-width: $bp-large) {
+    @media (min-width: $bp-medium) {
       padding-bottom: 20px;
     }
   
@@ -86,13 +95,37 @@ fieldset label {
   }
 }
 
-#checkout-container {
-  width: 100%;
+#next-actions {
   text-align: center;
-  margin: rem(35px) 0 rem(44px);
+  
+  @media (min-width: $bp-medium) {
+    display: inline-block;
+    width: 100%;
+    margin: 25px 0 83px;
+  }
+}
+
+#add-pet {
+  cursor: pointer;
+  width: 260px;
+  padding: rem(14px) 0;
+  text-decoration: none;
+  border: 1px solid #57B8B4;
+  color: $green;
+
+  background-color: initial;
+
+  font-weight: $semibold;
+  font-size: em(17px);
+
+  margin: 25px 0 10px;
+
+  border-radius: 5px;
+  text-transform: uppercase;
 
   @media (min-width: $bp-medium) {
-    text-align: right;
+    width: 138px;
+    margin: 0 15px 0 0;
   }
 }
 
@@ -101,4 +134,58 @@ fieldset label {
   font-size: rem(17px);
   color: #F7F7F7;
   width: 260px;
+
+  padding: rem(15px) 0;
+
+  margin-bottom: 44px;
+
+  @media (min-width: $bp-medium) {
+    width: 157px;
+    margin: 0;
+  }
+}
+
+#pet-discount {
+  margin-top: 25px;
+
+  text-align: center;
+
+  color: #4F4E4E;
+  font-size: 18px;
+  line-height: 24px;
+
+  @media (min-width: $bp-medium) {
+    max-width: 360px;
+    margin: 25px auto 0;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+    color: #259490;
+    font-size: rem(25px);
+    font-weight: $semibold;
+
+    @media (min-width: $bp-medium) {
+      font-size: rem(30px);
+      margin-bottom: 10px;
+    }
+  }
+}
+
+
+
+.remove-pet {
+  background: none;
+  border: none;
+  font-size: rem(16px);
+  cursor: pointer;
+
+  float: right;
+  margin: -3px 0 -6px;
+
+  color: #706E6E;
+
+  @media (min-width: $bp-medium) {
+    margin: 1px 1px -6px 0;
+  }
 }

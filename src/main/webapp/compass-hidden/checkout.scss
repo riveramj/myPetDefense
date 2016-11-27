@@ -2,6 +2,24 @@
 @import "nav-bar";
 @import "flow";
 
+.pet-count {
+  @media (min-width: $bp-medium) {
+    left: 9px;
+    padding: 4px 8px;
+    margin-top: -9px;
+  }
+}
+
+.step-choice.pet-details {
+  @media (min-width: $bp-medium) {
+    margin-left: -40px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin-left: 0;
+  }
+}
+
 #left-column {
   @media (min-width: $bp-med) {
     @include span-columns(6);
@@ -144,38 +162,36 @@ fieldset label {
   margin-right: rem(-4px);
 }
 
-.fa-shopping-cart {
-  display: inline-block;
-  color: #1D8884;
-  font-size: rem(18px);
-  padding-left: rem(14px); 
-}
-
 #summary {
-  margin-bottom: rem(25px);
-  @media (min-width: $bp-med) {
-    border-bottom: 1px solid #70C9C6;
+  margin-bottom: rem(15px);
+  border-bottom: 1px solid #70C9C6;
+
+  @media (min-width: $bp-large) {
+    margin-bottom: rem(24px);
   }
 }
 
 #order-summary {
   @include span-columns(12);
-  margin: em(50px) 0 em(30px);
+  margin: em(6px) 0 em(30px);
   border-radius: 4px;
-  background-color: #CDF5F4;
+  background-color: #FAFAFA;
 
-  @media (min-width: $bp-med) {
-    margin-top: rem(43px);
+  .fa-shopping-cart {
+    display: inline-block;
+    color: #1D8884;
+    font-size: rem(18px);
+    padding-left: rem(14px); 
   }
 
   h2 {
-    background-color: #CDF5F4;
+    background-color: initial;
     color: #1D8884;
     font-size: rem(22px);
-    padding: rem(16px) 0 rem(16px) rem(14px);
+    padding: rem(14px) 0 rem(13px) rem(11px);
     text-align: left;
     @include border-top-radius(4px);
-    font-weight: $semibold;
+    font-weight: $normal;
     
     display: inline-block;
   }
@@ -263,34 +279,35 @@ fieldset label {
 }
 
 #order-details {
-  @include shift(1);
+  padding: 0 rem(14px);
 
   color: #1D8884;
   font-weight: $semibold;
   font-size: em(14px);
   text-transform: uppercase;
 
-  padding-bottom: rem(31px);
-
-  @media (min-width: $bp-med) {
-    padding-bottom: rem(29px);
+  padding-bottom: rem(2px);
+  
+  @media (min-width: $bp-large) {
+    padding-bottom: rem(13px);
   }
 
   li {
     margin-bottom: rem(20px);
+
+    @media (min-width: $bp-large) {
+      margin-bottom: rem(15px);
+      font-weight: $semibold;
+    }
   }
 
   span {
     text-transform: initial;
-    color: #0E5552;
-    font-size: rem(22px);
+    color: #454343;
+    font-size: rem(16px);
     font-weight: $regular;
     margin-left: rem(10px);
   }
-}
-
-#order {
-  background-color: #137875;
 }
 
 #price-additions {
@@ -321,56 +338,23 @@ fieldset label {
   padding-bottom: rem(5px);
 }
 
-#order-total {
-  padding: em(26px) 0 em(30px);
-  text-align: center;
+#order {
+  padding: rem(16px) rem(14px);
+  text-align: left;
 
-  @media (min-width: $bp-med) {
-    padding: rem(11px) rem(14px) rem(12px);
-    text-align: right;
-  }
-  
-  h3 {
-    color: #ffffff;
-    font-size: em(14px);
-    font-weight: $semibold;
-    padding-bottom: rem(10px);
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
+  color: #ffffff;
+  font-size: rem(14px);
+  font-weight: $semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 
-    @media (min-width: $bp-med) {
-      float: left;
-      margin-top: rem(8px);
-      padding-bottom: 0;
+  background-color: #137875;
 
-      &.promo {
-        margin-top: 0;
-      }
-    }
-  }
-
-  .monthly-charge {
-    color: #ffffff;
-    font-size: rem(12px);
-    letter-spacing: 0.4px;
-    font-weight: $semibold;
-    text-transform: uppercase;
-
-    @media (min-width: $bp-med) {
-      display: inline-block;
-      padding-left: rem(10px);
-    }
-
-    &.promo {
-      font-size: rem(16px);
-      text-transform: none;
-    }
-  }
-
-  .amount {
-    color: #ffffff;
-    font-size: rem(27px);
-    font-weight: $semibold;
+  span {
+    font-weight: $regular;
+    text-transform: none;
+    font-size: rem(16px);
+    float: right;
   }
 }
 

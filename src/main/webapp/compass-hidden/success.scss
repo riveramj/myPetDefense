@@ -2,6 +2,21 @@
 @import "nav-bar";
 @import "flow";
 
+.current-step {
+  @include span-columns(11);
+  @include shift(0.5);
+
+  padding-bottom: rem(50px);
+
+  @media (min-width: $bp-large) {
+    @include span-columns(8);
+    @include shift(2);
+    padding-top: rem(52px);
+
+    padding-bottom: rem(100px);
+  }
+}
+
 .step-info {
   float: left;
   width: 100%;
@@ -48,41 +63,42 @@
 }
 
 #order-summary {
-  @include span-columns(12);
+  width: 340px;
   margin: 0 0 em(30px);
   border-radius: 4px;
   background-color: #E7E7E7;
 
   @media (min-width: $bp-med) {
     @include span-columns(6);
-    margin-top: -272px;
+    margin-top: -296px;
     @include omega;
   }
 
   h2 {
-    background-color: #605F5F;
-    color: #E7E7E7;
-    font-size: em(17px);
-    padding: rem(16px) 0;
-    text-align: center;
+    color: #818080;
+    font-size: em(22px);
+    padding: rem(13px) rem(14px) rem(12px);
+    text-align: left;
     @include border-top-radius(4px);
-    margin-bottom: rem(25px);
-    font-weight: $semibold;
+    margin-bottom: rem(18px);
+    font-weight: $normal;
+
+    border-bottom: solid 1px #CFCFCF;
   }
 }
 
 #order-details {
-  @include shift(1);
+  padding: 0 rem(14px);
 
   color: #949494;
   font-weight: $semibold;
   font-size: em(14px);
   text-transform: uppercase;
 
-  padding-bottom: rem(31px);
+  padding-bottom: rem(13px);
 
   li {
-    margin-bottom: rem(20px);
+    margin-bottom: rem(10px);
   }
 
   #selected-note {
@@ -99,30 +115,32 @@
 }
 
 #order-total {
-  border-top: dotted 1px #A3A2A2;
-  padding: em(26px) 0 em(30px);
-  text-align: center;
+  background-color: #605F5F;
+  padding: rem(17px) rem(14) rem(18px);
   
   h3 {
-    color: #949494;
+    color: #ffffff;
     font-size: em(14px);
     font-weight: $semibold;
-    padding-bottom: rem(10px);
     text-transform: uppercase;
     letter-spacing: 0.4px;
+    display: inline-block;
   }
 
-  #monthly-charge {
-    color: #454343;
-    font-size: rem(12px);
+  #checkout-total {
+    color: #ffffff;
+    font-size: rem(16px);
     letter-spacing: 0.4px;
     font-weight: $semibold;
     text-transform: uppercase;
+    font-weight: $semibold;
+
+    display: inline-block;
+    float: right;
   }
 
   #amount {
-    color: #605F5F;
-    font-size: em(27px);
-    font-weight: $semibold;
+    color: #ffffff;
+    font-weight: $regular;
   }
 }

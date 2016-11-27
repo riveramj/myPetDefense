@@ -16,7 +16,7 @@
           <dl class="step-container">
             <dt class="step-name">2. Size</dt>
             <dd class="step-choice">
-              <span class="chosen-size">5-9</span> pounds
+              <span class="chosen-size">5-9</span>
             </dd>
           </dl>
         </a>
@@ -34,12 +34,15 @@
           </dl>
         </a>
       </li>
-      <li class="complete">
+      <li class="complete" data-lift="NavBar.petCount">
         <a href="/pet-details">
           <i class="fa fa-check"></i>
           <dl class="step-container">
-            <dt class="step-name">4. Pet Details</dt>
-            <dd class="step-choice">
+            <dt class="step-name">
+              4. Pet Details
+              <div class="pet-count">0</div>
+            </dt>
+            <dd class="step-choice pet-details">
               Reviewed
               </span>
             </dd>
@@ -69,7 +72,7 @@
       <dl class="step-container">
         <dt class="step-name">2. Size</dt>
         <dd class="step-choice">
-          <span class="chosen-size">5-9</span> pounds
+          <span class="chosen-size">5-9</span>
         </dd>
       </dl>
     </a>
@@ -85,11 +88,11 @@
       </dl>
     </a>
   </div>
-  <div class="flow-step" data-lift="NavBar.petName">
+  <div class="flow-step" data-lift="NavBar.petCount">
     <a href="/pet-details">
       <i class="fa fa-check"></i>
       <dl class="step-container">
-        <dt class="step-name">4. Pet Details</dt>
+        <dt class="step-name">4. Pet Details<span class="pet-count">0</span></dt>
         <dd class="step-choice">
           <span class="chosen-product">Reviewed</span>
         </dd>
@@ -199,32 +202,17 @@
           <h2>Order Summary</h2>
         </div>
         <ul id="order-details">
-          <li id="selected-note">Your selected items:</li>
-          <li id="type">Pet <span>Dog</span></li>
-          <li id="size">Size <span>11-20</span></li>
-          <li id="product">Product <span>Adventure Plus for Dogs</span></li>
+          <li id="count">Pet Quantity <span>3</span></li>
+          <li id="subtotal">Subtotal <span>$1.99</span></li>
+          <li id="multi-pet-discount">Multi Pet Discount <span>$0.02</span></li>
+          <li id="tax">GA Sales Tax <span>$0.04</span></li>
+          <li id="monthly-total">Monthly Total <span>$11.99</span></li>
         </ul>
-        <div id="order">
-          <div id="price-additions">
-            <div class="monthly-charge">
-              <span class="amount">$9.99</span> / A Month
-            </div>
-            <div id="tax">
-              + GA Tax $<span id="tax-amount">0.99</span>
-            </div>
-            <div id="promo-discount-note">+ Promotion Discount</div>
-          </div>
-          <div id="order-total">
-            <h3>Order Total</h3>
-            <div class="monthly-charge">
-              <span class="amount">$1.11</span> / A Month
-            </div>
-          </div>
-        </div>
+        <div id="order">Order Total <span>$1.71</span></div>
       </div>
 
       <div class="signup-container">
-        <button type="submit" class="checkout select-choice">Place Order</button>
+        <button type="submit" class="checkout submit select-choice">Place Order</button>
         <div id="agreement">
           By clicking "Place Order" you agree to pay the full monthly amount shown above after promotions have completed.
         </div>
