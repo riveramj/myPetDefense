@@ -41,7 +41,7 @@ class PetDetails extends Loggable {
       currentPets.values.map { pet =>
       checkEmpty(pet.name.get, s"#${pet.petId.get}-name")
       }.flatten ++
-      birthdayErrors.map( birthdayId => ValidationError(birthdayId, "Not a validate date format.")) ++
+      birthdayErrors.map( birthdayId => ValidationError(birthdayId, "Not a valid date format.")) ++
       nameErrors.map( birthdayId => ValidationError(birthdayId, "Required."))
     ).toList.distinct
   }
