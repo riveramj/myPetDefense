@@ -12,7 +12,7 @@ import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.model._
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.LinkedHashMap
 
 object Success extends Loggable {
   import net.liftweb.sitemap._
@@ -36,7 +36,7 @@ class Success extends Loggable {
     petProduct(Empty)
     total(Empty)
     freeMonths(Empty)
-    completedPets(HashMap.empty)
+    completedPets(LinkedHashMap.empty)
 
     "#count span *" #> pets.size &
     "#monthly-total" #> ClearNodesIf(freeMonthCount == 0) &
