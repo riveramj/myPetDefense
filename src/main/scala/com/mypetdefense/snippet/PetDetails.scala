@@ -129,6 +129,7 @@ class PetDetails extends Loggable {
   }
 
   def render = {
+    val currentPetId = PetFlowChoices.petId.is.openOr(0L)
     val currentPet = {
       for {
         petType <- petChoice.is
@@ -136,7 +137,7 @@ class PetDetails extends Loggable {
         product <- petProduct.is
       } yield {
         Pet.create
-          .petId(petId.is.openOr(0L))
+          .petId(currentPetId)
           .animalType(petType)
           .size(size)
           .product(product)
@@ -144,7 +145,16 @@ class PetDetails extends Loggable {
     }
 
     currentPet.map { pet => 
-      currentPets(pet.petId.get) = pet
+      val updatedPet = {
+        if (currentPets.contains(currentPetId)) 
+          pet
+            .name(currentPets(currentPetId).name.get)
+            .birthday(currentPets(currentPetId).birthday.get)
+        else
+          pet
+      }
+
+      currentPets(currentPetId) = updatedPet
     }
 
     completedPets(currentPets)
