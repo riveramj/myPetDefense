@@ -7,7 +7,7 @@ import net.liftweb.http._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 
-import scala.collection.mutable.HashMap
+import scala.collection.mutable.LinkedHashMap
 
 object PetFlowChoices extends Loggable {
 
@@ -18,5 +18,5 @@ object PetFlowChoices extends Loggable {
   object total extends SessionVar[Box[Double]](Empty)
   object freeMonths extends SessionVar[Box[Int]](Empty)
 
-  object completedPets extends SessionVar[HashMap[Long, Pet]](HashMap.empty)
+  object completedPets extends SessionVar[LinkedHashMap[Long, Pet]](LinkedHashMap.empty)
 }
