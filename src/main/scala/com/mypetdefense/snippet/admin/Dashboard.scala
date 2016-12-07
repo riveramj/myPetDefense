@@ -73,7 +73,7 @@ class Dashboard extends Loggable {
 
       val user = subscription.user.obj
 
-      val products = subscription.getProducts
+      val petsAndProducts = subscription.getPetAndProducts
       val dateFormat = new SimpleDateFormat("MMM dd")
 
       val shipAddressRaw = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
@@ -85,9 +85,10 @@ class Dashboard extends Loggable {
       ".ship-on *" #> dateFormat.format(subscription.nextShipDate.get) &
       ".name *" #> user.map(_.name) &
       ".address *" #> address &
-      ".products" #> products.map { product =>
-        ".product-name *" #> product.name.get &
-        ".product-size *" #> product.size.get.toString
+      ".product" #> petsAndProducts.map { case (pet, product) =>
+        ".pet-name *" #> pet.name.get &
+        ".product-name *" #> product.map(_.name.get) &
+        ".product-size *" #> product.map(_.size.get.toString)
       } &
       ".payment-processed *" #> paymentProcessed_?(shipment) &
       ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, user, shipment))
