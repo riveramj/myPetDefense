@@ -224,3 +224,11 @@ div.create-coupon-container {
 .tiny-field.coupon-container {
   @include span-columns(2);
 }
+
+li.product {
+  margin: 6px 0;
+
+  .pet-name {
+    font-weight: $semibold;
+  }
+}
