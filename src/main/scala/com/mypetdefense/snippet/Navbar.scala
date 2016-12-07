@@ -7,6 +7,7 @@ import net.liftweb.http._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 import com.mypetdefense.service.PetFlowChoices
+import com.mypetdefense.util.ClearNodesIf
 
 class NavBar extends Loggable {
   import PetFlowChoices._
@@ -21,7 +22,7 @@ class NavBar extends Loggable {
         CatSize.menu.loc.calcDefaultHref
       }
     } &
-    ".chosen-size *" #> petSize.is.map(_.toString)
+    ".chosen-size *" #> petSize.is.map(_.toString + " pounds")
   }
 
   def product = {
@@ -33,5 +34,25 @@ class NavBar extends Loggable {
       }
     } &
     ".chosen-product *" #> petProduct.is.map(_.name.toString)
+  }
+
+  def petCount = {
+    val currentPage = S.uri
+
+    val petCount = {
+      if (
+          completedPets.is.get(petId.is.openOr(0L)).isEmpty && 
+          currentPage == PetDetails.menu.loc.calcDefaultHref &&
+          !petId.is.isEmpty
+      )
+        completedPets.is.size + 1
+      else
+        completedPets.is.size
+    }
+
+    val firstTimeFlow_? = (petId.is.isEmpty || petChoice.is.isEmpty || petSize.is.isEmpty || petProduct.is.isEmpty) && completedPets.is.isEmpty
+
+    ".pet-count" #> ClearNodesIf(firstTimeFlow_?) &
+    ".pet-count *" #> petCount
   }
 }

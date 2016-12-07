@@ -36,6 +36,8 @@ class Parents extends Loggable {
   var chosenProduct: Box[Product] = Empty
   var petName = ""
 
+  val coupons = Coupon.findAll()
+
   def petTypeRadio(renderer: IdMemoizeTransform) = {
     ajaxRadio(
       List(AnimalType.Dog, AnimalType.Cat),
@@ -57,6 +59,14 @@ class Parents extends Loggable {
       chosenProduct,
       (possibleProduct: Product) => chosenProduct = Full(possibleProduct)
     )
+  }
+
+  def addCoupon(parent: User, updatedCoupon: Box[Coupon]) = {
+    parent.coupon(updatedCoupon).saveMe
+
+    ParentService.updateCoupon(parent.stripeId.get, updatedCoupon.map(_.couponCode.get))
+
+    S.redirectTo(Parents.menu.loc.calcDefaultHref)
   }
 
   def addPet(parent: User, renderer: IdMemoizeTransform) = {
@@ -118,6 +128,16 @@ class Parents extends Loggable {
 
       val nextShipDate = Subscription.find(By(Subscription.user, parent)).map(_.nextShipDate.get)
 
+      var chosenCoupon: Box[Coupon] = parent.coupon.obj
+
+      def couponDropdown = {
+        SHtml.ajaxSelectObj(
+          (Empty, "No Coupon") +: coupons.map(coupon => (Full(coupon), coupon.couponCode.get)),
+          Full(chosenCoupon),
+          (possibleCoupon: Box[Coupon]) => chosenCoupon = possibleCoupon
+        )
+      }
+
       ".parent" #> {
         ".name *" #> parent.name &
         ".email *" #> parent.email &
@@ -136,6 +156,10 @@ class Parents extends Loggable {
           ".pet-type-select" #> petTypeRadio(renderer) &
           ".product-container .product-select" #> productDropdown &
           ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent, renderer))
+        } & 
+        ".add-coupon" #> {
+          ".coupon-container .coupon-select" #> couponDropdown &
+          ".create-coupon-container .create-coupon" #> SHtml.ajaxSubmit("Change Coupon", () => addCoupon(parent, chosenCoupon))
         } & 
         {
           val pets = Pet.findAll(By(Pet.user, parent))
