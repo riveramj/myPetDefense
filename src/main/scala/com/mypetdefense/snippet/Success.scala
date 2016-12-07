@@ -9,7 +9,10 @@ import net.liftweb.http._
 import net.liftweb.mapper.{By, NullRef}
 
 import com.mypetdefense.service.PetFlowChoices._
+import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.model._
+
+import scala.collection.mutable.LinkedHashMap
 
 object Success extends Loggable {
   import net.liftweb.sitemap._
@@ -17,22 +20,35 @@ object Success extends Loggable {
   import com.mypetdefense.util.Paths._
 
     val menu = Menu.i("Success") / "success" >>
-      petChosen >>
-      productChosen >>
-      sizeChosen >>
+      completedPetOrFlow >>
       finishedCheckout
 }
 
 class Success extends Loggable {
-
   def render() = {
-    val selectedPetType = petChoice.is
-    val selectedPetSize =  petSize.is
-    val selectedPetProduct = petProduct.is
+    val pets = completedPets.is
+    val monthylTotal = total.is
+    val freeMonthCount = freeMonths.is.openOr(0)
 
-    "#type span *" #> petChoice.is.map(_.toString) &
-    "#size span *" #> petSize.is.map(_.toString + " pounds") &
-    "#product span *" #> petProduct.is.map(_.name.get) &
-    "#monthly-charge #amount *" #> total.is.map(paid=> f"$$$paid%2.2f")
+    petId(Empty)
+    petChoice(Empty)
+    petSize(Empty)
+    petProduct(Empty)
+    total(Empty)
+    freeMonths(Empty)
+    completedPets(LinkedHashMap.empty)
+
+    "#count span *" #> pets.size &
+    "#monthly-total" #> ClearNodesIf(freeMonthCount == 0) &
+    "#monthly-total span *" #> monthylTotal.map( paid => f"$$$paid%2.2f" ) &
+    {
+      if (freeMonthCount == 0) {
+        "#checkout-total #amount *" #> monthylTotal.map( paid => f"$$$paid%2.2f" )
+      } else if (freeMonthCount == 1) {
+        "#checkout-total *" #> s"First Month Free"
+      } else {
+        "#checkout-total *" #> s"First ${freeMonthCount} months free"
+      }
+    }
   }
 }

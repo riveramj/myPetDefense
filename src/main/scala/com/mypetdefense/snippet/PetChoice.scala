@@ -7,6 +7,7 @@ import net.liftweb.http._
 
 import com.mypetdefense.service._
 import com.mypetdefense.model.AnimalType
+import com.mypetdefense.util.RandomIdGenerator._
 
 object PetChoice extends Loggable {
   import net.liftweb.sitemap._
@@ -28,6 +29,9 @@ class PetChoice extends Loggable {
       petProduct(Empty)
       petSize(Empty)
 
+      if (petId.is.isEmpty)
+        petId(Full(generateLongId))
+
       S.redirectTo(DogProduct.menu.loc.calcDefaultHref)
     }
 
@@ -35,6 +39,9 @@ class PetChoice extends Loggable {
       petChoice(Full(AnimalType.Cat))
       petProduct(Empty)
       petSize(Empty)
+
+      if (petId.is.isEmpty)
+        petId(Full(generateLongId))
 
       S.redirectTo(CatSize.menu.loc.calcDefaultHref)
     }

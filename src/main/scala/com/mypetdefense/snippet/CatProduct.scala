@@ -42,7 +42,7 @@ class CatProduct extends Loggable {
 
       petProduct(selectedProduct)
 
-      S.redirectTo(Checkout.menu.loc.calcDefaultHref)
+      S.redirectTo(PetDetails.menu.loc.calcDefaultHref)
     }
 
     ".adventure-plus" #> ClearNodesIf(petSize.is == Full(AnimalSize.CatSmall)) andThen

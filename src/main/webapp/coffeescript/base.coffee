@@ -14,3 +14,16 @@ $(document).on 'form-validation-error', (event) ->
 
   $target.addClass "error"
   $targetContainer.append $("<div />").addClass("validation-error").text(event.error)
+
+$("body").on "click", '.submit', (event) ->
+  $(".validation-error").remove()
+  $("input.error").removeClass("error")
+
+$('html').bind 'keypress', (event) ->
+  if (event.keyCode == 13)
+    false
+
+$(document).ready ->
+  $("input").on "focus", (event) ->
+    $target = $(event.target)
+    $target.removeClass("error").parent().find(".validation-error").remove()
