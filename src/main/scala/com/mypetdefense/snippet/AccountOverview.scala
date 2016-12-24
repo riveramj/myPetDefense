@@ -42,47 +42,36 @@ class AccountOverview extends Loggable {
     Pet.findAll(By(Pet.user, parent))
   }.openOr(Nil)
 
+  val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
+
   val stripeCustomerId = user.map(_.stripeId.get).openOr("")
 
-  val discount = ParentService.getDiscount(stripeCustomerId)
+  val upcomingInvoice = ParentService.getUpcomingInvoice(stripeCustomerId)
 
-  val productSubtotal = pets.size * 9.99
+  val productSubtotal = upcomingInvoice.map(_.subtotal/100D).openOr(0D)
 
-  val discountAmountRaw = productSubtotal * (discount.openOr(0)/100.0)
-  
-  val discountAmount = discount match {
-    case Full(_) =>
-      f"-$$$discountAmountRaw%2.2f"
-    
-    case Failure(_, _, _) =>
-      "Failed to retrieve discount."
-
-    case other =>
-      "-$0.00"
+  val discountPercent: Box[Double] = {
+    for {
+      invoice <- upcomingInvoice
+      discount <- invoice.discount
+      coupon = discount.coupon
+      discount <- coupon.percentOff
+    } yield {
+      discount.toDouble/100L
+    }
   }
 
+  val discountAmountRaw = discountPercent.map(_ * productSubtotal).openOr(0D)
+  
+  val discountAmount = discountAmountRaw match {
+    case 0 => "-$0.00"
+    case _ => f"-$$$discountAmountRaw%2.2f"
+  }
+
+  val taxDue = upcomingInvoice.flatMap(_.tax.map(_.toDouble/100D)).openOr(0D)
+  val totalDue = upcomingInvoice.map(_.amountDue.toDouble/100D).openOr(0D)
+
   def render = {
-    val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
-
-    val taxDue = {
-      if (shippingAddress.map(_.state.get.toLowerCase) == Full("ga")) {
-        shippingAddress.map { address =>
-          val taxInfo = TaxJarService.findTaxAmoutAndRate(
-            address.city.get,
-            address.state.get,
-            address.zip.get,
-            (productSubtotal - discountAmountRaw)
-          )
-
-          taxInfo._1
-        }.openOr(0D)
-      } else {
-        0D
-      }
-    }
-
-    val totalDue = productSubtotal - discountAmountRaw + taxDue
-
     "#page-body-container" #> {
       user.map { parent =>
         val subscription = parent.getSubscription

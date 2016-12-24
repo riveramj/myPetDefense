@@ -76,27 +76,27 @@ object Paths {
 
   val loggedIn = If(
     () => SecurityContext.loggedIn_?,
-    RedirectResponse("/")
+    RedirectResponse("/login")
   )
 
   val adminUser = If(
     () => SecurityContext.admin_?,
-    RedirectResponse("/")
+    RedirectResponse("/login")
   )
 
   val parent = If(
     () => SecurityContext.parent_?,
-    RedirectResponse("/")
+    RedirectResponse("/login")
   )
 
   val agentOrAdmin = If(
     () => (SecurityContext.admin_? || SecurityContext.agent_?),
-    RedirectResponse("/")
+    RedirectResponse("/login")
   )
 
   val notLoggedIn = If(
     () => ! SecurityContext.loggedIn_?,
-    RedirectResponse("/")
+    RedirectResponse("/login")
   )
 
   val finishedCheckout = If(
