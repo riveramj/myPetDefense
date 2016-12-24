@@ -57,7 +57,7 @@ class AccountOverview extends Loggable {
       coupon = discount.coupon
       discount <- coupon.percentOff
     } yield {
-      discount.toDouble/100L
+      discount.toDouble/100D
     }
   }
 

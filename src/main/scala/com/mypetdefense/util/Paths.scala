@@ -96,7 +96,7 @@ object Paths {
 
   val notLoggedIn = If(
     () => ! SecurityContext.loggedIn_?,
-    RedirectResponse("/login")
+    RedirectResponse("/logout")
   )
 
   val finishedCheckout = If(
