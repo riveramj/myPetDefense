@@ -81,7 +81,7 @@ class ShippingBilling extends Loggable {
         zip = shippingAddress.zip.get
 
         SHtml.makeFormsAjax andThen
-        "#shipping-billing-nav [class+]" #> "current" &
+        "#shipping-billing-nav a [class+]" #> "current" &
         "#user-email *" #> user.email & 
         "#first-name" #> text(firstName, firstName = _) &
         "#last-name" #> text(lastName, lastName = _) &
