@@ -45,12 +45,46 @@
           </dt>
         </dl>
       </form>
+      
+      <form>
+        <input type="hidden" id="stripe-token">
+        <dl id="payment-details-block" class="account-block">
+          <dt class="block-header">Payment Details</dt>
+          <dd class="block-details">
+            <div>
+              <label>
+                <div><span class="field-label cardholder-name">Cardholder Name</span></div>
+                <input type="text" id="cardholder-name">
+              </label>
+              <label class="short-field card-number">
+                <div><span class="field-label">Card Number</span></div>
+                <input id="card-number" type="tel" data-stripe="number" autocomplete="cc-number" placeholder="•••• •••• •••• ••••">
+              </label>
+              <label class="short-field expiration-date">
+                <div><span class="field-label">Expires</span></div>
+                <input type="tel" id="card-expiry" placeholder="MM/YY" autocomplete="cc-exp">
+              </label>
+              <label class="short-field cvc">
+                <span class="field-label">CVV</span>	
+                <input placeholder="000" id="card-cvc" size="4" type="text" data-stripe="cvc" autocomplete="off">
+              </label>
+            </div>
+          </dd>
+          <dt class="save-container">
+            <button class="save-changes update-billing">Save Changes</button>
+          </dt>
+        </dl>
+      </form>
     </div>
   </div>
 </div>
 
 <head_merge>
-<link rel="stylesheet" data-lift="style-bundle?name=shipping-billing">
+  <link rel="stylesheet" data-lift="style-bundle?name=shipping-billing">
 </head_merge>
+<tail>
+  <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+  <script type="text/javascript" data-lift="script-bundle?name=billing"></script>
+</tail>
 </div>
 

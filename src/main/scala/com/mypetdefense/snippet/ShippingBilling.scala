@@ -43,8 +43,14 @@ class ShippingBilling extends Loggable {
   var city = ""
   var state = ""
   var zip = ""
+  
+  var stripeToken = ""
 
-  def saveChanges() = {
+  def updateCard() = {
+    Noop
+  }
+
+  def updateAddress() = {
     for {
       user <- user
       shippingAddress <- user.addresses.find(_.addressType == AddressType.Shipping)
@@ -90,7 +96,9 @@ class ShippingBilling extends Loggable {
         "#city" #> text(city, city = _) &
         "#state" #> text(state, state = _) &
         "#zip" #> text(zip, zip = _) &
-        ".save-changes" #> SHtml.ajaxSubmit("Save Changes", saveChanges)
+        "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
+        ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateCard) &
+        ".save-changes" #> SHtml.ajaxSubmit("Update Address", updateAddress)
       }
     }
   }
