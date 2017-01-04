@@ -1,6 +1,23 @@
 @import "base";
 @import "nav-bar";
  
+#promo-bar {
+  background-color: #2E9F9B;
+  text-align: center;
+  color: #FFFFFF;
+  font-size: em(12px);
+  padding: em(10px);
+
+  @media (min-width: $bp-medium) {
+    font-size: em(16px);
+  }
+
+  span {
+    font-weight: $bold;
+    letter-spacing: .4px;
+  }
+}
+
 #cents {
   vertical-align: super;
   font-size: rem(16px);
