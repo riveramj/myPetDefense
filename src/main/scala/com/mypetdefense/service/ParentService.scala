@@ -8,7 +8,7 @@ import net.liftweb._
 
 import com.mypetdefense.model._
 
-import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription, Discount}
+import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => StripeSubscription, _}
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
 import com.mypetdefense.model._
@@ -104,7 +104,6 @@ object ParentService extends Loggable {
         logger.error(s"get customer failed with other error: ${throwable}")
         Empty
     }
-    
   }
 
   def getStripeCustomerDiscount(customerId: String): Box[Discount] = {
@@ -133,6 +132,38 @@ object ParentService extends Loggable {
         Failure(message)
 
       case Empty =>
+        Empty
+    }
+  }
+
+  def getUpcomingInvoice(customerId: String) = {
+    Try(
+      Await.result(Invoice.getUpcoming(customerId), new DurationInt(10).seconds)
+    ) match {
+      case TrySuccess(Full(stripeInvoice)) => Full(stripeInvoice)
+      
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"get upcoming invoice failed with stripe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"get upcoming invoice failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
+  def getInvoice(invoiceId: String) = {
+    Try(
+      Await.result(Invoice.get(invoiceId), new DurationInt(10).seconds)
+    ) match {
+      case TrySuccess(Full(stripeInvoice)) => Full(stripeInvoice)
+      
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"get upcoming invoice failed with stripe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"get upcoming invoice failed with other error: ${throwable}")
         Empty
     }
   }
