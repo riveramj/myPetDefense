@@ -34,12 +34,14 @@
 }
 
 #hero {
-  @include span-columns(12);
+  clear: both;
+  
+  @media (min-width: $bp-medium) {
+    height: em(488px);
+  }
 
-  @media (min-width: $bp-med) {
-    .leaf-divider {
-      display: none;
-    }
+  @media (min-width: $bp-large) {
+    height: 532px;
   }
 }
 
@@ -48,27 +50,36 @@
   background-size: cover;
   height: em(278px);
 
-  @media (min-width: $bp-med) {
-    height: em(648px);
+  @media (min-width: $bp-medium) {
+    height: 100%;
+    background-size: initial;
   }
 }
 
 #tag-line-container {
   position: relative;
+
   margin-top: em(-27px);
   background-color: $hero-background;
   text-align: center;
-  padding: em(31px) em(54px) em(25px);
+  padding: em(31px) em(20px) em(25px);
 
-  @media (min-width: $bp-med) {
-    @include span-columns(3);
-    @include shift(7);
+  @media (min-width: $bp-medium) {
+    width: 511px;
+    margin: 0 auto;
+
+    position: relative;
+    top: -400px;
     margin-top: 0;
 
-    position: absolute;
-    top: rem(218px);
+    background-color: rgba(0,0,0,0.70);
 
-    padding: em(39px);
+    padding: em(40px);
+  }
+
+  @media (min-width: $bp-large) {
+    margin-right: 168px;
+    top: -450px;
   }
 
   .signup {
@@ -79,20 +90,38 @@
     margin-top: rem(22px);
     margin-bottom: rem(21px);
 
-    @media (min-width: $bp-med) {
+    background-color: #FF8627;
+
+    @media (min-width: $bp-medium) {
       margin-bottom: 0;
+      background-color: #FF8627;
     }
   }
 }
 
 #tag-line {
-  font-size: em(26px);
-  font-weight: $light;
+  color: #f7f7f7;
+  font-size: rem(35px);
+  font-weight: $bold;
+  line-height: 50px;
 
-  line-height: rem(35px);
-
-  color: $hero-text;
   text-align: center;
+
+  @media (min-width: $bp-medium) {
+    font-size: rem(40px);
+    line-height: rem(72px);
+  }
+
+  div {
+    line-height: rem(30px);
+    font-size: rem(18px);
+    font-weight: $normal;
+    color: #ffffff;
+    
+    @media (min-width: $bp-medium) {
+      font-size: rem(22px);
+    }
+  }
 }
 
 .leaf-divider {
@@ -100,8 +129,12 @@
   background-size: cover;
   height: em(29px);
 
-  @media (min-width: $bp-med) {
-    height: em(75px);
+  @media (min-width: $bp-medium) {
+    display: none;
+  }
+
+  @media (min-width: $bp-large) {
+    display: block;
   }
 }
 
@@ -121,6 +154,10 @@
       margin-top: em(-100px);
       text-align: left;
     }
+  }
+
+  @media (min-width: $bp-large) {
+    margin-top: 0;
   }
   
   h2 {
