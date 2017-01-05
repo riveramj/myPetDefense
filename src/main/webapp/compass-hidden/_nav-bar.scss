@@ -1,41 +1,28 @@
 #top-bar {
-  @include span-columns(12);
   background-color: #ffffff;
-  display: inline-block;
+  display: block;
 }
 
 #logo-name { 
-  @include span-columns(2);
-  @include shift(0.5);
-
-  padding-top: em(20px);
+  padding-top: em(19px);
+  padding-left: em(25px);
+  
+  float: left;
   
   @media (min-width: $bp-medium) {
-    @include shift(0);
-    margin-left: em(89px);
     padding-top: em(16px);
   }
 
   @media (min-width: $bp-large) {
-    @include span-columns(3);
-    @include shift(2);
     padding-top: rem(19px);
+    padding-left: em(123px);
   }
 }
 
 nav {
   float: right;
-
   @media (min-width: $bp-large) {
-    float: none;
-    @include span-columns(3);
-    @include shift(3);
-  }
-
-  @media (min-width: $bp-med) {
-    float: none;
-    @include span-columns(4);
-    @include shift(3);
+    margin-right: em(123px);
   }
 }
 
@@ -52,6 +39,14 @@ nav {
 #menu-entries {
   .login, .new-user-signup, .entry {
     padding: em(28px) em(25px);
+  }
+
+  .login {
+    @media (min-width: $bp-large) {
+      font-size: rem(16px);
+      font-weight: $bold;
+      padding: em(22px) em(25px);
+    }
   }
 
   .entry a {
@@ -87,7 +82,19 @@ nav {
 
     .desktop {
       display: inline-block;
-      padding: rem(19px) 0;
+      padding: rem(13px) 0;
+
+      .signup {
+        background-color: initial;
+        color: #4F4E4E;
+        font-weight: $bold;
+        font-size: rem(16px);
+        text-transform: none;
+
+        &:visited {
+          color: #4F4E4E;
+        }
+      }
     }
   }
 
