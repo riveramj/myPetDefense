@@ -74,7 +74,7 @@
 
     background-color: rgba(0,0,0,0.70);
 
-    padding: em(40px);
+    padding: em(40px) em(40px) em(60px);
   }
 
   @media (min-width: $bp-large) {
@@ -127,15 +127,7 @@
 .leaf-divider {
   background: url(../../images/leaf-background-large.jpg) no-repeat left;
   background-size: cover;
-  height: em(30px);
-
-  @media (min-width: $bp-medium) {
-    display: none;
-  }
-
-  @media (min-width: $bp-large) {
-    display: block;
-  }
+  height: em(45px);
 }
 
 #how-it-works {
@@ -148,19 +140,11 @@
     padding-top: rem(30px);
   }
 
-  @media (min-width: $bp-med) {
-    margin-top: em(-42px);
-    padding-top: em(58px);
-    padding-bottom: em(32px);
-
-    #steps {
-      margin-top: em(-100px);
-      text-align: left;
-    }
-  }
-
   @media (min-width: $bp-large) {
     margin-top: 0;
+    #steps {
+      margin-top: em(-100px);
+    }
   }
   
   h2 {
@@ -169,11 +153,6 @@
     color: #4F4E4E;
 
     padding-top: 8px;
-
-    @media (min-width: $bp-med) {
-      padding: 0;
-      text-align: left;
-    }
   }
 }
 
@@ -188,11 +167,24 @@
   margin: rem(6px) auto auto;
   padding: rem(25px) rem(23px) rem(35px);
 
-  @media (min-width: $bp-med) {
+  &.choose-product {
+    padding-right: rem(18px);
+    padding-left: rem(18px);
+  }
+
+  @media (min-width: $bp-medium) {
     display: inline-block;
     margin-top: 0;
     vertical-align: top;
     text-align: center;
+    height: 100%;
+    min-height: 233px;
+
+    margin-left: 1px;
+
+    &:first-child {
+      margin-left: 0;
+    }
   }
 
   .image-background {
@@ -216,7 +208,7 @@
     margin-top: 0;
 
     .step-image {
-      @media (min-width: $bp-med) {
+      @media (min-width: $bp-medium) {
         margin-bottom: em(-5px);
       }
     }
@@ -226,18 +218,18 @@
 .step-image {
   padding-bottom: rem(15px);
 
-  @media (max-width: $bp-med) {
+  @media (max-width: $bp-medium) {
     display: inline-block;
   }
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     margin-right: 0;
     padding-bottom: em(22px);
   }
 }
 
 .step-instructions {
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     padding-right: 0;
     text-align: center;
   }
@@ -268,7 +260,7 @@
     width: rem(240px);
     display: inline-block;
 
-    @media (min-width: $bp-med) {
+    @media (min-width: $bp-medium) {
       padding-top: 0;
     }
   }
@@ -288,8 +280,7 @@
 }
 
 #why-signup {
-  @media (min-width: $bp-med) {
-
+  @media (min-width: $bp-medium) {
     padding-top: rem(177px);
     text-align: left;
   }
@@ -299,7 +290,7 @@
   padding-bottom: rem(85px);
   padding-top: rem(55px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-large) {
     padding: rem(183px) 0 rem(198);
   }
 }
@@ -310,6 +301,11 @@
   line-height: rem(23px);
   margin: auto;
   padding: rem(55px) rem(30px) 0;
+
+  @media (min-width: $bp-medium) {
+    padding-left: 126px;
+    padding-right: 126px;
+  }
 
   &:first-child {
       padding-top: 0;
@@ -338,7 +334,7 @@
   #testimonials {
     padding-top: em(49px);
 
-    @media (min-width: $bp-med) {
+    @media (min-width: $bp-medium) {
       display: inline-block;
       padding: em(175px) 0 em(183);
     }
@@ -346,13 +342,13 @@
 }
 
 .testimonial {
-  @media (max-width: $bp-med) {
+  @media (max-width: $bp-medium) {
     @include row(table);
     @include fill-parent();
     padding-bottom: em(60px);
   }
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     display: inline-block;
   }
 }
@@ -395,8 +391,14 @@
 #product-shot-container {
   #product-shot {
     background: url(../../images/product-shot.jpg) no-repeat center;
-    background-size: cover;
-    height: em(278px);
+    background-size: contain;
+    height: em(450px);
+    background-position-y: 200px;
+
+    @media (min-width: $bp-medium) {
+      background-size: cover;
+      background-position-y: 0;
+    }
   }
 }
 
@@ -412,11 +414,11 @@
   padding: rem(31px) rem(30px);
 
   @media (min-width: $bp-medium) {
-    width: 511px;
+    width: 382px;
     margin: 0 auto;
 
     position: relative;
-    top: -400px;
+    top: 110px;
     margin-top: 0;
 
     background-color: rgba(0,0,0,0.70);
@@ -494,7 +496,7 @@
   font-size: em(12px);
   text-align: center;
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     padding: rem(26px) 0 rem(15px);
   }
 }
@@ -507,7 +509,7 @@
   padding: rem(57px) 0 0;
   font-size: rem(18px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     padding: rem(51px) 0 0;
     font-size: rem(15px);
   }
