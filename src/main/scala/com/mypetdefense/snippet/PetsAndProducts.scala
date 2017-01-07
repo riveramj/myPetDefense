@@ -129,7 +129,7 @@ class PetsAndProducts extends Loggable {
 
   def render = {
     SHtml.makeFormsAjax andThen
-    ".pets-products [class+]" #> "current" &
+    ".pets-products a [class+]" #> "current" &
     "#user-email *" #> user.map(_.email.get) &
     "#new-pet" #> idMemoize { renderer =>
       "#new-pet-name" #> ajaxText(newPetName, newPetName = _) &
