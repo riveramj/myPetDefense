@@ -44,6 +44,7 @@ $(document).on "validate-stripe-form", (event) ->
   
   unless validationError
     Stripe.createToken
+      name: $('#cardholder-name').val(),
       number: $('#card-number').val(),
       cvc: $('#card-cvc').val(),
       exp_month: cardExpiry.month,

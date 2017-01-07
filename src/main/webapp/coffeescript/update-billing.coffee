@@ -17,6 +17,8 @@ $(document).ready ->
       stripeCallback: stripeCallback
     )
 
+  $('#card-number').val($('#old-card-last4').val())
+
 $(document).on 'stripe-form-ready', (event) ->
   $('#card-number').payment('formatCardNumber')
   $('#card-expiry').payment('formatCardExpiry')
@@ -44,6 +46,7 @@ $(document).on "validate-stripe-form", (event) ->
   
   unless validationError
     Stripe.createToken
+      name: $('#cardholder-name').val(),
       number: $('#card-number').val(),
       cvc: $('#card-cvc').val(),
       exp_month: cardExpiry.month,

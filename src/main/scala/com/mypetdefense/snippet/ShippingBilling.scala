@@ -21,7 +21,7 @@ import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.SecurityContext._
-import com.mypetdefense.service.TaxJarService
+import com.mypetdefense.service._
 
 object ShippingBilling extends Loggable {
   import net.liftweb.sitemap._
@@ -35,6 +35,7 @@ object ShippingBilling extends Loggable {
 
 class ShippingBilling extends Loggable {
   val user = currentUser
+  val stripeCustomerId = user.map(_.stripeId.get).openOr("")
 
   var firstName = ""
   var lastName = ""
@@ -44,10 +45,24 @@ class ShippingBilling extends Loggable {
   var state = ""
   var zip = ""
   
+  var cardName = ""
+  var cardNumber = ""
+  var cardExpire = ""
   var stripeToken = ""
 
+  val customerCard = ParentService.getCustomerCard(stripeCustomerId)
+
+  cardNumber = customerCard.map(card => s"Ends in ${card.last4}").getOrElse("")
+  cardName = customerCard.flatMap(_.name).getOrElse("")
+  cardExpire = customerCard.map(card => s"${card.expMonth}/${card.expYear}").getOrElse("")
+
   def updateCard() = {
-    Noop
+    ParentService.updateStripeCustomerCard(
+      stripeCustomerId,
+      stripeToken
+    )
+
+    S.redirectTo(ShippingBilling.menu.loc.calcDefaultHref)
   }
 
   def updateAddress() = {
@@ -96,6 +111,9 @@ class ShippingBilling extends Loggable {
         "#city" #> text(city, city = _) &
         "#state" #> text(state, state = _) &
         "#zip" #> text(zip, zip = _) &
+        "#cardholder-name" #> text(cardName, cardName = _) &
+        "#old-card-last4" #> hidden(cardNumber = _, cardNumber) &
+        "#card-expiry" #> text(cardExpire, cardExpire = _) &
         "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
         ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateCard) &
         ".save-changes" #> SHtml.ajaxSubmit("Update Address", updateAddress)
