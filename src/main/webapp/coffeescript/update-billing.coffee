@@ -3,19 +3,21 @@ stripeCallback = (status, response) ->
     myPetDefenseSite.validationError("#card-number", response.error.message)
   else
     $("#stripe-token").val(response.id)
-    $(".checkout").submit()
+    $(".update-billing").submit()
 
 $(document).ready ->
-  Stripe?.setPublishableKey? 'pk_live_hR6ryn2PwyeLHsRVTPX5EEol'
+  Stripe?.setPublishableKey? 'pk_test_rgQ72pMGC8pVMFU1KS3XlwLa'
 
   myPetDefenseSite.event("stripe-form-ready")
 
-  $("body").on "click", '.checkout', (event) ->
+  $("body").on "click", '.update-billing', (event) ->
     event.preventDefault()
 
     myPetDefenseSite.event("validate-stripe-form",
       stripeCallback: stripeCallback
     )
+
+  $('#card-number').val($('#old-card-last4').val())
 
 $(document).on 'stripe-form-ready', (event) ->
   $('#card-number').payment('formatCardNumber')
@@ -48,7 +50,7 @@ $(document).on "validate-stripe-form", (event) ->
       number: $('#card-number').val(),
       cvc: $('#card-cvc').val(),
       exp_month: cardExpiry.month,
-      exp_year: cardExpiry.year,
-      address_zip: $("#zip").val()
+      exp_year: cardExpiry.year
     , event.stripeCallback
+
 
