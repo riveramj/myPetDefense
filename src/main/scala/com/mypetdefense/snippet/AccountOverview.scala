@@ -85,7 +85,7 @@ class AccountOverview extends Loggable {
           }
         }
 
-        "#upcoming-order [class+]" #> "current" &
+        "#upcoming-order a [class+]" #> "current" &
         "#user-email *" #> parent.email &
         ".next-ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
         "#user-address" #> shippingAddress.map { address =>

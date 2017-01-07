@@ -22,6 +22,13 @@ object ParentService extends Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
 
+  def updateStripeCustomerCard(customerId: String, stripeToken: String) = {
+    Customer.update(
+      id = customerId,
+      card = Some(stripeToken)
+    )
+  }
+
   def updateStripeSubscriptionQuantity(customerId: String, subscriptionId: String, quantity: Int) = {
     StripeSubscription.update(
       customerId = customerId,
@@ -166,6 +173,15 @@ object ParentService extends Loggable {
         logger.error(s"get upcoming invoice failed with other error: ${throwable}")
         Empty
     }
+  }
+
+  def getCustomerCard(customerId: String): Option[Card] = {
+    (for {
+      customer <- getStripeCustomer(customerId).toList
+      cards <- customer.sources.data
+    } yield {
+      cards
+    }).headOption
   }
 }
 
