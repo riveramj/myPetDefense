@@ -2,6 +2,10 @@ html, body {
   height: 100%;
 }
 
+#top-bar #logo-name {
+  float: none;
+}
+
 #content-container {
   @media (min-width: $bp-med) {
     min-height: 100%;
