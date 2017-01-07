@@ -6,7 +6,7 @@ stripeCallback = (status, response) ->
     $(".update-billing").submit()
 
 $(document).ready ->
-  Stripe?.setPublishableKey? 'pk_test_tlQUPJdasEEdNTcUsbcsHmG7'
+  Stripe?.setPublishableKey? 'pk_test_rgQ72pMGC8pVMFU1KS3XlwLa'
 
   myPetDefenseSite.event("stripe-form-ready")
 
