@@ -127,7 +127,7 @@
 .leaf-divider {
   background: url(../../images/leaf-background-large.jpg) no-repeat left;
   background-size: cover;
-  height: em(29px);
+  height: em(30px);
 
   @media (min-width: $bp-medium) {
     display: none;
@@ -139,10 +139,14 @@
 }
 
 #how-it-works {
-  @include span-columns(12);
   background-color: $how-it-works-background;
   text-align: center;
-  padding-bottom: rem(90px);
+  padding-bottom: rem(55px);
+  padding-top: rem(30px);
+
+  #steps {
+    padding-top: rem(30px);
+  }
 
   @media (min-width: $bp-med) {
     margin-top: em(-42px);
@@ -150,7 +154,6 @@
     padding-bottom: em(32px);
 
     #steps {
-      @include span-columns(8);
       margin-top: em(-100px);
       text-align: left;
     }
@@ -161,28 +164,31 @@
   }
   
   h2 {
-    padding: rem(35px) 0 rem(35px);
     font-size: em(26px);
     font-weight: $light;
     color: #4F4E4E;
 
+    padding-top: 8px;
+
     @media (min-width: $bp-med) {
-      @include span-columns(2);
-      @include shift(2);
       padding: 0;
       text-align: left;
     }
   }
 }
 
+#how-it-works-header {
+  background: url(../../images/ribbon/how-it-works-ribbon.png) no-repeat center;
+  height: 53px;
+}
+
 .step {
-  @include fill-parent();
-  @include row(table);
-  margin-top: rem(60px);
+  width: rem(225px);
+  background-color: #FFFFFF;
+  margin: rem(6px) auto auto;
+  padding: rem(25px) rem(23px) rem(35px);
 
   @media (min-width: $bp-med) {
-    @include span-columns(2 of 7);
-    @include reset-display;
     display: inline-block;
     margin-top: 0;
     vertical-align: top;
@@ -193,7 +199,6 @@
     border-radius: 50%;
 	  width: 80px;
   	height: 80px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, .5);
     background-color: #949494;
     text-align: center;
     display: inline-block;
@@ -219,28 +224,19 @@
 }
 
 .step-image {
+  padding-bottom: rem(15px);
+
   @media (max-width: $bp-med) {
-    @include span-columns(5);
-    vertical-align: top;
-    text-align: right;
-    padding-right: rem(24px);
     display: inline-block;
   }
 
   @media (min-width: $bp-med) {
-    @include span-columns(7);
     margin-right: 0;
     padding-bottom: em(22px);
   }
 }
 
 .step-instructions {
-  @include span-columns(7);
-  @include reset-display;
-  vertical-align: middle;
-  padding-right: rem(58px);
-  text-align: left;
-
   @media (min-width: $bp-med) {
     padding-right: 0;
     text-align: center;
@@ -248,7 +244,7 @@
 
   h3 {
     color: #605F5F;
-    font-size: em(20px);
+    font-size: em(22px);
     padding-bottom:rem(5px);
   }
 
@@ -258,7 +254,6 @@
 }
 
 #why-mpd {
-  @include span-columns(12);
   background-color: $why-mpd-background;
 
   text-align: center;
@@ -270,7 +265,7 @@
 
     color: #FDFDFD;
     padding: rem(50px) 0 rem(20px);
-    width: rem(215px);
+    width: rem(240px);
     display: inline-block;
 
     @media (min-width: $bp-med) {
@@ -294,8 +289,6 @@
 
 #why-signup {
   @media (min-width: $bp-med) {
-    @include span-columns(2);
-    @include shift(2);
 
     padding-top: rem(177px);
     text-align: left;
@@ -304,9 +297,9 @@
 
 #benefits {
   padding-bottom: rem(85px);
+  padding-top: rem(55px);
 
   @media (min-width: $bp-med) {
-    @include span-columns(8);
     padding: rem(183px) 0 rem(198);
   }
 }
@@ -315,29 +308,21 @@
   text-align: center;
   color: #ffffff;
   line-height: rem(23px);
-  width: 81%;
   margin: auto;
-  padding-top: rem(46px);
+  padding: rem(55px) rem(30px) 0;
 
   &:first-child {
       padding-top: 0;
   }
 
-  h4 {
-    margin: auto;
-    text-align: left;
-    color: #454343;
-    font-weight: $semibold;
-    text-transform: uppercase;
-    font-size: em(15px);
-  }
-  
   h3 {
     margin: auto auto auto 0;
     text-align: left;
-    font-size: em(22px);
+    font-size: em(25px);
+    line-height: 33px;
     padding: rem(2px) 0 rem(16px);
-    width: 85%;
+    color: #137875;
+    font-weight: $semibold;
   }
   
   div {
@@ -347,7 +332,6 @@
 }
 
 #testimonials-container {
-  @include span-columns(12);
   text-align: center;
   background-color: #ffffff;
 
@@ -357,7 +341,6 @@
     @media (min-width: $bp-med) {
       display: inline-block;
       padding: em(175px) 0 em(183);
-      @include shift(1);
     }
   }
 }
@@ -370,15 +353,11 @@
   }
 
   @media (min-width: $bp-med) {
-    @include reset-display;
-    @include span-columns(5);
-
     display: inline-block;
   }
 }
 
 .headshot-container {
-  @include span-columns(5);
   vertical-align: top;
   text-align: right;
   padding-right: rem(24px);
@@ -395,9 +374,6 @@
 }
 
 .phrase {
-  @include span-columns(7);
-  @include reset-display;
-
   vertical-align: middle;
   padding-right: rem(25px);
   text-align: left;
@@ -416,31 +392,77 @@
   font-weight: $normal;
 }
 
+#product-shot-container {
+  #product-shot {
+    background: url(../../images/product-shot.jpg) no-repeat center;
+    background-size: cover;
+    height: em(278px);
+  }
+}
+
+#product-shot-cta-container {
+  position: relative;
+  color: #FFFFFF;
+  font-size: rem(18px);
+
+  line-height: 30px;
+
+  background-color: $hero-background;
+  text-align: center;
+  padding: rem(31px) rem(30px);
+
+  @media (min-width: $bp-medium) {
+    width: 511px;
+    margin: 0 auto;
+
+    position: relative;
+    top: -400px;
+    margin-top: 0;
+
+    background-color: rgba(0,0,0,0.70);
+
+    padding: em(40px);
+  }
+
+  @media (min-width: $bp-large) {
+    margin-right: 168px;
+    top: -450px;
+  }
+
+  .signup {
+    display: inline-block;
+    border-radius: 5px;
+    font-size: rem(18px);
+
+    padding: rem(13px) rem(25px); 
+    margin-top: rem(22px);
+
+    background-color: #FF8627;
+
+    @media (min-width: $bp-medium) {
+      margin-bottom: 0;
+      background-color: #FF8627;
+    }
+  }
+}
+
 #footer {
-  @include span-columns(12);
   background-color: #454343;
-  padding-top: em(60px);
+  padding: em(70px) em(20px) 0;
 
   text-align: center;
 }
 
 .footer-section {
-  @include span-columns(3 of 12);
   color: #ffffff;
   margin-right: 0;
   text-align: left;
 
-  @media (min-width: $bp-med) {
-     @include span-columns(1);
-  }
+  display: inline-block;
+  vertical-align: top;
 
   &:first-child {
-    @include shift(3);
     margin-right: rem(60px);
-
-    @media (min-width: $bp-med) {
-      @include shift(8);
-    }
   }
 
   h4 {
@@ -466,8 +488,6 @@
 }
 
 .legal {
-  @include span-columns(12);
- 
   background-color: #454343;
   color: #949494;
   padding: rem(26px) 0 rem(9px);
@@ -480,7 +500,6 @@
 }
 
 #need-help {
-  @include span-columns(12);
   text-align: center;
   background-color: #454343;
   color: #B2B0B0;
