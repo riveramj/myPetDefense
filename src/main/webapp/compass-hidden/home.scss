@@ -511,7 +511,7 @@
   text-align: center;
 
   @media (min-width: $bp-large) {
-    padding-bottom: 3px;
+    padding-bottom: rem(3px);
   }
 }
 
@@ -575,7 +575,7 @@
   }
 
   @media (min-width: $bp-large) {
-    padding-bottom: 4px;
+    padding-bottom: rem(4px);
   }
 
   a {
