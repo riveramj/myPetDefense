@@ -313,7 +313,8 @@
     background-size: 533px;
     padding-top: 0;
     padding-left: rem(677px);
-    padding-right: rem(187px);
+    padding-right: rem(165px);
+    padding-bottom: rem(31px);
   }
 }
 
@@ -329,7 +330,7 @@
       padding-top: 0;
 
       @media (min-width: $bp-large) {
-        padding-top: rem(65px);
+        padding-top: rem(85px);
       }
   }
 
@@ -457,7 +458,7 @@
 
   background-color: $hero-background;
   text-align: center;
-  padding: rem(31px) rem(30px);
+  padding: rem(36px) rem(30px);
 
   @media (min-width: $bp-medium) {
     width: 382px;
@@ -508,6 +509,10 @@
   padding: em(70px) em(20px) 0;
 
   text-align: center;
+
+  @media (min-width: $bp-large) {
+    padding-bottom: rem(3px);
+  }
 }
 
 .footer-section {
@@ -567,6 +572,10 @@
   @media (min-width: $bp-medium) {
     padding: rem(51px) 0 0;
     font-size: rem(15px);
+  }
+
+  @media (min-width: $bp-large) {
+    padding-bottom: rem(4px);
   }
 
   a {
