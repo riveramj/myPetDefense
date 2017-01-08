@@ -74,7 +74,7 @@
 
     background-color: rgba(0,0,0,0.70);
 
-    padding: em(40px);
+    padding: em(40px) em(40px) em(60px);
   }
 
   @media (min-width: $bp-large) {
@@ -93,6 +93,11 @@
     background-color: #FF8627;
 
     @media (min-width: $bp-medium) {
+      font-weight: semibold;
+      font-size: rem(18px);
+      letter-spacing: 0.4px;
+
+      padding: rem(16px) rem(30px);
       margin-bottom: 0;
       background-color: #FF8627;
     }
@@ -127,33 +132,21 @@
 .leaf-divider {
   background: url(../../images/leaf-background-large.jpg) no-repeat left;
   background-size: cover;
-  height: em(29px);
-
-  @media (min-width: $bp-medium) {
-    display: none;
-  }
+  height: em(45px);
 
   @media (min-width: $bp-large) {
-    display: block;
+    height: em(74px);
   }
 }
 
 #how-it-works {
-  @include span-columns(12);
   background-color: $how-it-works-background;
   text-align: center;
-  padding-bottom: rem(90px);
+  padding-bottom: rem(55px);
+  padding-top: rem(30px);
 
-  @media (min-width: $bp-med) {
-    margin-top: em(-42px);
-    padding-top: em(58px);
-    padding-bottom: em(32px);
-
-    #steps {
-      @include span-columns(8);
-      margin-top: em(-100px);
-      text-align: left;
-    }
+  #steps {
+    padding-top: rem(30px);
   }
 
   @media (min-width: $bp-large) {
@@ -161,39 +154,57 @@
   }
   
   h2 {
-    padding: rem(35px) 0 rem(35px);
     font-size: em(26px);
     font-weight: $light;
     color: #4F4E4E;
 
-    @media (min-width: $bp-med) {
-      @include span-columns(2);
-      @include shift(2);
-      padding: 0;
-      text-align: left;
-    }
+    padding-top: 8px;
   }
 }
 
-.step {
-  @include fill-parent();
-  @include row(table);
-  margin-top: rem(60px);
+#how-it-works-header {
+  background: url(../../images/ribbon/how-it-works-ribbon.png) no-repeat center;
+  height: 53px;
+}
 
-  @media (min-width: $bp-med) {
-    @include span-columns(2 of 7);
-    @include reset-display;
+.step {
+  width: rem(225px);
+  background-color: #FFFFFF;
+  margin: rem(6px) auto auto;
+  padding: rem(25px) rem(23px) rem(35px);
+
+  &.choose-product {
+    padding-right: rem(18px);
+    padding-left: rem(18px);
+  }
+
+  @media (min-width: $bp-medium) {
     display: inline-block;
     margin-top: 0;
     vertical-align: top;
     text-align: center;
+    height: 100%;
+    min-height: 233px;
+
+    margin-left: 1px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+
+  @media (min-width: $bp-large) {
+    margin-left: 17px;
+
+    &:first-child {
+      margin-left: 0;
+    }
   }
 
   .image-background {
     border-radius: 50%;
 	  width: 80px;
   	height: 80px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, .5);
     background-color: #949494;
     text-align: center;
     display: inline-block;
@@ -211,7 +222,7 @@
     margin-top: 0;
 
     .step-image {
-      @media (min-width: $bp-med) {
+      @media (min-width: $bp-medium) {
         margin-bottom: em(-5px);
       }
     }
@@ -219,36 +230,27 @@
 }
 
 .step-image {
-  @media (max-width: $bp-med) {
-    @include span-columns(5);
-    vertical-align: top;
-    text-align: right;
-    padding-right: rem(24px);
+  padding-bottom: rem(15px);
+
+  @media (max-width: $bp-medium) {
     display: inline-block;
   }
 
-  @media (min-width: $bp-med) {
-    @include span-columns(7);
+  @media (min-width: $bp-medium) {
     margin-right: 0;
     padding-bottom: em(22px);
   }
 }
 
 .step-instructions {
-  @include span-columns(7);
-  @include reset-display;
-  vertical-align: middle;
-  padding-right: rem(58px);
-  text-align: left;
-
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     padding-right: 0;
     text-align: center;
   }
 
   h3 {
     color: #605F5F;
-    font-size: em(20px);
+    font-size: em(22px);
     padding-bottom:rem(5px);
   }
 
@@ -258,7 +260,6 @@
 }
 
 #why-mpd {
-  @include span-columns(12);
   background-color: $why-mpd-background;
 
   text-align: center;
@@ -270,10 +271,10 @@
 
     color: #FDFDFD;
     padding: rem(50px) 0 rem(20px);
-    width: rem(215px);
+    width: rem(240px);
     display: inline-block;
 
-    @media (min-width: $bp-med) {
+    @media (min-width: $bp-medium) {
       padding-top: 0;
     }
   }
@@ -293,21 +294,26 @@
 }
 
 #why-signup {
-  @media (min-width: $bp-med) {
-    @include span-columns(2);
-    @include shift(2);
-
+  @media (min-width: $bp-medium) {
     padding-top: rem(177px);
     text-align: left;
   }
 }
 
 #benefits {
-  padding-bottom: rem(85px);
+  padding: rem(55px) rem(30px) rem(11px);
 
-  @media (min-width: $bp-med) {
-    @include span-columns(8);
-    padding: rem(183px) 0 rem(198);
+  @media (min-width: $bp-medium) {
+    padding-left: 126px;
+    padding-right: 126px;
+  }
+
+  @media (min-width: $bp-large) {
+    background: url(../../images/benefits-background@2x.jpg) no-repeat left #45ADA9;
+    background-size: 533px;
+    padding-top: 0;
+    padding-left: rem(677px);
+    padding-right: rem(187px);
   }
 }
 
@@ -315,70 +321,73 @@
   text-align: center;
   color: #ffffff;
   line-height: rem(23px);
-  width: 81%;
   margin: auto;
-  padding-top: rem(46px);
+
+  padding-bottom: rem(54px);
 
   &:first-child {
       padding-top: 0;
+
+      @media (min-width: $bp-large) {
+        padding-top: rem(65px);
+      }
   }
 
-  h4 {
-    margin: auto;
-    text-align: left;
-    color: #454343;
-    font-weight: $semibold;
-    text-transform: uppercase;
-    font-size: em(15px);
-  }
-  
   h3 {
     margin: auto auto auto 0;
     text-align: left;
-    font-size: em(22px);
+    font-size: rem(25px);
+    line-height: 33px;
     padding: rem(2px) 0 rem(16px);
-    width: 85%;
+    color: #137875;
+    font-weight: $semibold;
+
+    @media (min-width: $bp-large) {
+      padding-top: 0;
+      padding-bottom: rem(5px);
+      font-weight: $bold;
+      font-size: rem(28px);
+    }
   }
   
   div {
     margin: auto;
     text-align: left;
+
+    @media (min-width: $bp-large) {
+      max-width: rem(520px);
+      margin: 0;
+    }
   }
 }
 
 #testimonials-container {
-  @include span-columns(12);
   text-align: center;
   background-color: #ffffff;
 
   #testimonials {
     padding-top: em(49px);
 
-    @media (min-width: $bp-med) {
+    @media (min-width: $bp-medium) {
       display: inline-block;
       padding: em(175px) 0 em(183);
-      @include shift(1);
     }
   }
 }
 
 .testimonial {
-  @media (max-width: $bp-med) {
+  @media (max-width: $bp-medium) {
     @include row(table);
     @include fill-parent();
     padding-bottom: em(60px);
   }
 
-  @media (min-width: $bp-med) {
-    @include reset-display;
-    @include span-columns(5);
-
+  @media (min-width: $bp-medium) {
     display: inline-block;
   }
 }
 
 .headshot-container {
-  @include span-columns(5);
   vertical-align: top;
   text-align: right;
   padding-right: rem(24px);
@@ -395,9 +404,6 @@
 }
 
 .phrase {
-  @include span-columns(7);
-  @include reset-display;
-
   vertical-align: middle;
   padding-right: rem(25px);
   text-align: left;
@@ -416,31 +422,104 @@
   font-weight: $normal;
 }
 
+#product-shot-container {
+  #product-shot {
+    background: url(../../images/product-shot.jpg) no-repeat center;
+    background-size: contain;
+    height: em(450px);
+    background-position-y: 200px;
+
+    @media (min-width: $bp-medium) {
+      background-size: cover;
+      background-position-y: 0;
+      
+      display: flex;
+      justify-content: center;
+    }
+
+    @media (min-width: $bp-large) {
+      background: url(../../images/product-shot-large@2x.jpg) no-repeat center;
+      height: 625px;
+      background-size: cover;
+
+      display: flex;
+      justify-content: center;
+    }
+  }
+}
+
+#product-shot-cta-container {
+  position: relative;
+  color: #FFFFFF;
+  font-size: rem(18px);
+
+  line-height: 27px;
+
+  background-color: $hero-background;
+  text-align: center;
+  padding: rem(31px) rem(30px);
+
+  @media (min-width: $bp-medium) {
+    width: 382px;
+
+    margin: auto;
+    position: initial;
+
+    background-color: rgba(0,0,0,0.70);
+
+    padding: rem(35px) rem(70px) rem(40px);
+  }
+
+  @media (min-width: $bp-large) {
+    margin: auto;
+    position: initial;
+
+    width: 465px;
+
+    font-size: rem(22px);
+    line-height: 28px;
+
+    padding: rem(45px) rem(63px) rem(50px);
+  }
+
+  .signup {
+    display: inline-block;
+    border-radius: 5px;
+    font-size: rem(18px);
+
+    letter-spacing: 0.4px;
+
+    padding: rem(13px) rem(25px); 
+    margin-top: rem(22px);
+
+    background-color: #FF8627;
+
+    @media (min-width: $bp-medium) {
+      margin-bottom: 0;
+      background-color: #FF8627;
+
+      padding: rem(9px) rem(52px);
+    }
+  }
+}
+
 #footer {
-  @include span-columns(12);
   background-color: #454343;
-  padding-top: em(60px);
+  padding: em(70px) em(20px) 0;
 
   text-align: center;
 }
 
 .footer-section {
-  @include span-columns(3 of 12);
   color: #ffffff;
   margin-right: 0;
   text-align: left;
 
-  @media (min-width: $bp-med) {
-     @include span-columns(1);
-  }
+  display: inline-block;
+  vertical-align: top;
 
   &:first-child {
-    @include shift(3);
     margin-right: rem(60px);
-
-    @media (min-width: $bp-med) {
-      @include shift(8);
-    }
   }
 
   h4 {
@@ -466,21 +545,18 @@
 }
 
 .legal {
-  @include span-columns(12);
- 
   background-color: #454343;
   color: #949494;
   padding: rem(26px) 0 rem(9px);
   font-size: em(12px);
   text-align: center;
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     padding: rem(26px) 0 rem(15px);
   }
 }
 
 #need-help {
-  @include span-columns(12);
   text-align: center;
   background-color: #454343;
   color: #B2B0B0;
@@ -488,7 +564,7 @@
   padding: rem(57px) 0 0;
   font-size: rem(18px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     padding: rem(51px) 0 0;
     font-size: rem(15px);
   }
