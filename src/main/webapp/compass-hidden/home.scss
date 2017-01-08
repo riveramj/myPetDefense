@@ -93,6 +93,11 @@
     background-color: #FF8627;
 
     @media (min-width: $bp-medium) {
+      font-weight: semibold;
+      font-size: rem(18px);
+      letter-spacing: 0.4px;
+
+      padding: rem(16px) rem(30px);
       margin-bottom: 0;
       background-color: #FF8627;
     }
@@ -128,6 +133,10 @@
   background: url(../../images/leaf-background-large.jpg) no-repeat left;
   background-size: cover;
   height: em(45px);
+
+  @media (min-width: $bp-large) {
+    height: em(74px);
+  }
 }
 
 #how-it-works {
@@ -142,9 +151,6 @@
 
   @media (min-width: $bp-large) {
     margin-top: 0;
-    #steps {
-      margin-top: em(-100px);
-    }
   }
   
   h2 {
@@ -181,6 +187,14 @@
     min-height: 233px;
 
     margin-left: 1px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+
+  @media (min-width: $bp-large) {
+    margin-left: 17px;
 
     &:first-child {
       margin-left: 0;
@@ -287,11 +301,19 @@
 }
 
 #benefits {
-  padding-bottom: rem(85px);
-  padding-top: rem(55px);
+  padding: rem(55px) rem(30px) rem(11px);
+
+  @media (min-width: $bp-medium) {
+    padding-left: 126px;
+    padding-right: 126px;
+  }
 
   @media (min-width: $bp-large) {
-    padding: rem(183px) 0 rem(198);
+    background: url(../../images/benefits-background@2x.jpg) no-repeat left #45ADA9;
+    background-size: 533px;
+    padding-top: 0;
+    padding-left: rem(677px);
+    padding-right: rem(187px);
   }
 }
 
@@ -300,30 +322,42 @@
   color: #ffffff;
   line-height: rem(23px);
   margin: auto;
-  padding: rem(55px) rem(30px) 0;
 
-  @media (min-width: $bp-medium) {
-    padding-left: 126px;
-    padding-right: 126px;
-  }
+  padding-bottom: rem(54px);
 
   &:first-child {
       padding-top: 0;
+
+      @media (min-width: $bp-large) {
+        padding-top: rem(65px);
+      }
   }
 
   h3 {
     margin: auto auto auto 0;
     text-align: left;
-    font-size: em(25px);
+    font-size: rem(25px);
     line-height: 33px;
     padding: rem(2px) 0 rem(16px);
     color: #137875;
     font-weight: $semibold;
+
+    @media (min-width: $bp-large) {
+      padding-top: 0;
+      padding-bottom: rem(5px);
+      font-weight: $bold;
+      font-size: rem(28px);
+    }
   }
   
   div {
     margin: auto;
     text-align: left;
+
+    @media (min-width: $bp-large) {
+      max-width: rem(520px);
+      margin: 0;
+    }
   }
 }
 
@@ -398,6 +432,18 @@
     @media (min-width: $bp-medium) {
       background-size: cover;
       background-position-y: 0;
+      
+      display: flex;
+      justify-content: center;
+    }
+
+    @media (min-width: $bp-large) {
+      background: url(../../images/product-shot-large@2x.jpg) no-repeat center;
+      height: 625px;
+      background-size: cover;
+
+      display: flex;
+      justify-content: center;
     }
   }
 }
@@ -407,7 +453,7 @@
   color: #FFFFFF;
   font-size: rem(18px);
 
-  line-height: 30px;
+  line-height: 27px;
 
   background-color: $hero-background;
   text-align: center;
@@ -415,26 +461,33 @@
 
   @media (min-width: $bp-medium) {
     width: 382px;
-    margin: 0 auto;
 
-    position: relative;
-    top: 110px;
-    margin-top: 0;
+    margin: auto;
+    position: initial;
 
     background-color: rgba(0,0,0,0.70);
 
-    padding: em(40px);
+    padding: rem(35px) rem(70px) rem(40px);
   }
 
   @media (min-width: $bp-large) {
-    margin-right: 168px;
-    top: -450px;
+    margin: auto;
+    position: initial;
+
+    width: 465px;
+
+    font-size: rem(22px);
+    line-height: 28px;
+
+    padding: rem(45px) rem(63px) rem(50px);
   }
 
   .signup {
     display: inline-block;
     border-radius: 5px;
     font-size: rem(18px);
+
+    letter-spacing: 0.4px;
 
     padding: rem(13px) rem(25px); 
     margin-top: rem(22px);
@@ -444,6 +497,8 @@
     @media (min-width: $bp-medium) {
       margin-bottom: 0;
       background-color: #FF8627;
+
+      padding: rem(9px) rem(52px);
     }
   }
 }
