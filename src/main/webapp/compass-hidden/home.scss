@@ -280,9 +280,13 @@
 }
 
 .leaf-divider {
-  background: url(../../images/leaf-background-large.jpg) no-repeat left;
+  background: url(../../images/leaf-background.jpg) no-repeat left;
   background-size: cover;
   height: em(45px);
+
+  @media (min-width: $bp-medium) {
+    background: url(../../images/leaf-background-large.jpg) no-repeat left;
+  }
 
   @media (min-width: $bp-large) {
     height: em(74px);
@@ -464,7 +468,7 @@
     padding-top: 0;
     padding-left: rem(677px);
     padding-right: rem(165px);
-    padding-bottom: rem(31px);
+    padding-bottom: rem(15px);
   }
 }
 
@@ -480,7 +484,7 @@
       padding-top: 0;
 
       @media (min-width: $bp-large) {
-        padding-top: rem(85px);
+        padding-top: rem(78px);
       }
   }
 
