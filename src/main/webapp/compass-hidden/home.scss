@@ -18,6 +18,60 @@
   }
 }
 
+#promotion {
+  color: #ffffff;
+  margin-top: rem(15px);
+
+  li {
+    display: inline-block;
+  }
+
+  li:last-child {
+    vertical-align: top;
+  }
+}
+
+#promotion-details {
+  font-size: rem(16px);
+  font-weight: $bold;
+  text-transform: uppercase;
+  padding-right: 8px;
+
+  span {
+    font-size: rem(45px);
+    display: block;
+    margin-top: 3px;
+  }
+}
+
+#promotion-code-details {
+  background-color: #2E9F9B;
+  padding: rem(7px) rem(10px);
+
+  span {
+    text-transform: uppercase;
+  }
+
+  border: #1A7774 solid 2px;
+
+  li {
+    display: block;
+  }
+
+  li:first-child {
+    font-size: rem(15px);
+    font-weight: $semibold;
+    line-height: 20px;
+  }
+
+  li:last-child {
+    font-size: rem(14px);
+    font-weight: $regular;
+    padding: 3px 0;
+
+  }
+}
+
 #cents {
   vertical-align: super;
   font-size: rem(16px);
@@ -112,8 +166,12 @@
   text-align: center;
 
   @media (min-width: $bp-medium) {
-    font-size: rem(40px);
+    font-size: rem(45px);
     line-height: rem(72px);
+  }
+
+  @media (min-width: $bp-medium) {
+    font-size: rem(53px);
   }
 
   div {
