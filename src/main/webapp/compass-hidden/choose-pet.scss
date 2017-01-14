@@ -12,6 +12,22 @@ img.pet-choice {
   }
 }
 
+h2.step-question {
+  color: #4F4E4E;
+  font-size: rem(18px);
+
+  span {
+    text-transform: uppercase;
+    font-weight: $semibold;
+    color: #259490;
+    font-size: rem(17px);
+  }
+
+  @media (min-width: $bp-large) {
+    width: 686px;
+  }
+}
+
 .select-choice {
   position: relative;
   top: rem(-63px);
