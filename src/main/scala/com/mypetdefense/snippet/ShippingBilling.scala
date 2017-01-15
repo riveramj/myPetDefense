@@ -22,6 +22,7 @@ import com.mypetdefense.actor._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.SecurityContext._
 import com.mypetdefense.service._
+  import ValidationService._
 
 object ShippingBilling extends Loggable {
   import net.liftweb.sitemap._
@@ -66,37 +67,50 @@ class ShippingBilling extends Loggable {
   }
 
   def updateAddress() = {
-    for {
-      user <- user
-      shippingAddress <- user.addresses.find(_.addressType == AddressType.Shipping)
-    } {
-      user
-        .firstName(firstName)
-        .lastName(lastName)
-        .saveMe
+    val validateFields = List(
+        checkEmpty(firstName, "#first-name"),
+        checkEmpty(lastName, "#last-name"),
+        checkEmpty(street1, "#street-1"),
+        checkEmpty(city, "#city"),
+        checkEmpty(state, "#state"),
+        checkEmpty(zip, "#zip")
+      ).flatten
 
-      shippingAddress
-        .street1(street1)
-        .street2(street2)
-        .city(city)
-        .state(state)
-        .zip(zip)
-        .saveMe
+    if(validateFields.isEmpty) {
+      for {
+        user <- user
+        shippingAddress <- user.addresses.find(_.addressType == AddressType.Shipping)
+      } {
+        user
+          .firstName(firstName)
+          .lastName(lastName)
+          .saveMe
 
+          shippingAddress
+            .street1(street1)
+            .street2(street2)
+            .city(city)
+            .state(state)
+            .zip(zip)
+            .saveMe
+      }
+      S.redirectTo(ShippingBilling.menu.loc.calcDefaultHref)
+    } else {
+      validateFields.foldLeft(Noop)(_ & _)
     }
-    S.redirectTo(ShippingBilling.menu.loc.calcDefaultHref)
   }
+
   def render = {
     val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
     "#page-body-container" #> {
       for {
         user <- user
         shippingAddress <- user.addresses.find(_.addressType == AddressType.Shipping)
-      } yield {
-        firstName = user.firstName.get
-        lastName = user.lastName.get
-        street1 = shippingAddress.street1.get
-        street2 = shippingAddress.street2.get
+        } yield {
+          firstName = user.firstName.get
+          lastName = user.lastName.get
+          street1 = shippingAddress.street1.get
+          street2 = shippingAddress.street2.get
         city = shippingAddress.city.get
         state = shippingAddress.state.get
         zip = shippingAddress.zip.get
