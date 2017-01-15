@@ -1,6 +1,4 @@
 @import "base";
-
-@import "base";
 @import "parent-nav-bar";
 
 @media (min-width: $bp-medium) {
@@ -62,7 +60,7 @@
   letter-spacing: 0.4px;
   color: #949494;
   font-weight: $semibold;
-  padding-bottom: rem(5px);
+  padding-bottom: rem(15px);
   text-transform: uppercase;
 
   @media (min-width: $bp-medium) {
