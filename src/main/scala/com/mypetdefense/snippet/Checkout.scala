@@ -236,7 +236,7 @@ class Checkout extends Loggable {
     )
 
     if (Props.mode == Props.RunModes.Production) {
-      EmailActor ! NewSaleEmail()
+      EmailActor ! NewSaleEmail(user, pets.size, coupon.map(_.couponCode.get).openOr(""))
     }
 
     EmailActor ! SendWelcomeEmail(user)

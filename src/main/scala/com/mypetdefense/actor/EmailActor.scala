@@ -30,8 +30,9 @@ case class SendWelcomeEmail(user: User) extends EmailActorMessage
 case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class SendPasswordResetEmail(user: User) extends EmailActorMessage
 case class SendPasswordUpdatedEmail(user: User) extends EmailActorMessage
-case class NewSaleEmail() extends EmailActorMessage
-case class PaymentReceivedEmail() extends EmailActorMessage
+case class NewSaleEmail(user: User, petCount: Int, couponCode: String) extends EmailActorMessage
+case class PaymentReceivedEmail(user: User, amount: String) extends EmailActorMessage
+case class PetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
   userEmail: String,
   amount: Double,
@@ -129,25 +130,41 @@ trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
 
 trait NewSaleEmailHandling extends EmailHandlerChain {
   addHandler {
-    case NewSaleEmail() =>
-      val welcomeEmailTemplate = 
+    case NewSaleEmail(user, petCount, couponCode) =>
+      val newSaleTemplate =
         Templates("emails-hidden" :: "sale-email" :: Nil) openOr NodeSeq.Empty
       
       val subject = "New Sale! Check dashboard!!"
-      
-      sendEmail(subject, "sales@mypetdefense.com", welcomeEmailTemplate)
+
+      val transform = {
+        "#name *" #> user.name &
+        "#email *" #> user.email &
+        "#pet-count *" #> petCount &
+        "#coupon *" #> couponCode &
+        ".amount" #> ClearNodes
+      }
+
+      sendEmail(subject, "sales@mypetdefense.com", transform(newSaleTemplate))
   }
 }
 
 trait ShipmentReadyEmailHandling extends EmailHandlerChain {
   addHandler {
-    case PaymentReceivedEmail() =>
-      val welcomeEmailTemplate = 
+    case PaymentReceivedEmail(user, amount) =>
+      val paymentTemplate =
         Templates("emails-hidden" :: "sale-email" :: Nil) openOr NodeSeq.Empty
       
       val subject = "We got paid - time to ship product"
       
-      sendEmail(subject, "sales@mypetdefense.com", welcomeEmailTemplate)
+      val transform = {
+        "#name *" #> user.name &
+        "#email *" #> user.email &
+        ".count" #> ClearNodes &
+        ".coupon" #> ClearNodes &
+        "#amount *" #> amount
+      }
+
+      sendEmail(subject, "sales@mypetdefense.com", transform(paymentTemplate))
   }
 }
 
@@ -164,7 +181,7 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
     ) =>
       val subject = "My Pet Defense Receipt"
       val shipAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
-        val possibleBillAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Billing))
+      val possibleBillAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Billing))
 
       val billAddress = {
         if (possibleBillAddress.isEmpty)
