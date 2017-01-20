@@ -52,7 +52,7 @@
 
 #account-nav {
   background-color: #605F5F;
-  padding: em(15px) em(25px) em(9px);
+  padding: rem(15px) rem(25px) rem(13px);
 
   @media (min-width: $bp-medium) {
     width: 179px;
@@ -112,7 +112,7 @@
     display: inline-block;
     margin-right: rem(12px);
 
-    &.pets-products {
+    &.profile {
       margin-right: 0;
     }
 
@@ -145,7 +145,6 @@
   a.current {
     background-color: #454343;
     padding: rem(6px) rem(7px);
-    margin-right: rem(9px);
 
     &.pets-products {
       margin-right: 0;
