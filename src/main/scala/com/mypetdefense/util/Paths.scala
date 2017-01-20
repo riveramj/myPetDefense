@@ -126,6 +126,7 @@ object Paths {
     AccountOverview.menu,
     ShippingBilling.menu,
     PetsAndProducts.menu,
+    Profile.menu,
     admin.Dashboard.menu,
     admin.Parents.menu,
     admin.Users.menu,
