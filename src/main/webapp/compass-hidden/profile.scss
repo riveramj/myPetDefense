@@ -1,0 +1,65 @@
+@import "base";
+@import "parent-nav-bar";
+@import "parent-account";
+
+#update-password-container {
+  margin-top: 40px;
+
+  @media (min-width: $bp-large) {
+    margin-top: 0;
+  }
+}
+
+#update-email-container {
+  @media(min-width: $bp-large) {
+    margin-right: 80px;
+  }
+}
+
+#update-email-container, #update-password-container {
+  @media(min-width: $bp-large) {
+    display: inline-block;
+    width: 350px;
+    vertical-align: top;
+
+    input {
+      width: 100%;
+    }
+
+    .save-changes {
+      width: 164px;
+    }
+  }
+}
+
+.save-container {
+  @include outer-container;
+}
+
+.save-changes {
+  background-color: #45ADA9;
+  border: none;
+  font-family: $text-font;
+  text-transform: uppercase;
+  font-size: rem(16px);
+  color: white;
+  border-radius: 4px;
+  height: 45px;
+  @include span-columns(12);
+
+  @media(min-width: $bp-large) {
+    @include span-columns(3);
+    width: 19.55%;
+  }
+}
+
+input {
+  @media(min-width: $bp-large) {
+    width: 41.34%;
+    display: block;
+  }
+}
+
+.block-details {
+  @include outer-container;
+}

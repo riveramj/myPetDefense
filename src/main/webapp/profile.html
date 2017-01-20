@@ -1,0 +1,79 @@
+<div id="main" data-lift="surround?with=default-template;at=content"> 
+
+<div data-lift="Profile.render?eager_eval=true">
+  <div data-lift="embed?what=parent-logo-bar"></div>
+  <div id="page-body-container">
+    <div data-lift="embed?what=parent-nav-bar"></div>
+    <div class="account-section">
+      <h2>Profile</h2>
+      
+      <form id="update-email-container">
+        <dl class="account-block">
+          <dt class="block-header">Account Details</dt>
+          <dd class="block-details">
+            <div>
+              <label>
+                <div class="field-label">Email Address</div>
+                <input id="email" type="text">            
+              </label>
+            </div>
+          </dd>
+          <dt class="save-container">
+            <button class="save-changes update-email submit">Save Changes</button>
+          </dt>
+        </dl>
+      </form>
+
+      <form id="update-password-container">
+        <dl class="account-block">
+          <dt class="block-header">Password</dt>
+          <dd class="block-details">
+            <div>
+              <label>
+                <div class="field-label">Old Password</div>
+                <input id="old-password" type="password">            
+              </label>
+              <label>
+                <span class="field-label">New Password</span>
+                <input id="new-password" type="password">
+              </label>
+            </div>
+          </dd>
+          <dt class="save-container">
+            <button class="save-changes submit update-password">Save Changes</button>
+          </dt>
+        </dl>
+      </form>
+
+      <form id="cancel-account-container">
+        <dl class="account-block">
+          <dt class="block-header">Password</dt>
+          <dd class="block-details">
+            <div>
+              <label>
+                <div class="field-label">Old Password</div>
+                <input id="old-password" type="password">
+              </label>
+              <label>
+                <span class="field-label">New Password</span>
+                <input id="new-password" type="password">
+              </label>
+            </div>
+          </dd>
+          <dt class="save-container">
+            <button class="save-changes submit update-password">Save Changes</button>
+          </dt>
+        </dl>
+      </form>
+    </div>
+  </div>
+</div>
+
+<head_merge>
+  <link rel="stylesheet" data-lift="style-bundle?name=profile">
+</head_merge>
+<tail>
+  <script type="text/javascript" data-lift="script-bundle?name=profile"></script>
+</tail>
+</div>
+
