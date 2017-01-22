@@ -27,47 +27,6 @@
         </tr>
         <tr class="pets collapsed">
           <td colspan=7>
-            <form>
-              <fieldset class="create add-pet">
-                <legend>Add Pet</legend>
-                <label class="tiny-field pet-name-container">
-                  <span class="field-label">Pet name</span>
-                  <input class="new-pet-name" type="text">            
-                </label>
-                <div class="tiny-field pet-container">
-                  <div class="field-label">Pet Type</div>
-                  <span class="pet-type-select">
-                    <input type="radio" value="cat">cat
-                    <input type="radio" value="dog">dog
-                  </span>
-                </div>
-                <div class="tiny-field product-container">
-                  <span class="field-label">Product</span>
-                  <select class="product-select">
-                    <option value="123456">adventure 5-10</option>
-                    <option value="099221">zoguard 6-9</option>
-                  </select>
-                </div>
-                <div class="create-item-container">
-                  <button type="submit" class="create-item">add pet</button>
-                </div>
-              </fieldset>
-            </form>
-            <form>
-              <fieldset class="create add-coupon">
-                <legend>Add Coupon</legend>
-                <div class="tiny-field coupon-container">
-                  <span class="field-label">Coupon</span>
-                  <select class="coupon-select">
-                    <option value="123456">one month free</option>
-                    <option value="099221">nope</option>
-                  </select>
-                </div>
-                <div class="create-item-container create-coupon-container">
-                  <button type="submit" class="create-item create-coupon">change coupon</button>
-                </div>
-              </fieldset>
-            </form>
             <table>
               <thead>
                 <tr>
@@ -84,6 +43,55 @@
                 <td class="actions"><button class="delete">Delete</button></td>
               </tr>
             </table>
+            <form>
+              <fieldset class="create add-pet">
+                <ul id="add-pet">
+                  <li>
+                    <legend>Add Pet</legend>
+                    <label class="pet-name-container">
+                      <span class="field-label">Pet name</span>
+                      <input class="new-pet-name" type="text">            
+                    </label>
+                    <div class="pet-container">
+                      <div class="field-label">Pet Type</div>
+                      <span class="pet-type-select">
+                        <input type="radio" value="cat">cat
+                        <input type="radio" value="dog">dog
+                      </span>
+                    </div>
+                  </li>
+                  <li class="choose-product">
+                    <div class="product-container">
+                      <span class="field-label">Product</span>
+                      <select class="product-select">
+                        <option value="123456">adventure 5-10</option>
+                        <option value="099221">zoguard 6-9</option>
+                      </select>
+                    </div>
+                  </li>
+                  <li>
+                    <div class="create-item-container">
+                      <button type="submit" class="create-item">add pet</button>
+                    </div>
+                  </li>
+                </ul>
+              </fieldset>
+            </form>
+            <form>
+              <fieldset class="create add-coupon">
+                <legend>Add Coupon</legend>
+                <div class="coupon-container">
+                  <span class="field-label">Coupon</span>
+                  <select class="coupon-select">
+                    <option value="123456">one month free</option>
+                    <option value="099221">nope</option>
+                  </select>
+                </div>
+                <div class="create-item-container create-coupon-container">
+                  <button type="submit" class="create-item create-coupon">change coupon</button>
+                </div>
+              </fieldset>
+            </form>
           </td>
         </tr>
       </tbody>
@@ -91,10 +99,9 @@
   </div>
 </div>
   <head_merge>
-    <link rel="stylesheet" data-lift="style-bundle?name=admin">
+    <link rel="stylesheet" data-lift="style-bundle?name=parents">
   </head_merge>
   <tail>
     <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
   </tail>
 </div>
-

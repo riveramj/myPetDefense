@@ -1,0 +1,36 @@
+@import "base";
+
+.parent {
+  cursor: pointer;
+}
+
+.pet-name-container {
+  width: 211px;
+}
+
+.pet-name-container, .pet-container {
+  display: inline-block;
+}
+
+.pet-container {
+  margin-left: 45px;
+}
+
+.pets form {
+  width: 50%;
+  display: inline-block;
+  min-height: 245px;
+}
+
+fieldset.add-pet, fieldset.add-coupon {
+  float: none;
+  padding-top: 0;
+
+  legend {
+    padding-bottom: 20px;
+  }
+}
+
+.product-select {
+  width: 350px;
+}

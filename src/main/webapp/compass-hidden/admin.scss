@@ -19,16 +19,12 @@ nav {
   }
 }
 
-#user-container span, .pet-container span, .product-container span {
+#user-containe span, .pet-container span, .product-container span {
   display: inline-block;
   padding-right: 10px;
   
   color: #4F4E4E;
   font-size: em(16px);
-}
-
-.pet-container span, .product-container span {
-  display: block;
 }
 
 body {
@@ -118,20 +114,8 @@ fieldset label {
   @include span-columns(3);
 }
 
-.tiny-field.pet-container {
-  @include span-columns(2);
-}
-
-.tiny-field.product-container {
-  @include span-columns(3);
-}
-
 .tiny-field#agency-container {
   @include span-columns(2);
-}
-
-.tiny-field.pet-name-container {
-  @include span-columns(4);
 }
 
 div.create-item, div.create-item-container {
@@ -206,23 +190,8 @@ td table {
   margin-bottom: 0;
 }
 
-.parent {
-  cursor: pointer;
-}
-
 .collapsed {
   display: none;
-}
-
-
-div.create-coupon-container {
-  float: left;
-  width: auto;
-  padding-top: 3px;
-}
-
-.tiny-field.coupon-container {
-  @include span-columns(2);
 }
 
 li.product {
