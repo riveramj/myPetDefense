@@ -1,105 +1,41 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
-<div data-lift="admin.Parents.render?eager_eval=true">
-<div data-lift="embed?what=admin/admin-nav-bar"></div>
-  <div id="item-container">
-    <h2>Parents</h2>
-    <table>
-      <thead>
-        <tr>
-          <td>Name</td>
-          <td>Email</td>
-          <td>Phone</td>
-          <td>Coupon</td>
-          <td>Referer</td>
-          <td>Next Ship Date</td>
-          <td>Actions</td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr class="parent">
-          <td class="name">Mike Rivera
-          <td class="email">email@email.com
-          <td class="phone">123-123-1234
-          <td class="coupon">freeMonths
-          <td class="referer">We have pets
-          <td class="ship-date">123-123-1234
-          <td class="actions"><button class="delete">Delete</button></td>
-        </tr>
-        <tr class="pets collapsed">
-          <td colspan=7>
-            <table>
-              <thead>
-                <tr>
-                  <td>Pet Name</td>
-                  <td>Pet Type</td>
-                  <td>Product</td>
-                  <td>Actions</td>
-                </tr>
-              </thead>
-              <tr class="pet">
-                <td class="pet-name">spot</td>
-                <td class="pet-type">dog</td>
-                <td class="pet-product">adventure plus 10 pounds</td>
-                <td class="actions"><button class="delete">Delete</button></td>
-              </tr>
-            </table>
-            <form>
-              <fieldset class="create add-pet">
-                <ul id="add-pet">
-                  <li>
-                    <legend>Add Pet</legend>
-                    <label class="pet-name-container">
-                      <span class="field-label">Pet name</span>
-                      <input class="new-pet-name" type="text">            
-                    </label>
-                    <div class="pet-container">
-                      <div class="field-label">Pet Type</div>
-                      <span class="pet-type-select">
-                        <input type="radio" value="cat">cat
-                        <input type="radio" value="dog">dog
-                      </span>
-                    </div>
-                  </li>
-                  <li class="choose-product">
-                    <div class="product-container">
-                      <span class="field-label">Product</span>
-                      <select class="product-select">
-                        <option value="123456">adventure 5-10</option>
-                        <option value="099221">zoguard 6-9</option>
-                      </select>
-                    </div>
-                  </li>
-                  <li>
-                    <div class="create-item-container">
-                      <button type="submit" class="create-item">add pet</button>
-                    </div>
-                  </li>
-                </ul>
-              </fieldset>
-            </form>
-            <form>
-              <fieldset class="create add-coupon">
-                <legend>Add Coupon</legend>
-                <div class="coupon-container">
-                  <span class="field-label">Coupon</span>
-                  <select class="coupon-select">
-                    <option value="123456">one month free</option>
-                    <option value="099221">nope</option>
-                  </select>
-                </div>
-                <div class="create-item-container create-coupon-container">
-                  <button type="submit" class="create-item create-coupon">change coupon</button>
-                </div>
-              </fieldset>
-            </form>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div data-lift="admin.Parents.render?eager_eval=true">
+    <div data-lift="embed?what=admin/admin-nav-bar"></div>
+    <div id="item-container">
+      <h2>Parents</h2>
+      <table>
+        <thead>
+          <tr>
+            <td>Name</td>
+            <td>Email</td>
+            <td>Phone</td>
+            <td>Coupon</td>
+            <td>Referer</td>
+            <td>Next Ship Date</td>
+            <td>Actions</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="parent">
+            <td class="name">Mike Rivera</td>
+            <td class="email">email@email.com</td>
+            <td class="phone">123-123-1234</td>
+            <td class="coupon">freeMonths</td>
+            <td class="referer">We have pets</td>
+            <td class="ship-date">123-123-1234</td>
+            <td class="actions"><button class="delete">Delete</button></td>
+          </tr>
+          <tr class="pets collapsed">
+            <td colspan=7>
+              <div data-lift="embed?what=admin/parents-pets"></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
   <head_merge>
-    <link rel="stylesheet" data-lift="style-bundle?name=parents">
+  <link rel="stylesheet" data-lift="style-bundle?name=parents">
   </head_merge>
   <tail>
     <script type="text/javascript" data-lift="script-bundle?name=admin"></script>

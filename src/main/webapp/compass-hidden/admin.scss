@@ -3,8 +3,7 @@
 
 #logo-name { 
   @media (min-width: $bp-med) {
-    @include span-columns(2);
-    @include shift(1);
+    padding-left: 123px;
     padding-top: rem(19px);
   }
 }
@@ -17,14 +16,6 @@ nav {
 
     text-align: right;
   }
-}
-
-#user-containe span, .pet-container span, .product-container span {
-  display: inline-block;
-  padding-right: 10px;
-  
-  color: #4F4E4E;
-  font-size: em(16px);
 }
 
 body {

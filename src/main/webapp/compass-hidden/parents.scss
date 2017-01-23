@@ -19,7 +19,7 @@
 .pets form {
   width: 50%;
   display: inline-block;
-  min-height: 245px;
+  min-height: 270px;
 }
 
 fieldset.add-pet, fieldset.add-coupon {
@@ -33,4 +33,12 @@ fieldset.add-pet, fieldset.add-coupon {
 
 .product-select {
   width: 350px;
+}
+
+.pet-container span, .product-container span {
+  display: block;
+  padding-right: 10px;
+  
+  color: #4F4E4E;
+  font-size: em(16px);
 }
