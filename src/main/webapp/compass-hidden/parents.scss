@@ -2,6 +2,10 @@
 
 .parent {
   cursor: pointer;
+  
+  &.active {
+    border-bottom: none;
+  }
 }
 
 .pet-name-container {
@@ -17,9 +21,11 @@
 }
 
 .pets form {
-  width: 50%;
+  width: 49%;
   display: inline-block;
-  min-height: 270px;
+  vertical-align: top;
+  float: none;
+  background-color: #ffffff;
 }
 
 fieldset.add-pet, fieldset.add-coupon {
@@ -41,4 +47,34 @@ fieldset.add-pet, fieldset.add-coupon {
   
   color: #4F4E4E;
   font-size: em(16px);
+}
+
+.parent-nav {
+  li {
+    display: inline-block;
+    padding: 10px 18px;
+    margin-right: 2px;
+
+    background-color: #2E9F9B;
+    color: #ffffff;
+
+    &.active {
+      background-color: #F2F2F2;
+      color: #454343;
+    }
+  }
+}
+
+.add-to-parent {
+  background-color: #ffffff;
+  padding-top: 20px;
+}
+
+.parent-details {
+  padding: 20px;
+  background-color: #F1F1F1;
+
+  thead {
+    background-color: #818080;
+  }
 }

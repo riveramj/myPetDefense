@@ -10,4 +10,5 @@ $(document).ready ->
 
   $("body").on "click", '.parent', (event) ->
     $(this).next('tr').toggleClass('collapsed')
+    $(event.target).parent().toggleClass('active')
     

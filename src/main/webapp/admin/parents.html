@@ -27,7 +27,12 @@
           </tr>
           <tr class="pets collapsed">
             <td colspan=7>
-              <div data-lift="embed?what=admin/parents-pets"></div>
+              <ul class="parent-nav">
+                <li class="active">Pets</li>
+                <li>Shipments</li>
+                <li>Information</li>
+              </ul>
+              <div data-lift="embed?what=admin/parents-shipments"></div>
             </td>
           </tr>
         </tbody>
@@ -35,7 +40,7 @@
     </div>
   </div>
   <head_merge>
-  <link rel="stylesheet" data-lift="style-bundle?name=parents">
+    <link rel="stylesheet" data-lift="style-bundle?name=parents">
   </head_merge>
   <tail>
     <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
