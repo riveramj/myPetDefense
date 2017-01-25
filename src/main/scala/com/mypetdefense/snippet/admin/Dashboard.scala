@@ -25,6 +25,47 @@ object Dashboard extends Loggable {
   val menu = Menu.i("Dashboard") / "admin" / "dashboard" >>
     adminUser >>
     loggedIn
+
+  val exportMenu = Menu.i("Export CSV") / "admin" / "dashboard" / "export_data.csv" >>
+    adminUser >>
+    loggedIn >>
+    EarlyResponse(exportCSV _)
+
+  def exportCSV: Box[LiftResponse] = {
+    val csvHeaders = "Name" :: Nil
+    val csvRows: List[List[String]] = {
+      val parents = User.findAll(By(User.userType, UserType.Parent))
+      val shipments = Shipment.findAll()
+      val dateFormat = new SimpleDateFormat("MMM dd")
+      
+      {
+        for {
+          shipment <- shipments
+          subscription <- shipment.subscription.obj
+          user <- subscription.user.obj
+        } yield {
+          user.name ::
+          user.email.get ::
+          dateFormat.format(subscription.nextShipDate.get).toString ::
+          dateFormat.format(shipment.dateProcessed.get).toString ::
+          shipment.amountPaid.toString ::
+          Nil
+        }
+      }
+    }
+
+    val resultingCsv = (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
+
+    Some(new InMemoryResponse(
+      resultingCsv.getBytes("UTF-8"),
+      List(
+        "Content-Type" -> "binary/octet-stream",
+        "Content-Disposition" -> "attachment; filename=\"data.csv\""
+        ),
+      Nil,
+      200
+    ))
+  }
 }
 
 class Dashboard extends Loggable {
@@ -65,6 +106,7 @@ class Dashboard extends Loggable {
 
   def render = {
     ".dashboard [class+]" #> "current" &
+    "#csv-export [href]" #> Dashboard.exportMenu.loc.calcDefaultHref &
     ".shipment" #> getUpcomingShipments.map { subscription =>
       val shipment = Shipment.find(
         By(Shipment.subscription, subscription),
