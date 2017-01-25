@@ -32,7 +32,7 @@ object Dashboard extends Loggable {
     EarlyResponse(exportCSV _)
 
   def exportCSV: Box[LiftResponse] = {
-    val csvHeaders = "Name" :: "Email" :: "Shipped Date" :: "Amount Paid" :: Nil
+    val csvHeaders = "Name" :: "Email" :: "Shipped Date" :: "Amount Paid" :: "Items Shipped" :: Nil
     val csvRows: List[List[String]] = {
       val parents = User.findAll(By(User.userType, UserType.Parent))
       val shipments = Shipment.findAll()
@@ -44,10 +44,15 @@ object Dashboard extends Loggable {
           subscription <- shipment.subscription.obj
           user <- subscription.user.obj
         } yield {
+          val itemsList: List[ShipmentLineItem] = ShipmentLineItem.findAll(By(ShipmentLineItem.shipment, shipment))
+
+          val itemsShipped: String = itemsList.flatMap(_.product.obj.map(_.getNameAndSize)).mkString(";")
+
           user.name ::
           user.email.get ::
           dateFormat.format(shipment.dateProcessed.get).toString ::
           shipment.amountPaid.toString ::
+          itemsShipped :: 
           Nil
         }
       }
