@@ -128,6 +128,7 @@ object Paths {
     PetsAndProducts.menu,
     Profile.menu,
     admin.Dashboard.menu,
+    admin.Dashboard.exportMenu,
     admin.Parents.menu,
     admin.Users.menu,
     admin.Coupons.menu,
