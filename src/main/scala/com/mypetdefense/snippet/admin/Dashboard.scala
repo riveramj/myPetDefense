@@ -55,7 +55,7 @@ object Dashboard extends Loggable {
           s"${address.street1.get} ${address.street2.get} ${address.city.get} ${address.state.get} ${address.zip.get}" ::
           dateFormat.format(shipment.dateProcessed.get).toString ::
           shipment.amountPaid.toString ::
-          itemsShipped :: 
+          itemsShipped.replaceAll(","," ") :: 
           Nil
         }
       }
