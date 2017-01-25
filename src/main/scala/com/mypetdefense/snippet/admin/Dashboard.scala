@@ -48,14 +48,14 @@ object Dashboard extends Loggable {
         } yield {
           val itemsList: List[ShipmentLineItem] = ShipmentLineItem.findAll(By(ShipmentLineItem.shipment, shipment))
 
-          val itemsShipped: String = itemsList.flatMap(_.product.obj.map(_.getNameAndSize)).mkString(";")
+          val itemsShipped: String = itemsList.flatMap(_.product.obj.map(_.getNameAndSize)).mkString("; ")
 
           user.name ::
           user.email.get ::
           s"${address.street1.get} ${address.street2.get} ${address.city.get} ${address.state.get} ${address.zip.get}" ::
           dateFormat.format(shipment.dateProcessed.get).toString ::
           shipment.amountPaid.toString ::
-          itemsShipped.replaceAll(","," ") :: 
+          itemsShipped.replaceAll(",","") :: 
           Nil
         }
       }
