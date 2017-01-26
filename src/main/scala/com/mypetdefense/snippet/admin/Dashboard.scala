@@ -16,6 +16,7 @@ import java.time.{LocalDate, ZoneId}
 import com.mypetdefense.model._
 import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
+import com.mypetdefense.service.ParentService
 
 object Dashboard extends Loggable {
   import net.liftweb.sitemap._
@@ -94,15 +95,22 @@ class Dashboard extends Loggable {
       "Yes"
   }
 
-  def updateNextShipDate(subscription: Subscription) = {
+  def updateNextShipBillDate(subscription: Subscription, user: Box[User]) = {
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
     val nextShipDate = subscription.nextShipDate(nextMonthDate)
     nextShipDate.save
+
+    ParentService.changeBillDate(
+      user.map(_.stripeId.get).openOr(""),
+      user.flatMap(_.getSubscription.map(_.stripeSubscriptionId.get)).getOrElse(""),
+      nextMonthDate.getTime/1000
+    )
   }
 
   def shipProduct(subscription: Subscription, user: Box[User], shipment: Box[Shipment])() = {
-    updateNextShipDate(subscription)
+    updateNextShipBillDate(subscription, user)
+
     EmailActor ! SendInvoicePaymentSucceededEmail(
       user,
       subscription,

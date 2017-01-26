@@ -183,5 +183,13 @@ object ParentService extends Loggable {
       cards
     }).headOption
   }
+
+  def changeBillDate(customerId: String, subscriptionId: String, date: Long) = {
+    StripeSubscription.update(
+      customerId = customerId,
+      subscriptionId = subscriptionId,
+      trialEnd = Some(date)
+    )
+  }
 }
 

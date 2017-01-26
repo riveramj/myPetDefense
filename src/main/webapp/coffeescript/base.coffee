@@ -19,9 +19,8 @@ $("body").on "click", '.submit', (event) ->
   $(".validation-error").remove()
   $("input.error").removeClass("error")
 
-$('html').bind 'keypress', (event) ->
-  if (event.keyCode == 13)
-    false
+$('form.current-step input').on 'keypress', (e) ->
+  e.keyCode != 13
 
 $(document).ready ->
   $("input").on "focus", (event) ->
