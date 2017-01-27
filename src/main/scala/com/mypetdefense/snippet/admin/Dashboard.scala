@@ -16,6 +16,7 @@ import java.time.{LocalDate, ZoneId}
 import com.mypetdefense.model._
 import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
+import com.mypetdefense.service.ParentService
 
 object Dashboard extends Loggable {
   import net.liftweb.sitemap._
@@ -25,6 +26,54 @@ object Dashboard extends Loggable {
   val menu = Menu.i("Dashboard") / "admin" / "dashboard" >>
     adminUser >>
     loggedIn
+
+  val exportMenu = Menu.i("Export CSV") / "admin" / "dashboard" / "export_data.csv" >>
+    adminUser >>
+    loggedIn >>
+    EarlyResponse(exportCSV _)
+
+  def exportCSV: Box[LiftResponse] = {
+    val csvHeaders = "Name" :: "Email" :: "Address" :: "Shipped Date" :: "Amount Paid" :: "Items Shipped" :: Nil
+    
+    val csvRows: List[List[String]] = {
+      val parents = User.findAll(By(User.userType, UserType.Parent))
+      val shipments = Shipment.findAll()
+      val dateFormat = new SimpleDateFormat("MMM dd")
+      
+      {
+        for {
+          shipment <- shipments
+          subscription <- shipment.subscription.obj
+          user <- subscription.user.obj
+          address <- user.addresses.toList.headOption
+        } yield {
+          val itemsList: List[ShipmentLineItem] = ShipmentLineItem.findAll(By(ShipmentLineItem.shipment, shipment))
+
+          val itemsShipped: String = itemsList.flatMap(_.product.obj.map(_.getNameAndSize)).mkString("; ")
+
+          user.name ::
+          user.email.get ::
+          s"${address.street1.get} ${address.street2.get} ${address.city.get} ${address.state.get} ${address.zip.get}" ::
+          dateFormat.format(shipment.dateProcessed.get).toString ::
+          shipment.amountPaid.toString ::
+          itemsShipped.replaceAll(",","") :: 
+          Nil
+        }
+      }
+    }
+
+    val resultingCsv = (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
+
+    Some(new InMemoryResponse(
+      resultingCsv.getBytes("UTF-8"),
+      List(
+        "Content-Type" -> "binary/octet-stream",
+        "Content-Disposition" -> "attachment; filename=\"data.csv\""
+        ),
+      Nil,
+      200
+    ))
+  }
 }
 
 class Dashboard extends Loggable {
@@ -46,15 +95,22 @@ class Dashboard extends Loggable {
       "Yes"
   }
 
-  def updateNextShipDate(subscription: Subscription) = {
+  def updateNextShipBillDate(subscription: Subscription, user: Box[User]) = {
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
     val nextShipDate = subscription.nextShipDate(nextMonthDate)
     nextShipDate.save
+
+    ParentService.changeBillDate(
+      user.map(_.stripeId.get).openOr(""),
+      user.flatMap(_.getSubscription.map(_.stripeSubscriptionId.get)).getOrElse(""),
+      nextMonthDate.getTime/1000
+    )
   }
 
   def shipProduct(subscription: Subscription, user: Box[User], shipment: Box[Shipment])() = {
-    updateNextShipDate(subscription)
+    updateNextShipBillDate(subscription, user)
+
     EmailActor ! SendInvoicePaymentSucceededEmail(
       user,
       subscription,
@@ -65,6 +121,7 @@ class Dashboard extends Loggable {
 
   def render = {
     ".dashboard [class+]" #> "current" &
+    "#csv-export [href]" #> Dashboard.exportMenu.loc.calcDefaultHref &
     ".shipment" #> getUpcomingShipments.map { subscription =>
       val shipment = Shipment.find(
         By(Shipment.subscription, subscription),
