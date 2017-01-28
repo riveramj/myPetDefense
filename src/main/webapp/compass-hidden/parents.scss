@@ -78,3 +78,51 @@ fieldset.add-pet, fieldset.add-coupon {
     background-color: #818080;
   }
 }
+
+.information {
+
+  .address {
+    span {
+      font-size: em(18px);
+    }
+    
+    li {
+      padding-bottom: 5px;
+    }
+  }
+
+  h3 {
+    font-size: rem(18px);
+    padding-bottom: 15px;
+    color: #4F4E4E;
+  }
+
+  > li {
+    display: inline-block;
+    margin-right: 80px;
+    vertical-align: top;
+  }
+
+  label {
+    width: 100%;
+    padding-bottom: em(22px);
+  }
+
+  input {
+    width: 100%;
+    color: #4F4E4E;
+    font-size: em(22px);
+    border: 1px solid #CECECE;
+    padding: rem(7px) rem(10px);
+    border-radius: 3px;
+
+    @include placeholder {
+      color: #949494;
+    }
+  }
+
+  form {
+    background-color: inherit;
+    width: 100%;
+  }
+}

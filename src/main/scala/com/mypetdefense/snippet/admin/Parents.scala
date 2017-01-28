@@ -38,6 +38,8 @@ class Parents extends Loggable {
 
   val coupons = Coupon.findAll()
 
+  val nextShipDateFormat= new SimpleDateFormat("MM/dd/yyyy")
+
   def petTypeRadio(renderer: IdMemoizeTransform) = {
     ajaxRadio(
       List(AnimalType.Dog, AnimalType.Cat),
@@ -177,6 +179,34 @@ class Parents extends Loggable {
         }
       }
 
+      def parentInformationBinding = {
+        val address = parent.addresses.toList.headOption
+        var updateNextShipDate = nextShipDate.map(date => nextShipDateFormat.format(date).toString).getOrElse("")
+
+        def updateShipDate() = {
+          println(updateNextShipDate)
+
+          val updatedDate = nextShipDateFormat.parse(updateNextShipDate)
+          println(updatedDate)
+
+          subscription.map { oldSubscription =>
+            oldSubscription.nextShipDate(updatedDate).saveMe
+          }
+          
+          S.redirectTo(Parents.menu.loc.calcDefaultHref)
+        }
+
+        ".address" #> {
+          ".address-1 *" #> address.map(_.street1.get) &
+          ".address-2 *" #> address.map(_.street2.get) &
+          ".city *" #> address.map(_.city.get) &
+          ".state *" #> address.map(_.state.get) &
+          ".zip *" #> address.map(_.zip.get) 
+        } &
+        ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
+        ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate)
+      }
+
       ".parent" #> {
         ".name *" #> parent.name &
         ".email *" #> parent.email &
@@ -187,11 +217,11 @@ class Parents extends Loggable {
         ".actions .delete" #> ClearNodesIf(parent.pets.size > 0) &
         ".actions .delete [onclick]" #> Confirm(s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
           ajaxInvoke(deleteParent(parent))
-          )
+        ) 
       } &
       petBindings &
-      shipmentBindings
+      shipmentBindings &
+      parentInformationBinding
     }
   }
 }
-
