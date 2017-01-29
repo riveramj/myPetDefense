@@ -35,7 +35,15 @@ trait StripeHook extends RestHelper with Loggable {
       user <- User.find(By(User.stripeId, stripeCustomerId))
       shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
+      linesJson = ((objectJson \ "lines" \ "data")(0))
     } yield {
+      val descriptionRaw = tryo((linesJson \ "description").extract[Option[String]]).openOr(None)
+      val description: String = descriptionRaw match {
+        case Some(possibleNull) if possibleNull == null => ""
+        case Some(description) => description
+        case _ => ""
+      }
+
       val city = shippingAddress.city.get
       val state = shippingAddress.state.get
       val zip = shippingAddress.zip.get
@@ -49,26 +57,28 @@ trait StripeHook extends RestHelper with Loggable {
           f"$formattedAmount%2.2f"
       }
 
-      TaxJarService.processTaxesCharged(
-        invoicePaymentId,
-        city,
-        state,
-        zip,
-        formatAmount(subtotal),
-        formatAmount(tax)
-      )
+      if (!(description contains "Unused time")) {
+        TaxJarService.processTaxesCharged(
+          invoicePaymentId,
+          city,
+          state,
+          zip,
+          formatAmount(subtotal),
+          formatAmount(tax)
+        )
 
-      val shipment = Shipment.createShipment(
-        user,
-        invoicePaymentId,
-        formatAmount(amountPaid),
-        formatAmount(tax)
-      )
-      
-      shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
+        val shipment = Shipment.createShipment(
+          user,
+          invoicePaymentId,
+          formatAmount(amountPaid),
+          formatAmount(tax)
+        )
 
-      if (Props.mode == Props.RunModes.Production) {
-        emailActor ! PaymentReceivedEmail(user, amountPaid)
+        shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
+
+        if (Props.mode == Props.RunModes.Production) {
+          emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
+        }
       }
 
       OkResponse()
@@ -80,24 +90,23 @@ trait StripeHook extends RestHelper with Loggable {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
       user <- User.find("stripeCustomerId" -> stripeCustomerId)
       totalAmountInCents <- tryo((objectJson \ "total").extract[Long]) ?~! "No total."
-    } yield {
-      val nextPaymentAttemptSecs: Option[Long] =
-        tryo((objectJson \ "next_payment_attempt").extract[Option[Long]]).openOr(None)
+      } yield {
+        val nextPaymentAttemptSecs: Option[Long] =
+          tryo((objectJson \ "next_payment_attempt").extract[Option[Long]]).openOr(None)
 
-      val nextPaymentAttempt = nextPaymentAttemptSecs.map { nextPaymentAttemptInSecs =>
-        new DateTime(nextPaymentAttemptInSecs * 1000)
-      } filter {
-        _ isAfterNow
+        val nextPaymentAttempt = nextPaymentAttemptSecs.map { nextPaymentAttemptInSecs =>
+          new DateTime(nextPaymentAttemptInSecs * 1000)
+          } filter {
+            _ isAfterNow
+          }
+          val amount = totalAmountInCents / 100d
+
+          emailActor ! SendInvoicePaymentFailedEmail(user.email.get, amount, nextPaymentAttempt)
+
+          OkResponse()
       }
-      val amount = totalAmountInCents / 100d
-
-      emailActor ! SendInvoicePaymentFailedEmail(user.email.get, amount, nextPaymentAttempt)
-      
-      OkResponse()
-    }
   }
 
-  
   serve {
     case req @ Req("stripe-hook" :: Nil, _, PostRequest) =>
       {
@@ -115,15 +124,10 @@ trait StripeHook extends RestHelper with Loggable {
           }
 
           result match {
-            case Full(resp) if resp.isInstanceOf[OkResponse] =>
-              resp
-
+            case Full(resp) if resp.isInstanceOf[OkResponse] => resp
             case Full(resp) => resp
-
             case Empty => NotFoundResponse()
-
-            case Failure(msg, _, _) =>
-              PlainTextResponse(msg, Nil, 500)
+            case Failure(msg, _, _) => PlainTextResponse(msg, Nil, 500)
           }
         }
       }

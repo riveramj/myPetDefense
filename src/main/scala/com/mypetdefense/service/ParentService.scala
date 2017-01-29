@@ -18,6 +18,8 @@ import scala.concurrent.duration._
 
 import dispatch._, Defaults._
 
+import java.util.Date
+
 object ParentService extends Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
@@ -184,11 +186,22 @@ object ParentService extends Loggable {
     }).headOption
   }
 
+  def updateNextShipBillDate(subscription: Subscription, user: Box[User], nextDate: Date) = {
+    subscription.nextShipDate(nextDate).saveMe
+
+    ParentService.changeBillDate(
+      user.map(_.stripeId.get).openOr(""),
+      user.flatMap(_.getSubscription.map(_.stripeSubscriptionId.get)).getOrElse(""),
+      nextDate.getTime/1000
+    )
+  }
+
   def changeBillDate(customerId: String, subscriptionId: String, date: Long) = {
     StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
-      trialEnd = Some(date)
+      trialEnd = Some(date),
+      prorate = Some(false)
     )
   }
 }

@@ -95,21 +95,11 @@ class Dashboard extends Loggable {
       "Yes"
   }
 
-  def updateNextShipBillDate(subscription: Subscription, user: Box[User]) = {
+  def shipProduct(subscription: Subscription, user: Box[User], shipment: Box[Shipment])() = {
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
-    val nextShipDate = subscription.nextShipDate(nextMonthDate)
-    nextShipDate.save
 
-    ParentService.changeBillDate(
-      user.map(_.stripeId.get).openOr(""),
-      user.flatMap(_.getSubscription.map(_.stripeSubscriptionId.get)).getOrElse(""),
-      nextMonthDate.getTime/1000
-    )
-  }
-
-  def shipProduct(subscription: Subscription, user: Box[User], shipment: Box[Shipment])() = {
-    updateNextShipBillDate(subscription, user)
+    ParentService.updateNextShipBillDate(subscription, user, nextMonthDate)
 
     EmailActor ! SendInvoicePaymentSucceededEmail(
       user,
