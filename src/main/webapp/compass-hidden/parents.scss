@@ -1,0 +1,163 @@
+@import "base";
+
+.parent {
+  cursor: pointer;
+  
+  &.active {
+    border-bottom: none;
+  }
+}
+
+.pet-name-container {
+  width: 211px;
+}
+
+.pet-name-container, .pet-container {
+  display: inline-block;
+}
+
+.pet-container {
+  margin-left: 45px;
+}
+
+.pets form {
+  width: 49%;
+  display: inline-block;
+  vertical-align: top;
+  float: none;
+  background-color: #ffffff;
+}
+
+fieldset.add-pet, fieldset.add-coupon {
+  float: none;
+  padding-top: 0;
+
+  legend {
+    padding-bottom: 20px;
+  }
+}
+
+.product-select {
+  width: 350px;
+}
+
+.pet-container span, .product-container span {
+  display: block;
+  padding-right: 10px;
+  
+  color: #4F4E4E;
+  font-size: em(16px);
+}
+
+.parent-nav {
+  li {
+    display: inline-block;
+    margin-right: 2px;
+
+    background-color: #2E9F9B;
+    color: #ffffff;
+
+    &.active {
+      background-color: #F2F2F2;
+      color: #454343;
+    }
+  }
+
+  button {
+    padding: 10px 18px;
+    border: none;
+
+    color: inherit;
+    background-color: inherit;
+
+    font-size: rem(13px);
+
+    cursor: pointer;
+  }
+}
+
+.add-to-parent {
+  background-color: #ffffff;
+  padding-top: 20px;
+}
+
+.parent-details {
+  padding: 20px;
+  background-color: #F1F1F1;
+
+  thead {
+    background-color: #818080;
+  }
+}
+
+.information {
+  .address {
+    span {
+      font-size: em(18px);
+    }
+    
+    li {
+      padding-bottom: 5px;
+    }
+  }
+
+  h3 {
+    font-size: rem(18px);
+    padding-bottom: 15px;
+    color: #4F4E4E;
+  }
+
+  > li {
+    display: inline-block;
+    margin-right: 120px;
+    vertical-align: top;
+  }
+
+  label {
+    width: 160px;
+    display: inline-block;
+  }
+
+  input {
+    width: 100%;
+    color: #4F4E4E;
+    font-size: em(22px);
+    border: 1px solid #CECECE;
+    padding: rem(7px) rem(10px);
+    border-radius: 3px;
+
+    @include placeholder {
+      color: #949494;
+    }
+  }
+
+  form {
+    background-color: inherit;
+    width: 100%;
+  }
+}
+
+.parent-details {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
+
+.coupon-container {
+  display: inline;
+}
+
+div.create-item-container.create-coupon-container {
+  float: none;
+  display: inline;
+  padding-top: 0;
+  margin-left: 25px;
+}
+
+.change-date {
+  display: inline-block;
+  vertical-align: bottom;
+  margin-left: 10px;
+}
