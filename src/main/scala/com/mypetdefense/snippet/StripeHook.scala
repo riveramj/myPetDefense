@@ -12,7 +12,7 @@ import net.liftweb._
     import Extraction._
 
 import com.mypetdefense.model._
-import com.mypetdefense.service.TaxJarService
+import com.mypetdefense.service.{TaxJarService, ParentService}
 import com.mypetdefense.actor._
 
 import me.frmr.stripe
@@ -29,21 +29,16 @@ trait StripeHook extends RestHelper with Loggable {
   def invoicePaymentSucceeded(objectJson: JValue) = {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
+      stripeSubscriptionId <- tryo((objectJson \ "subscription").extract[String]) ?~! "No subscription id."
       subtotal <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
       tax <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
       amountPaid <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
       user <- User.find(By(User.stripeId, stripeCustomerId))
       shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
-      linesJson = ((objectJson \ "lines" \ "data")(0))
     } yield {
-      val descriptionRaw = tryo((linesJson \ "description").extract[Option[String]]).openOr(None)
-      val description: String = descriptionRaw match {
-        case Some(possibleNull) if possibleNull == null => ""
-        case Some(description) => description
-        case _ => ""
-      }
 
+      val notTrial_? = ParentService.notTrialSubscription_?(stripeCustomerId, stripeSubscriptionId)
       val city = shippingAddress.city.get
       val state = shippingAddress.state.get
       val zip = shippingAddress.zip.get
@@ -57,7 +52,7 @@ trait StripeHook extends RestHelper with Loggable {
           f"$formattedAmount%2.2f"
       }
 
-      if (!(description contains "Unused time")) {
+      if (notTrial_?) {
         TaxJarService.processTaxesCharged(
           invoicePaymentId,
           city,
