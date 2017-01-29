@@ -28,10 +28,14 @@
           <tr class="pets collapsed">
             <td colspan=7>
               <ul class="parent-nav">
-                <li class="active">Pets</li>
-                <li>Shipments</li>
-                <li>Information</li>
+                <li class="active parent-pets">
+                  <button type="button" class="parent-tab">Pets</button>
+                </li>
+                <li class="parent-information">
+                  <button type="button" class="parent-tab">Information</button>
+                </li>
               </ul>
+              <div data-lift="embed?what=admin/parents-pets"></div>
               <div data-lift="embed?what=admin/parents-information"></div>
             </td>
           </tr>

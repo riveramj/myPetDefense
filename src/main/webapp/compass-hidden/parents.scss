@@ -52,7 +52,6 @@ fieldset.add-pet, fieldset.add-coupon {
 .parent-nav {
   li {
     display: inline-block;
-    padding: 10px 18px;
     margin-right: 2px;
 
     background-color: #2E9F9B;
@@ -62,6 +61,18 @@ fieldset.add-pet, fieldset.add-coupon {
       background-color: #F2F2F2;
       color: #454343;
     }
+  }
+
+  button {
+    padding: 10px 18px;
+    border: none;
+
+    color: inherit;
+    background-color: inherit;
+
+    font-size: rem(13px);
+
+    cursor: pointer;
   }
 }
 
@@ -80,7 +91,6 @@ fieldset.add-pet, fieldset.add-coupon {
 }
 
 .information {
-
   .address {
     span {
       font-size: em(18px);
@@ -99,13 +109,13 @@ fieldset.add-pet, fieldset.add-coupon {
 
   > li {
     display: inline-block;
-    margin-right: 80px;
+    margin-right: 120px;
     vertical-align: top;
   }
 
   label {
-    width: 100%;
-    padding-bottom: em(22px);
+    width: 160px;
+    display: inline-block;
   }
 
   input {
@@ -125,4 +135,29 @@ fieldset.add-pet, fieldset.add-coupon {
     background-color: inherit;
     width: 100%;
   }
+}
+
+.parent-details {
+  display: none;
+
+  &.active {
+    display: block;
+  }
+}
+
+.coupon-container {
+  display: inline;
+}
+
+div.create-item-container.create-coupon-container {
+  float: none;
+  display: inline;
+  padding-top: 0;
+  margin-left: 25px;
+}
+
+.change-date {
+  display: inline-block;
+  vertical-align: bottom;
+  margin-left: 10px;
 }
