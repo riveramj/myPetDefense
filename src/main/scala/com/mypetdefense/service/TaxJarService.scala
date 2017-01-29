@@ -70,7 +70,6 @@ object TaxJarService extends Loggable {
   }
 
   def processTaxesCharged(orderIdentifier: String, city: String, state: String, zip: String, subtotal: String, tax: String) = {
-    println("taxes processed =======1")
     if (tax != "0") {
       createTaxOrder(
         orderIdentifier,

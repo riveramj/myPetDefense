@@ -200,7 +200,8 @@ object ParentService extends Loggable {
     StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
-      trialEnd = Some(date)
+      trialEnd = Some(date),
+      prorate = Some(false)
     )
   }
 }

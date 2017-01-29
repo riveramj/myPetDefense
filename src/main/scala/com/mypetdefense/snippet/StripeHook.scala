@@ -32,13 +32,17 @@ trait StripeHook extends RestHelper with Loggable {
       subtotal <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
       tax <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
       amountPaid <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
-      description <- tryo((objectJson \ "description").extract[String]) ?~! "No description"
       user <- User.find(By(User.stripeId, stripeCustomerId))
       shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
+      linesJson = ((objectJson \ "lines" \ "data")(0))
     } yield {
-      val description = tryo((objectJson \ "description").extract[String]) ?~! "No description"
-      println(description + " this is description ========")
+      val descriptionRaw = tryo((linesJson \ "description").extract[Option[String]]).openOr(None)
+      val description: String = descriptionRaw match {
+        case Some(possibleNull) if possibleNull == null => ""
+        case Some(description) => description
+        case _ => ""
+      }
 
       val city = shippingAddress.city.get
       val state = shippingAddress.state.get
@@ -53,9 +57,7 @@ trait StripeHook extends RestHelper with Loggable {
           f"$formattedAmount%2.2f"
       }
 
-      if (!description.map(_ contains "Unused time").openOr(false)) {
-        println("we got no contains -rivera1234")
-
+      if (!(description contains "Unused time")) {
         TaxJarService.processTaxesCharged(
           invoicePaymentId,
           city,
@@ -77,8 +79,6 @@ trait StripeHook extends RestHelper with Loggable {
         if (Props.mode == Props.RunModes.Production) {
           emailActor ! PaymentReceivedEmail(user, amountPaid)
         }
-      } else {
-        println("we got contains -mike1234")
       }
 
       OkResponse()
@@ -107,7 +107,6 @@ trait StripeHook extends RestHelper with Loggable {
       }
   }
 
-  
   serve {
     case req @ Req("stripe-hook" :: Nil, _, PostRequest) =>
       {
@@ -125,15 +124,10 @@ trait StripeHook extends RestHelper with Loggable {
           }
 
           result match {
-            case Full(resp) if resp.isInstanceOf[OkResponse] =>
-              resp
-
+            case Full(resp) if resp.isInstanceOf[OkResponse] => resp
             case Full(resp) => resp
-
             case Empty => NotFoundResponse()
-
-            case Failure(msg, _, _) =>
-              PlainTextResponse(msg, Nil, 500)
+            case Failure(msg, _, _) => PlainTextResponse(msg, Nil, 500)
           }
         }
       }
