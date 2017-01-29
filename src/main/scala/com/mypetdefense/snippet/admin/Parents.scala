@@ -184,12 +184,10 @@ class Parents extends Loggable {
         var updateNextShipDate = nextShipDate.map(date => nextShipDateFormat.format(date).toString).getOrElse("")
 
         def updateShipDate() = {
-          println(updateNextShipDate)
-
           val updatedDate = nextShipDateFormat.parse(updateNextShipDate)
-          println(updatedDate)
 
           subscription.map { oldSubscription =>
+            ParentService.updateNextShipBillDate(oldSubscription, Full(parent), updatedDate)
             oldSubscription.nextShipDate(updatedDate).saveMe
           }
           
