@@ -177,6 +177,22 @@ object ParentService extends Loggable {
     }
   }
 
+  def getStripeSubscription(stripeCustomerId: String, subscriptionId: String): Box[StripeSubscription] = {
+    Try(
+      Await.result(StripeSubscription.get(stripeCustomerId, subscriptionId), new DurationInt(10).seconds)
+    ) match {
+      case TrySuccess(Full(stripeSubscription)) => Full(stripeSubscription)
+
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"get subscription failed with stripe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"get subscription failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
   def getCustomerCard(customerId: String): Option[Card] = {
     (for {
       customer <- getStripeCustomer(customerId).toList
@@ -203,6 +219,11 @@ object ParentService extends Loggable {
       trialEnd = Some(date),
       prorate = Some(false)
     )
+  }
+
+  def notTrialSubscription_?(stripeCustomerId: String, subscriptionId: String) = {
+    val subscription = getStripeSubscription(stripeCustomerId, subscriptionId)
+    subscription.map(_.trialEnd.isEmpty).openOr(false)
   }
 }
 
