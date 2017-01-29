@@ -38,6 +38,7 @@ trait StripeHook extends RestHelper with Loggable {
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
       val description = tryo((objectJson \ "description").extract[String]) ?~! "No description"
+      println(description + " this is description ========")
 
       val city = shippingAddress.city.get
       val state = shippingAddress.state.get
