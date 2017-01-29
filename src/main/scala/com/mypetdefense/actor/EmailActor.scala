@@ -31,7 +31,7 @@ case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class SendPasswordResetEmail(user: User) extends EmailActorMessage
 case class SendPasswordUpdatedEmail(user: User) extends EmailActorMessage
 case class NewSaleEmail(user: User, petCount: Int, couponCode: String) extends EmailActorMessage
-case class PaymentReceivedEmail(user: User, amount: String) extends EmailActorMessage
+case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class PetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
   userEmail: String,
@@ -161,7 +161,7 @@ trait ShipmentReadyEmailHandling extends EmailHandlerChain {
         "#email *" #> user.email &
         ".count" #> ClearNodes &
         ".coupon" #> ClearNodes &
-        "#amount *" #> amount
+        "#amount *" #> ("$" + ("%1.2f" format amount))
       }
 
       sendEmail(subject, "sales@mypetdefense.com", transform(paymentTemplate))

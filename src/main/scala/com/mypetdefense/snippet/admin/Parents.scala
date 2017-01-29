@@ -38,6 +38,8 @@ class Parents extends Loggable {
 
   val coupons = Coupon.findAll()
 
+  val nextShipDateFormat= new SimpleDateFormat("MM/dd/yyyy")
+
   def petTypeRadio(renderer: IdMemoizeTransform) = {
     ajaxRadio(
       List(AnimalType.Dog, AnimalType.Cat),
@@ -126,7 +128,8 @@ class Parents extends Loggable {
     "tbody" #> parents.map { parent =>
       val dateFormat = new SimpleDateFormat("MMM dd")
 
-      val nextShipDate = Subscription.find(By(Subscription.user, parent)).map(_.nextShipDate.get)
+      val subscription = Subscription.find(By(Subscription.user, parent))
+      val nextShipDate = subscription.map(_.nextShipDate.get)
 
       var chosenCoupon: Box[Coupon] = parent.coupon.obj
 
@@ -136,6 +139,70 @@ class Parents extends Loggable {
           Full(chosenCoupon),
           (possibleCoupon: Box[Coupon]) => chosenCoupon = possibleCoupon
         )
+      }
+
+      def petBindings = {
+        ".parent-pets" #> idMemoize { renderer =>
+          ".create" #> {
+            ".new-pet-name" #> ajaxText(petName, petName = _) &
+            ".pet-type-select" #> petTypeRadio(renderer) &
+            ".product-container .product-select" #> productDropdown &
+            ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent, renderer))
+          } & 
+          ".add-coupon" #> {
+            ".coupon-container .coupon-select" #> couponDropdown &
+            ".create-coupon-container .create-coupon" #> SHtml.ajaxSubmit("Change Coupon", () => addCoupon(parent, chosenCoupon))
+          } & 
+          {
+            val pets = Pet.findAll(By(Pet.user, parent))
+
+            ".pet" #> pets.map { pet =>
+              ".pet-name *" #> pet.name &
+              ".pet-type *" #> pet.animalType.toString &
+              ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
+              ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
+                ajaxInvoke(deletePet(parent, pet, renderer))
+                )
+            }
+          }
+        }
+      }
+
+      def shipmentBindings = {
+        val shipments: List[Shipment] = subscription.map { sub => 
+          Shipment.findAll(By(Shipment.subscription, sub))
+        }.openOr(Nil)
+
+        ".parent-shipments .shipment" #> shipments.map { shipment =>
+          ".ship-date *" #> dateFormat.format(shipment.dateShipped.get) &
+          ".amount-paid *" #> shipment.amountPaid.get
+        }
+      }
+
+      def parentInformationBinding = {
+        val address = parent.addresses.toList.headOption
+        var updateNextShipDate = nextShipDate.map(date => nextShipDateFormat.format(date).toString).getOrElse("")
+
+        def updateShipDate() = {
+          val updatedDate = nextShipDateFormat.parse(updateNextShipDate)
+
+          subscription.map { oldSubscription =>
+            ParentService.updateNextShipBillDate(oldSubscription, Full(parent), updatedDate)
+            oldSubscription.nextShipDate(updatedDate).saveMe
+          }
+          
+          S.redirectTo(Parents.menu.loc.calcDefaultHref)
+        }
+
+        ".address" #> {
+          ".address-1 *" #> address.map(_.street1.get) &
+          ".address-2 *" #> address.map(_.street2.get) &
+          ".city *" #> address.map(_.city.get) &
+          ".state *" #> address.map(_.state.get) &
+          ".zip *" #> address.map(_.zip.get) 
+        } &
+        ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
+        ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate)
       }
 
       ".parent" #> {
@@ -148,33 +215,11 @@ class Parents extends Loggable {
         ".actions .delete" #> ClearNodesIf(parent.pets.size > 0) &
         ".actions .delete [onclick]" #> Confirm(s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
           ajaxInvoke(deleteParent(parent))
-        )
+        ) 
       } &
-      ".pets" #> idMemoize { renderer =>
-        ".create" #> {
-          ".new-pet-name" #> ajaxText(petName, petName = _) &
-          ".pet-type-select" #> petTypeRadio(renderer) &
-          ".product-container .product-select" #> productDropdown &
-          ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent, renderer))
-        } & 
-        ".add-coupon" #> {
-          ".coupon-container .coupon-select" #> couponDropdown &
-          ".create-coupon-container .create-coupon" #> SHtml.ajaxSubmit("Change Coupon", () => addCoupon(parent, chosenCoupon))
-        } & 
-        {
-          val pets = Pet.findAll(By(Pet.user, parent))
-
-          ".pet" #> pets.map { pet =>
-            ".pet-name *" #> pet.name &
-            ".pet-type *" #> pet.animalType.toString &
-            ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
-            ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
-              ajaxInvoke(deletePet(parent, pet, renderer))
-            )
-          }
-        }
-      }
+      petBindings &
+      shipmentBindings &
+      parentInformationBinding
     }
   }
 }
-
