@@ -223,7 +223,9 @@ object ParentService extends Loggable {
 
   def notTrialSubscription_?(stripeCustomerId: String, subscriptionId: String) = {
     val subscription = getStripeSubscription(stripeCustomerId, subscriptionId)
-    subscription.map(_.trialEnd.isEmpty).openOr(false)
+    val trialStatus = subscription.flatMap(_.status).getOrElse("")
+    logger.info(s"stripeCustomerId: ${stripeCustomerId}. subscriptionId: ${subscriptionId}. trialStatus: ${trialStatus}")
+    trialStatus != "trialing"
   }
 }
 
