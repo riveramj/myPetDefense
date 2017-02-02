@@ -33,7 +33,6 @@ class PetDetails extends Loggable {
   val formatter = new SimpleDateFormat("MM/yy")
 
   var currentPets = completedPets.is
-  var birthdayErrors: List[String] = Nil
   var nameErrors: List[String] = Nil
 
   def validateNameBirthday = {
@@ -41,7 +40,6 @@ class PetDetails extends Loggable {
       currentPets.values.map { pet =>
       checkEmpty(pet.name.get, s"#${pet.petId.get}-name")
       }.flatten ++
-      birthdayErrors.map( birthdayId => ValidationError(birthdayId, "Not a valid date format.")) ++
       nameErrors.map( nameId => ValidationError(nameId, "Required."))
     ).toList.distinct
   }
@@ -93,24 +91,6 @@ class PetDetails extends Loggable {
     }
   }
 
-  def updatePetBirthday(birthday: String, pet: Pet) = {
-    val birthdayId = s"#${pet.petId.get}-birthday"
-    val birthdayError = checkBirthday(birthday, formatter, birthdayId)
-
-    if (birthdayError.isEmpty) {
-      val updatedPet = tryo(formatter.parse(birthday)).map(pet.birthday(_))
-      updatedPet.map( pet => currentPets(pet.petId.get) = pet)
-      completedPets(currentPets)
-
-      birthdayErrors = birthdayErrors.filter(_ != birthdayId)
-
-      Noop
-    } else {
-      birthdayErrors = (birthdayErrors :+ birthdayId).distinct
-      birthdayError.foldLeft(Noop)(_ & _)
-    }
-  }
-
   def removePet(pet: Pet)() = {
     currentPets.remove(pet.petId.get)
     completedPets(currentPets)
@@ -149,7 +129,6 @@ class PetDetails extends Loggable {
         if (currentPets.contains(currentPetId)) 
           pet
             .name(currentPets(currentPetId).name.get)
-            .birthday(currentPets(currentPetId).birthday.get)
         else
           pet
       }
@@ -162,7 +141,6 @@ class PetDetails extends Loggable {
     SHtml.makeFormsAjax andThen
     ".pet" #> currentPets.values.map { pet =>
       var name = pet.name.get
-      var birthday = tryo(formatter.format(pet.birthday.get).toString).openOr("")
 
       ".remove-pet [onclick]" #> ajaxInvoke(removePet(pet)) &
       ".details-pet *" #> pet.animalType.toString &
@@ -172,11 +150,6 @@ class PetDetails extends Loggable {
         name,
         possibleName => updatePetName(possibleName, pet),
         "id" -> s"${pet.petId.get}-name"
-      ) &
-      ".birthday" #> ajaxText(
-        birthday,
-        possibleBirthday => updatePetBirthday(possibleBirthday, pet),
-        "id" -> s"${pet.petId.get}-birthday"
       )
     } &
     "#add-pet" #> ajaxSubmit("Add Pet", addNewPet) &
