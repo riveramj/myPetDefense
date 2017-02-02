@@ -334,6 +334,11 @@
   margin: rem(6px) auto auto;
   padding: rem(25px) rem(23px) rem(35px);
 
+  a {
+    text-decoration: none;
+    color: #444343;
+  }
+
   &.choose-product {
     padding-right: rem(18px);
     padding-left: rem(18px);
