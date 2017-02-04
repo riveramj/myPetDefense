@@ -96,7 +96,7 @@
   }
 
   div {
-    line-height: rem(30px);
+    line-height: rem(34px);
     font-size: rem(28px);
     font-weight: $normal;
     margin-top: 15px;
@@ -137,16 +137,11 @@
   width: rem(289px);
   background-color: #FFFFFF;
   margin: rem(20px) auto auto;
-  padding: rem(25px) rem(23px) rem(35px);
+  padding: rem(25px) rem(30px) rem(35px);
 
   a {
     text-decoration: none;
     color: #444343;
-  }
-
-  &.choose-product {
-    padding-right: rem(18px);
-    padding-left: rem(18px);
   }
 
   @media (min-width: $bp-medium) {
@@ -201,7 +196,7 @@
 }
 
 .step-image {
-  padding-bottom: rem(15px);
+  padding-bottom: rem(24px);
 
   @media (max-width: $bp-medium) {
     display: inline-block;
@@ -221,12 +216,13 @@
 
   h3 {
     color: #605F5F;
-    font-size: em(22px);
+    font-size: em(24px);
     padding-bottom:rem(5px);
   }
 
   div {
-    line-height: rem(22px);
+    font-size: em(18px);
+    line-height: rem(26px);
   }
 }
 
@@ -392,87 +388,6 @@
   font-size: em(14px);
   padding-top: em(10px);
   font-weight: $normal;
-}
-
-#product-shot-container {
-  #product-shot {
-    background: url(../../images/product-shot.jpg) no-repeat center;
-    background-size: contain;
-    height: em(450px);
-    background-position-y: 200px;
-
-    @media (min-width: $bp-medium) {
-      background-size: cover;
-      background-position-y: 0;
-      
-      display: flex;
-      justify-content: center;
-    }
-
-    @media (min-width: $bp-large) {
-      background: url(../../images/product-shot-large@2x.jpg) no-repeat center;
-      height: 625px;
-      background-size: cover;
-
-      display: flex;
-      justify-content: center;
-    }
-  }
-}
-
-#product-shot-cta-container {
-  position: relative;
-  color: #FFFFFF;
-  font-size: rem(18px);
-
-  line-height: 27px;
-
-  background-color: $hero-background;
-  text-align: center;
-  padding: rem(36px) rem(30px);
-
-  @media (min-width: $bp-medium) {
-    width: 382px;
-
-    margin: auto;
-    position: initial;
-
-    background-color: rgba(0,0,0,0.70);
-
-    padding: rem(35px) rem(70px) rem(40px);
-  }
-
-  @media (min-width: $bp-large) {
-    margin: auto;
-    position: initial;
-
-    width: 465px;
-
-    font-size: rem(22px);
-    line-height: 28px;
-
-    padding: rem(45px) rem(63px) rem(50px);
-  }
-
-  .signup {
-    display: inline-block;
-    border-radius: 5px;
-    font-size: rem(18px);
-
-    letter-spacing: 0.4px;
-
-    padding: rem(13px) rem(25px); 
-    margin-top: rem(22px);
-
-    background-color: #FF8627;
-
-    @media (min-width: $bp-medium) {
-      margin-bottom: 0;
-      background-color: #FF8627;
-
-      padding: rem(9px) rem(52px);
-    }
-  }
 }
 
 #footer {
