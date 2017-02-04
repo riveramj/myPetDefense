@@ -14,6 +14,8 @@ import com.mypetdefense.service._
   import ValidationService._
 import com.mypetdefense.actor._
 
+case class HelpMessageSent() extends MyPetDefenseEvent("help-message-sent")
+
 class ContactUs extends Loggable {
   var name = ""
   var email = ""
@@ -29,7 +31,8 @@ class ContactUs extends Loggable {
 
     if(validateFields.isEmpty) {
       EmailActor ! ContactUsEmail(name, email, message, sourcePage)
-      Noop
+      
+      HelpMessageSent()
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }

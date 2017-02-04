@@ -299,6 +299,15 @@
   }
 }
 
+.message-sent {
+  text-align: center;
+  margin-top: 25px;
+
+  &.hidden {
+    display: none;
+  }
+}
+
 #footer {
   background-color: #454343;
   padding: em(50px) em(20px) 0;

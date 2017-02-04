@@ -15,6 +15,9 @@ $(document).on 'form-validation-error', (event) ->
   $target.addClass "error"
   $targetContainer.append $("<div />").addClass("validation-error").text(event.error)
 
+$(document).on 'help-message-sent', (event) ->
+  $('.message-sent').removeClass("hidden")
+
 $("body").on "click", '.submit', (event) ->
   $(".validation-error").remove()
   $("input.error").removeClass("error")
