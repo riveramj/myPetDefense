@@ -1,147 +1,17 @@
 @import "base"; 
 @import "nav-bar";
- 
-#promo-bar {
-  background-color: #2E9F9B;
+
+
+#logo-name { 
+  padding: em(20px) 0;
   text-align: center;
-  color: #FFFFFF;
-  font-size: em(12px);
-  padding: em(10px);
-
-  @media (min-width: $bp-medium) {
-    font-size: em(16px);
-  }
-
-  span {
-    font-weight: $bold;
-    letter-spacing: .4px;
-  }
-}
-
-#promotion {
-  color: #ffffff;
-  margin-top: rem(15px);
-
-  @media (min-width: $bp-medium) {
-    display: inline-block;
-    margin-right: rem(22px);
-    margin-top: rem(22px);
-  }
-
-  @media (min-width: $bp-large) {
-    margin-top: rem(25px);
-    margin-right: rem(40px);
-  }
-
-  li {
-    display: inline-block;
-
-    @media (min-width: $bp-medium) {
-      display: block;
-      width: 175px;
-    }
-  }
-
-  li:last-child {
-    vertical-align: top;
-  }
-}
-
-#promotion-details {
-  font-size: rem(16px);
-  font-weight: $bold;
-  text-transform: uppercase;
-  padding-right: 8px;
-
-  @media (min-width: $bp-medium) {
-    padding: 0;
-    font-size: rem(20px);
-  }
-
-  @media (min-width: $bp-medium) {
-    font-size: rem(23px);
-  }
-
-  span {
-    font-size: rem(45px);
-    display: block;
-    margin-top: 3px;
-
-    @media (min-width: $bp-medium) {
-      font-size: rem(58px);
-    }
-
-    @media (min-width: $bp-medium) {
-      font-size: rem(64px);
-    }
-  }
-}
-
-#promotion-code-details {
-  background-color: #2E9F9B;
-  padding: rem(7px) rem(10px);
-  border: #1A7774 solid 2px;
-
-  @media (min-width: $bp-medium) {
-    background-color: initial;
-    border: none;
-    padding: 7px 0 0;
-  }
-
-  span {
-    text-transform: uppercase;
-  }
-
-  li {
-    display: block;
-  }
-
-  li:first-child {
-    font-size: rem(15px);
-    font-weight: $semibold;
-    line-height: 20px;
-
-    @media (min-width: $bp-medium) {
-      background-color: #2E9F9B;
-      border: #1A7774 solid 2px;
-      padding: 2px 0;
-    }
-
-    @media (min-width: $bp-large) {
-      font-size: rem(16px);
-    }
-  }
-
-  li:last-child {
-    font-size: rem(14px);
-    font-weight: $regular;
-    padding: 3px 0;
-
-    @media (min-width: $bp-medium) {
-      padding: 7px 0;
-      font-size: rem(15px);
-    }
-  }
-}
-
-#cents {
-  vertical-align: super;
-  font-size: rem(16px);
-}
-
-.signup {
-  background-color: $signup-button-background;
-  color: #ffffff;
   
-  text-decoration: none;
-  text-transform: uppercase;
-  font-weight: $semibold;
-  font-size: em(14px);
+  display: block;
+  float: none;
 }
 
+//not in use below
 #hero {
-  clear: both;
-  
   @media (min-width: $bp-medium) {
     height: em(488px);
   }
@@ -149,56 +19,46 @@
   @media (min-width: $bp-large) {
     height: 532px;
   }
-
-  #signup-container {
-    @media (min-width: $bp-medium) {
-      display: inline-block;
-      border-left: 1px solid #979797;
-      width: 191px;
-      height: 145px;
-      vertical-align: bottom;
-      padding-left: 22px;
-
-      .signup {
-        width: 191px;
-        padding: 16px 24px;
-        margin-top: 47px;
-      }
-    }
-
-    @media (min-width: $bp-large) {
-      width: 221px;
-      padding-left: 40px;
-      height: 120px;
-      vertical-align: bottom;
-      margin-bottom: 19px;
-
-      .signup {
-        width: auto;
-        padding: 12px 30px;
-        margin-top: 47px;
-      }
-    }
-  }
 }
 
 #hero-dog-cat {
-  background: url(../../images/cat-dog-friends.jpg) no-repeat center;
+  background: url(../../images/cat-dog-friends.jpg) no-repeat top center;
   background-size: cover;
-  height: em(278px);
+  width: 100%;
+  padding: 40px 0px;
+  text-align: center;
 
   @media (min-width: $bp-medium) {
     height: 100%;
   }
+
+  .signup {
+    display: inline-block;
+    text-transform: uppercase;
+    font-size: rem(30px);
+
+    padding: rem(20px) rem(40px); 
+    margin-top: rem(15px);
+    background-color: #FF8627;
+
+    @media (min-width: $bp-medium) {
+      font-weight: $semibold;
+      font-size: rem(18px);
+      letter-spacing: 0.4px;
+
+      padding: rem(16px) rem(30px);
+      margin-bottom: 0;
+      background-color: #FF8627;
+    }
+  }
 }
 
 #tag-line-container {
-  position: relative;
-
-  margin-top: em(-27px);
-  background-color: $hero-background;
+  background-color: rgba(69, 67, 67, 0.7);
   text-align: center;
-  padding: em(31px) em(20px) em(25px);
+  padding: em(30px) em(20px) em(30px);
+  color: #ffffff;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
 
   @media (min-width: $bp-medium) {
     width: 555px;
@@ -219,42 +79,10 @@
     top: -450px;
   }
 
-  .signup {
-    display: inline-block;
-    border-radius: 5px;
-
-    padding: rem(13px) rem(25px); 
-    margin-top: rem(22px);
-    margin-bottom: rem(21px);
-
-    background-color: #FF8627;
-
-    @media (min-width: $bp-medium) {
-      font-weight: $semibold;
-      font-size: rem(18px);
-      letter-spacing: 0.4px;
-
-      padding: rem(16px) rem(30px);
-      margin-bottom: 0;
-      background-color: #FF8627;
-    }
-  }
-}
-
-#tag-line {
-  color: #f7f7f7;
-  
-  width: 200px;
-  margin: 0 auto;
-
-  @media (min-width: $bp-medium) {
-    width: auto;
-  }
-
   h3 {
-    font-size: rem(35px);
-    font-weight: $bold;
-    line-height: 50px;
+    font-size: rem(34px);
+    font-weight: $semibold;
+    line-height: 41px;
 
     @media (min-width: $bp-medium) {
       font-weight: $semibold;
@@ -267,13 +95,11 @@
     }
   }
 
-  text-align: center;
-
   div {
     line-height: rem(30px);
-    font-size: rem(18px);
+    font-size: rem(28px);
     font-weight: $normal;
-    color: #ffffff;
+    margin-top: 15px;
     
     @media (min-width: $bp-medium) {
       font-size: rem(22px);
@@ -286,28 +112,14 @@
   }
 }
 
-.leaf-divider {
-  background: url(../../images/leaf-background.jpg) no-repeat left;
-  background-size: cover;
-  height: em(45px);
-
-  @media (min-width: $bp-medium) {
-    background: url(../../images/leaf-background-large.jpg) no-repeat left;
-  }
-
-  @media (min-width: $bp-large) {
-    height: em(74px);
-  }
-}
-
 #how-it-works {
-  background-color: $how-it-works-background;
+  background-color: #E7E7E7;
   text-align: center;
   padding-bottom: rem(55px);
   padding-top: rem(30px);
 
   #steps {
-    padding-top: rem(30px);
+    padding-top: rem(25px);
   }
 
   @media (min-width: $bp-large) {
@@ -315,23 +127,16 @@
   }
   
   h2 {
-    font-size: em(26px);
+    font-size: em(28px);
     font-weight: $light;
-    color: #4F4E4E;
-
-    padding-top: 8px;
+    color: #3a3a3a;
   }
 }
 
-#how-it-works-header {
-  background: url(../../images/ribbon/how-it-works-ribbon.png) no-repeat center;
-  height: 53px;
-}
-
 .step {
-  width: rem(225px);
+  width: rem(289px);
   background-color: #FFFFFF;
-  margin: rem(6px) auto auto;
+  margin: rem(20px) auto auto;
   padding: rem(25px) rem(23px) rem(35px);
 
   a {
@@ -748,3 +553,4 @@
     color: #B2B0B0;
   }
 }
+
