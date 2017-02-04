@@ -71,7 +71,7 @@
   </div>
 
   <div id="contact-us">
-    <form>
+    <form  data-lift="ContactUs.render">
       <h4>Contact Us</h4>
       <label>
         <div><span class="field-label">Name</span></div>
@@ -83,9 +83,9 @@
       </label>
       <label>
         <div><span class="field-label">Message</span></div>
-        <textarea class="message" rows="6"></textarea>
+        <textarea class="message" rows="8"></textarea>
       </label>
-      <button type="submit">Send</button>
+      <button type="submit" id="send-message">Send</button>
     </form>
   </div>
 
@@ -106,5 +106,8 @@
     <link rel="stylesheet" data-lift="style-bundle?name=convenient-landing
 ">
   </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=landing"></script>
+  </tail>
 </div>
 
