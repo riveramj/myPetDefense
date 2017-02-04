@@ -227,167 +227,37 @@
 }
 
 #why-mpd {
-  background-color: $why-mpd-background;
-
   text-align: center;
+  padding: 30px;
 
-  h2 {
-    font-size: em(26px);
+  div {
+    font-size: 18px;
     font-weight: $light;
-    line-height: rem(35px);
-
-    color: #FDFDFD;
-    padding: rem(50px) 0 rem(20px);
-    width: rem(240px);
-    display: inline-block;
-
-    @media (min-width: $bp-medium) {
-      padding-top: 0;
-    }
+    line-height: 26px;
   }
 
-  .signup-container {
-    display: block;
-    margin-bottom: em(60px);
-  }
-  
-  .signup {
-    background-color: inherit;
-    padding: em(17px) em(26px);
-    border: 1px solid #ffffff;
-    display: inline-block;
-    border-radius: 5px;
-  }
-}
+  h3 {
+    font-size: rem(28px);
+    font-weight: $light;
+    line-height: rem(34px);
 
-#why-signup {
-  @media (min-width: $bp-medium) {
-    padding-top: rem(177px);
-    text-align: left;
+    color: #3a3a3a;
   }
 }
 
 #benefits {
-  padding: rem(55px) rem(30px) rem(11px);
-
-  @media (min-width: $bp-medium) {
-    padding-left: 126px;
-    padding-right: 126px;
+  .benefit-header {
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #1C8884;
+    margin: 45px 0 15px;
   }
 
-  @media (min-width: $bp-large) {
-    background: url(../../images/benefits-background@2x.jpg) no-repeat left #45ADA9;
-    background-size: 533px;
-    padding-top: 0;
-    padding-left: rem(677px);
-    padding-right: rem(165px);
-    padding-bottom: rem(15px);
+  .benefit {
+    padding-bottom: 10px;
+    color: #3a3a3a3;
   }
-}
-
-.mpd-benefit {
-  text-align: center;
-  color: #ffffff;
-  line-height: rem(23px);
-  margin: auto;
-
-  padding-bottom: rem(54px);
-
-  &:first-child {
-      padding-top: 0;
-
-      @media (min-width: $bp-large) {
-        padding-top: rem(78px);
-      }
-  }
-
-  h3 {
-    margin: auto auto auto 0;
-    text-align: left;
-    font-size: rem(25px);
-    line-height: 33px;
-    padding: rem(2px) 0 rem(16px);
-    color: #137875;
-    font-weight: $semibold;
-
-    @media (min-width: $bp-large) {
-      padding-top: 0;
-      padding-bottom: rem(5px);
-      font-weight: $bold;
-      font-size: rem(28px);
-    }
-  }
-  
-  div {
-    margin: auto;
-    text-align: left;
-
-    @media (min-width: $bp-large) {
-      max-width: rem(520px);
-      margin: 0;
-    }
-  }
-}
-
-#testimonials-container {
-  text-align: center;
-  background-color: #ffffff;
-
-  #testimonials {
-    padding-top: em(49px);
-
-    @media (min-width: $bp-medium) {
-      display: inline-block;
-      padding: em(175px) 0 em(183);
-    }
-  }
-}
-
-.testimonial {
-  @media (max-width: $bp-medium) {
-    @include row(table);
-    @include fill-parent();
-    padding-bottom: em(60px);
-  }
-
-  @media (min-width: $bp-medium) {
-    display: inline-block;
-  }
-}
-
-.headshot-container {
-  vertical-align: top;
-  text-align: right;
-  padding-right: rem(24px);
-  display: inline-block;
-}
-
-.headshot {
-  border-radius: 50%;
-  width: 89px;
-  height: 89px;
-  background-color: #CECECE;
-  text-align: center;
-  display: inline-block;
-}
-
-.phrase {
-  vertical-align: middle;
-  padding-right: rem(25px);
-  text-align: left;
-
-  color: $green;
-  font-size: em(21px);
-  font-weight: $light;
-  line-height: rem(27px);
-}
-
-.endorser-name {
-  text-transform: uppercase;
-  color: #706E6E;
-  font-size: em(14px);
-  padding-top: em(10px);
-  font-weight: $normal;
 }
 
 #footer {
@@ -446,26 +316,3 @@
     padding: rem(26px) 0 rem(15px);
   }
 }
-
-#need-help {
-  text-align: center;
-  background-color: #454343;
-  color: #B2B0B0;
-
-  padding: rem(57px) 0 0;
-  font-size: rem(18px);
-
-  @media (min-width: $bp-medium) {
-    padding: rem(51px) 0 0;
-    font-size: rem(15px);
-  }
-
-  @media (min-width: $bp-large) {
-    padding-bottom: rem(4px);
-  }
-
-  a {
-    color: #B2B0B0;
-  }
-}
-
