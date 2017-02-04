@@ -33,6 +33,10 @@
     background-position-y: -90px;
   }
 
+  @media (min-width: $bp-large) {
+    padding-bottom: 80px;
+  }
+
   .signup {
     display: inline-block;
     text-transform: uppercase;
@@ -59,19 +63,18 @@
   max-width: 700px;
   margin: 0 auto;
 
+  @media (min-width: $bp-large) {
+    padding: 40px 50px;
+  }
+
   h3 {
     font-size: rem(34px);
     font-weight: $semibold;
     line-height: 41px;
 
     @media (min-width: $bp-medium) {
-      font-weight: $semibold;
       font-size: rem(55px);
       line-height: rem(66px);
-    }
-
-    @media (min-width: $bp-large) {
-      font-size: rem(53px);
     }
   }
 
@@ -84,11 +87,6 @@
     @media (min-width: $bp-medium) {
       font-size: rem(30px);
       font-weight: $light;
-    }
-
-    @media (min-width: $bp-large) {
-      font-size: rem(27px);
-      line-height: 34px;
     }
   }
 }
@@ -111,6 +109,10 @@
     font-size: em(28px);
     font-weight: $light;
     color: #3a3a3a;
+
+    @media (min-width: $bp-medium) {
+      font-size: rem(30px);
+    }
   }
 }
 
@@ -127,6 +129,9 @@
 
   @media (min-width: $bp-large) {
     margin-left: 17px;
+    display: inline-block;
+    min-height: 280px;
+    vertical-align: bottom;
 
     &:first-child {
       margin-left: 0;
@@ -167,11 +172,6 @@
   @media (max-width: $bp-medium) {
     display: inline-block;
   }
-
-  @media (min-width: $bp-medium) {
-    margin-right: 0;
-    padding-bottom: em(22px);
-  }
 }
 
 .step-instructions {
@@ -184,6 +184,10 @@
     color: #605F5F;
     font-size: em(24px);
     padding-bottom:rem(5px);
+
+    @media (min-width: $bp-medium) {
+      padding-bottom:rem(11px);
+    }
   }
 
   div {
@@ -196,11 +200,8 @@
   text-align: center;
   padding: 30px;
 
-  div {
-    font-size: 18px;
-    font-weight: $light;
-    line-height: 26px;
-  }
+  max-width: 600px;
+  margin: 0 auto;
 
   h3 {
     font-size: rem(28px);
@@ -208,6 +209,17 @@
     line-height: rem(34px);
     margin-bottom: 20px;
     color: #3a3a3a;
+
+    @media (min-width: $bp-medium) {
+      font-size: rem(30px);
+      margin-top: 25px;
+    }
+  }
+
+  div {
+    font-size: 18px;
+    font-weight: $light;
+    line-height: 26px;
   }
 }
 
@@ -249,6 +261,11 @@
 
     margin: 0 auto;
 
+    @media (min-width: $bp-medium) {
+      padding: 40px 50px;
+      max-width: 650px;
+    }
+
     label, input, textarea {
       display: block;
       width: 100%;
@@ -273,6 +290,7 @@
       border: none;
       border-radius: 4px;
       text-transform: uppercase;
+      cursor: pointer;
 
       @media (min-width: $bp-medium) {
         width: auto;
