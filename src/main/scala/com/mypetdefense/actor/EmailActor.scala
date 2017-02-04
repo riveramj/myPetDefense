@@ -189,7 +189,7 @@ trait ContactUsEmailHandling extends EmailHandlerChain {
         "#source-page *" #> sourcePage
       }
 
-      sendEmail(subject, "rivera.mj@gmail.com", transform(contactTemplate))
+      sendEmail(subject, "help@mypetdefense.com", transform(contactTemplate))
   }
 }
 
