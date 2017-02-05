@@ -15,7 +15,11 @@ $(document).on 'form-validation-error', (event) ->
   $target.addClass "error"
   $targetContainer.append $("<div />").addClass("validation-error").text(event.error)
 
-$("body").on "click", '.submit', (event) ->
+$(document).on 'help-message-sent', (event) ->
+  $('.message-sent').removeClass("hidden")
+  $('.name, .email, .message').val("")
+  
+$("body").on "click", '.submit, #send-message', (event) ->
   $(".validation-error").remove()
   $("input.error").removeClass("error")
 
@@ -23,6 +27,6 @@ $('form.current-step input').on 'keypress', (e) ->
   e.keyCode != 13
 
 $(document).ready ->
-  $("input").on "focus", (event) ->
+  $("input, textarea").on "focus", (event) ->
     $target = $(event.target)
     $target.removeClass("error").parent().find(".validation-error").remove()
