@@ -19,7 +19,7 @@ $(document).on 'help-message-sent', (event) ->
   $('.message-sent').removeClass("hidden")
   $('.name, .email, .message').val("")
   
-$("body").on "click", '.submit', (event) ->
+$("body").on "click", '.submit, #send-message', (event) ->
   $(".validation-error").remove()
   $("input.error").removeClass("error")
 
