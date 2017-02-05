@@ -65,7 +65,7 @@ object ValidationService extends Loggable {
         badEmail
       }
     } else {
-      Full(ValidationError(errorId, S ? "Field Required."))
+      Full(ValidationError(errorId, S ? "Required."))
     }
   }
 

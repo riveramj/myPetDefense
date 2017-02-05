@@ -1,0 +1,112 @@
+<div id="main" data-lift="surround?with=landing-template;at=content">
+  <div id="top-bar">
+    <div id="logo-name">
+      <a href="/">
+        <picture>
+        <img src="images/logo-name.png" srcset="images/logo-name.png, images/logo-name-2x.png 2x">
+        </picture>
+      </a>
+    </div>
+  </div>
+
+  <div id="hero-dog-cat">
+    <div id="tag-line-container">
+      <h3>Convenient. Automated. Budget Friendly.</h3>
+      <div>Flea and Tick prevention at your doorstep every month for only $9.99.</div>
+    </div>
+    <a class="signup action" href="./pet-choice">
+      Try It Now<i class="fa fa-caret-right" aria-hidden="true"></i>
+    </a>
+  </div>
+  
+  <div id="how-it-works">
+    <div id="how-it-works-header">
+      <h2>How It Works</h2>
+    </div>
+    <ul id="steps">
+      <li>
+        <a href="/pet-choice" class="step">
+          <img src="images/choose-pet.png" srcset="images/choose-pet.png, images/choose-pet@2x.png 2x">
+          <div class="step-instructions">
+            <h3>Choose Pet Type</h3>
+            <div>Let us know if your pet is a cat or a dog.</div>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="/pet-choice" class="step">
+          <img src="images/choose-product.png" srcset="images/choose-product.png, images/choose-product@2x.png 2x">
+          <div class="step-instructions">
+            <h3>Choose Product</h3>
+            <div>Pick from a selection of quality, vet recommended products</div>
+          </div>
+        </a>
+      </li>
+      <li>
+        <a href="/pet-choice" class="step">
+          <img src="images/get-protected.png" srcset="images/get-protected.png, images/get-protected@2x.png 2x">
+          <div class="step-instructions">
+            <h3>Get Protected</h3>
+            <div>Receive your monthly dose of product for only $9.99!</div>
+          </div>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div id="why-mpd">
+    <h3>Flea and Tick Prevention</h3>
+    <div>
+      Are you looking for flea and tick prevention for your pet? You’ve come to the right place.<br><br>At My Pet Defense we have completely automated the process of buying your dog or cat flea and tick control. All you have to do is take a few minutes to sign up!
+    </div>
+    <ul id="benefits">
+      <li class="benefit-header">Why My Pet Defense?</li>
+      <li class="benefit">+ Scheduled Deliveries</li>
+      <li class="benefit">+ Budget Friendly</li>
+      <li class="benefit">+ Superior Protection</li>
+      <li class="benefit">+ Complete Flexibility</li>
+    </ul>
+  </div>
+
+  <div id="contact-us">
+    <form  data-lift="ContactUs.render">
+      <h4>Contact Us</h4>
+      <label>
+        <div><span class="field-label">Name</span></div>
+        <input class="name" type="text">
+      </label>
+      <label>
+        <div><span class="field-label">Email</span></div>
+        <input class="email" type="text">
+      </label>
+      <label>
+        <div><span class="field-label">Message</span></div>
+        <textarea class="message" rows="8"></textarea>
+      </label>
+      <button type="submit" class="action" id="send-message">Submit</button>
+      <div class="message-sent hidden">Message sent. We'll be in touch soon!</div>
+    </form>
+  </div>
+
+  <div id="footer">
+    <div class="footer-section">
+      <h4>Follow</h4>
+      <ul>
+        <li><a href="https://twitter.com/mypetdefense">Twitter</a></li>
+        <li><a href="https://www.facebook.com/mypetdefense/">Facebook</a></li>
+        <li><a href="https://www.instagram.com/mypetdefense/">Instagram</a></li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="legal">&copy;2017 My Pet Defense. All rights reserved.</div>
+
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=convenient-landing
+">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=landing"></script>
+  </tail>
+</div>
+
