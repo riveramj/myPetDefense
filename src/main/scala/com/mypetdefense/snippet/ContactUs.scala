@@ -24,7 +24,7 @@ class ContactUs extends Loggable {
   
   def sendMessage() = {
     val validateFields = List(
-      checkEmail(email, ".email"),
+      checkEmpty(email, ".email"),
       checkEmpty(name, ".name"),
       checkEmpty(message, ".message")
     ).flatten
