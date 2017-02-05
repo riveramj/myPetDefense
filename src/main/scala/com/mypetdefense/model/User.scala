@@ -122,6 +122,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def isCorrectPassword_?(password: String, user: User) = {
     user.password.get == hashPassword(password, user.salt.get)
   }
+
+  def nameAndEmail = s"${this.name} <${this.email}>"
 }
 
 object User extends User with LongKeyedMetaMapper[User]
