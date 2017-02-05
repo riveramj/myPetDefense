@@ -126,11 +126,13 @@ class Dashboard extends Loggable {
       val shipAddressRaw = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
 
       val address = shipAddressRaw.map { ship =>
-        s"${ship.street1} / ${ship.street2} / ${ship.city}, ${ship.state} ${ship.zip}"
+        s"""${ship.street1}
+          |${ship.street2}
+          |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
       }
 
       ".ship-on *" #> dateFormat.format(subscription.nextShipDate.get) &
-      ".name *" #> user.map(_.name) &
+      ".name *" #> user.map(_.nameAndEmail) &
       ".address *" #> address &
       ".product" #> petsAndProducts.map { case (pet, product) =>
         ".pet-name *" #> pet.name.get &
