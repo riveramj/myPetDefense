@@ -43,7 +43,7 @@ class ContactUs extends Loggable {
     ".name" #> text(name, name = _) &
     ".email" #> text(email, email = _) &
     ".message" #> textarea(message, message = _) &
-    "#send-message" #> ajaxSubmit("Send", sendMessage)
+    "#send-message" #> ajaxSubmit("Submit", sendMessage)
   }
 }
 
