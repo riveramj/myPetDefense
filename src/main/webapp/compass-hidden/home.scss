@@ -1,5 +1,6 @@
-@import "base";
+@import "base"; 
 @import "nav-bar";
+@import "how-it-works";
  
 #promo-bar {
   background-color: #2E9F9B;
@@ -297,131 +298,6 @@
 
   @media (min-width: $bp-large) {
     height: em(74px);
-  }
-}
-
-#how-it-works {
-  background-color: $how-it-works-background;
-  text-align: center;
-  padding-bottom: rem(55px);
-  padding-top: rem(30px);
-
-  #steps {
-    padding-top: rem(30px);
-  }
-
-  @media (min-width: $bp-large) {
-    margin-top: 0;
-  }
-  
-  h2 {
-    font-size: em(26px);
-    font-weight: $light;
-    color: #4F4E4E;
-
-    padding-top: 8px;
-  }
-}
-
-#how-it-works-header {
-  background: url(../../images/ribbon/how-it-works-ribbon.png) no-repeat center;
-  height: 53px;
-}
-
-.step {
-  width: rem(225px);
-  background-color: #FFFFFF;
-  margin: rem(6px) auto auto;
-  padding: rem(25px) rem(23px) rem(35px);
-
-  a {
-    text-decoration: none;
-    color: #444343;
-  }
-
-  &.choose-product {
-    padding-right: rem(18px);
-    padding-left: rem(18px);
-  }
-
-  @media (min-width: $bp-medium) {
-    display: inline-block;
-    margin-top: 0;
-    vertical-align: top;
-    text-align: center;
-    height: 100%;
-    min-height: 257px;
-
-    margin-left: 1px;
-
-    &:first-child {
-      margin-left: 0;
-    }
-  }
-
-  @media (min-width: $bp-large) {
-    margin-left: 17px;
-
-    &:first-child {
-      margin-left: 0;
-    }
-  }
-
-  .image-background {
-    border-radius: 50%;
-	  width: 80px;
-  	height: 80px;
-    background-color: #949494;
-    text-align: center;
-    display: inline-block;
-
-    img {
-      padding: 23% 0;
-    }
-  }
-
-  &:last-child .image-background img {
-      padding: 32% 0;
-    }
-
-  &:first-child {
-    margin-top: 0;
-
-    .step-image {
-      @media (min-width: $bp-medium) {
-        margin-bottom: em(-5px);
-      }
-    }
-  }
-}
-
-.step-image {
-  padding-bottom: rem(15px);
-
-  @media (max-width: $bp-medium) {
-    display: inline-block;
-  }
-
-  @media (min-width: $bp-medium) {
-    margin-right: 0;
-    padding-bottom: em(22px);
-  }
-}
-
-.step-instructions {
-  @media (min-width: $bp-medium) {
-    padding-right: 0;
-    text-align: center;
-  }
-
-  h3 {
-    color: #605F5F;
-    font-size: em(22px);
-    padding-bottom:rem(5px);
-  }
-
-  div {
-    line-height: rem(22px);
   }
 }
 
@@ -748,3 +624,18 @@
     color: #B2B0B0;
   }
 }
+
+.action {
+  background-color: #FF8627;
+  box-shadow: 0 6px #E2690A;
+
+  &:hover {
+    background-color: #FF7A11;
+  }
+
+  &:active {
+    box-shadow: 0 3px #E2690A;
+    transform: translateY(4px);
+  }
+}
+
