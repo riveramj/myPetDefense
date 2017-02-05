@@ -4,7 +4,10 @@ import net.liftweb.common._
 import net.liftweb.http.RedirectResponse
 import net.liftweb.sitemap._
   import Loc._
+import net.liftweb.util._
+  import Helpers._
 import net.liftweb.util.Props
+import net.liftweb.http._
 
 import com.mypetdefense.snippet._
 import com.mypetdefense.model._
@@ -12,7 +15,9 @@ import com.mypetdefense.service.PetFlowChoices._
 
 object Paths {
 
-  val index = Menu.i("Home") / "index"
+  val homePage = Menu.i("Home") / "index"
+  val convenientLanding = Menu.i("Convenient. Automated. Budget Friendly.") / "convenient" >>
+    TemplateBox(() => Templates("landing" :: "convenient" :: Nil))
 
   def flowComplete_? = (!petChoice.is.isEmpty && !petSize.is.isEmpty && !petProduct.is.isEmpty)
 
@@ -114,7 +119,8 @@ object Paths {
   }
 
   def siteMap = SiteMap(
-    index,
+    homePage,
+    convenientLanding,
     PetChoice.menu,
     DogSize.menu,
     PetDetails.menu,

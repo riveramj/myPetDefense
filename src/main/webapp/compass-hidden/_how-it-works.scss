@@ -1,0 +1,105 @@
+#how-it-works {
+  background-color: #E7E7E7;
+  text-align: center;
+  padding-bottom: rem(55px);
+  padding-top: rem(30px);
+
+  #steps {
+    padding-top: rem(30px);
+    
+    li {
+      margin-bottom: 7px;
+
+      @media (min-width: $bp-medium) {
+        margin-bottom: 0;
+        margin-left: 6px;
+        
+        display: inline-block;
+        
+        vertical-align: top;
+
+        &:first-child {
+          margin-left: 0;
+        }
+      }
+
+      @media (min-width: $bp-large) {
+        margin-left: 20px;
+      }
+    }
+  }
+
+  @media (min-width: $bp-large) {
+    margin-top: 0;
+  }
+  
+  h2 {
+    font-size: em(27px);
+    font-weight: $semibold;
+    color: #605F5F;
+
+    padding-top: 8px;
+  }
+}
+
+#how-it-works-header {
+  background: url(../../images/ribbon/how-it-works-ribbon.png) no-repeat center;
+  height: 53px;
+}
+
+.step {
+  width: rem(225px);
+  display: block;
+  background-color: #FFFFFF;
+  
+  padding: rem(25px) rem(22px) rem(35px);
+  margin: 0 auto;
+  
+  text-decoration: none;
+  color: #444343;
+  box-shadow: 0 2px 4px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+
+  @media (min-width: $bp-medium) {
+    min-height: 265px;
+  }
+
+  @media (min-width: $bp-large) {
+    min-height: 290px;
+    width: rem(279px);
+    padding: rem(35px) rem(50px) rem(37px);
+  }
+
+  img {
+    width: 90px;
+    height: 90px;
+  }
+
+  @media (min-width: $bp-large) {
+    img {
+      width: 120px;
+      height: 120px;
+    }
+  }
+}
+
+.step-instructions {
+  @media (min-width: $bp-medium) {
+    padding-right: 0;
+    text-align: center;
+  }
+
+  h3 {
+    color: #605F5F;
+    font-size: rem(22px);
+    padding-bottom:rem(5px);
+  }
+
+  div {
+    line-height: rem(22px);
+    font-size: rem(16px);
+  }
+}
