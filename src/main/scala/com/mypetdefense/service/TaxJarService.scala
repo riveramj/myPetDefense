@@ -13,6 +13,7 @@ import scala.language.postfixOps
 
 import scala.collection.concurrent.TrieMap
 import scala.util.{Failure => TryFail, _}
+import scala.math.BigDecimal
 
 import java.util.Date
 
@@ -65,7 +66,9 @@ object TaxJarService extends Loggable {
       amount <- tryo(taxDue.toDouble).toList
       rate <- tryo(taxRate.toDouble).toList
     } yield {
-      (amount, rate * 100)
+      val normalizedRate = tryo(BigDecimal(rate * 100).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble).openOr(0D)
+
+      (amount, normalizedRate)
     }).headOption.getOrElse((0D, 0D))
   }
 
