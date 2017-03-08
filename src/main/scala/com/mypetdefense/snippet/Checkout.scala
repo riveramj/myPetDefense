@@ -63,8 +63,8 @@ class Checkout extends Loggable {
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
 
   var stripeToken = ""
-  var couponCode = ""
-  var coupon: Box[Coupon] = None
+  var coupon: Box[Coupon] = PetFlowChoices.coupon
+  var couponCode = coupon.map(_.couponCode.get).openOr("")
 
   val petCount = completedPets.is.size
   val subtotal = petCount * 9.99
@@ -287,8 +287,18 @@ class Checkout extends Loggable {
     "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
     "#cardholder-name" #> text(cardholderName, cardholderName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    "#promo-code" #> ajaxText(couponCode, couponCode = _) &
-    ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
+    {
+      val successCoupon = {
+        if (!PetFlowChoices.coupon.isEmpty)
+          "promo-success"
+        else
+          ""
+      }
+
+      ".promotion-info [class+]" #> successCoupon &
+      "#promo-code" #> ajaxText(couponCode, couponCode = _) &
+      ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
+    } &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup)
     }
   }

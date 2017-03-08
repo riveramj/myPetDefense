@@ -37,6 +37,7 @@ class Success extends Loggable {
     total(Empty)
     freeMonths(Empty)
     completedPets(LinkedHashMap.empty)
+    coupon(Empty)
 
     "#count span *" #> pets.size &
     "#monthly-total" #> ClearNodesIf(freeMonthCount == 0) &
