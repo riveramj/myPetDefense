@@ -12,11 +12,17 @@
 }
 
 #hero-dog-cat {
-  background: url(../../images/cat-dog-friends@2x.jpg) no-repeat top center;
+  background: url(../../images/dog_play.jpg) no-repeat top center;
   background-size: cover;
   width: 100%;
   padding: 40px 0px;
   text-align: center;
+
+  background-position-x: -170px;
+
+  @media (min-width: 35em) {
+    background-position-x: center;
+  }
 
   @media (min-width: $bp-medium) {
     background-attachment: fixed;
@@ -24,7 +30,6 @@
 
   @media (min-width: $bp-large) {
     padding-bottom: 80px;
-    background-position-y: 83px;
   }
 
   .signup {
@@ -59,7 +64,7 @@
   color: #ffffff;
   text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
 
-  max-width: 700px;
+  max-width: 745px;
   margin: 0 auto;
 
   @media (min-width: $bp-large) {

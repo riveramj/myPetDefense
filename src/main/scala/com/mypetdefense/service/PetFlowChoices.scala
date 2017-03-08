@@ -17,6 +17,7 @@ object PetFlowChoices extends Loggable {
   object petProduct extends SessionVar[Box[Product]](Empty)
   object total extends SessionVar[Box[Double]](Empty)
   object freeMonths extends SessionVar[Box[Int]](Empty)
+  object coupon extends SessionVar[Box[Coupon]](Empty)
 
   object completedPets extends SessionVar[LinkedHashMap[Long, Pet]](LinkedHashMap.empty)
 }
