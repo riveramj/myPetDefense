@@ -13,6 +13,8 @@ import net.liftweb._
 import com.mypetdefense.service._
   import ValidationService._
 import com.mypetdefense.actor._
+import com.mypetdefense.util.Paths
+
 
 case class HelpMessageSent() extends MyPetDefenseEvent("help-message-sent")
 
@@ -23,8 +25,15 @@ class ContactUs extends Loggable {
   val sourcePage = S.uri
   
   def sendMessage() = {
+    val emailValidation: Box[ValidationError] = {
+      if (sourcePage != "/testimonial")
+        validEmailFormat(email, ".email")
+      else
+        Empty
+    }
+
     val validateFields = List(
-      validEmailFormat(email, ".email"),
+      emailValidation,
       checkEmpty(name, ".name"),
       checkEmpty(message, ".message")
     ).flatten
