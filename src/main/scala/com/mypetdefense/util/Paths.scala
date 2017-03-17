@@ -16,6 +16,9 @@ import com.mypetdefense.service.PetFlowChoices._
 object Paths {
 
   val homePage = Menu.i("Home") / "index"
+
+  val testimonial = Menu.i("Review") / "testimonial" >>
+    TemplateBox(() => Templates("testimonial" :: Nil))
   
   def flowComplete_? = (!petChoice.is.isEmpty && !petSize.is.isEmpty && !petProduct.is.isEmpty)
 
@@ -118,6 +121,7 @@ object Paths {
 
   def siteMap = SiteMap(
     homePage,
+    testimonial,
     LandingPage.fetchLanding,
     PetChoice.menu,
     DogSize.menu,
