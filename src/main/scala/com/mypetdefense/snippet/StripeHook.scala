@@ -42,6 +42,7 @@ trait StripeHook extends RestHelper with Loggable {
       val city = shippingAddress.city.get
       val state = shippingAddress.state.get
       val zip = shippingAddress.zip.get
+      val activePets_? = user.activePets.length > 0
       
       def formatAmount(possibleAmount: String) = {
         val formattedAmount = tryo(possibleAmount.toDouble/100.0).openOr(0D)
@@ -52,7 +53,7 @@ trait StripeHook extends RestHelper with Loggable {
           f"$formattedAmount%2.2f"
       }
 
-      if (notTrial_?) {
+      if (notTrial_? && activePets_?) {
         TaxJarService.processTaxesCharged(
           invoicePaymentId,
           city,
@@ -62,17 +63,19 @@ trait StripeHook extends RestHelper with Loggable {
           formatAmount(tax)
         )
 
-        val shipment = Shipment.createShipment(
-          user,
-          invoicePaymentId,
-          formatAmount(amountPaid),
-          formatAmount(tax)
-        )
+        if (activePets_?) {
+          val shipment = Shipment.createShipment(
+            user,
+            invoicePaymentId,
+            formatAmount(amountPaid),
+            formatAmount(tax)
+          )
 
-        shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
+          shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
 
-        if (Props.mode == Props.RunModes.Production) {
-          emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
+          if (Props.mode == Props.RunModes.Production) {
+            emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
+          }
         }
       }
 
