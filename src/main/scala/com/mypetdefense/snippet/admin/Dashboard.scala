@@ -78,13 +78,18 @@ object Dashboard extends Loggable {
 
 class Dashboard extends Loggable {
 
-  def getUpcomingShipments = {
+  def upcomingShipments = {
     Subscription.findAll(
       BySql(
         "nextShipDate < CURRENT_DATE + interval '5 day'",
         IHaveValidatedThisSQL("mike","2016-09-04")
       )
     )
+  }
+
+  val activeSubscriptions = upcomingShipments.filter { subscription =>
+    val pets = subscription.user.obj.map(_.activePets).getOrElse(Nil)
+    pets.length > 0
   }
 
   def paymentProcessed_?(shipment: Box[Shipment]) = {
@@ -112,7 +117,7 @@ class Dashboard extends Loggable {
   def render = {
     ".dashboard [class+]" #> "current" &
     "#csv-export [href]" #> Dashboard.exportMenu.loc.calcDefaultHref &
-    ".shipment" #> getUpcomingShipments.map { subscription =>
+    ".shipment" #> activeSubscriptions.map { subscription =>
       val shipment = Shipment.find(
         By(Shipment.subscription, subscription),
         By(Shipment.expectedShipDate, subscription.nextShipDate.get)

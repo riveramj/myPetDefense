@@ -29,7 +29,10 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
 
   def getProducts = Pet.findAll(By(Pet.user, user.get)).flatMap(_.product.obj)
 
-  def getPetAndProducts = Pet.findAll(By(Pet.user, user.get)).map { pet =>
+  def getPetAndProducts = Pet.findAll(
+    By(Pet.user, user.get),
+    By(Pet.status, Status.Active)
+  ).map { pet =>
     (pet, pet.product.obj)
   }
 

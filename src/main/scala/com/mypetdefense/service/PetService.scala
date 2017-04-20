@@ -84,18 +84,13 @@ object PetService extends Loggable {
 
     Try(Await.result(updateSubscription, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(stripeSub)) =>
-        if (pet.delete_!)
-          Full(pet)
-        else
-          Empty
+        Full(pet.status(Status.Inactive).saveMe)
 
       case TrySuccess(stripeFailure) =>
         logger.error(s"update (remove) subscription failed with stipe error: ${stripeFailure}")
         logger.error(s"trying to delete ${pet} anyways")
-        if (pet.delete_!)
-          Full(pet)
-        else
-          Empty
+
+        Full(pet.status(Status.Inactive).saveMe)
 
       case TryFail(throwable: Throwable) =>
         logger.error(s"update (remove) subscription failed with other error: ${throwable}")
