@@ -117,7 +117,7 @@ class Dashboard extends Loggable {
   def render = {
     ".dashboard [class+]" #> "current" &
     "#csv-export [href]" #> Dashboard.exportMenu.loc.calcDefaultHref &
-    ".shipment" #> activeSubscriptions.map { subscription =>
+    ".shipment" #> activeSubscriptions.sortBy(_.nextShipDate.get.getTime).map { subscription =>
       val shipment = Shipment.find(
         By(Shipment.subscription, subscription),
         By(Shipment.expectedShipDate, subscription.nextShipDate.get)
