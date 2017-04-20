@@ -67,7 +67,10 @@ class PetsAndProducts extends Loggable {
   }
 
   val pets = user.map { parent => 
-    Pet.findAll(By(Pet.user, parent))
+    Pet.findAll(
+      By(Pet.user, parent),
+      By(Pet.status, Status.Active)
+    )
   }.openOr(Nil)
 
 

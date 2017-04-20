@@ -154,7 +154,10 @@ class Parents extends Loggable {
             ".create-coupon-container .create-coupon" #> SHtml.ajaxSubmit("Change Coupon", () => addCoupon(parent, chosenCoupon))
           } & 
           {
-            val pets = Pet.findAll(By(Pet.user, parent))
+            val pets = Pet.findAll(
+              By(Pet.user, parent),
+              By(Pet.status, Status.Active)
+            )
 
             ".pet" #> pets.map { pet =>
               ".pet-name *" #> pet.name &
@@ -212,7 +215,7 @@ class Parents extends Loggable {
         ".coupon *" #> parent.coupon.obj.map(_.couponCode.get) &
         ".referer *" #> parent.referer.obj.map(_.name.get) &
         ".ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
-        ".actions .delete" #> ClearNodesIf(parent.pets.size > 0) &
+        ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
         ".actions .delete [onclick]" #> Confirm(s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
           ajaxInvoke(deleteParent(parent))
         ) 
