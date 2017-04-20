@@ -43,6 +43,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
 
   def getSubscription = subscription.headOption
 
+  def activePets = pets.filter(_.status == Status.Active)
+
   def createNewUser(
     firstName: String,
     lastName: String,
