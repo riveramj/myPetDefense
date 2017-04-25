@@ -20,5 +20,8 @@ $(document).ready ->
     
     selectedTab.parent().addClass('active')
     selectedTab.parents('.parent-nav').siblings(selectedTabClass).addClass('active')
+  $('.dashboard-nav').on "click", 'button', (event) ->
+    $(event.target).parent().siblings().removeClass('active')
+    $(event.target).parent().addClass('active')
 
     
