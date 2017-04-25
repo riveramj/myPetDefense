@@ -7,6 +7,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.http._
+  import js.JsCmds._
 import net.liftweb.mapper.{BySql, IHaveValidatedThisSQL, By}
 
 import java.text.SimpleDateFormat
@@ -77,20 +78,50 @@ object Dashboard extends Loggable {
 }
 
 class Dashboard extends Loggable {
+  var subscriptionSet: List[Subscription] = Nil
+  var shipmentRenderer: Box[IdMemoizeTransform] = Empty
 
-  def upcomingShipments = {
+  val currentShipments = {
     Subscription.findAll(
       BySql(
-        "nextShipDate < CURRENT_DATE + interval '5 day'",
-        IHaveValidatedThisSQL("mike","2016-09-04")
+        "nextShipDate >= CURRENT_DATE and nextShipdate < current_date + interval '5 day'",
+        IHaveValidatedThisSQL("mike","2017-04-26")
       )
     )
   }
 
-  val activeSubscriptions = upcomingShipments.filter { subscription =>
-    val pets = subscription.user.obj.map(_.activePets).getOrElse(Nil)
-    pets.length > 0
+  val pendingShipments = {
+    Subscription.findAll(
+      BySql(
+        "nextShipDate > CURRENT_DATE - interval '14 day' and nextshipdate < current_date",
+        IHaveValidatedThisSQL("mike","2017-04-26")
+      )
+    )
   }
+
+  val pastDueShipments = {
+    Subscription.findAll(
+      BySql(
+        "nextShipDate < CURRENT_DATE and nextshipdate < current_date - interval '14 day'",
+        IHaveValidatedThisSQL("mike","2017-04-26")
+      )
+    )
+  }
+
+  def updateSubscriptionSet(subscriptions: List[Subscription]) = {
+    subscriptions.filter { subscription =>
+      val pets = subscription.user.obj.map(_.activePets).getOrElse(Nil)
+      pets.length > 0
+    }
+  }
+
+  def changeSubscriptionSet(subscriptions: List[Subscription]) = {
+    subscriptionSet = updateSubscriptionSet(subscriptions)
+
+    shipmentRenderer.map(_.setHtml).openOr(Noop)
+  }
+
+  subscriptionSet = updateSubscriptionSet(currentShipments)
 
   def paymentProcessed_?(shipment: Box[Shipment]) = {
     val paymentId = shipment.map(_.stripePaymentId.get).openOr("")
@@ -117,35 +148,42 @@ class Dashboard extends Loggable {
   def render = {
     ".dashboard [class+]" #> "current" &
     "#csv-export [href]" #> Dashboard.exportMenu.loc.calcDefaultHref &
-    ".shipment" #> activeSubscriptions.sortBy(_.nextShipDate.get.getTime).map { subscription =>
-      val shipment = Shipment.find(
-        By(Shipment.subscription, subscription),
+    "#dashboard-current [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(currentShipments)) &
+    "#dashboard-pending [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(pendingShipments)) &
+    "#dashboard-past-due [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(pastDueShipments)) &
+    ".dashboard-details" #> SHtml.idMemoize { renderer =>
+      shipmentRenderer = Full(renderer)
+
+      ".shipment" #> subscriptionSet.sortBy(_.nextShipDate.get.getTime).map { subscription =>
+        val shipment = Shipment.find(
+          By(Shipment.subscription, subscription),
         By(Shipment.expectedShipDate, subscription.nextShipDate.get)
       )
 
-      val user = subscription.user.obj
+        val user = subscription.user.obj
 
-      val petsAndProducts = subscription.getPetAndProducts
-      val dateFormat = new SimpleDateFormat("MMM dd")
+        val petsAndProducts = subscription.getPetAndProducts
+        val dateFormat = new SimpleDateFormat("MMM dd")
 
-      val shipAddressRaw = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
+        val shipAddressRaw = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
 
-      val address = shipAddressRaw.map { ship =>
-        s"""${ship.street1}
+        val address = shipAddressRaw.map { ship =>
+          s"""${ship.street1}
           |${ship.street2}
           |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
-      }
+        }
 
-      ".ship-on *" #> dateFormat.format(subscription.nextShipDate.get) &
-      ".name *" #> user.map(_.nameAndEmail) &
-      ".address *" #> address &
-      ".product" #> petsAndProducts.map { case (pet, product) =>
-        ".pet-name *" #> pet.name.get &
-        ".product-name *" #> product.map(_.name.get) &
-        ".product-size *" #> product.map(_.size.get.toString)
-      } &
-      ".payment-processed *" #> paymentProcessed_?(shipment) &
-      ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, user, shipment))
+        ".ship-on *" #> dateFormat.format(subscription.nextShipDate.get) &
+        ".name *" #> user.map(_.nameAndEmail) &
+        ".address *" #> address &
+        ".product" #> petsAndProducts.map { case (pet, product) =>
+          ".pet-name *" #> pet.name.get &
+          ".product-name *" #> product.map(_.name.get) &
+          ".product-size *" #> product.map(_.size.get.toString)
+        } &
+        ".payment-processed *" #> paymentProcessed_?(shipment) &
+        ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, user, shipment))
+      }
     }
   }
 }
