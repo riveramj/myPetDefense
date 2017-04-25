@@ -148,11 +148,6 @@ class Dashboard extends Loggable {
   def render = {
     ".dashboard [class+]" #> "current" &
     "#csv-export [href]" #> Dashboard.exportMenu.loc.calcDefaultHref &
-<<<<<<< HEAD
-    ".shipment" #> activeSubscriptions.sortBy(_.nextShipDate.get.getTime).map { subscription =>
-      val shipment = Shipment.find(
-        By(Shipment.subscription, subscription),
-=======
     "#dashboard-current [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(currentShipments)) &
     "#dashboard-pending [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(pendingShipments)) &
     "#dashboard-past-due [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(pastDueShipments)) &
@@ -162,7 +157,6 @@ class Dashboard extends Loggable {
       ".shipment" #> subscriptionSet.sortBy(_.nextShipDate.get.getTime).map { subscription =>
         val shipment = Shipment.find(
           By(Shipment.subscription, subscription),
->>>>>>> origin/master
         By(Shipment.expectedShipDate, subscription.nextShipDate.get)
       )
 
