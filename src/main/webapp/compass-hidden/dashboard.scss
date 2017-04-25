@@ -1,0 +1,43 @@
+@import "base";
+
+.shipment-container {
+  background-color: #ffffff;
+  padding: 20px;
+  margin-bottom: 50px;
+}
+
+.dashboard-nav {
+  li {
+    display: inline-block;
+    margin-right: 2px;
+
+    background-color: #2E9F9B;
+    color: #ffffff;
+
+    &.active {
+      background-color: #F2F2F2;
+      color: #454343;
+    }
+  }
+
+  button {
+    padding: 10px 18px;
+    border: none;
+
+    color: inherit;
+    background-color: inherit;
+
+    font-size: rem(13px);
+
+    cursor: pointer;
+  }
+}
+
+.dashboard-details {
+  padding: 20px;
+  background-color: #F1F1F1;
+
+  table {
+    margin-bottom: 0;
+  }
+}
