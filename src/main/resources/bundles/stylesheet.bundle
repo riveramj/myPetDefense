@@ -48,6 +48,10 @@ parents
 parents.css
 admin.css
 
+dashboard
+dashboard.css
+admin.css
+
 account-overview
 account-overview.css
 
