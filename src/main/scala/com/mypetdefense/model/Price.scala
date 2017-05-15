@@ -1,6 +1,7 @@
 package com.mypetdefense.model
 
 import net.liftweb.mapper._
+import net.liftweb.common.Box
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
@@ -10,7 +11,7 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
   object priceId extends MappedLong(this){
     override def dbIndexed_? = true
   }
-  object price extends MappedLong(this)
+  object price extends MappedDouble(this)
   object code extends MappedString(this, 100)
   object product extends MappedLongForeignKey(this, Product)
   object active extends MappedBoolean(this)
@@ -18,7 +19,7 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
     override def defaultValue = new Date()
   }
 
-  def createPrice(price: Long, code: String, product: Product) = {
+  def createPrice(price: Double, code: String, product: Box[Product]) = {
     Price.create
     .priceId(generateLongId)
     .price(price)
