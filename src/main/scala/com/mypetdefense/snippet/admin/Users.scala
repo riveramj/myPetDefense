@@ -118,7 +118,6 @@ class Users extends Loggable {
     ".user" #> users.map { user =>
       ".name *" #> user.name &
       ".email *" #> user.email &
-      ".email *" #> user.email &
       ".type *" #> user.userType &
       ".agency *" #> user.agency.obj.map(_.name.get) &
       ".actions .delete" #> ClearNodesIf(user.userType == UserType.Parent) &
