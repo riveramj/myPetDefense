@@ -19,9 +19,9 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
     override def defaultValue = new Date()
   }
 
-  def createPrice(price: Double, code: String, product: Box[Product]) = {
+  def createPrice(priceId: Long, price: Double, code: String, product: Box[Product]) = {
     Price.create
-    .priceId(generateLongId)
+    .priceId(priceId)
     .price(price)
     .code(code)
     .product(product)
