@@ -4,10 +4,11 @@
 }
 
 #logo-name { 
-  padding-top: em(19px);
-  padding-left: em(25px);
+  padding-top: em(14px);
+  padding-bottom: em(11px);
+  padding-left: em(15px);
 
-  float: left;
+  display: inline-block;
   
   @media (min-width: $bp-medium) {
     padding-top: em(16px);
@@ -32,13 +33,16 @@ nav {
   
   text-decoration: none;
   text-transform: uppercase;
-  font-weight: $semibold;
+  font-weight: $bold;
   font-size: em(14px);
+
+  letter-spacing: 0.31px;
+  line-height: 17px;
 }
 
 #menu-entries {
   .login, .new-user-signup, .entry {
-    padding: em(28px) em(25px);
+    padding: rem(17px) rem(19px) rem(16px) rem(20px);
   }
 
   .login {
@@ -120,7 +124,7 @@ nav {
       color: #ffffff;
     }
 
-    padding: em(28px) em(25px);
+    padding: rem(17px) rem(19px) rem(16px) rem(20px);
 
     @media (min-width: $bp-med) {
       border-radius: 5px;

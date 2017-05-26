@@ -6,8 +6,8 @@
   background-color: #2E9F9B;
   text-align: center;
   color: #FFFFFF;
-  font-size: em(12px);
-  padding: em(10px);
+  font-size: em(13px);
+  padding: em(13px);
 
   @media (min-width: $bp-medium) {
     font-size: em(16px);
@@ -16,6 +16,13 @@
   span {
     font-weight: $bold;
     letter-spacing: .4px;
+  }
+
+  &:after {
+    @extend %icon;
+    content: $fa-var-caret-right;
+    margin-left: 4px;
+    vertical-align: middle;
   }
 }
 
@@ -183,10 +190,11 @@
   }
 }
 
-#hero-dog-cat {
-  background: url(../../images/cat-dog-friends@2x.jpg) no-repeat center;
-  background-size: cover;
-  height: em(278px);
+#hero-dog-park {
+  background: url(../../images/dog-park-small@2x.png) no-repeat center;
+  background-size: contain;
+  background-attachment: fixed;
+  background-position-y: 85px;
 
   @media (min-width: $bp-medium) {
     height: 100%;
@@ -194,12 +202,8 @@
 }
 
 #tag-line-container {
-  position: relative;
-
-  margin-top: em(-27px);
-  background-color: $hero-background;
   text-align: center;
-  padding: em(31px) em(20px) em(25px);
+  padding-top: 217px;
 
   @media (min-width: $bp-medium) {
     width: 555px;
@@ -224,11 +228,23 @@
     display: inline-block;
     border-radius: 5px;
 
-    padding: rem(13px) rem(25px); 
+    padding: rem(15px) rem(41px); 
     margin-top: rem(22px);
-    margin-bottom: rem(21px);
+    margin-bottom: rem(40px);
+
+    font-size: 17px;
+    font-weight: $bold;
+    line-height: 27px;
+
+    letter-spacing: 0.4px;
 
     background-color: #FF8627;
+
+    &:after {
+      @extend %icon;
+      content: $fa-var-caret-right;
+      margin-left: -2px;
+    }
 
     @media (min-width: $bp-medium) {
       font-weight: $semibold;
@@ -243,19 +259,19 @@
 }
 
 #tag-line {
-  color: #f7f7f7;
+  background-color: #137875;
+  color: #FFFFFF;
+  margin-top: -1px;
+  width: 100%;
   
-  width: 200px;
-  margin: 0 auto;
-
-  @media (min-width: $bp-medium) {
-    width: auto;
-  }
-
   h3 {
-    font-size: rem(35px);
+    font-size: rem(28px);
     font-weight: $bold;
-    line-height: 50px;
+    line-height: 35px;
+    width: 329px;
+    margin: 0 auto;
+    padding-top: 29px;
+    padding-bottom: 3px;
 
     @media (min-width: $bp-medium) {
       font-weight: $semibold;
@@ -271,10 +287,13 @@
   text-align: center;
 
   div {
-    line-height: rem(30px);
+    line-height: rem(32px);
     font-size: rem(18px);
     font-weight: $normal;
     color: #ffffff;
+    width: 250px;
+    margin: 0 auto;
+    padding-bottom: 17px;
     
     @media (min-width: $bp-medium) {
       font-size: rem(22px);
@@ -627,15 +646,15 @@
 
 .action {
   background-color: #FF8627;
-  box-shadow: 0 6px #E2690A;
+  box-shadow: 0 3px #E2690A;
 
   &:hover {
     background-color: #FF7A11;
   }
 
   &:active {
-    box-shadow: 0 3px #E2690A;
-    transform: translateY(4px);
+    box-shadow: 0 1px #E2690A;
+    transform: translateY(2px);
   }
 }
 
