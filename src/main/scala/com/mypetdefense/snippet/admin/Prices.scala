@@ -18,8 +18,11 @@ import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
 import com.mypetdefense.util.ClearNodesIf
-import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.service._
+  import ValidationService._
 import com.mypetdefense.actor._
+
+import com.mypetdefense.util.RandomIdGenerator._
 
 object Prices extends Loggable {
   import net.liftweb.sitemap._
@@ -55,9 +58,26 @@ class Prices extends Loggable {
     ).flatten
 
     if(validateFields.isEmpty) {
-      val newPrice = Price.createPrice(price, code, chosenProduct)
+
+      val priceDbId = generateLongId
+      val date = LocalDate.now
+      val name = chosenProduct.map(_.name.get + s" (${code} ${date})").openOr("")
+
+      val stripePrice = PriceService.createStripePrice(
+        price,
+        priceDbId,
+        name
+      )
+
+      stripePrice match {
+        case Full(_) =>
+          val newStripePrice = Price.createPrice(priceDbId, price, code, chosenProduct)
+          S.redirectTo(Prices.menu.loc.calcDefaultHref)
+
+        case _ =>
+          Noop
+      }
       
-      S.redirectTo(Prices.menu.loc.calcDefaultHref)
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
