@@ -126,10 +126,8 @@ nav {
 
     padding: rem(17px) rem(19px) rem(16px) rem(20px);
 
-    @media (min-width: $bp-med) {
-      border-radius: 5px;
-      padding: rem(9px) rem(12px) rem(9px) rem(13px);
-      margin-left: rem(30px);
+    @media (min-width: $bp-medium) {
+      padding: 22px 22px 21px 25px;
     }
   }
 

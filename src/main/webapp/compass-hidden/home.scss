@@ -42,74 +42,57 @@
 }
 
 .hero {
-  clear: both;
+  @media (min-width: $bp-medium) {
+    background: url(../../images/dog-park@2x.jpg) no-repeat;
+    background-size: cover;
+  }
+  img {
+    width: 100%;
+    display: block;
+
+    @media (min-width: $bp-medium) {
+      display: none;
+    }
+  }
+}
+
+.tag-line {
+  text-align: center;
+
+  background-color: #137875;
+  color: #FFFFFF;
+  width: 100%;
   
   @media (min-width: $bp-medium) {
-    height: em(488px);
+    padding: 172px 0 170px;
+    width: 50%;
   }
 
-  @media (min-width: $bp-large) {
-    height: 532px;
-  }
-
-  #signup-container {
-    @media (min-width: $bp-medium) {
-      display: inline-block;
-      border-left: 1px solid #979797;
-      width: 191px;
-      height: 145px;
-      vertical-align: bottom;
-      padding-left: 22px;
-
-      .signup {
-        width: 191px;
-        padding: 16px 24px;
-        margin-top: 47px;
-      }
-    }
-
-    @media (min-width: $bp-large) {
-      width: 221px;
-      padding-left: 40px;
-      height: 120px;
-      vertical-align: bottom;
-      margin-bottom: 19px;
-
-      .signup {
-        width: auto;
-        padding: 12px 20px;
-        margin-top: 47px;
-      }
-    }
-  }
-}
-
-#dog-park {
-  background: url(../../images/dog-park-small@2x.png) no-repeat;
-  background-size: contain;
-}
-
-.tag-line-container {
-  text-align: center;
-  padding-top: 217px;
-
-  @media (min-width: $bp-medium) {
-    width: 555px;
+  h3 {
+    font-size: rem(28px);
+    font-weight: $bold;
+    line-height: 35px;
     margin: 0 auto;
-
-    position: relative;
-    top: -417px;
-    margin-top: 0;
-
-    background-color: rgba(0,0,0,0.70);
-
-    padding: em(20px) em(40px) em(30px);
+    padding: 29px 23px 3px;
+    
+    @media (min-width: $bp-medium) {
+      font-size: rem(32px);
+      padding: 0 69px 0 67px;
+      line-height: 38px;
+    }
   }
 
-  @media (min-width: $bp-large) {
-    width: 640px;
-    margin-right: 168px;
-    top: -450px;
+  > div {
+    line-height: rem(32px);
+    font-size: rem(18px);
+    font-weight: $normal;
+    color: #ffffff;
+    padding: 0 62px 17px;
+
+    @media (min-width: $bp-medium) {
+      font-size: rem(22px);
+      padding: 0 70px 0 71px;
+    }
   }
 
   .signup {
@@ -132,60 +115,6 @@
       @extend %icon;
       content: $fa-var-caret-right;
       margin-left: -2px;
-    }
-
-    @media (min-width: $bp-medium) {
-      font-weight: $semibold;
-      font-size: rem(18px);
-      letter-spacing: 0.4px;
-
-      padding: rem(16px) rem(30px);
-      margin-bottom: 0;
-      background-color: #FF8627;
-    }
-  }
-}
-
-.tag-line {
-  background-color: #137875;
-  color: #FFFFFF;
-  margin-top: -1px;
-  width: 100%;
-  
-  h3 {
-    font-size: rem(28px);
-    font-weight: $bold;
-    line-height: 35px;
-    margin: 0 auto;
-    padding: 29px 23px 3px;
-
-    @media (min-width: $bp-medium) {
-      font-weight: $semibold;
-      font-size: rem(45px);
-      line-height: rem(72px);
-    }
-
-    @media (min-width: $bp-large) {
-      font-size: rem(53px);
-    }
-  }
-
-  text-align: center;
-
-  div {
-    line-height: rem(32px);
-    font-size: rem(18px);
-    font-weight: $normal;
-    color: #ffffff;
-    padding: 0 62px 17px;
-    
-    @media (min-width: $bp-medium) {
-      font-size: rem(22px);
-    }
-
-    @media (min-width: $bp-medium) {
-      font-size: rem(27px);
-      line-height: 34px;
     }
   }
 }
