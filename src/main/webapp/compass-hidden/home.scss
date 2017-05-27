@@ -45,7 +45,10 @@
   @media (min-width: $bp-medium) {
     background: url(../../images/dog-park@2x.jpg) no-repeat;
     background-size: cover;
+    height: 550px;
+    background-position-x: -135px;
   }
+
   img {
     width: 100%;
     display: block;
@@ -66,6 +69,7 @@
   @media (min-width: $bp-medium) {
     padding: 172px 0 170px;
     width: 50%;
+    background-color: rgba(14, 85, 82, 0.73);
   }
 
   h3 {
@@ -172,6 +176,8 @@
 #product-hand {
   background: url(../../images/product-hand-small@2x.jpg) no-repeat;
   background-size: contain;
+  
+  padding-top: 216px;
 }
 
 #footer {
