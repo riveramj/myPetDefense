@@ -41,7 +41,7 @@
   }
 }
 
-#hero {
+.hero {
   clear: both;
   
   @media (min-width: $bp-medium) {
@@ -84,18 +84,12 @@
   }
 }
 
-#hero-dog-park {
-  background: url(../../images/dog-park-small@2x.png) no-repeat center;
+#dog-park {
+  background: url(../../images/dog-park-small@2x.png) no-repeat;
   background-size: contain;
-  background-attachment: fixed;
-  background-position-y: 85px;
-
-  @media (min-width: $bp-medium) {
-    height: 100%;
-  }
 }
 
-#tag-line-container {
+.tag-line-container {
   text-align: center;
   padding-top: 217px;
 
@@ -152,7 +146,7 @@
   }
 }
 
-#tag-line {
+.tag-line {
   background-color: #137875;
   color: #FFFFFF;
   margin-top: -1px;
@@ -246,85 +240,9 @@
   background-color: #E7E7E7;
 }
 
-#product-shot-container {
-  #product-shot {
-    background: url(../../images/product-shot.jpg) no-repeat center;
-    background-size: contain;
-    height: em(450px);
-    background-position-y: 200px;
-
-    @media (min-width: $bp-medium) {
-      background-size: cover;
-      background-position-y: 0;
-      
-      display: flex;
-      justify-content: center;
-    }
-
-    @media (min-width: $bp-large) {
-      background: url(../../images/product-shot-large@2x.jpg) no-repeat center;
-      height: 625px;
-      background-size: cover;
-
-      display: flex;
-      justify-content: center;
-    }
-  }
-}
-
-#product-shot-cta-container {
-  position: relative;
-  color: #FFFFFF;
-  font-size: rem(18px);
-
-  line-height: 27px;
-
-  background-color: $hero-background;
-  text-align: center;
-  padding: rem(36px) rem(30px);
-
-  @media (min-width: $bp-medium) {
-    width: 382px;
-
-    margin: auto;
-    position: initial;
-
-    background-color: rgba(0,0,0,0.70);
-
-    padding: rem(35px) rem(70px) rem(40px);
-  }
-
-  @media (min-width: $bp-large) {
-    margin: auto;
-    position: initial;
-
-    width: 465px;
-
-    font-size: rem(22px);
-    line-height: 28px;
-
-    padding: rem(45px) rem(63px) rem(50px);
-  }
-
-  .signup {
-    display: inline-block;
-    border-radius: 5px;
-    font-size: rem(18px);
-
-    letter-spacing: 0.4px;
-
-    padding: rem(13px) rem(18px);
-    margin-top: rem(22px);
-
-    background-color: #FF8627;
-
-    @media (min-width: $bp-medium) {
-      margin-bottom: 0;
-      background-color: #FF8627;
-
-      padding: rem(9px) rem(18px);
-    }
-  }
+#product-hand {
+  background: url(../../images/product-hand-small@2x.jpg) no-repeat;
+  background-size: contain;
 }
 
 #footer {
