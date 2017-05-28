@@ -46,14 +46,16 @@
   }
 }
 
-.hero {
+.dog-park {
   @media (min-width: $bp-medium) {
     background: url(../../images/dog-park@2x.jpg) no-repeat;
     background-size: cover;
-    height: 550px;
-    background-position-x: -135px;
-    clear: both;
+    height: 450px;
   }
+}
+
+.hero {
+  clear: both;
 
   img {
     width: 100%;
@@ -73,8 +75,9 @@
   width: 100%;
   
   @media (min-width: $bp-medium) {
-    padding: 172px 0 170px;
     width: 50%;
+    height: 100%;
+    padding-top: 100px;
     background-color: rgba(14, 85, 82, 0.73);
   }
 
@@ -87,7 +90,7 @@
     
     @media (min-width: $bp-medium) {
       font-size: rem(32px);
-      padding: 0 69px 0 67px;
+      padding: 0 30px;
       line-height: 38px;
     }
   }
@@ -101,7 +104,7 @@
 
     @media (min-width: $bp-medium) {
       font-size: rem(22px);
-      padding: 0 70px 0 71px;
+      padding: 0 40px;
     }
   }
 
@@ -214,11 +217,17 @@ li.feature-info {
   }
 }
 
-#product-hand {
+.product-hand {
   background: url(../../images/product-hand-small@2x.jpg) no-repeat;
   background-size: contain;
-  
   padding-top: 216px;
+  
+  @media (min-width: $bp-medium) {
+    padding-top: 0;
+    background: url(../../images/product-hand@2x.jpg) no-repeat;
+    background-size: cover;
+    height: 450px;
+  }
 }
 
 #footer {
