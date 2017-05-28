@@ -46,11 +46,22 @@
   }
 }
 
-.dog-park {
+.hero.dog-park {
   @media (min-width: $bp-medium) {
-    background: url(../../images/dog-park@2x.jpg) no-repeat;
+    background: url(../../images/dog-park@2x.jpg);
+    background-color: #259490;
+    background-repeat: no-repeat;
     background-size: cover;
     height: 450px;
+  }
+  
+  @media (min-width: $bp-large) {
+    height: 550px;
+    background: url(../../images/sunglasses-dog@2x.jpg), url(../../images/dog-park@2x.jpg);
+    background-size: contain;
+    background-position: left center, right center;
+    background-color: #259490;
+    background-repeat: no-repeat;
   }
 }
 
@@ -79,6 +90,11 @@
     height: 100%;
     padding-top: 100px;
     background-color: rgba(14, 85, 82, 0.73);
+  }
+
+  @media (min-width: $bp-large) {
+    width: 33%;
+    margin-left: 488px;
   }
 
   h3 {
