@@ -46,36 +46,33 @@
   }
 }
 
-.hero.dog-park {
+.dog-park {
+  background: url(../../images/dog-park-small@2x.jpg);
+  background-repeat: no-repeat;
+  background-size: contain;
+  padding-top: 216px;
+
   @media (min-width: $bp-medium) {
+    padding-top: 0;
     background: url(../../images/dog-park@2x.jpg);
-    background-color: #259490;
     background-repeat: no-repeat;
     background-size: cover;
     height: 450px;
   }
   
   @media (min-width: $bp-large) {
+    background-color: #259490;
     height: 550px;
-    background: url(../../images/sunglasses-dog@2x.jpg), url(../../images/dog-park@2x.jpg);
-    background-size: contain;
-    background-position: left center, right center;
+    background: url(../../images/dog-park@2x.jpg);
+    background-size: cover;
     background-color: #259490;
     background-repeat: no-repeat;
+    background-position-y: -100px;
   }
 }
 
 .hero {
   clear: both;
-
-  img {
-    width: 100%;
-    display: block;
-
-    @media (min-width: $bp-medium) {
-      display: none;
-    }
-  }
 }
 
 .tag-line {
@@ -88,13 +85,14 @@
   @media (min-width: $bp-medium) {
     width: 50%;
     height: 100%;
-    padding-top: 100px;
+    padding-top: 120px;
     background-color: rgba(14, 85, 82, 0.73);
   }
 
   @media (min-width: $bp-large) {
     width: 33%;
-    margin-left: 488px;
+    margin-left: 20%;
+    padding-top: 170px;
   }
 
   h3 {
@@ -109,6 +107,10 @@
       padding: 0 30px;
       line-height: 38px;
     }
+
+    @media (min-width: $bp-large) {
+      padding: 0 30px;
+    }
   }
 
   > div {
@@ -121,6 +123,10 @@
     @media (min-width: $bp-medium) {
       font-size: rem(22px);
       padding: 0 40px;
+    }
+
+    @media (min-width: $bp-large) {
+      padding: 0 70px;
     }
   }
 
@@ -140,6 +146,10 @@
 
     background-color: #FF8627;
 
+    @media (min-width: $bp-large) {
+      margin-top: rem(38px);
+    }
+
     &:after {
       @extend %icon;
       content: $fa-var-caret-right;
@@ -157,6 +167,17 @@
     clear: both;
   }
 
+  @media (min-width: $bp-large) {
+    padding: 170px 0 200px;
+
+    ul {
+      max-width: 953px;
+      text-align: center;
+
+      margin: 0 auto;
+    }
+  }
+
   li {
     text-align: center;
   }
@@ -167,6 +188,10 @@
   @media (min-width: $bp-medium) {
     float: right;
     margin-right: 60px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin-top: -20px;
   }
 }
 
@@ -184,6 +209,11 @@ li.feature-tagline {
     margin-top: 0;
     padding-left: 60px;
   }
+
+  @media (min-width: $bp-large) {
+    font-size: 28px;
+    width: 465px;
+  }
 }
 
 li.feature-info {
@@ -197,6 +227,11 @@ li.feature-info {
     text-align: left;
     padding-left: 60px;
     padding-top: 15px;
+  }
+
+  @media (min-width: $bp-large) {
+    font-size: 24px;
+    width: 465px;
   }
 }
 
@@ -231,6 +266,12 @@ li.feature-info {
       padding-left: 35px;
     }
   }
+
+  @media (min-width: $bp-large) {
+    .graphic {
+      margin: -20px 0 165px 60px;
+    }
+  }
 }
 
 .product-hand {
@@ -243,6 +284,15 @@ li.feature-info {
     background: url(../../images/product-hand@2x.jpg) no-repeat;
     background-size: cover;
     height: 450px;
+  }
+
+  @media (min-width: $bp-large) {
+    height: 550px;
+    background-position-y: -95px;
+
+    .tag-line h3 {
+      padding: 0 67px 0 69px;
+    }
   }
 }
 

@@ -8,16 +8,21 @@
     padding-top: rem(50px);
   }
 
+  @media (min-width: $bp-large) {
+    padding-top: rem(70px);
+    padding-bottom: rem(112px);
+  }
+
   #steps {
     padding-top: rem(30px);
     
+    @media (min-width: $bp-large) {
+      padding-top: rem(45px);
+    }
+
     li {
       margin-top: 60px;
       
-      @media (min-width: $bp-medium) {
-        margin-top: 0;
-      }
-
       &:first-child {
         margin-top: 0;
       }
@@ -26,6 +31,8 @@
 
       @media (min-width: $bp-medium) {
         margin-left: 35px;
+        margin-top: 0;
+        margin-bottom: 0;
 
         display: inline-block;
         
@@ -37,7 +44,7 @@
       }
 
       @media (min-width: $bp-large) {
-        margin-left: 20px;
+        margin-left: 70px;
       }
     }
   }
@@ -56,8 +63,13 @@
 }
 
 #how-it-works-header {
-  background: url(../../images/ribbon/how-it-works-ribbon.png) no-repeat center;
+  background: url(../../images/ribbon/how-it-works-ribbon-small.png) no-repeat center;
   height: 53px;
+
+  @media (min-width: $bp-large) {
+    background: url(../../images/ribbon/how-it-works-ribbon.png) no-repeat center;
+    height: 53px;
+  }
 }
 
 .step {
@@ -79,19 +91,11 @@
   @media (min-width: $bp-large) {
     min-height: 290px;
     width: rem(279px);
-    padding: rem(35px) rem(50px) rem(37px);
   }
 
   img {
     width: 222px;
     height: 185px;
-  }
-
-  @media (min-width: $bp-large) {
-    img {
-      width: 120px;
-      height: 120px;
-    }
   }
 }
 
@@ -114,5 +118,10 @@
     line-height: rem(24px);
     font-size: rem(18px);
     color: #444343;
+
+    @media (min-width: $bp-large) {
+      width: 222px;
+      margin: 0 auto;
+    }
   }
 }

@@ -15,8 +15,7 @@
   }
 
   @media (min-width: $bp-large) {
-    padding-top: rem(15px);
-    padding-left: em(123px);
+    padding: 15px 0 15px 123px;
   }
 }
 
@@ -47,9 +46,10 @@ nav {
 
   .login {
     @media (min-width: $bp-large) {
-      font-size: rem(16px);
+      font-size: rem(20px);
+      line-height: 24px;
       font-weight: $bold;
-      padding: em(22px) em(25px);
+      padding: 19px 25px 19px 0;
     }
   }
 
@@ -102,6 +102,12 @@ nav {
     }
   }
 
+  @media (min-width: $bp-large) {
+    .desktop .signup {
+      font-size: rem(20px);
+    }
+  }
+
   font-size: rem(14px);
   font-weight: $bold;
 
@@ -128,6 +134,10 @@ nav {
 
     @media (min-width: $bp-medium) {
       padding: 22px 22px 21px 25px;
+    }
+
+    @media (min-width: $bp-large) {
+      padding: 0;
     }
   }
 
