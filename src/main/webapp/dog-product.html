@@ -3,7 +3,6 @@
     <ul>
       <li class="complete">
         <a href="/pet-choice">
-          <i class="fa fa-check"></i>
           <dl class="step-container">
             <dt class="step-name">1. Pet</dt>
             <dd class="step-choice">Dog</dd>
@@ -28,9 +27,8 @@
       </li>
     </ul>
   </div>
-  <div class="flow-step">
+  <div class="flow-step choose-pet complete">
     <a href="/pet-choice">
-      <i class="fa fa-check"></i>
       <dl class="step-container">
         <dt class="step-name">1. Pet</dd>
         <dd class="step-choice">Dog</dd>
@@ -41,11 +39,12 @@
     <div class="step-name">2. Product</div>
     <div class="arrow-up"></div>
   </div>
+  
   <form class="current-step" data-lift="DogProduct">
     <div class="header-container">
       <h1 class="step-header">Choose Your Product</h1>
       <h2 class="step-question">
-        <span id="select-a-product">Please select one of the <span id="product-count">three products below</span>. </span>All of the products we offer are made and packaged in the <span id="products-usa">United States</span>.
+        <span id="select-a-product">Please select one of the <span id="product-count">three products below</span>. </span>All of the products we offer are made and packaged in the United States.
       </h2>
     </div>
     <div class="promise-container">
@@ -57,34 +56,94 @@
       </div>
     </div>
 
+    <div class="choice-container collapsed frontline-plus">
+      <ul>
+        <li class="product-logo">
+          <picture>
+            <source 
+              media="(min-width: 48em)" 
+              srcset="images/products/frontline-plus.png, images/products/frontline-plus@2x.png 2x">
+            <img class="product" src="images/products/frontline-plus-small.jpg" srcset="images/products/frontline-plus-small.jpg, images/products/frontline-plus-small@2x.jpg 2x">
+          </picture>
+        </li>
+        <li class="product-price">
+          $<span class="price">14</span> per month
+        </li>
+        <li class="product-statement">Complete flea and tick control.</li>
+        <li><button class="select-choice" id="frontline-plus">Select</button></li>
+        <li class="expand-details-container">
+          <button type="button" class="expand-details">
+            View product details
+          </button>
+        </li>
+      </ul>
+
+      <ul class="product-features">
+        <li class="feature">
+          <ul class="feature-container">
+            <li class="top-recommended feature-icon"></li>
+            <li class="feature-container">
+              <span class="key-point">Top Vet Recommended</span> Flea &amp; Tick preventative
+            </li>
+          </ul>
+        </li>
+        <li class="feature">
+          <div>
+            <i class="fa fa-ban"></i>
+            <div class="feature-container">
+              Kills all existing fleas on your pet <span class="key-point">within 12 hours</span>
+            </div>
+          </div>
+        </li>
+        <li class="feature">
+          <div>
+            <i class="fa fa-ban"></i>
+            <div class="feature-container">
+              Kills ticks and chewing lice              
+            </div>
+          </div>
+        </li>
+        <li class="feature">
+          <div>
+            <i class="fa fa-umbrella"></i>
+            <div class="feature-container">
+              Waterproof
+             </div>
+           </div>
+         </li>
+       </ul>
+       <div class="product-description">
+         <div class="product-description-header">
+           <h3>More Info</h3>
+           <a class="product-label" target="_blank" href="images/labels/Frontline-Plus-for-Dogs-Specimen-Label.pdf">View Label</a>
+         </div>
+         ZoGuard Plus provides total control of both fleas and ticks. Classified as a "non-repellent," fleas and ticks cannot detect the presence of the active ingredients, ensuring a lethal dose is achieved.
+       </div>
+    </div>
+
     <div class="choice-container collapsed zoguard-plus">
-      <div class="product-name"><h2>Zoguard Plus<br>for Dogs</h2></div>
-      <picture>
-        <source 
-          media="(min-width: 48em)" 
-          srcset="images/products/ZoGuard-Plus_Dogs.png, images/products/ZoGuard-Plus_Dogs@2x.png 2x">
-        <img class="product" src="images/products/ZoGuard-Plus_Dogs-small.png" srcset="images/products/ZoGuard-Plus_Dogs-small.png, images/products/ZoGuard-Plus_Dogs-small@2x.png 2x">
-      </picture>
-      <div><div class="compare-to">Compare to Frontline Plus</div></div>
-      <div class="ribbon">
-        <picture>
-          <source 
-            media="(min-width: 48em)" 
-            srcset="images/ribbon/tablet.png, images/ribbon/tablet@2x.png 2x">
-          <img class="ribbon" src="images/ribbon/mobile.png" srcset="images/ribbon/mobile.png, images/ribbon/mobile@2x.png 2x">
-        </picture>
-      </div>
+      <ul>
+        <li class="product-logo">
+          <picture>
+            <source 
+              media="(min-width: 48em)" 
+              srcset="images/products/ZoGuard-Plus-Dogs.jpg, images/products/ZoGuard-Plus-Dogs@2x.jp 2x">
+            <img class="product" src="images/products/ZoGuard-Plus-Dogs-small.jpg" srcset="images/products/ZoGuard-Plus-Dogs-small.jpg, images/products/ZoGuard-Plus-Dogs-small@2x.jpg 2x">
+          </picture>
+        </li>
+        <li class="compare-to">Compare to Frontline Plus</li>
+        <li class="product-price">
+          $<span class="price">14</span> per month
+        </li>
+        <li class="product-statement">Complete flea and tick control.</li>
+        <li><button class="select-choice" id="zoguard-plus">Select</button></li>
+        <li class="expand-details-container">
+          <button type="button" class="expand-details">
+            View product details
+          </button>
+        </li>
+      </ul>
 
-      <div class="product-statement">Complete flea and tick control.</div>
-      <button class="select-choice" id="zoguard-plus">Select</button>
-
-      <div class="expand-details-container">
-        <button type="button" class="expand-details">
-          View product details
-          <i class="fa fa-caret-right"></i>
-          <i class="fa fa-caret-down"></i>
-        </button>
-      </div>
       <ul class="product-features">
         <li class="feature">
           <div>
@@ -127,34 +186,31 @@
          ZoGuard Plus provides total control of both fleas and ticks. Classified as a "non-repellent," fleas and ticks cannot detect the presence of the active ingredients, ensuring a lethal dose is achieved.
        </div>
     </div>
+
     <div class="choice-container collapsed adventure-plus">
-      <div class="product-name"><h2>Adventure Plus<br>for Dogs</h2></div>
-      <picture>
-        <source 
-          media="(min-width: 48em)" 
-          srcset="images/products/Adventure-Plus_Dogs.png, images/products/Adventure-Plus_Dogs@2x.png 2x">
-        <img class="product" src="images/products/Adventure-Plus_Dogs-small.png" srcset="images/products/Adventure-Plus_Dogs-small.png, images/products/Adventure-Plus_Dogs-small@2x.png 2x">
-      </picture>
-      <div><div class="compare-to">Compare to Advantage II</div></div>
-      <div class="ribbon">
-        <picture>
-          <source 
-            media="(min-width: 48em)" 
-            srcset="images/ribbon/desktop.png, images/ribbon/desktop@2x.png 2x">
-          <img class="ribbon" src="images/ribbon/mobile.png" srcset="images/ribbon/mobile.png, images/ribbon/mobile@2x.png 2x">
-        </picture>
-      </div>
+      <ul>
+        <li class="product-logo">
+          <picture>
+            <source 
+              media="(min-width: 48em)" 
+              srcset="images/products/Adventure-Plus_Dogs.jpg, images/products/Adventure-Plus-Dogs@2x.jpg 2x">
+            <img class="product" src="images/products/Adventure-Plus-Dogs-small.png" srcset="images/products/Adventure-Plus-Dogs-small.jpg, images/products/Adventure-Plus-Dogs-small@2x.jpg 2x">
+          </picture>
+        </li>
+        </li>
+        <li class="compare-to">Compare to Advantage II</li>
+        <li class="product-price">
+          $<span class="price">14</span> per month
+        </li>
+        <li class="product-statement">Superior flea control.</li>
+        <li><button class="select-choice" id="adventure-plus">Select</button></li>
+        <li class="expand-details-container">
+          <button type="button" class="expand-details">
+            View product details
+          </button>
+        </li>
+      </ul>
 
-      <div class="product-statement">Superior flea control.</div>
-      <button class="select-choice" id="adventure-plus">Select</button>
-
-      <div class="expand-details-container">
-        <button type="button" class="expand-details">
-          View product details
-          <i class="fa fa-caret-right"></i>
-          <i class="fa fa-caret-down"></i>
-        </button>
-      </div>
       <ul class="product-features">
          <li class="feature">
            <div>
@@ -200,32 +256,27 @@
        </div>
     </div>
     <div class="choice-container collapsed shieldtec-plus">
-      <div class="product-name"><h2>ShieldTec Plus<br>for Dogs</h2></div>
-      <picture>
-        <source 
-          media="(min-width: 48em)" 
-          srcset="images/products/ShieldTec-Plus_Dogs.png, images/products/ShieldTec-Plus_Dogs@2x.png 2x">
-        <img class="product" src="images/products/ShieldTec-Plus_Dogs-small.png" srcset="images/products/ShieldTec-Plus_Dogs-small.png, images/products/ShieldTec-Plus_Dogs-small@2x.png 2x">
-      </picture>
-      <div><div class="compare-to">Repels &amp; Kills Fleas, Ticks, &amp; Mosquitos</div></div>
-      <div class="ribbon">
-        <picture>
-          <source 
-            media="(min-width: 48em)" 
-            srcset="images/ribbon/desktop.png, images/ribbon/desktop@2x.png 2x">
-          <img class="ribbon" src="images/ribbon/mobile.png" srcset="images/ribbon/mobile.png, images/ribbon/mobile@2x.png 2x">
-        </picture>
-      </div>
-      <div class="product-statement">Best tick and mosquito protection.</div>
-      <button class="select-choice" id="shieldtec-plus">Select</button>
-      
-      <div class="expand-details-container">
-        <button type="button" class="expand-details">
-          View product details
-          <i class="fa fa-caret-right"></i>
-          <i class="fa fa-caret-down"></i>
-        </button>
-      </div>
+      <ul>
+        <li class="product-logo">
+          <picture>
+            <source 
+              media="(min-width: 48em)" 
+              srcset="images/products/ShieldTec-Plus-Dogs.jpg, images/products/ShieldTec-Plus-Dogs@2x.jpg 2x">
+            <img class="product" src="images/products/ShieldTec-Plus-Dogs-small.jpg" srcset="images/products/ShieldTec-Plus-Dogs-small.jpg, images/products/ShieldTec-Plus-Dogs-small@2x.jpg 2x">
+          </picture>
+        </li>
+        <li class="product-price">
+          $<span class="price">14</span> per month
+        </li>
+        <li class="product-statement">Best tick and mosquito protection.</li>
+        <li><button class="select-choice" id="shieldtec-plus">Select</button></li>
+        <li class="expand-details-container">
+          <button type="button" class="expand-details">
+            View product details
+          </button>
+        </li>
+      </ul>
+
       <ul class="product-features">
         <li class="feature">
           <div>
@@ -254,11 +305,18 @@
     </div>
   </form>
   <div class="promise" id="promise-mobile">
+    <picture>
+      <source 
+        media="(min-width: 46.8em)" 
+        srcset="images/clipboard.jpg, images/clipboard@2x.jpg 2x">
+      <img src="images/clipboard-small.jpg" srcset="images/clipboard-small.jpg, images/clipboard-small@2x.jpg 2x">
+    </picture>
     <h3>Our Promise</h3>
-    <div>
+    <div >
       The products offered by My Pet Defense have been researched and tested to ensure maximum efficacy while maintaining the highest level of quality and safety.
     </div>
   </div>
+
   <div class="flow-step unanswered">
     <div class="step-name">3. Dog Size</div>
   </div>

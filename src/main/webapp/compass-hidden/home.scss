@@ -22,13 +22,6 @@
     font-weight: $bold;
     letter-spacing: .4px;
   }
-
-  &:after {
-    @extend %icon;
-    content: $fa-var-caret-right;
-    margin-left: 4px;
-    vertical-align: middle;
-  }
 }
 
 .signup {
@@ -288,7 +281,7 @@ li.feature-info {
 
   @media (min-width: $bp-large) {
     height: 550px;
-    background-position-y: -95px;
+    background-position-y: -100px;
 
     .tag-line h3 {
       padding: 0 67px 0 69px;
