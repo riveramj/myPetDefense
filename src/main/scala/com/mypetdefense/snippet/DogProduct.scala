@@ -42,6 +42,7 @@ class DogProduct extends Loggable {
       S.redirectTo(DogSize.menu.loc.calcDefaultHref)
     }
 
+    "#frontline-plus" #> SHtml.submit("Select", () => chooseProduct("Frontline Plus for Dogs")) &
     "#zoguard-plus" #> SHtml.submit("Select", () => chooseProduct("ZoGuard Plus for Dogs")) &
     "#adventure-plus" #> SHtml.submit("Select", () => chooseProduct("Adventure Plus for Dogs")) &
     "#shieldtec-plus" #> SHtml.submit("Select", () => chooseProduct("ShieldTec Plus for Dogs"))
