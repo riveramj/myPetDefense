@@ -299,6 +299,7 @@
   margin-bottom: rem(2px);
 
   display: inline-block;
+  text-align: left;
 
   @media (min-width: $bp-med) {
     padding: em(20px) 0;
@@ -322,6 +323,7 @@
 
 .feature-container {
   display: inline-block;
+  vertical-align: middle;
 
   li {
     display: table-cell;
@@ -330,12 +332,38 @@
 
   .top-recommended:before {
     @extend %icon;
+    content: $fa-var-trophy;
+  }
+
+  .bug:before {
+    @extend %icon;
     content: $fa-var-bug;
+  }
+
+  .kills:before {
+    @extend %icon;
+    content: $fa-var-ban;
+  }
+
+  .waterproof:before {
+    @extend %icon;
+    content: $fa-var-umbrella;
+  }
+
+  .clock:before {
+    @extend %icon;
+    content: $fa-var-clock-o;
   }
 
   .feature-icon {
     color: #B2B0B0;
     font-size: em(25px);
+    padding-top: 11px;
+  }
+
+  .feature-statement {
+    padding-left: 11px;
+    vertical-align: bottom;
   }
 }
 
