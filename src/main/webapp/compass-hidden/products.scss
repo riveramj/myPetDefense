@@ -2,22 +2,6 @@
 @import "nav-bar";
 @import "flow";
 
-.current-step {
-  @media (min-width: $bp-medium) {
-    @include span-columns(9);
-    @include shift(1.5);
-    
-    padding-bottom: 150px;
-  }
-
-  @media (min-width: $bp-large) {
-    @include span-columns(12);
-    @include shift(0);
-    
-    padding-bottom: 200px;
-  }
-}
-
 .arrow-up {
   @media (min-width: $bp-medium) {
     margin-left: em(35px);
@@ -33,10 +17,10 @@
   display: inline-block;
   margin-bottom: em(17px);
   padding-bottom: em(5px);
-  max-width: 340px;
+  width: 340px;
 
   @media (min-width: $bp-medium) {
-    max-width: 530px;
+    width: 530px;
   }
 
   @media (min-width: $bp-large) {
@@ -49,15 +33,7 @@
     display: block;
 
     @media (min-width: $bp-medium) {
-      display: initial;
-      @include span-columns(7);
-      @include shift(1);
-
-      padding-top: rem(35px);
-    }
-
-    @media (min-width: $bp-large) {
-      @include span-columns(6.5);
+      margin: 0 auto;
     }
   }
 
@@ -160,9 +136,15 @@
 
 .header-container {
   text-align: left;
-}
 
-.header-container {
+  @media (min-width: $bp-medium) {
+    padding-left: 89px;
+
+    h2 {
+      width: 560px;
+    }
+  }
+
   @media (min-width: $bp-large) {
     @include span-columns(4);
     @include shift(2);
@@ -410,8 +392,13 @@
     height: 180px;
   }
 
-  @media (min-width: $bp-med) {
-    display: none;
+  @media (min-width: $bp-medium) {
+    margin-top: 90px;
+    > div {
+      width: 280px;
+      margin: 0 auto;
+      padding: 9px 0 120px;
+    }
   }
 }
 
