@@ -256,18 +256,6 @@
   color: #259490;
   padding-left: rem(20px);
   font-size: rem(16px);
-
-  @media (min-width: $bp-med) {
-    @include shift(2);
-    @include span-columns(8);
-  }
-}
-
-.product-features, .expand-details-container {
-  @media (min-width: $bp-med) {
-    @include shift(1.5);
-    @include span-columns(9);
-  }
 }
 
 .feature {
@@ -280,11 +268,6 @@
 
   display: inline-block;
   text-align: left;
-
-  @media (min-width: $bp-med) {
-    padding: em(20px) 0;
-    margin-bottom: 0;
-  }
 }
 
 .expand-details {
@@ -366,13 +349,6 @@
   @include span-columns(11);
   @include shift(.5);
   line-height: em(24px);
-
-  @media (min-width: $bp-med) {
-    @include shift(1.5);
-    @include span-columns(9);
-
-    padding-top: em(22px);
-  }
 
   h3 {
     display: inline-block;
