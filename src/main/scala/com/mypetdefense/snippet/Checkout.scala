@@ -73,6 +73,7 @@ class Checkout extends Loggable {
     price.map(_.price.get).getOrElse(0D)
   }
   val subtotal = prices.reduce(_+_)
+  val pennyCount = (subtotal * 100).toInt
   val multiPetDiscount = petCount match {
     case 0 | 1 => 0
     case 2 => subtotal * 0.05
@@ -154,16 +155,16 @@ class Checkout extends Loggable {
           Customer.create(
             email = Some(email),
             card = Some(stripeToken),
-            plan = Some("Product"),
-            quantity = Some(petCount),
+            plan = Some("pennyProduct"),
+            quantity = Some(pennyCount),
             taxPercent = Some(taxRate)
           )
         } else {
           Customer.create(
             email = Some(email),
             card = Some(stripeToken),
-            plan = Some("Product"),
-            quantity = Some(petCount),
+            plan = Some("pennyProduct"),
+            quantity = Some(pennyCount),
             taxPercent = Some(taxRate),
             coupon = couponId
           )

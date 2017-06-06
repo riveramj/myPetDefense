@@ -15,17 +15,19 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
   object code extends MappedString(this, 100)
   object product extends MappedLongForeignKey(this, Product)
   object active extends MappedBoolean(this)
+  object stripeName extends MappedString(this, 200)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
-  def createPrice(priceId: Long, price: Double, code: String, product: Product) = {
+  def createPrice(priceId: Long, price: Double, code: String, product: Product, stripeName: String) = {
     Price.create
     .priceId(priceId)
     .price(price)
     .code(code)
     .product(product)
     .active(true)
+    .stripeName(stripeName)
     .saveMe
   }
 

@@ -76,7 +76,7 @@ class Prices extends Loggable {
           for {
             product <- selectedProducts
           } yield {
-            Price.createPrice(priceDbId, price, code, product)
+            Price.createPrice(priceDbId, price, code, product, name)
           }
 
           S.redirectTo(Prices.menu.loc.calcDefaultHref)
@@ -88,6 +88,11 @@ class Prices extends Loggable {
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
+  }
+
+  def deletePrice(price: Price)() = {
+    price.delete_!
+    S.redirectTo(Prices.menu.loc.calcDefaultHref)
   }
 
   def render = {
@@ -103,7 +108,8 @@ class Prices extends Loggable {
       ".code *" #> price.code.toString &
       ".product-price *" #> price.price &
       ".product *" #> price.product.obj.map(_.name.get) &
-      ".status *" #> price.active
+      ".status *" #> price.active &
+      ".delete [onclick]" #> SHtml.ajaxInvoke(deletePrice(price))
     }
   }
 }
