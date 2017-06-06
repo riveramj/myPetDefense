@@ -1,19 +1,39 @@
 #how-it-works {
-  background-color: #E7E7E7;
+  background-color: #ffffff;
   text-align: center;
-  padding-bottom: rem(55px);
+  padding-bottom: rem(65px);
   padding-top: rem(30px);
+
+  @media (min-width: $bp-medium) {
+    padding-top: rem(50px);
+  }
+
+  @media (min-width: $bp-large) {
+    padding-top: rem(70px);
+    padding-bottom: rem(112px);
+  }
 
   #steps {
     padding-top: rem(30px);
     
+    @media (min-width: $bp-large) {
+      padding-top: rem(45px);
+    }
+
     li {
+      margin-top: 60px;
+      
+      &:first-child {
+        margin-top: 0;
+      }
+
       margin-bottom: 7px;
 
       @media (min-width: $bp-medium) {
+        margin-left: 35px;
+        margin-top: 0;
         margin-bottom: 0;
-        margin-left: 6px;
-        
+
         display: inline-block;
         
         vertical-align: top;
@@ -24,7 +44,7 @@
       }
 
       @media (min-width: $bp-large) {
-        margin-left: 20px;
+        margin-left: 70px;
       }
     }
   }
@@ -34,30 +54,31 @@
   }
   
   h2 {
-    font-size: em(27px);
-    font-weight: $semibold;
+    font-size: em(25px);
+    font-weight: $bold;
     color: #605F5F;
 
-    padding-top: 8px;
+    padding-top: 10px;
   }
 }
 
 #how-it-works-header {
-  background: url(../../images/ribbon/how-it-works-ribbon.png) no-repeat center;
+  background: url(../../images/ribbon/how-it-works-ribbon-small.png) no-repeat center;
   height: 53px;
+
+  @media (min-width: $bp-large) {
+    background: url(../../images/ribbon/how-it-works-ribbon.png) no-repeat center;
+    height: 53px;
+  }
 }
 
 .step {
-  width: rem(225px);
+  width: rem(222px);
   display: block;
-  background-color: #FFFFFF;
-  
-  padding: rem(25px) rem(22px) rem(35px);
   margin: 0 auto;
   
   text-decoration: none;
   color: #444343;
-  box-shadow: 0 2px 4px;
 
   &:first-child {
     margin-top: 0;
@@ -70,19 +91,11 @@
   @media (min-width: $bp-large) {
     min-height: 290px;
     width: rem(279px);
-    padding: rem(35px) rem(50px) rem(37px);
   }
 
   img {
-    width: 90px;
-    height: 90px;
-  }
-
-  @media (min-width: $bp-large) {
-    img {
-      width: 120px;
-      height: 120px;
-    }
+    width: 222px;
+    height: 185px;
   }
 }
 
@@ -93,13 +106,22 @@
   }
 
   h3 {
-    color: #605F5F;
-    font-size: rem(22px);
-    padding-bottom:rem(5px);
+    font-weight: $regular;
+    color: #4F4E4E;
+    font-size: rem(26px);
+    padding-bottom:rem(9px);
+    padding-top: 15px;
+    line-height: 28px;
   }
 
   div {
-    line-height: rem(22px);
-    font-size: rem(16px);
+    line-height: rem(24px);
+    font-size: rem(18px);
+    color: #444343;
+
+    @media (min-width: $bp-large) {
+      width: 222px;
+      margin: 0 auto;
+    }
   }
 }

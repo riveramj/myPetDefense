@@ -34,5 +34,3 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
 }
 
 object Agency extends Agency with LongKeyedMetaMapper[Agency]
-
-

@@ -3,7 +3,6 @@
     <ul>
       <li class="complete">
         <a href="/pet-choice">
-          <i class="fa fa-check"></i>
           <dl class="step-container">
             <dt class="step-name">1. Pet</dt>
             <dd class="step-choice">Dog</dd>
@@ -12,7 +11,6 @@
       </li>
       <li class="complete">
         <a href="/dog-product">
-          <i class="fa fa-check"></i>
           <dl class="step-container">
             <dt class="step-name">2. Product</dt>
             <dd class="step-choice">
@@ -36,18 +34,16 @@
       </li>
     </ul>
   </div>
-  <div class="flow-step">
+  <div class="flow-step complete">
     <a href="/pet-choice">
-      <i class="fa fa-check"></i>
       <div class="step-container">
         <div class="step-name">1. Pet</div>
         <div class="step-choice">Dog</div>
       </div>
     </a>
   </div>
-  <div class="flow-step">
+  <div class="flow-step complete">
     <a href="/dog-product">
-      <i class="fa fa-check"></i>
       <div class="step-container">
         <div class="step-name">2. Product</div>
         <div class="step-choice">
@@ -61,18 +57,20 @@
     <div class="arrow-up"></div>
   </div>
   <form class="current-step" data-lift="DogSize">
-    <h1 class="step-header">Choose A Size Range</h1>
-    <h2 class="step-question">
-      Flea and tick products have different dosage amounts based on pet size ranges.
-      <br/>
-      Choose the size range that best matches your dog.
+    <div class="header-container">
+      <h1 class="step-header">Choose A Size Range</h1>
+      <h2 class="step-question">
+        Flea and tick products have different dosage amounts based on pet size ranges.
+        <br/>
+        Choose the size range that best matches your dog.
     </h2>
+    </div>
     <div class="choice-container dog small">
       <picture>
         <source 
           media="(min-width: 46.8em)" 
-          srcset="images/small-bone.png, images/small-bone@2x.png 2x">
-        <img class="size-choice dog small" src="images/small-bone-small.png" srcset="images/small-bone-small.png, images/small-bone-small@2x.png 2x">
+          srcset="images/pet-sizes/small-bone.png, images/pet-sizes/small-bone@2x.png 2x">
+        <img class="size-choice dog small" src="images/pet-sizes/small-bone-small.png" srcset="images/pet-sizes/small-bone-small.png, images/pet-sizes/small-bone-small@2x.png 2x">
       </picture>
       <ul class="weight dog small">
         <li class="weight-number">1-2</li>
@@ -84,8 +82,8 @@
       <picture>
         <source 
           media="(min-width: 46.8em)" 
-          srcset="images/medium-bone.png, images/medium-bone@2x.png 2x">
-        <img class="size-choice dog medium" src="images/medium-bone-small.png" srcset="images/medium-bone-small.png, images/medium-bone-small@2x.png 2x">
+          srcset="images/pet-sizes/medium-bone.png, images/pet-sizes/medium-bone@2x.png 2x">
+        <img class="size-choice dog medium" src="images/pet-sizes/medium-bone-small.png" srcset="images/pet-sizes/medium-bone-small.png, images/pet-sizes/medium-bone-small@2x.png 2x">
       </picture>
       <ul class="weight dog medium">
         <li class="weight-number">4-15</li>
@@ -97,8 +95,8 @@
       <picture>
         <source 
           media="(min-width: 46.8em)" 
-          srcset="images/large-bone.png, images/large-bone@2x.png 2x">
-        <img class="size-choice dog large" src="images/larg-bone-small.png" srcset="images/large-bone-small.png, images/large-bone-small@2x.png 2x">
+          srcset="images/pet-sizes/large-bone.png, images/pet-sizes/large-bone@2x.png 2x">
+        <img class="size-choice dog large" src="images/pet-sizes/larg-bone-small.png" srcset="images/pet-sizes/large-bone-small.png, images/pet-sizes/large-bone-small@2x.png 2x">
       </picture>
       <ul class="weight dog large">
         <li class="weight-number">17-30</li>
@@ -110,8 +108,8 @@
       <picture>
         <source 
           media="(min-width: 46.8em)" 
-          srcset="images/xlarge-bone.png, images/xlarge-bone@2x.png 2x">
-        <img class="size-choice dog xlarge" src="images/xlarge-bone-small.png" srcset="images/xlarge-bone-small.png, images/xlarge-bone-small@2x.png 2x">
+          srcset="images/pet-sizes/xlarge-bone.png, images/pet-sizes/xlarge-bone@2x.png 2x">
+        <img class="size-choice dog xlarge" src="images/pet-sizes/xlarge-bone-small.png" srcset="images/pet-sizes/xlarge-bone-small.png, images/pet-sizes/xlarge-bone-small@2x.png 2x">
       </picture>
       <ul class="weight dog xlarge">
         <li class="weight-number">40+</li>

@@ -4,6 +4,18 @@
 @import "bourbon/bourbon";
 @import "neat/neat";
 
+@import "compass";
+
+$fa-font-path: "/static/fonts";
+@import "font-awesome/scss/variables";
+@import "font-awesome/scss/mixins";
+@import "font-awesome/scss/path";
+@import "font-awesome/scss/core";
+
+%icon {
+  font-family: 'FontAwesome';
+}
+
 /// Weights
 $light: 300;
 $normal: 400;
