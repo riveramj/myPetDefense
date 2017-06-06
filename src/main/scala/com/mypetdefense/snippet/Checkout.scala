@@ -67,7 +67,12 @@ class Checkout extends Loggable {
   var couponCode = coupon.map(_.couponCode.get).openOr("")
 
   val petCount = completedPets.is.size
-  val subtotal = petCount * 9.99
+  val products = completedPets.is.flatMap(_._2.product.obj)
+  val prices = products.map { product =>
+    val price = Price.find(By(Price.product, product), By(Price.code, "default"))
+    price.map(_.price.get).getOrElse(0D)
+  }
+  val subtotal = prices.reduce(_+_)
   val multiPetDiscount = petCount match {
     case 0 | 1 => 0
     case 2 => subtotal * 0.05

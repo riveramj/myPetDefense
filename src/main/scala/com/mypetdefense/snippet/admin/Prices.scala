@@ -35,19 +35,19 @@ object Prices extends Loggable {
 }
 
 class Prices extends Loggable {
-  val productLines = Product.findAll()
+  val productNames = Product.findAll().map(_.name.get).distinct
   val prices = Price.findAll()
 
   var code = ""
   var rawPrice = ""
-  var chosenProduct: Box[Product] = Empty
+  var chosenProduct = ""
   
   def productDropdown = {
-    SHtml.selectObj(
-        productLines.map(product => (product, product.name.get)),
-        chosenProduct,
-        (product: Product) => chosenProduct = Full(product)
-      )
+    SHtml.select(
+      ("","") +: productNames.map(name => (name,name)),
+      Full(chosenProduct),
+      chosenProduct = _
+    )
   }
 
   def createPrice = {
@@ -61,7 +61,9 @@ class Prices extends Loggable {
 
       val priceDbId = generateLongId
       val date = LocalDate.now
-      val name = chosenProduct.map(_.name.get + s" (${code} ${date})").openOr("")
+      val name = s"${chosenProduct} (${code} ${date})"
+
+      val selectedProducts = Product.findAll(By(Product.name, chosenProduct))
 
       val stripePrice = PriceService.createStripePrice(
         price,
@@ -71,7 +73,12 @@ class Prices extends Loggable {
 
       stripePrice match {
         case Full(_) =>
-          val newStripePrice = Price.createPrice(priceDbId, price, code, chosenProduct)
+          for {
+            product <- selectedProducts
+          } yield {
+            Price.createPrice(priceDbId, price, code, product)
+          }
+
           S.redirectTo(Prices.menu.loc.calcDefaultHref)
 
         case _ =>

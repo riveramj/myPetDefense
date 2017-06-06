@@ -37,6 +37,18 @@ object DataLoader extends Loggable {
       Product.createProduct(
         name = "Frontline Plus for Cats",
         animalType = AnimalType.Cat,
+        size = AnimalSize.CatSmall
+      )
+
+      Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatSmall
+      )
+
+      Product.createProduct(
+        name = "Frontline Plus for Cats",
+        animalType = AnimalType.Cat,
         size = AnimalSize.CatMedium
       )
 
@@ -51,12 +63,6 @@ object DataLoader extends Loggable {
       Product.createProduct(
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
-        size = AnimalSize.CatSmall
-      )
-
-      Product.createProduct(
-        name = "Adventure Plus for Cats",
-        animalType = AnimalType.Cat,
         size = AnimalSize.CatMedium
       )
 
@@ -64,6 +70,12 @@ object DataLoader extends Loggable {
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatLarge
+      )
+
+      Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatSmall
       )
 
       Product.createProduct(

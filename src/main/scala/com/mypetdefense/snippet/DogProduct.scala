@@ -28,12 +28,26 @@ class DogProduct extends Loggable {
     petProduct.is.map(_.name.toString)
   }
 
+  val prices = Price.findAll(
+    By(Price.code, "default"),
+    By(Price.active, true)
+  )
+
+  def getPriceForProduct(product: String) = {
+    val price = prices.filter { price =>
+      val productName = price.product.obj.map(_.name.get).getOrElse("")
+      productName == s"${product} Plus for Dogs"
+    }.headOption.map(_.price.get).getOrElse(0D)
+
+    f"$price%2.2f"
+  }
+
   def render = {
     def chooseProduct(name: String) = {
       val selectedProduct = for {
         petType <- petChoice.is
         product <- Product.find(
-          By(Product.name, name)
+          By(Product.name, s"${name} Plus for Dogs")
         )} yield product
 
       petProduct(selectedProduct)
@@ -42,10 +56,22 @@ class DogProduct extends Loggable {
       S.redirectTo(DogSize.menu.loc.calcDefaultHref)
     }
 
-    "#frontline-plus" #> SHtml.submit("Select", () => chooseProduct("Frontline Plus for Dogs")) &
-    "#zoguard-plus" #> SHtml.submit("Select", () => chooseProduct("ZoGuard Plus for Dogs")) &
-    "#adventure-plus" #> SHtml.submit("Select", () => chooseProduct("Adventure Plus for Dogs")) &
-    "#shieldtec-plus" #> SHtml.submit("Select", () => chooseProduct("ShieldTec Plus for Dogs"))
+    ".frontline-plus" #> {
+      ".price *" #> getPriceForProduct("Frontline") &
+      "#frontline-plus" #> SHtml.submit("Select", () => chooseProduct("Frontline"))
+    } &
+    ".zoguard-plus" #> {
+      ".price *" #> getPriceForProduct("ZoGuard") &
+      "#zoguard-plus" #> SHtml.submit("Select", () => chooseProduct("ZoGuard"))
+    } &
+    ".adventure-plus" #> {
+      ".price *" #> getPriceForProduct("Adventure") &
+      "#adventure-plus" #> SHtml.submit("Select", () => chooseProduct("Adventure"))
+    } &
+    ".shieldtec-plus" #> {
+      ".price *" #> getPriceForProduct("ShieldTec") &
+      "#shieldtec-plus" #> SHtml.submit("Select", () => chooseProduct("ShieldTec"))
+    }
   }
 }
 
