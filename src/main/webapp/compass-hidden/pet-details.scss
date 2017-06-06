@@ -9,6 +9,10 @@
   }
 }
 
+.current-step {
+  text-align: left;
+}
+
 .account-info {
   background-color: #F1F1F1;
   
@@ -172,8 +176,6 @@ fieldset label {
   }
 }
 
-
-
 .remove-pet {
   background: none;
   border: none;
@@ -184,6 +186,15 @@ fieldset label {
   margin: -3px 0 -6px;
 
   color: #706E6E;
+
+  overflow: hidden;
+  width: 19px;
+  height: 19px;
+
+  &:before {
+    @extend %icon;
+    content: $fa-var-trash;
+  }
 
   @media (min-width: $bp-medium) {
     margin: 1px 1px -6px 0;

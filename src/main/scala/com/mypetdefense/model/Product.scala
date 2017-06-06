@@ -13,6 +13,7 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   object name extends MappedString(this, 100)
   object animalType extends MappedEnum(this, AnimalType)
   object size extends MappedEnum(this, AnimalSize)
+  object prices extends MappedOneToMany(Price, Price.product)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }

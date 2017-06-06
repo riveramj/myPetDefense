@@ -10,13 +10,56 @@ import dispatch._, Defaults._
 
 object DataLoader extends Loggable {
   def loadProducts = {
-    if (Product.findAll().isEmpty) {
+    if (Product.find(By(Product.name, "Frontline Plus for Dogs")).isEmpty) {
       Product.createProduct(
-        name = "Adventure Plus for Cats",
+        name = "Frontline Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogSmallZo
+      )
+      Product.createProduct(
+        name = "Frontline Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogMediumZo
+      )
+      Product.createProduct(
+        name = "Frontline Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogLargeZo
+      )
+      Product.createProduct(
+        name = "Frontline Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogXLargeZo
+      )
+    }
+
+    if (Product.find(By(Product.name, "Frontline Plus for Cats")).isEmpty) {
+      Product.createProduct(
+        name = "Frontline Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatSmall
       )
 
+      Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatSmall
+      )
+
+      Product.createProduct(
+        name = "Frontline Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatMedium
+      )
+
+      Product.createProduct(
+        name = "Frontline Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatLarge
+      )
+    }
+
+    if (Product.findAll().isEmpty) {
       Product.createProduct(
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
@@ -27,6 +70,12 @@ object DataLoader extends Loggable {
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatLarge
+      )
+
+      Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatSmall
       )
 
       Product.createProduct(
