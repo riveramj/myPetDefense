@@ -81,7 +81,7 @@ class Checkout extends Loggable {
 
   val subtotalWithDiscount = subtotal - multiPetDiscount
 
-  val pennyCount = (subtotalWithDiscount * 100).toInt
+  val pennyCount = (subtotal * 100).toInt
 
   def validateCouponCode() = {
     val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
