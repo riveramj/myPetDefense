@@ -2,25 +2,27 @@
   <div class="flow-progress-bar">
     <ul>
       <li class="complete">
-          <i class="fa fa-check"></i>
+        <a href="#">
           <dl class="step-container">
             <dt class="step-name">1. Pet</dt>
             <dd class="step-choice">
               <span class="chosen-pet" data-lift="PetChoice.chosenPet">catdog</span>
             </dd>
           </dl>
+        </a>
       </li>
       <li class="complete" data-lift="NavBar.size">
-          <i class="fa fa-check"></i>
+        <a href="#">
           <dl class="step-container">
             <dt class="step-name">2. Size</dt>
             <dd class="step-choice">
               <span class="chosen-size">5-9</span>
             </dd>
           </dl>
+        </a>
       </li>
       <li class="complete" data-lift="NavBar.product">
-          <i class="fa fa-check"></i>
+        <a href="#">
           <dl class="step-container">
             <dt class="step-name">3. Product</dt>
             <dd class="step-choice">
@@ -29,6 +31,7 @@
               </span>
             </dd>
           </dl>
+        </a>
       </li>
       <li>
         <span class="pet-count" data-lift="NavBar.petCount">0</span>
@@ -40,8 +43,7 @@
       </li>
     </ul>
   </div>
-  <div class="flow-step">
-      <i class="fa fa-check"></i>
+  <div class="flow-step complete">
       <dl class="step-container">
         <dt class="step-name">1. Pet</dt>
         <dd class="step-choice">
@@ -49,8 +51,7 @@
         </dd>
       </dl>
   </div>
-  <div class="flow-step" data-lift="NavBar.size">
-      <i class="fa fa-check"></i>
+  <div class="flow-step complete" data-lift="NavBar.size">
       <dl class="step-container">
         <dt class="step-name">2. Size</dt>
         <dd class="step-choice">
@@ -58,8 +59,7 @@
         </dd>
       </dl>
   </div>
-  <div class="flow-step" data-lift="NavBar.product">
-      <i class="fa fa-check"></i>
+  <div class="flow-step complete" data-lift="NavBar.product">
       <dl class="step-container">
         <dt class="step-name">3. Product</dt>
         <dd class="step-choice">
@@ -75,7 +75,7 @@
   <form class="current-step" data-lift="PetDetails.render">
     <h1 class="step-header">Pet Details</h1>
     <fieldset class="account-info pet">
-      <button class="remove-pet"><i class="fa fa-trash"></i></button>
+      <button class="remove-pet">Remove Pet</button>
       <ul class="name-birth">
         <li>
           <label>
