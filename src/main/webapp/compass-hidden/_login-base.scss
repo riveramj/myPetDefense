@@ -1,6 +1,12 @@
 @import "base";
 @import "nav-bar";
 
+
+#logo-name {
+  padding-top: 12px;
+  padding-bottom: 9px;
+}
+
 #page-container {
   @include span-columns(12);
   background-color: #DCDBDB;

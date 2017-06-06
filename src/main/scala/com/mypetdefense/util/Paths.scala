@@ -139,6 +139,7 @@ object Paths {
     admin.Dashboard.exportMenu,
     admin.Parents.menu,
     admin.Users.menu,
+    admin.Prices.menu,
     admin.Coupons.menu,
     admin.Agencies.menu,
     admin.PhonePortal.menu,

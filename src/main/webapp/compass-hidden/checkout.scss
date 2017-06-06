@@ -10,6 +10,10 @@
   }
 }
 
+.current-step {
+  text-align: left;
+}
+
 .step-choice.pet-details {
   @media (min-width: $bp-medium) {
     margin-left: -40px;
@@ -166,6 +170,14 @@ fieldset label {
   margin-bottom: rem(15px);
   border-bottom: 1px solid #70C9C6;
 
+  &:before {
+    @extend %icon;
+    content: $fa-var-shopping-cart;
+    color: #1D8884;
+    font-size: rem(18px);
+    padding-left: rem(14px);
+  }
+
   @media (min-width: $bp-large) {
     margin-bottom: rem(24px);
   }
@@ -176,13 +188,6 @@ fieldset label {
   margin: em(6px) 0 em(30px);
   border-radius: 4px;
   background-color: #FAFAFA;
-
-  .fa-shopping-cart {
-    display: inline-block;
-    color: #1D8884;
-    font-size: rem(18px);
-    padding-left: rem(14px); 
-  }
 
   h2 {
     background-color: initial;
@@ -203,11 +208,14 @@ fieldset label {
     font-size: rem(12px);
     display: none;
     font-weight: $semibold;
-  }
 
-  .fa-check {
-    font-size: rem(15px);
-    color: #259490;
+    &:before {
+      @extend %icon;
+      content: $fa-var-check;
+      font-size: rem(15px);
+      color: #259490;
+      margin-right: 2px;
+    }
   }
 
   &.promo-error {

@@ -6,28 +6,32 @@ html, body {
   float: none;
 }
 
-#content-container {
-  @media (min-width: $bp-med) {
-    min-height: 100%;
-    background-color: #f7f7f7;
+#top-bar #logo-name {
+  padding-top: 17px;
+  padding-bottom: 20px;
+
+  @media (min-width: $bp-large) {
+    padding-top: 15px;
+    padding-bottom: 15px;
   }
 }
 
 .header-container {
-  @media (min-width: $bp-med) {
-    @include span-columns(6);
+  @media (min-width: $bp-large) {
+    text-align: left;
+    margin-bottom: 54px;
   }
 }
 
 #step-container {
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-large) {
     overflow: auto;
 	  padding-bottom: 110px; /* must be same height as the footer */
   }
 }
 
 .footer {
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-large) {
     position: relative;
 	  margin-top: -110px; /* negative value of footer height */
   	height: 110px;
@@ -41,33 +45,31 @@ html, body {
 
   padding-top: em(82px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-large) {
     padding-top: em(55px);
   }
 }
 
 #top-bar {
   background-color: $green;
-  padding-bottom: em(20px);
 
   @media (min-width: $bp-medium) {
     padding-bottom: em(16px);
   }
 
   @media (min-width: $bp-large) {
-    padding: em(15px) 0;
+    padding: 0;
   }
 }
 
 #step-container {
-  @include span-columns(12);
   background-color: #ffffff;
 }
 
 .current-step {
-  @include span-columns(9 of 11);
-  @include shift(1);
-  padding-top: em(30px);
+  padding-top: 25px;
+  margin: 0 18px;
+  text-align: center;
 
   @media (min-width: $bp-medium) {
     padding-top: rem(51px);
@@ -84,13 +86,14 @@ html, body {
   color: #605F5F;
   font-weight: $semibold;
   font-size: em(27px);
-  padding-bottom: rem(8px);
+  padding-bottom: 3px;
+  line-height: 33px;
 }
 
 .step-question {
   font-size: em(18px);
   font-weight: $normal;
-  padding-bottom: rem(40px);
+  padding-bottom: 35px;
   line-height: rem(24px);
 
   @media (min-width: $bp-medium) {
@@ -103,28 +106,24 @@ html, body {
 }
 
 .flow-step {
-  @include span-columns(12);
   background-color: #57B8B4;
+  text-align: center;
+  clear: both;
 
   border-top: 1px solid #137875;
 
-  padding: 10px 0;
+  padding: 9px 0 12px;
 
-  a {
-    @include span-columns(12);
-  }
-
-  .fa-check {
-    @include span-columns(2);
-    @include shift(0.5);
+  &.complete:before {
+    @extend %icon;
+    content: $fa-var-check;
+    padding-left: 18px;
+    padding-top: 10px;
+    
     color: #1D8884;
     font-size: em(25px);
-    padding-top: 7px;
     margin-right: 0;
-  }
-
-  .step-container {
-    @include span-columns(7.5);
+    float: left;
   }
 
   .step-name {
@@ -133,16 +132,27 @@ html, body {
     font-size: em(14);
     color: #0E5552;
     font-weight: $semibold;
+    letter-spacing: 0.4px;
+    line-height: 17px;
   }
 
-  a, .step-info {
+  a, > dl {
     text-decoration: none;
-    padding: em(10px) 0;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: -43px;
+  }
+
+  .step-info {
     display: block;
   }
 
   &.unanswered {
-    padding: em(24px) 0;
+    padding: em(24px) 0; 
+
+    a {
+      margin-left: 0;
+    }
   }
 
   @media (min-width: $bp-medium) {
@@ -187,7 +197,7 @@ html, body {
     vertical-align: middle;
 
     @media (min-width: $bp-medium) {
-      padding: rem(27px) rem(70px) rem(26px) 0;
+      padding: rem(27px) rem(70px) rem(24px) 0;
     }
 
     &:last-child {
@@ -195,35 +205,51 @@ html, body {
     }
   }
 
-  .fa-check {
-    font-size: em(14px);
-    float: left;
+  &.complete:before {
+    @extend %icon;
+    content: $fa-var-check;
   }
 }
 
 li.complete {
   padding: rem(15px) rem(30px) rem(12px) 0;
 
+  &:before {
+    @extend %icon;
+    content: $fa-var-check;
+
+    @media (min-width: $bp-medium) {
+      position: relative;
+      top: -29px;
+      left: -3px;
+    }
+  }
+
+  @media (min-width: $bp-medium) {
+    padding-bottom: 0;
+    padding-top: 7px;
+  }
+
   @media (min-width: $bp-large) {
     padding: rem(15px) rem(70px) rem(12px) 0;
   }
 
-  .fa-check {
-    padding-right: rem(5px);
-  }
-  
   .step-choice {
     padding: rem(7px) 0 0 rem(1px);
+
+    @media (min-width: $bp-medium) {
+      padding-top: 0;
+    }
   }
 }
 
 .step-choice {
   color: #ffffff;
   font-size: em(22);
-  padding-top: rem(8px);
+  line-height: 28px;
   text-align: center;
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-large) {
     padding-top: 0;
     text-align: left;
   }
@@ -238,7 +264,7 @@ li.complete {
   border-right: 10px solid transparent;
   border-bottom: 10px solid #ffffff;
   padding-top: rem(16px);
-  margin-bottom: rem(-27px);
+  margin-bottom: rem(-24px);
 
   @media (min-width: $bp-large) {
     border-left: 16px solid transparent;
@@ -252,7 +278,7 @@ li.complete {
 .choice-container {
   background-color: #E7E7E7;
   padding: em(39px) 0 em(25px);
-  margin-bottom: em(40px);
+  margin: 0 auto em(40px);
   text-align: center;
 }
 
@@ -283,7 +309,7 @@ li.complete {
     color: #B2B0B0;
   }
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-large) {
     font-size: em(15);
   }
 }
@@ -296,7 +322,7 @@ li.complete {
   padding: rem(48px) 0 rem(9px);
   text-align: center;
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-large) {
     padding: 0 0 rem(15px);
   }
 }
@@ -304,10 +330,9 @@ li.complete {
 .flow-step-complete {
   position: relative;
   
-  .fa-check {
-    position: absolute;
-    top: 1px;
-    left: -15px;
+  &.complete:before {
+    @extend %icon;
+    content: $fa-var-check;
   }
 }
 

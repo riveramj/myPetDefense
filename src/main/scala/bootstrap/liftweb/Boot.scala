@@ -44,7 +44,8 @@ class Boot {
       ShipmentLineItem,
       Subscription,
       Agency,
-      Coupon
+      Coupon,
+      Price
     )
 
     DataLoader.loadProducts
