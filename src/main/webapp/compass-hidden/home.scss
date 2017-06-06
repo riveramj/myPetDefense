@@ -283,6 +283,11 @@ li.feature-info {
     height: 550px;
     background-position-y: -100px;
 
+    .tag-line {
+      margin-left: 0;
+      float: right;
+    }
+
     .tag-line h3 {
       padding: 0 67px 0 69px;
     }
