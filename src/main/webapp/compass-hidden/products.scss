@@ -25,8 +25,11 @@
 
   @media (min-width: $bp-large) {
     max-width: 410px;
-    min-height: 353px;
+    min-height: 434px;
     margin-right: rem(20px);
+    margin-bottom: 0;
+    vertical-align: top;
+
   }
 
   img.product {
@@ -44,22 +47,37 @@
         padding-left: 29px;
       }
     }
+    @media (min-width: $bp-medium) {
+      .product-logo {
+        padding-top: 31px;
+        padding-bottom: 31px;
+      }
+    }
   }
 
   &.shieldtec-plus {
-    div.compare-to {
-      padding-top: 14px;
-      
-      @media (min-width: $bp-medium) {
-        padding-top: 16px;
-        padding-left: 30px;
-      }
-
-      @media (min-width: $bp-large) {
-        padding-top: 4px;
+    @media (min-width: $bp-large) {
+      .product-logo {
+        padding-top: 45px;
+        padding-bottom: 44px;
       }
     }
+  }
 
+  &.zoguard-plus {
+    @media (min-width: $bp-large) {
+      .product-logo {
+        padding-top: 31px;
+        padding-bottom: 31px;
+      }
+    }
+  }
+
+
+  &.adventure-plus, &.shieldtec-plus {
+    @media (min-width: $bp-large) {
+      margin-top: 21px
+    }
   }
 
   h2 {
@@ -146,8 +164,7 @@
   }
 
   @media (min-width: $bp-large) {
-    @include span-columns(4);
-    @include shift(2);
+    padding-left: 0;
   }
 }
 
@@ -181,25 +198,6 @@
 
 #product-count {
   font-weight: $semibold;
-}
-
-.promise-container {
-  @media (max-width: $bp-med) {
-    display: none;
-  }
-
-  @media (min-width: $bp-med) {
-    @include span-columns(6);
-    font-size: rem(12px);
-    padding-bottom: rem(54px);
-    @include omega();
-  }
-
-  @media (min-width: $bp-large) {
-    @include span-columns(4);
-    @include shift(1);
-  }
-
 }
 
 .product-statement {
@@ -398,6 +396,22 @@
       width: 280px;
       margin: 0 auto;
       padding: 9px 0 120px;
+    }
+  }
+
+  @media (min-width: $bp-large) {
+    width: 616px;
+    margin: 0 auto;
+    padding-top: 90px;
+    float: none;
+
+    > div {
+      width: 450px;
+    }
+
+    img {
+      float: left;
+      margin-right: 35px;
     }
   }
 }
