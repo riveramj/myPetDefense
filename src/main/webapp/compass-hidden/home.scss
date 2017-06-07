@@ -225,6 +225,7 @@ li.feature-info {
   @media (min-width: $bp-large) {
     font-size: 24px;
     width: 465px;
+    letter-spacing: 0.4px;
   }
 }
 
@@ -387,3 +388,6 @@ li.feature-info {
   }
 }
 
+iframe[google_conversion_frame] {
+  display: none !important;
+}
