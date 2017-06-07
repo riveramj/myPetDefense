@@ -2,6 +2,12 @@
 @import "nav-bar";
 @import "flow";
 
+.header-container {
+  @media (min-width: $bp-large) {
+    margin-bottom: 0;
+  }
+}
+
 img.pet-choice {
   width: 100%;
 }
@@ -26,6 +32,7 @@ h2.step-question {
 
   @media (min-width: $bp-large) {
     width: 686px;
+    padding-bottom: 35px;
   }
 }
 
