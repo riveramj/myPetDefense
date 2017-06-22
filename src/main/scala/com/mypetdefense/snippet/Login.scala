@@ -12,7 +12,7 @@ import com.mypetdefense.service._
     import ValidationService._
 
 import com.mypetdefense._
-  import model.{User, UserType}
+  import model.{User, UserType, Status}
   import snippet.admin.Dashboard
 import com.mypetdefense.util.SecurityContext
 
@@ -51,6 +51,8 @@ class Login extends Loggable {
     def userCanLogIn_?(user: User, password: String): Box[Boolean] = {
       if (!User.isCorrectPassword_?(password, user)) {
         Failure(S.?("login-invalidEmailOrPassword"))
+      } else if (user.status == Status.Inactive) {
+        Failure("Inactive user")
       } else {
         Full(true)
       }
