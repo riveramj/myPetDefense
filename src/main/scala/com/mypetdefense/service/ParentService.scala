@@ -69,12 +69,10 @@ object ParentService extends Loggable {
         val shipments = subscription.map(_.shipments.toList).openOr(Nil)
         val addresses = user.map(_.addresses.toList).openOr(Nil)
 
-        shipments.map(_.delete_!)
-        addresses.map(_.delete_!)
-        subscription.map(_.delete_!)
-        user.map(_.delete_!)
-
-        user
+        shipments.map(_.status(Status.Inactive).saveMe)
+        addresses.map(_.status(Status.Inactive).saveMe)
+        subscription.map(_.status(Status.Inactive).saveMe)
+        user.map(_.status(Status.Inactive).saveMe)
 
       case TrySuccess(stripeFailure) =>
         logger.error(s"remove customer failed with stipe error: ${stripeFailure}")

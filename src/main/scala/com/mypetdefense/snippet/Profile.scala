@@ -89,6 +89,16 @@ class Profile extends Loggable {
     }
   }
 
+  def cancelAccount() = {
+    val pets: List[Pet] = user.map(_.pets.toList).openOr(Nil)
+
+    pets.map(PetService.removePet(user, _))
+
+    user.map(ParentService.removeParent(_))
+
+    S.redirectTo(homePage.loc.calcDefaultHref)
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".profile a [class+]" #> "current" &
@@ -97,7 +107,10 @@ class Profile extends Loggable {
     "#old-password" #> SHtml.password(oldPassword, oldPass => oldPassword = oldPass.trim) &
     "#new-password" #> SHtml.password(newPassword, newPass => newPassword = newPass.trim) &
     ".update-email" #> SHtml.ajaxSubmit("Save Changes", updateEmail) &
-    ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword)
+    ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword) &
+    ".stauts" #> user.map(_.status.get.toString) &
+    ".confirm-cancel-account" #> SHtml.ajaxSubmit("Yes, cancel my acount", cancelAccount)
+    
   }
 }
 

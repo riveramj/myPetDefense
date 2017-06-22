@@ -30,7 +30,7 @@ object Parents extends Loggable {
 }
 
 class Parents extends Loggable {
-  val parents = User.findAll(By(User.userType, UserType.Parent))
+  val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
   
   var petType: Box[AnimalType.Value] = Empty
   var chosenProduct: Box[Product] = Empty

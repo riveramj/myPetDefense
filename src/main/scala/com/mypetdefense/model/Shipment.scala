@@ -19,6 +19,9 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object dateReceived extends MappedDateTime(this)
   object taxPaid extends MappedString(this, 100)
   object amountPaid extends MappedString(this, 100)
+  object status extends MappedEnum(this, Status) {
+    override def defaultValue = Status.Active
+  }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
