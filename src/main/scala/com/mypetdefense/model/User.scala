@@ -35,6 +35,9 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object pets extends MappedOneToMany(Pet, Pet.user)
   object subscription extends MappedOneToMany(Subscription, Subscription.user)
   object addresses extends MappedOneToMany(Address, Address.user)
+  object status extends MappedEnum(this, Status) {
+    override def defaultValue = Status.Active
+  }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }

@@ -47,22 +47,24 @@
 
       <form id="cancel-account-container">
         <dl class="account-block">
-          <dt class="block-header">Password</dt>
+          <dt class="block-header">Account Status</dt>
           <dd class="block-details">
-            <div>
-              <label>
-                <div class="field-label">Old Password</div>
-                <input id="old-password" type="password">
-              </label>
-              <label>
-                <span class="field-label">New Password</span>
-                <input id="new-password" type="password">
-              </label>
-            </div>
+            <div class="status">Active</div>
+            <div class="status-copy">Happy to have you and your fur family on board!</div>
           </dd>
           <dt class="save-container">
-            <button class="save-changes submit update-password">Save Changes</button>
+            <button class="save-changes submit cancel-account">Cancel Account</button>
           </dt>
+          <dd class="cancel-confirm">
+            <h4>
+              <div>Are you sure?</div>
+              <button class="close">Close</button>
+            </h4>
+            <div>
+              Canceling will delete your account information and you will no longer receive shipments.
+            </div>
+            <button class="confirm-cancel-account">Yes, cancel my acount</button>
+          </dd>
         </dl>
       </form>
     </div>
