@@ -19,6 +19,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   object startDate extends MappedDateTime(this)
   object renewalDate extends MappedDateTime(this)
   object nextShipDate extends MappedDateTime(this)
+  object priceCode extends MappedString(this, 100)
   object shipments extends MappedOneToMany(Shipment, Shipment.subscription)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
@@ -48,6 +49,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     .stripeSubscriptionId(stripeSubscriptionId)
     .startDate(startDate)
     .nextShipDate(nextShipDate)
+    .priceCode("default")
     .saveMe
   }
 }
