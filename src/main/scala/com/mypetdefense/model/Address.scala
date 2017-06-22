@@ -24,6 +24,9 @@ class Address extends LongKeyedMapper[Address] with IdPK {
   object state extends MappedString(this, 100)
   object zip extends MappedString(this, 100)
   object addressType extends MappedEnum(this, AddressType)
+  object status extends MappedEnum(this, Status) {
+    override def defaultValue = Status.Active
+  }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
