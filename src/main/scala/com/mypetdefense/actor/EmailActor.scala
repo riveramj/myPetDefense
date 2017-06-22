@@ -218,6 +218,7 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
       val products = subscription.getProducts
+      val priceCode = subscription.priceCode.get
 
       val transform = {
         "#ship-date" #> dateFormatter.format(new Date()) &
@@ -237,7 +238,13 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
         "#bill-zip" #> billAddress.map(_.zip.get) &
         "#tax" #> ClearNodesIf(taxPaid == "0") andThen
         ".ordered-product" #> products.map { product =>
-          val price = Price.getDefaultProductPrice(product).map(_.price.get).openOr(9.99D)
+          val price = {
+            if (priceCode == null) {
+              9.99D
+            } else {
+              Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0D)
+            }
+          }
           ".product *" #> s"${product.name.get}, ${product.size.get.toString} pounds" &
           ".amount-due *" #> s"$$${price}"
         } &
