@@ -31,8 +31,12 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
     .saveMe
   }
 
-  def getPricesByCode(code: String, active: Boolean = true) = {
-    Price.find(By(Price.code, code), By(Price.active, active))
+  def getPricesByCode(product: Product, code: String, active: Boolean = true) = {
+    Price.find(
+      By(Price.product, product),
+      By(Price.code, code),
+      By(Price.active, active)
+    )
   }
 
   def getDefaultProductPrice(product: Product, active: Boolean = true) = {
