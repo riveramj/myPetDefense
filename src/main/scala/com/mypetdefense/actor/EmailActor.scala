@@ -34,7 +34,7 @@ case class NewSaleEmail(user: User, petCount: Int, couponCode: String) extends E
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class PetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
-  userEmail: String,
+  user: User,
   amount: Double,
   nextPaymentAttempt: Option[DateTime]
 ) extends EmailActorMessage
@@ -117,20 +117,23 @@ trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
     Templates("emails-hidden" :: "invoice-payment-failed-email" :: Nil) openOr NodeSeq.Empty
 
   addHandler {
-    case SendInvoicePaymentFailedEmail(userEmail, amount, nextPaymentAttempt) =>
+    case SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt) =>
       val subject = "Problem Billing your Credit Card"
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val invoicePaymentFailedMessage = (
+      val transform = {
+        "#card-problem [src]" #> (Paths.serverUrl + "/images/credit-card-problem@2x.png") &
+        ".first-name" #> user.firstName.get &
+        ".billing-url [href]" #> (Paths.serverUrl + ShippingBilling.menu.loc.calcDefaultHref) &
         ".will-bill-again" #> (nextPaymentAttempt.isDefined ? PassThru | ClearNodes) andThen
         ".will-not-bill-again" #> (nextPaymentAttempt.isDefined ? ClearNodes | PassThru) andThen
         ".bill-amount" #> ("$" + ("%1.2f" format amount)) &
         ".next-payment-attempt" #> nextPaymentAttempt.map { paymentAttemptDate =>
           dateFormatter.format(paymentAttemptDate.toDate)
         }
-      ).apply(invoicePaymentFailedEmailTemplate)
+      }
 
-      sendEmail(subject, userEmail, invoicePaymentFailedEmailTemplate)
+      sendEmail(subject, user.email.get, transform(invoicePaymentFailedEmailTemplate))
   }
 }
 

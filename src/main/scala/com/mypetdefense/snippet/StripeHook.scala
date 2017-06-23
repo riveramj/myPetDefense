@@ -99,7 +99,7 @@ trait StripeHook extends RestHelper with Loggable {
           }
           val amount = totalAmountInCents / 100d
 
-          emailActor ! SendInvoicePaymentFailedEmail(user.email.get, amount, nextPaymentAttempt)
+          emailActor ! SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt)
 
           OkResponse()
       }
