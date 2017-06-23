@@ -86,7 +86,7 @@ trait StripeHook extends RestHelper with Loggable {
   def invoicePaymentFailed(objectJson: JValue) = {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
-      user <- User.find("stripeCustomerId" -> stripeCustomerId)
+      user <- User.find(By(User.stripeId, stripeCustomerId))
       totalAmountInCents <- tryo((objectJson \ "total").extract[Long]) ?~! "No total."
       } yield {
         val nextPaymentAttemptSecs: Option[Long] =
@@ -99,7 +99,7 @@ trait StripeHook extends RestHelper with Loggable {
           }
           val amount = totalAmountInCents / 100d
 
-          emailActor ! SendInvoicePaymentFailedEmail(user.email.get, amount, nextPaymentAttempt)
+          emailActor ! SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt)
 
           OkResponse()
       }
@@ -118,6 +118,7 @@ trait StripeHook extends RestHelper with Loggable {
         } yield {
           val result: Box[LiftResponse] = eventType match {
             case "invoice.payment_succeeded" => invoicePaymentSucceeded(objectJson)
+            //case "invoice.payment_failed" => invoicePaymentFailed(objectJson)
             case _ => Full(OkResponse())
           }
 
