@@ -119,10 +119,11 @@ trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
   addHandler {
     case SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt) =>
       val subject = "Problem Billing your Credit Card"
-      val dateFormatter = new SimpleDateFormat("MMM dd")
+      val dateFormatter = new SimpleDateFormat("MMMM dd, yyyy")
 
       val transform = {
         "#card-problem [src]" #> (Paths.serverUrl + "/images/credit-card-problem@2x.png") &
+        ".attempted-date *" #> dateFormatter.format(new Date()) &
         ".first-name" #> user.firstName.get &
         ".billing-url [href]" #> (Paths.serverUrl + ShippingBilling.menu.loc.calcDefaultHref) &
         ".will-bill-again" #> (nextPaymentAttempt.isDefined ? PassThru | ClearNodes) andThen
