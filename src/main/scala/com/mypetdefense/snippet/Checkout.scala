@@ -37,8 +37,7 @@ object Checkout extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Checkout") / "checkout" >>
-    completedPetOrFlow
+  val menu = Menu.i("Checkout") / "checkout"
 }
 
 case class PromoCodeMessage(status: String) extends MyPetDefenseEvent("promotion-code-message")

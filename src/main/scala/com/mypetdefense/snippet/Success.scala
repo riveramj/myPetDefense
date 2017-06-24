@@ -19,9 +19,7 @@ object Success extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-    val menu = Menu.i("Success") / "success" >>
-      completedPetOrFlow >>
-      finishedCheckout
+    val menu = Menu.i("Success") / "success"
 }
 
 class Success extends Loggable {
