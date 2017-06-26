@@ -82,6 +82,7 @@ object Paths {
     ResetPassword.menu,
     ResetPasswordSent.menu,
     Signup.menu,
+    Products.menu,
     Login.logoutMenu
   )
 }

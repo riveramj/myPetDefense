@@ -1,0 +1,161 @@
+#top-bar {
+  background-color: #ffffff;
+  display: block;
+}
+
+#logo-name { 
+  padding-top: em(14px);
+  padding-bottom: em(11px);
+  padding-left: em(15px);
+
+  display: inline-block;
+  
+  @media (min-width: $bp-medium) {
+    padding-top: em(16px);
+  }
+
+  @media (min-width: $bp-large) {
+    padding: 15px 0 15px 123px;
+  }
+}
+
+nav {
+  float: right;
+  @media (min-width: $bp-large) {
+    margin-right: em(123px);
+  }
+}
+
+.signup {
+  background-color: $signup-button-background;
+  color: #ffffff;
+  
+  text-decoration: none;
+  text-transform: uppercase;
+  font-weight: $bold;
+  font-size: em(14px);
+
+  letter-spacing: 0.31px;
+  line-height: 17px;
+}
+
+#menu-entries {
+  .login, .new-user-signup, .entry {
+    padding: rem(17px) rem(19px) rem(16px) rem(20px);
+  }
+
+  .login {
+    @media (min-width: $bp-large) {
+      font-size: rem(20px);
+      line-height: 24px;
+      font-weight: $bold;
+      padding: 19px 25px 19px 0;
+    }
+  }
+
+  .entry a {
+    font-weight: $regular;
+    text-transform: uppercase;
+  }
+
+  .current a, .new-user-signup a {
+    border-bottom: 2px solid #2E9F9B;
+    padding-bottom: rem(3px);
+    font-weight: $bold;
+  }
+  
+
+  li {
+    display: inline-block;
+  }
+
+  .desktop {
+    display: none;
+  }
+
+  @media (min-width: $bp-med) {
+    display: inline-block;
+
+    .logout {
+      padding-right: 0;
+    }
+
+    .mobile {
+      display: none;
+    }
+
+    .desktop {
+      display: inline-block;
+      padding: rem(13px) 0;
+
+      .signup {
+        background-color: initial;
+        color: #4F4E4E;
+        font-weight: $bold;
+        font-size: rem(16px);
+        text-transform: none;
+
+        &:visited {
+          color: #4F4E4E;
+        }
+      }
+    }
+  }
+
+  @media (min-width: $bp-large) {
+    .desktop .signup {
+      font-size: rem(20px);
+    }
+  }
+
+  font-size: rem(14px);
+  font-weight: $bold;
+
+  a {
+    text-decoration: none;
+    color: #454343;
+
+     &:visited {
+       color: #454343;
+     }
+  }
+
+  .signup {
+    display: block;
+    font-weight: $semibold;
+    font-size: rem(14px);
+    color: #ffffff;
+  
+    &:visited {
+      color: #ffffff;
+    }
+
+    padding: rem(17px) rem(19px) rem(16px) rem(20px);
+
+    @media (min-width: $bp-medium) {
+      padding: 22px 22px 21px 25px;
+    }
+
+    @media (min-width: $bp-large) {
+      padding: 0;
+    }
+  }
+
+  .learn-more {
+    display: none;
+    
+    @media (min-width: $bp-med) {
+      display: inline-block;
+      
+      color: #706E6E;
+      text-decoration: none;
+      text-transform: uppercase;
+      font-weight: $semibold;
+      font-size: rem(14px);
+
+      &:visited {
+        color: #706E6E;
+      }
+    }
+  }
+}
