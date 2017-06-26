@@ -5,6 +5,27 @@
   background-color: #259490;
 }
 
+#menu-entries li.login a {
+  color: #ffffff;
+  letter-spacing: 0.4px;
+}
+
+.shopping-cart {
+  margin-top: 5px;
+  color: #ffffff;
+  font-size: 23px;
+  overflow: hidden;
+  width: 33px;
+  height: 33px;
+  margin-right: 10px;
+
+  &:before {
+    @extend %icon;
+    content: $fa-var-shopping-cart;
+    margin-right: 2px;
+  }
+}
+
 #main {
   background-color: #e7e7e7;
   padding-bottom: 50px;
