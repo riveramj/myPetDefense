@@ -26,6 +26,11 @@ signup.css
 products
 products.css
 
+product-detail
+product-detail.css
+slick/slick.css
+slick/slick-theme.css
+
 checkout
 checkout.css
 

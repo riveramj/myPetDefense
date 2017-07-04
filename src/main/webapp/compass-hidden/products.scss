@@ -15,9 +15,11 @@
   color: #ffffff;
   font-size: 23px;
   overflow: hidden;
-  width: 33px;
-  height: 33px;
+  width: 30px;
+  height: 35px;
   margin-right: 10px;
+  border: none;
+  background: none;
 
   &:before {
     @extend %icon;
@@ -27,25 +29,82 @@
 }
 
 #main {
-  background-color: #e7e7e7;
-  padding-bottom: 50px;
+  background-color: #ffffff;
+  padding-bottom: 200px;
+}
+
+.page-header {
+  color: #605F5F;
+  font-weight: $semibold;
+  font-size: em(27px);
+  padding-bottom: 3px;
+  line-height: 33px;
+}
+
+.products-desciption {
+  font-size: em(18px);
+  font-weight: $normal;
+  line-height: rem(24px);
+}
+
+.header-container {
+  text-align: left;
+  padding: 25px 14px;
+
+  @media (min-width: $bp-medium) {
+    padding-left: 89px;
+
+    h2 {
+      width: 560px;
+    }
+  }
+
+  @media (min-width: $bp-large) {
+    padding-left: 0;
+  }
+}
+
+.products {
+  text-align: center;
 }
 
 .product {
-  background-color: #ffffff;
+  background-color: #F7F7F7;
   padding: 14px;
   display: table;
   margin-bottom: 3px;
+  width: 100%;
+
+  @media (min-width: $bp-large) {
+    width: 370px;
+    border: solid 1px #CECECE;
+    background-color: #ffffff;
+    margin-right: 41px;
+    margin-bottom: 41px;
+    display: inline-block;
+    padding: 30px 18px;
+  }
 }
 
 .product-shot {
   width: 118px;
   display: table-cell;
   vertical-align: top;
+  
+  @media (min-width: $bp-large) {
+    display: block;
+    width: 225px;
+    margin: 0 auto;
+  }
 
   img {
     max-height: 170px;
     width: 100%;
+
+    @media (min-width: $bp-large) {
+      max-height: 182px;
+      height: 182px;
+    }
   }
 }
 
@@ -53,17 +112,30 @@
   display: table-cell;
   vertical-align: top;
   padding-left: 12px;
+
+  @media (min-width: $bp-large) {
+   border-top: 1px solid #DCDBDB;
+   padding-top: 13px;
+   padding-left: 0;
+   text-align: left;
+  }
 }
 
 .name {
-  line-height: 19px;
-  font-weight: $bold;
+  line-height: 18px;
   letter-spacing: 0.4px;
+  color: #259490;
+  margin-right: 10px;
 }
 
 .price {
   margin-top: 8px;
-  color: #B12704;
+  color: #393939;
+  font-weight: $bold;
+
+  @media (min-width: $bp-large) {
+    margin-top: 10px;
+  }
 
   span {
     font-size: 16px;
@@ -75,9 +147,9 @@
 .product-options {
   margin-top: 10px;
 
-  a {
-    background-color: #ffffff;
-    border: 1px solid #259490;
+  a, &.desktop {
+    background-color: #f7f7f7;
+    border: 1px solid #B2B0B0;
     font-size: 14px;
     padding: 7px 15px;
     cursor: pointer;
@@ -85,5 +157,20 @@
     text-decoration: none;
     color: #454343;
     display: inline-block;
+  }
+
+  &.desktop {
+    display: none;
+    margin-bottom: 15px;
+  }
+
+  @media (min-width: $bp-large) {
+    &.mobile {
+      display: none;
+    }
+
+    &.desktop {
+      display: inline-block;
+    }
   }
 }

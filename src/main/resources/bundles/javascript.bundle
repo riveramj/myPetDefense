@@ -42,3 +42,7 @@ missing-product.js
 
 landing
 base.js
+
+product-detail
+slick/slick.min.js
+product-detail.js

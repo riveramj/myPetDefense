@@ -1,0 +1,47 @@
+@import "base"; 
+@import "nav-bar";
+
+#top-bar {
+  background-color: #259490;
+}
+
+#menu-entries li.login a {
+  color: #ffffff;
+  letter-spacing: 0.4px;
+}
+
+.shopping-cart {
+  margin-top: 5px;
+  color: #ffffff;
+  font-size: 23px;
+  overflow: hidden;
+  width: 30px;
+  height: 35px;
+  margin-right: 10px;
+  border: none;
+  background: none;
+
+  &:before {
+    @extend %icon;
+    content: $fa-var-shopping-cart;
+    margin-right: 2px;
+  }
+}
+
+#main {
+  background-color: #ffffff;
+  padding-bottom: 200px;
+}
+
+.product-shot {
+  width: 250px;
+  margin: 0 auto;
+}
+
+.product-slider {
+  .slick-next, .slick-prev {
+    display: none;
+    left: 0;
+    right: 0;
+  }
+}

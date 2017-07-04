@@ -1,0 +1,39 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div id="top-bar">
+    <div id="logo-name">
+      <a href="/">
+        <picture>
+          <source srcset="images/logo/logo-name-white.png, images/logo/logo-name-white@2x.png 2x" media="(min-width: 46.8em)">
+        <img srcset="images/logo/logo-name-white-small.png, images/logo/logo-name-white-small@2x.png 2x" src="images/logo/logo-name-white-small.png">
+        </picture>
+      </a>
+    </div>
+    <nav>
+      <ul id="menu-entries">
+        <li class="login"><a href="./login">Login</a></li>
+        <li>
+          <button class="shopping-cart">Shopping Cart</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <section class="product-list">
+    <div>
+      <div class="product-slider">
+        <div><img class="product-shot" src="images/product-shots/frontline-detail.jpg"></div>
+        <div><img class="product-shot" src="images/product-shots/frontline-dogs.jpg"></div>
+        <div><img class="product-shot" src="images/product-shots/frontline-dogs-back.jpg"></div>
+        <div><img class="product-shot" src="images/product-shots/refill.jpg"></div>
+      </div>
+    </div>
+  </section>
+
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=product-detail">
+  </head_merge>
+  <tail>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script type="text/javascript" data-lift="script-bundle?name=product-detail"></script>
+  </tail>
+</div>
