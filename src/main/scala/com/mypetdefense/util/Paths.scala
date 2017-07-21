@@ -137,6 +137,7 @@ object Paths {
     Profile.menu,
     admin.Dashboard.menu,
     admin.Dashboard.exportMenu,
+    admin.Dashboard.shipmentsCSVMenu,
     admin.Parents.menu,
     admin.Users.menu,
     admin.Prices.menu,
