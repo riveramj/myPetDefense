@@ -12,7 +12,7 @@ $(document).ready ->
   $('.add-to-cart').on 'click', (event) ->
     $('#shopping-cart').addClass('opened')
 
-  $('.mobile-close, .continue-shopping').on 'click', (event) ->
+  $('#main').on 'click', '.mobile-close, .continue-shopping', (event) ->
     $('#shopping-cart').removeClass('opened')
     $('.pet-name').val('')
     $('.product').removeClass('selected')

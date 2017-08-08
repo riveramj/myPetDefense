@@ -41,7 +41,8 @@ class ProductDetail extends Loggable {
     case "frontline-dog-detail" => Product.findAll(By(Product.name, "Frontline Plus for Dogs"))
   }
 
-  def addToCart(product: Product, name: String, price: Double)() = {
+  def addToCart(product: Product, name: String, price: Double) = {
+    recentProduct(Full(product))
     shoppingCart(shoppingCart.is :+ (generateLongId, name, product, price))
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
@@ -54,17 +55,28 @@ class ProductDetail extends Loggable {
       ".size *" #> s"${product.getSizeAndSizeName}" &
       ".price *" #> s"$$${price}" &
       ".pet-name" #> ajaxText("", name = _) &
-      ".add-to-cart [onclick]" #> ajaxInvoke(addToCart(product, name, price))
+      ".add-to-cart [onclick]" #> ajaxInvoke(() => addToCart(product, name, price))
     } & 
-    "#items-in-cart" #> idMemoize { renderer =>
+    "#shopping-cart" #> idMemoize { renderer =>
+      val cart = shoppingCart.is
+
       cartRenderer = Full(renderer)
-
-      ".cart-item" #> shoppingCart.is.map { cartItem =>
-        println(cartItem)
-
-        ".cart-pet-name *" #> cartItem._2 &
-        ".cart-pet-price *" #> s"$$${cartItem._4}"
+      val subtotal = cart.map(_._4).sum
+      val multiPetDiscount = cart.size match {
+        case 0 | 1 => 0
+        case 2 => subtotal * 0.05
+        case _ => subtotal * 0.1
       }
+
+      val subtotalWithDiscount = subtotal - multiPetDiscount
+      
+      ".added-product *" #> recentProduct.map(_.getNameAndSize).openOr("") &
+      ".cart-item" #> cart.map { cartItem =>
+        ".cart-pet-name *" #> cartItem._2 &
+        ".cart-pet-price *" #> f"$$${cartItem._4%2.2f}"
+      } &
+      ".discount *" #> f"-$$${multiPetDiscount%2.2f}" &
+      ".subtotal *" #> f"$$${subtotalWithDiscount%2.2f}"
     }
   }
 }
