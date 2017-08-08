@@ -53,7 +53,7 @@ class ProductDetail extends Loggable {
       val price = Price.getDefaultProductPrice(product).map(_.price.get).openOr(0D)
 
       ".size *" #> s"${product.getSizeAndSizeName}" &
-      ".price *" #> s"$$${price}" &
+      ".price *" #> f"$$$price%2.2f" &
       ".pet-name" #> ajaxText("", name = _) &
       ".add-to-cart [onclick]" #> ajaxInvoke(() => addToCart(product, name, price))
     } & 
@@ -72,11 +72,12 @@ class ProductDetail extends Loggable {
       
       ".added-product *" #> recentProduct.map(_.getNameAndSize).openOr("") &
       ".cart-item" #> cart.map { cartItem =>
+        val itemPrice = cartItem._4
         ".cart-pet-name *" #> cartItem._2 &
-        ".cart-pet-price *" #> f"$$${cartItem._4%2.2f}"
+        ".cart-pet-price *" #> f"$$$itemPrice%2.2f"
       } &
-      ".discount *" #> f"-$$${multiPetDiscount%2.2f}" &
-      ".subtotal *" #> f"$$${subtotalWithDiscount%2.2f}"
+      ".discount *" #> f"-$$$multiPetDiscount%2.2f" &
+      ".subtotal *" #> f"$$$subtotalWithDiscount%2.2f"
     }
   }
 }
