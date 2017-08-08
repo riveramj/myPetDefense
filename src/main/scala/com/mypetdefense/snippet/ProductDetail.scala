@@ -47,6 +47,10 @@ class ProductDetail extends Loggable {
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
+  def getImageUrl(product: Box[Product]) = {
+    s"images/product-shots/${product.map(_.imageName).openOr("")}"
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".product" #> products.map { product =>
@@ -71,8 +75,11 @@ class ProductDetail extends Loggable {
       val subtotalWithDiscount = subtotal - multiPetDiscount
       
       ".added-product *" #> recentProduct.map(_.getNameAndSize).openOr("") &
+      ".added-product-image [src]" #> getImageUrl(recentProduct) &
       ".cart-item" #> cart.map { cartItem =>
         val itemPrice = cartItem._4
+
+        ".cart-product-image [src]" #> getImageUrl(Full(cartItem._3)) &
         ".cart-pet-name *" #> cartItem._2 &
         ".cart-pet-price *" #> f"$$$itemPrice%2.2f"
       } &
