@@ -27,9 +27,11 @@
   background: #ffffff;
   margin-left: auto;
   float: right;
-  height: 100%;
+  height: 88%;
+  height: calc(100% - 121px);
   width: 0;
   width: 275px;
+  overflow: scroll;
 
   > h3 {
     text-align: center;
@@ -50,6 +52,7 @@
   border-top: 2px solid #CECECE;
   width: 275px;
   padding: 0 15px;
+  background: #ffffff;
 }
 
 .cart-totals {

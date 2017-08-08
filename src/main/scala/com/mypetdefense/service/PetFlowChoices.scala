@@ -10,14 +10,11 @@ import com.mypetdefense.snippet._
 import scala.collection.mutable.LinkedHashMap
 
 object PetFlowChoices extends Loggable {
-
-  object petId extends SessionVar[Box[Long]](Empty)
-  object petChoice extends SessionVar[Box[AnimalType.Value]](Empty)
-  object petSize extends SessionVar[Box[AnimalSize.Value]](Empty)
-  object petProduct extends SessionVar[Box[Product]](Empty)
-  object total extends SessionVar[Box[Double]](Empty)
   object freeMonths extends SessionVar[Box[Int]](Empty)
   object coupon extends SessionVar[Box[Coupon]](Empty)
+  object total extends SessionVar[Box[Double]](Empty)
 
   object completedPets extends SessionVar[LinkedHashMap[Long, Pet]](LinkedHashMap.empty)
+  
+  object shoppingCart extends SessionVar[Seq[(Long, String, Product, Double)]](Seq.empty)
 }

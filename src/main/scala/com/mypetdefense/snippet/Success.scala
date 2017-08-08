@@ -28,10 +28,6 @@ class Success extends Loggable {
     val monthylTotal = total.is
     val freeMonthCount = freeMonths.is.openOr(0)
 
-    petId(Empty)
-    petChoice(Empty)
-    petSize(Empty)
-    petProduct(Empty)
     total(Empty)
     freeMonths(Empty)
     completedPets(LinkedHashMap.empty)
