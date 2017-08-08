@@ -1,4 +1,69 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
+  <div id="shopping-cart">
+    <div class="cart-contents">
+      <h3>Way to go!</h3>
+      <div class="added-to-cart">
+        <ul>
+          <li>You added</li>
+          <li class="added-product-shot"><img class="added-product-image" src="images/product-shots/frontline-detail.jpg"></li>
+          <li>
+            <span class="added-product">FrontLine Plus for Dogs, 5 - 22 lbs</span>
+          </li>
+        </ul>
+      </div>
+
+      <h4>Current Products</h4>
+
+      <ul id="items-in-cart">
+        <li class="cart-item">
+          <div class="cart-product-shot">
+            <img class="cart-product-image" src="images/product-shots/frontline-detail.jpg">
+          </div>
+          <ul class="cart-pet">
+            <li>
+              <span class="cart-pet-name">Fido</span>
+            </li>
+            <li>
+              <span class="cart-pet-price">$17.99</span>
+            </li>
+          </ul>
+        </li>
+        <li class="cart-item">
+          <div class="cart-product-shot">
+            <img class="cart-product-image" src="images/product-shots/frontline-detail.jpg">
+          </div>
+          <ul class="cart-pet">
+            <li>
+              <span class="cart-pet-name">Spot</span>
+            </li>
+            <li>
+              <span class="cart-pet-price">$17.99</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <ul class="cart-footer">
+        <ul class="cart-totals">
+          <li>
+            <div>Discount</div><div class="discount">-$2.99</div>
+          </li>
+          <li>
+            <div>Subtotal</div><div class="subtotal">$22.99</div>
+          </li>
+        </ul>
+        <ul class="cart-actions">
+          <li>
+            <button type="button" class="continue-shopping">Continue Shopping</button>
+          </li>
+          <li>
+            <button type="button" class="checkout">Checkout</button>
+          </li>
+        </ul>
+      </ul>
+    </div>
+    <div class="mobile-close"></div>
+  </div>
+
   <div id="top-bar">
     <div id="logo-name">
       <a href="/">
@@ -18,15 +83,90 @@
     </nav>
   </div>
 
-  <section class="product-list">
-    <div>
-      <div class="product-slider">
-        <div><img class="product-shot" src="images/product-shots/frontline-detail.jpg"></div>
-        <div><img class="product-shot" src="images/product-shots/frontline-dogs.jpg"></div>
-        <div><img class="product-shot" src="images/product-shots/frontline-dogs-back.jpg"></div>
-        <div><img class="product-shot" src="images/product-shots/refill.jpg"></div>
-      </div>
+  <section class="details">
+    <div class="product-slider">
+      <div><img class="product-shot" src="images/product-shots/frontline-detail.jpg"></div>
+      <div><img class="product-shot" src="images/product-shots/frontline-dogs.jpg"></div>
+      <div><img class="product-shot" src="images/product-shots/frontline-dogs-back.jpg"></div>
+      <div><img class="product-shot" src="images/product-shots/refill.jpg"></div>
     </div>
+    <button type="button" id="buy-more">Buy More. Save More.</button>
+
+    <div id="pricing">
+      <div id="switch-save">
+        <h3>Switch and Save</h3>
+        <div>Order ZoGuard Plus today!</div>
+      </div>
+      <ul id="price-list">
+        <li class="product">
+          <div class="size-price">
+            <span class="size">Small, 5-22 lbs</span>
+            <span class="price">$10.99</span>
+          </div>
+          <ul class="name-cart">
+            <li>
+              <label>
+                <div>Pet Name</div>
+                <input class="pet-name" placeholder="Name">
+              </label>
+            </li>
+            <li>
+              <button class="add-to-cart">Add to Cart</button>
+            </li>
+          </ul>
+        </li>
+        <li class="product">
+          <div class="size-price">
+            <span class="size">Medium, 23-44 lbs</span>
+            <span class="price">$10.99</span>
+          </div>
+          <ul class="name-cart">
+            <li>
+              <label>
+                <div>Pet Name</div>
+                <input class="pet-name" placeholder="Name">
+              </label>
+            </li>
+            <li>
+              <button class="add-to-cart">Add to Cart</button>
+            </li>
+          </ul>
+        </li>
+        <li class="product">
+          <div class="size-price">
+            <span class="size">Large, 45-88 lbs</span>
+            <span class="price">$10.99</span>
+          </div>
+          <ul class="name-cart">
+            <li>
+              <label>
+                <div>Pet Name</div>
+                <input class="pet-name" placeholder="Pet Name">
+              </label>
+            </li>
+            <li>
+              <button class="add-to-cart">Add to Cart</button>
+            </li>
+          </ul>
+        </li>
+        <li class="product">
+          <div class="size-price">
+            <span class="size">XLarge, 88-132 lbs</span>
+            <span class="price">$10.99</span>
+          </div>
+          <ul class="name-cart">
+            <li>
+              <label>
+                <div>Pet Name</div>
+                <input class="pet-name" placeholder="Name">
+              </label>
+            </li>
+            <li>
+              <button class="add-to-cart">Add to Cart</button>
+            </li>
+          </ul>
+        </li>
+      </ul>
   </section>
 
   <head_merge>
