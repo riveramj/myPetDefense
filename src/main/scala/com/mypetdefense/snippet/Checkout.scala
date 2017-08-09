@@ -65,14 +65,10 @@ class Checkout extends Loggable {
   var coupon: Box[Coupon] = PetFlowChoices.coupon
   var couponCode = coupon.map(_.couponCode.get).openOr("")
 
-  val petCount = completedPets.is.size
-  val products = completedPets.is.flatMap(_._2.product.obj)
-  val prices = products.map { product =>
-    val price = Price.find(By(Price.product, product), By(Price.code, "default"))
-    price.map(_.price.get).getOrElse(0D)
-  }
-  val subtotal = prices.reduce(_+_)
-  val multiPetDiscount = petCount match {
+  val cart = shoppingCart.is
+  val petCount = cart.size
+  val subtotal = cart.values.map(_._3).sum
+  val multiPetDiscount = cart.size match {
     case 0 | 1 => 0
     case 2 => subtotal * 0.05
     case _ => subtotal * 0.1
@@ -81,26 +77,6 @@ class Checkout extends Loggable {
   val subtotalWithDiscount = subtotal - multiPetDiscount
 
   val pennyCount = (subtotal * 100).toInt
-
-  def validateCouponCode() = {
-    val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
-
-    if (possibleCoupon.isEmpty) {
-      coupon = None
-      
-      (
-        PromoCodeMessage("error") &
-        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
-      )
-    } else {
-      coupon = possibleCoupon
-
-      (
-        PromoCodeMessage("success") &
-        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
-      )
-    }
-  }
 
   def calculateTax(possibleState: String, possibleZip: String) = {
     state = possibleState
@@ -253,9 +229,8 @@ class Checkout extends Loggable {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
 
-        val monthlyTotal = subtotal - multiPetDiscount + taxDue
+        val monthlyTotal = subtotalWithDiscount + taxDue
 
-        "#count span *" #> petCount &
         "#subtotal span *" #> f"$$$subtotal%2.2f" &
         "#multi-pet-discount" #> ClearNodesIf(multiPetDiscount == 0) &
         "#multi-pet-discount span *" #> f"$$$multiPetDiscount%2.2f" &
@@ -293,18 +268,6 @@ class Checkout extends Loggable {
     "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
     "#cardholder-name" #> text(cardholderName, cardholderName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    {
-      val successCoupon = {
-        if (!PetFlowChoices.coupon.isEmpty)
-          "promo-success"
-        else
-          ""
-      }
-
-      ".promotion-info [class+]" #> successCoupon &
-      "#promo-code" #> ajaxText(couponCode, couponCode = _) &
-      ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
-    } &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup)
-    }
   }
+}

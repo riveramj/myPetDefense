@@ -1,99 +1,21 @@
-<div id="step-container" data-lift="surround?with=flow-template;at=content">
-  <div class="flow-progress-bar">
-    <ul>
-      <li class="complete">
-        <a href="/pet-choice">
-          <dl class="step-container">
-            <dt class="step-name">1. Pet</dt>
-            <dd class="step-choice"><span class="chosen-pet" data-lift="PetChoice.chosenPet">catdog</span></dd>
-          </dl>
-        </a>
-      </li>
-      <li class="complete" data-lift="NavBar.size">
-        <a href="/pet-choice">
-          <dl class="step-container">
-            <dt class="step-name">2. Size</dt>
-            <dd class="step-choice">
-              <span class="chosen-size">5-9</span>
-            </dd>
-          </dl>
-        </a>
-      </li>
-      <li class="complete" data-lift="NavBar.product">
-        <a href="/pet-choice">
-          <dl class="step-container">
-            <dt class="step-name">3. Product</dt>
-            <dd class="step-choice">
-              <span class="chosen-product">
-                zoguard plus for cats
-              </span>
-            </dd>
-          </dl>
-        </a>
-      </li>
-      <li class="complete" data-lift="NavBar.petCount">
-        <a href="/pet-details">
-          <dl class="step-container">
-            <dt class="step-name">
-              4. Pet Details
-              <div class="pet-count">0</div>
-            </dt>
-            <dd class="step-choice pet-details">
-              Reviewed
-              </span>
-            </dd>
-          </dl>
-        </a>
-      </li>
-      <li>
-        5. Checkout
-        <div class="arrow-up"></div>
-      </li>
-    </ul>
-  </div>
-  <div class="flow-step complete">
-    <a href="/pet-choice">
-      <dl class="step-container">
-        <dt class="step-name">1. Pet</dt>
-        <dd class="step-choice">
-          <span class="chosen-pet" data-lift="PetChoice.chosenPet">cat</span>
-        </dd>
-      </dl>
-    </a>
-  </div>
-  <div class="flow-step complete" data-lift="NavBar.size">
-    <a href="/cat-size">
-      <dl class="step-container">
-        <dt class="step-name">2. Size</dt>
-        <dd class="step-choice">
-          <span class="chosen-size">5-9</span>
-        </dd>
-      </dl>
-    </a>
-  </div>
-  <div class="flow-step complete" data-lift="NavBar.product">
-    <a href="/cat-product">
-      <dl class="step-container">
-        <dt class="step-name">3. Product</dt>
-        <dd class="step-choice">
-          <span class="chosen-product">zoguard plus for cats</span>
-        </dd>
-      </dl>
-    </a>
-  </div>
-  <div class="flow-step complete" data-lift="NavBar.petCount">
-    <a href="/pet-details">
-      <dl class="step-container">
-        <dt class="step-name">4. Pet Details<span class="pet-count">0</span></dt>
-        <dd class="step-choice">
-          <span class="chosen-product">Reviewed</span>
-        </dd>
-      </dl>
-    </a>
-  </div>
-  <div class="flow-step unanswered">
-    <div class="step-name">5. Checkout</div>
-    <div class="arrow-up"></div>
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div id="top-bar">
+    <div id="logo-name">
+      <a href="/">
+        <picture>
+          <source srcset="images/logo/logo-name-white.png, images/logo/logo-name-white@2x.png 2x" media="(min-width: 46.8em)">
+        <img srcset="images/logo/logo-name-white-small.png, images/logo/logo-name-white-small@2x.png 2x" src="images/logo/logo-name-white-small.png">
+        </picture>
+      </a>
+    </div>
+    <nav>
+      <ul id="menu-entries">
+        <li class="login"><a href="./login">Login</a></li>
+        <li>
+          <button class="shopping-cart">Shopping Cart</button>
+        </li>
+      </ul>
+    </nav>
   </div>
   <form class="current-step" data-lift="Checkout.render">
     <h1 class="step-header">Checkout</h1>
@@ -169,31 +91,11 @@
         </div>
       </fieldset>
 
-      <fieldset class="promotion-info">
-        <legend>Promotion Code</legend>
-        <div>
-          <label>
-            <div>
-              <span class="field-label">Promotion Code</span>
-              <span id="promo-error" class="hidden">Invalid. Please try another code.</span>
-              <span id="promo-success" class="hidden">Promotion applied.</span>
-            </div>
-            <div class="apply-promo-container">
-              <input size="20" id="promo-code" type="text">
-              <button class="apply-promo mobile" type="button">Apply</button>
-              <button class="apply-promo desktop" type="button">Apply Code</button>
-            </div>
-            
-          </label>
-        </div>
-      </fieldset>
-
       <div id="order-summary">
         <div id="summary">
           <h2>Order Summary</h2>
         </div>
         <ul id="order-details">
-          <li id="count">Pet Quantity <span>3</span></li>
           <li id="subtotal">Subtotal <span>$1.99</span></li>
           <li id="multi-pet-discount">Multi-Pet Discount <span>$0.02</span></li>
           <li id="tax">GA Sales Tax <span>$0.04</span></li>
