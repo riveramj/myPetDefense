@@ -17,5 +17,5 @@ object PetFlowChoices extends Loggable {
 
   object completedPets extends SessionVar[LinkedHashMap[Long, Pet]](LinkedHashMap.empty)
   
-  object shoppingCart extends SessionVar[Seq[(Long, String, Product, Double)]](Seq.empty)
+  object shoppingCart extends SessionVar[Map[Long, (String, Product, Double)]](Map())
 }

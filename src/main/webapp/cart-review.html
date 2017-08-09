@@ -1,0 +1,85 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div id="top-bar">
+    <div id="logo-name">
+      <a href="/">
+        <picture>
+          <source srcset="images/logo/logo-name-white.png, images/logo/logo-name-white@2x.png 2x" media="(min-width: 46.8em)">
+        <img srcset="images/logo/logo-name-white-small.png, images/logo/logo-name-white-small@2x.png 2x" src="images/logo/logo-name-white-small.png">
+        </picture>
+      </a>
+    </div>
+    <nav>
+      <ul id="menu-entries">
+        <li class="login"><a href="./login">Login</a></li>
+        <li>
+          <button class="shopping-cart">Shopping Cart</button>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div id="shopping-cart" data-lift="CartReview.render">
+    <div class="cart-contents">
+      <h2>Cart (<span class="cart-count">0.1 items</span>)</h2>
+      <ul class="cart-totals">
+        <li>
+          <div>Starting Total</div><div class="starting-total">$25.98</div>
+        </li>
+        <li class="discount-container">
+          <div>Discount</div><div class="discount">-$2.99</div>
+        </li>
+        <li>
+          <div>Monthly Subtotal</div><div class="subtotal">$22.99</div>
+        </li>
+      </ul>
+
+      <div class="promo-container">
+        <label>
+          <div>
+            <span class="field-label">Promotion Code</span>
+            <span id="promo-error" class="hidden">Invalid. Please try another code.</span>
+            <span id="promo-success" class="hidden">Promotion applied.</span>
+          </div>
+          <div class="apply-promo-container">
+            <input size="20" id="promo-code" type="text">
+            <button class="apply-promo mobile" type="button">Apply</button>
+            <button class="apply-promo desktop" type="button">Apply Code</button>
+          </div>
+        </label>
+      </div>
+
+      <ul id="items-in-cart">
+        <li class="cart-item">
+          <div class="cart-product-shot">
+            <img class="cart-product-image" src="images/product-shots/frontline-detail.jpg">
+            <button type="button" class="cart-pet-remove">Remove</button>
+          </div>
+          <ul class="cart-pet">
+            <li>
+              <div class="product-name-size">Frontline Plus for Dogs Small, 0-1 lbs</div>
+            </li>
+            <li>
+              <div class="cart-pet-price">$0.99</div>
+            </li>
+            <li>
+              <label class="pet-name-label">
+                <span class="field-label cart-pet-label">Pet Name</span>
+                <input class="pet-name" placeholder="Name">
+              </label>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <div class="cart-footer">
+        <a href="/checkout" class="checkout">Proceed to Secure Checkout</a>
+      </div>
+    </div>
+  </div>
+
+  <tail>
+    <!--<script type="text/javascript" data-lift="script-bundle?name=cart-review"></script>-->
+  </tail>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=cart-review">
+  </head_merge>
+</div>

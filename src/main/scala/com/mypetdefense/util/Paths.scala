@@ -63,6 +63,7 @@ object Paths {
     homePage,
     testimonial,
     LandingPage.fetchLanding,
+    CartReview.menu,
     Checkout.menu,
     Success.menu,
     AccountOverview.menu,

@@ -35,7 +35,6 @@ class ProductDetail extends Loggable {
   val path = S.request.map(_.uri).openOr("").drop(1)
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
-  var name = ""
 
   val products = path match {
     case "frontline-dog-detail" => Product.findAll(By(Product.name, "Frontline Plus for Dogs"))
@@ -43,7 +42,7 @@ class ProductDetail extends Loggable {
 
   def addToCart(product: Product, name: String, price: Double) = {
     recentProduct(Full(product))
-    shoppingCart(shoppingCart.is :+ (generateLongId, name, product, price))
+    shoppingCart(shoppingCart.is + (generateLongId -> (name, product, price)))
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
@@ -53,8 +52,9 @@ class ProductDetail extends Loggable {
 
   def render = {
     SHtml.makeFormsAjax andThen
-    ".product" #> products.map { product =>
+    ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>
       val price = Price.getDefaultProductPrice(product).map(_.price.get).openOr(0D)
+      var name = ""
 
       ".size *" #> s"${product.getSizeAndSizeName}" &
       ".price *" #> f"$$$price%2.2f" &
@@ -65,7 +65,7 @@ class ProductDetail extends Loggable {
       val cart = shoppingCart.is
 
       cartRenderer = Full(renderer)
-      val subtotal = cart.map(_._4).sum
+      val subtotal = cart.values.map(_._3).sum
       val multiPetDiscount = cart.size match {
         case 0 | 1 => 0
         case 2 => subtotal * 0.05
@@ -76,15 +76,16 @@ class ProductDetail extends Loggable {
       
       ".added-product *" #> recentProduct.map(_.getNameAndSize).openOr("") &
       ".added-product-image [src]" #> getImageUrl(recentProduct) &
-      ".cart-item" #> cart.map { cartItem =>
-        val itemPrice = cartItem._4
+      ".cart-item" #> cart.values.map { cartItem =>
+        val itemPrice = cartItem._3
 
-        ".cart-product-image [src]" #> getImageUrl(Full(cartItem._3)) &
-        ".cart-pet-name *" #> cartItem._2 &
+        ".cart-product-image [src]" #> getImageUrl(Full(cartItem._2)) &
+        ".cart-pet-name *" #> cartItem._1 &
         ".cart-pet-price *" #> f"$$$itemPrice%2.2f"
       } &
       ".discount *" #> f"-$$$multiPetDiscount%2.2f" &
-      ".subtotal *" #> f"$$$subtotalWithDiscount%2.2f"
+      ".subtotal *" #> f"$$$subtotalWithDiscount%2.2f" &
+      ".checkout [href]" #> CartReview.menu.loc.calcDefaultHref
     }
   }
 }
