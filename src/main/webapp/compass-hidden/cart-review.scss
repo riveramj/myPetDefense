@@ -62,9 +62,13 @@
     padding: 5px 0;
   }
 
-  .subtotal, .discount, .starting-total {
+  .subtotal, .discount, .starting-total, .free-months-count {
     float: right;
   }
+}
+
+.free-months {
+  color: #259490;
 }
 
 .promo-container {
@@ -79,7 +83,7 @@
   display: inline-block;
   vertical-align: top;
   margin: 17px 0 0 20px;
-  width: 200px;
+  width: 188px;
 }
 
 .cart-product-image {
@@ -344,6 +348,7 @@
 .product-name-size {
   padding-bottom: 10px;
   font-size: 17px;
+  line-height: 19px;
 }
 
 .cart-pet-price {

@@ -16,4 +16,3 @@ $(document).ready ->
     $('#shopping-cart').removeClass('opened')
     $('.pet-name').val('')
     $('.product').removeClass('selected')
-

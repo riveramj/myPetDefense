@@ -51,12 +51,18 @@ class CartReview extends Loggable {
       )
     } else {
       coupon = possibleCoupon
+      PetFlowChoices.coupon(coupon)
 
       (
         PromoCodeMessage("success") &
         cartRenderer.map(_.setHtml).openOr(Noop)
       )
     }
+  }
+
+  def removePet(petId: Long)() = {
+    shoppingCart(shoppingCart.is - petId)
+    cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def render = {
@@ -84,10 +90,19 @@ class CartReview extends Loggable {
       ".starting-total *" #> f"$$$subtotal%2.2f" &
       ".discount *" #> f"-$$$multiPetDiscount%2.2f" &
       ".subtotal *" #> f"$$$subtotalWithDiscount%2.2f" &
+      {
+        if(coupon.isEmpty) {
+          ".free-months" #> ClearNodes
+        } else {
+          ".free-months-count *" #> coupon.map(_.freeMonths.get).openOr(0)
+        }
+      } &
       ".cart-item" #> cart.map { case (id, pet) =>
         val itemPrice = pet._3
 
         ".cart-product-image [src]" #> getImageUrl(Full(pet._2)) &
+        ".cart-pet-remove [onclick]" #> ajaxInvoke(removePet(id)) &
+        ".product-name-size *" #> s"${pet._2.name.get} ${pet._2.getSizeAndSizeName}" &
         ".pet-name" #> ajaxText(pet._1, possibleName => {
           shoppingCart(shoppingCart.is + (id -> pet.copy(_1 = possibleName)))
           Noop
