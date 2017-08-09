@@ -1,0 +1,31 @@
+#top-bar {
+  background-color: #259490;
+}
+
+#menu-entries li.login a {
+  color: #ffffff;
+  letter-spacing: 0.4px;
+}
+
+#menu-entries a.shopping-cart {
+  margin-top: 5px;
+  color: #ffffff;
+  font-size: 23px;
+  overflow: hidden;
+  width: 23px;
+  height: 22px;
+  display: block;
+  margin-right: 10px;
+  border: none;
+  background: none;
+
+  &:before {
+    @extend %icon;
+    content: $fa-var-shopping-cart;
+    margin-right: 2px;
+  }
+}
+
+#main {
+  background-color: #ffffff;
+}
