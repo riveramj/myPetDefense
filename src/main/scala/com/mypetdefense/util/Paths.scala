@@ -86,6 +86,12 @@ object Paths {
     Signup.menu,
     Products.menu,
     ProductDetail.frontlineDogsMenu,
+    ProductDetail.zoguardDogsMenu,
+    ProductDetail.adventureDogsMenu,
+    ProductDetail.sheieldtecDogsMenu,
+    ProductDetail.frontlineCatsMenu,
+    ProductDetail.zoguardCatsMenu,
+    ProductDetail.adventureCatsMenu,
     Login.logoutMenu
   )
 }

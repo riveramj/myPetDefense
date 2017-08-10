@@ -27,6 +27,13 @@ object ProductDetail extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val frontlineDogsMenu = Menu.i("Frontline Plus for Dogs") / "frontline-dog-detail"
+  val zoguardDogsMenu = Menu.i("ZoGuard Plus for Dogs") / "zoguard-dog-detail"
+  val adventureDogsMenu = Menu.i("Adventure Plus for Dogs") / "adventure-dog-detail"
+  val sheieldtecDogsMenu = Menu.i("ShieldTec for Dogs") / "shieldtec-dog-detail"
+  val frontlineCatsMenu = Menu.i("Frontline Plus for Cats") / "frontline-cat-detail"
+  val zoguardCatsMenu = Menu.i("ZoGuard Plus for Cats") / "zoguard-cat-detail"
+  val adventureCatsMenu = Menu.i("Adventure Plus for Cats") / "adventure-cat-detail"
+
 }
 
 class ProductDetail extends Loggable {
@@ -38,6 +45,12 @@ class ProductDetail extends Loggable {
 
   val products = path match {
     case "frontline-dog-detail" => Product.findAll(By(Product.name, "Frontline Plus for Dogs"))
+    case "adventure-dog-detail" => Product.findAll(By(Product.name, "Adventure Plus for Dogs"))
+    case "shieldtec-dog-detail" => Product.findAll(By(Product.name, "ShieldTec for Dogs"))
+    case "zoguard-dog-detail" => Product.findAll(By(Product.name, "ZoGuard Plus for Dogs"))
+    case "frontline-cat-detail" => Product.findAll(By(Product.name, "Frontline Plus for Cats"))
+    case "adventure-cat-detail" => Product.findAll(By(Product.name, "Adventure Plus for Cats"))
+    case "zoguard-cat-detail" => Product.findAll(By(Product.name, "ZoGuard Plus for Cats"))
   }
 
   def addToCart(product: Product, name: String, price: Double) = {
