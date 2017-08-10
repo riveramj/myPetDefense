@@ -29,7 +29,7 @@ object ProductDetail extends Loggable {
   val frontlineDogsMenu = Menu.i("Frontline Plus for Dogs") / "frontline-dog-detail"
   val zoguardDogsMenu = Menu.i("ZoGuard Plus for Dogs") / "zoguard-dog-detail"
   val adventureDogsMenu = Menu.i("Adventure Plus for Dogs") / "adventure-dog-detail"
-  val sheieldtecDogsMenu = Menu.i("ShieldTec for Dogs") / "shieldtec-dog-detail"
+  val sheieldtecDogsMenu = Menu.i("ShieldTec Plus for Dogs") / "shieldtec-dog-detail"
   val frontlineCatsMenu = Menu.i("Frontline Plus for Cats") / "frontline-cat-detail"
   val zoguardCatsMenu = Menu.i("ZoGuard Plus for Cats") / "zoguard-cat-detail"
   val adventureCatsMenu = Menu.i("Adventure Plus for Cats") / "adventure-cat-detail"
@@ -46,7 +46,7 @@ class ProductDetail extends Loggable {
   val products = path match {
     case "frontline-dog-detail" => Product.findAll(By(Product.name, "Frontline Plus for Dogs"))
     case "adventure-dog-detail" => Product.findAll(By(Product.name, "Adventure Plus for Dogs"))
-    case "shieldtec-dog-detail" => Product.findAll(By(Product.name, "ShieldTec for Dogs"))
+    case "shieldtec-dog-detail" => Product.findAll(By(Product.name, "ShieldTec Plus for Dogs"))
     case "zoguard-dog-detail" => Product.findAll(By(Product.name, "ZoGuard Plus for Dogs"))
     case "frontline-cat-detail" => Product.findAll(By(Product.name, "Frontline Plus for Cats"))
     case "adventure-cat-detail" => Product.findAll(By(Product.name, "Adventure Plus for Cats"))
@@ -65,6 +65,7 @@ class ProductDetail extends Loggable {
 
   def render = {
     SHtml.makeFormsAjax andThen
+    "#switch-save" #> ClearNodesIf(!path.contains("frontline")) &
     ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>
       val price = Price.getDefaultProductPrice(product).map(_.price.get).openOr(0D)
       var name = ""

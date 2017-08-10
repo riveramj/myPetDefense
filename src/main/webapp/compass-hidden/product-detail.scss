@@ -255,3 +255,109 @@
 .selected .name-cart {
   display: block;
 }
+
+
+
+
+
+.product-description-header {
+  padding-bottom: rem(6px);
+}
+
+.product-label {
+  display: inline-block;
+  color: #259490;
+  padding-left: rem(20px);
+  font-size: rem(16px);
+}
+
+.product-features {
+  margin: 15px;
+}
+
+.feature {
+  width: 100%;
+  background-color: #F1F1F1;
+  padding: 18px 19px 17px 21px;
+
+  line-height: em(24px);
+  margin-bottom: rem(2px);
+
+  display: inline-block;
+  text-align: left;
+}
+
+.feature-container {
+  display: inline-block;
+  vertical-align: middle;
+
+  li {
+    display: table-cell;
+    text-align: left;
+  }
+
+  .top-recommended:before {
+    @extend %icon;
+    content: $fa-var-trophy;
+  }
+
+  .bug:before {
+    @extend %icon;
+    content: $fa-var-bug;
+  }
+
+  .kills:before {
+    @extend %icon;
+    content: $fa-var-ban;
+  }
+
+  .waterproof:before {
+    @extend %icon;
+    content: $fa-var-umbrella;
+  }
+
+  .clock:before {
+    @extend %icon;
+    content: $fa-var-clock-o;
+  }
+
+  .feature-icon {
+    color: #B2B0B0;
+    font-size: em(25px);
+    padding-top: 11px;
+  }
+
+  .feature-statement {
+    padding-left: 11px;
+    vertical-align: bottom;
+  }
+}
+
+.product-note {
+  line-height: rem(16px);
+  font-size: em(12px);
+  font-weight: $semibold;
+  letter-spacing: rem(.4px);
+
+  span {
+    text-transform: uppercase;
+    color: #259490;
+  }
+}
+
+.product-description {
+  padding-top: em(25px);
+  padding-bottom: em(35px);
+  text-align: left;
+  @include span-columns(11);
+  @include shift(.5);
+  line-height: em(24px);
+
+  h3 {
+    display: inline-block;
+    color: #454343;
+    font-weight: $semibold;
+    font-size: rem(17px);
+    text-transform: uppercase;
+  }
+}
