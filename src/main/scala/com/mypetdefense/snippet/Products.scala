@@ -29,6 +29,8 @@ object Products extends Loggable {
 }
 
 class Products extends Loggable {
+  val products = Product.findAll()
+
   val prices = Price.findAll(
     By(Price.code, "default"),
     By(Price.active, true)
@@ -43,14 +45,62 @@ class Products extends Loggable {
     f"$$$price%2.2f"
   }
 
+  def getImageUrl(product: Box[Product]) = {
+    s"images/product-shots/${product.map(_.imageName).openOr("")}"
+  }
+  
+  def getImgeAndPrice(productName: String): (String, Double) = {
+    val product = products.filter(_.name.get == productName).headOption
+    val imageName = s"images/product-shots/${product.map(_.imageName.get).getOrElse("")}"
+    val price: Double = product.flatMap { possibleProduct =>
+      Price.getDefaultProductPrice(possibleProduct).map(_.price.get)
+    }.getOrElse(0D)
+
+    (imageName, price)
+  }
 
   def render = {
-    ".frontline-dogs .month-price *" #> getPriceForProduct("Frontline", "Dogs") &
-    ".zoguard-dogs .month-price *" #> getPriceForProduct("ZoGuard", "Dogs") &
-    ".adventure-dogs .month-price *" #> getPriceForProduct("Adventure", "Dogs") &
-    ".shieldtec-dogs .month-price *" #> getPriceForProduct("ShieldTec", "Dogs") &
-    ".frontline-cats .month-price *" #> getPriceForProduct("Frontline", "Cats") &
-    ".zoguard-cats .month-price *" #> getPriceForProduct("ZoGuard", "Cats") &
-    ".adventure-cats .month-price *" #> getPriceForProduct("Adventure", "Cats")
+    ".frontline-dogs" #> {
+      val (imageName, price) = getImgeAndPrice("Frontline Plus for Dogs")
+
+      ".product-shot img [src]" #> imageName &
+      ".month-price *" #> f"$$$price%2.2f"
+    } &
+    ".zoguard-dogs" #> {
+      val (imageName, price) = getImgeAndPrice("ZoGuard Plus for Dogs")
+
+      ".product-shot img [src]" #> imageName &
+      ".month-price *" #> f"$$$price%2.2f"
+    } &
+    ".adventure-dogs" #> {
+      val (imageName, price) = getImgeAndPrice("Adventure Plus for Dogs")
+
+      ".product-shot img [src]" #> imageName &
+      ".month-price *" #> f"$$$price%2.2f"
+    } &
+    ".shieldtec-dogs" #> {
+      val (imageName, price) = getImgeAndPrice("ShieldTec Plus for Dogs")
+
+      ".product-shot img [src]" #> imageName &
+      ".month-price *" #> f"$$$price%2.2f"
+    } &
+    ".frontline-cats" #> {
+      val (imageName, price) = getImgeAndPrice("Frontline Plus for Cats")
+
+      ".product-shot img [src]" #> imageName &
+      ".month-price *" #> f"$$$price%2.2f"
+    } &
+    ".zoguard-cats" #> {
+      val (imageName, price) = getImgeAndPrice("ZoGuard Plus for Cats")
+
+      ".product-shot img [src]" #> imageName &
+      ".month-price *" #> f"$$$price%2.2f"
+    } &
+    ".adventure-cats" #> {
+      val (imageName, price) = getImgeAndPrice("Adventure Plus for Cats")
+
+      ".product-shot img [src]" #> imageName &
+      ".month-price *" #> f"$$$price%2.2f"
+    }
   }
 }
