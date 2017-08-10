@@ -40,9 +40,15 @@
 .product {
   background-color: #ffffff;
   border: solid 1px #CECECE;
-  padding: 14px;
   display: table;
   margin: 0 15px 10px;
+
+  a {
+    text-decoration: none;
+    display: block;
+    width: 345px;
+    padding: 14px;
+  }
 
   @media (min-width: $bp-large) {
     width: 370px;
@@ -119,7 +125,7 @@
 .product-options {
   margin-top: 10px;
 
-  a, &.desktop {
+  div, &.desktop {
     background-color: #f7f7f7;
     border: 1px solid #B2B0B0;
     font-size: 14px;

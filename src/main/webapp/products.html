@@ -18,7 +18,7 @@
     </nav>
   </div>
 
-  <section class="product-list">
+  <section class="product-list" data-lift="Products.render">
     <div class="header-container">
       <h1 class="page-header">Our Products</h1>
       <h2 class="products-desciption">
@@ -27,53 +27,131 @@
     </div>
 
     <ul class="products">
-      <li class="product">
-        <div class="product-shot">
-          <picture>
-            <source 
-              media="(min-width: 46.8em)" 
-              srcset="images/product-shots/frontline-dogs.jpg">
-            <img src="images/product-shots/frontline-dogs.jpg" srcset="images/product-shots/frontline-dogs.jpg">
-          </picture>
-        </div>
-        <a href="/frontline-dog-detail" class="product-options desktop">See Size Options</a>
-        <ul class="product-details">
-          <li class="name">Frontline Plus Flea and Tick Control for Dogs, 1 dose</li>
-          <li class="price"><span>$17.99</span> per month</li>
-          <li class="product-options mobile"><a href="/frontline-dog-detail">See Size Options</a></li>
-        </ul>
+      <li class="product frontline-dogs">
+        <a href="/frontline-dog-detail">
+          <div class="product-shot">
+            <picture>
+              <source 
+                 media="(min-width: 46.8em)" 
+                 srcset="images/product-shots/frontline-dogs.jpg">
+              <img src="images/product-shots/frontline-dogs.jpg" srcset="images/product-shots/frontline-dogs.jpg">
+            </picture>
+          </div>
+          <div class="product-options desktop">See Size Options</div>
+          <ul class="product-details">
+            <li class="name">Frontline Plus for Dogs</li>
+            <li class="price"><span class="month-price">0.99</span> per month</li>
+            <li class="product-options mobile"><div>See Size Options</div></li>
+          </ul>
+        </a>
       </li>
-      <li class="product">
-        <div class="product-shot">
-          <picture>
-            <source 
-              media="(min-width: 46.8em)" 
-              srcset="images/product-shots/frontline-dogs.jpg">
-            <img src="images/product-shots/frontline-dogs.jpg" srcset="images/product-shots/frontline-dogs.jpg">
-          </picture>
-        </div>
-        <a href="/frontline-dog-detail" class="product-options desktop">See Size Options</a>
-        <ul class="product-details">
-          <li class="name">Frontline Plus Flea and Tick Control for Dogs, 1 dose</li>
-          <li class="price"><span>$17.99</span> per month</li>
-          <li class="product-options mobile"><a href="/frontline-dog-detail">See Size Options</a></li>
-        </ul>
+      <li class="product zoguard-dogs">
+        <a href="/frontline-dog-detail">
+          <div class="product-shot">
+            <picture>
+              <source 
+                 media="(min-width: 46.8em)" 
+                 srcset="images/product-shots/frontline-dogs.jpg">
+              <img src="images/product-shots/frontline-dogs.jpg" srcset="images/product-shots/frontline-dogs.jpg">
+            </picture>
+          </div>
+          <div class="product-options desktop">See Size Options</div>
+          <ul class="product-details">
+            <li class="name">ZoGuard Plus for Dogs</li>
+            <li class="price"><span class="month-price">0.99</span> per month</li>
+            <li class="product-options mobile"><div>See Size Options</div></li>
+          </ul>
+        </a>
       </li>
-      <li class="product">
-        <div class="product-shot">
-          <picture>
-            <source 
-              media="(min-width: 46.8em)" 
-              srcset="images/product-shots/frontline-dogs.jpg">
-            <img src="images/product-shots/frontline-dogs.jpg" srcset="images/product-shots/frontline-dogs.jpg">
-          </picture>
-        </div>
-        <a href="/frontline-dog-detail" class="product-options desktop">See Size Options</a>
-        <ul class="product-details">
-          <li class="name">Frontline Plus Flea and Tick Control for Dogs, 1 dose</li>
-          <li class="price"><span>$17.99</span> per month</li>
-          <li class="product-options mobile"><a href="/frontline-dog-detail">See Size Options</a></li>
-        </ul>
+      <li class="product shieldtec-dogs">
+        <a href="/frontline-dog-detail">
+          <div class="product-shot">
+            <picture>
+              <source 
+                 media="(min-width: 46.8em)" 
+                 srcset="images/product-shots/frontline-dogs.jpg">
+              <img src="images/product-shots/frontline-dogs.jpg" srcset="images/product-shots/frontline-dogs.jpg">
+            </picture>
+          </div>
+          <div class="product-options desktop">See Size Options</div>
+          <ul class="product-details">
+            <li class="name">ShieldTec for Dogs</li>
+            <li class="price"><span class="month-price">0.99</span> per month</li>
+            <li class="product-options mobile"><div>See Size Options</div></li>
+          </ul>
+        </a>
+      </li>
+      <li class="product adventure-dogs">
+        <a href="/frontline-dog-detail">
+          <div class="product-shot">
+            <picture>
+              <source 
+                 media="(min-width: 46.8em)" 
+                 srcset="images/product-shots/frontline-dogs.jpg">
+              <img src="images/product-shots/frontline-dogs.jpg" srcset="images/product-shots/frontline-dogs.jpg">
+            </picture>
+          </div>
+          <div class="product-options desktop">See Size Options</div>
+          <ul class="product-details">
+            <li class="name">Adventure Plus for Dogs</li>
+            <li class="price"><span class="month-price">0.99</span> per month</li>
+            <li class="product-options mobile"><div>See Size Options</div></li>
+          </ul>
+        </a>
+      </li>
+      <li class="product frontline-cats">
+        <a href="/frontline-dog-detail">
+          <div class="product-shot">
+            <picture>
+              <source 
+                 media="(min-width: 46.8em)" 
+                 srcset="images/product-shots/frontline-dogs.jpg">
+              <img src="images/product-shots/frontline-dogs.jpg" srcset="images/product-shots/frontline-dogs.jpg">
+            </picture>
+          </div>
+          <div class="product-options desktop">See Size Options</div>
+          <ul class="product-details">
+            <li class="name">Frontline Plus for Cats</li>
+            <li class="price"><span class="month-price">0.99</span> per month</li>
+            <li class="product-options mobile"><div>See Size Options</div></li>
+          </ul>
+        </a>
+      </li>
+      <li class="product zoguard-cats">
+        <a href="/frontline-dog-detail">
+          <div class="product-shot">
+            <picture>
+              <source 
+                 media="(min-width: 46.8em)" 
+                 srcset="images/product-shots/frontline-dogs.jpg">
+              <img src="images/product-shots/frontline-dogs.jpg" srcset="images/product-shots/frontline-dogs.jpg">
+            </picture>
+          </div>
+          <div class="product-options desktop">See Size Options</div>
+          <ul class="product-details">
+            <li class="name">ZoGuard Plus for Cats</li>
+            <li class="price"><span class="month-price">0.99</span> per month</li>
+            <li class="product-options mobile"><div>See Size Options</div></li>
+          </ul>
+        </a>
+      </li>
+      <li class="product adventure-cats">
+        <a href="/frontline-dog-detail">
+          <div class="product-shot">
+            <picture>
+              <source 
+                 media="(min-width: 46.8em)" 
+                 srcset="images/product-shots/frontline-dogs.jpg">
+              <img src="images/product-shots/frontline-dogs.jpg" srcset="images/product-shots/frontline-dogs.jpg">
+            </picture>
+          </div>
+          <div class="product-options desktop">See Size Options</div>
+          <ul class="product-details">
+            <li class="name">Adventure Plus for Cats</li>
+            <li class="price"><span class="month-price">0.99</span> per month</li>
+            <li class="product-options mobile"><div>See Size Options</div></li>
+          </ul>
+        </a>
       </li>
     </ul>
   </section>
