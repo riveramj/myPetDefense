@@ -330,3 +330,18 @@
   padding-bottom: 10px;
   display: block;
 }
+
+.back-to-products {
+  margin: 10px 15px 0;
+
+  a {
+    color: #259490;
+    text-decoration: none;
+
+    &:before {
+      @extend %icon;
+      content: $fa-var-caret-left;
+      margin-right: 5px;
+    }
+  }
+}

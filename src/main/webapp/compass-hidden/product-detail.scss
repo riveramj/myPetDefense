@@ -107,7 +107,6 @@
   }
 }
 
-
 .added-product-shot {
   text-align: center;
 }
@@ -154,6 +153,21 @@
     display: none;
     left: 0;
     right: 0;
+  }
+}
+
+.back-to-products {
+  margin: 10px 15px;
+
+  a {
+    color: #259490;
+    text-decoration: none;
+
+    &:before {
+      @extend %icon;
+      content: $fa-var-caret-left;
+      margin-right: 5px;
+    }
   }
 }
 
