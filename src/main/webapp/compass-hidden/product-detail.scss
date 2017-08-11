@@ -145,7 +145,14 @@
 
 .details {
   @media (min-width: $bp-medium) {
-    margin: 0 50px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  @media (min-width: $bp-med-large) {
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
   }
 }
 
@@ -156,10 +163,6 @@
   @media (min-width: $bp-medium) {
     width: 300px;
   }
-
-  @media (min-width: 64em) {
-    width: 500px;
-  }
 }
 
 .product-slider {
@@ -167,10 +170,6 @@
     width: 320px;
     display: inline-block !important;
     vertical-align: top;
-  }
-
-  @media (min-width: $bp-large) {
-    width: 520px;
   }
 
   .slick-next, .slick-prev {
@@ -205,7 +204,7 @@
 
   @media (min-width: $bp-medium) {
     display: inline-block;
-    width: 340px
+    margin-left: 45px;
   }
 }
 
@@ -213,6 +212,7 @@
   background-color: #CDF5F4;
   padding: 18px;
   margin-bottom: 15px;
+  text-align: left;
 
   h3 {
     font-size: 18px;
@@ -226,7 +226,12 @@
   padding: 10px;
   
   @media (min-width: $bp-medium) {
-    padding: 18px;
+    padding: 18px 40px;
+    text-align: left;
+  }
+
+  @media (min-width: $bp-med-large) {
+    width: 520px;
   }
 }
 
@@ -250,6 +255,10 @@
   margin: 7px 0;
   border-radius: 5px;
 
+  @media (min-width: $bp-med-large) {
+    margin: 8px;
+  }
+
   &.selected {
     border: 1px solid #45ADA9;
   }
@@ -257,6 +266,10 @@
 
 .size-price {
   padding: 0 10px;
+
+  @media (min-width: $bp-med-large) {
+    width: 220px;
+   }
 
   .price {
     float: right;
@@ -315,7 +328,8 @@
   text-align: center;
 
   @media (min-width: $bp-medium) {
-    margin: 30px 50px 50px;
+    margin: 40px auto;
+    max-width: 668px;
   }
 }
 
@@ -389,14 +403,22 @@
 }
 
 .product-description {
-  padding-top: em(25px) 0 em(35px);
+  padding: em(25px) 0 em(35px);
   text-align: left;
   line-height: em(24px);
   margin: 15px;
 
   @media (min-width: $bp-medium) {
-    margin: 0 50px 50px;
+    margin: 20px auto;
+    max-width: 668px;
     padding: 0;
+  }
+  
+  @media (min-width: $bp-med-large) {
+    display: inline-block;
+    width: 400px;
+    vertical-align: top;
+    margin-top: 30px;
   }
 
   h3 {
