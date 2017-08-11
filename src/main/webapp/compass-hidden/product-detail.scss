@@ -143,14 +143,38 @@
   }
 }
 
+.details {
+  @media (min-width: $bp-medium) {
+    margin: 0 50px;
+  }
+}
+
 .product-shot {
   width: 250px;
   margin: 0 auto;
+
+  @media (min-width: $bp-medium) {
+    width: 300px;
+  }
+
+  @media (min-width: 64em) {
+    width: 500px;
+  }
 }
 
 .product-slider {
+  @media (min-width: $bp-medium) {
+    width: 320px;
+    display: inline-block !important;
+    vertical-align: top;
+  }
+
+  @media (min-width: $bp-large) {
+    width: 520px;
+  }
+
   .slick-next, .slick-prev {
-    display: none;
+    display: none !important;
     left: 0;
     right: 0;
   }
@@ -158,6 +182,11 @@
 
 .back-to-products {
   margin: 10px 15px;
+
+  @media (min-width: $bp-medium) {
+    margin: 20px 15px 10px;
+  }
+
 
   a {
     color: #259490;
@@ -173,6 +202,11 @@
 
 #pricing {
   padding: 0 15px;
+
+  @media (min-width: $bp-medium) {
+    display: inline-block;
+    width: 340px
+  }
 }
 
 #switch-save {
@@ -190,6 +224,10 @@
 #price-list {
   background-color: #F7F7F7;
   padding: 10px;
+  
+  @media (min-width: $bp-medium) {
+    padding: 18px;
+  }
 }
 
 #buy-more {
@@ -200,6 +238,10 @@
   font-size: 14px;
   margin-bottom: 10px;
   text-decoration: underline;
+
+  @media (min-width: $bp-medium) {
+    display: none;
+  }
 }
 
 .product {
@@ -257,9 +299,6 @@
 }
 
 
-
-
-
 .product-description-header {
   padding-bottom: rem(6px);
 }
@@ -273,17 +312,21 @@
 
 .product-features {
   margin: 15px;
+  text-align: center;
+
+  @media (min-width: $bp-medium) {
+    margin: 30px 50px 50px;
+  }
 }
 
 .feature {
-  width: 100%;
+  display: block;
+  margin: 0 auto 0.125rem;
+
   background-color: #F1F1F1;
   padding: 18px 19px 17px 21px;
 
   line-height: em(24px);
-  margin-bottom: rem(2px);
-
-  display: inline-block;
   text-align: left;
 }
 
@@ -346,12 +389,15 @@
 }
 
 .product-description {
-  padding-top: em(25px);
-  padding-bottom: em(35px);
+  padding-top: em(25px) 0 em(35px);
   text-align: left;
-  @include span-columns(11);
-  @include shift(.5);
   line-height: em(24px);
+  margin: 15px;
+
+  @media (min-width: $bp-medium) {
+    margin: 0 50px 50px;
+    padding: 0;
+  }
 
   h3 {
     display: inline-block;
