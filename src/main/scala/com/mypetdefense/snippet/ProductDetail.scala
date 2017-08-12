@@ -63,8 +63,13 @@ class ProductDetail extends Loggable {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
   }
 
+  val productImages = products.map(product => getImageUrl(Full(product)))
+
   def render = {
     SHtml.makeFormsAjax andThen
+    ".product-shot-container" #> productImages.map { productImage =>
+      ".product-shot [src]" #> productImage
+    } &
     "#switch-save" #> ClearNodesIf(!path.contains("frontline")) &
     ".product-name *" #> products.headOption.map(_.name.get).getOrElse("") &
     ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>

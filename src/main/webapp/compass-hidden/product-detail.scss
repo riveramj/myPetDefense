@@ -182,7 +182,7 @@
 
 .product-slider {
   @media (min-width: $bp-medium) {
-    width: 320px;
+    width: 350px;
     display: inline-block !important;
     vertical-align: top;
   }
@@ -195,10 +195,10 @@
 }
 
 .back-to-products {
-  margin: 10px 15px;
+  margin: 10px 15px 35px;
 
   @media (min-width: $bp-medium) {
-    margin: 20px 15px 10px;
+    margin: 20px 15px 35px;
   }
 
 
