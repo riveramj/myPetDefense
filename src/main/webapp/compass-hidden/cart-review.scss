@@ -9,6 +9,12 @@
 .cart-contents {
   padding: 20px 15px;
   background: #ffffff;
+  max-width: 1280px;
+  margin: 0 auto;
+
+  @media (min-width: $bp-medium) {
+    padding: 30px 40px;
+  }
 
   > h2 {
     font-size: 24px;
@@ -29,6 +35,14 @@
   width: 100%;
   padding: 15px;
   background: #ffffff;
+  
+  @media (min-width: $bp-medium) {
+    margin: 0 -40px;
+  }
+
+  @media (min-width: $bp-large) {
+    display: none;
+  }
 }
 
 .checkout {
@@ -43,13 +57,48 @@
   font-size: 17px;
   letter-spacing: 0.5px;
   font-weight: $semibold;
+
+  &.desktop {
+    display: none;
+  }
+
+  @media (min-width: $bp-medium) {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: $bp-large) {
+    margin-top: 24px;
+
+    &.desktop {
+      display: block;
+    }
+  }
 }
 
+.totals-promo {
+  @media (min-width: $bp-large) {
+    float: right;
+    border: solid 1px #CECECE;
+    padding: 24px;
+  }
+}
 
 .cart-totals {
   border-bottom: 1px solid #CECECE;
   margin: 0 -15px;
   padding: 0 15px 15px;
+
+  @media (min-width: $bp-medium) {
+    margin: 0 -40px;
+    padding: 0 40px 15px;
+  }
+
+  @media (min-width: $bp-large) {
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
 
   .discount-container {
     color: red;
@@ -74,8 +123,21 @@
 
 .promo-container {
   padding: 15px 0;
+
+  @media (min-width: $bp-medium) {
+    padding: 20px 0;
+  }
 }
 
+#items-in-cart {
+  @media (min-width: $bp-large) {
+    max-width: 650px;
+  }
+
+  @media (min-width: 77em) {
+    max-width: 750px;
+  }
+}
 .cart-product-shot {
   display: inline-block;
   width: 139px;
@@ -87,6 +149,10 @@
   vertical-align: top;
   margin-left: 20px;
   width: 180px;
+
+  @media (min-width: $bp-large) {
+    width: auto;
+  }
 }
 
 .cart-product-image {
@@ -98,8 +164,23 @@
   margin: 0 -15px;
   padding: 15px;
 
+  @media (min-width: $bp-medium) {
+    margin: 0 -40px;
+    padding: 25px 40px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin: 0;
+    border: 1px solid #CECECE;
+    margin-bottom: -1px;
+  }
+
   &:last-child {
     border-bottom: 1px solid #CECECE;
+    
+    @media (min-width: $bp-large) {
+      margin-bottom: 0;
+    }
   }
 }
 
@@ -271,7 +352,7 @@
     display: none;
   }
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     &.mobile {
       display: none;
     }
