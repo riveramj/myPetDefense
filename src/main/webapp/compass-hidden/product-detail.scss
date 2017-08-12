@@ -68,8 +68,12 @@
 
 .cart-totals {
   border-bottom: 1px solid #CECECE;
-  margin: 0 -30px 15px;
+  margin: 0 -15px 15px;
   padding: 0 15px;
+
+  @media (min-width: $bp-medium) {
+    margin: 0 -30px 15px;
+  }
 
   li:first-child {
     color: red;

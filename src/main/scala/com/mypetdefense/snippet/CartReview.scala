@@ -98,12 +98,14 @@ class CartReview extends Loggable {
         }
       } &
       ".cart-item" #> cart.map { case (id, pet) =>
+        val petName = pet._1
+        val product = pet._2
         val itemPrice = pet._3
 
-        ".cart-product-image [src]" #> getImageUrl(Full(pet._2)) &
-        ".cart-pet-remove [onclick]" #> ajaxInvoke(removePet(id)) &
-        ".product-name-size *" #> s"${pet._2.name.get} ${pet._2.getSizeAndSizeName}" &
-        ".pet-name" #> ajaxText(pet._1, possibleName => {
+        ".cart-product-image [src]" #> getImageUrl(Full(product)) &
+        ".cart-pet-remove [onclick]" #> Confirm(s"Remove ${petName}?", ajaxInvoke(removePet(id))) &
+        ".product-name-size *" #> s"${product.name.get} ${product.getSizeAndSizeName}" &
+        ".pet-name" #> ajaxText(petName, possibleName => {
           shoppingCart(shoppingCart.is + (id -> pet.copy(_1 = possibleName)))
           Noop
         }) &
