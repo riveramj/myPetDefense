@@ -250,6 +250,15 @@
   }
 }
 
+.product-name {
+  color: #605F5F;
+  font-weight: $bold;
+  font-size: 27px;
+  line-height: 33px;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
 #buy-more {
   display: block;
   margin: 0 auto;
@@ -435,8 +444,9 @@
   margin: 15px;
 
   @media (min-width: $bp-medium) {
-    margin: 20px auto;
     padding: 0;
+    margin: 0 auto 40px;
+    max-width: 668px;
   }
   
   @media (min-width: $bp-med-large) {

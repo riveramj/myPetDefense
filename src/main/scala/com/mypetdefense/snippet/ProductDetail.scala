@@ -66,6 +66,7 @@ class ProductDetail extends Loggable {
   def render = {
     SHtml.makeFormsAjax andThen
     "#switch-save" #> ClearNodesIf(!path.contains("frontline")) &
+    ".product-name *" #> products.headOption.map(_.name.get).getOrElse("") &
     ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>
       val price = Price.getDefaultProductPrice(product).map(_.price.get).openOr(0D)
       var name = ""
