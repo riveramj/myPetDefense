@@ -147,7 +147,7 @@ class Checkout extends Loggable {
         }
       }
 
-      Try(Await.result(stripeCustomer, new DurationInt(5).seconds)) match {
+      Try(Await.result(stripeCustomer, new DurationInt(7).seconds)) match {
         case TrySuccess(Full(customer)) =>
           newUserSetup(
             customer
