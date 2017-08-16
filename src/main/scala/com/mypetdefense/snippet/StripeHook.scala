@@ -118,7 +118,7 @@ trait StripeHook extends RestHelper with Loggable {
         } yield {
           val result: Box[LiftResponse] = eventType match {
             case "invoice.payment_succeeded" => invoicePaymentSucceeded(objectJson)
-            //case "invoice.payment_failed" => invoicePaymentFailed(objectJson)
+            case "invoice.payment_failed" => invoicePaymentFailed(objectJson)
             case _ => Full(OkResponse())
           }
 
