@@ -5,24 +5,45 @@
 #menu-entries li.login a {
   color: #ffffff;
   letter-spacing: 0.4px;
+  
+  @media (min-width: $bp-medium) {
+    font-size: 18px;
+  }
+}
+
+.cart-container {
+  vertical-align: middle;
 }
 
 #menu-entries a.shopping-cart {
-  margin-top: 5px;
+  margin-top: -7px;
   color: #ffffff;
   font-size: 23px;
   overflow: hidden;
   width: 23px;
   height: 22px;
   display: block;
-  margin-right: 15px;
+  margin-right: 17px;
   border: none;
   background: none;
+
+  @media (min-width: $bp-medium) {
+    font-size: 18px;
+    overflow: unset;
+    width: auto;
+    height: auto;
+    margin-right: 0;
+  }
 
   &:before {
     @extend %icon;
     content: $fa-var-shopping-cart;
     margin-right: 2px;
+  
+    @media (min-width: $bp-medium) {
+      font-size: 20px;
+      margin-right: 8px;
+    }
   }
 }
 
