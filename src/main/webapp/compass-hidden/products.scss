@@ -69,7 +69,7 @@
 .product-shot {
   width: 118px;
   display: table-cell;
-  vertical-align: top;
+  vertical-align: middle;
   
   @media (min-width: $bp-medium) {
     display: block;
@@ -116,6 +116,7 @@
   line-height: 18px;
   letter-spacing: 0.4px;
   color: #259490;
+  font-size: 17px;
 
   @media (min-width: $bp-medium) {
     font-size: 20px;
@@ -123,10 +124,17 @@
   }
 }
 
+.marketing-statement {
+  color: #393939;
+  font-size: 13px;
+  margin: 10px 0 15px;
+  line-height: 16px;
+}
+
 .price {
   margin-top: 8px;
   color: #393939;
-  font-weight: $normal;
+  font-weight: $semibold;
 
   @media (min-width: $bp-medium) {
     font-weight: $semibold;
