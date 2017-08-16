@@ -34,6 +34,8 @@ object PetsAndProducts extends Loggable {
 
 class PetsAndProducts extends Loggable {
   val user = currentUser
+  val subscription = user.flatMap(_.getSubscription)
+  val priceCode = subscription.map(_.priceCode.get).getOrElse("")
 
   var newPetType: Box[AnimalType.Value] = Empty
   var newPetChosenProduct: Box[Product] = Empty
@@ -144,6 +146,11 @@ class PetsAndProducts extends Loggable {
       var currentProduct = pet.product.obj
       var currentPetName = pet.name.get
 
+      val priceItem = currentProduct.flatMap { item =>
+        Price.getPricesByCode(item, priceCode)
+      }
+      val price = priceItem.map(_.price.get).getOrElse(0D)
+
       val currentProductDropdown = {
         val products = Product.findAll(By(Product.animalType, pet.animalType.get))
 
@@ -158,6 +165,7 @@ class PetsAndProducts extends Loggable {
 
       ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
       ".pet-product" #> currentProductDropdown &
+      ".price *" #> f"$$$price%2.2f" &
       ".pet-status *" #> pet.status.get.toString &
       ".cancel [onclick]" #> Confirm(s"Remove ${pet.name} and cancel future shipments?",
         ajaxInvoke(deletePet(pet))

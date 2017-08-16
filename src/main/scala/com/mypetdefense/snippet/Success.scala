@@ -19,21 +19,23 @@ object Success extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-    val menu = Menu.i("Success") / "success"
+  val menu = Menu.i("Success") / "success" >> 
+    finishedCheckout
 }
 
 class Success extends Loggable {
   def render() = {
-    val pets = completedPets.is
+    val petCount = shoppingCart.is.size
     val monthylTotal = total.is
     val freeMonthCount = freeMonths.is.openOr(0)
 
     total(Empty)
     freeMonths(Empty)
-    completedPets(LinkedHashMap.empty)
+    shoppingCart(Map())
     coupon(Empty)
+    recentProduct(Empty)
 
-    "#count span *" #> pets.size &
+    "#count span *" #> petCount &
     "#monthly-total" #> ClearNodesIf(freeMonthCount == 0) &
     "#monthly-total span *" #> monthylTotal.map( paid => f"$$$paid%2.2f" ) &
     {

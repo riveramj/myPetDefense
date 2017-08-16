@@ -50,6 +50,11 @@ object Paths {
     RedirectResponse(Checkout.menu.loc.calcDefaultHref)
   )
 
+  val hasProductInCart = If(
+    () => !shoppingCart.is.isEmpty,
+    RedirectResponse(Products.menu.loc.calcDefaultHref)
+  )
+
   def serverUrl = {
     val hostUrl = Props.get("server.url") openOr "http://localhost:8080/"
 

@@ -29,6 +29,7 @@ object Products extends Loggable {
 }
 
 class Products extends Loggable {
+  PetFlowChoices.priceCode(Full("default"))
   val products = Product.findAll()
 
   val prices = Price.findAll(

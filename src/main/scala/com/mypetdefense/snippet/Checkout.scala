@@ -37,7 +37,8 @@ object Checkout extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Checkout") / "checkout"
+  val menu = Menu.i("Checkout") / "checkout" >>
+    hasProductInCart
 }
 
 case class PromoCodeMessage(status: String) extends MyPetDefenseEvent("promotion-code-message")
@@ -172,6 +173,12 @@ class Checkout extends Loggable {
     }
   }
 
+  def createNewPets(user: User) = {
+    cart.map { case (_, (name, product, _)) =>
+      Pet.createNewPet(user, name, product)
+    }
+  }
+
   def newUserSetup(customer: Customer) = {
     val stripeId = customer.id
 
@@ -198,9 +205,7 @@ class Checkout extends Loggable {
       AddressType.Shipping
     )
     
-    val pets = PetFlowChoices.completedPets.is
-
-    pets.values.map(Pet.createNewPet(_, user))
+    createNewPets(user)
 
     val subscriptionId = (
       for {
@@ -214,11 +219,12 @@ class Checkout extends Loggable {
       user,
       subscriptionId,
       new Date(),
-      new Date()
+      new Date(),
+      priceCode.is.openOr("default")
     )
 
     if (Props.mode == Props.RunModes.Production) {
-      EmailActor ! NewSaleEmail(user, pets.size, coupon.map(_.couponCode.get).openOr(""))
+      EmailActor ! NewSaleEmail(user, cart.size, coupon.map(_.couponCode.get).openOr(""))
     }
 
     EmailActor ! SendWelcomeEmail(user)
