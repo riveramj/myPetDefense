@@ -65,12 +65,19 @@ class ProductDetail extends Loggable {
 
   val productImages = products.map(product => getImageUrl(Full(product)))
 
+  val switchSaveProduct = path match {
+    case "frontline-dog-detail" => "/zoguard-dog-detail"
+    case "frontline-cat-detail" => "/zoguard-cat-detail"
+    case _ => ""
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".product-shot-container" #> productImages.map { productImage =>
       ".product-shot [src]" #> productImage
     } &
-    "#switch-save" #> ClearNodesIf(!path.contains("frontline")) &
+    "#switch-save" #> ClearNodesIf(switchSaveProduct.isEmpty) &
+    "#switch-save [href]" #> switchSaveProduct &
     ".product-name *" #> products.headOption.map(_.name.get).getOrElse("") &
     ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>
       val price = Price.getDefaultProductPrice(product).map(_.price.get).openOr(0D)
