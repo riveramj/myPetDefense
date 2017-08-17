@@ -70,23 +70,23 @@ update product set imagename = 'frontline/Frontline-Plus-cat.jpg' where id = '23
 prod
 
 update product set sizename = 'Small' where size_c = '0';
-update product set sizename = 'Medium' where id = '1';
-update product set sizename = 'Large' where id = '2';
+update product set sizename = 'Medium' where size_c = '1';
+update product set sizename = 'Large' where size_c = '2';
 
 update product set sizename = 'Small' where size_c = '3';
-update product set sizename = 'Medium' where id = '4';
-update product set sizename = 'Large' where id = '5';
-update product set sizename = 'X-Large' where id = '6';
+update product set sizename = 'Medium' where size_c = '4';
+update product set sizename = 'Large' where size_c = '5';
+update product set sizename = 'X-Large' where size_c = '6';
 
 update product set sizename = 'Small' where size_c = '7';
-update product set sizename = 'Medium' where id = '8';
-update product set sizename = 'Large' where id = '9';
-update product set sizename = 'X-Large' where id = '10';
+update product set sizename = 'Medium' where size_c = '8';
+update product set sizename = 'Large' where size_c = '9';
+update product set sizename = 'X-Large' where size_c = '10';
 
 update product set sizename = 'Small' where size_c = '11';
-update product set sizename = 'Medium' where id = '12';
-update product set sizename = 'Large' where id = '13';
-update product set sizename = 'X-Large' where id = '14';
+update product set sizename = 'Medium' where size_c = '12';
+update product set sizename = 'Large' where size_c = '13';
+update product set sizename = 'X-Large' where size_c = '14';
 
  id |          name           | size_c
 ----+-------------------------+--------
@@ -146,5 +146,5 @@ update product set imagename = 'frontline/Frontline-Plus-xlarge-dog.jpg' where i
 
 update product set imagename = 'frontline/Frontline-Plus-cat.jpg' where id = '22';
 update product set imagename = 'frontline/Frontline-Plus-cat.jpg' where id = '24';
-update product set imagename = 'frontline/Frontline-Plus-cat.jpg' where id = '23';
+update product set imagename = 'frontline/Frontline-Plus-cat.jpg' where id = '25';
 
