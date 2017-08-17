@@ -88,7 +88,7 @@ class PetsAndProducts extends Loggable {
         product <- newPetChosenProduct
         size = product.size.get
       } yield {
-        PetService.addNewPet(
+        ParentService.addNewPet(
           user = parent,
           name = newPetName,
           animalType = pet,
@@ -107,7 +107,7 @@ class PetsAndProducts extends Loggable {
   }
 
   def deletePet(pet: Pet)() = {
-    PetService.removePet(user, pet) match {
+    ParentService.removePet(user, pet) match {
       case Full(_) =>
         S.redirectTo(PetsAndProducts.menu.loc.calcDefaultHref)
       case _ =>

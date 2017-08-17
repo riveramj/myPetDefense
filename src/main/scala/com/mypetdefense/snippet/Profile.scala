@@ -92,7 +92,7 @@ class Profile extends Loggable {
   def cancelAccount() = {
     val pets: List[Pet] = user.map(_.pets.toList).openOr(Nil)
 
-    pets.map(PetService.removePet(user, _))
+    pets.map(ParentService.removePet(user, _))
 
     user.map(ParentService.removeParent(_))
 
