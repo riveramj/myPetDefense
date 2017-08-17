@@ -14,22 +14,26 @@ object DataLoader extends Loggable {
       Product.createProduct(
         name = "Frontline Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogSmallZo
+        size = AnimalSize.DogSmallZo,
+        sizeName = "Small"
       )
       Product.createProduct(
         name = "Frontline Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogMediumZo
+        size = AnimalSize.DogMediumZo,
+        sizeName = "Medium"
       )
       Product.createProduct(
         name = "Frontline Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogLargeZo
+        size = AnimalSize.DogLargeZo,
+        sizeName = "Large"
       )
       Product.createProduct(
         name = "Frontline Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogXLargeZo
+        size = AnimalSize.DogXLargeZo,
+        sizeName = "X-Large"
       )
     }
 
@@ -37,25 +41,29 @@ object DataLoader extends Loggable {
       Product.createProduct(
         name = "Frontline Plus for Cats",
         animalType = AnimalType.Cat,
-        size = AnimalSize.CatSmall
+        size = AnimalSize.CatSmall,
+        sizeName = "Small"
       )
 
       Product.createProduct(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
-        size = AnimalSize.CatSmall
+        size = AnimalSize.CatSmall,
+        sizeName = "Small"
       )
 
       Product.createProduct(
         name = "Frontline Plus for Cats",
         animalType = AnimalType.Cat,
-        size = AnimalSize.CatMedium
+        size = AnimalSize.CatMedium,
+        sizeName = "Medium"
       )
 
       Product.createProduct(
         name = "Frontline Plus for Cats",
         animalType = AnimalType.Cat,
-        size = AnimalSize.CatLarge
+        size = AnimalSize.CatLarge,
+        sizeName = "Lage"
       )
     }
 
@@ -63,94 +71,111 @@ object DataLoader extends Loggable {
       Product.createProduct(
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
-        size = AnimalSize.CatMedium
+        size = AnimalSize.CatMedium,
+        sizeName = "Medium"
       )
 
       Product.createProduct(
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
-        size = AnimalSize.CatLarge
+        size = AnimalSize.CatLarge,
+        sizeName = "Large"
       )
 
       Product.createProduct(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
-        size = AnimalSize.CatSmall
+        size = AnimalSize.CatSmall,
+        sizeName = "Small"
       )
 
       Product.createProduct(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
-        size = AnimalSize.CatMedium
+        size = AnimalSize.CatMedium,
+        sizeName = "Medium"
       )
 
       Product.createProduct(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
-        size = AnimalSize.CatLarge
+        size = AnimalSize.CatLarge,
+        sizeName = "Large"
       )
 
       Product.createProduct(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogSmallAdv
+        size = AnimalSize.DogSmallAdv,
+        sizeName = "Small"
       )
       Product.createProduct(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogMediumAdv
+        size = AnimalSize.DogMediumAdv,
+        sizeName = "Medium"
       )
       Product.createProduct(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogLargeAdv
+        size = AnimalSize.DogLargeAdv,
+        sizeName = "Large"
       )
       Product.createProduct(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogXLargeAdv
+        size = AnimalSize.DogXLargeAdv,
+        sizeName = "X-Large"
       )
 
       Product.createProduct(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogSmallZo
+        size = AnimalSize.DogSmallZo,
+        sizeName = "Small"
       )
       Product.createProduct(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogMediumZo
+        size = AnimalSize.DogMediumZo,
+        sizeName = "Medium"
       )
       Product.createProduct(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogLargeZo
+        size = AnimalSize.DogLargeZo,
+        sizeName = "Large"
       )
       Product.createProduct(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogXLargeZo
+        size = AnimalSize.DogXLargeZo,
+        sizeName = "X-Large"
       )
 
       Product.createProduct(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogSmallShld
+        size = AnimalSize.DogSmallShld,
+        sizeName = "Small"
       )
       Product.createProduct(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogMediumShld
+        size = AnimalSize.DogMediumShld,
+        sizeName = "Medium"
       )
       Product.createProduct(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogLargeShld
+        size = AnimalSize.DogLargeShld,
+        sizeName = "Large"
       )
       Product.createProduct(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
-        size = AnimalSize.DogXLargeShld
+        size = AnimalSize.DogXLargeShld,
+        sizeName = "X-Large"
       )
     }
   }

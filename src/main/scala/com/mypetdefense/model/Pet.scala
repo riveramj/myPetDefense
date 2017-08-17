@@ -45,6 +45,21 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     .saveMe
   }
 
+  def createNewPet(
+    user: User,
+    name: String,
+    product: Product
+  ) = {
+    Pet.create
+    .petId(generateLongId)
+    .user(user)
+    .name(name)
+    .animalType(product.animalType.get)
+    .size(product.size.get)
+    .product(product)
+    .saveMe
+  }
+
   def createNewPet(pet: Pet, user: User) = {
     pet.user(user).saveMe
   }
