@@ -82,7 +82,7 @@ class Parents extends Loggable {
         product <- chosenProduct
         size = product.size.get
       } yield {
-        PetService.addNewPet(
+        ParentService.addNewPet(
           user = parent,
           name = petName,
           animalType = pet,
@@ -105,7 +105,7 @@ class Parents extends Loggable {
   }
 
   def deletePet(parent: User, pet: Pet, renderer: IdMemoizeTransform)() = {
-    PetService.removePet(parent, pet) match {
+    ParentService.removePet(parent, pet) match {
       case Full(_) =>
         renderer.setHtml
       case _ =>

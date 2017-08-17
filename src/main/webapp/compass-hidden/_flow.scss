@@ -33,7 +33,7 @@ html, body {
 .footer {
   @media (min-width: $bp-large) {
     position: relative;
-	  margin-top: -110px; /* negative value of footer height */
+	  margin-top: -51px;; /* negative value of footer height */
   	height: 110px;
 	  clear: both;
   }

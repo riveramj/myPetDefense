@@ -118,7 +118,7 @@ trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
 
   addHandler {
     case SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt) =>
-      val subject = "Problem Billing your Credit Card"
+      val subject = "Problem Billing your Card"
       val dateFormatter = new SimpleDateFormat("MMMM dd, yyyy")
 
       val transform = {
