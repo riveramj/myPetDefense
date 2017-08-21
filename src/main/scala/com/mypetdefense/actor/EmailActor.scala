@@ -1,4 +1,4 @@
-package com.mypetdefense.actor
+ package com.mypetdefense.actor
 
 import scala.xml.NodeSeq
 import scala.util._
@@ -118,7 +118,14 @@ trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
 
   addHandler {
     case SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt) =>
-      val subject = "Problem Billing your Card"
+      val finalAttempt = !nextPaymentAttempt.isDefined
+      val subject = {
+        if (finalAttempt)
+          "Account Suspended"
+        else
+          "Problem Billing your Card"
+      }
+
       val dateFormatter = new SimpleDateFormat("MMMM dd, yyyy")
 
       val transform = {
