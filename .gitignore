@@ -8,3 +8,4 @@ src/main/webapp/static/js/*
 *.scssc
 src/main/webapp/static/css/*
 src/main/webapp/static/stylesheets/*
+blog/
