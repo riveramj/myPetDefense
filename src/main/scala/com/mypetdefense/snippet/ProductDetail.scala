@@ -33,7 +33,6 @@ object ProductDetail extends Loggable {
   val frontlineCatsMenu = Menu.i("Frontline Plus for Cats") / "frontline-cat-detail"
   val zoguardCatsMenu = Menu.i("ZoGuard Plus for Cats") / "zoguard-cat-detail"
   val adventureCatsMenu = Menu.i("Adventure Plus for Cats") / "adventure-cat-detail"
-
 }
 
 class ProductDetail extends Loggable {
@@ -42,6 +41,9 @@ class ProductDetail extends Loggable {
   val path = S.request.map(_.uri).openOr("").drop(1)
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
+  var name = ""
+  var chosenProduct: Box[Product] = Empty
+  var chosenPrice = 0D
 
   val products = path match {
     case "frontline-dog-detail" => Product.findAll(By(Product.name, "Frontline Plus for Dogs"))
@@ -53,10 +55,26 @@ class ProductDetail extends Loggable {
     case "zoguard-cat-detail" => Product.findAll(By(Product.name, "ZoGuard Plus for Cats"))
   }
 
-  def addToCart(product: Product, name: String, price: Double) = {
-    recentProduct(Full(product))
-    shoppingCart(shoppingCart.is + (generateLongId -> (name, product, price)))
-    cartRenderer.map(_.setHtml).openOr(Noop)
+  def addToCart() = {
+    val validateFields = List(checkEmpty(chosenProduct.map(_.name.get), ".product")).flatten
+
+    if (validateFields.isEmpty) {
+      (
+        for {
+          product <- chosenProduct
+          price = chosenPrice
+          renderer <- cartRenderer
+        } yield {
+          recentProduct(Full(product))
+          shoppingCart(shoppingCart.is + (generateLongId -> (name, product, price)))
+          chosenProduct = Empty
+          chosenPrice = 0D
+          renderer.setHtml
+        }
+      ).openOr(Noop)
+    } else {
+      validateFields.foldLeft(Noop)(_ & _)
+    }
   }
 
   def getImageUrl(product: Box[Product]) = {
@@ -71,6 +89,13 @@ class ProductDetail extends Loggable {
     case _ => ""
   }
 
+  def updateProductChoice(product: Product, price: Double) = {
+    chosenProduct = Full(product)
+    chosenPrice = price
+
+    Noop
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".product-shot-container" #> productImages.map { productImage =>
@@ -81,13 +106,12 @@ class ProductDetail extends Loggable {
     ".product-name *" #> products.headOption.map(_.name.get).getOrElse("") &
     ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>
       val price = Price.getDefaultProductPrice(product).map(_.price.get).openOr(0D)
-      var name = ""
-
       ".size *" #> s"${product.getSizeAndSizeName}" &
       ".price *" #> f"$$$price%2.2f" &
-      ".pet-name" #> ajaxText("", name = _) &
-      ".add-to-cart [onclick]" #> ajaxInvoke(() => addToCart(product, name, price))
+      "^ [onclick]" #> ajaxInvoke(() => updateProductChoice(product, price))
     } & 
+    ".pet-name" #> ajaxText("", name = _) &
+    ".add-to-cart [onclick]" #> ajaxInvoke(() => addToCart()) &
     "#shopping-cart" #> idMemoize { renderer =>
       val cart = shoppingCart.is
 
