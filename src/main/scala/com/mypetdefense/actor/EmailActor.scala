@@ -27,6 +27,7 @@ import Mailer._
 
 sealed trait EmailActorMessage
 case class SendWelcomeEmail(user: User) extends EmailActorMessage
+case class SendFeedbackEmail(user: User) extends EmailActorMessage
 case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class SendPasswordResetEmail(user: User) extends EmailActorMessage
 case class SendPasswordUpdatedEmail(user: User) extends EmailActorMessage
@@ -65,6 +66,24 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
       }
 
       sendEmail(welcomeEmailSubject, user.email.get, transform(welcomeEmailTemplate))
+  }
+}
+
+trait FeedbackEmailHandling extends EmailHandlerChain {
+  val feedbackEmailSubject = "We Value Your Feedback - Free Month"
+  val feedbackEmailTemplate = 
+    Templates("emails-hidden" :: "Feedback-email" :: Nil) openOr NodeSeq.Empty
+  
+  val feedbackLink = Paths.serverUrl + Paths.testimonial.loc.calcDefaultHref
+
+  addHandler {
+    case SendFeedbackEmail(user) => 
+      val transform = {
+        ".first-name" #> user.firstName.get &
+        ".take-survy-link [href]" #> feedbackLink
+      }
+
+      sendEmail(feedbackEmailSubject, user.email.get, transform(feedbackEmailTemplate))
   }
 }
 
@@ -270,6 +289,7 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
 object EmailActor extends EmailActor
 trait EmailActor extends EmailHandlerChain
                     with WelcomeEmailHandling
+                    with FeedbackEmailHandling
                     with SendNewUserEmailHandling
                     with InvoicePaymentFailedEmailHandling
                     with InvoicePaymentSucceededEmailHandling 
