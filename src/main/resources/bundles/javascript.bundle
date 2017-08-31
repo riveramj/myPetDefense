@@ -8,9 +8,6 @@ update-billing.js
 jquery.payment.js
 base.js
 
-pet-details
-base.js
-
 profile
 profile.js
 base.js
@@ -45,6 +42,7 @@ base.js
 product-detail
 slick/slick.min.js
 product-detail.js
+base.js
 
 cart-review
 promo-code.js
