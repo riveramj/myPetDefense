@@ -11,6 +11,7 @@ $(document).ready ->
     $target.addClass "error"
 
   $("#price-list").on "click", ".product", (event) ->
+    $('.product').removeClass('error')
     $(".selected").removeClass("selected")
     product = $(event.target).closest('.product')
     $(product).addClass("selected")
