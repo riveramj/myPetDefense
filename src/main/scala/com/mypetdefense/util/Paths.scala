@@ -67,7 +67,8 @@ object Paths {
   def siteMap = SiteMap(
     homePage,
     testimonial,
-    LandingPage.fetchLanding,
+    LandingPage.landing2Free,
+    LandingPage.landing3Free,
     CartReview.menu,
     Checkout.menu,
     Success.menu,
