@@ -6,6 +6,8 @@
   </appender>
 
   <logger name="net.liftweb.util.TimeHelpers" level="warn"/>
+  <logger name="com.ning.http.client.providers.netty.channel.pool.DefaultChannelPool" level="warn"/>
+  <logger name="net.liftweb.db.ProtoDBVendor" level="warn"/>
 
   <root level="info">
     <appender-ref ref="STDOUT" />

@@ -45,7 +45,8 @@ class Boot {
       Subscription,
       Agency,
       Coupon,
-      Price
+      Price,
+      Review
     )
 
     DataLoader.loadProducts

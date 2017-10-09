@@ -114,6 +114,24 @@
   }
 }
 
+.star {
+  display: inline-block;
+
+  &:after {
+    @extend %icon;
+  }
+
+  &.filled:after {
+    content: $fa-var-star;
+    color: gold;
+  }
+
+  &.empty:after {
+    content: $fa-var-star-o;
+    color: black;
+  }
+}
+
 .name {
   line-height: 18px;
   letter-spacing: 0.4px;

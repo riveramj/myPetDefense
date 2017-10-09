@@ -261,12 +261,34 @@
   }
 }
 
+.rating {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.star {
+  display: inline-block;
+
+  &:after {
+    @extend %icon;
+  }
+
+  &.filled:after {
+    content: $fa-var-star;
+    color: gold;
+  }
+
+  &.empty:after {
+    content: $fa-var-star-o;
+    color: black;
+  }
+}
+
 .product-name {
   color: #605F5F;
   font-weight: $bold;
   font-size: 27px;
   line-height: 33px;
-  margin-bottom: 15px;
   text-align: center;
 }
 
