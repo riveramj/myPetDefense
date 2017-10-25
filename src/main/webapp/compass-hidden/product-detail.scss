@@ -444,7 +444,7 @@
 }
 
 .product-features {
-  margin-top: 23px;
+  margin: 23px 0 50px;
 
   @media (min-width: $bp-medium) {
     margin: 40px auto;
@@ -550,4 +550,50 @@
     font-size: 27px;
     line-height: 33px;
   }
+}
+
+.reviews {
+  text-align: left;
+  margin: 0 20px;
+  
+  h2 {
+    margin-bottom: 10px;
+  }
+
+  h2, .review-count {
+    color: #605F5F;
+    font-size: 27px;
+    font-weight: $bold;
+    line-height: 33px;
+    padding-left: 0;
+  }
+}
+
+.review {
+  border-bottom: 1px solid #CBCCCC;
+  margin-top: 25px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.review-title {
+  font-size: 18px;
+  font-weight: $bold;
+  line-height: 24px;
+}
+
+.author-details {
+  color: #B2B0B0;
+  font-size: 14px;
+  line-height: 18px;
+  margin-top: 2px;
+}
+
+.review-body {
+  color: #454343;
+  line-height: 23px;
+  font-size: 16px;
+  margin-bottom: 25px;
 }
