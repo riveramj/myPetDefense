@@ -22,7 +22,7 @@
 
 .header-container {
   text-align: left;
-  padding: 25px 14px;
+  padding: 30px 15px 0;
 
   @media (min-width: $bp-medium) {
     padding: 30px 20px 15px;
@@ -35,19 +35,20 @@
 
 .products {
   text-align: center;
-  padding-left: 15px;
+  padding: 35px 25px;
 }
 
 .product {
   background-color: #ffffff;
-  border: solid 1px #CECECE;
   display: block;
-  margin: 0 15px 10px;
+  border-bottom: 1px solid #CECECE;
+
+  margin: 0 -25px;
+  padding: 30px 25px 0;
 
   a {
     text-decoration: none;
     display: block;
-    padding: 14px;
 
     @media (min-width: $bp-large) {
       padding: 30px 14px;
@@ -68,11 +69,22 @@
   }
 }
 
+.zoguard-dogs , .zoguard-cats {
+  .vertical-box img {
+    max-height: 225px;
+  }
+}
+
+.shieldtec-dogs .vertical-box img {
+  max-height: 235px;
+}
+
 .product-shot {
-  width: 118px;
+  width: 131px;
   display: table-cell;
-  vertical-align: middle;
-  
+  vertical-align: top;
+  padding-bottom: 30px;
+
   @media (min-width: $bp-medium) {
     display: block;
     margin: 0 auto;
@@ -103,7 +115,7 @@
 .product-details {
   display: table-cell;
   vertical-align: top;
-  padding-left: 12px;
+  padding-left: 23px;
 
   li {
     text-align: left;
@@ -112,6 +124,10 @@
   @media (min-width: $bp-medium) {
     padding-left: 0;
   }
+}
+
+.rating {
+  padding-bottom: 5px;
 }
 
 .star {
@@ -123,7 +139,7 @@
 
   &.filled:after {
     content: $fa-var-star;
-    color: gold;
+    color: #FE9900;
   }
 
   &.empty:after {
@@ -132,11 +148,19 @@
   }
 }
 
-.name {
+.review-count {
+  color: #454343;
+  font-size: 14px;
+  font-weight: $normal;
+  display: inline-block;
+  padding-left: 4px;
   line-height: 18px;
-  letter-spacing: 0.4px;
+}
+
+.name {
+  line-height: 24px;
   color: #259490;
-  font-size: 17px;
+  font-size: 18px;
 
   @media (min-width: $bp-medium) {
     font-size: 20px;
@@ -146,9 +170,10 @@
 
 .marketing-statement {
   color: #393939;
-  font-size: 13px;
-  margin: 10px 0 15px;
-  line-height: 16px;
+  font-size: 16px;
+  line-height: 24px;
+
+  padding-bottom: 20px;
 
   @media (min-width: $bp-large) {
     font-size: 14px;
@@ -157,10 +182,12 @@
 }
 
 .price {
-  margin-top: 8px;
   color: #393939;
-  font-weight: $semibold;
+  font-weight: $bold;
   font-size: 12px;
+  text-transform: uppercase;
+  line-height: 24px;
+  padding-bottom: 30px;
 
   @media (min-width: $bp-medium) {
     font-weight: $semibold;
@@ -173,7 +200,7 @@
   }
 
   span {
-    font-size: 16px;
+    font-size: 26px;
     
     @media (min-width: $bp-large) {
       font-size: 18px;
@@ -182,17 +209,22 @@
 }
 
 .product-options {
-  margin-top: 10px;
+  margin-bottom: 30px;
 
   div, &.tablet-desktop {
-    background-color: #f7f7f7;
-    border: 1px solid #B2B0B0;
-    font-size: 13px;
-    padding: 7px 15px;
+    background-color: #259490;
+    border-radius: 5px;
+    color: #F7F7F7;
+    
+    font-size: 17px;
+    font-weight: $bold;
+    letter-spacing: 0.4px;
+    line-height: 22px;
+    
+    padding: 14px 80px;
     cursor: pointer;
     border-radius: 4px;
     text-decoration: none;
-    color: #454343;
     display: inline-block;
   }
 
