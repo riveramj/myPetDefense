@@ -25,7 +25,7 @@
   padding: 30px 15px 0;
 
   @media (min-width: $bp-medium) {
-    padding: 30px 20px 15px;
+    padding: 30px 20px 0;
   }
 
   @media (min-width: $bp-large) {
@@ -56,12 +56,13 @@
   }
 
   @media (min-width: $bp-medium) {
-    width: 260px;
+    width: 220px;
     border: solid 1px #CECECE;
     display: inline-block;
     vertical-align: top;
     margin: 0 15px 22px 0;
     min-height: 407px;
+    padding: 15px 16px;
   }
 
   @media (min-width: $bp-large) {
@@ -72,11 +73,27 @@
 .zoguard-dogs , .zoguard-cats {
   .vertical-box img {
     max-height: 225px;
+    
+    @media (min-width: $bp-medium) {
+      max-height: 144px;
+    }
+
+    @media (min-width: $bp-large) {
+      max-height: 182px;
+    }
   }
 }
 
 .shieldtec-dogs .vertical-box img {
   max-height: 235px;
+  
+  @media (min-width: $bp-medium) {
+    max-height: 142px;
+  }
+
+  @media (min-width: $bp-large) {
+    max-height: 182px;
+  }
 }
 
 .product-shot {
@@ -174,11 +191,6 @@
   line-height: 24px;
 
   padding-bottom: 20px;
-
-  @media (min-width: $bp-large) {
-    font-size: 14px;
-    line-height: 17px;
-  }
 }
 
 .price {
@@ -192,6 +204,7 @@
   @media (min-width: $bp-medium) {
     font-weight: $semibold;
     line-height: 24px;
+    padding-bottom: 0;
   }
 
   @media (min-width: $bp-large) {
@@ -230,12 +243,16 @@
 
   &.tablet-desktop {
     display: none;
-    font-size: 14px;
+    font-size: 15px;
+    line-height: 22px;
+    letter-spacing: 0.38px;
     padding: 4px 25px;
-    margin-bottom: 15px;
+    margin-bottom: 17px;
+    padding: 14px 27px;
 
     @media (min-width: $bp-large) {
-      margin-bottom: 20px;
+      padding: 13px 72px;
+      font-size: 17px;
     }
   }
 
