@@ -230,7 +230,7 @@
 #switch-save {
   background-color: #CDF5F4;
   padding: 18px;
-  margin-bottom: 15px;
+  margin-bottom: 25px;
   text-align: left;
   text-decoration: none;
   display: block;
@@ -248,9 +248,6 @@
 }
 
 #price-list {
-  background-color: #F7F7F7;
-  padding: 10px;
-  
   @media (min-width: $bp-medium) {
     padding: 18px 40px;
     text-align: left;
@@ -261,9 +258,15 @@
   }
 }
 
+.product-name {
+  color: #605F5F;
+  font-weight: $bold;
+  font-size: 27px;
+  line-height: 33px;
+}
+
 .rating {
-  text-align: center;
-  margin-bottom: 10px;
+  margin: 5px 0 10px;
 }
 
 .star {
@@ -275,7 +278,7 @@
 
   &.filled:after {
     content: $fa-var-star;
-    color: gold;
+    color: #FE9900;
   }
 
   &.empty:after {
@@ -284,12 +287,43 @@
   }
 }
 
-.product-name {
-  color: #605F5F;
+.review-count {
+  color: #454343;
+  font-size: 14px;
+  font-weight: $normal;
+  display: inline-block;
+  padding-left: 4px;
+  line-height: 18px;
+}
+
+.price-container {
+  color: #454343;
   font-weight: $bold;
-  font-size: 27px;
-  line-height: 33px;
-  text-align: center;
+  font-size: 18px;
+  line-height: 24px;
+  margin-bottom: 12px;
+}
+
+.amount {
+  line-height: 23px;
+  font-size: 16px;
+  font-weight: $normal;
+  text-transform: uppercase;
+
+  span {
+    color: #259490;
+    font-size: 24px;
+    font-weight: $bold;
+    line-height: 42px;
+  }
+}
+
+.size-header {
+  color: #454343;
+  font-weight: $bold;
+  font-size: 18px;
+  line-height: 24px;
+  margin-bottom: 6px;
 }
 
 #buy-more {
@@ -307,18 +341,26 @@
 }
 
 .product {
-  padding: 14px 6px;
+  padding: 14px 0;
+  text-align: center;
   border: 1px solid #B2B0B0;
-  margin: 7px 0;
+  margin: 0 0 20px 20px;
   border-radius: 5px;
   cursor: pointer;
+  display: inline-block;
+  width: 160px;
+
+  &:nth-child(odd) {
+    margin-left: 0;
+  }
 
   @media (min-width: $bp-med-large) {
     margin: 8px;
   }
 
   &.selected {
-    border: 1px solid #45ADA9;
+    border: 1px solid #5BB8B3;
+    background-color: #E1FFFE;
   }
 
   &.error {
@@ -327,58 +369,72 @@
 }
 
 .product-choice {
-  cursor: pointer;
+  display: none;
 }
 
-.size-price {
-  padding: 0 10px;
-  display: inline;
-
-  .price {
-    float: right;
-  }
+.size {
+  color: #000000;
+  font-size: 16px;
+  line-height: 24px;
 }
 
 .name-cart {
-  margin-top: 25px;
-  padding: 0 10px;
-
+  margin-top: 5px;
+  
   label div {
-    margin-bottom: 4px;
-    font-size: 14px;
-    font-weight: $semibold;
+    margin-bottom: 5px;
+    color: #454343;
+    font-size: 18px;
+    font-weight: $bold;
+    line-height: 24px;
   }
 }
 
 .pet-name {
-  border-radius: 5px;
+  border-radius: 3px;
   border: 1px solid #CECECE;
   padding: 6px 9px;
   font-size: 16px;
+  width: 100%;
 }
 
 .add-to-cart {
   background-color: #259490;
   color: #F7F7F7;
-  font-weight: 900;
+  
+  font-weight: $bold;
+  font-size: 17px;
+  text-transform: uppercase;
+  
+  padding: 14px 0;
+  margin: 30px 0 50px;
+  width: 100%;
+
+  letter-spacing: 0.4px;
+  line-height: 22px;
+
   border: none;
-  border-radius: 3px;
-  letter-spacing: 1px;
-  font-size: 15px;
-  padding: 10px 22px;
-  margin-top: 15px;
+  border-radius: 5px;
+
   cursor: pointer;
 }
 
 .product-description-header {
-  padding-bottom: rem(6px);
+  padding-bottom: 15px;
+}
+
+.product-overview {
+  color: #454343;
+  font-size: 16px;
+  line-height: 23px;
 }
 
 .product-label {
   display: inline-block;
   color: #259490;
-  padding-left: rem(20px);
-  font-size: rem(16px);
+  padding-left: 10px;
+  font-size: 16px;
+  line-height: 24px;
 }
 
 .details-container {
@@ -388,8 +444,7 @@
 }
 
 .product-features {
-  margin: 15px;
-  text-align: center;
+  margin-top: 23px;
 
   @media (min-width: $bp-medium) {
     margin: 40px auto;
@@ -403,13 +458,11 @@
 }
 
 .feature {
-  display: block;
-  margin: 0 auto 0.125rem;
+  padding: 0 20px 16px 20px;
 
-  background-color: #F1F1F1;
-  padding: 18px 19px 17px 21px;
-
-  line-height: em(24px);
+  line-height: 23px;
+  font-size: 16px;
+  color: #454343;
   text-align: left;
 }
 
@@ -472,10 +525,9 @@
 }
 
 .product-description {
-  padding: em(25px) 0 em(35px);
+  margin: 0 20px 20px;
   text-align: left;
   line-height: em(24px);
-  margin: 15px;
 
   @media (min-width: $bp-medium) {
     padding: 0;
@@ -493,9 +545,9 @@
 
   h3 {
     display: inline-block;
-    color: #454343;
-    font-weight: $semibold;
-    font-size: rem(17px);
-    text-transform: uppercase;
+    color: #605F5F;
+    font-weight: $bold;
+    font-size: 27px;
+    line-height: 33px;
   }
 }
