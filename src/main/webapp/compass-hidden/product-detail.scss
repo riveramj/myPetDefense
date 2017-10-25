@@ -569,12 +569,21 @@
   }
 }
 
+.reviews-list {
+  margin-bottom: 20px;
+  
+}
+
 .review {
   border-bottom: 1px solid #CBCCCC;
   margin-top: 25px;
 
   &:first-child {
     margin-top: 0;
+  }
+
+  &:last-child {
+    border-bottom: none;
   }
 }
 
@@ -596,4 +605,21 @@
   line-height: 23px;
   font-size: 16px;
   margin-bottom: 25px;
+}
+
+.show-more-reviews {
+  background: #ffffff;
+  
+  padding: 14px 0;
+  margin: 20px 0 130px;
+  width: 100%;
+  
+  text-transform: uppercase;
+  font-size: 17px;
+  font-weight: $bold;
+  line-height: 22px;
+  letter-spacing: 0.4px;
+  
+  border: 1px solid #979797;
+  border-radius: 5px;
 }
