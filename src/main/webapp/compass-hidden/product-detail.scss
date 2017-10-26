@@ -163,8 +163,11 @@
 }
 
 .details {
+  margin: 0 auto;
+  width: 345px;
+
   @media (min-width: $bp-medium) {
-    margin: 0 auto;
+    width: 620px;
     text-align: center;
   }
 
@@ -219,11 +222,8 @@
 }
 
 #pricing {
-  padding: 0 15px;
-
   @media (min-width: $bp-medium) {
     display: inline-block;
-    padding: 0 50px;
     text-align: left;
   }
 }
@@ -366,10 +366,6 @@
     margin-left: 0;
   }
 
-  @media (min-width: 530px) {
-    width: 240px;
-  }
-
   @media (min-width: $bp-medium) {
     width: 300px;
   }
@@ -458,16 +454,23 @@
 }
 
 .details-container {
+  margin: 0 auto;
+  width: 345px;
+
   max-width: 1200px;
   margin: 0 auto;
   text-align: center;
+
+  @media (min-width: $bp-medium) {
+    width: 620px;
+  }
 }
 
 .product-features {
   margin: 23px 0 50px;
 
   @media (min-width: $bp-medium) {
-    margin: 0 50px 50px;
+    margin: 0 0 50px;
   }
   
   @media (min-width: $bp-med-large) {
@@ -477,7 +480,7 @@
 }
 
 .feature {
-  padding: 0 20px 16px 20px;
+  padding-bottom: 16px;
 
   @media (min-width: $bp-medium) {
     padding-left: 0;
@@ -553,13 +556,16 @@
 }
 
 .product-description {
-  margin: 0 20px 20px;
+  margin: 0 auto;
+  width: 345px;
+
   text-align: left;
   line-height: em(24px);
 
   @media (min-width: $bp-medium) {
     padding: 0;
-    margin: 0 50px 23px;
+    margin: 0 auto 23px;
+    width: 620px;
   }
   
   @media (min-width: $bp-med-large) {
@@ -581,7 +587,13 @@
 
 .reviews {
   text-align: left;
-  margin: 0 50px;
+
+  margin: 0 auto;
+  width: 345px;
+
+  @media (min-width: $bp-medium) {
+    width: 620px;
+  }
   
   h2 {
     margin-bottom: 10px;
