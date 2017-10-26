@@ -172,6 +172,7 @@
   }
 
   @media (min-width: $bp-med-large) {
+    width: auto;
     max-width: 1200px;
     margin: 0 auto;
     text-align: center;
@@ -184,6 +185,11 @@
 
   @media (min-width: $bp-medium) {
     width: 300px;
+  }
+
+  @media (min-width: $bp-medium) {
+    width: auto;
+    max-height: 300px
   }
 }
 
@@ -226,6 +232,10 @@
     display: inline-block;
     text-align: left;
   }
+
+  @media (min-width: $bp-large) {
+    margin-left: 75px;
+  }
 }
 
 #switch-save {
@@ -249,11 +259,8 @@
 }
 
 #price-list {
-  @media (min-width: $bp-medium) {
-  }
-
   @media (min-width: $bp-med-large) {
-    width: 520px;
+    width: 480px;
   }
 }
 
@@ -266,6 +273,10 @@
 
   @media (min-width: $bp-medium) {
     font-size: 32px;
+  }
+
+  @media (min-width: $bp-medium) {
+    margin-top: 0;
   }
 }
 
@@ -372,6 +383,7 @@
 
   @media (min-width: $bp-med-large) {
     margin: 8px;
+    width: 228px;
   }
 
   &.selected {
@@ -570,7 +582,7 @@
   
   @media (min-width: $bp-med-large) {
     display: inline-block;
-    width: 400px;
+    width: 523px;
     vertical-align: top;
     margin-top: 40px;
     margin-right: 50px;
