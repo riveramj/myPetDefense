@@ -223,7 +223,8 @@
 
   @media (min-width: $bp-medium) {
     display: inline-block;
-    margin-left: 45px;
+    padding: 0 50px;
+    text-align: left;
   }
 }
 
@@ -249,8 +250,6 @@
 
 #price-list {
   @media (min-width: $bp-medium) {
-    padding: 18px 40px;
-    text-align: left;
   }
 
   @media (min-width: $bp-med-large) {
@@ -263,10 +262,19 @@
   font-weight: $bold;
   font-size: 27px;
   line-height: 33px;
+  margin-top: 25px;
+
+  @media (min-width: $bp-medium) {
+    font-size: 32px;
+  }
 }
 
 .rating {
   margin: 5px 0 10px;
+
+  @media (min-width: $bp-medium) {
+    margin-bottom: 20px;
+  }
 }
 
 .star {
@@ -294,6 +302,10 @@
   display: inline-block;
   padding-left: 4px;
   line-height: 18px;
+
+  @media (min-width: $bp-medium) {
+    font-size: 16px;
+  }
 }
 
 .price-container {
@@ -352,6 +364,14 @@
 
   &:nth-child(odd) {
     margin-left: 0;
+  }
+
+  @media (min-width: 530px) {
+    width: 240px;
+  }
+
+  @media (min-width: $bp-medium) {
+    width: 300px;
   }
 
   @media (min-width: $bp-med-large) {
@@ -447,8 +467,7 @@
   margin: 23px 0 50px;
 
   @media (min-width: $bp-medium) {
-    margin: 40px auto;
-    max-width: 668px;
+    margin: 0 50px 50px;
   }
   
   @media (min-width: $bp-med-large) {
@@ -459,6 +478,11 @@
 
 .feature {
   padding: 0 20px 16px 20px;
+
+  @media (min-width: $bp-medium) {
+    padding-left: 0;
+    padding-right: 0;
+  }
 
   line-height: 23px;
   font-size: 16px;
@@ -504,6 +528,10 @@
     color: #B2B0B0;
     font-size: em(25px);
     padding-top: 11px;
+
+    @media (min-width: $bp-medium) {
+      padding-top: 0;
+    }
   }
 
   .feature-statement {
@@ -531,8 +559,7 @@
 
   @media (min-width: $bp-medium) {
     padding: 0;
-    margin: 0 auto 40px;
-    max-width: 668px;
+    margin: 0 50px 23px;
   }
   
   @media (min-width: $bp-med-large) {
@@ -554,7 +581,7 @@
 
 .reviews {
   text-align: left;
-  margin: 0 20px;
+  margin: 0 50px;
   
   h2 {
     margin-bottom: 10px;
