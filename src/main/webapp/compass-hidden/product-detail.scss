@@ -187,9 +187,10 @@
     width: 300px;
   }
 
-  @media (min-width: $bp-medium) {
+  @media (min-width: $bp-large) {
     width: auto;
-    max-height: 300px
+    max-height: 375px;
+    max-width: 220px;
   }
 }
 
@@ -285,6 +286,10 @@
 
   @media (min-width: $bp-medium) {
     margin-bottom: 20px;
+  }
+  
+  @media (min-width: $bp-large) {
+    margin-bottom: 1px;
   }
 }
 
@@ -445,6 +450,10 @@
   border-radius: 5px;
 
   cursor: pointer;
+
+  @media (min-width: $bp-large) {
+    margin-bottom: 0;
+  }
 }
 
 .product-description-header {
@@ -476,6 +485,11 @@
   @media (min-width: $bp-medium) {
     width: 620px;
   }
+
+  @media (min-width: $bp-large) {
+    width: 100%;
+    padding-top: 50px;
+  }
 }
 
 .product-features {
@@ -485,9 +499,13 @@
     margin: 0 0 50px;
   }
   
-  @media (min-width: $bp-med-large) {
+  @media (min-width: $bp-large) {
     display: inline-block;
-    margin-right: 50px;
+    margin-right: 0;
+    width: 523px;
+    margin-right: 7px;
+    margin-bottom: 60px;
+    padding-top: 4px;
   }
 }
 
@@ -580,12 +598,13 @@
     width: 620px;
   }
   
-  @media (min-width: $bp-med-large) {
+  @media (min-width: $bp-large) {
     display: inline-block;
-    width: 523px;
+    width: 475px;
     vertical-align: top;
-    margin-top: 40px;
-    margin-right: 50px;
+    margin-top: 0;
+    margin-right: 0;
+    padding-right: 50px;
   }
 
   h3 {
@@ -606,6 +625,10 @@
   @media (min-width: $bp-medium) {
     width: 620px;
   }
+
+  @media (min-width: $bp-large) {
+    width: 1009px;
+  }
   
   h2 {
     margin-bottom: 10px;
@@ -617,6 +640,11 @@
     font-weight: $bold;
     line-height: 33px;
     padding-left: 0;
+
+    @media (min-width: $bp-large) {
+      font-size: 32px;
+      margin-bottom: 15px;
+    }
   }
 }
 
@@ -656,6 +684,10 @@
   line-height: 23px;
   font-size: 16px;
   margin-bottom: 25px;
+
+  @media (min-width: $bp-large) {
+    margin-top: 8px;
+  }
 }
 
 .show-more-reviews {
@@ -673,4 +705,8 @@
   
   border: 1px solid #979797;
   border-radius: 5px;
+
+  @media (min-width: $bp-large) {
+    width: 237px;
+  }
 }
