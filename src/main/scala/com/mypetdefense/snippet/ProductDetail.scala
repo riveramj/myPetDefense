@@ -97,6 +97,11 @@ class ProductDetail extends Loggable {
   }
 
   def render = {
+    val possibleProduct = products.headOption
+    val price = possibleProduct.flatMap { product =>
+      Price.getDefaultProductPrice(product).map(_.price.get)
+    }.getOrElse(0D)
+
     SHtml.makeFormsAjax andThen
     ".product-shot-container" #> productImages.map { productImage =>
       ".product-shot [src]" #> productImage
@@ -104,10 +109,9 @@ class ProductDetail extends Loggable {
     "#switch-save" #> ClearNodesIf(switchSaveProduct.isEmpty) &
     "#switch-save [href]" #> switchSaveProduct &
     ".product-name *" #> products.headOption.map(_.name.get).getOrElse("") &
+    ".dollar-value *" #> f"$$$price%2.2f" &
     ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>
-      val price = Price.getDefaultProductPrice(product).map(_.price.get).openOr(0D)
       ".size *" #> s"${product.getSizeAndSizeName}" &
-      ".price *" #> f"$$$price%2.2f" &
       "^ [onclick]" #> ajaxInvoke(() => updateProductChoice(product, price))
     } & 
     ".pet-name" #> ajaxText("", name = _) &
