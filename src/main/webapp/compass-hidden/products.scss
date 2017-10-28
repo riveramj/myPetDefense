@@ -35,38 +35,41 @@
 
 .products {
   text-align: center;
-  padding: 35px 25px;
+  padding: 5px 25px 35px;
+
+  @media (min-width: $bp-medium) {
+    padding-top: 35px;
+  }
 }
 
 .product {
   background-color: #ffffff;
   display: block;
-  border-bottom: 1px solid #CECECE;
-
-  margin: 0 -25px;
-  padding: 30px 25px 0;
 
   a {
     text-decoration: none;
     display: block;
+    border-bottom: 1px solid #CECECE;
+    margin: 0 -25px;
+    padding: 30px 25px 0;
+
+    @media (min-width: $bp-medium) {
+      width: 220px;
+      border: solid 1px #CECECE;
+      margin: 0 15px 22px 0;
+      min-height: 492px;
+      padding: 15px 16px;
+    }
 
     @media (min-width: $bp-large) {
-      padding: 30px 14px;
+      width: 354px;
+      min-height: 457px;
     }
   }
 
   @media (min-width: $bp-medium) {
-    width: 220px;
-    border: solid 1px #CECECE;
     display: inline-block;
     vertical-align: top;
-    margin: 0 15px 22px 0;
-    min-height: 407px;
-    padding: 15px 16px;
-  }
-
-  @media (min-width: $bp-large) {
-    width: 354px;
   }
 }
 
@@ -234,11 +237,17 @@
     letter-spacing: 0.4px;
     line-height: 22px;
     
-    padding: 14px 80px;
+    padding: 14px 0;
+    width: 325px;
     cursor: pointer;
     border-radius: 4px;
     text-decoration: none;
     display: inline-block;
+
+    @media (min-width: $bp-medium) {
+      width: 186px;
+    }
+
   }
 
   &.tablet-desktop {
@@ -251,7 +260,7 @@
     padding: 14px 27px;
 
     @media (min-width: $bp-large) {
-      padding: 13px 72px;
+      padding: 13px 0;
       font-size: 17px;
     }
   }
@@ -264,5 +273,35 @@
     &.tablet-desktop {
       display: inline-block;
     }
+  }
+}
+
+.frontline-dogs .price, .frontline-cats .price {
+  @media (min-width: $bp-medium) {
+    margin-top: 73px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin-top: 29px;
+  }
+}
+
+.shieldtec-dogs .price {
+  @media (min-width: $bp-medium) {
+    margin-top: 50px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin-top: 29px;
+  }
+}
+
+.adventure-dogs .price, .adventure-cats .price {
+  @media (min-width: $bp-medium) {
+    margin-top: 49px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin-top: 0;
   }
 }

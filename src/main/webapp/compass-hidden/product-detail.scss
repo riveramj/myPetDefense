@@ -190,7 +190,7 @@
   @media (min-width: $bp-large) {
     width: auto;
     max-height: 375px;
-    max-width: 220px;
+    max-width: 300px;
   }
 }
 
@@ -489,6 +489,7 @@
   @media (min-width: $bp-large) {
     width: 100%;
     padding-top: 50px;
+    margin-bottom: 60px;
   }
 }
 
@@ -503,8 +504,8 @@
     display: inline-block;
     margin-right: 0;
     width: 523px;
+    margin-bottom: 0;
     margin-right: 7px;
-    margin-bottom: 60px;
     padding-top: 4px;
   }
 }
