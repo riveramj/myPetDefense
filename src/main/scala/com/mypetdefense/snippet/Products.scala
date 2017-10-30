@@ -50,7 +50,7 @@ class Products extends Loggable {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
   }
   
-  def getImagePriceRating(productName: String): (String, Double, Double) = {
+  def getImagePriceRating(productName: String): (String, Double, Double, Int) = {
     val product = products.filter(_.name.get == productName).headOption
     val imageName = s"images/product-shots/${product.map(_.imageName.get).getOrElse("")}"
     val price: Double = product.flatMap { possibleProduct =>
@@ -58,14 +58,15 @@ class Products extends Loggable {
     }.getOrElse(0D)
     
     val rating = product.map(_.rating.get).getOrElse(0D)
+    val reviewCount = product.map(_.reviews.toList.size).getOrElse(0)
 
-    (imageName, price, rating)
+    (imageName, price, rating, reviewCount)
   }
 
   def imagePriceRatingBinding(productName: String) = {
-    val (imageName, price, rating) = getImagePriceRating(productName)
+    val (imageName, price, rating, reviewCount) = getImagePriceRating(productName)
 
-    val starBinding = 3D match {
+    val starBinding = rating match {
       case 0D => 
         ".star [class+]" #> "empty"
 
@@ -102,6 +103,7 @@ class Products extends Loggable {
     }
 
     starBinding &
+    ".count *" #> reviewCount &
     ".product-shot img [src]" #> imageName &
     ".month-price *" #> f"$$$price%2.2f"
   }

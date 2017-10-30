@@ -96,11 +96,76 @@ class ProductDetail extends Loggable {
     Noop
   }
 
+  def starBinding(rating: Double) = {
+    rating match {
+      case 0D => 
+        ".star [class+]" #> "empty"
+
+      case star if star < 2D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "empty" &
+        ".three [class+]" #> "empty" &
+        ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 3D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "empty" &
+        ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 4D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 5D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "filled" &
+        ".five [class+]" #> "empty"
+
+      case star =>
+        ".star [class+]" #> "filled"
+    }
+  }
+
+  def ratingBinding(product: Option[Product]) = {
+    val rating = product.map(_.rating.get).getOrElse(0D)
+    val reviewCount = product.map(_.reviews.toList.size).getOrElse(0)
+
+    starBinding(rating) &
+    ".count *" #> reviewCount
+  }
+
+  def getReviews = {
+    val product = products.headOption
+    val reviews = product.map(_.reviews.toList).getOrElse(Nil)
+    val reviewCount = reviews.size
+
+    ".review-count *" #> reviewCount &
+    ".review" #> reviews.map { review =>
+
+      starBinding(review.rating.get) &
+      ".review-title *" #> review.title.get &
+      ".author-details" #> {
+        ".author-name *" #> review.author.get &
+        ".review-date *" #> review.date.get.toString
+      } &
+      ".review-body *" #> review.body.get
+    }
+  }
+
   def render = {
     val possibleProduct = products.headOption
     val price = possibleProduct.flatMap { product =>
       Price.getDefaultProductPrice(product).map(_.price.get)
     }.getOrElse(0D)
+    val productName = products.headOption.map(_.name.get).getOrElse("")
 
     SHtml.makeFormsAjax andThen
     ".product-shot-container" #> productImages.map { productImage =>
@@ -108,7 +173,8 @@ class ProductDetail extends Loggable {
     } &
     "#switch-save" #> ClearNodesIf(switchSaveProduct.isEmpty) &
     "#switch-save [href]" #> switchSaveProduct &
-    ".product-name *" #> products.headOption.map(_.name.get).getOrElse("") &
+    ratingBinding(products.headOption) &
+    ".product-name *" #> productName &
     ".dollar-value *" #> f"$$$price%2.2f" &
     ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>
       ".size *" #> s"${product.getSizeAndSizeName}" &
