@@ -97,8 +97,6 @@ class ProductDetail extends Loggable {
   }
 
   def starBinding(rating: Double) = {
-    println(rating + " +++++++")
-
     rating match {
       case 0D => 
         ".star [class+]" #> "empty"
@@ -136,9 +134,14 @@ class ProductDetail extends Loggable {
     }
   }
 
-  def ratingBinding(product: Option[Product]) = {
-    val rating = product.map(_.rating.get).getOrElse(0D)
-    val reviewCount = product.map(_.reviews.toList.size).getOrElse(0)
+  def ratingBinding(product: List[Product]) = {
+    val allReviews = products.map(_.reviews.toList).flatten
+    val rating = allReviews.map(_.rating.get).sum/allReviews.map(_.rating.get).size
+    val reviewCount = allReviews.size
+
+    println(allReviews + " allReviews")
+    println(rating + " rating")
+    println(reviewCount + " count")
 
     starBinding(rating) &
     ".count *" #> reviewCount
@@ -151,13 +154,7 @@ class ProductDetail extends Loggable {
 
     ".review-count *" #> reviewCount &
     ".review" #> reviews.map { review =>
-      println(review + " ++++")
-
-      ".review-rating" #> {
-        println(starBinding(review.rating.get))
-
-        starBinding(review.rating.get)
-      } &
+      starBinding(review.rating.get) &
       ".review-title *" #> review.title.get &
       ".author-details" #> {
         ".author-name *" #> review.author.get &
@@ -180,7 +177,7 @@ class ProductDetail extends Loggable {
     } &
     "#switch-save" #> ClearNodesIf(switchSaveProduct.isEmpty) &
     "#switch-save [href]" #> switchSaveProduct &
-    ratingBinding(products.headOption) &
+    ratingBinding(products) &
     ".product-name *" #> productName &
     ".dollar-value *" #> f"$$$price%2.2f" &
     ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>
