@@ -14,7 +14,7 @@ class Review extends LongKeyedMapper[Review] with IdPK with OneToMany[Long, Revi
     override def dbIndexed_? = true
   }
   object title extends MappedString(this, 100)
-  object body extends MappedString(this, 300)
+  object body extends MappedString(this, 1000)
   object rating extends MappedDouble(this)
   object author extends MappedString(this, 100)
   object date extends MappedDateTime(this)
