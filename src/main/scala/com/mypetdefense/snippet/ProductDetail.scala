@@ -115,11 +115,25 @@ class ProductDetail extends Loggable {
         ".four [class+]" #> "empty" &
         ".five [class+]" #> "empty"
 
-      case star if star < 4D =>
+      case star if star < 3.5D =>
         ".one [class+]" #> "filled" &
         ".two [class+]" #> "filled" &
         ".three [class+]" #> "filled" &
         ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 4D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "half" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 4.5D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "filled" &
         ".five [class+]" #> "empty"
 
       case star if star < 5D =>
@@ -127,7 +141,7 @@ class ProductDetail extends Loggable {
         ".two [class+]" #> "filled" &
         ".three [class+]" #> "filled" &
         ".four [class+]" #> "filled" &
-        ".five [class+]" #> "empty"
+        ".five [class+]" #> "half"
 
       case star =>
         ".star [class+]" #> "filled"
@@ -139,6 +153,7 @@ class ProductDetail extends Loggable {
     val rating = product.map(_.rating.get).getOrElse(0D)
     val reviewCount = product.map(_.reviewCount.get).getOrElse(0)
 
+    ".rating [title]" #> f"Average Rating: $rating%1.2f" & 
     starBinding(rating) &
     ".count *" #> reviewCount
   }

@@ -283,6 +283,7 @@
 
 .rating {
   margin: 5px 0 10px;
+    display: inline-block;
 
   @media (min-width: $bp-medium) {
     margin-bottom: 20px;

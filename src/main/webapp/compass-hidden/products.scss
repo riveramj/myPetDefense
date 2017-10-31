@@ -162,6 +162,11 @@
     color: #FE9900;
   }
 
+  &.half:after {
+    content: $fa-var-star-half-o ;
+    color: #FE9900;
+  }
+
   &.empty:after {
     content: $fa-var-star-o;
     color: black;

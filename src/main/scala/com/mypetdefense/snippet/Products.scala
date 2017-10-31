@@ -84,11 +84,25 @@ class Products extends Loggable {
         ".four [class+]" #> "empty" &
         ".five [class+]" #> "empty"
 
-      case star if star < 4D =>
+      case star if star < 3.5D =>
         ".one [class+]" #> "filled" &
         ".two [class+]" #> "filled" &
         ".three [class+]" #> "filled" &
         ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 4D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "half" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 4.5D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "filled" &
         ".five [class+]" #> "empty"
 
       case star if star < 5D =>
@@ -96,12 +110,13 @@ class Products extends Loggable {
         ".two [class+]" #> "filled" &
         ".three [class+]" #> "filled" &
         ".four [class+]" #> "filled" &
-        ".five [class+]" #> "empty"
+        ".five [class+]" #> "half"
 
       case star =>
         ".star [class+]" #> "filled"
     }
 
+    ".rating [title]" #> f"Average Rating: $rating%1.2f" &
     starBinding &
     ".count *" #> reviewCount &
     ".product-shot img [src]" #> imageName &
