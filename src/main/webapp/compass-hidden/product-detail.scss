@@ -215,6 +215,9 @@
     margin: 20px 15px 35px;
   }
 
+  @media (min-width: $bp-large) {
+    margin-left: 123px;
+  }
 
   a {
     color: #259490;
@@ -283,7 +286,7 @@
 
 .rating {
   margin: 5px 0 10px;
-    display: inline-block;
+  display: inline-block;
 
   @media (min-width: $bp-medium) {
     margin-bottom: 20px;
@@ -390,6 +393,11 @@
   @media (min-width: $bp-med-large) {
     margin: 8px;
     width: 228px;
+  }
+
+  &:hover {
+    border: 1px solid #5BB8B3;
+    background-color: #E1FFFE;
   }
 
   &.selected {
