@@ -58,6 +58,8 @@ class Reviews extends Loggable {
 
     def createReviews() = {
       newReviews.map(_.reviewId(generateLongId).saveMe)
+      ReviewsUploadCSV.updateProductRatings
+
       S.redirectTo(Reviews.menu.loc.calcDefaultHref)
     }
 
@@ -85,8 +87,6 @@ class Reviews extends Loggable {
 
   def render = {
     val allReviews = Review.findAll()
-
-    println(allReviews)
 
     SHtml.makeFormsAjax andThen
     ".reviews [class+]" #> "current" &

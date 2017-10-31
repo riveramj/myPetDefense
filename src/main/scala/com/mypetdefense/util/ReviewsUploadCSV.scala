@@ -201,5 +201,26 @@ object ReviewsUploadCSV extends Loggable {
         .product(prod)
     }
   }
+
+  def updateRating(productName: String) = {
+    val products = Product.findAll(By(Product.name, productName))
+    val reviews = products.map(_.reviews.toList).flatten
+    val ratings = reviews.map(_.rating.get)
+    val avgRating = ratings.sum/reviews.size
+
+    products.map { product =>
+      product.rating(avgRating).reviewCount(reviews.size).saveMe
+    }
+  }
+
+  def updateProductRatings = {
+      updateRating("Frontline Plus for Dogs")
+      updateRating("Frontline Plus for Cats")
+      updateRating("ZoGuard Plus for Dogs")
+      updateRating("ZoGuard Plus for Cats")
+      updateRating("Adventure Plus for Dogs")
+      updateRating("Adventure Plus for Cats")
+      updateRating("ShieldTec Plus for Dogs")
+  }
 }
 

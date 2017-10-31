@@ -134,22 +134,17 @@ class ProductDetail extends Loggable {
     }
   }
 
-  def ratingBinding(product: List[Product]) = {
-    val allReviews = products.map(_.reviews.toList).flatten
-    val rating = allReviews.map(_.rating.get).sum/allReviews.map(_.rating.get).size
-    val reviewCount = allReviews.size
-
-    println(allReviews + " allReviews")
-    println(rating + " rating")
-    println(reviewCount + " count")
+  def ratingBinding(products: List[Product]) = {
+    val product = products.headOption
+    val rating = product.map(_.rating.get).getOrElse(0D)
+    val reviewCount = product.map(_.reviewCount.get).getOrElse(0)
 
     starBinding(rating) &
     ".count *" #> reviewCount
   }
 
   def getReviews = {
-    val product = products.headOption
-    val reviews = product.map(_.reviews.toList).getOrElse(Nil)
+    val reviews = products.map(_.reviews.toList).flatten
     val reviewCount = reviews.size
 
     ".review-count *" #> reviewCount &
