@@ -22,57 +22,89 @@
 
 .header-container {
   text-align: left;
-  padding: 25px 14px;
+  padding: 30px 15px 0;
 
   @media (min-width: $bp-medium) {
-    padding: 30px 20px 15px;
+    padding: 30px 20px 0;
   }
 
   @media (min-width: $bp-large) {
-    padding: 50px 50px 15px;
+    padding: 50px 50px 15px 123px;
   }
 }
 
 .products {
   text-align: center;
-  padding-left: 15px;
+  padding: 5px 25px 35px;
+
+  @media (min-width: $bp-medium) {
+    padding-top: 35px;
+  }
 }
 
 .product {
   background-color: #ffffff;
-  border: solid 1px #CECECE;
   display: block;
-  margin: 0 15px 10px;
 
   a {
     text-decoration: none;
     display: block;
-    padding: 14px;
+    border-bottom: 1px solid #CECECE;
+    margin: 0 -25px;
+    padding: 30px 25px 0;
+
+    @media (min-width: $bp-medium) {
+      width: 220px;
+      border: solid 1px #CECECE;
+      margin: 0 15px 22px 0;
+      min-height: 492px;
+      padding: 15px 16px;
+    }
 
     @media (min-width: $bp-large) {
-      padding: 30px 14px;
+      width: 354px;
+      min-height: 457px;
     }
   }
 
   @media (min-width: $bp-medium) {
-    width: 260px;
-    border: solid 1px #CECECE;
     display: inline-block;
     vertical-align: top;
-    margin: 0 15px 22px 0;
-    min-height: 407px;
+  }
+}
+
+.zoguard-dogs , .zoguard-cats {
+  .vertical-box img {
+    max-height: 225px;
+    
+    @media (min-width: $bp-medium) {
+      max-height: 144px;
+    }
+
+    @media (min-width: $bp-large) {
+      max-height: 182px;
+    }
+  }
+}
+
+.shieldtec-dogs .vertical-box img {
+  max-height: 235px;
+  
+  @media (min-width: $bp-medium) {
+    max-height: 142px;
   }
 
   @media (min-width: $bp-large) {
-    width: 354px;
+    max-height: 182px;
   }
 }
 
 .product-shot {
-  width: 118px;
+  width: 131px;
   display: table-cell;
-  vertical-align: middle;
-  
+  vertical-align: top;
+  padding-bottom: 30px;
+
   @media (min-width: $bp-medium) {
     display: block;
     margin: 0 auto;
@@ -103,7 +135,7 @@
 .product-details {
   display: table-cell;
   vertical-align: top;
-  padding-left: 12px;
+  padding-left: 23px;
 
   li {
     text-align: left;
@@ -114,11 +146,46 @@
   }
 }
 
-.name {
+.rating {
+  padding-bottom: 5px;
+}
+
+.star {
+  display: inline-block;
+
+  &:after {
+    @extend %icon;
+  }
+
+  &.filled:after {
+    content: $fa-var-star;
+    color: #FE9900;
+  }
+
+  &.half:after {
+    content: $fa-var-star-half-o ;
+    color: #FE9900;
+  }
+
+  &.empty:after {
+    content: $fa-var-star-o;
+    color: #FE9900;
+  }
+}
+
+.review-count {
+  color: #454343;
+  font-size: 14px;
+  font-weight: $normal;
+  display: inline-block;
+  padding-left: 4px;
   line-height: 18px;
-  letter-spacing: 0.4px;
+}
+
+.name {
+  line-height: 24px;
   color: #259490;
-  font-size: 17px;
+  font-size: 18px;
 
   @media (min-width: $bp-medium) {
     font-size: 20px;
@@ -128,25 +195,24 @@
 
 .marketing-statement {
   color: #393939;
-  font-size: 13px;
-  margin: 10px 0 15px;
-  line-height: 16px;
+  font-size: 16px;
+  line-height: 24px;
 
-  @media (min-width: $bp-large) {
-    font-size: 14px;
-    line-height: 17px;
-  }
+  padding-bottom: 20px;
 }
 
 .price {
-  margin-top: 8px;
   color: #393939;
-  font-weight: $semibold;
+  font-weight: $bold;
   font-size: 12px;
+  text-transform: uppercase;
+  line-height: 24px;
+  padding-bottom: 30px;
 
   @media (min-width: $bp-medium) {
     font-weight: $semibold;
     line-height: 24px;
+    padding-bottom: 0;
   }
 
   @media (min-width: $bp-large) {
@@ -155,7 +221,7 @@
   }
 
   span {
-    font-size: 16px;
+    font-size: 26px;
     
     @media (min-width: $bp-large) {
       font-size: 18px;
@@ -164,28 +230,43 @@
 }
 
 .product-options {
-  margin-top: 10px;
+  margin-bottom: 30px;
 
   div, &.tablet-desktop {
-    background-color: #f7f7f7;
-    border: 1px solid #B2B0B0;
-    font-size: 13px;
-    padding: 7px 15px;
+    background-color: #259490;
+    border-radius: 5px;
+    color: #F7F7F7;
+    
+    font-size: 17px;
+    font-weight: $bold;
+    letter-spacing: 0.4px;
+    line-height: 22px;
+    
+    padding: 14px 0;
+    width: 325px;
     cursor: pointer;
     border-radius: 4px;
     text-decoration: none;
-    color: #454343;
     display: inline-block;
+
+    @media (min-width: $bp-medium) {
+      width: 186px;
+    }
+
   }
 
   &.tablet-desktop {
     display: none;
-    font-size: 14px;
+    font-size: 15px;
+    line-height: 22px;
+    letter-spacing: 0.38px;
     padding: 4px 25px;
-    margin-bottom: 15px;
+    margin-bottom: 17px;
+    padding: 14px 27px;
 
     @media (min-width: $bp-large) {
-      margin-bottom: 20px;
+      padding: 13px 0;
+      font-size: 17px;
     }
   }
 
@@ -197,5 +278,35 @@
     &.tablet-desktop {
       display: inline-block;
     }
+  }
+}
+
+.frontline-dogs .price, .frontline-cats .price {
+  @media (min-width: $bp-medium) {
+    margin-top: 73px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin-top: 29px;
+  }
+}
+
+.shieldtec-dogs .price {
+  @media (min-width: $bp-medium) {
+    margin-top: 50px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin-top: 29px;
+  }
+}
+
+.adventure-dogs .price, .adventure-cats .price {
+  @media (min-width: $bp-medium) {
+    margin-top: 49px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin-top: 0;
   }
 }

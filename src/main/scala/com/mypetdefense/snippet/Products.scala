@@ -50,58 +50,100 @@ class Products extends Loggable {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
   }
   
-  def getImgeAndPrice(productName: String): (String, Double) = {
+  def getImagePriceRating(productName: String): (String, Double, Double, Int) = {
     val product = products.filter(_.name.get == productName).headOption
     val imageName = s"images/product-shots/${product.map(_.imageName.get).getOrElse("")}"
     val price: Double = product.flatMap { possibleProduct =>
       Price.getDefaultProductPrice(possibleProduct).map(_.price.get)
     }.getOrElse(0D)
+    
+    val rating = product.map(_.rating.get).getOrElse(0D)
+    val reviewCount = product.map(_.reviews.toList.size).getOrElse(0)
 
-    (imageName, price)
+    (imageName, price, rating, reviewCount)
+  }
+
+  def imagePriceRatingBinding(productName: String) = {
+    val (imageName, price, rating, reviewCount) = getImagePriceRating(productName)
+
+    val starBinding = rating match {
+      case 0D => 
+        ".star [class+]" #> "empty"
+
+      case star if star < 2D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "empty" &
+        ".three [class+]" #> "empty" &
+        ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 3D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "empty" &
+        ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 3.5D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 4D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "half" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 4.5D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "filled" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 5D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "filled" &
+        ".five [class+]" #> "half"
+
+      case star =>
+        ".star [class+]" #> "filled"
+    }
+
+    ".rating [title]" #> f"Average Rating: $rating%1.2f" &
+    starBinding &
+    ".count *" #> reviewCount &
+    ".product-shot img [src]" #> imageName &
+    ".month-price *" #> f"$$$price%2.2f"
   }
 
   def render = {
     ".frontline-dogs" #> {
-      val (imageName, price) = getImgeAndPrice("Frontline Plus for Dogs")
-
-      ".product-shot img [src]" #> imageName &
-      ".month-price *" #> f"$$$price%2.2f"
+      imagePriceRatingBinding("Frontline Plus for Dogs")
     } &
     ".zoguard-dogs" #> {
-      val (imageName, price) = getImgeAndPrice("ZoGuard Plus for Dogs")
-
-      ".product-shot img [src]" #> imageName &
-      ".month-price *" #> f"$$$price%2.2f"
+      imagePriceRatingBinding("ZoGuard Plus for Dogs")
     } &
     ".adventure-dogs" #> {
-      val (imageName, price) = getImgeAndPrice("Adventure Plus for Dogs")
-
-      ".product-shot img [src]" #> imageName &
-      ".month-price *" #> f"$$$price%2.2f"
+      imagePriceRatingBinding("Adventure Plus for Dogs")
     } &
     ".shieldtec-dogs" #> {
-      val (imageName, price) = getImgeAndPrice("ShieldTec Plus for Dogs")
-
-      ".product-shot img [src]" #> imageName &
-      ".month-price *" #> f"$$$price%2.2f"
+      imagePriceRatingBinding("ShieldTec Plus for Dogs")
     } &
     ".frontline-cats" #> {
-      val (imageName, price) = getImgeAndPrice("Frontline Plus for Cats")
-
-      ".product-shot img [src]" #> imageName &
-      ".month-price *" #> f"$$$price%2.2f"
+      imagePriceRatingBinding("Frontline Plus for Cats")
     } &
     ".zoguard-cats" #> {
-      val (imageName, price) = getImgeAndPrice("ZoGuard Plus for Cats")
-
-      ".product-shot img [src]" #> imageName &
-      ".month-price *" #> f"$$$price%2.2f"
+      imagePriceRatingBinding("ZoGuard Plus for Cats")
     } &
     ".adventure-cats" #> {
-      val (imageName, price) = getImgeAndPrice("Adventure Plus for Cats")
-
-      ".product-shot img [src]" #> imageName &
-      ".month-price *" #> f"$$$price%2.2f"
+      imagePriceRatingBinding("Adventure Plus for Cats")
     }
   }
 }
