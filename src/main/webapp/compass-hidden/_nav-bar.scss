@@ -21,6 +21,11 @@
 
 nav {
   float: right;
+
+  @media (min-width: $bp-medium) {
+    margin-right: 15px;
+  }
+
   @media (min-width: $bp-large) {
     margin-right: em(123px);
   }

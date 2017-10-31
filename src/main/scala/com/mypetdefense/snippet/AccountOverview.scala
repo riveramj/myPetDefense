@@ -33,6 +33,9 @@ object AccountOverview extends Loggable {
 
 class AccountOverview extends Loggable {
   val user = currentUser
+  val subscription = user.flatMap(_.getSubscription)
+  val priceCode = subscription.map(_.priceCode.get).getOrElse("")
+
   val shippingAddress = Address.find(
     By(Address.user, user),
     By(Address.addressType, AddressType.Shipping)
@@ -79,9 +82,16 @@ class AccountOverview extends Loggable {
 
         val petBindings = {
           ".pet" #> pets.map { pet =>
+            val product = pet.product.obj
+            val priceItem = product.flatMap { item =>
+              Price.getPricesByCode(item, priceCode)
+            }
+            val price = priceItem.map(_.price.get).getOrElse(0D)
+
             ".pet-name *" #> pet.name &
-            ".pet-product *" #> pet.product.obj.map(_.name.get) & 
-            ".pet-size *" #> pet.product.obj.map(_.size.get.toString)
+            ".pet-product *" #> product.map(_.name.get) & 
+            ".pet-size *" #> product.map(_.getSizeAndSizeName) &
+            ".price *" #> f"$$$price%2.2f"
           }
         }
 

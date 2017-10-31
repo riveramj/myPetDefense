@@ -23,20 +23,19 @@ reset-password-sent.css
 signup
 signup.css
 
-choose-pet
-choose-pet.css
-
-pet-size
-pet-size.css
-
-pet-details
-pet-details.css
-
 products
 products.css
 
+product-detail
+product-detail.css
+slick/slick.css
+slick/slick-theme.css
+
 checkout
 checkout.css
+
+cart-review
+cart-review.css
 
 success
 success.css

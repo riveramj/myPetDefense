@@ -1,0 +1,129 @@
+<div data-lift="ProductDetail.render">
+  <div id="shopping-cart">
+    <div class="cart-contents">
+      <h3>Way to go!</h3>
+      <div class="added-to-cart">
+        <ul>
+          <li>You added</li>
+          <li class="added-product-shot"><img class="added-product-image" src="images/product-shots/frontline-detail.jpg"></li>
+          <li>
+            <span class="added-product">FrontLine Plus for Dogs, 1 - 2 lbs</span>
+          </li>
+        </ul>
+      </div>
+
+      <h4>Current Products</h4>
+
+      <ul id="items-in-cart">
+        <li class="cart-item">
+          <div class="cart-product-shot">
+            <img class="cart-product-image" src="images/product-shots/frontline-detail.jpg">
+          </div>
+          <ul class="cart-pet">
+            <li>
+              <span class="cart-pet-name">FidoSpot</span>
+            </li>
+            <li>
+              <span class="cart-pet-price">$0.99</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <ul class="cart-footer">
+        <ul class="cart-totals">
+          <li class="discount-container">
+            <div>Discount</div><div class="discount">-$2.99</div>
+          </li>
+          <li>
+            <div>Subtotal</div><div class="subtotal">$22.99</div>
+          </li>
+        </ul>
+        <ul class="cart-actions">
+          <li>
+            <button type="button" class="continue-shopping">Continue Shopping</button>
+          </li>
+          <li>
+            <a href="/cart-review" class="checkout">Checkout</a>
+          </li>
+        </ul>
+      </ul>
+    </div>
+    <div class="mobile-close"></div>
+  </div>
+
+  <div id="top-bar">
+    <div id="logo-name">
+      <a href="/">
+        <picture>
+          <source srcset="images/logo/logo-name-white.png, images/logo/logo-name-white@2x.png 2x" media="(min-width: 46.8em)">
+        <img srcset="images/logo/logo-name-white-small.png, images/logo/logo-name-white-small@2x.png 2x" src="images/logo/logo-name-white-small.png">
+        </picture>
+      </a>
+    </div>
+    <nav>
+      <ul id="menu-entries">
+        <li class="login"><a href="./login">Login</a></li>
+        <li class="cart-container">
+          <a href="/cart-review" class="shopping-cart">Cart</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="back-to-products"><a href="/products">Back to All Products</a></div>
+
+  <section class="details">
+    <div class="product-slider">
+      <div class="product-shot-container"><img class="product-shot" src="images/product-shots/refill.jpg"></div>
+    </div>
+    <button type="button" id="buy-more">Buy More. Save More.</button>
+
+    <div id="pricing">
+      <a id="switch-save" href="/zoguard-dog-detail">
+        <h3>Switch to ZoGuard Plus and save 30%</h3>
+        <div>
+          Contains same active ingredients as Frontline Plus.
+        </div>
+      </a>
+      <ul id="price-list">
+        <li class="product-name">Frontline Plus for Dogs</li>
+        <li class="rating">
+          <div class="star one"></div>
+          <div class="star two"></div>
+          <div class="star three"></div>
+          <div class="star four"></div>
+          <div class="star five"></div>
+          <div class="review-count">
+            <span class="count">999</span> reviews
+          </div>
+        </li>
+        <li class="price-container">
+          Price:&nbsp;&nbsp;<span class="amount"><span class="dollar-value">$0.02</span>&nbsp;&nbsp;/&nbsp;&nbsp;month</span>
+        </li>
+        <li class="size-header">Choose Pet Size</li>
+        <li class="product">
+          <input type="radio" name="product" class="product-choice">
+          <div class="size">
+            S-M-L-XL, 1-999 lbs
+          </div>
+        </li>
+        <li class="add-product">
+          <form>
+            <ul class="name-cart">
+              <li>
+                <label>
+                  <div>Pet Name</div>
+                  <input class="pet-name" placeholder="Name">
+                </label>
+              </li>
+              <li>
+                <button class="add-to-cart" type="submit">Add to Cart</button>
+              </li>
+            </ul>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </section>
+</div>
+

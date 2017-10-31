@@ -8,6 +8,10 @@ window.myPetDefenseSite =
       fieldSelector: fieldSelector,
       error: error
 
+# Alias setTimeout. nextTick is so we're clear when we're using a
+# setTimeout just to delay an operation one tick.
+window.myPetDefenseSite.nextTick = (fn) -> setTimeout fn
+
 $(document).on 'form-validation-error', (event) ->
   $target = $(event.fieldSelector)
   $targetContainer = $target.closest('label').find('.field-label')

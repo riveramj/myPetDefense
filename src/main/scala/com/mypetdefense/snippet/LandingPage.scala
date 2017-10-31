@@ -25,18 +25,29 @@ object LandingPage extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val fetchLanding = Menu.i("Fetch!") / "fetch" >>
+  val landing2Free = Menu.i("2 Months Free!") / "2free" >>
+    TemplateBox(() => Templates("landing" :: "landing" :: Nil))
+  
+  val landing3Free = Menu.i("3 Months Free!") / "3free" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
 }
 
 class LandingPage extends Loggable {
   import PetFlowChoices._
 
-  val possibleTwoFreeCoupon = Coupon.find(By(Coupon.couponCode, "fetch2free"))
-  coupon(possibleTwoFreeCoupon)
+  val path = S.request.map(_.uri).openOr("").drop(1)
+
+  val (possibleCoupon, monthCount) = path match {
+    case "2free" => (Coupon.find(By(Coupon.couponCode, "2free")), 2)
+    case "3free" => (Coupon.find(By(Coupon.couponCode, "3free")), 3)
+  }
+
+  PetFlowChoices.coupon(possibleCoupon)
+
 
   def render = {
-    "#foo" #> ""
+    ".coupon-code *" #> path &
+    ".applied-months *" #> s" ${monthCount} months free!"
   }
 
 }

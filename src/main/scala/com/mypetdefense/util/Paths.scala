@@ -20,66 +20,6 @@ object Paths {
   val testimonial = Menu.i("Review") / "testimonial" >>
     TemplateBox(() => Templates("testimonial" :: Nil))
   
-  def flowComplete_? = (!petChoice.is.isEmpty && !petSize.is.isEmpty && !petProduct.is.isEmpty)
-
-  val petChosen = If(
-    () => !petChoice.is.isEmpty,
-    RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
-  )
-
-  val catProductChosen = If(
-    () => !petProduct.is.isEmpty,
-    RedirectResponse(CatProduct.menu.loc.calcDefaultHref)
-  )
-
-  val dogProductChosen = If(
-    () => !petProduct.is.isEmpty,
-    RedirectResponse(DogProduct.menu.loc.calcDefaultHref)
-  )
-
-  val catSizeChosen = If(
-    () => !petSize.is.isEmpty,
-    RedirectResponse(CatSize.menu.loc.calcDefaultHref)
-  )
-
-  val dogSizeChosen = If(
-    () => !petSize.is.isEmpty,
-    RedirectResponse(DogSize.menu.loc.calcDefaultHref)
-  )
-
-  val productChosen = If(
-    () => !petProduct.is.isEmpty,
-    () => {
-      petChoice.is match {
-        case Full(AnimalType.Dog) => 
-          RedirectResponse(DogProduct.menu.loc.calcDefaultHref)
-        case Full(AnimalType.Cat) => 
-          RedirectResponse(CatProduct.menu.loc.calcDefaultHref)
-        case _ => 
-          RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
-      }
-    }
-  )
-
-  val sizeChosen = If(
-    () => !petSize.is.isEmpty, 
-    () => {
-      petChoice.is match {
-        case Full(AnimalType.Dog) => 
-          RedirectResponse(DogSize.menu.loc.calcDefaultHref)
-        case Full(AnimalType.Cat) => 
-          RedirectResponse(CatSize.menu.loc.calcDefaultHref)
-        case _ => 
-          RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
-      }
-    }
-  )
-
-  val completedPetOrFlow = If(
-    () => (!completedPets.isEmpty || flowComplete_?),
-    () => RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
-  )
-
   val loggedIn = If(
     () => SecurityContext.loggedIn_?,
     RedirectResponse("/login")
@@ -110,6 +50,11 @@ object Paths {
     RedirectResponse(Checkout.menu.loc.calcDefaultHref)
   )
 
+  val hasProductInCart = If(
+    () => !shoppingCart.is.isEmpty,
+    RedirectResponse(Products.menu.loc.calcDefaultHref)
+  )
+
   def serverUrl = {
     val hostUrl = Props.get("server.url") openOr "http://localhost:8080/"
 
@@ -122,13 +67,9 @@ object Paths {
   def siteMap = SiteMap(
     homePage,
     testimonial,
-    LandingPage.fetchLanding,
-    PetChoice.menu,
-    DogSize.menu,
-    PetDetails.menu,
-    CatSize.menu,
-    DogProduct.menu,
-    CatProduct.menu,
+    LandingPage.landing2Free,
+    LandingPage.landing3Free,
+    CartReview.menu,
     Checkout.menu,
     Success.menu,
     AccountOverview.menu,
@@ -141,6 +82,7 @@ object Paths {
     admin.Parents.menu,
     admin.Users.menu,
     admin.Prices.menu,
+    admin.Reviews.menu,
     admin.Coupons.menu,
     admin.Agencies.menu,
     admin.PhonePortal.menu,
@@ -149,6 +91,14 @@ object Paths {
     ResetPassword.menu,
     ResetPasswordSent.menu,
     Signup.menu,
+    Products.menu,
+    ProductDetail.frontlineDogsMenu,
+    ProductDetail.zoguardDogsMenu,
+    ProductDetail.adventureDogsMenu,
+    ProductDetail.sheieldtecDogsMenu,
+    ProductDetail.frontlineCatsMenu,
+    ProductDetail.zoguardCatsMenu,
+    ProductDetail.adventureCatsMenu,
     Login.logoutMenu
   )
 }

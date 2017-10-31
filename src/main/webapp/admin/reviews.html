@@ -1,0 +1,71 @@
+<div id="main" data-lift="surround?with=default-template;at=content"> 
+<div data-lift="admin.reviews.render?eager_eval=true">
+  <div data-lift="embed?what=admin/admin-nav-bar"></div>
+  <div id="item-container">
+    <h2>Reviews</h2>
+    <form id="upload-reviews-form" data-lift="admin.Reviews.fileUpload">
+      <fieldset class="create">
+        <legend>Create Reviews</legend>
+
+        <div class="fileUploadForm">
+          <p>Try uploading a file:</p>
+          <input type="file" id="review-upload" />
+          <input type="submit" value="Submit" id="upload-reviews" />
+        </div>
+
+        <table class="new-reviews">
+          <thead>
+            <tr>
+              <td>Title</td>
+              <td>Body</td>
+              <td>Rating</td>
+              <td>Author</td>
+              <td>Date</td>
+              <td>Product</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="new-review">
+              <td class="title">Amazing Product</td>
+              <td class="body">long review!</td>
+              <td class="rating">3.2</td>
+              <td class="author">Mike</td>
+              <td class="date">Feb 29, 2017</td>
+              <td class="product">zgrd+</td>
+            </tr>
+          </tbody>
+        </table>
+        <input type="submit" value="Create Review" id="create-reviews" />
+      </fieldset>
+    </form>
+    <table class="all-reviews">
+      <thead>
+        <tr>
+          <td>Title</td>
+          <td>Body</td>
+          <td>Rating</td>
+          <td>Author</td>
+          <td>Date</td>
+          <td>Product</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="review">
+          <td class="title">Amazing Product</td>
+          <td class="body">long review!</td>
+          <td class="rating">3.2</td>
+          <td class="author">Mike</td>
+          <td class="date">Feb 29, 2017</td>
+          <td class="product">zgrd+</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<head_merge>
+<link rel="stylesheet" data-lift="style-bundle?name=admin">
+</head_merge>
+<tail>
+<script type="text/javascript" data-lift="script-bundle?name=reviews"></script>
+</tail>
+</div>

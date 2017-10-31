@@ -32,16 +32,28 @@ object ParentService extends Loggable {
   }
 
   def updateStripeSubscriptionQuantity(customerId: String, subscriptionId: String, quantity: Int) = {
-    StripeSubscription.update(
+    val subscription = StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
       quantity = Some(quantity),
       prorate = Some(false)
     )
+
+    Try(Await.result(subscription, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(updatedSubscription)) =>
+        Full(updatedSubscription)
+      
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"update subscription failed with stipe error: ${stripeFailure}")
+        stripeFailure
+      
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"update subscription failed with other error: ${throwable}")
+        throwable
+    }
   }
 
   def updateCoupon(customerId: String, couponCode: Box[String]) = {
-
     if (couponCode.isEmpty) {
       Customer.deleteDiscount(customerId)
     } else {
@@ -52,19 +64,15 @@ object ParentService extends Loggable {
     }
   }
 
-  def deleteStripeCustomer(customerId: String) = {
-    Customer.delete(customerId)
-  }
-
   def removeParent(oldUser: User): Box[User] = {
     val user = User.find(By(User.userId, oldUser.userId.get))
-
-    val removeCustomer = deleteStripeCustomer(user.map(_.stripeId.get).openOr(""))
+    val stripeCustomerId = user.map(_.stripeId.get).openOr("")
+    
+    val removeCustomer = Customer.delete(stripeCustomerId)
 
     Try(Await.result(removeCustomer, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(stripeSub)) =>
         val subscription = user.flatMap(_.getSubscription)
-
 
         val shipments = subscription.map(_.shipments.toList).openOr(Nil)
         val addresses = user.map(_.addresses.toList).openOr(Nil)
@@ -76,19 +84,7 @@ object ParentService extends Loggable {
 
       case TrySuccess(stripeFailure) =>
         logger.error(s"remove customer failed with stipe error: ${stripeFailure}")
-        logger.error(s"trying to delete ${user} anyways")
-        logger.error(s"no promises this works. Check data tables")
-
-        val subscription = user.flatMap(_.getSubscription)
-        val shipments = subscription.map(_.shipments.toList).openOr(Nil)
-        val addresses = user.map(_.addresses.toList).openOr(Nil)
-
-        shipments.map(_.delete_!)
-        addresses.map(_.delete_!)
-        subscription.map(_.delete_!)
-        user.map(_.delete_!)
-
-        user
+        Empty
 
       case TryFail(throwable: Throwable) =>
         logger.error(s"remove customer failed with other error: ${throwable}")
@@ -117,14 +113,11 @@ object ParentService extends Loggable {
     val stripeCustomer = getStripeCustomer(customerId)
 
     stripeCustomer match { 
-      case Full(customer) =>
-        customer.discount
+      case Full(customer) => customer.discount
 
-      case Failure(message, _, _) =>
-        Failure(message)
+      case Failure(message, _, _) => Failure(message)
 
-      case Empty =>
-        Empty
+      case Empty => Empty
     }
   }
 
@@ -201,29 +194,103 @@ object ParentService extends Loggable {
   }
 
   def updateNextShipBillDate(subscription: Subscription, user: Box[User], nextDate: Date) = {
-    subscription.nextShipDate(nextDate).saveMe
-
-    ParentService.changeBillDate(
+    val updatedSubscription = changeStripeBillDate(
       user.map(_.stripeId.get).openOr(""),
       user.flatMap(_.getSubscription.map(_.stripeSubscriptionId.get)).getOrElse(""),
       nextDate.getTime/1000
     )
+
+    updatedSubscription match {
+      case Full(stripeSubscription) => subscription.nextShipDate(nextDate).saveMe
+      case _ => Empty
+    }
   }
 
-  def changeBillDate(customerId: String, subscriptionId: String, date: Long) = {
-    StripeSubscription.update(
+  def changeStripeBillDate(customerId: String, subscriptionId: String, date: Long) = {
+    val updatedSubscription = StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
       trialEnd = Some(date),
       prorate = Some(false)
     )
+
+    Try(Await.result(updatedSubscription, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(updatedSubscription)) =>
+        Full(updatedSubscription)
+
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"update subscription failed with stipe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"update subscription failed with other error: ${throwable}")
+        throwable
+    }
   }
 
   def notTrialSubscription_?(stripeCustomerId: String, subscriptionId: String) = {
     val subscription = getStripeSubscription(stripeCustomerId, subscriptionId)
     val trialStatus = subscription.flatMap(_.status).getOrElse("")
-    logger.info(s"stripeCustomerId: ${stripeCustomerId}. subscriptionId: ${subscriptionId}. trialStatus: ${trialStatus}")
+    
     trialStatus != "trialing"
   }
-}
 
+  def addNewPet(
+    user: User,
+    name: String,
+    animalType: AnimalType.Value,
+    size: AnimalSize.Value,
+    product: Product
+  ): Box[Pet] = {
+
+    val updatedSubscription = updateStripeSubscriptionQuantity(
+      user.stripeId.get,
+      user.getSubscription.map(_.stripeSubscriptionId.get).getOrElse(""),
+      user.pets.size + 1
+    )
+
+    updatedSubscription match {
+      case Full(stripeSub) =>
+        Full(Pet.createNewPet(
+          user = user,
+          name = name,
+          animalType = animalType,
+          size = size,
+          product = product
+        ))
+
+      case _ => Empty
+    }
+  }
+
+  def removePet(oldUser: Box[User], pet: Pet): Box[Pet] = {
+    oldUser.map(user => removePet(user, pet)).openOr(Empty)
+  }
+
+  def removePet(oldUser: User, pet: Pet): Box[Pet] = {
+    val user = User.find(By(User.userId, oldUser.userId.get))
+
+    val subscriptionId = (
+      for {
+        updatedUser <- user
+        subscription <- updatedUser.getSubscription
+      } yield {
+        subscription.stripeSubscriptionId.get
+      }
+    ).openOr("")
+
+    val updatedSubscription = updateStripeSubscriptionQuantity(
+      user.map(_.stripeId.get).openOr(""),
+      subscriptionId,
+      user.map(_.pets.size - 1).openOr(0)
+    )
+
+    updatedSubscription match {
+      case Full(stripeSub) =>
+        Full(pet.status(Status.Inactive).saveMe)
+
+      case _ =>
+        Empty
+    }
+  }
+}

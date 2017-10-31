@@ -1,15 +1,11 @@
 checkout
 stripe.js
 jquery.payment.js
-promo-code.js
 base.js
 
 billing
 update-billing.js
 jquery.payment.js
-base.js
-
-pet-details
 base.js
 
 profile
@@ -42,3 +38,16 @@ missing-product.js
 
 landing
 base.js
+
+product-detail
+slick/slick.min.js
+product-detail.js
+base.js
+
+cart-review
+promo-code.js
+base.js
+
+reviews
+admin
+ajax-file-upload.js
