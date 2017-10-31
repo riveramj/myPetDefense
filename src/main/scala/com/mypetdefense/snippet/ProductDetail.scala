@@ -21,6 +21,8 @@ import com.mypetdefense.model._
 import com.mypetdefense.actor._
 import com.mypetdefense.util.RandomIdGenerator._
 
+import java.text.SimpleDateFormat
+
 object ProductDetail extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
@@ -37,6 +39,8 @@ object ProductDetail extends Loggable {
 
 class ProductDetail extends Loggable {
   import PetFlowChoices._
+
+  val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
 
   val path = S.request.map(_.uri).openOr("").drop(1)
 
@@ -168,7 +172,7 @@ class ProductDetail extends Loggable {
       ".review-title *" #> review.title.get &
       ".author-details" #> {
         ".author-name *" #> review.author.get &
-        ".review-date *" #> ""
+        ".review-date *" #> dateFormat.format(review.date.get)
       } &
       ".review-body *" #> review.body.get
     }

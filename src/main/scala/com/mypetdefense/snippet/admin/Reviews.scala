@@ -45,6 +45,8 @@ class Reviews extends Loggable {
   var newReviews: List[Review] = Nil
   var newReviewsRenderer: Box[IdMemoizeTransform] = Empty
   
+  val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
+  
   def fileUpload = {
     var fileHolder: Box[FileParamHolder] = Empty
     
@@ -80,6 +82,7 @@ class Reviews extends Loggable {
         ".body *" #> review.body.get &
         ".rating *" #> review.rating.get &
         ".author *" #> review.author.get &
+        ".date *" #> dateFormat.format(review.date.get) &
         ".product *" #> review.product.map(_.name.get)
       }
     }
@@ -95,6 +98,7 @@ class Reviews extends Loggable {
       ".body *" #> review.body.get &
       ".rating *" #> review.rating.get &
       ".author *" #> review.author.get &
+      ".date *" #> dateFormat.format(review.date.get) &
       ".product *" #> review.product.map(_.name.get)
     }
   }

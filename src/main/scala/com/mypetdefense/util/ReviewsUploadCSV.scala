@@ -20,6 +20,8 @@ import java.nio.charset.StandardCharsets
 import scala.language.implicitConversions
 import scala.language.postfixOps
 
+import java.text.SimpleDateFormat
+
 case class ReviewsList(list: List[Review])
 
 object ReviewsUploadCSV extends Loggable {
@@ -175,7 +177,6 @@ object ReviewsUploadCSV extends Loggable {
     val title = Columns.cellValue(Columns.Title, headerIndex, fieldList).openOr("")
     val body = Columns.cellValue(Columns.Body, headerIndex, fieldList).openOr("")
     val author = Columns.cellValue(Columns.Author, headerIndex, fieldList).openOr("")
-    val date = Columns.cellValue(Columns.Date, headerIndex, fieldList).openOr("")
     val productName = Columns.cellValue(Columns.Product, headerIndex, fieldList).openOr("")
 
     val product = (productName match {
@@ -192,12 +193,17 @@ object ReviewsUploadCSV extends Loggable {
 
     val rating = tryo(ratingRaw.toDouble).openOr(0D)
 
+    val dateRaw = Columns.cellValue(Columns.Date, headerIndex, fieldList).openOr("")
+    val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
+    val date = dateFormat.parse(dateRaw)
+
     product.map { prod => 
       Review.create
         .title(title)
         .body(body)
         .rating(rating)
         .author(author)
+        .date(date)
         .product(prod)
     }
   }
