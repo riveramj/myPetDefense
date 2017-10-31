@@ -97,6 +97,8 @@ class ProductDetail extends Loggable {
   }
 
   def starBinding(rating: Double) = {
+    println(rating + " +++++++")
+
     rating match {
       case 0D => 
         ".star [class+]" #> "empty"
@@ -149,12 +151,17 @@ class ProductDetail extends Loggable {
 
     ".review-count *" #> reviewCount &
     ".review" #> reviews.map { review =>
+      println(review + " ++++")
 
-      starBinding(review.rating.get) &
+      ".review-rating" #> {
+        println(starBinding(review.rating.get))
+
+        starBinding(review.rating.get)
+      } &
       ".review-title *" #> review.title.get &
       ".author-details" #> {
         ".author-name *" #> review.author.get &
-        ".review-date *" #> review.date.get.toString
+        ".review-date *" #> ""
       } &
       ".review-body *" #> review.body.get
     }
