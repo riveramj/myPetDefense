@@ -32,8 +32,13 @@ class CartReview extends Loggable {
   import PetFlowChoices._
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
-  var coupon: Box[Coupon] = PetFlowChoices.coupon
+  
+  var coupon: Box[Coupon] = PetFlowChoices.coupon.is
   var couponCode = coupon.map(_.couponCode.get).openOr("")
+
+  var groupons: List[Groupon] = PetFlowChoices.groupons.is
+  var grouponCodes = groupons.map(_.grouponCode.get)
+  var possibleGrouponCode = ""
 
   def getImageUrl(product: Box[Product]) = {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
@@ -43,18 +48,47 @@ class CartReview extends Loggable {
     val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
 
     if (possibleCoupon.isEmpty) {
-      coupon = None
-      
-      (
-        PromoCodeMessage("error") &
-        cartRenderer.map(_.setHtml).openOr(Noop)
-      )
+      PromoCodeMessage("error")
     } else {
       coupon = possibleCoupon
       PetFlowChoices.coupon(coupon)
 
       (
         PromoCodeMessage("success") &
+        cartRenderer.map(_.setHtml).openOr(Noop)
+      )
+    }
+  }
+
+  def validateGrouponCode() = {
+    def shoppingCartDoesNotQualify = {
+      val cart = PetFlowChoices.shoppingCart.is
+
+      val productNames = cart.map(_._2._2.name.get)
+
+      val numberOfNonFrontlines = productNames.count { name =>
+        (name != "Frontline Plus for Dogs") || (name != "Frontline Plus for Cats")
+      }
+
+      println(productNames + " === " + numberOfNonFrontlines)
+      println(!(numberOfNonFrontlines >= (groupons.size + 1)) + " ===")
+
+      (groupons.size + 1) > numberOfNonFrontlines
+    }
+
+    val possibleGroupon = Groupon.find(By(Groupon.grouponCode, possibleGrouponCode.toLowerCase()))
+
+    if (possibleGroupon.isEmpty || possibleGrouponCode.isEmpty) {
+      GrouponCodeMessage("error") 
+    } else if (shoppingCartDoesNotQualify) {
+      GrouponCodeMessage("frontline-error")
+    } else {
+      groupons = (groupons ++ possibleGroupon.toList).distinct
+      PetFlowChoices.groupons(groupons)
+      PetFlowChoices.freeMonths(groupons.headOption.map(_.freeMonths.get))
+
+      (
+        GrouponCodeMessage("success") &
         cartRenderer.map(_.setHtml).openOr(Noop)
       )
     }
@@ -79,16 +113,28 @@ class CartReview extends Loggable {
         case _ => subtotal * 0.1
       }
 
+      val grouponDiscount = groupons.size * 12.99
+
+      val discount = {
+        if (grouponDiscount > 0) 
+          grouponDiscount
+        else
+          multiPetDiscount
+      }
+
+      PetFlowChoices.discount(discount)
+      PetFlowChoices.subtotal(subtotal)
+
       val cartCount = cart.size match {
         case 1 => s"1 item"
         case count => s"${count} items"
       }
 
-      val subtotalWithDiscount = subtotal - multiPetDiscount
+      val subtotalWithDiscount = subtotal - discount
 
       ".cart-count *" #> cartCount &
       ".starting-total *" #> f"$$$subtotal%2.2f" &
-      ".discount *" #> f"-$$$multiPetDiscount%2.2f" &
+      ".discount *" #> f"-$$$discount%2.2f" &
       ".subtotal *" #> f"$$$subtotalWithDiscount%2.2f" &
       {
         if(coupon.isEmpty) {
@@ -119,9 +165,22 @@ class CartReview extends Loggable {
             ""
         }
 
+        val successGroupon = {
+          if (!PetFlowChoices.groupons.isEmpty)
+            "groupon-success"
+          else
+            ""
+        }
+
         ".promotion-info [class+]" #> successCoupon &
+        ".groupon-info [class+]" #> successGroupon &
         "#promo-code" #> ajaxText(couponCode, couponCode = _) &
-        ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
+        "#groupon-code" #> ajaxText(possibleGrouponCode, possibleGrouponCode = _) &
+        ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
+        ".apply-groupon [onClick]" #> SHtml.ajaxInvoke(() => validateGrouponCode()) &
+        ".groupon" #> groupons.map { groupon =>
+          ".code *" #> groupon.grouponCode.get
+        }
       }
     }
   }

@@ -42,6 +42,7 @@ object Checkout extends Loggable {
 }
 
 case class PromoCodeMessage(status: String) extends MyPetDefenseEvent("promotion-code-message")
+case class GrouponCodeMessage(status: String) extends MyPetDefenseEvent("groupon-code-message")
 
 class Checkout extends Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
@@ -68,14 +69,10 @@ class Checkout extends Loggable {
 
   val cart = shoppingCart.is
   val petCount = cart.size
-  val subtotal = cart.values.map(_._3).sum
-  val multiPetDiscount = cart.size match {
-    case 0 | 1 => 0
-    case 2 => subtotal * 0.05
-    case _ => subtotal * 0.1
-  }
-
-  val subtotalWithDiscount = subtotal - multiPetDiscount
+  
+  val subtotal = PetFlowChoices.subtotal.is.openOr(0D)
+  val discount = PetFlowChoices.discount.is.openOr(0D)
+  val subtotalWithDiscount = subtotal - discount
 
   val pennyCount = (subtotal * 100).toInt
 
@@ -262,6 +259,7 @@ class Checkout extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
+    ".billing-info" #> ClearNodesIf(shoppingCart.size <= groupons.size) andThen
     orderSummary &
     "#first-name" #> text(firstName, firstName = _) &
     "#last-name" #> text(lastName, lastName = _) &
