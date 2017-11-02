@@ -160,6 +160,34 @@
   }
 }
 
+.video-wrapper {
+	position: relative;
+	padding-bottom: 275px; /* 16:9 */
+	padding-top: 25px;
+	height: 0;
+}
+
+
+.video-container {
+  padding-top: 20px;
+
+ @media (min-width: $bp-medium) { 
+    padding: 45px 25% 0;
+  }
+
+  @media (min-width: $bp-medium) {
+    padding-top: 60px;
+  }
+}
+
+.video-wrapper iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
 .feature {
   padding: 84px 0;
   margin: 0 auto;
