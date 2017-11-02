@@ -45,12 +45,14 @@ class Boot {
       Subscription,
       Agency,
       Coupon,
+      Groupon,
       Price,
       Review
     )
 
     DataLoader.loadProducts
     DataLoader.loadAdmin
+    DataLoader.loadGroupons
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
