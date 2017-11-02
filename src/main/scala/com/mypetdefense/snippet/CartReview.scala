@@ -70,13 +70,10 @@ class CartReview extends Loggable {
         (name != "Frontline Plus for Dogs") && (name != "Frontline Plus for Cats")
       }
 
-      println(productNames + " === " + numberOfNonFrontlines)
-      println(!(numberOfNonFrontlines >= (groupons.size + 1)) + " ===")
-
       (groupons.size + 1) > numberOfNonFrontlines
     }
 
-    val possibleGroupon = Groupon.find(By(Groupon.grouponCode, possibleGrouponCode.toLowerCase()))
+    val possibleGroupon = Groupon.find(By(Groupon.grouponCode, possibleGrouponCode.toLowerCase()), NullRef(Groupon.user))
 
     if (possibleGroupon.isEmpty || possibleGrouponCode.isEmpty) {
       GrouponCodeMessage("error") 

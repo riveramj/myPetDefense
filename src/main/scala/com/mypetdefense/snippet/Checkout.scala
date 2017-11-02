@@ -168,7 +168,7 @@ class Checkout extends Loggable {
 
       Try(Await.result(stripeCustomer, new DurationInt(7).seconds)) match {
         case TrySuccess(Full(customer)) =>
-          newUserSetup(
+          val user = newUserSetup(
             customer
           )
 
@@ -177,6 +177,8 @@ class Checkout extends Loggable {
           PetFlowChoices.total(Full(total))
           
           PetFlowChoices.freeMonths(coupon.map(_.freeMonths.get))
+
+          PetFlowChoices.groupons.map(_.user(user).redeemedAt(new Date()).saveMe)
 
           S.redirectTo(Success.menu.loc.calcDefaultHref)
 
@@ -248,6 +250,8 @@ class Checkout extends Loggable {
     }
 
     EmailActor ! SendWelcomeEmail(user)
+    
+    user
   }
 
   def render = {
