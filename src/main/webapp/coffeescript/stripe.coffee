@@ -20,10 +20,7 @@ $(document).ready ->
     )
 
 $(document).on 'groupon-only', (event) ->
-  console.log "got it"
-  console.log window.myPetDefenseSite.groupon ->
   window.myPetDefenseSite.groupon = -> true
-  console.log window.myPetDefenseSite.groupon ->
 
 $(document).on 'stripe-form-ready', (event) ->
   $('#card-number').payment('formatCardNumber')
@@ -31,10 +28,7 @@ $(document).on 'stripe-form-ready', (event) ->
   $("#card-cvc").payment('formatCardCVC')
 
 $(document).on "validate-stripe-form", (event) ->
-  console.log myPetDefenseSite.groupon ->
-
   if (window.myPetDefenseSite.groupon ->)
-    console.log "in groupon"
     $(".checkout").submit()
     return false
 

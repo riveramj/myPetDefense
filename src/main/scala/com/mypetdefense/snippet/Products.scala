@@ -125,10 +125,7 @@ class Products extends Loggable {
   }
 
   def render = {
-    println(PetFlowChoices.purchased.is + " _-----")
     if (PetFlowChoices.purchased.is.openOr(false)) {
-      println("in render")
-
       PetFlowChoices.total(Empty)
       PetFlowChoices.freeMonths(Empty)
       PetFlowChoices.shoppingCart(Map())
