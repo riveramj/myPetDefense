@@ -113,8 +113,11 @@ class Products extends Loggable {
         ".four [class+]" #> "filled" &
         ".five [class+]" #> "half"
 
-      case star =>
+      case star if star == 5D =>
         ".star [class+]" #> "filled"
+
+      case star =>
+        ".star [class+]" #> "empty"
     }
 
     ".rating [title]" #> f"Average Rating: $rating%1.2f" &
