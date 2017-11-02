@@ -304,9 +304,21 @@
       border: 1px solid #FF9295;
     }
 
-    #promo-error, #groupon-error, #groupon-frontline-error {
+    #promo-error {
       display: inline-block;
     }
+  }
+
+  &.groupon-error #groupon-error {
+    display: inline-block;
+  }
+
+  &.groupon-frontline-error #groupon-frontline-error {
+    display: inline-block;
+  }
+
+  &.groupon-count-error #groupon-count-error {
+    display: inline-block;
   }
 
   &.promo-success, &.groupon-success {
@@ -325,6 +337,11 @@
   display: none;
   color: #E52323;
   font-weight: $semibold;
+}
+
+#groupon-frontline-error {
+  margin-bottom: 5px;
+  line-height: 18px;
 }
 
 

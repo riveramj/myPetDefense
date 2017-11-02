@@ -4,7 +4,6 @@ $(document).ready ->
       if event.status == "success"
         $('.promotion-info').removeClass("promo-error").addClass("promo-success")
       else
-        console.log "in error"
         $('.promotion-info').removeClass("promo-success").addClass("promo-error")
 
     .on 'groupon-code-message', (event) ->
