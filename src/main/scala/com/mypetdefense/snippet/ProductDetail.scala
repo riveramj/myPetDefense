@@ -145,8 +145,11 @@ class ProductDetail extends Loggable {
         ".four [class+]" #> "filled" &
         ".five [class+]" #> "half"
 
-      case star =>
+      case star if star == 5D =>
         ".star [class+]" #> "filled"
+
+      case star =>
+        ".star [class+]" #> "empty"
     }
   }
 
@@ -173,7 +176,8 @@ class ProductDetail extends Loggable {
         ".review-date *" #> dateFormat.format(review.date.get)
       } &
       ".review-body *" #> review.body.get
-    }
+    } &
+    ".show-more-reviews" #> ClearNodesIf(true)
   }
 
   def render = {
