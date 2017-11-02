@@ -5,6 +5,8 @@ stripeCallback = (status, response) ->
     $("#stripe-token").val(response.id)
     $(".checkout").submit()
 
+window.myPetDefenseSite.groupon = -> false
+    
 $(document).ready ->
   Stripe?.setPublishableKey? 'pk_test_tlQUPJdasEEdNTcUsbcsHmG7'
 
@@ -17,12 +19,19 @@ $(document).ready ->
       stripeCallback: stripeCallback
     )
 
+$(document).on 'groupon-only', (event) ->
+  window.myPetDefenseSite.groupon = -> true
+
 $(document).on 'stripe-form-ready', (event) ->
   $('#card-number').payment('formatCardNumber')
   $('#card-expiry').payment('formatCardExpiry')
   $("#card-cvc").payment('formatCardCVC')
 
 $(document).on "validate-stripe-form", (event) ->
+  if (window.myPetDefenseSite.groupon ->)
+    $(".checkout").submit()
+    return false
+
   $(".validation-error").remove()
   $("input.error").removeClass("error")
   

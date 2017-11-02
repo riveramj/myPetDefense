@@ -40,14 +40,23 @@
 }
 
 .dog-park {
-  background: url(../../images/dog-park-small@2x.jpg);
+  background: url(../../images/autumn-dog-mobile.jpeg);
   background-repeat: no-repeat;
   background-size: contain;
   padding-top: 216px;
+  background-position-y: 0;
+
+  @media (min-width: 370px) {
+    background-position-y: -30px;
+  }
+
+  @media (min-width: 550px) {
+    background-position-y: -130px;
+  }
 
   @media (min-width: $bp-medium) {
     padding-top: 0;
-    background: url(../../images/dog-park@2x.jpg);
+    background: url(../../images/autumn-dog.jpeg);
     background-repeat: no-repeat;
     background-size: cover;
     height: 450px;
@@ -56,11 +65,10 @@
   @media (min-width: $bp-large) {
     background-color: #259490;
     height: 550px;
-    background: url(../../images/dog-park@2x.jpg);
+    background: url(../../images/autumn-dog.jpeg);
     background-size: cover;
     background-color: #259490;
     background-repeat: no-repeat;
-    background-position-y: -100px;
   }
 }
 
@@ -84,7 +92,7 @@
 
   @media (min-width: $bp-large) {
     width: 33%;
-    margin-left: 20%;
+    margin-left: 6%;
     padding-top: 170px;
   }
 
@@ -149,6 +157,33 @@
       margin-left: -2px;
     }
   }
+}
+
+.video-wrapper {
+	position: relative;
+	padding-bottom: 275px; /* 16:9 */
+	padding-top: 25px;
+	height: 0;
+}
+
+.video-container {
+  padding-top: 20px;
+
+ @media (min-width: $bp-medium) { 
+    padding: 45px 25% 0;
+  }
+
+  @media (min-width: $bp-medium) {
+    padding-top: 60px;
+  }
+}
+
+.video-wrapper iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
 }
 
 .feature {
