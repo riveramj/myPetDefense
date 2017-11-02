@@ -44,6 +44,8 @@ object Checkout extends Loggable {
 case class PromoCodeMessage(status: String) extends MyPetDefenseEvent("promotion-code-message")
 case class GrouponCodeMessage(status: String) extends MyPetDefenseEvent("groupon-code-message")
 
+case object GrouponOnlyCheckout extends MyPetDefenseEvent("groupon-only")
+
 class Checkout extends Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
@@ -74,7 +76,9 @@ class Checkout extends Loggable {
   val discount = PetFlowChoices.discount.is.openOr(0D)
   val subtotalWithDiscount = subtotal - discount
 
-  val pennyCount = (subtotal * 100).toInt
+  val groupon_? = (subtotalWithDiscount == 0) && (groupons.size > 0)
+
+  val pennyCount = (subtotalWithDiscount * 100).toInt
 
   def calculateTax(possibleState: String, possibleZip: String) = {
     state = possibleState
@@ -99,10 +103,9 @@ class Checkout extends Loggable {
   }
 
   def signup() = {
-    val validateFields = List(
+    val validateFieldsPartial = List(
         checkEmail(email, "#email"),
         checkEmpty(firstName, "#first-name"),
-        checkEmpty(cardholderName, "#cardholder-name"),
         checkEmpty(lastName, "#last-name"),
         checkEmpty(password, "#password"),
         checkEmpty(street1, "#street-1"),
@@ -111,21 +114,39 @@ class Checkout extends Loggable {
         checkEmpty(zip, "#zip")
       ).flatten
 
+    val validateFields = {
+      if (!groupon_?)
+        validateFieldsPartial ++ checkEmpty(cardholderName, "#cardholder-name")
+      else
+        validateFieldsPartial
+    }
+
     if(validateFields.isEmpty) {
-      (coupon, petCount) match {
-        case (Full(_), _) =>
-        case (Empty, 1) => 
-        case (Empty, 2) => 
+      (coupon, petCount, groupons.isEmpty) match {
+        case (Full(_), _, _) =>
+        case (Empty, 1, _) => 
+        case (Empty, 2, true) => 
           coupon = Coupon.find(By(Coupon.couponCode, "twopets"))
-        case (Empty, manyPets) if manyPets > 2 => 
+        case (Empty, manyPets, true) if manyPets > 2 => 
           coupon = Coupon.find(By(Coupon.couponCode, "threepets"))
-        case (_, _) => 
+        case (_, _, _) => 
       }
 
       val couponId = coupon.map(_.couponCode.get)
 
+      val subscriptionLength = groupons.headOption.map(_.freeMonths.get).getOrElse(0)
+
       val stripeCustomer = {
-        if (couponId.isEmpty) {
+        if (!groupons.isEmpty && (subtotalWithDiscount == 0)) {
+          Customer.create(
+            email = Some(email),
+            card = None,
+            plan = Some("grouponPlan"),
+            quantity = Some(1),
+            taxPercent = Some(taxRate),
+            coupon = Some(s"${subscriptionLength}monthgroupon")
+          )
+        } else if (couponId.isEmpty) {
           Customer.create(
             email = Some(email),
             card = Some(stripeToken),
@@ -152,7 +173,9 @@ class Checkout extends Loggable {
           )
 
           val total = subtotalWithDiscount + taxDue
+          
           PetFlowChoices.total(Full(total))
+          
           PetFlowChoices.freeMonths(coupon.map(_.freeMonths.get))
 
           S.redirectTo(Success.menu.loc.calcDefaultHref)
@@ -235,8 +258,10 @@ class Checkout extends Loggable {
         val monthlyTotal = subtotalWithDiscount + taxDue
 
         "#subtotal span *" #> f"$$$subtotal%2.2f" &
-        "#multi-pet-discount" #> ClearNodesIf(multiPetDiscount == 0) &
-        "#multi-pet-discount span *" #> f"$$$multiPetDiscount%2.2f" &
+        "#discount" #> ClearNodesIf(discount == 0) &
+        "#discount span *" #> f"$$$discount%2.2f" &
+        "#subscription-length" #> ClearNodesIf(groupons.isEmpty) &
+        "#subscription-length span *" #> s"${groupons.headOption.map(_.freeMonths.get).getOrElse(0)} months" &
         "#tax" #> ClearNodesIf(taxDue == 0D) &
         "#tax span *" #> f"$$$taxDue%2.2f" &
         "#monthly-total span *" #> f"$$$monthlyTotal%2.2f" &
@@ -258,6 +283,9 @@ class Checkout extends Loggable {
       }
     }
 
+    if (groupon_?)
+      S.appendGlobalJs(GrouponOnlyCheckout)
+
     SHtml.makeFormsAjax andThen
     ".billing-info" #> ClearNodesIf(shoppingCart.size <= groupons.size) andThen
     orderSummary &
@@ -272,6 +300,7 @@ class Checkout extends Loggable {
     "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
     "#cardholder-name" #> text(cardholderName, cardholderName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup)
+    ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup) &
+    ".agreement" #> ClearNodesIf(subtotalWithDiscount == 0)
   }
 }

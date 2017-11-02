@@ -67,7 +67,7 @@ class CartReview extends Loggable {
       val productNames = cart.map(_._2._2.name.get)
 
       val numberOfNonFrontlines = productNames.count { name =>
-        (name != "Frontline Plus for Dogs") || (name != "Frontline Plus for Cats")
+        (name != "Frontline Plus for Dogs") && (name != "Frontline Plus for Cats")
       }
 
       println(productNames + " === " + numberOfNonFrontlines)
@@ -122,8 +122,8 @@ class CartReview extends Loggable {
           multiPetDiscount
       }
 
-      PetFlowChoices.discount(discount)
-      PetFlowChoices.subtotal(subtotal)
+      PetFlowChoices.discount(Full(discount))
+      PetFlowChoices.subtotal(Full(subtotal))
 
       val cartCount = cart.size match {
         case 1 => s"1 item"

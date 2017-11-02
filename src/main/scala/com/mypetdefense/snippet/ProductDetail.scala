@@ -38,8 +38,6 @@ object ProductDetail extends Loggable {
 }
 
 class ProductDetail extends Loggable {
-  import PetFlowChoices._
-
   val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
 
   val path = S.request.map(_.uri).openOr("").drop(1)
