@@ -1,5 +1,5 @@
 #top-bar {
-  background-color: #ffffff;
+  background-color: #259490;
   display: block;
 }
 
@@ -21,6 +21,11 @@
 
 nav {
   float: right;
+  padding-top: 4px;
+
+  @media (min-width: 430px) {
+    padding-top: 0;
+  }
 
   @media (min-width: $bp-medium) {
     margin-right: 15px;
@@ -45,11 +50,11 @@ nav {
 }
 
 #menu-entries {
-  .login, .new-user-signup, .entry {
+  .login, .new-user-signup, .entry, .blog {
     padding: rem(17px) rem(19px) rem(16px) rem(20px);
   }
 
-  .login {
+  .login, .blog {
     @media (min-width: $bp-large) {
       font-size: rem(20px);
       line-height: 24px;
@@ -74,8 +79,14 @@ nav {
     display: inline-block;
   }
 
-  .desktop {
+  .desktop, .mobile {
     display: none;
+  }
+
+  @media (min-width: 430px) {
+    .mobile {
+      display: inline-block;
+    }
   }
 
   @media (min-width: $bp-med) {
@@ -95,13 +106,13 @@ nav {
 
       .signup {
         background-color: initial;
-        color: #4F4E4E;
+        color: #FFFFFF;;
         font-weight: $bold;
         font-size: rem(16px);
         text-transform: none;
 
         &:visited {
-          color: #4F4E4E;
+          color: #FFFFFF;;
         }
       }
     }
@@ -118,10 +129,10 @@ nav {
 
   a {
     text-decoration: none;
-    color: #454343;
+    color: #FFFFFF;
 
      &:visited {
-       color: #454343;
+       color: #FFFFFF;
      }
   }
 
