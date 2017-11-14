@@ -61,7 +61,7 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
 
 object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem] {
   def createShipmentItems(shipment: Shipment, user: User) = {
-    val pets = Pet.findAll(By(Pet.user, user))
+    val pets = Pet.findAll(By(Pet.user, user), By(Pet.status, Status.Active))
     val products = pets.map(_.product.obj)
 
     products.map { product =>
