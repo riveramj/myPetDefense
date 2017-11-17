@@ -82,6 +82,7 @@ object Paths {
     admin.Parents.menu,
     admin.Users.menu,
     admin.Prices.menu,
+    admin.Reviews.menu,
     admin.Coupons.menu,
     admin.Agencies.menu,
     admin.PhonePortal.menu,

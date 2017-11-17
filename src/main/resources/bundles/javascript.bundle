@@ -1,7 +1,7 @@
 checkout
+base.js
 stripe.js
 jquery.payment.js
-base.js
 
 billing
 update-billing.js
@@ -47,3 +47,7 @@ base.js
 cart-review
 promo-code.js
 base.js
+
+reviews
+admin
+ajax-file-upload.js

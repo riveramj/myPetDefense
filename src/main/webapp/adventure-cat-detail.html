@@ -2,57 +2,85 @@
   <div data-lift="embed?what=product-detail"></div>
 
   <div class="details-container">
-  <ul class="product-features">
-    <li class="feature">
-      <ul class="feature-container">
-        <li class="bug feature-icon"></li>
-        <li class="feature-statement">
-          Kills adult <span class="key-point">fleas and chewing lice</span> on contact
-          <div class="product-note"><span>Note</span> Adventure Plus is not effective protection against ticks.
-          </div>
-        </li>
-      </ul>
-    </li>
-    <li class="feature">
-      <ul class="feature-container">
-        <li class="clock feature-icon"></li>
-        <li class="feature-statement">
-          Kills adult fleas <span class="key-point">within 12 hours</span> of application
-        </li>
-      </ul>
-    </li>
-    <li class="feature">
-      <ul class="feature-container">
-        <li class="kills feature-icon"></li>
-        <li class="feature-statement">
-          <span class="key-point">Prevents flea re-infestation</span> by killing flea eggs and larvae
-        </li>
-      </ul>
-    </li>
-    <li class="feature">
-      <ul class="feature-container">
-        <li class="waterproof feature-icon"></li>
-        <li class="feature-statement">
-          Waterproof
-        </li>
-      </ul>
-    </li>
-  </ul>
-  <div class="product-description">
-    <div class="product-description-header">
-      <h3>More Info</h3>
-      <a class="product-label" target="_blank" href="images/labels/Adventure_Plus_Cats_Specimen_Label.pdf">View Label</a>
+    <div class="product-description">
+      <div class="product-description-header">
+        <h3>Description</h3>
+        <a class="product-label" target="_blank" href="images/labels/Adventure_Plus_Cats_Specimen_Label.pdf">View Label</a>
+      </div>
+
+      <p class="product-overview">
+      Adventure Plus offers the fastest and most complete control of fleas. Contact with the active ingredient renders fleas unable to bite within 5 minutes, making it a product of choice for pets with flea bite allergies.
+      </p>
     </div>
-    Adventure Plus offers the fastest and most complete control of fleas. Contact with the active ingredient renders fleas unable to bite within 5 minutes, making it a product of choice for pets with flea bite allergies.
+    <ul class="product-features">
+      <li class="feature">
+        <ul class="feature-container">
+          <li class="bug feature-icon"></li>
+          <li class="feature-statement">
+            Kills adult <span class="key-point">fleas and chewing lice</span> on contact
+            <div class="product-note"><span>Note</span> Adventure Plus is not effective protection against ticks.
+            </div>
+          </li>
+        </ul>
+      </li>
+      <li class="feature">
+        <ul class="feature-container">
+          <li class="clock feature-icon"></li>
+          <li class="feature-statement">
+            Kills adult fleas <span class="key-point">within 12 hours</span> of application
+          </li>
+        </ul>
+      </li>
+      <li class="feature">
+        <ul class="feature-container">
+          <li class="kills feature-icon"></li>
+          <li class="feature-statement">
+            <span class="key-point">Prevents flea re-infestation</span> by killing flea eggs and larvae
+          </li>
+        </ul>
+      </li>
+      <li class="feature">
+        <ul class="feature-container">
+          <li class="waterproof feature-icon"></li>
+          <li class="feature-statement">
+            Waterproof
+          </li>
+        </ul>
+      </li>
+    </ul>
   </div>
+
+  <div class="reviews" data-lift="ProductDetail.getReviews">
+    <h2><span class="review-count">123</span> Reviews</h2>
+    <ul class="reviews-list">
+      <li class="review">
+        <ul>
+          <li class="rating review-rating">
+            <div class="star one"></div>
+            <div class="star two"></div>
+            <div class="star three"></div>
+            <div class="star four"></div>
+            <div class="star five"></div>
+          </li>
+          <li><h3 class="review-title">Amazing Review</h3></li>
+          <li class="author-details">
+            by <span class="author-name">Customer</span> on <span class="review-date">March 20 2016</span>
+          </li>
+          <li class="review-body">
+            Raclette neutra craft beer banjo air plant sartorial. Tattooed seitan +1, everyday carry plaid pork belly chillwave butcher. Portland flannel ethical farm-to-table microdosing.
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <button class="show-more-reviews">See More Reviews</button>
   </div>
 
   <head_merge>
-    <link rel="stylesheet" data-lift="style-bundle?name=product-detail">
+  <link rel="stylesheet" data-lift="style-bundle?name=product-detail">
   </head_merge>
   <tail>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script type="text/javascript" data-lift="script-bundle?name=product-detail"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+  <script type="text/javascript" data-lift="script-bundle?name=product-detail"></script>
   </tail>
 </div>
 

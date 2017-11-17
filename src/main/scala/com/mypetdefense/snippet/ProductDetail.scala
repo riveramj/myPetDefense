@@ -21,6 +21,8 @@ import com.mypetdefense.model._
 import com.mypetdefense.actor._
 import com.mypetdefense.util.RandomIdGenerator._
 
+import java.text.SimpleDateFormat
+
 object ProductDetail extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
@@ -36,7 +38,7 @@ object ProductDetail extends Loggable {
 }
 
 class ProductDetail extends Loggable {
-  import PetFlowChoices._
+  val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
 
   val path = S.request.map(_.uri).openOr("").drop(1)
 
@@ -96,18 +98,106 @@ class ProductDetail extends Loggable {
     Noop
   }
 
+  def starBinding(rating: Double) = {
+    rating match {
+      case 0D => 
+        ".star [class+]" #> "empty"
+
+      case star if star < 2D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "empty" &
+        ".three [class+]" #> "empty" &
+        ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 3D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "empty" &
+        ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 3.5D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "empty" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 4D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "half" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 4.5D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "filled" &
+        ".five [class+]" #> "empty"
+
+      case star if star < 5D =>
+        ".one [class+]" #> "filled" &
+        ".two [class+]" #> "filled" &
+        ".three [class+]" #> "filled" &
+        ".four [class+]" #> "filled" &
+        ".five [class+]" #> "half"
+
+      case star if star == 5D =>
+        ".star [class+]" #> "filled"
+
+      case star =>
+        ".star [class+]" #> "empty"
+    }
+  }
+
+  def ratingBinding(products: List[Product]) = {
+    val product = products.headOption
+    val rating = product.map(_.rating.get).getOrElse(0D)
+    val reviewCount = product.map(_.reviewCount.get).getOrElse(0)
+
+    ".rating [title]" #> f"Average Rating: $rating%1.2f" & 
+    starBinding(rating) &
+    ".count *" #> reviewCount
+  }
+
+  def getReviews = {
+    val reviews = products.map(_.reviews.toList).flatten
+    val reviewCount = reviews.size
+
+    ".review-count *" #> reviewCount &
+    ".review" #> reviews.map { review =>
+      starBinding(review.rating.get) &
+      ".review-title *" #> review.title.get &
+      ".author-details" #> {
+        ".author-name *" #> review.author.get &
+        ".review-date *" #> dateFormat.format(review.date.get)
+      } &
+      ".review-body *" #> review.body.get
+    } &
+    ".show-more-reviews" #> ClearNodesIf(true)
+  }
+
   def render = {
+    val possibleProduct = products.headOption
+    val price = possibleProduct.flatMap { product =>
+      Price.getDefaultProductPrice(product).map(_.price.get)
+    }.getOrElse(0D)
+    val productName = products.headOption.map(_.name.get).getOrElse("")
+
     SHtml.makeFormsAjax andThen
     ".product-shot-container" #> productImages.map { productImage =>
       ".product-shot [src]" #> productImage
     } &
     "#switch-save" #> ClearNodesIf(switchSaveProduct.isEmpty) &
     "#switch-save [href]" #> switchSaveProduct &
-    ".product-name *" #> products.headOption.map(_.name.get).getOrElse("") &
+    ratingBinding(products) &
+    ".product-name *" #> productName &
+    ".dollar-value *" #> f"$$$price%2.2f" &
     ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>
-      val price = Price.getDefaultProductPrice(product).map(_.price.get).openOr(0D)
       ".size *" #> s"${product.getSizeAndSizeName}" &
-      ".price *" #> f"$$$price%2.2f" &
       "^ [onclick]" #> ajaxInvoke(() => updateProductChoice(product, price))
     } & 
     ".pet-name" #> ajaxText("", name = _) &
