@@ -9,20 +9,144 @@
     </div>
   </div>
   <div id="contact-us">
-    <form  data-lift="ContactUs.render">
-      <h4>Testimonial</h4>
+    <form>
+      <h4>Survey</h4>
       <label>
         <div><span class="field-label">Name</span></div>
         <input class="name" type="text">
       </label>
       <label>
-        <div><span class="field-label">Email</span></div>
+        <div class="email"><span class="field-label">Email</span>  (Must be provided for free month.)</div>
         <input class="email" type="text">
       </label>
+
+      <div class="rating-question product-satisfaction">
+        <div>
+          <span class="field-label">
+            I am satisfied with the product choices offered.</span>
+        </div>
+        <ul>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Strongly Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Neutral</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Agree</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Strongly Agree</span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <div class="rating-question packages">
+        <div>
+          <span class="field-label">
+            My packages are accurate and professional.</span>
+        </div>
+        <ul>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Strongly Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Neutral</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Agree</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Strongly Agree</span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <div class="rating-question recommend">
+        <div>
+          <span class="field-label">
+            I would recommend My Pet Defense to a friend.</span>
+        </div>
+        <ul>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Strongly Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Neutral</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Agree</span>
+            </label>
+          </li>
+          <li>
+            <label>
+              <input name="accurate" type="radio">
+              <span>Strongly Agree</span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
       <label>
-        <div><span class="field-label">Message</span></div>
-        <textarea class="message" rows="8"></textarea>
+        <div class="testimonial"><span class="field-label">Testimonial</span> (Must be provided for free month.)</div>
+        <textarea class="message" rows="5"></textarea>
       </label>
+
+      <label>
+        <div><span class="field-label">Additional Comments</span></div>
+        <textarea class="message" rows="5"></textarea>
+      </label>
+      
       <button type="submit" class="action" id="send-message">Submit</button>
       <div class="message-sent hidden">Thank you for your review!</div>
     </form>
