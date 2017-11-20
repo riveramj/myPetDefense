@@ -38,6 +38,10 @@ body {
     &:last-child {
       border-right: none;
     }
+
+    @media (min-width: $bp-medium) {
+      height: 47px;
+    }
   }
 
   label span {
