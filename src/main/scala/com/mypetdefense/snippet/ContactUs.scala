@@ -10,48 +10,82 @@ import net.liftweb._
   import JsCmds._
   
 
-import com.mypetdefense.service._
-  import ValidationService._
 import com.mypetdefense.actor._
 import com.mypetdefense.util.Paths
 
 
-case class HelpMessageSent() extends MyPetDefenseEvent("help-message-sent")
+case class RatingSent() extends MyPetDefenseEvent("rating-sent")
+case class TestimonialSent() extends MyPetDefenseEvent("testimonial-sent")
 
 class ContactUs extends Loggable {
   var name = ""
   var email = ""
-  var message = ""
+  var testimonial = ""
+  var comments = ""
   val sourcePage = S.uri
+  val isTestimonialPage = sourcePage == "/testimonial"
+  var satisfactionRating: String = ""
+  var accuracyRating: String = ""
+  var recommendationRating: String = ""
   
   def sendMessage() = {
-    val emailValidation: Box[ValidationError] = {
-      if (sourcePage != "/testimonial")
-        validEmailFormat(email, ".email")
-      else
-        Empty
-    }
+    EmailActor ! TestimonialEmail(
+      name,
+      email,
+      satisfactionRating,
+      accuracyRating,
+      recommendationRating,
+      testimonial,
+      comments
+    )
+    
+    if (testimonial.nonEmpty)
+      TestimonialSent()
+    else
+      RatingSent()
+  }
 
-    val validateFields = List(
-      emailValidation,
-      checkEmpty(name, ".name"),
-      checkEmpty(message, ".message")
-    ).flatten
-
-    if(validateFields.isEmpty) {
-      EmailActor ! ContactUsEmail(name, email, message, sourcePage)
-      
-      HelpMessageSent()
-    } else {
-      validateFields.foldLeft(Noop)(_ & _)
+  def setRating(ratingName: String, ratingValue: String) = {
+    ratingName match {
+      case "satisfaction" => satisfactionRating = ratingValue
+      case "accuracy" => accuracyRating = ratingValue
+      case _ => recommendationRating = ratingValue
     }
   }
 
   def render = {
+    val productSatisfactionRatings = {
+      ".product-satisfaction .strongly-disagree [onclick]" #> ajaxInvoke(() => setRating("satisfaction", "Strongly Disagree")) &
+      ".product-satisfaction .disagree [onclick]" #> ajaxInvoke(() => setRating("satisfaction", "Disagree")) &
+      ".product-satisfaction .neutral [onclick]" #> ajaxInvoke(() => setRating("satisfaction", "Neutral")) &
+      ".product-satisfaction .agree [onclick]" #> ajaxInvoke(() => setRating("satisfaction", "Agree")) &
+      ".product-satisfaction .strongly-agree [onclick]" #> ajaxInvoke(() => setRating("satisfaction", "Strongly Agree"))
+    }
+
+    val accuracyRatings = {
+      ".accuracy .strongly-disagree [onclick]" #> ajaxInvoke(() => setRating("accuracy", "Strongly Disagree")) &
+      ".accuracy .disagree [onclick]" #> ajaxInvoke(() => setRating("accuracy", "Disagree")) &
+      ".accuracy .neutral [onclick]" #> ajaxInvoke(() => setRating("accuracy", "Neutral")) &
+      ".accuracy .agree [onclick]" #> ajaxInvoke(() => setRating("accuracy", "Agree")) &
+      ".accuracy .strongly-agree [onclick]" #> ajaxInvoke(() => setRating("accuracy", "Strongly Agree"))
+    }
+
+    val recommendationRating = {
+      ".recommendation .strongly-disagree [onclick]" #> ajaxInvoke(() => setRating("recommendation", "Strongly Disagree")) &
+      ".recommendation .disagree [onclick]" #> ajaxInvoke(() => setRating("recommendation", "Disagree")) &
+      ".recommendation .neutral [onclick]" #> ajaxInvoke(() => setRating("recommendation", "Neutral")) &
+      ".recommendation .agree [onclick]" #> ajaxInvoke(() => setRating("recommendation", "Agree")) &
+      ".recommendation .strongly-agree [onclick]" #> ajaxInvoke(() => setRating("recommendation", "Strongly Agree"))
+    }
+
     SHtml.makeFormsAjax andThen
     ".name" #> text(name, name = _) &
     ".email" #> text(email, email = _) &
-    ".message" #> textarea(message, message = _) &
+    ".testimonial" #> textarea(testimonial, testimonial = _) &
+    ".comments" #> textarea(comments, comments = _) &
+    productSatisfactionRatings &
+    accuracyRatings &
+    recommendationRating &
     "#send-message" #> ajaxSubmit("Submit", sendMessage)
   }
 }

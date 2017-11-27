@@ -1,5 +1,6 @@
 @import "base";  
 @import "nav-bar";
+@import "compass/css3/user-interface";
 
 body {
   background-color: #454343;
@@ -30,24 +31,24 @@ body {
 
   li {
     display: inline-block;
-    padding: 8px 0 0;
     width: 19%;
     vertical-align: top;
-    height: 60px;
-    border-right: 1px solid #1C8884;
 
-    &:last-child {
-      border-right: none;
-    }
-
-    @media (min-width: $bp-medium) {
-      height: 47px;
-    }
   }
 
-  label span {
-    font-size: 11px;
-    letter-spacing: 0.4px;
+  label {
+    padding: 10px 0;
+    border-right: 1px solid #1C8884;
+    min-height: 65px;
+
+    &.strongly-agree {
+      border-right: none;
+    }
+    
+    span {
+      font-size: 11px;
+      letter-spacing: 0.4px;
+    }
   }
 }
 
@@ -61,13 +62,19 @@ body {
   margin-bottom: 25px;
 }
 
-.testimonial, .email {
+.testimonial-container, .email-container {
   font-size: 13px;
   font-style: italic;
 
   span {
     font-size: 15px;
     font-style: normal;
+  }
+}
+
+.testimonial {
+  @include input-placeholder {
+    color: #c0c0c0;
   }
 }
 
@@ -84,5 +91,15 @@ body {
 
   form {
     padding-bottom: 52px;
+  }
+}
+
+.submitted-message {
+  margin-top: 40px;
+  line-height: 18px;
+  letter-spacing: 0.4px;
+
+  &.hidden {
+    display: none;
   }
 }

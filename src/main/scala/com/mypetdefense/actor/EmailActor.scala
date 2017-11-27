@@ -51,6 +51,15 @@ case class ContactUsEmail(
   message: String,
   sourcePage: String
 ) extends EmailActorMessage
+case class TestimonialEmail(
+  name: String,
+  email: String,
+  satisfactionRating: String,
+  accuracyRating: String,
+  recommendationRating: String,
+  testimonial: String,
+  comments: String
+) extends EmailActorMessage
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
@@ -223,6 +232,28 @@ trait ContactUsEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait TestimonialEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case TestimonialEmail(name, email, satisfactionRating, accuracyRating, recommendationRating, testimonial, comments) =>
+      val testimonialTemplate =
+        Templates("emails-hidden" :: "testimonial-email" :: Nil) openOr NodeSeq.Empty
+      
+      val subject = "New Survey Result"
+      
+      val transform = {
+        "#name *" #> name &
+        "#email *" #> email &
+        "#satisfaction-rating *" #> satisfactionRating &
+        "#accuracy-rating *" #> accuracyRating &
+        "#recommendation-rating *" #> recommendationRating &
+        "#testimonial *" #> testimonial &
+        "#comments *" #> comments
+      }
+
+      sendEmail(subject, "help@mypetdefense.com", transform(testimonialTemplate))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -297,7 +328,8 @@ trait EmailActor extends EmailHandlerChain
                     with ResetPasswordHandling 
                     with CompleteResetPasswordHandling 
                     with ShipmentReadyEmailHandling 
-                    with ContactUsEmailHandling {
+                    with ContactUsEmailHandling
+                    with TestimonialEmailHandling {
 
   val baseEmailTemplate = 
     Templates("emails-hidden" :: "email-template" :: Nil) openOr NodeSeq.Empty
