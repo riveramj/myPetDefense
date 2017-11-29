@@ -26,6 +26,7 @@ class ContactUs extends Loggable {
   val isTestimonialPage = sourcePage == "/testimonial"
   var satisfactionRating: String = ""
   var accuracyRating: String = ""
+  var convenientRating: String = ""
   var recommendationRating: String = ""
   
   def sendMessage() = {
@@ -34,6 +35,7 @@ class ContactUs extends Loggable {
       email,
       satisfactionRating,
       accuracyRating,
+      convenientRating,
       recommendationRating,
       testimonial,
       comments
@@ -49,6 +51,7 @@ class ContactUs extends Loggable {
     ratingName match {
       case "satisfaction" => satisfactionRating = ratingValue
       case "accuracy" => accuracyRating = ratingValue
+      case "convenient" => convenientRating = ratingValue
       case _ => recommendationRating = ratingValue
     }
   }
@@ -70,6 +73,14 @@ class ContactUs extends Loggable {
       ".accuracy .strongly-agree [onclick]" #> ajaxInvoke(() => setRating("accuracy", "Strongly Agree"))
     }
 
+    val convenientRatings = {
+      ".convenient .strongly-disagree [onclick]" #> ajaxInvoke(() => setRating("convenient", "Strongly Disagree")) &
+      ".convenient .disagree [onclick]" #> ajaxInvoke(() => setRating("convenient", "Disagree")) &
+      ".convenient .neutral [onclick]" #> ajaxInvoke(() => setRating("convenient", "Neutral")) &
+      ".convenient .agree [onclick]" #> ajaxInvoke(() => setRating("convenient", "Agree")) &
+      ".convenient .strongly-agree [onclick]" #> ajaxInvoke(() => setRating("convenient", "Strongly Agree"))
+    }
+
     val recommendationRating = {
       ".recommendation .strongly-disagree [onclick]" #> ajaxInvoke(() => setRating("recommendation", "Strongly Disagree")) &
       ".recommendation .disagree [onclick]" #> ajaxInvoke(() => setRating("recommendation", "Disagree")) &
@@ -85,6 +96,7 @@ class ContactUs extends Loggable {
     ".comments" #> textarea(comments, comments = _) &
     productSatisfactionRatings &
     accuracyRatings &
+    convenientRatings &
     recommendationRating &
     "#send-message" #> ajaxSubmit("Submit", sendMessage)
   }

@@ -1,4 +1,4 @@
- package com.mypetdefense.actor
+package com.mypetdefense.actor
 
 import scala.xml.NodeSeq
 import scala.util._
@@ -56,6 +56,7 @@ case class TestimonialEmail(
   email: String,
   satisfactionRating: String,
   accuracyRating: String,
+  convenientRating: String,
   recommendationRating: String,
   testimonial: String,
   comments: String
@@ -234,7 +235,7 @@ trait ContactUsEmailHandling extends EmailHandlerChain {
 
 trait TestimonialEmailHandling extends EmailHandlerChain {
   addHandler {
-    case TestimonialEmail(name, email, satisfactionRating, accuracyRating, recommendationRating, testimonial, comments) =>
+    case TestimonialEmail(name, email, satisfactionRating, accuracyRating, convenientRating, recommendationRating, testimonial, comments) =>
       val testimonialTemplate =
         Templates("emails-hidden" :: "testimonial-email" :: Nil) openOr NodeSeq.Empty
       
@@ -245,6 +246,7 @@ trait TestimonialEmailHandling extends EmailHandlerChain {
         "#email *" #> email &
         "#satisfaction-rating *" #> satisfactionRating &
         "#accuracy-rating *" #> accuracyRating &
+        "#convenient-rating *" #> convenientRating &
         "#recommendation-rating *" #> recommendationRating &
         "#testimonial *" #> testimonial &
         "#comments *" #> comments
