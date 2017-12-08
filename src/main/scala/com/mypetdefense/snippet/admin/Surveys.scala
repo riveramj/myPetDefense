@@ -47,16 +47,10 @@ class Surveys extends Loggable {
     "tbody" #> SHtml.idMemoize { renderer =>
       val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
 
-      println("in rerender")
-
       ".parent-survey" #> parents.map { parent =>
         val possibleSurvey = parent.survey.obj
 
-        println(possibleSurvey)
-        println("^ survey")
-
         def sendSurvey() = {
-          println("in send")
           val newSurvey = Survey.createNewSurvey(parent)
           parent.survey(newSurvey).saveMe
 
@@ -69,8 +63,6 @@ class Surveys extends Loggable {
         ".email *" #> parent.email &
         {
           possibleSurvey.map { survey =>
-            println(survey)
-
             val completedSurvey = survey.ratingGiven.get || survey.testimonialGiven.get
             ".survey-sent *" #> survey.sentDate.toString &
             ".ratings *" #> survey.ratingGiven.get &
