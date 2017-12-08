@@ -8,13 +8,10 @@ import net.liftweb._
   import http._
   import js._
   import JsCmds._
-  
 
 import com.mypetdefense.actor._
 import com.mypetdefense.util.Paths
 
-
-case class RatingSent() extends MyPetDefenseEvent("rating-sent")
 case class TestimonialSent() extends MyPetDefenseEvent("testimonial-sent")
 
 class ContactUs extends Loggable {
@@ -41,10 +38,7 @@ class ContactUs extends Loggable {
       comments
     )
     
-    if (testimonial.nonEmpty)
-      TestimonialSent()
-    else
-      RatingSent()
+    TestimonialSent()
   }
 
   def setRating(ratingName: String, ratingValue: String) = {

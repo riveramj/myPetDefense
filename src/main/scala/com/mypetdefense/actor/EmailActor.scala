@@ -82,7 +82,7 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
 trait FeedbackEmailHandling extends EmailHandlerChain {
   val feedbackEmailSubject = "We Value Your Feedback - Free Month"
   val feedbackEmailTemplate = 
-    Templates("emails-hidden" :: "Feedback-email" :: Nil) openOr NodeSeq.Empty
+    Templates("emails-hidden" :: "feedback-email" :: Nil) openOr NodeSeq.Empty
   
   val feedbackLink = Paths.serverUrl + Paths.testimonial.loc.calcDefaultHref
 

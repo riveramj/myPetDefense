@@ -20,9 +20,6 @@ $(document).on 'form-validation-error', (event) ->
   $targetContainer.append $("<div />").addClass("validation-error").text(event.error)
 
 $(document).on 'rating-sent', (event) ->
-  $('.rating-sent').removeClass("hidden")
-
-$(document).on 'testimonial-sent', (event) ->
   $('.testimonial-sent').removeClass("hidden")
   
 $("body").on "click", '.submit, #send-message', (event) ->

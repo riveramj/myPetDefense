@@ -32,6 +32,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object referer extends MappedLongForeignKey(this, Agency)
   object coupon extends MappedLongForeignKey(this, Coupon)
   object agency extends MappedLongForeignKey(this, Agency)
+  object survey extends MappedLongForeignKey(this, Survey)
   object pets extends MappedOneToMany(Pet, Pet.user)
   object subscription extends MappedOneToMany(Subscription, Subscription.user)
   object addresses extends MappedOneToMany(Address, Address.user)
