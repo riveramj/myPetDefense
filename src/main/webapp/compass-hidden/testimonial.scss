@@ -1,6 +1,110 @@
 @import "base";  
 @import "nav-bar";
+@import "compass/css3/user-interface";
 
 body {
   background-color: #454343;
+}
+
+#top-bar {
+  background-color: #ffffff;
+}
+
+#logo-name {
+  display: block;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+#contact-us form .rating-question {
+  text-align: center;
+  padding-bottom: 25px;
+
+  div {
+    text-align: left;
+  }
+
+  input[type=radio] {
+    margin: 0 auto 2px;
+    width: 18px;
+  }
+
+  li {
+    display: inline-block;
+    width: 19%;
+    vertical-align: top;
+
+  }
+
+  label {
+    padding: 10px 0;
+    border-right: 1px solid #1C8884;
+    min-height: 65px;
+
+    @media (min-width: $bp-medium) {
+      padding: 12px 0;
+      min-height: 54px;
+    }
+
+    &.strongly-agree {
+      border-right: none;
+    }
+    
+    span {
+      font-size: 11px;
+      letter-spacing: 0.4px;
+    }
+  }
+}
+
+.rating-question ul {
+  background-color: #137875;
+  border-radius: 4px;
+  margin-top: 5px;
+}
+
+#contact-us form input, #contact-us form textarea {
+  margin-bottom: 25px;
+}
+
+.testimonial-container, .email-container {
+  font-size: 13px;
+  font-style: italic;
+
+  span {
+    font-size: 15px;
+    font-style: normal;
+  }
+}
+
+.testimonial {
+  @include input-placeholder {
+    color: #c0c0c0;
+  }
+}
+
+#contact-us {
+  padding: 0;
+
+  @media (min-width: $bp-medium) {
+    padding: 100px 0;
+  }
+
+  h4 {
+    margin-bottom: 25px;
+  }
+
+  form {
+    padding-bottom: 52px;
+  }
+}
+
+.submitted-message {
+  margin-top: 40px;
+  line-height: 18px;
+  letter-spacing: 0.4px;
+
+  &.hidden {
+    display: none;
+  }
 }

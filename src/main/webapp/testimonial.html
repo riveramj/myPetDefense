@@ -8,23 +8,182 @@
       </a>
     </div>
   </div>
-  <div id="contact-us">
-    <form  data-lift="ContactUs.render">
-      <h4>Testimonial</h4>
+  <div id="contact-us" data-lift="ContactUs">
+    <form>
+      <h4>Survey</h4>
       <label>
         <div><span class="field-label">Name</span></div>
         <input class="name" type="text">
       </label>
       <label>
-        <div><span class="field-label">Email</span></div>
+        <div class="email-container"><span class="field-label">Email</span>  (Must be provided for free month.)</div>
         <input class="email" type="text">
       </label>
+
+      <div class="rating-question accuracy">
+        <div>
+          <span class="field-label">My shipments are accurate and on-time.</span>
+        </div>
+        <ul>
+          <li>
+            <label>
+              <input name="accuracy" type="radio" value="1" class="strongly-disagree">
+              <span>Strongly Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label class="disagree">
+              <input name="accuracy" type="radio" value="2">
+              <span>Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label class="neutral">
+              <input name="accuracy" type="radio" value="3">
+              <span>Neutral</span>
+            </label>
+          </li>
+          <li>
+            <label class="agree">
+              <input name="accuracy" type="radio" value="4">
+              <span>Agree</span>
+            </label>
+          </li>
+          <li>
+            <label class="strongly-agree">
+              <input name="accuracy" type="radio" value="5">
+              <span>Strongly Agree</span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <div class="rating-question convenient">
+        <div>
+          <span class="field-label">Using My Pet Defense is easy and convenient.</span>
+        </div>
+        <ul>
+          <li>
+            <label class="strongly-disagree">
+              <input name="convenient" type="radio" value="1">
+              <span>Strongly Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label class="disagree">
+              <input name="convenient" type="radio" value="2">
+              <span>Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label class="neutral">
+              <input name="convenient" type="radio" value="3">
+              <span>Neutral</span>
+            </label>
+          </li>
+          <li>
+            <label class="agree">
+              <input name="convenient" type="radio" value="4">
+              <span>Agree</span>
+            </label>
+          </li>
+          <li>
+            <label class="strongly-agree">
+              <input name="convenient" type="radio" value="5">
+              <span>Strongly Agree</span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <div class="rating-question product-satisfaction">
+        <div>
+          <span class="field-label">I am satisfied with the available product choices.</span>
+        </div>
+        <ul>
+          <li>
+            <label>
+              <input name="product-choice" type="radio" value="1" class="strongly-disagree">
+              <span>Strongly Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label class="disagree">
+              <input name="product-choice" type="radio" value="2">
+              <span>Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label class="neutral">
+              <input name="product-choice" type="radio" value="3">
+              <span>Neutral</span>
+            </label>
+          </li>
+          <li>
+            <label class="agree">
+              <input name="product-choice" type="radio" value="4">
+              <span>Agree</span>
+            </label>
+          </li>
+          <li>
+            <label class="strongly-agree">
+              <input name="product-choice" type="radio" value="5">
+              <span>Strongly Agree</span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
+      <div class="rating-question recommendation">
+        <div>
+          <span class="field-label">I am likely to recommend this service to others.</span>
+        </div>
+        <ul>
+          <li>
+            <label class="strongly-disagree">
+              <input name="recommendation" type="radio" value="1">
+              <span>Strongly Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label class="disagree">
+              <input name="recommendation" type="radio" value="2">
+              <span>Disagree</span>
+            </label>
+          </li>
+          <li>
+            <label class="neutral">
+              <input name="recommendation" type="radio" value="3">
+              <span>Neutral</span>
+            </label>
+          </li>
+          <li>
+            <label class="agree">
+              <input name="recommendation" type="radio" value="4">
+              <span>Agree</span>
+            </label>
+          </li>
+          <li>
+            <label class="strongly-agree">
+              <input name="recommendation" type="radio" value="5">
+              <span>Strongly Agree</span>
+            </label>
+          </li>
+        </ul>
+      </div>
+
       <label>
-        <div><span class="field-label">Message</span></div>
-        <textarea class="message" rows="8"></textarea>
+        <div class="testimonial-container"><span class="field-label">Testimonial</span></div>
+        <textarea class="testimonial" rows="5" placeholder="My Pet Defense is amazing! :-)"></textarea>
       </label>
+
+      <label>
+        <div><span class="field-label">Additional Comments</span></div>
+        <textarea class="comments" rows="5"></textarea>
+      </label>
+      
       <button type="submit" class="action" id="send-message">Submit</button>
-      <div class="message-sent hidden">Thank you for your review!</div>
+      <div class="testimonial-sent hidden submitted-message">Thank you for your feedback! Your free month will be applied to your next shipment!</div>
     </form>
   </div>
 
