@@ -47,7 +47,8 @@ class Boot {
       Coupon,
       Groupon,
       Price,
-      Review
+      Review,
+      Survey
     )
 
     DataLoader.loadProducts
