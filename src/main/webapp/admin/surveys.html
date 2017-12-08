@@ -1,0 +1,47 @@
+<div id="main" data-lift="surround?with=default-template;at=content"> 
+  <div data-lift="admin.Surveys.render?eager_eval=true">
+    <div data-lift="embed?what=admin/admin-nav-bar"></div>
+    <div id="item-container">
+      <h2>Parents</h2>
+      <table>
+        <thead>
+          <tr>
+            <td>Name</td>
+            <td>Email</td>
+            <td>Survey Sent</td>
+            <td>Ratings Answered</td>
+            <td>Testimonial Given</td>
+            <td>Coupon Applied</td>
+            <td>Actions</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="parent-survey">
+            <td class="name">Mike Rivera</td>
+            <td class="email">email@email.com</td>
+            <td class="survey-sent">-</td>
+            <td class="ratings">
+              <button class="ratings-given">Ratings Answered</button>
+            </td>
+            <td class="testimonial">
+              <button class="testimonial-given">Testimonial Given</button>
+            </td>
+            <td class="coupon">
+              <button class="apply-coupon">Apply Coupon</button>
+            </td>
+            <td class="actions">
+              <button class="send-survey send">Send Survey</button>
+              <button class="resend-survey send">Resend Survey</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=parents">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+  </tail>
+</div>

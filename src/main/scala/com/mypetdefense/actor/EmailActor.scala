@@ -1,4 +1,4 @@
- package com.mypetdefense.actor
+package com.mypetdefense.actor
 
 import scala.xml.NodeSeq
 import scala.util._
@@ -27,6 +27,7 @@ import Mailer._
 
 sealed trait EmailActorMessage
 case class SendWelcomeEmail(user: User) extends EmailActorMessage
+case class SendFeedbackEmail(user: User) extends EmailActorMessage
 case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class SendPasswordResetEmail(user: User) extends EmailActorMessage
 case class SendPasswordUpdatedEmail(user: User) extends EmailActorMessage
@@ -50,6 +51,16 @@ case class ContactUsEmail(
   message: String,
   sourcePage: String
 ) extends EmailActorMessage
+case class TestimonialEmail(
+  name: String,
+  email: String,
+  satisfactionRating: String,
+  accuracyRating: String,
+  convenientRating: String,
+  recommendationRating: String,
+  testimonial: String,
+  comments: String
+) extends EmailActorMessage
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
@@ -65,6 +76,24 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
       }
 
       sendEmail(welcomeEmailSubject, user.email.get, transform(welcomeEmailTemplate))
+  }
+}
+
+trait FeedbackEmailHandling extends EmailHandlerChain {
+  val feedbackEmailSubject = "We Value Your Feedback - Free Month"
+  val feedbackEmailTemplate = 
+    Templates("emails-hidden" :: "feedback-email" :: Nil) openOr NodeSeq.Empty
+  
+  val feedbackLink = Paths.serverUrl + Paths.testimonial.loc.calcDefaultHref
+
+  addHandler {
+    case SendFeedbackEmail(user) => 
+      val transform = {
+        ".first-name" #> user.firstName.get &
+        ".take-survy-link [href]" #> feedbackLink
+      }
+
+      sendEmail(feedbackEmailSubject, user.email.get, transform(feedbackEmailTemplate))
   }
 }
 
@@ -204,6 +233,29 @@ trait ContactUsEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait TestimonialEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case TestimonialEmail(name, email, satisfactionRating, accuracyRating, convenientRating, recommendationRating, testimonial, comments) =>
+      val testimonialTemplate =
+        Templates("emails-hidden" :: "testimonial-email" :: Nil) openOr NodeSeq.Empty
+      
+      val subject = "New Survey Result"
+      
+      val transform = {
+        "#name *" #> name &
+        "#email *" #> email &
+        "#satisfaction-rating *" #> satisfactionRating &
+        "#accuracy-rating *" #> accuracyRating &
+        "#convenient-rating *" #> convenientRating &
+        "#recommendation-rating *" #> recommendationRating &
+        "#testimonial *" #> testimonial &
+        "#comments *" #> comments
+      }
+
+      sendEmail(subject, "help@mypetdefense.com", transform(testimonialTemplate))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -270,6 +322,7 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
 object EmailActor extends EmailActor
 trait EmailActor extends EmailHandlerChain
                     with WelcomeEmailHandling
+                    with FeedbackEmailHandling
                     with SendNewUserEmailHandling
                     with InvoicePaymentFailedEmailHandling
                     with InvoicePaymentSucceededEmailHandling 
@@ -277,7 +330,8 @@ trait EmailActor extends EmailHandlerChain
                     with ResetPasswordHandling 
                     with CompleteResetPasswordHandling 
                     with ShipmentReadyEmailHandling 
-                    with ContactUsEmailHandling {
+                    with ContactUsEmailHandling
+                    with TestimonialEmailHandling {
 
   val baseEmailTemplate = 
     Templates("emails-hidden" :: "email-template" :: Nil) openOr NodeSeq.Empty

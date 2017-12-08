@@ -86,6 +86,7 @@ object Paths {
     admin.Coupons.menu,
     admin.Agencies.menu,
     admin.PhonePortal.menu,
+    admin.Surveys.menu,
     Login.menu,
     ForgotPassword.menu,
     ResetPassword.menu,
