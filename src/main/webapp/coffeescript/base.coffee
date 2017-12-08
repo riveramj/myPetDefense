@@ -19,7 +19,7 @@ $(document).on 'form-validation-error', (event) ->
   $target.addClass "error"
   $targetContainer.append $("<div />").addClass("validation-error").text(event.error)
 
-$(document).on 'rating-sent', (event) ->
+$(document).on 'testimonial-sent', (event) ->
   $('.testimonial-sent').removeClass("hidden")
   
 $("body").on "click", '.submit, #send-message', (event) ->
