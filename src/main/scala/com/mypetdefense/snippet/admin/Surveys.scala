@@ -63,7 +63,6 @@ class Surveys extends Loggable {
         ".email *" #> parent.email &
         {
           possibleSurvey.map { survey =>
-            val completedSurvey = survey.ratingGiven.get || survey.testimonialGiven.get
             val surveyCouponApplied = survey.couponApplied.get
 
             def applyCoupon() = {
@@ -78,11 +77,11 @@ class Surveys extends Loggable {
             { if (surveyCouponApplied == null) {
                 ".coupon .apply-coupon [onclick]" #> ajaxInvoke(applyCoupon)
               } else {
-                ".coupon *" #> dateFormat.format(surveyCouponApplied)
+                ".coupon *" #> dateFormat.format(surveyCouponApplied) &
+                ".actions .resend-survey" #> ClearNodes
               }
             } &
-            ".actions .send-survey" #> ClearNodes &
-            ".actions .resend-survey" #> ClearNodesIf(completedSurvey)
+            ".actions .send-survey" #> ClearNodes
           }.openOr {
             ".survey-sent *" #> ClearNodes &
             ".ratings .ratings-given" #> ClearNodes &
