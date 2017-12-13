@@ -47,7 +47,7 @@ class Surveys extends Loggable {
     "tbody" #> SHtml.idMemoize { renderer =>
       val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
 
-      ".parent-survey" #> parents.map { parent =>
+      ".parent-survey" #> parents.sortWith(_.name < _.name).map { parent =>
         val possibleSurvey = parent.survey.obj
 
         def sendSurvey() = {
@@ -64,10 +64,23 @@ class Surveys extends Loggable {
         {
           possibleSurvey.map { survey =>
             val completedSurvey = survey.ratingGiven.get || survey.testimonialGiven.get
-            ".survey-sent *" #> survey.sentDate.toString &
+            val surveyCouponApplied = survey.couponApplied.get
+
+            def applyCoupon() = {
+              ParentService.updateCoupon(parent.stripeId.get, Full("feedbacksurvey"))
+              survey.couponApplied(new Date()).saveMe
+              renderer.setHtml
+            }
+
+            ".survey-sent *" #> dateFormat.format(survey.sentDate.get) &
             ".ratings *" #> survey.ratingGiven.get &
             ".testimonial *" #> survey.testimonialGiven.get &
-            //".coupon *" #> surveycouponApplied.toString &
+            { if (surveyCouponApplied == null) {
+                ".coupon .apply-coupon [onclick]" #> ajaxInvoke(applyCoupon)
+              } else {
+                ".coupon *" #> dateFormat.format(surveyCouponApplied)
+              }
+            } &
             ".actions .send-survey" #> ClearNodes &
             ".actions .resend-survey" #> ClearNodesIf(completedSurvey)
           }.openOr {
