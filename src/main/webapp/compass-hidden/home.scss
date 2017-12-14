@@ -40,35 +40,45 @@
 }
 
 .dog-park {
-  background: url(../../images/autumn-dog-mobile.jpeg);
+  background: url(../../images/winter-dog-header-mobile@2x.jpg);
   background-repeat: no-repeat;
   background-size: contain;
   padding-top: 216px;
   background-position-y: 0;
 
-  @media (min-width: 370px) {
-    background-position-y: -30px;
-  }
-
   @media (min-width: 550px) {
-    background-position-y: -130px;
+    background-position-y: -75px;
   }
 
   @media (min-width: $bp-medium) {
     padding-top: 0;
-    background: url(../../images/autumn-dog.jpeg);
+    background: url(../../images/winter-dog-header@2x.jpg);
     background-repeat: no-repeat;
     background-size: cover;
     height: 450px;
+    background-position-x: -200px;
+  }
+
+  @media (min-width: 550px) {
+    background-position-x: -150px;
+  }
+
+  @media (min-width: 950px) {
+    background-position-x: -100px;
+  }
+
+  @media (min-width: 1038px) {
+    background-position-x: 0;
   }
   
   @media (min-width: $bp-large) {
     background-color: #259490;
     height: 550px;
-    background: url(../../images/autumn-dog.jpeg);
+    background: url(../../images/winter-dog-header@2x.jpg);
     background-size: cover;
     background-color: #259490;
     background-repeat: no-repeat;
+    background-position-x: 0;
   }
 }
 
