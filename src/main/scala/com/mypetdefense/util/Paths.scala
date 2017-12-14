@@ -16,6 +16,7 @@ import com.mypetdefense.service.PetFlowChoices._
 object Paths {
 
   val homePage = Menu.i("Home") / "index"
+  val thanksPage = Menu.i("Thanks") / "thanks"
 
   val testimonial = Menu.i("Review") / "testimonial" >>
     TemplateBox(() => Templates("testimonial" :: Nil))
@@ -66,6 +67,7 @@ object Paths {
 
   def siteMap = SiteMap(
     homePage,
+    thanksPage,
     testimonial,
     LandingPage.landing2Free,
     LandingPage.landing3Free,
