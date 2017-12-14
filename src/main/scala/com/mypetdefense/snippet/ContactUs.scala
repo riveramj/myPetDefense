@@ -38,7 +38,7 @@ class ContactUs extends Loggable {
       comments
     )
     
-    TestimonialSent()
+    S.redirectTo(Paths.thanksPage.loc.calcDefaultHref)
   }
 
   def setRating(ratingName: String, ratingValue: String) = {
