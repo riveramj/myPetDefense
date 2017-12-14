@@ -27,6 +27,48 @@ object Parents extends Loggable {
   val menu = Menu.i("Parents") / "admin" / "parents" >>
     adminUser >>
     loggedIn
+
+  val activeParentsCsvMenu = Menu.i("Active Parents") / "admin" / "parents" / "export_active_parents.csv" >>
+    adminUser >>
+    loggedIn >>
+    EarlyResponse(exportActiveParents _)
+
+  def exportActiveParents: Box[LiftResponse] = {
+      val csvHeaders = "Name" :: "Email" :: "Address" :: "Pet Name" :: "Animal Type" :: "Pet Size" :: Nil
+
+      val csvRows: List[List[String]] = {
+        val pets = Pet.findAll(By(Pet.status, Status.Active))
+        
+        {
+          for {
+            pet <- pets
+            user <- pet.user.obj
+            address <- user.addresses.toList.headOption
+          } yield {
+
+            user.name ::
+            user.email.get ::
+            s"${address.street1.get} ${address.street2.get} ${address.city.get} ${address.state.get} ${address.zip.get}" ::
+            pet.name.get ::
+            pet.animalType.get.toString ::
+            pet.size.get.toString  ::
+            Nil
+          }
+        }
+      }
+
+      val resultingCsv = (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
+
+        Some(new InMemoryResponse(
+          resultingCsv.getBytes("UTF-8"),
+          List(
+            "Content-Type" -> "binary/octet-stream",
+            "Content-Disposition" -> "attachment; filename=\"data.csv\""
+            ),
+          Nil,
+          200
+        ))
+    }
 }
 
 class Parents extends Loggable {
@@ -125,7 +167,8 @@ class Parents extends Loggable {
   def render = {
     SHtml.makeFormsAjax andThen
     ".parents [class+]" #> "current" &
-    "tbody" #> parents.map { parent =>
+    "#active-parents-export [href]" #> Parents.activeParentsCsvMenu.loc.calcDefaultHref &
+    "tbody" #> parents.sortWith(_.name < _.name).map { parent =>
       val dateFormat = new SimpleDateFormat("MMM dd")
 
       val subscription = Subscription.find(By(Subscription.user, parent))
