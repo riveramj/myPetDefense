@@ -80,6 +80,7 @@ object Paths {
     admin.Dashboard.exportMenu,
     admin.Dashboard.shipmentsCSVMenu,
     admin.Parents.menu,
+    admin.Parents.activeParentsCsvMenu,
     admin.Users.menu,
     admin.Prices.menu,
     admin.Reviews.menu,
