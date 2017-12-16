@@ -180,11 +180,11 @@
   padding-top: 20px;
 
  @media (min-width: $bp-medium) { 
-    padding: 45px 25% 0;
+    padding: 60px 25% 60px;
   }
 
-  @media (min-width: $bp-medium) {
-    padding-top: 60px;
+  @media (min-width: $bp-large) {
+    padding-bottom: 0;
   }
 }
 
@@ -271,6 +271,107 @@ li.feature-info {
     font-size: 24px;
     width: 465px;
     letter-spacing: 0.4px;
+  }
+}
+
+#testimonials {
+  background-color: #F1F1F1;
+
+  padding: 45px 0 20px;
+  
+  .feature-tagline {
+    color: #605F5F;
+    margin-top: 0;
+    margin-bottom: -15px;
+
+    &.desktop {
+      display: none;
+    }
+
+    @media (min-width: $bp-medium) {
+      margin-bottom: -10px;
+      padding: 0;
+      width: auto;
+      text-align: center;
+
+      &.desktop {
+        display: block;
+      }
+
+      &.mobile {
+        display: none;
+      }
+    }
+  }
+
+  @media (min-width: $bp-medium) {
+    padding-top: 65px;
+
+    > ul {
+      text-align: center;
+    }
+  }
+
+  .customer-testimonial {
+    border-bottom: 1px solid #CBCCCC;
+    width: 255px;
+    margin: 0 auto;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    @media (min-width: $bp-medium) {
+      display: inline-block;
+      vertical-align: top;
+      border-bottom: none;
+
+      width: 33%;
+      padding: 0px 10px;
+    }
+  }
+
+  .testimonial {
+    font-size: 18px;
+    color: #3A3A3A;
+    line-height: 24px;
+    width: 222px;
+    margin: 0 auto;
+  }
+
+  .name {
+    padding: 10px 0 45px;
+    color: #B2AFAF;
+    font-size: 18px;
+    margin: 0 auto;
+  }
+}
+
+.rating {
+  padding: 45px 0 10px;
+}
+
+.star {
+  display: inline-block;
+  font-size: 22px;
+
+  &:after {
+    @extend %icon;
+  }
+
+  &.filled:after {
+    content: $fa-var-star;
+    color: #FE9900;
+  }
+
+  &.half:after {
+    content: $fa-var-star-half-o ;
+    color: #FE9900;
+  }
+
+  &.empty:after {
+    content: $fa-var-star-o;
+    color: #FE9900;
   }
 }
 
