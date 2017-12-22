@@ -15,6 +15,40 @@ import com.mypetdefense.service.PetFlowChoices._
 
 object Paths {
 
+  object intendedPath extends SessionVar[Box[String]](Empty)
+
+  def storeAndRedirect = {
+    intendedPath(S.request.map { req =>
+      val path = req.path
+      val pathString =
+        path.wholePath match {
+          // If we have an end slash and the last path element is
+          // "index", that element is a virtual element added by Lift
+          // and we should drop it before generating the URL.
+          case indexPath if indexPath.last == "index" && path.endSlash =>
+            indexPath.dropRight(1).mkString("/")
+          case indexPath if indexPath.last == "home" =>
+            req.uri
+          case menuParam if menuParam.contains("star") =>
+            req.uri
+          case other =>
+            other.mkString("/")
+        }
+
+      val finalPath =
+        ((path.absolute ? "/" | "") +
+          pathString +
+          (path.endSlash ? "/" | "")).replaceAll("//", "/")
+
+      S.queryString.map { queryString =>
+        finalPath + "?" + queryString
+      } openOr {
+        finalPath
+      }
+    })
+    RedirectResponse(Login.menu.loc.calcDefaultHref)
+  }
+
   val homePage = Menu.i("Home") / "index"
   val thanksPage = Menu.i("Thanks") / "thanks"
 
@@ -23,22 +57,22 @@ object Paths {
   
   val loggedIn = If(
     () => SecurityContext.loggedIn_?,
-    RedirectResponse("/login")
+    storeAndRedirect _
   )
 
   val adminUser = If(
     () => SecurityContext.admin_?,
-    RedirectResponse("/login")
+    storeAndRedirect _
   )
 
   val parent = If(
     () => SecurityContext.parent_?,
-    RedirectResponse("/login")
+    storeAndRedirect _
   )
 
   val agentOrAdmin = If(
     () => (SecurityContext.admin_? || SecurityContext.agent_?),
-    RedirectResponse("/login")
+    storeAndRedirect _
   )
 
   val notLoggedIn = If(
@@ -76,6 +110,7 @@ object Paths {
     Success.menu,
     AccountOverview.menu,
     ShippingBilling.menu,
+    ShippingBilling.menuBilling,
     PetsAndProducts.menu,
     Profile.menu,
     admin.Dashboard.menu,
