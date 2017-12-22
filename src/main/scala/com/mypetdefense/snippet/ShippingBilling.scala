@@ -32,6 +32,9 @@ object ShippingBilling extends Loggable {
   val menu = Menu.i("Shipping and Billing") / "shipping-billing" >>
     loggedIn >>
     parent
+
+  val menuBilling = Menu.i("Billing Renew") / "billing" >>
+    EarlyResponse(() => Full(RedirectResponse(menu.loc.calcDefaultHref)))
 }
 
 class ShippingBilling extends Loggable {
