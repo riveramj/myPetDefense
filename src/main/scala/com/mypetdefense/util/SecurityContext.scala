@@ -30,11 +30,22 @@ object SecurityContext extends Loggable {
 
     logIn(user)
 
+    val possibleRedirect = Paths.intendedPath.is map { redirectLocation =>
+      logger.info(s"Redirecting user to ${redirectLocation}.")
+      S.redirectTo(redirectLocation)
+    } 
+
     user.userType match {
-      case admin if admin == UserType.Admin => 
-        S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
+      case admin if admin == UserType.Admin =>
+        possibleRedirect.openOr {
+          logger.info("Redirecting user to dashboard.")
+          S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
+        }
       case parent if parent == UserType.Parent =>
-        S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
+        possibleRedirect.openOr {
+          logger.info("Redirecting user to AccountOverview.")
+          S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
+        }
     }
   }
 
