@@ -78,7 +78,6 @@ class ShippingBilling extends Loggable {
     updateCard(parent)
 
     val coupon = Coupon.find(By(Coupon.couponCode,"winter17"))
-    println("Coupon" + coupon)
     parent.coupon(coupon).saveMe
 
     ParentService.updateCoupon(parent.stripeId.get, coupon.map(_.couponCode.get))
