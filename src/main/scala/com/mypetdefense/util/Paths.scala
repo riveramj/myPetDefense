@@ -51,6 +51,7 @@ object Paths {
 
   val homePage = Menu.i("Home") / "index"
   val thanksPage = Menu.i("Thanks") / "thanks"
+  val billingThanksPage = Menu.i("Success!") / "update-success"
 
   val testimonial = Menu.i("Review") / "testimonial" >>
     TemplateBox(() => Templates("testimonial" :: Nil))
@@ -102,6 +103,7 @@ object Paths {
   def siteMap = SiteMap(
     homePage,
     thanksPage,
+    billingThanksPage,
     testimonial,
     LandingPage.landing2Free,
     LandingPage.landing3Free,

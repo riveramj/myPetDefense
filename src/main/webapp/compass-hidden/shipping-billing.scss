@@ -73,11 +73,11 @@
   }
 }
 
-#payment-details-block {
+.shipping-address {
   @media(min-width: $bp-large) {
-    padding-top: 40px;
-    border-top: 1px solid #DCDBDB;
-    margin-top: 71px;
+    padding-bottom: 71px;
+    border-bottom: 1px solid #DCDBDB;
+    margin-bottom: 40px;
   }
 }
 
@@ -90,4 +90,65 @@ input {
 
 .block-details {
   @include outer-container;
+}
+
+#page-body-container.renew-billing {
+  background: url(../../images/winter-background-5.jpg) no-repeat top center fixed;
+  background-size: cover;
+  margin: 0;
+  padding: 50px 0 136px;
+
+  .account-section {
+    background: none;
+
+    @media(min-width: $bp-medium) {
+      padding: 0;
+    }
+
+    @media(min-width: $bp-large) {
+      max-width: 750px;
+    }
+
+    .account-block {
+      @media(min-width: $bp-medium) {
+        padding: 25px 25px 85px;
+      }
+
+      @media(min-width: $bp-large) {
+        padding: 50px;
+      }
+    }
+
+    input {
+      @media(min-width: $bp-large) {
+        width: 100%;
+      }
+    }
+
+    .save-container {
+      @media(min-width: $bp-large) {
+        width: 200px;
+      }
+    }
+  }
+
+  h2 {
+    padding-bottom: 15px;
+  }
+}
+
+.section-header {
+  text-align: center;
+}
+
+.billing-renew #logo-sign-out {
+  #logo-name {
+    display: block;
+    padding: 0;
+    text-align: center;
+  }
+  
+  .sign-out {
+    display: none;
+  }
 }
