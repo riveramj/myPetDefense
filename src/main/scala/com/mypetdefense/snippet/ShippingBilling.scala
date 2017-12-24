@@ -82,7 +82,7 @@ class ShippingBilling extends Loggable {
 
     ParentService.updateCoupon(parent.stripeId.get, coupon.map(_.couponCode.get))
 
-    println(s"billing info has been updated for ${user.email.get}.")
+    println(s"billing info has been updated for ${parent.email.get}.")
 
     S.redirectTo(billingThanksPage.loc.calcDefaultHref)
   }
