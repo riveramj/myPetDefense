@@ -34,7 +34,8 @@ object ShippingBilling extends Loggable {
     parent
 
   val menuBilling = Menu.i("Billing Renew") / "billing" >>
-    EarlyResponse(() => Full(RedirectResponse(menu.loc.calcDefaultHref)))
+    loggedIn >>
+    parent
 }
 
 class ShippingBilling extends Loggable {
@@ -53,6 +54,7 @@ class ShippingBilling extends Loggable {
   var cardNumber = ""
   var cardExpire = ""
   var stripeToken = ""
+  var promoCode = ""
 
   val customerCard = ParentService.getCustomerCard(stripeCustomerId)
 
@@ -60,13 +62,29 @@ class ShippingBilling extends Loggable {
   cardName = customerCard.flatMap(_.name).getOrElse("")
   cardExpire = customerCard.map(card => s"${card.expMonth}/${card.expYear}").getOrElse("")
 
-  def updateCard() = {
+  def updateCard(parent: User) = {
     ParentService.updateStripeCustomerCard(
       stripeCustomerId,
       stripeToken
     )
+  }
 
+  def updateBilling(parent: User)() = {
+    updateCard(parent)
     S.redirectTo(ShippingBilling.menu.loc.calcDefaultHref)
+  }
+
+  def updateBillingAddWinterCoupon(parent: User)() = {
+    updateCard(parent)
+
+    val coupon = Coupon.find(By(Coupon.couponCode,"winter17"))
+    parent.coupon(coupon).saveMe
+
+    ParentService.updateCoupon(parent.stripeId.get, coupon.map(_.couponCode.get))
+
+    println(s"billing info has been updated for ${parent.email.get}.")
+
+    S.redirectTo(billingThanksPage.loc.calcDefaultHref)
   }
 
   def updateAddress() = {
@@ -109,11 +127,11 @@ class ShippingBilling extends Loggable {
       for {
         user <- user
         shippingAddress <- user.addresses.find(_.addressType == AddressType.Shipping)
-        } yield {
-          firstName = user.firstName.get
-          lastName = user.lastName.get
-          street1 = shippingAddress.street1.get
-          street2 = shippingAddress.street2.get
+      } yield {
+        firstName = user.firstName.get
+        lastName = user.lastName.get
+        street1 = shippingAddress.street1.get
+        street2 = shippingAddress.street2.get
         city = shippingAddress.city.get
         state = shippingAddress.state.get
         zip = shippingAddress.zip.get
@@ -132,8 +150,32 @@ class ShippingBilling extends Loggable {
         "#old-card-last4" #> hidden(cardNumber = _, cardNumber) &
         "#card-expiry" #> text(cardExpire, cardExpire = _) &
         "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-        ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateCard) &
+        ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBilling(user)) &
         ".save-changes" #> SHtml.ajaxSubmit("Update Address", updateAddress)
+      }
+    }
+  }
+
+  def billingRenew = {
+    val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
+    "#page-body-container" #> {
+      for {
+        user <- user
+      } yield {
+        firstName = user.firstName.get
+        lastName = user.lastName.get
+
+        SHtml.makeFormsAjax andThen
+        "#shipping-billing-nav a [class+]" #> "current" &
+        "#user-email *" #> user.email & 
+        "#first-name" #> text(firstName, firstName = _) &
+        "#last-name" #> text(lastName, lastName = _) &
+        "#cardholder-name" #> text(cardName, cardName = _) &
+        "#old-card-last4" #> hidden(cardNumber = _, "") &
+        "#card-expiry" #> text("", cardExpire = _) &
+        "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
+        "#promo-code" #> text(promoCode, promoCode = _) &
+        ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBillingAddWinterCoupon(user))
       }
     }
   }

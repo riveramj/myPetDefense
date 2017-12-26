@@ -121,3 +121,28 @@ body {
     margin-bottom: 10px;
   }
 }
+
+#contact-us .thanks.update-success {
+  background-color: #ffffff;
+  color: #454343;
+
+  h2 {
+    color: #2E9F9B;
+  }
+  
+}
+
+.go-to-account {
+  background-color: #45ADA9;
+  border: none;
+  text-transform: uppercase;
+  font-size: 16px;
+  color: #ffffff;
+  border-radius: 4px;
+  height: 45px;
+  text-decoration: none;
+  padding: 10px 10px 7px;
+  display: block;
+  width: 300px;
+  margin: 30px auto 0;
+}
