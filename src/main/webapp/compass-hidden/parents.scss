@@ -161,3 +161,15 @@ div.create-item-container.create-coupon-container {
   vertical-align: bottom;
   margin-left: 10px;
 }
+
+.change-ship-date-container {
+  padding-bottom: 20px;
+}
+
+.stripe-payment {
+  color: #259490;
+
+  &:visited {
+    color: #259490;
+  }
+}
