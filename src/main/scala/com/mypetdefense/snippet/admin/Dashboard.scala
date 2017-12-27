@@ -227,11 +227,18 @@ class Dashboard extends Loggable {
       "Yes"
   }
 
-  def shipProduct(subscription: Subscription, user: Box[User], shipment: Box[Shipment])() = {
+  def shipProduct(
+    subscription: Subscription,
+    user: Box[User],
+    shipment: Box[Shipment],
+    address: String
+  )() = {
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
 
     ParentService.updateNextShipBillDate(subscription, user, nextMonthDate)
+
+    shipment.map(_.dateShipped(new Date()).address(address).saveMe)
 
     EmailActor ! SendInvoicePaymentSucceededEmail(
       user,
@@ -279,7 +286,7 @@ class Dashboard extends Loggable {
           ".product-size *" #> product.map(_.size.get.toString)
         } &
         ".payment-processed *" #> paymentProcessed_?(shipment) &
-        ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, user, shipment))
+        ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, user, shipment, address.openOr("")))
       }
     }
   }
