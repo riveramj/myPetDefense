@@ -13,12 +13,14 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object subscription extends MappedLongForeignKey(this, Subscription)
   object stripePaymentId extends MappedString(this, 100)
   object trackingNumber extends MappedString(this, 100)
+  object address extends MappedString(this, 200)
   object dateProcessed extends MappedDateTime(this)
   object expectedShipDate extends MappedDateTime(this)
   object dateShipped extends MappedDateTime(this)
   object dateReceived extends MappedDateTime(this)
   object taxPaid extends MappedString(this, 100)
   object amountPaid extends MappedString(this, 100)
+  object shipmentLineItems extends MappedOneToMany(ShipmentLineItem, ShipmentLineItem.shipment)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
   }
@@ -57,6 +59,13 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
   }
   object shipment extends MappedLongForeignKey(this, Shipment)
   object product extends MappedLongForeignKey(this, Product)
+  object petName extends MappedString(this, 100)
+  object pet extends MappedLongForeignKey(this, Pet)
+
+  def getShipmentItem = {
+    val productNameSize = this.product.obj.map(_.getSizeAndSizeName).openOr("")
+    s"${this.petName.get} - ${productNameSize}".replace("null", "")
+  }
 }
 
 object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem] {
@@ -64,12 +73,17 @@ object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[Shipme
     val pets = Pet.findAll(By(Pet.user, user), By(Pet.status, Status.Active))
     val products = pets.map(_.product.obj)
 
-    products.map { product =>
+    for {
+      pet <- pets
+      product <- pet.product.obj
+    } yield {
       ShipmentLineItem.create
-      .shipmentLineItemId(generateLongId)
-      .shipment(shipment)
-      .product(product)
-      .saveMe
+        .shipmentLineItemId(generateLongId)
+        .shipment(shipment)
+        .product(product)
+        .pet(pet)
+        .petName(pet.name.get)
+        .saveMe
     }
   }
 }

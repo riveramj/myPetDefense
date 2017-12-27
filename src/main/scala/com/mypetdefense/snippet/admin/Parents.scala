@@ -4,6 +4,7 @@ package admin
 import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml._
 import net.liftweb.util.Helpers._
+import net.liftweb.util.Props
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.http._
@@ -79,6 +80,8 @@ class Parents extends Loggable {
   var petName = ""
 
   val coupons = Coupon.findAll()
+
+  val stripePaymentsBaseURL = Props.get("stripe.payments.url") openOr "https://dashboard.stripe.com/test/"
 
   val nextShipDateFormat= new SimpleDateFormat("MM/dd/yyyy")
 
@@ -219,9 +222,18 @@ class Parents extends Loggable {
           Shipment.findAll(By(Shipment.subscription, sub))
         }.openOr(Nil)
 
-        ".parent-shipments .shipment" #> shipments.map { shipment =>
-          ".ship-date *" #> dateFormat.format(shipment.dateShipped.get) &
-          ".amount-paid *" #> shipment.amountPaid.get
+        ".shipment" #> shipments.map { shipment =>
+          val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
+
+          ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
+          ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
+          ".amount-paid .stripe-payment *" #> s"$$${shipment.amountPaid.get}" &
+          ".amount-paid .stripe-payment [href]" #> s"${stripePaymentsBaseURL}/${shipment.stripePaymentId.get}" &
+          ".pets" #> itemsShipped.map { itemsShipped =>
+            ".pet-product *" #> itemsShipped
+          } &
+          ".address *" #> shipment.address.get &
+          ".tracking-number *" #> shipment.trackingNumber.get
         }
       }
 

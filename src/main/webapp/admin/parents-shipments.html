@@ -1,14 +1,43 @@
-<div class="parent-details parent-shipments">
-  <table>
-    <thead>
-      <tr>
-        <td>Date</td>
-        <td>Paid</td>
-      </tr>
-    </thead>
-    <tr class="shipment">
-      <td class="ship-date">jan 7, 1986</td>
-      <td class="amount-paid">$1.99</td>
-    </tr>
-  </table>
+<div class="parent-details parent-shipments"> 
+  <ul class="shipments">
+    <li class="information change-ship-date-container">
+      <h3>Next Ship Date</h3>
+      <form class="change-ship-date">
+        <label>
+          <span class="field-label">Change Ship Date</span>
+          <input class="next-ship-date" type="text" value="1/7/86">            
+        </label>
+        <button type="submit" class="create-item change-date">Change Date</button>
+      </form>
+    </li>
+    <li>
+      <table>
+        <thead>
+          <tr>
+            <td>Paid Date</td>
+            <td>Shipped Date</td>
+            <td>Amount Paid</td>
+            <td>Pets - Products</td>
+            <td>Address</td>
+            <td>Tracking Number</td>
+          </tr>
+        </thead>
+        <tr class="shipment">
+          <td class="paid-date">10/18/2015</td>
+          <td class="ship-date">10/19/2016</td>
+          <td class="amount-paid"><a class="stripe-payment" href="https://dashboard.stripe.com/test/payments/payment-id">$0.02</a></td>
+          <td class="pets">
+            <ul>
+              <li class="pet-product">Fido - zoguard for dogs small</li>
+            </ul>
+          </td>
+          <td class="address">
+            123 Main St
+            Atlanta, GA 30318
+          </td>
+          <td class="tracking-number">1234567890</td>
+        </tr>
+      </table>
+    </li>
+  </ul>
 </div>
