@@ -230,8 +230,6 @@ class Parents extends Loggable {
           ".amount-paid .stripe-payment *" #> s"$$${shipment.amountPaid.get}" &
           ".amount-paid .stripe-payment [href]" #> s"${stripePaymentsBaseURL}/${shipment.stripePaymentId.get}" &
           ".pets ul" #> { itemsShipped.sortWith(_ < _).map { itemShipped =>
-            println(itemShipped + " ======")
-
             ".pet-product *" #> itemShipped
           }} &
           ".address *" #> shipment.address.get &
