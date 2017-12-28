@@ -172,7 +172,7 @@ class Parents extends Loggable {
     ".parents [class+]" #> "current" &
     "#active-parents-export [href]" #> Parents.activeParentsCsvMenu.loc.calcDefaultHref &
     "tbody" #> parents.sortWith(_.name < _.name).map { parent =>
-      val dateFormat = new SimpleDateFormat("MMM dd")
+      val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
 
       val subscription = Subscription.find(By(Subscription.user, parent))
       val nextShipDate = subscription.map(_.nextShipDate.get)
@@ -222,16 +222,16 @@ class Parents extends Loggable {
           Shipment.findAll(By(Shipment.subscription, sub))
         }.openOr(Nil)
 
-        ".shipment" #> shipments.map { shipment =>
+      ".shipment" #> shipments.sortWith(_.dateProcessed.toString < _.dateProcessed.toString).map { shipment =>
           val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
 
           ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
           ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
           ".amount-paid .stripe-payment *" #> s"$$${shipment.amountPaid.get}" &
           ".amount-paid .stripe-payment [href]" #> s"${stripePaymentsBaseURL}/${shipment.stripePaymentId.get}" &
-          ".pets" #> itemsShipped.map { itemsShipped =>
-            ".pet-product *" #> itemsShipped
-          } &
+          ".pets ul" #> { itemsShipped.sortWith(_ < _).map { itemShipped =>
+            ".pet-product *" #> itemShipped
+          }} &
           ".address *" #> shipment.address.get &
           ".tracking-number *" #> shipment.trackingNumber.get
         }
