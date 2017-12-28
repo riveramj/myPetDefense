@@ -222,7 +222,7 @@ class Parents extends Loggable {
           Shipment.findAll(By(Shipment.subscription, sub))
         }.openOr(Nil)
 
-      ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime < _.dateProcessed.get.getTime).map { shipment =>
+      ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
           val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
 
           ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
