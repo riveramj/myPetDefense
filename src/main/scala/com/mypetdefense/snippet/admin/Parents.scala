@@ -5,6 +5,7 @@ import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml._
 import net.liftweb.util.Helpers._
 import net.liftweb.util.Props
+import net.liftweb.util.ClearNodes
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.http._
@@ -222,7 +223,22 @@ class Parents extends Loggable {
           Shipment.findAll(By(Shipment.subscription, sub))
         }.openOr(Nil)
 
-      ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime < _.dateProcessed.get.getTime).map { shipment =>
+        var updateNextShipDate = nextShipDate.map(date => nextShipDateFormat.format(date).toString).getOrElse("")
+
+        def updateShipDate() = {
+          val updatedDate = nextShipDateFormat.parse(updateNextShipDate)
+
+          subscription.map { oldSubscription =>
+            ParentService.updateNextShipBillDate(oldSubscription, Full(parent), updatedDate)
+            oldSubscription.nextShipDate(updatedDate).saveMe
+          }
+          
+          S.redirectTo(Parents.menu.loc.calcDefaultHref)
+        }
+
+      ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
+      ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
+      ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
           val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
 
           ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
@@ -239,15 +255,10 @@ class Parents extends Loggable {
 
       def parentInformationBinding = {
         val address = parent.addresses.toList.headOption
-        var updateNextShipDate = nextShipDate.map(date => nextShipDateFormat.format(date).toString).getOrElse("")
+        val billingStatus = parent.status.get
 
-        def updateShipDate() = {
-          val updatedDate = nextShipDateFormat.parse(updateNextShipDate)
-
-          subscription.map { oldSubscription =>
-            ParentService.updateNextShipBillDate(oldSubscription, Full(parent), updatedDate)
-            oldSubscription.nextShipDate(updatedDate).saveMe
-          }
+        def updateBillingStatus(status: Status.Value, oldSubscription: Subscription) = {
+          oldSubscription.status(status).saveMe
           
           S.redirectTo(Parents.menu.loc.calcDefaultHref)
         }
@@ -259,15 +270,42 @@ class Parents extends Loggable {
           ".state *" #> address.map(_.state.get) &
           ".zip *" #> address.map(_.zip.get) 
         } &
-        ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
-        ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate)
+        (subscription.map { oldSubscription =>
+          val oldStatus = oldSubscription.status.get
+
+          oldStatus match {
+            case Status.BillingSuspended =>
+              "#parent-billing-status [class+]" #> "past-due" &
+              "#parent-billing-status *" #> "Suspended due to billing" &
+              ".change-to-active [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
+              ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
+              ".change-to-billing-suspended" #> ClearNodes
+
+            case Status.UserSuspended =>
+              "#parent-billing-status *" #> "User Suspended" &
+              ".change-to-active [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
+              ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))&
+              ".change-to-billing-user-suspended" #> ClearNodes
+
+            case Status.Active =>
+              "#parent-billing-status *" #> "Active" &
+              ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription)) &
+              ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
+              ".change-to-active" #> ClearNodes
+
+            case _ =>
+              "#parent-billing-status *" #> oldStatus.toString &
+              ".change-billing-status [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
+              ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
+              ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))
+          }
+        }).openOr(".foo *" #> "")
       }
 
       ".parent" #> {
         ".name *" #> parent.name &
         ".email *" #> parent.email &
-        ".phone *" #> parent.phone &
-        ".coupon *" #> parent.coupon.obj.map(_.couponCode.get) &
+        ".billing-status *" #> parent.subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
         ".referer *" #> parent.referer.obj.map(_.name.get) &
         ".ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
         ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
