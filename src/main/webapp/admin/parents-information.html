@@ -1,4 +1,4 @@
-<div class="parent-details parent-information">
+<div class="parent-details parent-information active">
   <ul class="information">
     <li>
       <h3>Address</h3>
@@ -14,14 +14,16 @@
         </li>
       </ul>
     </li>
-    <li>
-      <h3>Change Ship Date</h3>
-      <form class="change-ship-date">
-        <label>
-          <span class="field-label">Next Ship Date</span>
-          <input class="next-ship-date" type="text" value="1/7/86">            
+    <li class="billing-status">
+      <h3>Billing Status</h3>
+      <form class="change-billing">
+        <label class="billing">
+          <span class="field-label">Current Subscription Status</span>
+          <div id="parent-billing-status">Past Code Date</div>
         </label>
-        <button type="submit" class="create-item change-date">Change Date</button>
+        <button type="submit" class="create-item change-billing-status change-to-active">Change to Active</button>
+        <button type="submit" class="create-item change-billing-status change-to-user-suspended">Change to <span class="suspend-type">User</span> Suspended</button>
+        <button type="submit" class="create-item change-billing-status change-to-billing-suspended">Change to <span class="suspend-type">Billing</span> Suspended</button>
       </form>
     </li>
   </ul>
