@@ -113,6 +113,10 @@ fieldset.add-pet, fieldset.add-coupon {
     vertical-align: top;
   }
 
+  .billing-status {
+    margin-right: 0;
+  }
+
   label {
     width: 160px;
     display: inline-block;
@@ -172,4 +176,32 @@ div.create-item-container.create-coupon-container {
   &:visited {
     color: #259490;
   }
+}
+
+#parent-billing-status {
+  font-size: 18px;
+  padding-top: 8px;
+
+  &.past-due {
+    color: #ff0000;
+  }
+}
+
+.change-billing-status {
+  vertical-align: bottom;
+  margin-left: 10px;
+}
+
+button.create-item.change-to-billing-suspended, button.create-item.change-to-user-suspended {
+  border: 1px solid #259490;
+  background: inherit;
+  color: #259490;
+}
+
+.suspend-type {
+  font-weight: $bold;
+}
+
+.billing {
+  margin-right: -10px;
 }
