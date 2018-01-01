@@ -285,7 +285,7 @@ class Parents extends Loggable {
               "#parent-billing-status *" #> "User Suspended" &
               ".change-to-active [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
               ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))&
-              ".change-to-billing-user-suspended" #> ClearNodes
+              ".change-to-user-suspended" #> ClearNodes
 
             case Status.Active =>
               "#parent-billing-status *" #> "Active" &
