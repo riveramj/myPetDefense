@@ -112,7 +112,7 @@ trait StripeHook extends RestHelper with Loggable {
       accountStatus <- tryo((objectJson \ "status").extract[String]) ?~! "No status."
       } yield {
         if (accountStatus == "past_due")
-          user.subscription.map(_.status(Status.Suspended).saveMe)
+          user.subscription.map(_.status(Status.BillingSuspended).saveMe)
 
         OkResponse()
       }
