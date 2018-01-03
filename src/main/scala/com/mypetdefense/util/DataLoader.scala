@@ -216,4 +216,15 @@ object DataLoader extends Loggable {
       }
     }
   }
+
+  def updateParentNoPets = {
+    val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
+
+    parents.map { parent =>
+      val pets = parent.activePets
+
+      if (pets.size == 0)
+        parent.getSubscription.map(_.status(Status.UserSuspended).saveMe)
+    }
+  }
 }

@@ -82,9 +82,16 @@ class Parents extends Loggable {
 
   val coupons = Coupon.findAll()
 
-  val stripePaymentsBaseURL = Props.get("stripe.payments.url") openOr "https://dashboard.stripe.com/test/"
+  val stripeBaseUrl = Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
+  val stripePaymentsBaseURL = s"${stripeBaseUrl}/invoices"
+  val stripeSubscriptionBaseURL = s"${stripeBaseUrl}/subscriptions"
+
 
   val nextShipDateFormat= new SimpleDateFormat("MM/dd/yyyy")
+  val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
+
+  var parentDetailsRenderer: Box[IdMemoizeTransform] = Empty
+  var currentParent: Box[User] = Empty
 
   def petTypeRadio(renderer: IdMemoizeTransform) = {
     ajaxRadio(
@@ -109,15 +116,15 @@ class Parents extends Loggable {
     )
   }
 
-  def addCoupon(parent: User, updatedCoupon: Box[Coupon]) = {
-    parent.coupon(updatedCoupon).saveMe
+  def addCoupon(parent: Box[User], updatedCoupon: Box[Coupon]) = {
+    parent.map(_.coupon(updatedCoupon).saveMe)
 
-    ParentService.updateCoupon(parent.stripeId.get, updatedCoupon.map(_.couponCode.get))
+    ParentService.updateCoupon(parent.map(_.stripeId.get).openOr(""), updatedCoupon.map(_.couponCode.get))
 
     S.redirectTo(Parents.menu.loc.calcDefaultHref)
   }
 
-  def addPet(parent: User, renderer: IdMemoizeTransform) = {
+  def addPet(possibleParent: Box[User], renderer: IdMemoizeTransform) = {
     val validateFields = List(
       checkEmpty(petName, ".new-pet-name")
     ).flatten
@@ -126,6 +133,7 @@ class Parents extends Loggable {
       (for {
         pet <- petType
         product <- chosenProduct
+        parent <- possibleParent
         size = product.size.get
       } yield {
         ParentService.addNewPet(
@@ -150,7 +158,7 @@ class Parents extends Loggable {
     }
   }
 
-  def deletePet(parent: User, pet: Pet, renderer: IdMemoizeTransform)() = {
+  def deletePet(parent: Box[User], pet: Pet, renderer: IdMemoizeTransform)() = {
     ParentService.removePet(parent, pet) match {
       case Full(_) =>
         renderer.setHtml
@@ -168,154 +176,193 @@ class Parents extends Loggable {
     }
   }
 
+  def deleteShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment)() = {
+    shipment.shipmentLineItems.map(_.delete_!)
+    shipment.delete_!
+
+    detailsRenderer.setHtml
+  }
+
+  def parentInformationBinding(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]) = {
+    val parent = currentParent
+    val address = parent.flatMap(_.addresses.toList.headOption)
+
+    def updateBillingStatus(status: Status.Value, oldSubscription: Subscription) = {
+      oldSubscription.status(status).saveMe
+
+      detailsRenderer.setHtml
+    }
+
+    ".parent-information .address" #> {
+      ".address-1 *" #> address.map(_.street1.get) &
+      ".address-2 *" #> address.map(_.street2.get) &
+      ".city *" #> address.map(_.city.get) &
+      ".state *" #> address.map(_.state.get) &
+      ".zip *" #> address.map(_.zip.get) 
+    } &
+    ".parent-information .billing-status" #> subscription.map { oldSubscription =>
+      val oldStatus = oldSubscription.status.get
+
+      oldStatus match {
+        case Status.BillingSuspended =>
+          "#parent-billing-status .stripe-subscription [class+]" #> "past-due" &
+          "#parent-billing-status .stripe-subscription [href]" #> s"${stripeSubscriptionBaseURL}/${oldSubscription.stripeSubscriptionId.get}" &
+          "#parent-billing-status .stripe-subscription *" #> "Suspended due to billing" &
+          ".change-to-active [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
+          ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
+          ".change-to-billing-suspended" #> ClearNodes
+
+        case Status.UserSuspended =>
+          "#parent-billing-status .stripe-subscription *" #> "User Suspended" &
+          "#parent-billing-status .stripe-subscription [href]" #> s"${stripeSubscriptionBaseURL}/${oldSubscription.stripeSubscriptionId.get}" &
+          ".change-to-active [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
+          ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))&
+          ".change-to-user-suspended" #> ClearNodes
+
+        case Status.Active =>
+          "#parent-billing-status .stripe-subscription *" #> "Active" &
+          "#parent-billing-status .stripe-subscription [href]" #> s"${stripeSubscriptionBaseURL}/${oldSubscription.stripeSubscriptionId.get}" &
+          ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription)) &
+          ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
+          ".change-to-active" #> ClearNodes
+
+        case _ =>
+          "#parent-billing-status .stripe-subscription *" #> oldStatus.toString &
+          "#parent-billing-status .stripe-subscription [href]" #> s"${stripeSubscriptionBaseURL}/${oldSubscription.stripeSubscriptionId.get}" &
+          ".change-billing-status [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
+          ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
+          ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))
+      }
+    }
+  }
+
+  def petBindings = {
+    val parent = currentParent
+    var chosenCoupon = parent.flatMap(_.coupon.obj)
+
+    def couponDropdown = {
+      SHtml.ajaxSelectObj(
+        (Empty, "No Coupon") +: coupons.map(coupon => (Full(coupon), coupon.couponCode.get)),
+        Full(chosenCoupon),
+        (possibleCoupon: Box[Coupon]) => chosenCoupon = possibleCoupon
+      )
+    }
+
+    ".parent-pets" #> idMemoize { renderer =>
+      ".create" #> {
+        ".new-pet-name" #> ajaxText(petName, petName = _) &
+        ".pet-type-select" #> petTypeRadio(renderer) &
+        ".product-container .product-select" #> productDropdown &
+        ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent, renderer))
+      } & 
+      ".add-coupon" #> {
+        ".coupon-container .coupon-select" #> couponDropdown &
+        ".create-coupon-container .create-coupon" #> SHtml.ajaxSubmit("Change Coupon", () => addCoupon(parent, chosenCoupon))
+      } & 
+      {
+        val pets = Pet.findAll(
+          By(Pet.user, parent),
+          By(Pet.status, Status.Active)
+        )
+
+        ".pet" #> pets.map { pet =>
+          ".pet-name *" #> pet.name &
+          ".pet-type *" #> pet.animalType.toString &
+          ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
+          ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
+            ajaxInvoke(deletePet(parent, pet, renderer))
+          )
+        }
+      }
+    }
+  }
+
+  def shipmentBindings(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]) = {
+    val parent = currentParent
+    val nextShipDate = subscription.map(_.nextShipDate.get)
+
+    val shipments: List[Shipment] = subscription.map { sub => 
+      Shipment.findAll(By(Shipment.subscription, sub))
+    }.getOrElse(Nil)
+
+    var updateNextShipDate = nextShipDate.map(date => nextShipDateFormat.format(date).toString).getOrElse("")
+
+    def updateShipDate() = {
+      val updatedDate = nextShipDateFormat.parse(updateNextShipDate)
+
+      subscription.map { oldSubscription =>
+        ParentService.updateNextShipBillDate(oldSubscription, parent, updatedDate)
+        oldSubscription.nextShipDate(updatedDate).saveMe
+      }
+
+      detailsRenderer.setHtml
+    }
+
+    ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
+    ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
+    ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
+      val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
+
+      ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
+      ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
+      ".amount-paid .stripe-payment *" #> s"$$${shipment.amountPaid.get}" &
+      ".amount-paid .stripe-payment [href]" #> s"${stripePaymentsBaseURL}/${shipment.stripePaymentId.get}" &
+      ".pets ul" #> { itemsShipped.sortWith(_ < _).map { itemShipped =>
+        ".pet-product *" #> itemShipped
+      }} &
+      ".address *" #> shipment.address.get &
+      ".tracking-number *" #> shipment.trackingNumber.get &
+      ".shipment-actions .delete [onclick]" #> Confirm(
+        "Delete this shipment? This cannot be undone!",
+        ajaxInvoke(deleteShipment(detailsRenderer, shipment))
+      )
+    }
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".parents [class+]" #> "current" &
     "#active-parents-export [href]" #> Parents.activeParentsCsvMenu.loc.calcDefaultHref &
     "tbody" #> parents.sortWith(_.name < _.name).map { parent =>
-      val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
+      val refererName = parent.referer.obj.map(_.name.get)
+      idMemoize { detailsRenderer =>
+        val subscription = parent.getSubscription
+        val nextShipDate = subscription.map(_.nextShipDate.get)
 
-      val subscription = Subscription.find(By(Subscription.user, parent))
-      val nextShipDate = subscription.map(_.nextShipDate.get)
-
-      var chosenCoupon: Box[Coupon] = parent.coupon.obj
-
-      def couponDropdown = {
-        SHtml.ajaxSelectObj(
-          (Empty, "No Coupon") +: coupons.map(coupon => (Full(coupon), coupon.couponCode.get)),
-          Full(chosenCoupon),
-          (possibleCoupon: Box[Coupon]) => chosenCoupon = possibleCoupon
-        )
-      }
-
-      def petBindings = {
-        ".parent-pets" #> idMemoize { renderer =>
-          ".create" #> {
-            ".new-pet-name" #> ajaxText(petName, petName = _) &
-            ".pet-type-select" #> petTypeRadio(renderer) &
-            ".product-container .product-select" #> productDropdown &
-            ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent, renderer))
-          } & 
-          ".add-coupon" #> {
-            ".coupon-container .coupon-select" #> couponDropdown &
-            ".create-coupon-container .create-coupon" #> SHtml.ajaxSubmit("Change Coupon", () => addCoupon(parent, chosenCoupon))
-          } & 
-          {
-            val pets = Pet.findAll(
-              By(Pet.user, parent),
-              By(Pet.status, Status.Active)
-            )
-
-            ".pet" #> pets.map { pet =>
-              ".pet-name *" #> pet.name &
-              ".pet-type *" #> pet.animalType.toString &
-              ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
-              ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
-                ajaxInvoke(deletePet(parent, pet, renderer))
-                )
+        ".parent" #> {
+          ".name *" #> parent.name &
+          ".email *" #> parent.email &
+          ".billing-status *" #> subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
+          ".referer *" #> refererName &
+          ".ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
+          ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
+          ".actions .delete [onclick]" #> Confirm(
+            s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
+            ajaxInvoke(deleteParent(parent))
+          ) &
+          "^ [onclick]" #> ajaxInvoke(() => {
+            if (currentParent.isEmpty) {
+              currentParent = Full(parent)
+            } else {
+              currentParent = Empty
             }
+
+            detailsRenderer.setHtml
+          })
+        } & 
+        ".info [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
+        "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
+        ".parent-info" #> {
+          if (!currentParent.isEmpty) {
+            petBindings &
+            shipmentBindings(detailsRenderer, subscription) &
+            parentInformationBinding(detailsRenderer, subscription)
+          }
+          else {
+            "^" #> ClearNodes
           }
         }
       }
-
-      def shipmentBindings = {
-        val shipments: List[Shipment] = subscription.map { sub => 
-          Shipment.findAll(By(Shipment.subscription, sub))
-        }.openOr(Nil)
-
-        var updateNextShipDate = nextShipDate.map(date => nextShipDateFormat.format(date).toString).getOrElse("")
-
-        def updateShipDate() = {
-          val updatedDate = nextShipDateFormat.parse(updateNextShipDate)
-
-          subscription.map { oldSubscription =>
-            ParentService.updateNextShipBillDate(oldSubscription, Full(parent), updatedDate)
-            oldSubscription.nextShipDate(updatedDate).saveMe
-          }
-          
-          S.redirectTo(Parents.menu.loc.calcDefaultHref)
-        }
-
-      ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
-      ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
-      ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
-          val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
-
-          ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
-          ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
-          ".amount-paid .stripe-payment *" #> s"$$${shipment.amountPaid.get}" &
-          ".amount-paid .stripe-payment [href]" #> s"${stripePaymentsBaseURL}/${shipment.stripePaymentId.get}" &
-          ".pets ul" #> { itemsShipped.sortWith(_ < _).map { itemShipped =>
-            ".pet-product *" #> itemShipped
-          }} &
-          ".address *" #> shipment.address.get &
-          ".tracking-number *" #> shipment.trackingNumber.get
-        }
-      }
-
-      def parentInformationBinding = {
-        val address = parent.addresses.toList.headOption
-        val billingStatus = parent.status.get
-
-        def updateBillingStatus(status: Status.Value, oldSubscription: Subscription) = {
-          oldSubscription.status(status).saveMe
-          
-          S.redirectTo(Parents.menu.loc.calcDefaultHref)
-        }
-
-        ".address" #> {
-          ".address-1 *" #> address.map(_.street1.get) &
-          ".address-2 *" #> address.map(_.street2.get) &
-          ".city *" #> address.map(_.city.get) &
-          ".state *" #> address.map(_.state.get) &
-          ".zip *" #> address.map(_.zip.get) 
-        } &
-        (subscription.map { oldSubscription =>
-          val oldStatus = oldSubscription.status.get
-
-          oldStatus match {
-            case Status.BillingSuspended =>
-              "#parent-billing-status [class+]" #> "past-due" &
-              "#parent-billing-status *" #> "Suspended due to billing" &
-              ".change-to-active [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
-              ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
-              ".change-to-billing-suspended" #> ClearNodes
-
-            case Status.UserSuspended =>
-              "#parent-billing-status *" #> "User Suspended" &
-              ".change-to-active [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
-              ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))&
-              ".change-to-user-suspended" #> ClearNodes
-
-            case Status.Active =>
-              "#parent-billing-status *" #> "Active" &
-              ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription)) &
-              ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
-              ".change-to-active" #> ClearNodes
-
-            case _ =>
-              "#parent-billing-status *" #> oldStatus.toString &
-              ".change-billing-status [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
-              ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
-              ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))
-          }
-        }).openOr(".foo *" #> "")
-      }
-
-      ".parent" #> {
-        ".name *" #> parent.name &
-        ".email *" #> parent.email &
-        ".billing-status *" #> parent.subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
-        ".referer *" #> parent.referer.obj.map(_.name.get) &
-        ".ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
-        ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
-        ".actions .delete [onclick]" #> Confirm(s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
-          ajaxInvoke(deleteParent(parent))
-        ) 
-      } &
-      petBindings &
-      shipmentBindings &
-      parentInformationBinding
     }
   }
 }
