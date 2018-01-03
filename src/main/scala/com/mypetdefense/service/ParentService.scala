@@ -287,7 +287,14 @@ object ParentService extends Loggable {
 
     updatedSubscription match {
       case Full(stripeSub) =>
-        Full(pet.status(Status.Inactive).saveMe)
+        val petRemoved = Full(pet.status(Status.Inactive).saveMe)
+
+        if (user.map(_.activePets.size == 0).openOr(false)) {
+          val subscription = user.flatMap(_.getSubscription)
+          subscription.map(_.status(Status.UserSuspended).saveMe)
+        }
+
+        petRemoved
 
       case _ =>
         Empty

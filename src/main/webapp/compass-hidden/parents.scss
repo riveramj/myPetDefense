@@ -178,9 +178,9 @@ div.create-item-container.create-coupon-container {
   }
 }
 
-#parent-billing-status {
+#parent-billing-status .stripe-subscription {
   font-size: 18px;
-  padding-top: 8px;
+  color: #2E9F9B;
 
   &.past-due {
     color: #ff0000;
@@ -204,4 +204,20 @@ button.create-item.change-to-billing-suspended, button.create-item.change-to-use
 
 .billing {
   margin-right: -10px;
+}
+
+.expand-parent {
+  display: none;
+}
+
+.pets.info {
+  display: none;
+
+  &.expanded {
+    display: table-row;
+  }
+}
+
+.parent.expanded {
+  border-bottom: none;
 }
