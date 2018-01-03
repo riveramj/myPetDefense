@@ -15,7 +15,7 @@ mail.password=89307da8-63e1-40c7-af24-0b03eb3e6dd8
 [Stripe]
 secret.key=sk_test_BC0GclTGecvZKl6kimEn1dAn
 public.key=pk_test_rgQ72pMGC8pVMFU1KS3XlwLa
-stripe.payments.url=https://dashboard.stripe.com/test/invoices
+stripe.base.url=https://dashboard.stripe.com/test
 
 server.url=http://demo.mypetdefense.com/
 
