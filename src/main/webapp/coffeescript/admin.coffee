@@ -8,10 +8,11 @@ $(document).ready ->
     $("input.error").removeClass("error")
 
   $("body").on "click", '.parent', (event) ->
-    $(this).next('tr').toggleClass('collapsed')
+    $(this).toggleClass('expanded')
+
     $(event.target).parent().toggleClass('active')
 
-  $(".parent-tab").on "click", (event) ->
+  $("body").on "click", '.parent-tab', (event) ->
     selectedTab = $(this)
     selectedTabClass = "." + selectedTab.parent().attr('class')
 
@@ -23,5 +24,3 @@ $(document).ready ->
   $('.dashboard-nav').on "click", 'button', (event) ->
     $(event.target).parent().siblings().removeClass('active')
     $(event.target).parent().addClass('active')
-
-    

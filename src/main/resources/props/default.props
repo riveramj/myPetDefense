@@ -10,7 +10,7 @@ mail.smtp.host=localhost
 [Stripe]
 secret.key=sk_test_vvw6ZOLkVyQWYNEwVocSs27V
 public.key=pk_test_JLczczIy7T5qGL8DOmwTc2O0
-stripe.payments.url=https://dashboard.stripe.com/test/invoices
+stripe.base.url=https://dashboard.stripe.com/test
 
 server.url=http://localhost:8080/
 
