@@ -18,6 +18,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
 import com.mypetdefense.service.ParentService
+import com.mypetdefense.util.ClearNodesIf
 
 object Dashboard extends Loggable {
   import net.liftweb.sitemap._
@@ -81,103 +82,101 @@ object Dashboard extends Loggable {
       ))
   }
 
-    def exportShipments: Box[LiftResponse] = {
-      val csvHeaders = "Order ID (required)" ::
-                       "Order Date" ::
-                       "Order Value" ::
-                       "Requested Service" ::
-                       "Ship To - Name" ::
-                       "Ship To - Company" ::
-                       "Ship To - Address 1" ::
-                       "Ship To - Address 2" ::
-                       "Ship To - Address 3" ::
-                       "Ship To - State/Province" ::
-                       "Ship To - City" ::
-                       "Ship To - Postal Code" ::
-                       "Ship To - Country" ::
-                       "Ship To - Phone" ::
-                       "Ship To - Email" ::
-                       "Total Weight in Oz" ::
-                       "Dimensions - Length" ::
-                       "Dimensions - Width" ::
-                       "Dimensions - Height" ::
-                       "Notes - From Customer" ::
-                       "Notes - Internal" ::
-                       "Gift Wrap?" ::
-                       "Gift Message" ::
-                       Nil
+  def exportShipments: Box[LiftResponse] = {
+    val csvHeaders = "Order ID (required)" ::
+                     "Order Date" ::
+                     "Order Value" ::
+                     "Requested Service" ::
+                     "Ship To - Name" ::
+                     "Ship To - Company" ::
+                     "Ship To - Address 1" ::
+                     "Ship To - Address 2" ::
+                     "Ship To - Address 3" ::
+                     "Ship To - State/Province" ::
+                     "Ship To - City" ::
+                     "Ship To - Postal Code" ::
+                     "Ship To - Country" ::
+                     "Ship To - Phone" ::
+                     "Ship To - Email" ::
+                     "Total Weight in Oz" ::
+                     "Dimensions - Length" ::
+                     "Dimensions - Width" ::
+                     "Dimensions - Height" ::
+                     "Notes - From Customer" ::
+                     "Notes - Internal" ::
+                     "Gift Wrap?" ::
+                     "Gift Message" ::
+                     Nil
 
-      val csvRows: List[List[String]] = {
-        val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+    val csvRows: List[List[String]] = {
+      val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-        val currentShipments = {
-          Subscription.findAll(
-            BySql(
-              "nextShipDate >= CURRENT_DATE and nextShipdate < current_date + interval '5 day'",
-              IHaveValidatedThisSQL("mike","2017-04-26")
-            )
+      val currentShipments = {
+        Subscription.findAll(
+          BySql(
+            "nextShipDate >= CURRENT_DATE and nextShipdate < current_date + interval '5 day'",
+            IHaveValidatedThisSQL("mike","2017-04-26")
           )
-        }
-
-        {
-          for {
-            subscription <- currentShipments
-            shipment <- Shipment.find(
-                          By(Shipment.subscription, subscription),
-                          By(Shipment.expectedShipDate, subscription.nextShipDate.get)
-                        )
-            user <- subscription.user.obj
-            address <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
-          } yield {
-
-            shipment.shipmentId.get.toString ::
-            dateFormat.format(new Date()) ::
-            "" ::
-            "standard shipping" ::
-            user.name ::
-            "" ::
-            address.street1.get ::
-            address.street2.get ::
-            "" ::
-            address.city.get ::
-            address.state.get ::
-            address.zip.get ::
-            "" ::
-            "" ::
-            "" ::
-            "4" ::
-            "" ::
-            "" ::
-            "" ::
-            "" ::
-            "" ::
-            "" ::
-            "" ::
-            Nil
-          }
-        }
+        )
       }
 
-      val resultingCsv = (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
-
-      Some(new InMemoryResponse(
-        resultingCsv.getBytes("UTF-8"),
-        List(
-          "Content-Type" -> "binary/octet-stream",
-          "Content-Disposition" -> "attachment; filename=\"shipments.csv\""
-          ),
-        Nil,
-        200
-      ))
+      {
+        for {
+          subscription <- currentShipments
+          shipment <- Shipment.find(
+                        By(Shipment.subscription, subscription),
+                        By(Shipment.expectedShipDate, subscription.nextShipDate.get)
+                      )
+          user <- subscription.user.obj
+          address <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
+        } yield {
+          shipment.shipmentId.get.toString ::
+          dateFormat.format(new Date()) ::
+          "" ::
+          "standard shipping" ::
+          user.name ::
+          "" ::
+          address.street1.get ::
+          address.street2.get ::
+          "" ::
+          address.city.get ::
+          address.state.get ::
+          address.zip.get ::
+          "" ::
+          "" ::
+          "" ::
+          "4" ::
+          "" ::
+          "" ::
+          "" ::
+          "" ::
+          "" ::
+          "" ::
+          "" ::
+          Nil
+        }
+      }
     }
-  }
 
+    val resultingCsv = (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
+
+    Some(new InMemoryResponse(
+      resultingCsv.getBytes("UTF-8"),
+      List(
+        "Content-Type" -> "binary/octet-stream",
+        "Content-Disposition" -> "attachment; filename=\"shipments.csv\""
+        ),
+      Nil,
+      200
+    ))
+  }
+}
 
 class Dashboard extends Loggable {
   var subscriptionSet: List[Subscription] = Nil
   var shipmentRenderer: Box[IdMemoizeTransform] = Empty
 
-  val currentShipments = {
+  def currentShipments = {
     Subscription.findAll(
       BySql(
         "nextShipDate >= CURRENT_DATE and nextShipdate < current_date + interval '5 day'",
@@ -186,28 +185,27 @@ class Dashboard extends Loggable {
     )
   }
 
-  val pendingShipments = {
+  def pendingShipments = {
     Subscription.findAll(
       BySql(
-        "nextShipDate > CURRENT_DATE - interval '14 day' and nextshipdate < current_date",
+        "nextShipDate > CURRENT_DATE - interval '5 day' and nextshipdate < current_date",
         IHaveValidatedThisSQL("mike","2017-04-26")
       )
     )
   }
 
-  val pastDueShipments = {
+  def pastDueShipments = {
     Subscription.findAll(
       BySql(
-        "nextShipDate < CURRENT_DATE and nextshipdate < current_date - interval '14 day'",
-        IHaveValidatedThisSQL("mike","2017-04-26")
+        "nextShipDate + interval '5 day' < CURRENT_DATE and nextshipdate > current_date - interval '10 day'",
+        IHaveValidatedThisSQL("mike","2018-01-04")
       )
     )
   }
 
   def updateSubscriptionSet(subscriptions: List[Subscription]) = {
     subscriptions.filter { subscription =>
-      val pets = subscription.user.obj.map(_.activePets).getOrElse(Nil)
-      pets.length > 0
+      subscription.status == Status.Active
     }
   }
 
@@ -221,17 +219,15 @@ class Dashboard extends Loggable {
 
   def paymentProcessed_?(shipment: Box[Shipment]) = {
     val paymentId = shipment.map(_.stripePaymentId.get).openOr("")
-    if (paymentId.isEmpty)
-      "No"
-    else
-      "Yes"
+    !paymentId.isEmpty
   }
 
   def shipProduct(
     subscription: Subscription,
     user: Box[User],
     shipment: Box[Shipment],
-    address: String
+    address: String,
+    renderer: IdMemoizeTransform
   )() = {
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
@@ -246,9 +242,20 @@ class Dashboard extends Loggable {
       shipment.map(_.taxPaid.get).openOr(""),
       shipment.map(_.amountPaid.get).openOr("")
     )
+    
+    renderer.setHtml
+  }
+
+  def shipmentHasShipped_?(possibleShipment: Box[Shipment]) = {
+    val shippedDate = possibleShipment.map { shipment =>
+      !tryo(shipment.dateShipped.get.toString).isEmpty
+    }
+
+    shippedDate.openOr(false)
   }
 
   def render = {
+    SHtml.makeFormsAjax andThen
     ".dashboard [class+]" #> "current" &
     "#csv-export [href]" #> Dashboard.exportMenu.loc.calcDefaultHref &
     "#shipments-export [href]" #> Dashboard.shipmentsCSVMenu.loc.calcDefaultHref &
@@ -262,7 +269,9 @@ class Dashboard extends Loggable {
         val shipment = Shipment.find(
           By(Shipment.subscription, subscription),
           By(Shipment.expectedShipDate, subscription.nextShipDate.get)
-       )
+        )
+        
+        val paymentProcessed = paymentProcessed_?(shipment)
 
         val user = subscription.user.obj
 
@@ -285,8 +294,23 @@ class Dashboard extends Loggable {
           ".product-name *" #> product.map(_.name.get) &
           ".product-size *" #> product.map(_.size.get.toString)
         } &
-        ".payment-processed *" #> paymentProcessed_?(shipment) &
-        ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, user, shipment, address.openOr("")))
+        ".payment-processed *" #> { if (paymentProcessed) "Yes" else "No" } &
+        ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
+          val updatedShipment = shipment.flatMap { possibleShipment =>
+            Shipment.find(By(Shipment.shipmentId, possibleShipment.shipmentId.get))
+          }
+
+          if (shipmentHasShipped_?(shipment)) {
+            ".ship [class+]" #> "shipped" &
+            ".ship *" #> "Already Shipped." &
+            ".ship [disabled]" #> "disabled"
+          } else if (shipment.isEmpty || !paymentProcessed) {
+            ".ship [class+]" #> "cant-ship" &
+            ".ship *" #> "Can't Ship Yet." &
+            ".ship [disabled]" #> "disabled"
+          } else 
+            ".ship [onclick]" #> SHtml.ajaxInvoke(shipProduct(subscription, user, shipment, address.openOr(""), shipButtonRenderer))
+        }
       }
     }
   }
