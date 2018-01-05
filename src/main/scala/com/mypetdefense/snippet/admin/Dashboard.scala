@@ -18,6 +18,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
 import com.mypetdefense.service.ParentService
+import com.mypetdefense.util.ClearNodesIf
 
 object Dashboard extends Loggable {
   import net.liftweb.sitemap._
@@ -177,7 +178,7 @@ class Dashboard extends Loggable {
   var subscriptionSet: List[Subscription] = Nil
   var shipmentRenderer: Box[IdMemoizeTransform] = Empty
 
-  val currentShipments = {
+  def currentShipments = {
     Subscription.findAll(
       BySql(
         "nextShipDate >= CURRENT_DATE and nextShipdate < current_date + interval '5 day'",
@@ -186,28 +187,27 @@ class Dashboard extends Loggable {
     )
   }
 
-  val pendingShipments = {
+  def pendingShipments = {
     Subscription.findAll(
       BySql(
-        "nextShipDate > CURRENT_DATE - interval '14 day' and nextshipdate < current_date",
+        "nextShipDate > CURRENT_DATE - interval '5 day' and nextshipdate < current_date",
         IHaveValidatedThisSQL("mike","2017-04-26")
       )
     )
   }
 
-  val pastDueShipments = {
+  def pastDueShipments = {
     Subscription.findAll(
       BySql(
-        "nextShipDate < CURRENT_DATE and nextshipdate < current_date - interval '14 day'",
-        IHaveValidatedThisSQL("mike","2017-04-26")
+        "nextShipDate + interval '5 day' < CURRENT_DATE and nextshipdate > current_date - interval '10 day'",
+        IHaveValidatedThisSQL("mike","2018-01-04")
       )
     )
   }
 
   def updateSubscriptionSet(subscriptions: List[Subscription]) = {
     subscriptions.filter { subscription =>
-      val pets = subscription.user.obj.map(_.activePets).getOrElse(Nil)
-      pets.length > 0
+      subscription.status == Status.Active
     }
   }
 
@@ -221,17 +221,15 @@ class Dashboard extends Loggable {
 
   def paymentProcessed_?(shipment: Box[Shipment]) = {
     val paymentId = shipment.map(_.stripePaymentId.get).openOr("")
-    if (paymentId.isEmpty)
-      "No"
-    else
-      "Yes"
+    !paymentId.isEmpty
   }
 
   def shipProduct(
     subscription: Subscription,
     user: Box[User],
     shipment: Box[Shipment],
-    address: String
+    address: String,
+    renderer: IdMemoizeTransform
   )() = {
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
@@ -246,9 +244,20 @@ class Dashboard extends Loggable {
       shipment.map(_.taxPaid.get).openOr(""),
       shipment.map(_.amountPaid.get).openOr("")
     )
+    
+    renderer.setHtml
+  }
+
+  def shipmentHasShipped_?(possibleShipment: Box[Shipment]) = {
+    val shippedDate = possibleShipment.map { shipment =>
+      !tryo(shipment.dateShipped.get.toString).isEmpty
+    }
+
+    shippedDate.openOr(false)
   }
 
   def render = {
+    SHtml.makeFormsAjax andThen
     ".dashboard [class+]" #> "current" &
     "#csv-export [href]" #> Dashboard.exportMenu.loc.calcDefaultHref &
     "#shipments-export [href]" #> Dashboard.shipmentsCSVMenu.loc.calcDefaultHref &
@@ -262,7 +271,9 @@ class Dashboard extends Loggable {
         val shipment = Shipment.find(
           By(Shipment.subscription, subscription),
           By(Shipment.expectedShipDate, subscription.nextShipDate.get)
-       )
+        )
+        
+        val paymentProcessed = paymentProcessed_?(shipment)
 
         val user = subscription.user.obj
 
@@ -285,8 +296,23 @@ class Dashboard extends Loggable {
           ".product-name *" #> product.map(_.name.get) &
           ".product-size *" #> product.map(_.size.get.toString)
         } &
-        ".payment-processed *" #> paymentProcessed_?(shipment) &
-        ".ship" #> SHtml.onSubmitUnit(shipProduct(subscription, user, shipment, address.openOr("")))
+        ".payment-processed *" #> { if (paymentProcessed) "Yes" else "No" } &
+        ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
+          val updatedShipment = shipment.flatMap { possibleShipment =>
+            Shipment.find(By(Shipment.shipmentId, possibleShipment.shipmentId.get))
+          }
+
+          if (shipmentHasShipped_?(shipment)) {
+            ".ship [class+]" #> "shipped" &
+            ".ship *" #> "Already Shipped." &
+            ".ship [disabled]" #> "disabled"
+          } else if (shipment.isEmpty || !paymentProcessed) {
+            ".ship [class+]" #> "cant-ship" &
+            ".ship *" #> "Can't Ship Yet." &
+            ".ship [disabled]" #> "disabled"
+          } else 
+            ".ship [onclick]" #> SHtml.ajaxInvoke(shipProduct(subscription, user, shipment, address.openOr(""), shipButtonRenderer))
+        }
       }
     }
   }
