@@ -82,97 +82,95 @@ object Dashboard extends Loggable {
       ))
   }
 
-    def exportShipments: Box[LiftResponse] = {
-      val csvHeaders = "Order ID (required)" ::
-                       "Order Date" ::
-                       "Order Value" ::
-                       "Requested Service" ::
-                       "Ship To - Name" ::
-                       "Ship To - Company" ::
-                       "Ship To - Address 1" ::
-                       "Ship To - Address 2" ::
-                       "Ship To - Address 3" ::
-                       "Ship To - State/Province" ::
-                       "Ship To - City" ::
-                       "Ship To - Postal Code" ::
-                       "Ship To - Country" ::
-                       "Ship To - Phone" ::
-                       "Ship To - Email" ::
-                       "Total Weight in Oz" ::
-                       "Dimensions - Length" ::
-                       "Dimensions - Width" ::
-                       "Dimensions - Height" ::
-                       "Notes - From Customer" ::
-                       "Notes - Internal" ::
-                       "Gift Wrap?" ::
-                       "Gift Message" ::
-                       Nil
+  def exportShipments: Box[LiftResponse] = {
+    val csvHeaders = "Order ID (required)" ::
+                     "Order Date" ::
+                     "Order Value" ::
+                     "Requested Service" ::
+                     "Ship To - Name" ::
+                     "Ship To - Company" ::
+                     "Ship To - Address 1" ::
+                     "Ship To - Address 2" ::
+                     "Ship To - Address 3" ::
+                     "Ship To - State/Province" ::
+                     "Ship To - City" ::
+                     "Ship To - Postal Code" ::
+                     "Ship To - Country" ::
+                     "Ship To - Phone" ::
+                     "Ship To - Email" ::
+                     "Total Weight in Oz" ::
+                     "Dimensions - Length" ::
+                     "Dimensions - Width" ::
+                     "Dimensions - Height" ::
+                     "Notes - From Customer" ::
+                     "Notes - Internal" ::
+                     "Gift Wrap?" ::
+                     "Gift Message" ::
+                     Nil
 
-      val csvRows: List[List[String]] = {
-        val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+    val csvRows: List[List[String]] = {
+      val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-        val currentShipments = {
-          Subscription.findAll(
-            BySql(
-              "nextShipDate >= CURRENT_DATE and nextShipdate < current_date + interval '5 day'",
-              IHaveValidatedThisSQL("mike","2017-04-26")
-            )
+      val currentShipments = {
+        Subscription.findAll(
+          BySql(
+            "nextShipDate >= CURRENT_DATE and nextShipdate < current_date + interval '5 day'",
+            IHaveValidatedThisSQL("mike","2017-04-26")
           )
-        }
-
-        {
-          for {
-            subscription <- currentShipments
-            shipment <- Shipment.find(
-                          By(Shipment.subscription, subscription),
-                          By(Shipment.expectedShipDate, subscription.nextShipDate.get)
-                        )
-            user <- subscription.user.obj
-            address <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
-          } yield {
-
-            shipment.shipmentId.get.toString ::
-            dateFormat.format(new Date()) ::
-            "" ::
-            "standard shipping" ::
-            user.name ::
-            "" ::
-            address.street1.get ::
-            address.street2.get ::
-            "" ::
-            address.city.get ::
-            address.state.get ::
-            address.zip.get ::
-            "" ::
-            "" ::
-            "" ::
-            "4" ::
-            "" ::
-            "" ::
-            "" ::
-            "" ::
-            "" ::
-            "" ::
-            "" ::
-            Nil
-          }
-        }
+        )
       }
 
-      val resultingCsv = (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
-
-      Some(new InMemoryResponse(
-        resultingCsv.getBytes("UTF-8"),
-        List(
-          "Content-Type" -> "binary/octet-stream",
-          "Content-Disposition" -> "attachment; filename=\"shipments.csv\""
-          ),
-        Nil,
-        200
-      ))
+      {
+        for {
+          subscription <- currentShipments
+          shipment <- Shipment.find(
+                        By(Shipment.subscription, subscription),
+                        By(Shipment.expectedShipDate, subscription.nextShipDate.get)
+                      )
+          user <- subscription.user.obj
+          address <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
+        } yield {
+          shipment.shipmentId.get.toString ::
+          dateFormat.format(new Date()) ::
+          "" ::
+          "standard shipping" ::
+          user.name ::
+          "" ::
+          address.street1.get ::
+          address.street2.get ::
+          "" ::
+          address.city.get ::
+          address.state.get ::
+          address.zip.get ::
+          "" ::
+          "" ::
+          "" ::
+          "4" ::
+          "" ::
+          "" ::
+          "" ::
+          "" ::
+          "" ::
+          "" ::
+          "" ::
+          Nil
+        }
+      }
     }
-  }
 
+    val resultingCsv = (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
+
+    Some(new InMemoryResponse(
+      resultingCsv.getBytes("UTF-8"),
+      List(
+        "Content-Type" -> "binary/octet-stream",
+        "Content-Disposition" -> "attachment; filename=\"shipments.csv\""
+        ),
+      Nil,
+      200
+    ))
+  }
+}
 
 class Dashboard extends Loggable {
   var subscriptionSet: List[Subscription] = Nil
