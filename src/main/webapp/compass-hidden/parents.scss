@@ -109,12 +109,8 @@ fieldset.add-pet, fieldset.add-coupon {
 
   > li {
     display: inline-block;
-    margin-right: 120px;
+    margin-right: 40px;
     vertical-align: top;
-  }
-
-  .billing-status {
-    margin-right: 0;
   }
 
   label {
@@ -139,6 +135,10 @@ fieldset.add-pet, fieldset.add-coupon {
     background-color: inherit;
     width: 100%;
   }
+
+  .stripe-subscription {
+    margin-right: 0;
+  }
 }
 
 .parent-details {
@@ -160,7 +160,7 @@ div.create-item-container.create-coupon-container {
   margin-left: 25px;
 }
 
-.change-date {
+.change-date, .change-id {
   display: inline-block;
   vertical-align: bottom;
   margin-left: 10px;
@@ -196,6 +196,8 @@ button.create-item.change-to-billing-suspended, button.create-item.change-to-use
   border: 1px solid #259490;
   background: inherit;
   color: #259490;
+  font-size: 12px;
+  padding: 11px;
 }
 
 .suspend-type {
@@ -220,4 +222,8 @@ button.create-item.change-to-billing-suspended, button.create-item.change-to-use
 
 .parent.expanded {
   border-bottom: none;
+}
+
+.change-stripe-subscription label {
+  width: 208px;
 }
