@@ -187,10 +187,21 @@ class Parents extends Loggable {
     val parent = currentParent
     val address = parent.flatMap(_.addresses.toList.headOption)
 
+    var stripeSubscriptionId = subscription.map(_.stripeSubscriptionId.get).getOrElse("")
+
     def updateBillingStatus(status: Status.Value, oldSubscription: Subscription) = {
       oldSubscription.status(status).saveMe
 
       detailsRenderer.setHtml
+    }
+
+    def updateStripeSubscriptionId(oldSubscription: Option[Subscription]) = {
+      oldSubscription.map(_.stripeSubscriptionId(stripeSubscriptionId).saveMe)
+
+      {
+        Alert("Id has been updated") &
+        detailsRenderer.setHtml
+      }
     }
 
     ".parent-information .address" #> {
@@ -233,7 +244,12 @@ class Parents extends Loggable {
           ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
           ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))
       }
-    }
+    } &
+    ".parent-information .change-stripe-subscription .stripe-subscription-id" #> ajaxText(stripeSubscriptionId, stripeSubscriptionId = _) &
+    ".parent-information .change-stripe-subscription .change-id [onClick]" #> Confirm(
+      s"Update Stripe Subscription Id? This can really mess things up!",
+      ajaxInvoke(() => updateStripeSubscriptionId(subscription))
+    )
   }
 
   def petBindings = {
