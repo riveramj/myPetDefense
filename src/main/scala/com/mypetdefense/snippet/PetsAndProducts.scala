@@ -97,6 +97,11 @@ class PetsAndProducts extends Loggable {
         )
       }).flatMap(identity) match {
         case Full(pet) =>
+
+          user.map { parent =>
+            EmailActor ! NewPetAddedEmail(parent, pet)
+          }
+    
           S.redirectTo(PetsAndProducts.menu.loc.calcDefaultHref)
         case other =>
           Alert("An error has occured. Please try again.")
@@ -109,6 +114,10 @@ class PetsAndProducts extends Loggable {
   def deletePet(pet: Pet)() = {
     ParentService.removePet(user, pet) match {
       case Full(_) =>
+        user.map { parent =>
+          EmailActor ! PetRemovedEmail(parent, pet)
+        }
+
         S.redirectTo(PetsAndProducts.menu.loc.calcDefaultHref)
       case _ =>
         Alert("An error has occured. Please try again.")
