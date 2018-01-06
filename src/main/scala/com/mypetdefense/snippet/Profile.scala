@@ -96,6 +96,12 @@ class Profile extends Loggable {
 
     user.map(ParentService.removeParent(_))
 
+    if (Props.mode != Props.RunModes.Pilot) {
+      user.map { parent =>
+        EmailActor ! AccountCancelledEmail(parent) 
+      }
+    }
+
     S.redirectTo(homePage.loc.calcDefaultHref)
   }
 

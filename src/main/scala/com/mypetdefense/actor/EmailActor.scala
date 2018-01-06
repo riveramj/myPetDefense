@@ -35,6 +35,7 @@ case class NewSaleEmail(user: User, petCount: Int, couponCode: String) extends E
 case class NewPetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class PetRemovedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class BillingUpdatedEmail(user: User) extends EmailActorMessage
+case class AccountCancelledEmail(user: User) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class PetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
@@ -95,7 +96,8 @@ trait PetRemovedEmailHandling extends EmailHandlerChain {
         "#email" #> user.email.get &
         "#pet-name" #> pet.name.get &
         "#billing-updated" #> ClearNodes &
-        "#pet-added" #> ClearNodes
+        "#pet-added" #> ClearNodes &
+        "#account-cancelled" #> ClearNodes
       }
 
       sendEmail(petRemovedSubject, "help@mypetdefense.com", transform(petRemovedTemplate))
@@ -115,7 +117,8 @@ trait NewPetAddedEmailHandling extends EmailHandlerChain {
         "#email" #> user.email.get &
         "#pet-name" #> pet.name.get &
         "#billing-updated" #> ClearNodes &
-        "#pet-removed" #> ClearNodes
+        "#pet-removed" #> ClearNodes &
+        "#account-cancelled" #> ClearNodes
       }
 
       sendEmail(newPetAddedSubject, "help@mypetdefense.com", transform(newPetAddedTemplate))
@@ -135,10 +138,32 @@ trait BillingUpdatedHandling extends EmailHandlerChain {
         "#email" #> user.email.get &
         "#pet-name-container" #> ClearNodes &
         "#pet-added" #> ClearNodes &
-        "#pet-removed" #> ClearNodes
+        "#pet-removed" #> ClearNodes &
+        "#account-cancelled" #> ClearNodes
       }
 
       sendEmail(billingUpdatedSubject, "help@mypetdefense.com", transform(billingUpdatedTemplate))
+  }
+}
+
+trait AccountCancelledHandling extends EmailHandlerChain {
+  val subject = "Account Cancelled"
+  val template = 
+    Templates("emails-hidden" :: "internal-account-changes-email" :: Nil) openOr NodeSeq.Empty
+  
+  addHandler {
+    case AccountCancelledEmail(user) =>
+      
+      val transform = {
+        "#name" #> user.name &
+        "#email" #> user.email.get &
+        "#pet-name-container" #> ClearNodes &
+        "#pet-added" #> ClearNodes &
+        "#pet-removed" #> ClearNodes &
+        "#billing-updated" #> ClearNodes
+      }
+
+      sendEmail(subject, "help@mypetdefense.com", transform(template))
   }
 }
 
@@ -389,6 +414,7 @@ trait EmailActor extends EmailHandlerChain
                     with NewPetAddedEmailHandling
                     with PetRemovedEmailHandling
                     with BillingUpdatedHandling
+                    with AccountCancelledHandling
                     with SendNewUserEmailHandling
                     with InvoicePaymentFailedEmailHandling
                     with InvoicePaymentSucceededEmailHandling 

@@ -2,7 +2,8 @@ package com.mypetdefense.snippet
 
 import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml._
-import net.liftweb.util.Helpers._
+import net.liftweb.util._
+  import Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.http._
@@ -98,8 +99,10 @@ class PetsAndProducts extends Loggable {
       }).flatMap(identity) match {
         case Full(pet) =>
 
-          user.map { parent =>
-            EmailActor ! NewPetAddedEmail(parent, pet)
+          if (Props.mode != Props.RunModes.Pilot) {
+            user.map { parent =>
+              EmailActor ! NewPetAddedEmail(parent, pet)
+            }
           }
     
           S.redirectTo(PetsAndProducts.menu.loc.calcDefaultHref)
@@ -114,8 +117,10 @@ class PetsAndProducts extends Loggable {
   def deletePet(pet: Pet)() = {
     ParentService.removePet(user, pet) match {
       case Full(_) =>
-        user.map { parent =>
-          EmailActor ! PetRemovedEmail(parent, pet)
+        if (Props.mode != Props.RunModes.Pilot) {
+            user.map { parent =>
+              EmailActor ! PetRemovedEmail(parent, pet)
+          }
         }
 
         S.redirectTo(PetsAndProducts.menu.loc.calcDefaultHref)
