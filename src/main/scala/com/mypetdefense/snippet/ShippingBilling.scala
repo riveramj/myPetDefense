@@ -72,7 +72,9 @@ class ShippingBilling extends Loggable {
   def updateBilling(parent: User)() = {
     updateCard(parent)
 
-    EmailActor ! BillingUpdatedEmail(parent)
+    if (Props.mode != Props.RunModes.Pilot) {
+      EmailActor ! BillingUpdatedEmail(parent)
+    }
 
     S.redirectTo(ShippingBilling.menu.loc.calcDefaultHref)
   }
@@ -85,7 +87,9 @@ class ShippingBilling extends Loggable {
 
     ParentService.updateCoupon(parent.stripeId.get, coupon.map(_.couponCode.get))
 
-    EmailActor ! BillingUpdatedEmail(parent)
+    if (Props.mode != Props.RunModes.Pilot) {
+      EmailActor ! BillingUpdatedEmail(parent)
+    }
 
     S.redirectTo(billingThanksPage.loc.calcDefaultHref)
   }
