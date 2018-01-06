@@ -32,6 +32,9 @@ case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class SendPasswordResetEmail(user: User) extends EmailActorMessage
 case class SendPasswordUpdatedEmail(user: User) extends EmailActorMessage
 case class NewSaleEmail(user: User, petCount: Int, couponCode: String) extends EmailActorMessage
+case class NewPetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
+case class PetRemovedEmail(user: User, pet: Pet) extends EmailActorMessage
+case class BillingUpdatedEmail(user: User) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class PetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
@@ -76,6 +79,66 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
       }
 
       sendEmail(welcomeEmailSubject, user.email.get, transform(welcomeEmailTemplate))
+  }
+}
+
+trait PetRemovedEmailHandling extends EmailHandlerChain {
+  val petRemovedSubject = "Pet removed from account"
+  val petRemovedTemplate = 
+    Templates("emails-hidden" :: "internal-account-changes-email" :: Nil) openOr NodeSeq.Empty
+  
+  addHandler {
+    case PetRemovedEmail(user, pet) =>
+
+      val transform = {
+        "#name" #> user.name &
+        "#email" #> user.email.get &
+        "#pet-name" #> pet.name.get &
+        "#billing-updated" #> ClearNodes &
+        "#pet-added" #> ClearNodes
+      }
+
+      sendEmail(petRemovedSubject, "help@mypetdefense.com", transform(petRemovedTemplate))
+  }
+}
+
+trait NewPetAddedEmailHandling extends EmailHandlerChain {
+  val newPetAddedSubject = "Pet removed from account"
+  val newPetAddedTemplate = 
+    Templates("emails-hidden" :: "internal-account-changes-email" :: Nil) openOr NodeSeq.Empty
+  
+  addHandler {
+    case NewPetAddedEmail(user, pet) =>
+
+      val transform = {
+        "#name" #> user.name &
+        "#email" #> user.email.get &
+        "#pet-name" #> pet.name.get &
+        "#billing-updated" #> ClearNodes &
+        "#pet-removed" #> ClearNodes
+      }
+
+      sendEmail(newPetAddedSubject, "help@mypetdefense.com", transform(newPetAddedTemplate))
+  }
+}
+
+trait BillingUpdatedHandling extends EmailHandlerChain {
+  val billingUpdatedSubject = "Parent Billing Updated"
+  val billingUpdatedTemplate = 
+    Templates("emails-hidden" :: "internal-account-changes-email" :: Nil) openOr NodeSeq.Empty
+  
+  addHandler {
+    case BillingUpdatedEmail(user) =>
+      
+      val transform = {
+        "#name" #> user.name &
+        "#email" #> user.email.get &
+        "#pet-name-container" #> ClearNodes &
+        "#pet-added" #> ClearNodes &
+        "#pet-removed" #> ClearNodes
+      }
+
+      sendEmail(billingUpdatedSubject, "help@mypetdefense.com", transform(billingUpdatedTemplate))
   }
 }
 
@@ -323,6 +386,9 @@ object EmailActor extends EmailActor
 trait EmailActor extends EmailHandlerChain
                     with WelcomeEmailHandling
                     with FeedbackEmailHandling
+                    with NewPetAddedEmailHandling
+                    with PetRemovedEmailHandling
+                    with BillingUpdatedHandling
                     with SendNewUserEmailHandling
                     with InvoicePaymentFailedEmailHandling
                     with InvoicePaymentSucceededEmailHandling 
