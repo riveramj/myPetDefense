@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet 
+package com.mypetdefense.snippet
 
 import net.liftweb._
   import http.SHtml._
@@ -31,7 +31,7 @@ object LandingPage extends Loggable {
   val landing3Free = Menu.i("3 Months Free!") / "3free" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
 
-  val cold5k = Menu.i("Dog Gone 5k") / "5k" >>
+  val cold5k = Menu.i("Dog Gone 5k") / "cold5k" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
 }
 
@@ -47,7 +47,6 @@ class LandingPage extends Loggable {
   }
 
   PetFlowChoices.coupon(possibleCoupon)
-
 
   def render = {
     ".coupon-code *" #> path &

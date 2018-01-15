@@ -1,5 +1,22 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
 <div data-lift="LandingPage.render">
+  <div id="landing-modal" class="modal active">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <header class="modal-header">
+        <span class="modal-title">Coupon and Pricing Applied!</span>
+        <span class="close">&times;</span>
+      </header>
+      <div class="modal-body">
+        <p>2 months free and $9.99 for life!</p>
+      </div>
+      <footer class="modal-footer">
+        <a href="./products">View Products</a>
+      </footer>
+    </div>
+
+  </div>
+
   <div id="promo-bar">
     Code <span class="coupon-code">2Free</span> applied for <span class="applied-months">2 months free!</span>
   </div>
@@ -239,8 +256,11 @@
   <div class="legal">&copy;2017 My Pet Defense. All rights reserved.</div>
 
   <head_merge>
-    <link rel="stylesheet" data-lift="style-bundle?name=home">
+    <link rel="stylesheet" data-lift="style-bundle?name=landing">
   </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=landing"></script>  
+  </tail>
 </div>
 </div>
 

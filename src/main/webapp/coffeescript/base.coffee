@@ -29,6 +29,18 @@ $("body").on "click", '.submit, #send-message', (event) ->
 $('form.current-step input').on 'keypress', (e) ->
   e.keyCode != 13
 
+$(".close").on "click", (event) ->
+  $(".modal").removeClass "active"
+
+$(".modal").on "click", (event) ->
+  if ($(event.target).is($(".modal")))
+    $(".modal").removeClass "active"
+
+$(document).on 'keyup', (event) ->
+  if (event.keyCode == 27)
+    $(".modal").removeClass "active"
+    $(document).unbind 'keyup'
+
 $(document).ready ->
   $("input, textarea").on "focus", (event) ->
     $target = $(event.target)
