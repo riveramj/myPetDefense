@@ -29,43 +29,56 @@ object Products extends Loggable {
 }
 
 class Products extends Loggable {
-  PetFlowChoices.priceCode(Full("default"))
+  val currentCoupon = PetFlowChoices.coupon.is
+  val currentCouponCode = currentCoupon.map(_.couponCode.get).openOr("")
+  val priceCode = PetFlowChoices.priceCode.is.openOr("default")
 
   val products = Product.findAll()
 
   val prices = Price.findAll(
+    By(Price.code, priceCode),
+    By(Price.active, true)
+  )
+
+  val defaultPrices = Price.findAll(
     By(Price.code, "default"),
     By(Price.active, true)
   )
 
-  def getPriceForProduct(product: String, petType: String) = {
-    val price = prices.filter { price =>
-      val productName = price.product.obj.map(_.name.get).getOrElse("")
-      productName == s"${product} Plus for ${petType}"
+  def getPriceForProduct(product: Product, priceList: List[Price]) = {
+    priceList.filter { price =>
+      price.product.obj == product
     }.headOption.map(_.price.get).getOrElse(0D)
-
-    f"$$$price%2.2f"
   }
 
   def getImageUrl(product: Box[Product]) = {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
   }
   
-  def getImagePriceRating(productName: String): (String, Double, Double, Int) = {
+  def getImagePriceRating(productName: String): (String, Double, Double, Double, Int) = {
     val product = products.filter(_.name.get == productName).headOption
     val imageName = s"images/product-shots/${product.map(_.imageName.get).getOrElse("")}"
-    val price: Double = product.flatMap { possibleProduct =>
-      Price.getDefaultProductPrice(possibleProduct).map(_.price.get)
+    
+    val price = product.map { possibleProduct =>
+      getPriceForProduct(possibleProduct, defaultPrices)
     }.getOrElse(0D)
+
+    val salePrice: Double = if (priceCode == "cold5k") {
+      product.map { possibleProduct =>
+        getPriceForProduct(possibleProduct, prices)
+      }.getOrElse(0D)
+    } else {
+      0D
+    }
     
     val rating = product.map(_.rating.get).getOrElse(0D)
     val reviewCount = product.map(_.reviews.toList.size).getOrElse(0)
 
-    (imageName, price, rating, reviewCount)
+    (imageName, price, salePrice, rating, reviewCount)
   }
 
   def imagePriceRatingBinding(productName: String) = {
-    val (imageName, price, rating, reviewCount) = getImagePriceRating(productName)
+    val (imageName, defaultPrice, salePrice, rating, reviewCount) = getImagePriceRating(productName)
 
     val starBinding = rating match {
       case 0D => 
@@ -124,7 +137,8 @@ class Products extends Loggable {
     starBinding &
     ".count *" #> reviewCount &
     ".product-shot img [src]" #> imageName &
-    ".month-price *" #> f"$$$price%2.2f"
+    ".month-price *" #> f"$$$defaultPrice%2.2f" &
+    ".sale-price *" #> f"$$$salePrice%2.2f"
   }
 
   def render = {
@@ -141,26 +155,34 @@ class Products extends Loggable {
       PetFlowChoices.shoppingCart(Map())
     }
 
-    ".frontline-dogs" #> {
+    ".products .frontline-dogs" #> {
       imagePriceRatingBinding("Frontline Plus for Dogs")
     } &
-    ".zoguard-dogs" #> {
+    ".products .zoguard-dogs" #> {
       imagePriceRatingBinding("ZoGuard Plus for Dogs")
     } &
-    ".adventure-dogs" #> {
+    ".products .adventure-dogs" #> {
       imagePriceRatingBinding("Adventure Plus for Dogs")
     } &
-    ".shieldtec-dogs" #> {
+    ".products .shieldtec-dogs" #> {
       imagePriceRatingBinding("ShieldTec Plus for Dogs")
     } &
-    ".frontline-cats" #> {
+    ".products .frontline-cats" #> {
       imagePriceRatingBinding("Frontline Plus for Cats")
     } &
-    ".zoguard-cats" #> {
+    ".products .zoguard-cats" #> {
       imagePriceRatingBinding("ZoGuard Plus for Cats")
     } &
-    ".adventure-cats" #> {
+    ".products .adventure-cats" #> {
       imagePriceRatingBinding("Adventure Plus for Cats")
+    } andThen
+    {
+      if (currentCouponCode == "cold5k") {
+        ".products [class+]" #> "sale" &
+        ".generic-price [class+]" #> "strike"
+      } else {
+        ".sale-price" #> ClearNodes
+      }
     }
   }
 }

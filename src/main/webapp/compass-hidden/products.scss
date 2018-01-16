@@ -229,6 +229,11 @@
   }
 }
 
+.sale-price {
+  color: #ff0000;
+  font-size: 20px;
+}
+
 .product-options {
   margin-bottom: 30px;
 
@@ -291,6 +296,24 @@
   }
 }
 
+.products.sale {
+  .product a {
+   @media (min-width: $bp-large) {
+      min-height: 482px;
+    }
+  }
+
+  .frontline-dogs .price, .frontline-cats .price {
+    @media (min-width: $bp-medium) {
+      margin-top: 73px;
+    }
+
+    @media (min-width: $bp-large) {
+      margin-top: 54px;
+    }
+  }
+}
+
 .shieldtec-dogs .price {
   @media (min-width: $bp-medium) {
     margin-top: 50px;
@@ -309,4 +332,18 @@
   @media (min-width: $bp-large) {
     margin-top: 0;
   }
+}
+
+.strike {
+  position: relative;
+  display: inline-block;
+}
+
+.strike::before {
+  content: '';
+  border-bottom: 2px solid red;
+  width: 100%;
+  position: absolute;
+  right: 0;
+  top: 50%;
 }
