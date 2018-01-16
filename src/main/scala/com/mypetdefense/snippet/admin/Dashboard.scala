@@ -205,7 +205,7 @@ class Dashboard extends Loggable {
 
   def updateSubscriptionSet(subscriptions: List[Subscription]) = {
     subscriptions.filter { subscription =>
-      subscription.status == Status.Active
+      (subscription.status == Status.Active || subscription.status == Status.BillingSuspended)
     }
   }
 

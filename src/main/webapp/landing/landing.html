@@ -1,5 +1,22 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
 <div data-lift="LandingPage.render">
+  <div id="landing-modal" class="modal active">
+    <!-- Modal content -->
+    <div class="modal-content">
+      <header class="modal-header">
+        <span class="modal-title">Coupon and Pricing Applied!</span>
+        <span class="close">&times;</span>
+      </header>
+      <div class="modal-body">
+        <p>2 months free and $9.99 for life!</p>
+      </div>
+      <footer class="modal-footer">
+        <a href="./products">View Products</a>
+      </footer>
+    </div>
+
+  </div>
+
   <div id="promo-bar">
     Code <span class="coupon-code">2Free</span> applied for <span class="applied-months">2 months free!</span>
   </div>
@@ -9,13 +26,14 @@
         <picture>
           <source 
             media="(min-width: 46.8em)" 
-            srcset="images/logo/logo-name.png, images/logo/logo-name-2x.png 2x">
-        <img src="images/logo/logo-name-small.png" srcset="images/logo/logo-name-small.png, images/logo/logo-name-small@2x.png 2x">
+            srcset="images/logo/logo-name-white.png, images/logo/logo-name-white@2x.png 2x">
+        <img src="images/logo/logo-name-white-small.png" srcset="images/logo/logo-name-white-small.png, images/logo/logo-name-white-small@2x.png 2x">
         </picture>
       </a>
     </div>
     <nav>
       <ul id="menu-entries">
+        <li class="blog"><a href="\\blog.mypetdefense.com" target="_blank">Blog</a></li>
         <li class="login"><a href="./login">Login</a></li>
         <li class="desktop"><a class="signup" href="./products">Sign Up</a></li>
         <li class="mobile"><a class="signup" href="./products">Start</a></li>
@@ -26,7 +44,7 @@
   <div class="hero dog-park">
     <div class="tag-line">
       <h3>
-        <div>Enjoy summer</div>
+        <div>Make sure your pet is</div>
         <div>free of fleas and ticks!</div>
       </h3>
       <div>Monthly deliveries, hassle free.</div>
@@ -69,6 +87,68 @@
         </a>
       </li>
     </ul>
+
+    <div class="video-container"><div class="video-wrapper">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/rusWywSW5rE?rel=0&amp;showinfo=0" frameborder="0" gesture="media" allowfullscreen></iframe>
+    </div></div>
+  </div>
+
+  <div id="testimonials" class="feature">
+    <ul>
+      <li class="feature-tagline mobile">Testimonials</li>
+      <li class="feature-tagline desktop">What Our Customers Say</li>
+      <li class="customer-testimonial">
+        <ul>
+          <li class="rating">
+            <div class="star one filled"></div>
+            <div class="star two filled"></div>
+            <div class="star three filled"></div>
+            <div class="star four filled"></div>
+            <div class="star five filled"></div>
+          </li>
+          <li class="testimonial">
+            I'm in love with My Pet Defense! It is so convenient and easy to have all of my pets protected every month &amp; the customer service is phenomenal (:
+          </li>
+          <li class="name">
+            Shelby, 2 Dogs &amp; 1 Cat
+          </li>
+        </ul>
+      </li>
+      <li class="customer-testimonial">
+        <ul>
+          <li class="rating">
+            <div class="star one filled"></div>
+            <div class="star two filled"></div>
+            <div class="star three filled"></div>
+            <div class="star four filled"></div>
+            <div class="star five filled"></div>
+          </li>
+          <li class="testimonial">
+            My Pet Defense is great, easy, and no hassle at all!
+          </li>
+          <li class="name">
+            Stephanie, 1 Dog
+          </li>
+        </ul>
+      </li>
+      <li class="customer-testimonial">
+        <ul>
+          <li class="rating">
+            <div class="star one filled"></div>
+            <div class="star two filled"></div>
+            <div class="star three filled"></div>
+            <div class="star four filled"></div>
+            <div class="star five filled"></div>
+          </li>
+          <li class="testimonial">
+            My dog gets really bad fleas all year round and this is the only product i found that actually works.
+          </li>
+          <li class="name">
+            Alisha, 2 Dogs
+          </li>
+        </ul>
+      </li>
+    </ul>
   </div>
 
   <div id="never-forget-dose" class="feature">
@@ -101,7 +181,7 @@
         </picture>
       </li>
       <li class="feature-tagline">
-        Monthly subscription starting at under $10
+        Monthly subscription starting at under <span class="low-price">$13</span>
       </li>
       <li class="feature-info">
         With My Pet Defense, you pay a fixed cost each month.
@@ -150,7 +230,7 @@
   <div class="hero product-hand">
     <div class="tag-line">
       <h3>Start getting monthly deliveries of flea and tick products today!</h3>
-      <a class="signup action" href="./pet-choice">
+      <a class="signup action" href="./products">
         View Products<i class="fa fa-caret-right" aria-hidden="true"></i>
       </a>
     </div>
@@ -160,7 +240,7 @@
     <div class="footer-section">
       <h4>Menu</h4>
       <ul>
-        <li><a href="./pet-choice">Sign Up</a></li>
+        <li><a href="./products">Sign Up</a></li>
       </ul>
     </div>
     <div class="footer-section">
@@ -174,10 +254,13 @@
   </div>
   <div id="need-help">Need help? Email us at <a href="mailto:help@mypetdefense.com?Subject=Help">help@mypetdefense.com</a></div>
   <div class="legal">&copy;2017 My Pet Defense. All rights reserved.</div>
-  
+
   <head_merge>
-    <link rel="stylesheet" data-lift="style-bundle?name=home">
+    <link rel="stylesheet" data-lift="style-bundle?name=landing">
   </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=landing"></script>  
+  </tail>
 </div>
 </div>
 

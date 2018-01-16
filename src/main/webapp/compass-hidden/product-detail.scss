@@ -346,12 +346,22 @@
   font-size: 16px;
   font-weight: $normal;
   text-transform: uppercase;
+  display: inline-block;
 
   span {
     color: #259490;
     font-size: 24px;
     font-weight: $bold;
     line-height: 42px;
+  }
+
+  .strike {
+    font-size: 20px;
+  }
+
+  .sale-price {
+    color: #ff0000;
+    padding-right: 5px;
   }
 }
 
@@ -724,4 +734,18 @@
   @media (min-width: $bp-large) {
     width: 237px;
   }
+}
+
+.strike {
+  position: relative;
+  display: inline-block;
+}
+
+.strike::before {
+  content: '';
+  border-bottom: 2px solid red;
+  width: 100%;
+  position: absolute;
+  right: 0;
+  top: 50%;
 }

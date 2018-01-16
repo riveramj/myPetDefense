@@ -50,6 +50,7 @@ object Paths {
   }
 
   val homePage = Menu.i("Home") / "index"
+  
   val thanksPage = Menu.i("Thanks") / "thanks"
   val billingThanksPage = Menu.i("Success!") / "update-success"
 
@@ -107,6 +108,7 @@ object Paths {
     testimonial,
     LandingPage.landing2Free,
     LandingPage.landing3Free,
+    LandingPage.cold5k,
     CartReview.menu,
     Checkout.menu,
     Success.menu,
