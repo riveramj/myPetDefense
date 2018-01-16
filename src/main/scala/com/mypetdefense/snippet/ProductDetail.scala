@@ -42,6 +42,8 @@ class ProductDetail extends Loggable {
 
   val path = S.request.map(_.uri).openOr("").drop(1)
 
+  val priceCode = PetFlowChoices.priceCode.is.openOr("")
+
   var cartRenderer: Box[IdMemoizeTransform] = Empty
   var name = ""
   var chosenProduct: Box[Product] = Empty
@@ -182,10 +184,17 @@ class ProductDetail extends Loggable {
 
   def render = {
     val possibleProduct = products.headOption
-    val price = possibleProduct.flatMap { product =>
+    val productName = possibleProduct.map(_.name.get).getOrElse("")
+
+    val salePrice = possibleProduct.flatMap { product =>
+      Price.getPricesByCode(product, priceCode).map(_.price.get)
+    }.getOrElse(0D)
+
+    val defaultPrice = possibleProduct.flatMap { product =>
       Price.getDefaultProductPrice(product).map(_.price.get)
     }.getOrElse(0D)
-    val productName = products.headOption.map(_.name.get).getOrElse("")
+
+    val currentPrice = if (priceCode == "cold5k") salePrice else defaultPrice
 
     SHtml.makeFormsAjax andThen
     ".product-shot-container" #> productImages.map { productImage =>
@@ -195,10 +204,10 @@ class ProductDetail extends Loggable {
     "#switch-save [href]" #> switchSaveProduct &
     ratingBinding(products) &
     ".product-name *" #> productName &
-    ".dollar-value *" #> f"$$$price%2.2f" &
+    ".dollar-value *" #> f"$$$defaultPrice%2.2f" &
     ".product" #> products.sortWith(_.size.get < _.size.get).map { product =>
       ".size *" #> s"${product.getSizeAndSizeName}" &
-      "^ [onclick]" #> ajaxInvoke(() => updateProductChoice(product, price))
+      "^ [onclick]" #> ajaxInvoke(() => updateProductChoice(product, currentPrice))
     } & 
     ".pet-name" #> ajaxText("", name = _) &
     ".add-to-cart [onclick]" #> ajaxInvoke(() => addToCart()) &
@@ -227,6 +236,14 @@ class ProductDetail extends Loggable {
       ".discount *" #> f"-$$$multiPetDiscount%2.2f" &
       ".subtotal *" #> f"$$$subtotalWithDiscount%2.2f" &
       ".checkout [href]" #> CartReview.menu.loc.calcDefaultHref
+    } andThen
+    {
+      if (priceCode == "cold5k" && !path.contains("frontline")) {
+        ".dollar-value [class+]" #> "strike" &
+        ".sale-price *" #> f"$$$salePrice%2.2f"
+      } else {
+        ".sale-price" #> ClearNodes
+      }
     }
   }
 }
