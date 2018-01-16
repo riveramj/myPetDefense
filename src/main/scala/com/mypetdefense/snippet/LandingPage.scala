@@ -40,18 +40,29 @@ class LandingPage extends Loggable {
 
   val path = S.request.map(_.uri).openOr("").drop(1)
 
-  val (possibleCoupon, monthCount) = path match {
-    case "2free" => (Coupon.find(By(Coupon.couponCode, "2free")), 2)
-    case "3free" => (Coupon.find(By(Coupon.couponCode, "3free")), 3)
-    case "cold5k" => (Coupon.find(By(Coupon.couponCode, "cold5k")), 2)
+  path match {
+    case "2free" => 
+      val possibleCoupon = Coupon.find(By(Coupon.couponCode, "2free"))
+      PetFlowChoices.coupon(possibleCoupon)
+      PetFlowChoices.priceCode(Full("default"))
+      
+    case "3free" => 
+      val possibleCoupon = Coupon.find(By(Coupon.couponCode, "3free"))
+      PetFlowChoices.coupon(possibleCoupon)
+      PetFlowChoices.priceCode(Full("default"))
+
+    case "cold5k" => 
+      val possibleCoupon = Coupon.find(By(Coupon.couponCode, "cold5k"))
+      PetFlowChoices.coupon(possibleCoupon)
+      PetFlowChoices.priceCode(Full("cold5k"))
   }
 
-  PetFlowChoices.coupon(possibleCoupon)
+  val monthCount = PetFlowChoices.coupon.is.map(_.freeMonths.get).openOr(0)
+  val couponCode = PetFlowChoices.coupon.is.map(_.couponCode.get).openOr("")
 
   def render = {
-    ".coupon-code *" #> path &
+    ".coupon-code *" #> couponCode &
     ".applied-months *" #> s" ${monthCount} months free!" &
-    ".low-price *" #> { if (path == "cold5k") "$10" else "$13" }
+    ".low-price *" #> { if (couponCode == "cold5k") "$10" else "$13" }
   }
-
 }
