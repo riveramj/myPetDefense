@@ -32,7 +32,9 @@ object AccountOverview extends Loggable {
 }
 
 class AccountOverview extends Loggable {
-  val user = currentUser
+  val oldUser = currentUser
+  val user = User.find(By(User.userId, oldUser.map(_.userId.get).openOr(0L)))
+  val pets = user.map(_.activePets).openOr(Nil)
   val subscription = user.flatMap(_.getSubscription)
   val priceCode = subscription.map(_.priceCode.get).getOrElse("")
 
@@ -40,10 +42,6 @@ class AccountOverview extends Loggable {
     By(Address.user, user),
     By(Address.addressType, AddressType.Shipping)
   )
-
-  val pets = user.map { parent => 
-    Pet.findAll(By(Pet.user, parent))
-  }.openOr(Nil)
 
   val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
 

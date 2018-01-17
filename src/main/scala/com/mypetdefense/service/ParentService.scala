@@ -236,65 +236,109 @@ object ParentService extends Loggable {
   }
 
   def addNewPet(
-    user: User,
+    oldUser: User,
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value,
     product: Product
   ): Box[Pet] = {
 
+    val newPet = Pet.createNewPet(
+      user = oldUser,
+      name = name,
+      animalType = animalType,
+      size = size,
+      product = product
+    )
+
+    val updatedUser = User.find(By(User.userId, oldUser.userId.get))
+
+    val products: List[Product] = {
+      for {
+        user <- updatedUser.toList
+        pet <- user.activePets
+        product <- pet.product.obj
+      } yield {
+        product
+      }
+    }
+
+    val (subscriptionId, priceCode, stripeId) = (
+      for {
+        user <- updatedUser
+        subscription <- user.getSubscription
+      } yield {
+        (subscription.stripeSubscriptionId.get, subscription.priceCode.get, user.stripeId.get)
+      }
+    ).openOr(("", "", ""))
+
+    val prices: List[Double] = products.map { product =>
+      Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0D)
+    }
+
+    val totalCost = "%.2f".format(prices.foldLeft(0D)(_ + _)).toDouble
+
     val updatedSubscription = updateStripeSubscriptionQuantity(
-      user.stripeId.get,
-      user.getSubscription.map(_.stripeSubscriptionId.get).getOrElse(""),
-      user.pets.size + 1
+      stripeId,
+      subscriptionId,
+      tryo((totalCost * 100).toInt).openOr(0)
     )
 
     updatedSubscription match {
-      case Full(stripeSub) =>
-        Full(Pet.createNewPet(
-          user = user,
-          name = name,
-          animalType = animalType,
-          size = size,
-          product = product
-        ))
-
+      case Full(stripeSub) => Full(newPet)
       case _ => Empty
     }
   }
 
-  def removePet(oldUser: Box[User], pet: Pet): Box[Pet] = {
+  def removePet(oldUser: Box[User], pet: Pet): Box[String] = {
     oldUser.map(user => removePet(user, pet)).openOr(Empty)
   }
 
-  def removePet(oldUser: User, pet: Pet): Box[Pet] = {
-    val user = User.find(By(User.userId, oldUser.userId.get))
-
-    val subscriptionId = (
+  def removePet(oldUser: User, oldPet: Pet): Box[String] = {
+    val refreshedPet = Pet.find(By(Pet.petId, oldPet.petId.get))
+    refreshedPet.map(_.status(Status.Inactive).saveMe)
+    
+    val updatedUser = User.find(By(User.userId, oldUser.userId.get))
+    
+    val products: List[Product] = {
       for {
-        updatedUser <- user
-        subscription <- updatedUser.getSubscription
+        user <- updatedUser.toList
+        pet <- user.activePets
+        product <- pet.product.obj
       } yield {
-        subscription.stripeSubscriptionId.get
+        product
       }
-    ).openOr("")
+    }
+
+    val (subscriptionId, priceCode) = (
+      for {
+        user <- updatedUser
+        subscription <- user.getSubscription
+      } yield {
+        (subscription.stripeSubscriptionId.get, subscription.priceCode.get)
+      }
+    ).openOr(("", ""))
+
+    val prices: List[Double] = products.map { product =>
+      Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0D)
+    }
+
+    val totalCost = "%.2f".format(prices.foldLeft(0D)(_ + _)).toDouble
 
     val updatedSubscription = updateStripeSubscriptionQuantity(
-      user.map(_.stripeId.get).openOr(""),
+      updatedUser.map(_.stripeId.get).openOr(""),
       subscriptionId,
-      user.map(_.pets.size - 1).openOr(0)
+      tryo((totalCost * 100).toInt).openOr(0)
     )
 
     updatedSubscription match {
       case Full(stripeSub) =>
-        val petRemoved = Full(pet.status(Status.Inactive).saveMe)
-
-        if (user.map(_.activePets.size == 0).openOr(false)) {
-          val subscription = user.flatMap(_.getSubscription)
+        if (updatedUser.map(_.activePets.size == 0).openOr(false)) {
+          val subscription = updatedUser.flatMap(_.getSubscription)
           subscription.map(_.status(Status.UserSuspended).saveMe)
         }
 
-        petRemoved
+        Full("")
 
       case _ =>
         Empty
