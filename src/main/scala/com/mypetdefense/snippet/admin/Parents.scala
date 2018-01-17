@@ -137,7 +137,7 @@ class Parents extends Loggable {
         size = product.size.get
       } yield {
         ParentService.addNewPet(
-          user = parent,
+          oldUser = parent,
           name = petName,
           animalType = pet,
           size = size,
