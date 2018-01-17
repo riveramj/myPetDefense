@@ -78,7 +78,7 @@ class Checkout extends Loggable {
 
   val groupon_? = (subtotalWithDiscount == 0) && (groupons.size > 0)
 
-  val pennyCount = (subtotalWithDiscount * 100).toInt
+  val pennyCount = (subtotal * 100).toInt
 
   def calculateTax(possibleState: String, possibleZip: String) = {
     state = possibleState
