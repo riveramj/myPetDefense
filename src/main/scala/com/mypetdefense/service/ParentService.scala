@@ -31,7 +31,7 @@ object ParentService extends Loggable {
     )
   }
 
-  def updateStripeSubscriptionQuantity(customerId: String, subscriptionId: String, quantity: Int) = {
+  def updateStripeSubscriptionQuantity(customerId: String, subscriptionId: String, quantity: Int): Box[StripeSubscription] = {
     val subscription = StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
@@ -49,7 +49,7 @@ object ParentService extends Loggable {
       
       case TryFail(throwable: Throwable) =>
         logger.error(s"update subscription failed with other error: ${throwable}")
-        throwable
+        Failure(throwable.toString)
     }
   }
 
@@ -65,7 +65,7 @@ object ParentService extends Loggable {
   }
 
   def removeParent(oldUser: User): Box[User] = {
-    val user = User.find(By(User.userId, oldUser.userId.get))
+    val user = oldUser.refresh
     val stripeCustomerId = user.map(_.stripeId.get).openOr("")
     
     val removeCustomer = Customer.delete(stripeCustomerId)
@@ -251,38 +251,7 @@ object ParentService extends Loggable {
       product = product
     )
 
-    val updatedUser = User.find(By(User.userId, oldUser.userId.get))
-
-    val products: List[Product] = {
-      for {
-        user <- updatedUser.toList
-        pet <- user.activePets
-        product <- pet.product.obj
-      } yield {
-        product
-      }
-    }
-
-    val (subscriptionId, priceCode, stripeId) = (
-      for {
-        user <- updatedUser
-        subscription <- user.getSubscription
-      } yield {
-        (subscription.stripeSubscriptionId.get, subscription.priceCode.get, user.stripeId.get)
-      }
-    ).openOr(("", "", ""))
-
-    val prices: List[Double] = products.map { product =>
-      Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0D)
-    }
-
-    val totalCost = "%.2f".format(prices.foldLeft(0D)(_ + _)).toDouble
-
-    val updatedSubscription = updateStripeSubscriptionQuantity(
-      stripeId,
-      subscriptionId,
-      tryo((totalCost * 100).toInt).openOr(0)
-    )
+    val updatedSubscription = updateStripeSubscriptionTotal(oldUser)
 
     updatedSubscription match {
       case Full(stripeSub) => Full(newPet)
@@ -290,15 +259,8 @@ object ParentService extends Loggable {
     }
   }
 
-  def removePet(oldUser: Box[User], pet: Pet): Box[String] = {
-    oldUser.map(user => removePet(user, pet)).openOr(Empty)
-  }
-
-  def removePet(oldUser: User, oldPet: Pet): Box[String] = {
-    val refreshedPet = Pet.find(By(Pet.petId, oldPet.petId.get))
-    refreshedPet.map(_.status(Status.Inactive).saveMe)
-    
-    val updatedUser = User.find(By(User.userId, oldUser.userId.get))
+  def updateStripeSubscriptionTotal(oldUser: User): Box[StripeSubscription] = {
+    val updatedUser = oldUser.refresh
     
     val products: List[Product] = {
       for {
@@ -325,12 +287,25 @@ object ParentService extends Loggable {
 
     val totalCost = "%.2f".format(prices.foldLeft(0D)(_ + _)).toDouble
 
-    val updatedSubscription = updateStripeSubscriptionQuantity(
+    updateStripeSubscriptionQuantity(
       updatedUser.map(_.stripeId.get).openOr(""),
       subscriptionId,
       tryo((totalCost * 100).toInt).openOr(0)
     )
+  }
 
+  def removePet(oldUser: Box[User], pet: Pet): Box[Pet] = {
+    oldUser.map(user => removePet(user, pet)).openOr(Empty)
+  }
+
+  def removePet(oldUser: User, oldPet: Pet): Box[Pet] = {
+    val refreshedPet = Pet.find(By(Pet.petId, oldPet.petId.get))
+    val updatedPet = refreshedPet.map(_.status(Status.Inactive).saveMe)
+
+    val updatedSubscription = updateStripeSubscriptionTotal(oldUser)
+
+    val updatedUser = oldUser.refresh
+    
     updatedSubscription match {
       case Full(stripeSub) =>
         if (updatedUser.map(_.activePets.size == 0).openOr(false)) {
@@ -338,7 +313,7 @@ object ParentService extends Loggable {
           subscription.map(_.status(Status.UserSuspended).saveMe)
         }
 
-        Full("")
+        updatedPet
 
       case _ =>
         Empty
