@@ -90,7 +90,7 @@ class PetsAndProducts extends Loggable {
         size = product.size.get
       } yield {
         ParentService.addNewPet(
-          user = parent,
+          oldUser = parent,
           name = newPetName,
           animalType = pet,
           size = size,
@@ -130,7 +130,7 @@ class PetsAndProducts extends Loggable {
   }
 
   def savePet(pet: Pet, name: String, updatedProduct: Box[Product]) = {
-    (
+    val updatedPet = (
       for {
         product <- updatedProduct
         size = product.size.get
@@ -138,8 +138,12 @@ class PetsAndProducts extends Loggable {
       } yield {
         updatedPet 
       }
-    ) match {
-      case Full(pet) =>
+    )
+
+    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal(_))
+
+    updatedSubscription match {
+      case Full(stripeSub) =>
         S.redirectTo(PetsAndProducts.menu.loc.calcDefaultHref)
       case _ =>
         Alert("An error has occured. Please try again.")

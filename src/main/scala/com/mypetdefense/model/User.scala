@@ -49,6 +49,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
 
   def activePets = pets.filter(_.status == Status.Active)
 
+  def refresh = User.find(By(User.userId, userId.get))
+
   def createNewUser(
     firstName: String,
     lastName: String,
