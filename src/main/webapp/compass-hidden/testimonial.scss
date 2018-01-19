@@ -1,6 +1,280 @@
-@import "base";  
+@import "base";
 @import "nav-bar";
+@import "how-it-works";
 @import "compass/css3/user-interface";
+
+#logo-name { 
+  padding: em(20px) 0;
+  text-align: center;
+  
+  display: block;
+  float: none;
+}
+
+#hero-dog-cat {
+  background: url(../../images/dog_play.jpg) no-repeat top center;
+  background-size: cover;
+  width: 100%;
+  padding: 40px 0px;
+  text-align: center;
+
+  background-position-x: -170px;
+
+  @media (min-width: 35em) {
+    background-position-x: center;
+  }
+
+  @media (min-width: $bp-medium) {
+    background-attachment: fixed;
+  }
+
+  @media (min-width: $bp-large) {
+    padding-bottom: 80px;
+  }
+
+  .signup {
+    display: inline-block;
+    text-transform: uppercase;
+    font-size: rem(30px);
+
+    padding: rem(20px) rem(40px); 
+    margin-top: rem(15px);
+
+    border-radius: 5px;
+
+    .fa-caret-right {
+      margin-left: 13px;
+    }
+
+    @media (min-width: $bp-medium) {
+      font-weight: $normal;
+      font-size: rem(30px);
+
+      .fa-caret-right {
+        font-size: 30px;
+      }
+    }
+  }
+}
+
+#tag-line-container {
+  background-color: rgba(0, 0, 0, 0.7);
+  text-align: center;
+  padding: em(30px) em(20px) em(30px);
+  color: #ffffff;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+
+  max-width: 745px;
+  margin: 0 auto;
+
+  @media (min-width: $bp-large) {
+    padding: 35px 50px 40px;
+  }
+
+  h3 {
+    font-size: rem(34px);
+    font-weight: $semibold;
+    line-height: 41px;
+
+    width: 297px;
+    margin: 0 auto;
+
+    @media (min-width: $bp-medium) {
+      font-size: rem(55px);
+      line-height: rem(66px);
+      width: auto;
+    }
+  }
+
+  div {
+    line-height: rem(34px);
+    font-size: rem(28px);
+    font-weight: $normal;
+    margin-top: 15px;
+    
+    @media (min-width: $bp-medium) {
+      font-size: rem(30px);
+    }
+  }
+}
+
+#why-mpd {
+  text-align: center;
+  padding: 30px;
+
+  max-width: 600px;
+  margin: 0 auto;
+
+  h3 {
+    font-size: rem(28px);
+    line-height: rem(34px);
+    margin-bottom: 20px;
+    color: #3a3a3a;
+
+    @media (min-width: $bp-medium) {
+      font-size: rem(30px);
+      margin-top: 25px;
+    }
+  }
+
+  div {
+    font-size: 18px;
+    line-height: 26px;
+  }
+}
+
+#benefits {
+  .benefit-header {
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #1C8884;
+    margin: 45px 0 15px;
+  }
+
+  .benefit {
+    padding-bottom: 10px;
+    color: #3a3a3a;
+  }
+}
+
+#contact-us {
+  background: url(../../images/winter-background-5.jpg) no-repeat top center fixed;
+  background-size: cover;
+  padding: 100px 0;
+
+  @media (min-width: $bp-medium) {
+    padding: 70px 0;
+  }
+
+  h4 {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+
+  form, .thanks {
+    padding: 40px 20px;
+    background-color: #1C8884;
+    max-width: 550px;
+    
+    font-size: 15px;
+    font-weight: $normal;
+    color: #ffffff;
+
+    margin: 0 auto;
+
+    @media (min-width: $bp-medium) {
+      padding: 40px 50px;
+      max-width: 650px;
+    }
+
+    label, input, textarea {
+      display: block;
+      width: 100%;
+    }
+
+    input, textarea {
+      padding: 15px;
+      margin: 4px 0 20px;
+      border-radius: 4px;
+      border: none;
+      font-size: 14px;
+    }
+
+    #send-message {
+      margin: 0 auto;
+      padding: 10px 20px;
+      display: block;
+      color: #ffffff;
+      font-size: 17px;
+      
+      border: none;
+      border-radius: 4px;
+      text-transform: uppercase;
+      cursor: pointer;
+
+      @media (min-width: $bp-medium) {
+        width: auto;
+      }
+    }
+  }
+}
+
+.action {
+  background-color: #FF8627;
+  box-shadow: 0 6px #E2690A;
+
+  &:hover {
+    background-color: #FF7A11;
+  }
+
+  &:active {
+    box-shadow: 0 3px #E2690A;
+    transform: translateY(4px);
+  }
+}
+
+.message-sent {
+  text-align: center;
+  margin-top: 25px;
+
+  &.hidden {
+    display: none;
+  }
+}
+
+#footer {
+  background-color: #454343;
+  padding: em(50px) em(20px) 0;
+
+  text-align: center;
+
+  @media (min-width: $bp-large) {
+    padding-bottom: rem(3px);
+  }
+}
+
+.footer-section {
+  color: #ffffff;
+
+  h4 {
+    text-transform: uppercase;
+    color: #B2B0B0;
+    font-size: em(15px);
+    font-weight: $semibold;
+  }
+
+  ul {
+    padding-top: rem(10px);
+    line-height: rem(23px);
+  }
+  
+  a {
+    text-decoration: none;
+    color: #ffffff;
+
+    &:visited {
+      color: #ffffff;
+    }
+  }
+}
+
+.legal {
+  background-color: #454343;
+  color: #949494;
+  padding: rem(26px) 0 rem(9px);
+  font-size: em(12px);
+  text-align: center;
+
+  @media (min-width: $bp-medium) {
+    padding: rem(26px) 0 rem(15px);
+  }
+}
+
+.validation-error {
+  color: #FFE02e;
+}
 
 body {
   background-color: #454343;
