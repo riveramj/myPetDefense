@@ -65,6 +65,13 @@ case class TestimonialEmail(
   testimonial: String,
   comments: String
 ) extends EmailActorMessage
+case class PictureEmail(
+  name: String,
+  email: String,
+  dogName: String,
+  instagram: String,
+  dogLove: String
+) extends EmailActorMessage
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
@@ -344,6 +351,26 @@ trait TestimonialEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait PictureEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case PictureEmail(name, email, dogName, instagram, dogLove) =>
+      val testimonialTemplate =
+        Templates("emails-hidden" :: "picture-email" :: Nil) openOr NodeSeq.Empty
+      
+      val subject = "New Picture Release"
+      
+      val transform = {
+        "#name *" #> name &
+        "#email *" #> email &
+        "#dog-name *" #> dogName &
+        "#instagram *" #> instagram &
+        "#dog-love *" #> dogLove
+      }
+
+      sendEmail(subject, "mike.rivera@mypetdefense.com", transform(testimonialTemplate))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -411,6 +438,7 @@ object EmailActor extends EmailActor
 trait EmailActor extends EmailHandlerChain
                     with WelcomeEmailHandling
                     with FeedbackEmailHandling
+                    with PictureEmailHandling
                     with NewPetAddedEmailHandling
                     with PetRemovedEmailHandling
                     with BillingUpdatedHandling
