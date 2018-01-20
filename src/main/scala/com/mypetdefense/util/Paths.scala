@@ -56,6 +56,9 @@ object Paths {
 
   val testimonial = Menu.i("Review") / "testimonial" >>
     TemplateBox(() => Templates("testimonial" :: Nil))
+
+  val pictureRelease = Menu.i("Picture Release") / "picture" >>
+    TemplateBox(() => Templates("picture" :: Nil))
   
   val loggedIn = If(
     () => SecurityContext.loggedIn_?,
@@ -106,6 +109,7 @@ object Paths {
     thanksPage,
     billingThanksPage,
     testimonial,
+    pictureRelease,
     LandingPage.landing2Free,
     LandingPage.landing3Free,
     LandingPage.cold5k,

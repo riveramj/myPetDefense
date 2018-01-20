@@ -1,0 +1,60 @@
+<div id="main" data-lift="surround?with=default-template;at=content"> 
+  <div id="top-bar">
+    <div id="logo-name">
+      <a href="/">
+        <picture>
+        <img src="images/logo/logo-name.png" srcset="images/logo/logo-name.png, images/logo/logo-name-2x.png 2x">
+        </picture>
+      </a>
+    </div>
+  </div>
+  <div id="contact-us" data-lift="Picture">
+    <form>
+      <h4>Picture Release</h4>
+      <label>
+        <div><span class="field-label">Name</span></div>
+        <input class="name" type="text">
+      </label>
+      <label>
+        <div><span class="field-label">Dog Name</span></div>
+        <input class="dog-name" type="text">
+      </label>
+      <label>
+        <div class="email-container"><span class="field-label">Email</span></div>
+        <input class="email" type="text">
+      </label>
+      <label>
+        <div><span class="field-label">Instagram</span></div>
+        <input class="instagram" type="text">
+      </label>
+
+      <label>
+        <div class="testimonial-container"><span class="field-label">What I Love About My Dog</span></div>
+        <textarea class="dog-love" rows="5" placeholder="He does this silly face..."></textarea>
+      </label>
+
+      <button type="submit" class="action photo" id="send-message">Submit</button>
+      <div>By clicking sumbit you agree to our <a href="/photo-release.pdf" target="_blank">photo terms and agreement.</a></div>
+    </form>
+  </div>
+
+  <div id="footer">
+    <div class="footer-section">
+      <h4>Follow</h4>
+      <ul>
+        <li><a href="https://twitter.com/mypetdefense">Twitter</a></li>
+        <li><a href="https://www.facebook.com/mypetdefense/">Facebook</a></li>
+        <li><a href="https://www.instagram.com/mypetdefense/">Instagram</a></li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="legal">&copy;2017 My Pet Defense. All rights reserved.</div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=testimonial
+">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=landing"></script>
+  </tail>
+</div>
