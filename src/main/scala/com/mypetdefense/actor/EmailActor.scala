@@ -438,6 +438,7 @@ object EmailActor extends EmailActor
 trait EmailActor extends EmailHandlerChain
                     with WelcomeEmailHandling
                     with FeedbackEmailHandling
+                    with PictureEmailHandling
                     with NewPetAddedEmailHandling
                     with PetRemovedEmailHandling
                     with BillingUpdatedHandling
