@@ -4,18 +4,22 @@
     <!-- Modal content -->
     <div class="modal-content">
       <header class="modal-header">
-        <span class="modal-title">Dog Gone Cold 5k</span>
-        <span class="close">&times;</span>
+        <span class="close"></span>
+        <picture>
+          <source 
+            media="(min-width: 70em)" 
+            srcset="images/fall-dog-run.jpg, images/fall-dog-run@2x.jpg 2x">
+          <source 
+            media="(min-width: 48em)" 
+            srcset="images/fall-dog-run-tablet.jpg, images/fall-dog-run-tablet@2x.jpg 2x">
+          <img src="images/fall-dog-run-mobile.jpg" srcset="images/fall-dog-run-mobile.jpg, images/fall-dog-run-mobile@2x.jpg 2x">
+        </picture>
       </header>
       <div class="modal-body">
-        <p>Great job out there at the race!
-        <br>
-        <br>
-        Click below to get your disconted pricing at $9.99 a month.</p>
+        <span class="modal-title">Your Discount</span>
+        <p class="modal-offer">Your Offer</p>
+        <a href="./products" class="signup action modal-action">View Products</a>
       </div>
-      <footer class="modal-footer">
-        <a href="./products">View Products</a>
-      </footer>
     </div>
 
   </div>
