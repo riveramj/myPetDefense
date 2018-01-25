@@ -33,6 +33,9 @@ object LandingPage extends Loggable {
 
   val cold5k = Menu.i("Dog Gone 5k") / "cold5k" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
+  
+  val doggiePalooza = Menu.i("Doggie-Palooza") / "palooza" >>
+    TemplateBox(() => Templates("landing" :: "landing" :: Nil))
 }
 
 class LandingPage extends Loggable {

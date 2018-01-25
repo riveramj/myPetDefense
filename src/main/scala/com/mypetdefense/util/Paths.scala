@@ -113,6 +113,7 @@ object Paths {
     LandingPage.landing2Free,
     LandingPage.landing3Free,
     LandingPage.cold5k,
+    LandingPage.doggiePalooza,
     CartReview.menu,
     Checkout.menu,
     Success.menu,
