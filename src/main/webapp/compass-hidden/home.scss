@@ -140,38 +140,38 @@
       padding: 0 70px;
     }
   }
+}
 
-  .signup {
-    display: inline-block;
-    border-radius: 5px;
+.tag-line .signup, .modal-body .signup {
+  display: inline-block;
+  border-radius: 5px;
 
-    padding: rem(15px) rem(41px); 
-    margin-top: rem(22px);
-    margin-bottom: rem(40px);
+  padding: rem(15px) rem(41px); 
+  margin-top: rem(22px);
+  margin-bottom: rem(40px);
 
-    font-size: 17px;
-    font-weight: $bold;
-    line-height: 27px;
+  font-size: 17px;
+  font-weight: $bold;
+  line-height: 27px;
 
-    letter-spacing: 0.4px;
+  letter-spacing: 0.4px;
 
-    background-color: #FF8627;
+  background-color: #FF8627;
 
-    @media (min-width: $bp-large) {
-      margin-top: rem(38px);
-    }
+  @media (min-width: $bp-large) {
+    margin-top: rem(38px);
+  }
 
-    &:after {
-      @extend %icon;
-      content: $fa-var-caret-right;
-      margin-left: -2px;
-    }
+  &:after {
+    @extend %icon;
+    content: $fa-var-caret-right;
+    margin-left: -2px;
   }
 }
 
 .video-wrapper {
-	position: relative;
-	padding-bottom: 275px; /* 16:9 */
+  position: relative;
+  padding-bottom: 275px; /* 16:9 */
 	padding-top: 25px;
 	height: 0;
 }
