@@ -36,6 +36,9 @@ object LandingPage extends Loggable {
   
   val doggiePalooza = Menu.i("Doggie-Palooza") / "palooza" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
+
+  val woofstock = Menu.i("Woofstock 2018") / "woofstock" >>
+    TemplateBox(() => Templates("landing" :: "landing" :: Nil))
 }
 
 class LandingPage extends Loggable {
@@ -67,6 +70,12 @@ class LandingPage extends Loggable {
       PetFlowChoices.coupon(possibleCoupon)
       PetFlowChoices.priceCode(Full("default"))
       ("Doggie-Palooza Discount","Hope you enjoyed your day at the park! Two free months has been added to your cart.")
+
+    case "woofstock" =>
+      val possibleCoupon = Coupon.find(By(Coupon.couponCode, "woofstock"))
+      PetFlowChoices.coupon(possibleCoupon)
+      PetFlowChoices.priceCode(Full("default"))
+      ("Woofstock 2018 Discount","Hope you enjoyed your day at Woofstock! Two free months has been added to your cart.")
   }
 
   val monthCount = PetFlowChoices.coupon.is.map(_.freeMonths.get).openOr(0)
