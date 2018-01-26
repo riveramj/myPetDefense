@@ -77,7 +77,7 @@ class LandingPage extends Loggable {
     ".applied-months *" #> s" ${monthCount} months free!" &
     ".low-price *" #> { if (couponCode == "cold5k") "$10" else "$13" } &
     ".modal-title *" #> modalTitle &
-    ".modal-offer *" #> modalOffer
-
+    ".modal-offer *" #> modalOffer &
+    ".modal [class+]" #> { if (modalTitle == "") "" else "active" }
   }
 }
