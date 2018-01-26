@@ -47,25 +47,25 @@ class LandingPage extends Loggable {
   val path = S.request.map(_.uri).openOr("").drop(1)
 
   val (modalTitle, modalOffer) = path match {
-    case "2free" => 
+    case "2free" =>
       val possibleCoupon = Coupon.find(By(Coupon.couponCode, "2free"))
       PetFlowChoices.coupon(possibleCoupon)
       PetFlowChoices.priceCode(Full("default"))
       ("","")
       
-    case "3free" => 
+    case "3free" =>
       val possibleCoupon = Coupon.find(By(Coupon.couponCode, "3free"))
       PetFlowChoices.coupon(possibleCoupon)
       PetFlowChoices.priceCode(Full("default"))
       ("","")
 
-    case "cold5k" => 
+    case "cold5k" =>
       val possibleCoupon = Coupon.find(By(Coupon.couponCode, "cold5k"))
       PetFlowChoices.coupon(possibleCoupon)
       PetFlowChoices.priceCode(Full("cold5k"))
       ("Dog Gone Cold 5k Discount", "Great job out there at the race! Click below to get your disconted pricing at $9.99 a month.")
 
-    case "palooza" => 
+    case "palooza" =>
       val possibleCoupon = Coupon.find(By(Coupon.couponCode, "palooza"))
       PetFlowChoices.coupon(possibleCoupon)
       PetFlowChoices.priceCode(Full("default"))
