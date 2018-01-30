@@ -3,6 +3,7 @@ package com.mypetdefense.model
 import net.liftweb.mapper._
 import net.liftweb.common.Box
 import java.util.Date
+import net.liftweb.util.Props
 
 import com.mypetdefense.util.RandomIdGenerator._
 
@@ -42,10 +43,12 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
   def getDefaultProductPrice(product: Product, active: Boolean = true) = {
     Price.find(
       By(Price.product, product),
-      By(Price.code, "default"),
+      By(Price.code, Price.defaultPriceCode),
       By(Price.active, active)
     )
   }
 }
 
-object Price extends Price with LongKeyedMetaMapper[Price]
+object Price extends Price with LongKeyedMetaMapper[Price] {
+  final val defaultPriceCode = Props.get("default.price.code").openOr("default")
+}

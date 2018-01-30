@@ -242,7 +242,7 @@ class Checkout extends Loggable {
       subscriptionId,
       new Date(),
       new Date(),
-      priceCode.is.openOr("default")
+      priceCode.is.openOr(Price.defaultPriceCode)
     )
 
     if (Props.mode == Props.RunModes.Production) {

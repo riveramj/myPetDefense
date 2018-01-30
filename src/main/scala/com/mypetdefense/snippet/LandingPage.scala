@@ -50,13 +50,13 @@ class LandingPage extends Loggable {
     case "2free" =>
       val possibleCoupon = Coupon.find(By(Coupon.couponCode, "2free"))
       PetFlowChoices.coupon(possibleCoupon)
-      PetFlowChoices.priceCode(Full("default"))
+      PetFlowChoices.priceCode(Full(Price.defaultPriceCode))
       ("","")
       
     case "3free" =>
       val possibleCoupon = Coupon.find(By(Coupon.couponCode, "3free"))
       PetFlowChoices.coupon(possibleCoupon)
-      PetFlowChoices.priceCode(Full("default"))
+      PetFlowChoices.priceCode(Full(Price.defaultPriceCode))
       ("","")
 
     case "cold5k" =>
@@ -68,13 +68,13 @@ class LandingPage extends Loggable {
     case "palooza" =>
       val possibleCoupon = Coupon.find(By(Coupon.couponCode, "palooza"))
       PetFlowChoices.coupon(possibleCoupon)
-      PetFlowChoices.priceCode(Full("default"))
+      PetFlowChoices.priceCode(Full(Price.defaultPriceCode))
       ("Doggie-Palooza Discount","Hope you enjoyed your day at the park! Two free months has been added to your cart.")
 
     case "woofstock" =>
       val possibleCoupon = Coupon.find(By(Coupon.couponCode, "woofstock"))
       PetFlowChoices.coupon(possibleCoupon)
-      PetFlowChoices.priceCode(Full("default"))
+      PetFlowChoices.priceCode(Full(Price.defaultPriceCode))
       ("Woofstock 2018 Discount","Hope you enjoyed your day at Woofstock! Two free months has been added to your cart.")
   }
 
