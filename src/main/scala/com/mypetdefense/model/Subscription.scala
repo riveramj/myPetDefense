@@ -42,7 +42,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     stripeSubscriptionId: String,
     startDate: Date,
     nextShipDate: Date,
-    priceCode: String = "default"
+    priceCode: String = Price.defaultPriceCode
   ) = {
     Subscription.create
     .subscriptionId(generateLongId)
