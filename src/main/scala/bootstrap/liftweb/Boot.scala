@@ -55,8 +55,7 @@ class Boot {
     DataLoader.loadAdmin
     DataLoader.loadGroupons
     DataLoader.updateParentNoPets
-    DataLoader.updateBlankPriceCode
-
+    
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
     
