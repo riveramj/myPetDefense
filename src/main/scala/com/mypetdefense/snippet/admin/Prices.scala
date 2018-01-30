@@ -34,9 +34,14 @@ object Prices extends Loggable {
     loggedIn
 }
 
+case class DisplayPrice(code: String, price: Double, productName: String)
+
 class Prices extends Loggable {
   val productNames = Product.findAll().map(_.name.get).distinct
-  val prices = Price.findAll()
+  val allPrices = Price.findAll()
+  val prices: List[DisplayPrice] = allPrices.map { price =>
+    DisplayPrice(price.code.get, price.price.get, price.product.obj.map(_.name.get).openOr(""))
+  }.distinct
 
   var code = ""
   var rawPrice = ""
@@ -44,7 +49,7 @@ class Prices extends Loggable {
   
   def productDropdown = {
     SHtml.select(
-      ("","") +: productNames.map(name => (name,name)),
+      ("","") +: productNames.sortWith(_<_).map(name => (name,name)),
       Full(chosenProduct),
       chosenProduct = _
     )
@@ -58,40 +63,30 @@ class Prices extends Loggable {
     ).flatten
 
     if(validateFields.isEmpty) {
-
       val priceDbId = generateLongId
       val date = LocalDate.now
       val name = s"${chosenProduct} (${code} ${date})"
 
       val selectedProducts = Product.findAll(By(Product.name, chosenProduct))
-
-      val stripePrice = PriceService.createStripePrice(
-        price,
-        priceDbId,
-        name
-      )
-
-      stripePrice match {
-        case Full(_) =>
-          for {
-            product <- selectedProducts
-          } yield {
-            Price.createPrice(priceDbId, price, code, product, name)
-          }
-
-          S.redirectTo(Prices.menu.loc.calcDefaultHref)
-
-        case _ =>
-          Noop
+      for {
+        product <- selectedProducts
+      } yield {
+        Price.createPrice(priceDbId, price, code, product, name)
       }
-      
+
+      S.redirectTo(Prices.menu.loc.calcDefaultHref)
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
   }
 
-  def deletePrice(price: Price)() = {
-    price.delete_!
+  def deletePrice(price: DisplayPrice)() = {
+    val products = Product.findAll(By(Product.name, price.productName))
+    products.map { product =>
+      val prices = Price.findAll(By(Price.product, product), By(Price.code, price.code))
+      prices.map(_.delete_!)
+    }
+    
     S.redirectTo(Prices.menu.loc.calcDefaultHref)
   }
 
@@ -104,15 +99,11 @@ class Prices extends Loggable {
       "#product-container #product-select" #> productDropdown &
       "#create-item" #> SHtml.ajaxSubmit("Create Price", () => createPrice)
     } &
-    ".price-entry" #> prices.map { price =>
+    ".price-entry" #> prices.sortWith(_.code < _.code).map { price =>
       ".code *" #> price.code.toString &
       ".product-price *" #> price.price &
-      ".product *" #> price.product.obj.map(_.name.get) &
-      ".status *" #> price.active &
+      ".product *" #> price.productName &
       ".delete [onclick]" #> SHtml.ajaxInvoke(deletePrice(price))
     }
   }
 }
-
-
-
