@@ -5,7 +5,7 @@ import net.liftweb._
   import common._
   import util._
 import net.liftweb.mapper.By
-import me.frmr.stripe.{Coupon => StripeCoupon, _}
+import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
 import dispatch._, Defaults._
 
 object DataLoader extends Loggable {
@@ -242,6 +242,15 @@ object DataLoader extends Loggable {
 
       if (pets.size == 0)
         parent.getSubscription.map(_.status(Status.UserSuspended).saveMe)
+    }
+  }
+
+  def updateBlankPriceCode = {
+    val subscriptions = Subscription.findAll()
+
+    subscriptions.map { subscription =>
+      if (subscription.priceCode.get == "")
+        subscription.priceCode("default").saveMe
     }
   }
 }
