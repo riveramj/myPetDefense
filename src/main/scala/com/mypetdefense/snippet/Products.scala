@@ -31,7 +31,7 @@ object Products extends Loggable {
 class Products extends Loggable {
   val currentCoupon = PetFlowChoices.coupon.is
   val currentCouponCode = currentCoupon.map(_.couponCode.get).openOr("")
-  val priceCode = PetFlowChoices.priceCode.is.openOr("default")
+  val priceCode = PetFlowChoices.priceCode.is.openOr(Price.defaultPriceCode)
 
   val products = Product.findAll()
 
@@ -41,7 +41,7 @@ class Products extends Loggable {
   )
 
   val defaultPrices = Price.findAll(
-    By(Price.code, "default"),
+    By(Price.code, Price.defaultPriceCode),
     By(Price.active, true)
   )
 

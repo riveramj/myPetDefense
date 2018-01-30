@@ -31,7 +31,8 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value,
-    sizeName: String
+    sizeName: String,
+    imageName: String
   ) = {
     Product.create
     .productId(generateLongId)
@@ -39,6 +40,7 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     .animalType(animalType)
     .size(size)
     .sizeName(sizeName)
+    .imageName(imageName)
     .saveMe
   }
 }

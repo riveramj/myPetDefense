@@ -5,35 +5,168 @@ import net.liftweb._
   import common._
   import util._
 import net.liftweb.mapper.By
-import me.frmr.stripe.{Coupon => StripeCoupon, _}
+import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
 import dispatch._, Defaults._
 
 object DataLoader extends Loggable {
   def loadProducts = {
+    if (Product.findAll().isEmpty) {
+      Product.createProduct(
+        name = "Adventure Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatMedium,
+        sizeName = "Medium",
+        imageName = "adventure/Adventure-Plus-medium-cat.jpg"
+      )
+
+      Product.createProduct(
+        name = "Adventure Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatLarge,
+        sizeName = "Large",
+        imageName = "adventure/Adventure-Plus-large-cat.jpg"
+      )
+
+      Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatSmall,
+        sizeName = "Small",
+        imageName = "zoguard/ZoGuard-Plus-cat-2.jpg"
+      )
+
+      Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatMedium,
+        sizeName = "Medium",
+        imageName = "zoguard/ZoGuard-Plus-cat-2.jpg"
+      )
+
+      Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatLarge,
+        sizeName = "Large",
+        imageName = "zoguard/ZoGuard-Plus-cat-2.jpg"
+      )
+
+      Product.createProduct(
+        name = "Adventure Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogSmallAdv,
+        sizeName = "Small",
+        imageName = "adventure/Adventure-Plus-small-dog.jpg"
+      )
+      Product.createProduct(
+        name = "Adventure Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogMediumAdv,
+        sizeName = "Medium",
+        imageName = "adventure/Adventure-Plus-medium-dog.jpg"
+      )
+      Product.createProduct(
+        name = "Adventure Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogLargeAdv,
+        sizeName = "Large",
+        imageName = "adventure/Adventure-Plus-large-dog.jpg"
+      )
+      Product.createProduct(
+        name = "Adventure Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogXLargeAdv,
+        sizeName = "X-Large",
+        imageName = "adventure/Adventure-Plus-xlarge-dog.jpg"
+      )
+
+      Product.createProduct(
+        name = "ZoGuard Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogSmallZo,
+        sizeName = "Small",
+        imageName = "zoguard/ZoGuard-Plus-small-dog.jpg"
+      )
+      Product.createProduct(
+        name = "ZoGuard Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogMediumZo,
+        sizeName = "Medium",
+        imageName = "zoguard/ZoGuard-Plus-medium-dog.jpg"
+      )
+      Product.createProduct(
+        name = "ZoGuard Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogLargeZo,
+        sizeName = "Large",
+        imageName = "zoguard/ZoGuard-Plus-large-dog.jpg"
+      )
+      Product.createProduct(
+        name = "ZoGuard Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogXLargeZo,
+        sizeName = "X-Large",
+        imageName = "zoguard/ZoGuard-Plus-xlarge-dog.jpg"
+      )
+
+      Product.createProduct(
+        name = "ShieldTec Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogSmallShld,
+        sizeName = "Small",
+        imageName = "shieldtec/ShieldTec-Plus-small-dog.jpg"
+      )
+      Product.createProduct(
+        name = "ShieldTec Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogMediumShld,
+        sizeName = "Medium",
+        imageName = "shieldtec/ShieldTec-Plus-medium-dog.jpg"
+      )
+      Product.createProduct(
+        name = "ShieldTec Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogLargeShld,
+        sizeName = "Large",
+        imageName = "shieldtec/ShieldTec-Plus-large-dog.jpg"
+      )
+      Product.createProduct(
+        name = "ShieldTec Plus for Dogs",
+        animalType = AnimalType.Dog,
+        size = AnimalSize.DogXLargeShld,
+        sizeName = "X-Large",
+        imageName = "shieldtec/ShieldTec-Plus-xlarge-dog.jpg"
+      )
+    }
+
     if (Product.find(By(Product.name, "Frontline Plus for Dogs")).isEmpty) {
       Product.createProduct(
         name = "Frontline Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogSmallZo,
-        sizeName = "Small"
+        sizeName = "Small",
+        imageName = "frontline/Frontline-Plus-small-dog.jpg"
       )
       Product.createProduct(
         name = "Frontline Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogMediumZo,
-        sizeName = "Medium"
+        sizeName = "Medium",
+        imageName = "frontline/Frontline-Plus-medium-dog.jpg"
       )
       Product.createProduct(
         name = "Frontline Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogLargeZo,
-        sizeName = "Large"
+        sizeName = "Large",
+        imageName = "frontline/Frontline-Plus-large-dog.jpg"
       )
       Product.createProduct(
         name = "Frontline Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogXLargeZo,
-        sizeName = "X-Large"
+        sizeName = "X-Large",
+        imageName = "frontline/Frontline-Plus-xlarge-dog.jpg"
       )
     }
 
@@ -42,140 +175,24 @@ object DataLoader extends Loggable {
         name = "Frontline Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatSmall,
-        sizeName = "Small"
-      )
-
-      Product.createProduct(
-        name = "ZoGuard Plus for Cats",
-        animalType = AnimalType.Cat,
-        size = AnimalSize.CatSmall,
-        sizeName = "Small"
+        sizeName = "Small",
+        imageName = "frontline/Frontline-Plus-cat.jpg"
       )
 
       Product.createProduct(
         name = "Frontline Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatMedium,
-        sizeName = "Medium"
+        sizeName = "Medium",
+        imageName = "frontline/Frontline-Plus-cat.jpg"
       )
 
       Product.createProduct(
         name = "Frontline Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatLarge,
-        sizeName = "Lage"
-      )
-    }
-
-    if (Product.findAll().isEmpty) {
-      Product.createProduct(
-        name = "Adventure Plus for Cats",
-        animalType = AnimalType.Cat,
-        size = AnimalSize.CatMedium,
-        sizeName = "Medium"
-      )
-
-      Product.createProduct(
-        name = "Adventure Plus for Cats",
-        animalType = AnimalType.Cat,
-        size = AnimalSize.CatLarge,
-        sizeName = "Large"
-      )
-
-      Product.createProduct(
-        name = "ZoGuard Plus for Cats",
-        animalType = AnimalType.Cat,
-        size = AnimalSize.CatSmall,
-        sizeName = "Small"
-      )
-
-      Product.createProduct(
-        name = "ZoGuard Plus for Cats",
-        animalType = AnimalType.Cat,
-        size = AnimalSize.CatMedium,
-        sizeName = "Medium"
-      )
-
-      Product.createProduct(
-        name = "ZoGuard Plus for Cats",
-        animalType = AnimalType.Cat,
-        size = AnimalSize.CatLarge,
-        sizeName = "Large"
-      )
-
-      Product.createProduct(
-        name = "Adventure Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogSmallAdv,
-        sizeName = "Small"
-      )
-      Product.createProduct(
-        name = "Adventure Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogMediumAdv,
-        sizeName = "Medium"
-      )
-      Product.createProduct(
-        name = "Adventure Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogLargeAdv,
-        sizeName = "Large"
-      )
-      Product.createProduct(
-        name = "Adventure Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogXLargeAdv,
-        sizeName = "X-Large"
-      )
-
-      Product.createProduct(
-        name = "ZoGuard Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogSmallZo,
-        sizeName = "Small"
-      )
-      Product.createProduct(
-        name = "ZoGuard Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogMediumZo,
-        sizeName = "Medium"
-      )
-      Product.createProduct(
-        name = "ZoGuard Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogLargeZo,
-        sizeName = "Large"
-      )
-      Product.createProduct(
-        name = "ZoGuard Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogXLargeZo,
-        sizeName = "X-Large"
-      )
-
-      Product.createProduct(
-        name = "ShieldTec Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogSmallShld,
-        sizeName = "Small"
-      )
-      Product.createProduct(
-        name = "ShieldTec Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogMediumShld,
-        sizeName = "Medium"
-      )
-      Product.createProduct(
-        name = "ShieldTec Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogLargeShld,
-        sizeName = "Large"
-      )
-      Product.createProduct(
-        name = "ShieldTec Plus for Dogs",
-        animalType = AnimalType.Dog,
-        size = AnimalSize.DogXLargeShld,
-        sizeName = "X-Large"
+        sizeName = "Lage",
+        imageName = "frontline/Frontline-Plus-cat.jpg"
       )
     }
   }
@@ -225,6 +242,15 @@ object DataLoader extends Loggable {
 
       if (pets.size == 0)
         parent.getSubscription.map(_.status(Status.UserSuspended).saveMe)
+    }
+  }
+
+  def updateBlankPriceCode = {
+    val subscriptions = Subscription.findAll()
+
+    subscriptions.map { subscription =>
+      if (subscription.priceCode.get == "")
+        subscription.priceCode("default").saveMe
     }
   }
 }
