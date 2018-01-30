@@ -249,8 +249,8 @@ object DataLoader extends Loggable {
     val subscriptions = Subscription.findAll()
 
     subscriptions.map { subscription =>
-      if (subscription.priceCode.get == "")
-        subscription.priceCode("default").saveMe
+      if (subscription.priceCode.get == "default")
+        subscription.priceCode("legacy").saveMe
     }
   }
 }
