@@ -462,6 +462,10 @@ fieldset label {
   input {
     width: inherit;
   }
+
+  span {
+    display: block;
+  }
 }
 
 .product-container, .size-container {
@@ -471,11 +475,13 @@ fieldset label {
 
 .product-container {
   @include span-columns(7);
+  margin-bottom: 20px;
 }
 
 .size-container {
   @include span-columns(5);
   @include omega;
+  float: none;
 
   span {
     display: block;
