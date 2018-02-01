@@ -244,13 +244,4 @@ object DataLoader extends Loggable {
         parent.getSubscription.map(_.status(Status.UserSuspended).saveMe)
     }
   }
-
-  def updateBlankPriceCode = {
-    val subscriptions = Subscription.findAll()
-
-    subscriptions.map { subscription =>
-      if (subscription.priceCode.get == "default")
-        subscription.priceCode("legacy").saveMe
-    }
-  }
 }

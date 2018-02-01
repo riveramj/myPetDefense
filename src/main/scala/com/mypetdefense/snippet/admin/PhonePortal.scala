@@ -93,7 +93,7 @@ class PhonePortal extends Loggable {
         city,
         state,
         zip,
-        9.99
+        12.99
       )
 
       taxDue = taxInfo._1
@@ -119,7 +119,7 @@ class PhonePortal extends Loggable {
       "#order" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
 
-        val total = 9.99 + taxDue
+        val total = 12.99 + taxDue
 
         "#price-additions" #> ClearNodesIf((taxDue == 0D) && (coupon.isEmpty)) &
         "#price-additions" #> {
