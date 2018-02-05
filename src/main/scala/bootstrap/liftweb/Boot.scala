@@ -86,4 +86,28 @@ class Boot {
 
   //Bundles
   LiftRules.snippets.append(Bundles.snippetHandlers)
- }
+
+  //Lift CSP settings see http://content-security-policy.com/ and 
+  //Lift API for more information.  
+  LiftRules.securityRules = () => {
+    SecurityRules(content = Some(ContentSecurityPolicy(           
+      scriptSources = List(
+        ContentSourceRestriction.Self,
+        ContentSourceRestriction.Host("https://ajax.googleapis.com")
+      ),
+      styleSources = List(
+        ContentSourceRestriction.Self,
+        ContentSourceRestriction.Host("https://fonts.googleapis.com")
+      ),
+      fontSources = List(
+        ContentSourceRestriction.Self,
+        ContentSourceRestriction.Host("https://fonts.googleapis.com"),
+        ContentSourceRestriction.Host("https://fonts.gstatic.com"),
+        ContentSourceRestriction.Host("data:")
+      ),
+      frameSources = List(
+        ContentSourceRestriction.Host("https://www.youtube.com"),
+      )
+    )))
+  }      
+}
