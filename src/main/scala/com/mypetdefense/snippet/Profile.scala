@@ -112,10 +112,10 @@ class Profile extends Loggable {
     "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#old-password" #> SHtml.password(oldPassword, oldPass => oldPassword = oldPass.trim) &
     "#new-password" #> SHtml.password(newPassword, newPass => newPassword = newPass.trim) &
-    ".update-email" #> SHtml.ajaxSubmit("Save Changes", updateEmail) &
-    ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword) &
+    ".update-email" #> SHtml.ajaxSubmit("Save Changes", updateEmail _) &
+    ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword _) &
     ".stauts" #> user.map(_.status.get.toString) &
-    ".confirm-cancel-account" #> SHtml.ajaxSubmit("Yes, cancel my acount", cancelAccount)
+    ".confirm-cancel-account" #> SHtml.ajaxSubmit("Yes, cancel my acount", cancelAccount _)
     
   }
 }

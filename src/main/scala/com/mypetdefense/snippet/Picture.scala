@@ -38,7 +38,7 @@ class Picture extends Loggable {
     ".email" #> text(email, email = _) &
     ".instagram" #> text(instagram, instagram = _) &
     ".dog-love" #> textarea(dogLove, dogLove = _) &
-    "#send-message" #> ajaxSubmit("Submit", sendMessage)
+    "#send-message" #> ajaxSubmit("Submit", sendMessage _)
   }
 }
 

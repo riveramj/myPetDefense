@@ -27,7 +27,7 @@ object TaxJarService extends Loggable {
   
   def findTaxAmoutAndRate(city: String, state: String, zip: String, amount: Double): (Double, Double) = {
     def taxResponse = {
-      Http(calculateTaxUrl << Map(
+      Http.default(calculateTaxUrl << Map(
         "to_country" -> "US",
         "to_zip" -> zip,
         "to_state" -> state,
@@ -58,11 +58,12 @@ object TaxJarService extends Loggable {
       }
     }
 
-    val parsedTax = parse(rawTax(retryAttempts).openOr("")) 
+    val parsedTax = parse(rawTax(retryAttempts).openOr(""))
 
     (for {
-      JField("amount_to_collect", JDouble(taxDue)) <- parsedTax
-      JField("rate", JDouble(taxRate)) <- parsedTax
+      JObject(tax) <- parsedTax
+      JField("amount_to_collect", JDouble(taxDue)) <- tax
+      JField("rate", JDouble(taxRate)) <- tax
       amount <- tryo(taxDue.toDouble).toList
       rate <- tryo(taxRate.toDouble).toList
     } yield {
@@ -88,7 +89,7 @@ object TaxJarService extends Loggable {
 
   def createTaxOrder(orderIdentifier: String, city: String, state: String, zip: String, amount: String, tax: String, date: String) = {
     def orderResponse = {
-      Http(createOrderTaxUrl << Map(
+      Http.default(createOrderTaxUrl << Map(
         "transaction_id" -> orderIdentifier,
         "transaction_date" -> date,
         "to_country" -> "US",
