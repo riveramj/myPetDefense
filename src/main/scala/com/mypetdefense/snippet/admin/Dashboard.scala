@@ -309,7 +309,7 @@ class Dashboard extends Loggable {
             ".ship *" #> "Can't Ship Yet." &
             ".ship [disabled]" #> "disabled"
           } else 
-            ".ship [onclick]" #> SHtml.ajaxInvoke(shipProduct(subscription, user, shipment, address.openOr(""), shipButtonRenderer))
+            ".ship [onclick]" #> SHtml.ajaxInvoke(shipProduct(subscription, user, shipment, address.openOr(""), shipButtonRenderer) _)
         }
       }
     }

@@ -76,7 +76,7 @@ class Agencies extends Loggable {
       ".coupon-count *" #> agency.coupons.size &
       ".actions .delete" #> ClearNodesIf(agency.customers.size > 0) &
       ".actions .delete [onclick]" #> Confirm(s"Delete ${agency.name}? This will delete all members and coupons.",
-        ajaxInvoke(deleteAgency(agency))
+        ajaxInvoke(deleteAgency(agency) _)
       )
     }
   }

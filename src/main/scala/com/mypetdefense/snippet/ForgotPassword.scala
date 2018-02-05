@@ -42,6 +42,6 @@ class ForgotPassword extends Loggable {
   def render = {
     SHtml.makeFormsAjax andThen
     "#email" #> SHtml.text(userEmail, email => userEmail = email.trim) &
-    "type=submit" #> SHtml.ajaxSubmit("Send Email", submitPasswordReset)
+    "type=submit" #> SHtml.ajaxSubmit("Send Email", submitPasswordReset _)
   }
 }
