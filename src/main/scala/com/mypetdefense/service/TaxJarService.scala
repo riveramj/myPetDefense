@@ -58,11 +58,12 @@ object TaxJarService extends Loggable {
       }
     }
 
-    val parsedTax = parse(rawTax(retryAttempts).openOr("")) 
+    val parsedTax = parse(rawTax(retryAttempts).openOr(""))
 
     (for {
-      JField("amount_to_collect", JDouble(taxDue)) <- parsedTax
-      JField("rate", JDouble(taxRate)) <- parsedTax
+      JObject(tax) <- parsedTax
+      JField("amount_to_collect", JDouble(taxDue)) <- tax
+      JField("rate", JDouble(taxRate)) <- tax
       amount <- tryo(taxDue.toDouble).toList
       rate <- tryo(taxRate.toDouble).toList
     } yield {

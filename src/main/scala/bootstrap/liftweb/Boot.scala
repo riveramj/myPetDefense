@@ -86,19 +86,4 @@ class Boot {
 
   //Bundles
   LiftRules.snippets.append(Bundles.snippetHandlers)
-
-
-  LiftRules.responseTransformers.append {
-    resp =>
-      (for (req <- S.request) yield {
-        resp.toResponse match {
-          case InMemoryResponse(data, headers, cookies, code)
-          if req.param("liftIFrameUpload") === req.path.wholePath.last &&
-          req.path.wholePath.head == LiftRules.ajaxPath =>
-            val contentlessHeaders = headers.filterNot(_._1.toLowerCase == "content-type")
-            InMemoryResponse(data, ("Content-Type", "text/plain; charset=utf-8") :: contentlessHeaders, cookies, code)
-          case _ => resp
-        }
-      }) openOr resp
-  }
-}
+ }
