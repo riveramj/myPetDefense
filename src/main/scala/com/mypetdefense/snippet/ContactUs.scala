@@ -92,7 +92,7 @@ class ContactUs extends Loggable {
     accuracyRatings &
     convenientRatings &
     recommendationRating &
-    "#send-message" #> ajaxSubmit("Submit", sendMessage)
+    "#send-message" #> ajaxSubmit("Submit", sendMessage _)
   }
 }
 

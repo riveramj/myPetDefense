@@ -157,8 +157,8 @@ class ShippingBilling extends Loggable {
         "#old-card-last4" #> hidden(cardNumber = _, cardNumber) &
         "#card-expiry" #> text(cardExpire, cardExpire = _) &
         "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-        ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBilling(user)) &
-        ".save-changes" #> SHtml.ajaxSubmit("Update Address", updateAddress)
+        ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBilling(user) _) &
+        ".save-changes" #> SHtml.ajaxSubmit("Update Address", updateAddress _)
       }
     }
   }
@@ -182,7 +182,7 @@ class ShippingBilling extends Loggable {
         "#card-expiry" #> text("", cardExpire = _) &
         "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
         "#promo-code" #> text(promoCode, promoCode = _) &
-        ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBillingAddWinterCoupon(user))
+        ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBillingAddWinterCoupon(user) _)
       }
     }
   }

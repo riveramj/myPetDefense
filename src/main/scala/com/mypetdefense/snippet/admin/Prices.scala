@@ -103,7 +103,7 @@ class Prices extends Loggable {
       ".code *" #> price.code.toString &
       ".product-price *" #> price.price &
       ".product *" #> price.productName &
-      ".delete [onclick]" #> SHtml.ajaxInvoke(deletePrice(price))
+      ".delete [onclick]" #> SHtml.ajaxInvoke(deletePrice(price) _)
     }
   }
 }

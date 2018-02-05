@@ -46,6 +46,6 @@ class ResetPassword {
   def render = {
     SHtml.makeFormsAjax andThen
     "#password" #> SHtml.password("", password = _) &
-    "type=submit" #> SHtml.ajaxSubmit("Reset Password", resetPassword)
+    "type=submit" #> SHtml.ajaxSubmit("Reset Password", resetPassword _)
   }
 }
