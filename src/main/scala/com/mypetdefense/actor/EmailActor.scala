@@ -383,11 +383,12 @@ trait Send5kEmailHandling extends EmailHandlerChain {
         Templates("emails-hidden" :: "cold5k-picture-email" :: Nil) openOr NodeSeq.Empty
       
       val subject = "Your Valentine Picture is Ready"
+      val hostUrl = Paths.serverUrl
       
       val transform = {
-        "#name *" #> name &
+        "#first-name *" #> name &
         "#email *" #> email &
-        "#dog-name *" #> dogName
+        ".view-pictures [href]" #> (s"${hostUrl}/valentine/${dogName}")
       }
 
       sendEmail(subject, email, transform(template))

@@ -60,9 +60,6 @@ object Paths {
   val pictureRelease = Menu.i("Picture Release") / "picture" >>
     TemplateBox(() => Templates("picture" :: Nil))
 
-  val valentinePhoto = Menu.i("Your Valentine Picture") / "valentine" >>
-    TemplateBox(() => Templates("valentine-picture" :: Nil))
-  
   val loggedIn = If(
     () => SecurityContext.loggedIn_?,
     storeAndRedirect _
@@ -113,11 +110,11 @@ object Paths {
     billingThanksPage,
     testimonial,
     pictureRelease,
-    valentinePhoto,
     LandingPage.landing2Free,
     LandingPage.landing3Free,
     LandingPage.cold5k,
     LandingPage.doggiePalooza,
+    ValentinePicture.menu,
     LandingPage.woofstock,
     CartReview.menu,
     Checkout.menu,
