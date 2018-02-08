@@ -72,6 +72,11 @@ case class PictureEmail(
   instagram: String,
   dogLove: String
 ) extends EmailActorMessage
+case class Send5kEmail(
+  name: String,
+  email: String,
+  dogName: String
+) extends EmailActorMessage
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
@@ -371,6 +376,24 @@ trait PictureEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait Send5kEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case Send5kEmail(name, email, dogName) =>
+      val template =
+        Templates("emails-hidden" :: "cold5k-picture-email" :: Nil) openOr NodeSeq.Empty
+      
+      val subject = "Your Valentine Picture is Ready"
+      
+      val transform = {
+        "#name *" #> name &
+        "#email *" #> email &
+        "#dog-name *" #> dogName
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -451,6 +474,7 @@ trait EmailActor extends EmailHandlerChain
                     with CompleteResetPasswordHandling 
                     with ShipmentReadyEmailHandling 
                     with ContactUsEmailHandling
+                    with Send5kEmailHandling
                     with TestimonialEmailHandling {
 
   val baseEmailTemplate = 
