@@ -99,9 +99,7 @@ class ValentinePicture extends Loggable {
     val dogPhotoCount = (namePhotoCount.find { case (name, count) => name.toUpperCase == dogName}).map(_._2).getOrElse(0)
     println(dogName + " " +dogPhotoCount)
 
-    while (
-      photoNumber < dogPhotoCount
-    ) {
+    while (photoNumber < dogPhotoCount) {
       photoNumber += 1
       photoNames += s"${dogName}-${photoNumber}.jpg"
     }
