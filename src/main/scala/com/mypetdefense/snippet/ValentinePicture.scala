@@ -38,17 +38,72 @@ class ValentinePicture extends Loggable {
   PetFlowChoices.coupon(possibleCoupon)
   PetFlowChoices.priceCode(Full("cold5k"))
 
+  val namePhotoCount = List(
+      ("DALTON", 2),
+      ("Bo", 3),
+      ("Bacon", 6),
+      ("Sookie", 2),
+      ("Zoey", 2),
+      ("Jerry", 2),
+      ("Penelope", 1),
+      ("Hope", 3),
+      ("Cooper", 5),
+      ("Marlowe", 1),
+      ("Sadie", 1),
+      ("Jack", 4),
+      ("LUCYLU-SCARLETT", 2),
+      ("Leber", 2),
+      ("ROB-KATE", 2),
+      ("zeke", 1),
+      ("Loki", 1),
+      ("Cairo", 1),
+      ("Sam", 2),
+      ("RUBIE-DIXIE-PIPER", 1),
+      ("Sage", 3),
+      ("Baxter", 2),
+      ("Wilson", 1),
+      ("Jax", 2),
+      ("Cherry", 2),
+      ("Cece", 2),
+      ("CARBON-PIEDMONT", 1),
+      ("Luna", 3),
+      ("MAYA-SKY", 2),
+      ("2Cooper", 2),
+      ("Tyson", 2),
+      ("Dixie", 1),
+      ("Sullivan", 1),
+      ("Beauregard", 2),
+      ("Annie", 1),
+      ("Rocky", 2),
+      ("Fitz", 3),
+      ("DIPPY-BAILEY", 3),
+      ("Doc", 1),
+      ("Gus", 1),
+      ("Felon", 4),
+      ("COPPER-DODGE", 2),
+      ("Sammie", 3),
+      ("Samson", 3),
+      ("DARCY-BAILEY", 3),
+      ("FARLEY-MATILDA", 1),
+      ("DEXTER-BAILEY", 1),
+      ("Willie", 2),
+      ("Horace", 1),
+      ("Lucy", 2)
+    )
+
   def render = {
     val dogName = ValentinePicture.menu.loc.currentValue.map(_.toString).openOr("").toUpperCase
 
-    var photoNumber = 1
+    var photoNumber = 0
     var photoNames = new ListBuffer[String]()
+    val dogPhotoCount = (namePhotoCount.find { case (name, count) => name.toUpperCase == dogName}).map(_._2).getOrElse(0)
+    println(dogName + " " +dogPhotoCount)
 
     while (
-      Files.exists(Paths.get(s"src/main/webapp/images/cold5k/${dogName}-${photoNumber}.jpg")) == true
+      photoNumber < dogPhotoCount
     ) {
-      photoNames += s"${dogName}-${photoNumber}.jpg"
       photoNumber += 1
+      photoNames += s"${dogName}-${photoNumber}.jpg"
     }
 
     ".photos [class+]" #> (if (photoNames.size < 3) "solo" else "") & 
