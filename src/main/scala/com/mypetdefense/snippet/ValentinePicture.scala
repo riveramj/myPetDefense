@@ -51,8 +51,9 @@ class ValentinePicture extends Loggable {
       photoNumber += 1
     }
 
-    ".photos" #> photoNames.map { photo =>
-      ".photo img [src]" #> s"/images/cold5k/${photo}"
+    ".photos [class+]" #> (if (photoNames.size < 3) "solo" else "") & 
+    ".photos .photo" #> photoNames.map { photo =>
+      "img [src]" #> s"/images/cold5k/${photo}"
     }
   }
 }
