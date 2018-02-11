@@ -120,11 +120,17 @@ a.signup {
   text-align: left;
   margin: 0 auto;
 
-  &.solo {
-    text-align: center;
+  @media (min-width: $bp-medium) {
+    &.solo {
+      text-align: center;
 
-    .photo:last-child {
-      margin-right: 0;
+      .photo {
+        width: 40%;
+      }
+
+      .photo:last-child {
+        margin-right: 0;
+      }
     }
   }
 }
