@@ -92,7 +92,7 @@ a.signup {
   }
 
   @media (min-width: $bp-medium) {
-    margin-top: 36px;
+    margin-top: 49px;
     width: 310px;
   }
 
@@ -105,7 +105,7 @@ a.signup {
 .photo {
   margin-bottom: 15px;
   
-  @media (min-width: $bp-large) {
+  @media (min-width: $bp-medium) {
     width: 28%;
     display: inline-block;
     margin: 25px 25px 0 0;
