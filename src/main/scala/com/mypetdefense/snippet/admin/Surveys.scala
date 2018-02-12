@@ -75,7 +75,7 @@ class Surveys extends Loggable {
             ".ratings *" #> survey.ratingGiven.get &
             ".testimonial *" #> survey.testimonialGiven.get &
             { if (surveyCouponApplied == null) {
-                ".coupon .apply-coupon [onclick]" #> ajaxInvoke(applyCoupon)
+                ".coupon .apply-coupon [onclick]" #> ajaxInvoke(applyCoupon _)
               } else {
                 ".coupon *" #> dateFormat.format(surveyCouponApplied) &
                 ".actions .resend-survey" #> ClearNodes
@@ -89,7 +89,7 @@ class Surveys extends Loggable {
             ".coupon .apply-coupon" #> ClearNodes &
             ".actions .resend-survey" #> ClearNodes
           } &
-          ".actions .send [onclick]" #> ajaxInvoke(sendSurvey)
+          ".actions .send [onclick]" #> ajaxInvoke(sendSurvey _)
         }
       }
     }

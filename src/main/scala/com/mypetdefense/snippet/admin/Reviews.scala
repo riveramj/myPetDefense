@@ -73,7 +73,7 @@ class Reviews extends Loggable {
         S.error("Missing file")
       }
     }) &
-    "#create-reviews" #> SHtml.ajaxOnSubmit(createReviews) &
+    "#create-reviews" #> SHtml.ajaxOnSubmit(createReviews _) &
     ".new-reviews" #> SHtml.idMemoize { renderer =>
       newReviewsRenderer = Full(renderer)
 
