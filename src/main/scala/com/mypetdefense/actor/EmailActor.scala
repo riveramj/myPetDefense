@@ -382,7 +382,7 @@ trait Send5kEmailHandling extends EmailHandlerChain {
       val template =
         Templates("emails-hidden" :: "cold5k-picture-email" :: Nil) openOr NodeSeq.Empty
       
-      val subject = "Your Valentine Picture is Ready"
+      val subject = "Your Valentine's Pictures are Ready"
       val hostUrl = Paths.serverUrl
       
       val transform = {
@@ -481,6 +481,9 @@ trait EmailActor extends EmailHandlerChain
   val baseEmailTemplate = 
     Templates("emails-hidden" :: "email-template" :: Nil) openOr NodeSeq.Empty
 
+  val valentineEmailTemplate = 
+    Templates("emails-hidden" :: "valentine-email-template" :: Nil) openOr NodeSeq.Empty
+
   val fromEmail = "sales@mypetdefense.com"
   val fromName = "My Pet Defense"
 
@@ -497,15 +500,21 @@ trait EmailActor extends EmailHandlerChain
   def sendEmail(
     subject: String, 
     to: String, 
-    message: NodeSeq
+    message: NodeSeq,
+    specialEmail: String = ""
   ) {
+    val emailTemplate = specialEmail match {
+      case "valentine" => valentineEmailTemplate
+      case _ => baseEmailTemplate
+    }
+
     val emailTransform = {
       "#content *" #> message &
       "#logo [src]" #> (hostUrl + "/images/logo/logo-name-white@2x.png") &
       "#user-email" #> to
     }
     
-    val body = emailTransform(baseEmailTemplate)
+    val body = emailTransform(emailTemplate)
 
     val envSubj = envTag + subject
 

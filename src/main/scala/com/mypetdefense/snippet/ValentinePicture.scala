@@ -97,7 +97,6 @@ class ValentinePicture extends Loggable {
     var photoNumber = 0
     var photoNames = new ListBuffer[String]()
     val dogPhotoCount = (namePhotoCount.find { case (name, count) => name.toUpperCase == dogName}).map(_._2).getOrElse(0)
-    println(dogName + " " +dogPhotoCount)
 
     while (photoNumber < dogPhotoCount) {
       photoNumber += 1

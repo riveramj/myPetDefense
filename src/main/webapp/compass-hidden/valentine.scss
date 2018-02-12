@@ -7,7 +7,7 @@
 
 #logo-name { 
   padding: 14px 15px;
-  text-align: left;
+  text-align: center;
   
   display: block;
   float: none;
@@ -43,6 +43,13 @@
       content: $fa-var-heart;
       color: #FF616C;
     }
+
+    @media (min-width: $bp-medium) {
+      font-size: 40px;
+      width: 695px;
+      font-weight: $bold;
+      line-height: 48px;
+    }
   }
 }
 
@@ -53,6 +60,12 @@
   line-height: 24px;
   margin: 12px auto 30px;
   text-align: center;
+
+  @media (min-width: $bp-medium) {
+    width: 555px;
+    font-size: 26px;
+    line-height: 32px;
+  }
 
   span {
     font-weight: $bold;
@@ -102,39 +115,28 @@ a.signup {
   }
 }
 
+.photos {
+  text-align: center;
+  margin: 0 auto;
+}
+
 .photo {
   margin-bottom: 15px;
-  
+
   @media (min-width: $bp-medium) {
-    width: 28%;
+    max-width: 400px;
     display: inline-block;
     margin: 25px 25px 0 0;
+  }
+
+  &:last-child {
+    margin-right: 0;
   }
 
   img {
     width: 100%;
   }
 }
-
-.photos {
-  text-align: left;
-  margin: 0 auto;
-
-  @media (min-width: $bp-medium) {
-    &.solo {
-      text-align: center;
-
-      .photo {
-        width: 40%;
-      }
-
-      .photo:last-child {
-        margin-right: 0;
-      }
-    }
-  }
-}
-
 
 #footer {
   clear: both;
