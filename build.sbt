@@ -9,7 +9,7 @@ version := "1.0-RC1"
 
 organization := "com.mypetdefense"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.4"
 
 seq(webSettings :_*)
 seq(resourceManagementSettings :_*)
@@ -46,7 +46,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val liftVersion = "2.6.3"
+  val liftVersion = "3.2.0"
   Seq(
     "org.apache.shiro"    %  "shiro-core"         % "1.2.4",
     "ch.qos.logback"      %  "logback-classic"    % "1.1.3",
@@ -57,8 +57,8 @@ libraryDependencies ++= {
     "net.liftweb"         %% "lift-webkit"        % liftVersion % "compile",
     "net.liftweb"         %% "lift-testkit"       % liftVersion % "test",
     "net.liftweb"         %% "lift-mapper"        % liftVersion % "compile",
-    "me.frmr.stripe"      %% "streifen"           % "0.0.6-SNAPSHOT",
-    "net.databinder.dispatch"   %% "dispatch-core"        % "0.11.3",
-    "net.databinder.dispatch"   %% "dispatch-lift-json"   % "0.11.3"
+    "me.frmr.stripe"      %% "streifen"           % "0.0.7-SNAPSHOT",
+    "net.databinder.dispatch"   %% "dispatch-core"        % "0.13.3",
+    "net.databinder.dispatch"   %% "dispatch-lift-json"   % "0.13.3"
   )
 }

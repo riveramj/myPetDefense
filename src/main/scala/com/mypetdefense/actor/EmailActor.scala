@@ -72,6 +72,11 @@ case class PictureEmail(
   instagram: String,
   dogLove: String
 ) extends EmailActorMessage
+case class Send5kEmail(
+  name: String,
+  email: String,
+  dogName: String
+) extends EmailActorMessage
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
@@ -371,6 +376,25 @@ trait PictureEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait Send5kEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case Send5kEmail(name, email, dogName) =>
+      val template =
+        Templates("emails-hidden" :: "cold5k-picture-email" :: Nil) openOr NodeSeq.Empty
+      
+      val subject = "Your Valentine Pictures are Ready"
+      val hostUrl = Paths.serverUrl
+      
+      val transform = {
+        "#first-name *" #> name &
+        "#email *" #> email &
+        ".view-pictures [href]" #> (s"${hostUrl}/valentine/${dogName}")
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -451,10 +475,14 @@ trait EmailActor extends EmailHandlerChain
                     with CompleteResetPasswordHandling 
                     with ShipmentReadyEmailHandling 
                     with ContactUsEmailHandling
+                    with Send5kEmailHandling
                     with TestimonialEmailHandling {
 
   val baseEmailTemplate = 
     Templates("emails-hidden" :: "email-template" :: Nil) openOr NodeSeq.Empty
+
+  val valentineEmailTemplate = 
+    Templates("emails-hidden" :: "valentine-email-template" :: Nil) openOr NodeSeq.Empty
 
   val fromEmail = "sales@mypetdefense.com"
   val fromName = "My Pet Defense"
@@ -469,18 +497,19 @@ trait EmailActor extends EmailHandlerChain
     }
   }
 
-  def sendEmail(
-    subject: String, 
-    to: String, 
-    message: NodeSeq
-  ) {
+  def sendEmail(subject: String, to: String, message: NodeSeq) {
+    val emailTemplate = subject match {
+      case valentine if subject.contains("Valentine") => valentineEmailTemplate
+      case _ => baseEmailTemplate
+    }
+
     val emailTransform = {
       "#content *" #> message &
       "#logo [src]" #> (hostUrl + "/images/logo/logo-name-white@2x.png") &
       "#user-email" #> to
     }
     
-    val body = emailTransform(baseEmailTemplate)
+    val body = emailTransform(emailTemplate)
 
     val envSubj = envTag + subject
 

@@ -12,7 +12,6 @@ import net.liftweb._
   import JsCmds._
 
 import com.mypetdefense.service._
-  import ValidationService._
   import PetFlowChoices._
 
 import com.mypetdefense.model._

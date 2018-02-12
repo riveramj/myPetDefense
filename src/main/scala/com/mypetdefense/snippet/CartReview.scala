@@ -146,7 +146,7 @@ class CartReview extends Loggable {
         val itemPrice = pet._3
 
         ".cart-product-image [src]" #> getImageUrl(Full(product)) &
-        ".cart-pet-remove [onclick]" #> Confirm(s"Remove ${petName}?", ajaxInvoke(removePet(id))) &
+        ".cart-pet-remove [onclick]" #> Confirm(s"Remove ${petName}?", ajaxInvoke(removePet(id) _)) &
         ".product-name-size *" #> s"${product.name.get} ${product.getSizeAndSizeName}" &
         ".pet-name" #> ajaxText(petName, possibleName => {
           shoppingCart(shoppingCart.is + (id -> pet.copy(_1 = possibleName)))

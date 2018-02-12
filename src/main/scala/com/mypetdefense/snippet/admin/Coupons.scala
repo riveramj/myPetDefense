@@ -115,7 +115,7 @@ class Coupons extends Loggable {
       ".agency *" #> coupon.agency.obj.map(_.name.get) &
       ".actions .delete" #> ClearNodesIf(coupon.users.size > 0) &
       ".actions .delete [onclick]" #> Confirm(s"Delete ${coupon.couponCode}?",
-        ajaxInvoke(deleteCoupon(coupon))
+        ajaxInvoke(deleteCoupon(coupon) _)
       )
     }
   }

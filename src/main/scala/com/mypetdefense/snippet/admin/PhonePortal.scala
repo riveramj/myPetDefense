@@ -137,7 +137,7 @@ class PhonePortal extends Loggable {
             "#order-total h3 [class+]" #> "promo" &
             "#order-total .monthly-charge [class+]" #> "promo" &
             "#order-total .monthly-charge *" #> {
-              val freeMonths = coupon.map(_.freeMonths).openOr("0")
+              val freeMonths = coupon.map(_.freeMonths).openOr(0)
               if (freeMonths == 1) {
                 s"FREE for first ${freeMonths} month"
               } else {

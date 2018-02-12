@@ -286,7 +286,7 @@ class Parents extends Loggable {
           ".pet-type *" #> pet.animalType.toString &
           ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
           ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
-            ajaxInvoke(deletePet(parent, pet, renderer))
+            ajaxInvoke(deletePet(parent, pet, renderer) _)
           )
         }
       }
@@ -330,7 +330,7 @@ class Parents extends Loggable {
       ".tracking-number *" #> shipment.trackingNumber.get &
       ".shipment-actions .delete [onclick]" #> Confirm(
         "Delete this shipment? This cannot be undone!",
-        ajaxInvoke(deleteShipment(detailsRenderer, shipment))
+        ajaxInvoke(deleteShipment(detailsRenderer, shipment) _)
       )
     }
   }
@@ -354,7 +354,7 @@ class Parents extends Loggable {
           ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
           ".actions .delete [onclick]" #> Confirm(
             s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
-            ajaxInvoke(deleteParent(parent))
+            ajaxInvoke(deleteParent(parent) _)
           ) &
           "^ [onclick]" #> ajaxInvoke(() => {
             if (currentParent.isEmpty) {
