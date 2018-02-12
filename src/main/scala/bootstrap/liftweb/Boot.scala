@@ -55,7 +55,7 @@ class Boot {
     DataLoader.loadAdmin
     DataLoader.loadGroupons
     DataLoader.updateParentNoPets
-    //SpecialEmailSender.send5kEmails
+    SpecialEmailSender.send5kEmails
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
