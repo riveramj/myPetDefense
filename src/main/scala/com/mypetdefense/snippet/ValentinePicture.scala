@@ -59,7 +59,7 @@ class ValentinePicture extends Loggable {
       ("Cairo", 1),
       ("Sam", 2),
       ("RUBIE-DIXIE-PIPER", 1),
-      ("Sage", 3),
+      ("Sage", 2),
       ("Baxter", 2),
       ("Wilson", 1),
       ("Jax", 2),

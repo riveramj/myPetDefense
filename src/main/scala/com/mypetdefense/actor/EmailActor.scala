@@ -382,7 +382,7 @@ trait Send5kEmailHandling extends EmailHandlerChain {
       val template =
         Templates("emails-hidden" :: "cold5k-picture-email" :: Nil) openOr NodeSeq.Empty
       
-      val subject = "Your Valentine's Pictures are Ready"
+      val subject = "Your Valentine Pictures are Ready"
       val hostUrl = Paths.serverUrl
       
       val transform = {

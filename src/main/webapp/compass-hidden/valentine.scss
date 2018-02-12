@@ -123,6 +123,11 @@ a.signup {
 .photo {
   margin-bottom: 15px;
 
+  @media (min-width: 500px) {
+    width: 70%;
+    margin: 0 auto 15px;
+  }
+
   @media (min-width: $bp-medium) {
     max-width: 400px;
     display: inline-block;
