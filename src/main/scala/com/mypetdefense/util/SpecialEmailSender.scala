@@ -61,9 +61,11 @@ object SpecialEmailSender extends Loggable {
     )
 
     if (Props.mode == Props.RunModes.Production) {
-      nameEmailDog.map { case (name, email, dogName) =>
-        EmailActor ! Send5kEmail(name, email, dogName)
-      }
+      //nameEmailDog.map { case (name, email, dogName) =>
+        //EmailActor ! Send5kEmail(name, email, dogName)
+      //}
+      
+      EmailActor ! Send5kEmail("Patrick", "patrick@augustasportscouncil.com", "Horace")
     }
   }
 } 
