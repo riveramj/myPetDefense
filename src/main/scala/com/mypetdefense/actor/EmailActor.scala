@@ -497,14 +497,9 @@ trait EmailActor extends EmailHandlerChain
     }
   }
 
-  def sendEmail(
-    subject: String, 
-    to: String, 
-    message: NodeSeq,
-    specialEmail: String = ""
-  ) {
-    val emailTemplate = specialEmail match {
-      case "valentine" => valentineEmailTemplate
+  def sendEmail(subject: String, to: String, message: NodeSeq) {
+    val emailTemplate = subject match {
+      case valentine if subject.contains("Valentine") => valentineEmailTemplate
       case _ => baseEmailTemplate
     }
 
