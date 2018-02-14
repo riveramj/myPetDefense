@@ -1,11 +1,17 @@
 stripe = Stripe 'pk_test_JLczczIy7T5qGL8DOmwTc2O0'
 elements = stripe.elements()
-card = elements.create 'card'
+card = elements.create('card',{
+  'style': {
+    'base': {
+      'fontSize': '18px',
+      'fontFamily': '"Lato", Helvetica, Arial, sans-serif'
+    }
+  }
+})
+
 card.mount '#card-element'
 
 stripeCallback = (token) ->
-  console.log "in callback"
-  console.log token
   $("#stripe-token").val(token.id)
   $(".checkout").submit()
 
@@ -31,13 +37,10 @@ $(document).on "validate-stripe-form", (event) ->
   $("input.error").removeClass("error")
 
   stripe.createToken(card).then((result) ->
-    console.log 'foo'
     if (result.error)
       # Inform the user if there was an error
-      console.log result.error.message
       $('#card-errors').val(result.error.message)
     else
-      console.log event.stripeCallback
       # Send the token to your server
       event.stripeCallback(result.token)
   )
