@@ -1,7 +1,6 @@
 checkout
 base.js
 stripe.js
-jquery.payment.js
 
 billing
 update-billing.js

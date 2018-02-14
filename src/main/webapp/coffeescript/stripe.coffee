@@ -1,17 +1,17 @@
-stripeCallback = (status, response) ->
-  if response.error
-    myPetDefenseSite.validationError("#card-number", response.error.message)
-  else
-    $("#stripe-token").val(response.id)
-    $(".checkout").submit()
+stripe = Stripe 'pk_test_JLczczIy7T5qGL8DOmwTc2O0'
+elements = stripe.elements()
+card = elements.create 'card'
+card.mount '#card-element'
+
+stripeCallback = (token) ->
+  console.log "in callback"
+  console.log token
+  $("#stripe-token").val(token.id)
+  $(".checkout").submit()
 
 window.myPetDefenseSite.groupon = -> false
     
 $(document).ready ->
-  Stripe?.setPublishableKey? 'pk_test_JLczczIy7T5qGL8DOmwTc2O0'
-
-  myPetDefenseSite.event("stripe-form-ready")
-
   $("body").on "click", '.checkout', (event) ->
     event.preventDefault()
 
@@ -22,11 +22,6 @@ $(document).ready ->
 $(document).on 'groupon-only', (event) ->
   window.myPetDefenseSite.groupon = -> true
 
-$(document).on 'stripe-form-ready', (event) ->
-  $('#card-number').payment('formatCardNumber')
-  $('#card-expiry').payment('formatCardExpiry')
-  $("#card-cvc").payment('formatCardCVC')
-
 $(document).on "validate-stripe-form", (event) ->
   if (window.myPetDefenseSite.groupon ->)
     $(".checkout").submit()
@@ -34,30 +29,15 @@ $(document).on "validate-stripe-form", (event) ->
 
   $(".validation-error").remove()
   $("input.error").removeClass("error")
-  
-  validationError = false
 
-  unless $.payment.validateCardNumber($("#card-number").val())
-    myPetDefenseSite.validationError("#card-number", "Invalid")
-    validationError = false
-  
-  unless $.payment.validateCardCVC($("#card-cvc").val())
-    myPetDefenseSite.validationError("#card-cvc", "Invalid")
-    validationError = true
-  
-  cardExpiry = $("#card-expiry").payment('cardExpiryVal')
-  
-  unless $.payment.validateCardExpiry(cardExpiry.month, cardExpiry.year)
-    myPetDefenseSite.validationError("#card-expiry", "Invalid")
-    validationError = true
-  
-  unless validationError
-    Stripe.createToken
-      name: $('#cardholder-name').val(),
-      number: $('#card-number').val(),
-      cvc: $('#card-cvc').val(),
-      exp_month: cardExpiry.month,
-      exp_year: cardExpiry.year,
-      address_zip: $("#zip").val()
-    , event.stripeCallback
-
+  stripe.createToken(card).then((result) ->
+    console.log 'foo'
+    if (result.error)
+      # Inform the user if there was an error
+      console.log result.error.message
+      $('#card-errors').val(result.error.message)
+    else
+      console.log event.stripeCallback
+      # Send the token to your server
+      event.stripeCallback(result.token)
+  )
