@@ -58,17 +58,19 @@ class Users extends Loggable {
     ).flatten
 
     if(validateFields.isEmpty) {
-      val newUser = User.createNewPendingUser(
-        firstName,
-        lastName,
-        email,
-        UserType.Admin,
-        chosenAgency,
-        None,
-        None
-      )
+      val newUser = userType.map { selectedType =>
+        User.createNewPendingUser(
+          firstName,
+          lastName,
+          email,
+          selectedType,
+          chosenAgency,
+          None,
+          None
+        )
+      }
       
-      EmailActor ! SendNewUserEmail(newUser)
+      newUser.map(EmailActor ! SendNewUserEmail(_))
 
       S.redirectTo(Users.menu.loc.calcDefaultHref)
     } else {
