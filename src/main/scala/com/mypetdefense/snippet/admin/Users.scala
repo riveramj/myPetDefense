@@ -63,7 +63,9 @@ class Users extends Loggable {
         lastName,
         email,
         UserType.Admin,
-        chosenAgency
+        chosenAgency,
+        None,
+        None
       )
       
       EmailActor ! SendNewUserEmail(newUser)
