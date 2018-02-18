@@ -45,6 +45,7 @@ object TPPApi extends RestHelper with Loggable {
 
     if (pennyCount == 0) {
       logger.error("Penny count is 0. This seems wrong.")
+      // TODO: Send price error email.
     }
 
     val couponName = {
@@ -98,9 +99,11 @@ object TPPApi extends RestHelper with Loggable {
 
       case TrySuccess(stripeFailure) =>
         logger.error("create customer failed with: " + stripeFailure)
+        // TODO: Send email with failure.
         stripeFailure
       case TryFail(throwable: Throwable) =>
         logger.error("create customer failed with: " + throwable)
+        // TODO: Send email with failure.
         throwable
     }
   }
@@ -135,6 +138,7 @@ object TPPApi extends RestHelper with Loggable {
 
     if (product == Empty) {
       logger.error("Didnt match product. Need manual resolution")
+      // TODO: Send email with product error.
     }
 
       product.map(Pet.createNewPet(parent, pet.name, _))
@@ -172,6 +176,7 @@ object TPPApi extends RestHelper with Loggable {
 
               if (createdPets.size != pets.size) {
                 logger.error("a pet creation failed")
+                // TODO: Send email with pet error.
               }
 
               setupStripeSubscription(currentParent, possibleParent.stripeToken, createdPets.flatten)
@@ -181,6 +186,7 @@ object TPPApi extends RestHelper with Loggable {
 
             case other => {
               logger.error("Conflict on user createation. Email sent.")
+              // TODO: Send email with user error.
 
               JsonResponse(
                 JsonParser.parse("""{"message:": "possible duplicate parent found. data logged."}"""),
