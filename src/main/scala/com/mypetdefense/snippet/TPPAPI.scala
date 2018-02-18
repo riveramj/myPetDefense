@@ -35,12 +35,26 @@ object TPPApi extends RestHelper with Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
 
-  def setupStripeSubscription(parent: User, stripeToken: String, price: Int, petCount: Int) = {
+  def setupStripeSubscription(parent: User, stripeToken: String, pets: List[Pet]) = {
+    println(pets)
+    val products = pets.flatMap(_.product.obj)
+    val rawPennyCount: Double = products.map { product => 
+      Price.getPricesByCode(product, Price.currentTppPriceCode).map(_.price.get) 
+    }.flatten.foldLeft(0D)(_+_)
+
+    println(rawPennyCount)
+
+    val pennyCount = tryo((rawPennyCount * 100).toInt).openOr(0)
+
+    if (pennyCount == 0) {
+      logger.error("Penny count is 0. This seems wrong.")
+    }
+
     val stripeCustomer: Future[Box[Customer]] = Customer.create(
       email = Some(parent.email.get),
-      card = None,
+      card = Some("tok_visa"),
       plan = Some("pennyProduct"),
-      quantity = Some(price),
+      quantity = Some(pennyCount),
       taxPercent = None,
       coupon = Some("tpp")
     )
@@ -68,7 +82,7 @@ object TPPApi extends RestHelper with Loggable {
           )
 
           if (Props.mode == Props.RunModes.Production) {
-            EmailActor ! NewSaleEmail(user, petCount, "TPP")
+            EmailActor ! NewSaleEmail(user, pets.size, "TPP")
           }
 
           EmailActor ! SendNewUserEmail(user)
@@ -94,7 +108,8 @@ object TPPApi extends RestHelper with Loggable {
             if possibleProduct.contains("zoguard") && possibleProduct.toLowerCase.contains("cat") =>
           "ZoGuard Plus for Cats"
         
-        case possibleProduct => 
+        case possibleProduct =>
+          println("oops ======= " + possibleProduct)
           possibleProduct
       }
 
@@ -134,8 +149,6 @@ object TPPApi extends RestHelper with Loggable {
           val salesAgent= User.find(By(User.email, phoneAgentEmail), By(User.userType, UserType.Agent))
 
           val salesAgency = salesAgent.flatMap(_.agency.obj)
-          val pennyCount = pets.size * 1299
-
           val existingUser = User.find(By(User.email, possibleParent.email), By(User.userType, UserType.Parent))
 
           existingUser match {
@@ -154,7 +167,7 @@ object TPPApi extends RestHelper with Loggable {
                 logger.error("a pet creation failed")
               }
 
-              setupStripeSubscription(currentParent, possibleParent.stripeToken, pennyCount, pets.size)
+              setupStripeSubscription(currentParent, possibleParent.stripeToken, createdPets.flatten)
 
               JsonResponse(requestJson, Nil, Nil, 201)
             }
