@@ -111,6 +111,10 @@ object TPPApi extends RestHelper with Loggable {
         By(Product.sizeName, sanitizedSize)
       )
 
+    if (product == Empty) {
+      logger.error("Didnt match product. Need manual resolution")
+    }
+
       product.map(Pet.createNewPet(parent, pet.name, _))
     }).filter(_ != Empty)
   }
@@ -121,35 +125,51 @@ object TPPApi extends RestHelper with Loggable {
       for {
         requestBody <- (req.body ?~ "No request body." ~> 400)
         requestJson <- tryo(Serialization.read[JValue](new String(requestBody))) ?~! "Invalid JSON." ~> 400
-        phoneAgentEmail <- tryo(requestJson \ "phoneAgentEmail").map(_.extract[String]) ?~ "Phone agent is missing." ~> 400
         parentJson <- Full(requestJson \ "parent")
         possibleParent <- tryo(parentJson.extract[NewParent]) ?~ "Error in customer json." ~> 400
         petsJson <- Full(requestJson \ "pets")
         pets <- tryo(petsJson.extract[List[NewPet]]) ?~ "Error in pets json." ~> 400
+        phoneAgentEmail <- tryo(requestJson \ "phoneAgentEmail").map(_.extract[String]) ?~ "Phone agent is missing." ~> 400
         } yield {
-
           val salesAgent= User.find(By(User.email, phoneAgentEmail), By(User.userType, UserType.Agent))
 
           val salesAgency = salesAgent.flatMap(_.agency.obj)
           val pennyCount = pets.size * 1299
 
-          val newParent = User.createNewPendingUser(
-            possibleParent,
-            salesAgency,
-            salesAgent
-          )
+          val existingUser = User.find(By(User.email, possibleParent.email), By(User.userType, UserType.Parent))
 
-          val parentAddress = Address.createNewAddress(possibleParent.address, Full(newParent))
+          existingUser match {
+            case Empty => {
+              val currentParent = User.createNewPendingUser(
+                possibleParent,
+                salesAgency,
+                salesAgent
+              )
 
-          val createdPets = createPets(pets, newParent) 
+              val parentAddress = Address.createNewAddress(possibleParent.address, Full(currentParent))
 
-          if (createdPets.size != pets.size) {
-            logger.error("a pet creation failed")
+              val createdPets = createPets(pets, currentParent) 
+
+              if (createdPets.size != pets.size) {
+                logger.error("a pet creation failed")
+              }
+
+              setupStripeSubscription(currentParent, possibleParent.stripeToken, pennyCount, pets.size)
+
+              JsonResponse(requestJson, Nil, Nil, 201)
+            }
+
+            case other => {
+              logger.error("Conflict on user createation. Email sent.")
+
+              JsonResponse(
+                JsonParser.parse("""{"message:": "possible duplicate parent found. data logged."}"""),
+                Nil,
+                Nil,
+                201
+              )
+            }
           }
-
-          setupStripeSubscription(newParent, possibleParent.stripeToken, pennyCount, pets.size)
-
-          JsonResponse(requestJson, Nil, Nil, 201)
         }
     }
   }
