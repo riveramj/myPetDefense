@@ -36,13 +36,10 @@ object TPPApi extends RestHelper with Loggable {
   implicit val e = new StripeExecutor(stripeSecretKey)
 
   def setupStripeSubscription(parent: User, stripeToken: String, pets: List[Pet]) = {
-    println(pets)
     val products = pets.flatMap(_.product.obj)
     val rawPennyCount: Double = products.map { product => 
       Price.getPricesByCode(product, Price.currentTppPriceCode).map(_.price.get) 
     }.flatten.foldLeft(0D)(_+_)
-
-    println(rawPennyCount)
 
     val pennyCount = tryo((rawPennyCount * 100).toInt).openOr(0)
 
@@ -50,13 +47,20 @@ object TPPApi extends RestHelper with Loggable {
       logger.error("Penny count is 0. This seems wrong.")
     }
 
+    val couponName = {
+      if (pets.size > 1)
+        Some(s"tpp-${pets.size}pets")
+      else
+        None
+    }
+
     val stripeCustomer: Future[Box[Customer]] = Customer.create(
       email = Some(parent.email.get),
       card = Some("tok_visa"),
-      plan = Some("pennyProduct"),
+      plan = Some("tpp-pennyPlan"),
       quantity = Some(pennyCount),
       taxPercent = None,
-      coupon = Some("tpp")
+      coupon = couponName
     )
 
     stripeCustomer onComplete {
@@ -80,7 +84,11 @@ object TPPApi extends RestHelper with Loggable {
             new Date(),
             Price.currentTppPriceCode
           )
+        }
+        val coupon = Coupon.find(By(Coupon.couponCode, couponName.getOrElse("")))
+        val updatedUser = updatedParent.map(_.coupon(coupon).saveMe)
 
+        updatedUser.map { user =>
           if (Props.mode == Props.RunModes.Production) {
             EmailActor ! NewSaleEmail(user, pets.size, "TPP")
           }
@@ -109,7 +117,6 @@ object TPPApi extends RestHelper with Loggable {
           "ZoGuard Plus for Cats"
         
         case possibleProduct =>
-          println("oops ======= " + possibleProduct)
           possibleProduct
       }
 
