@@ -64,7 +64,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def removeParent(oldUser: User): Box[User] = {
+  def removeParent(oldUser: User, fullDelete: Boolean = false) = {
     val user = oldUser.refresh
     val stripeCustomerId = user.map(_.stripeId.get).openOr("")
     
@@ -73,15 +73,26 @@ object ParentService extends Loggable {
     Try(Await.result(removeCustomer, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(stripeSub)) =>
         val subscription = user.flatMap(_.getSubscription)
-
         val shipments = subscription.map(_.shipments.toList).openOr(Nil)
         val addresses = user.map(_.addresses.toList).openOr(Nil)
-
-        shipments.map(_.status(Status.Inactive).saveMe)
-        addresses.map(_.status(Status.Inactive).saveMe)
-        subscription.map(_.status(Status.Inactive).saveMe)
-        user.map(_.status(Status.Inactive).saveMe)
-
+        
+        if (fullDelete) {
+          shipments.map { shipment =>
+            shipment.shipmentLineItems.map(_.delete_!)
+            shipment.delete_!
+          }
+          addresses.map(_.delete_!)
+          subscription.map(_.delete_!)
+          user.map { realUser =>
+            realUser.pets.toList.map(_.delete_!)
+            realUser.delete_!
+          }
+        } else {
+          shipments.map(_.status(Status.Inactive).saveMe)
+          addresses.map(_.status(Status.Inactive).saveMe)
+          subscription.map(_.status(Status.Inactive).saveMe)
+          user.map(_.status(Status.Inactive).saveMe)
+        }
       case TrySuccess(stripeFailure) =>
         logger.error(s"remove customer failed with stipe error: ${stripeFailure}")
         Empty

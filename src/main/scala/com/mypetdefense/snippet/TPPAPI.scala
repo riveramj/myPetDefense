@@ -164,8 +164,7 @@ object TPPApi extends RestHelper with Loggable {
   }
 
   serve {
-    case req @ Req("api" :: "v1" :: "customer" :: Nil, _, PostRequest) =>
-    {
+    case req @ Req("api" :: "v1" :: "customer" :: Nil, _, PostRequest) => {
       for {
         requestBody <- (req.body ?~ "No request body." ~> 400)
         requestJson <- tryo(Serialization.read[JValue](new String(requestBody))) ?~! "Invalid JSON." ~> 400
@@ -219,6 +218,15 @@ object TPPApi extends RestHelper with Loggable {
               )
             }
           }
+        }
+    }
+
+    case req @ Req("api" :: "v1" :: "customer" :: email :: Nil, _, DeleteRequest) => {
+      for {
+          user <- (User.find(By(User.email, email), By(User.userType, UserType.Parent)):Box[User]) ?~! "User not found." ~> 404
+        } yield {
+          ParentService.removeParent(user, true)
+          OkResponse()
         }
     }
   }
