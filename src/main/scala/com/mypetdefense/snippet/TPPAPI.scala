@@ -29,7 +29,7 @@ import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon}
 import dispatch.{Req => DispatchReq, _}, Defaults._
 
 case class NewAddress(street1: String, street2: Option[String], city: String, state: String, zip: String)
-case class NewPet(name: String, dateOfBirth: Option[String], product: String, currentSize: String, adultSize: String)
+case class NewPet(name: String, whelpDate: Option[String], product: String, currentSize: String, breed: String)
 case class NewParent(firstName: String, lastName: String, email: String, address: NewAddress, phone: Option[String], stripeToken: String)
 
 object TPPApi extends RestHelper with Loggable {
