@@ -75,7 +75,7 @@ object TPPApi extends RestHelper with Loggable {
 
     val stripeCustomer: Future[Box[Customer]] = Customer.create(
       email = Some(parent.email.get),
-      card = Some("tok_visa"),
+      card = Some(stripeToken),
       plan = Some("tpp-pennyPlan"),
       quantity = Some(pennyCount),
       coupon = couponName,
