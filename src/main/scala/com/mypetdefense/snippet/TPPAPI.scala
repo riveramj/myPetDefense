@@ -13,6 +13,7 @@ import net.liftweb._
     import Helpers._
   import json._
     import Extraction._
+    import JsonDSL._
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.{TaxJarService, ParentService}
@@ -198,7 +199,12 @@ object TPPApi extends RestHelper with Loggable {
 
               setupStripeSubscription(currentParent, possibleParent.stripeToken, createdPets.flatten, possibleParent.address)
 
-              JsonResponse(requestJson, Nil, Nil, 201)
+              JsonResponse(
+                ("id" -> s"${currentParent.userId}") ~ ("type" -> "User"),
+                Nil,
+                Nil,
+                201
+              )
             }
 
             case other => {
@@ -206,10 +212,10 @@ object TPPApi extends RestHelper with Loggable {
               // TODO: Send email with user error.
 
               JsonResponse(
-                JsonParser.parse("""{"message:": "possible duplicate parent found. data logged."}"""),
+                ("message" -> "possible duplicate parent found. data logged"),
                 Nil,
                 Nil,
-                201
+                200
               )
             }
           }
