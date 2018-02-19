@@ -68,14 +68,14 @@ object ParentService extends Loggable {
     val user = oldUser.refresh
     val stripeCustomerId = user.map(_.stripeId.get).openOr("")
     
+    val subscription = user.flatMap(_.getSubscription)
+    val shipments = subscription.map(_.shipments.toList).openOr(Nil)
+    val addresses = user.map(_.addresses.toList).openOr(Nil)
+
     val removeCustomer = Customer.delete(stripeCustomerId)
 
     Try(Await.result(removeCustomer, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(stripeSub)) =>
-        val subscription = user.flatMap(_.getSubscription)
-        val shipments = subscription.map(_.shipments.toList).openOr(Nil)
-        val addresses = user.map(_.addresses.toList).openOr(Nil)
-        
         if (fullDelete) {
           shipments.map { shipment =>
             shipment.shipmentLineItems.map(_.delete_!)
