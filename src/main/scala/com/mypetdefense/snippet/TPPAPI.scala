@@ -35,18 +35,13 @@ object TPPApi extends RestHelper with Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
 
-  def setupStripeSubscription(parent: User, stripeToken: String, pets: List[Pet]) = {
+  def setupStripeSubscription(parent: User, stripeToken: String, pets: List[Pet], address: NewAddress) = {
     val products = pets.flatMap(_.product.obj)
     val rawPennyCount: Double = products.map { product => 
       Price.getPricesByCode(product, Price.currentTppPriceCode).map(_.price.get) 
     }.flatten.foldLeft(0D)(_+_)
 
     val pennyCount = tryo((rawPennyCount * 100).toInt).openOr(0)
-
-    if (pennyCount == 0) {
-      logger.error("Penny count is 0. This seems wrong.")
-      // TODO: Send price error email.
-    }
 
     val couponName = {
       if (pets.size > 1)
@@ -55,13 +50,35 @@ object TPPApi extends RestHelper with Loggable {
         None
     }
 
+    val discountAmount = (pets.size - 1) * 100
+
+    val subtotalWithDiscount = (pennyCount - discountAmount) / 100
+
+    if (pennyCount == 0) {
+      logger.error("Penny count is 0. This seems wrong.")
+      // TODO: Send price error email.
+    }
+
+    val (taxDue, taxRate) = {
+      if (address.state.toLowerCase() == "ga") {
+        TaxJarService.findTaxAmoutAndRate(
+          address.city,
+          address.state,
+          address.zip,
+          subtotalWithDiscount
+        )
+      } else {
+        (0D, 0D)
+      }
+    }
+
     val stripeCustomer: Future[Box[Customer]] = Customer.create(
       email = Some(parent.email.get),
       card = Some("tok_visa"),
       plan = Some("tpp-pennyPlan"),
       quantity = Some(pennyCount),
-      taxPercent = None,
-      coupon = couponName
+      coupon = couponName,
+      taxPercent = Some(taxRate)
     )
 
     stripeCustomer onComplete {
@@ -179,7 +196,7 @@ object TPPApi extends RestHelper with Loggable {
                 // TODO: Send email with pet error.
               }
 
-              setupStripeSubscription(currentParent, possibleParent.stripeToken, createdPets.flatten)
+              setupStripeSubscription(currentParent, possibleParent.stripeToken, createdPets.flatten, possibleParent.address)
 
               JsonResponse(requestJson, Nil, Nil, 201)
             }
