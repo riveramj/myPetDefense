@@ -48,3 +48,17 @@
   color: #259490;
   cursor: not-allowed;
 }
+
+#csv-export, #shipments-export {
+  color: #259490;
+  margin-bottom: 5px;
+  display: inline-block;
+
+  &:visited {
+    color: #259490;
+  }
+}
+
+#shipments-export {
+  margin-left: 15px;
+}
