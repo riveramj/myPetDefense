@@ -120,9 +120,20 @@ object Dashboard extends Loggable {
         )
       }
 
+      val pendingShipments = {
+        Subscription.findAll(
+          BySql(
+            "nextShipDate > CURRENT_DATE - interval '5 day' and nextshipdate < current_date",
+            IHaveValidatedThisSQL("mike","2017-04-26")
+          )
+        )
+      }
+
+      val subscriptions = currentShipments ++ pendingShipments
+
       {
         for {
-          subscription <- currentShipments
+          subscription <- subscriptions
           shipment <- Shipment.find(
                         By(Shipment.subscription, subscription),
                         By(Shipment.expectedShipDate, subscription.nextShipDate.get)
