@@ -117,7 +117,7 @@ trait PetRemovedEmailHandling extends EmailHandlerChain {
 }
 
 trait NewPetAddedEmailHandling extends EmailHandlerChain {
-  val newPetAddedSubject = "Pet removed from account"
+  val newPetAddedSubject = "Pet added to account"
   val newPetAddedTemplate = 
     Templates("emails-hidden" :: "internal-account-changes-email" :: Nil) openOr NodeSeq.Empty
   
