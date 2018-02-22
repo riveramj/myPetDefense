@@ -57,7 +57,39 @@ object TPPApi extends RestHelper with Loggable {
 
     if (pennyCount == 0) {
       logger.error("Penny count is 0. This seems wrong.")
-      // TODO: Send price error email.
+
+      val prices = products.map { product => 
+        Price.getPricesByCode(product, Price.currentTppPriceCode).map(_.price.get) 
+      }
+      
+      val errorMsg = s"""
+        Something went wrong with price association.
+          
+        Error given was:
+        ===============
+        Penny count is 0. This seems wrong.
+        ===============
+
+        Price Info:
+        ===============
+        parent: ${parent}
+        plan: tpp-pennyPlan
+        pennyCount: ${pennyCount}
+        rawPennyCount: ${rawPennyCount}
+        ===============
+
+        Products:
+        ==============
+        ${products}
+        ==============
+
+        Prices
+        ==============
+        ${prices}
+        ==============
+      """
+
+      EmailActor ! SendAPIErrorEmail(errorMsg)
     }
 
     val (taxDue, taxRate) = {
@@ -116,12 +148,58 @@ object TPPApi extends RestHelper with Loggable {
         }
 
       case TrySuccess(stripeFailure) =>
-        logger.error("create customer failed with: " + stripeFailure)
-        // TODO: Send email with failure.
+        logger.error("create customer failed with: " + stripeFailure + ". Email sent to log error.")
+
+        val errorMsg = s"""
+          Something went wrong with stripe creation.
+          
+          We did not create a Stripe subscription or an internal subscription.
+
+          Error given was:
+          ===============
+          ${stripeFailure}
+          ===============
+
+          stripe Info:
+          ===============
+          parent: ${parent}
+          token: ${stripeToken}
+          plan: tpp-pennyPlan
+          quantity: ${pennyCount}
+          coupon: ${couponName}
+          taxPercent: ${taxRate}
+          ===============
+        """
+
+        EmailActor ! SendAPIErrorEmail(errorMsg)
+
         stripeFailure
       case TryFail(throwable: Throwable) =>
-        logger.error("create customer failed with: " + throwable)
-        // TODO: Send email with failure.
+        logger.error("create customer failed with: " + throwable + ". Email sent to log error.")
+        
+        val errorMsg = s"""
+          Something went wrong with stripe creation.
+          
+          We did not create a Stripe subscription or an internal subscription.
+
+          Error given was:
+          ===============
+          ${throwable}
+          ===============
+
+          stripe Info:
+          ===============
+          parent: ${parent}
+          token: ${stripeToken}
+          plan: tpp-pennyPlan
+          quantity: ${pennyCount}
+          coupon: ${couponName}
+          taxPercent: ${taxRate}
+          ===============
+        """
+
+        EmailActor ! SendAPIErrorEmail(errorMsg)
+
         throwable
     }
   }
@@ -155,11 +233,31 @@ object TPPApi extends RestHelper with Loggable {
       )
 
     if (product == Empty) {
-      logger.error("Didnt match product. Need manual resolution")
-      // TODO: Send email with product error.
+      logger.error("Didnt match product. Need manual resolution. Email sent.")
+      val errorMsg = s"""
+        Something went wrong with product matching.
+          
+        We could not match the product name given. This will lead to no pets being created. And other failures.
+
+        Error given was:
+        ===============
+        No product found.
+        ===============
+
+        Product Info:
+        ===============
+        parent: ${parent}
+        pet: ${pet}
+        rawProductName: ${pet.product.toLowerCase}
+        rawPetSize: ${pet.currentSize.toLowerCase}
+        ===============
+      """
+
+      EmailActor ! SendAPIErrorEmail(errorMsg)
     }
 
-      product.map(Pet.createNewPet(parent, pet.name, _))
+      // TODO: add whelp date here based on format
+      product.map(Pet.createNewPet(parent, pet.name, _, pet.breed))
     }).filter(_ != Empty)
   }
 
@@ -192,8 +290,27 @@ object TPPApi extends RestHelper with Loggable {
               val createdPets = createPets(pets, currentParent) 
 
               if (createdPets.size != pets.size) {
-                logger.error("a pet creation failed")
-                // TODO: Send email with pet error.
+                logger.error("A pet creation failed. Emailed error.")
+                
+                val errorMsg = s"""
+                  Something went wrong with creating a pet matching.
+
+                  We had ${pets.size} pets in the API call but only created ${createdPets.size} new pets.
+
+                  Error given was:
+                  ===============
+                  Created pets doesn't equal raw pets.
+                  ===============
+
+                  Pet Info:
+                  ===============
+                  parent: ${currentParent}
+                  pets: ${pets}
+                  createdPets: ${createdPets}
+                  ===============
+                """
+
+                EmailActor ! SendAPIErrorEmail(errorMsg)
               }
 
               setupStripeSubscription(currentParent, possibleParent.stripeToken, createdPets.flatten, possibleParent.address)
@@ -208,7 +325,27 @@ object TPPApi extends RestHelper with Loggable {
 
             case other => {
               logger.error("Conflict on user createation. Email sent.")
-              // TODO: Send email with user error.
+              
+              val errorMsg = s"""
+                Something went wrong with user creation.
+        
+                We couldnt create a new user in our system. Nothing else will happen due to this failure.
+
+                Error given was:
+                ===============
+                Matching user found for ${possibleParent.email}
+                ===============
+
+                api Info:
+                ===============
+                rawUser: ${possibleParent}
+                existing user matched: ${existingUser}
+                pets: ${pets}
+                phoneAgentEmail: ${phoneAgentEmail}
+                ===============
+              """
+
+              EmailActor ! SendAPIErrorEmail(errorMsg)
 
               JsonResponse(
                 ("message" -> "possible duplicate parent found. data logged"),
