@@ -72,10 +72,17 @@ object TPPApi extends RestHelper with Loggable {
 
         Price Info:
         ===============
-        parent: ${parent}
-        plan: tpp-pennyPlan
-        pennyCount: ${pennyCount}
-        rawPennyCount: ${rawPennyCount}
+        parent:
+        ${parent}
+
+        plan:
+        tpp-pennyPlan
+        
+        pennyCount:
+        ${pennyCount}
+        
+        rawPennyCount:
+        ${rawPennyCount}
         ===============
 
         Products:
@@ -162,12 +169,23 @@ object TPPApi extends RestHelper with Loggable {
 
           stripe Info:
           ===============
-          parent: ${parent}
-          token: ${stripeToken}
-          plan: tpp-pennyPlan
-          quantity: ${pennyCount}
-          coupon: ${couponName}
-          taxPercent: ${taxRate}
+          parent:
+          ${parent}
+          
+          token:
+          ${stripeToken}
+
+          plan:
+          tpp-pennyPlan
+          
+          quantity:
+          ${pennyCount}
+          
+          coupon:
+          ${couponName}
+          
+          taxPercent:
+          ${taxRate}
           ===============
         """
 
@@ -189,12 +207,23 @@ object TPPApi extends RestHelper with Loggable {
 
           stripe Info:
           ===============
-          parent: ${parent}
-          token: ${stripeToken}
-          plan: tpp-pennyPlan
-          quantity: ${pennyCount}
-          coupon: ${couponName}
-          taxPercent: ${taxRate}
+          parent:
+          ${parent}
+          
+          token:
+          ${stripeToken}
+          
+          plan:
+          tpp-pennyPlan
+          
+          quantity:
+          ${pennyCount}
+          
+          coupon:
+          ${couponName}
+          
+          taxPercent:
+          ${taxRate}
           ===============
         """
 
@@ -246,10 +275,17 @@ object TPPApi extends RestHelper with Loggable {
 
         Product Info:
         ===============
-        parent: ${parent}
-        pet: ${pet}
-        rawProductName: ${pet.product.toLowerCase}
-        rawPetSize: ${pet.currentSize.toLowerCase}
+        parent:
+        ${parent}
+
+        pet:
+        ${pet}
+        
+        rawProductName:
+        ${pet.product.toLowerCase}
+        
+        rawPetSize:
+        ${pet.currentSize.toLowerCase}
         ===============
       """
 
@@ -304,9 +340,14 @@ object TPPApi extends RestHelper with Loggable {
 
                   Pet Info:
                   ===============
-                  parent: ${currentParent}
-                  pets: ${pets}
-                  createdPets: ${createdPets}
+                  parent:
+                  ${currentParent}
+                  
+                  pets:
+                  ${pets}
+
+                  createdPets:
+                  ${createdPets}
                   ===============
                 """
 
@@ -338,10 +379,17 @@ object TPPApi extends RestHelper with Loggable {
 
                 api Info:
                 ===============
-                rawUser: ${possibleParent}
-                existing user matched: ${existingUser}
-                pets: ${pets}
-                phoneAgentEmail: ${phoneAgentEmail}
+                rawUser:
+                ${possibleParent}
+                
+                existing user matched:
+                ${existingUser}
+                
+                pets:
+                ${pets}
+                
+                phoneAgentEmail:
+                ${phoneAgentEmail}
                 ===============
               """
 
