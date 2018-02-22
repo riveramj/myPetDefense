@@ -37,7 +37,6 @@ case class PetRemovedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class BillingUpdatedEmail(user: User) extends EmailActorMessage
 case class AccountCancelledEmail(user: User) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
-case class PetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
   user: User,
   amount: Double,
