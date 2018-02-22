@@ -197,7 +197,7 @@ class Checkout extends Loggable {
 
   def createNewPets(user: User) = {
     cart.map { case (_, (name, product, _)) =>
-      Pet.createNewPet(user, name, product)
+      Pet.createNewPet(user, name, product, "")
     }
   }
 
