@@ -408,7 +408,7 @@ trait SendAPIErrorEmailHandling extends EmailHandlerChain {
         "#error *" #> emailBody
       }
 
-      sendEmail(subject, "help@mypetdefense.com", transform(template))
+      sendEmail(subject, "mike.rivera@mypetdefense.com", transform(template))
   }
 }
 
