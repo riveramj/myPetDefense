@@ -65,6 +65,15 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     .addressType(AddressType.Shipping)
     .saveMe
   }
+
+  def cancel = {
+    this
+    .street1("")
+    .street2("")
+    .zip("")
+    .status(Status.Cancelled)
+    .saveMe
+  }
 }
 
 object Address extends Address with LongKeyedMetaMapper[Address]

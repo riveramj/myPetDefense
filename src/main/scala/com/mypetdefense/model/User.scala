@@ -157,6 +157,20 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   }
 
   def nameAndEmail = s"${this.name} <${this.email}>"
+
+  def cancel = {
+    this
+      .firstName("")
+      .lastName("")
+      .email("")
+      .password("")
+      .salt("")
+      .phone("")
+      .accessKey("")
+      .resetPasswordKey("")
+      .status(Status.Cancelled)
+      .saveMe
+  }
 }
 
 object User extends User with LongKeyedMetaMapper[User]

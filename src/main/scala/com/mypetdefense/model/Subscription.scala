@@ -27,8 +27,16 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+  object cancellationDate extends MappedDateTime(this)
 
   def getProducts = Pet.findAll(By(Pet.user, user.get)).flatMap(_.product.obj)
+
+  def cancel = {
+    this
+      .status(Status.Cancelled)
+      .cancellationDate(new Date())
+      .saveMe
+  }
 
   def getPetAndProducts = Pet.findAll(
     By(Pet.user, user.get),
@@ -58,5 +66,5 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
 object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]
 
 object Status extends Enumeration {
-  val Active, Inactive, UserSuspended, BillingSuspended = Value
+  val Active, Inactive, UserSuspended, BillingSuspended, Cancelled = Value
 }

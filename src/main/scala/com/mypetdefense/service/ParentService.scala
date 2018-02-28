@@ -88,10 +88,10 @@ object ParentService extends Loggable {
             realUser.delete_!
           }
         } else {
-          shipments.map(_.status(Status.Inactive).saveMe)
-          addresses.map(_.status(Status.Inactive).saveMe)
-          subscription.map(_.status(Status.Inactive).saveMe)
-          user.map(_.status(Status.Inactive).saveMe)
+          shipments.map(_.cancel)
+          addresses.map(_.cancel)
+          subscription.map(_.cancel)
+          user.map(_.cancel)
         }
       case TrySuccess(stripeFailure) =>
         logger.error(s"remove customer failed with stipe error: ${stripeFailure}")
@@ -311,7 +311,7 @@ object ParentService extends Loggable {
 
   def removePet(oldUser: User, oldPet: Pet): Box[Pet] = {
     val refreshedPet = Pet.find(By(Pet.petId, oldPet.petId.get))
-    val updatedPet = refreshedPet.map(_.status(Status.Inactive).saveMe)
+    val updatedPet = refreshedPet.map(_.status(Status.Cancelled).saveMe)
 
     val updatedSubscription = updateStripeSubscriptionTotal(oldUser)
 
