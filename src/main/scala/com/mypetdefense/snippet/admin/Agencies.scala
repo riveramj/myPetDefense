@@ -34,6 +34,10 @@ object Agencies extends Loggable {
     loggedIn >>
     EarlyResponse(exportGrossSales _)
 
+  val cancellationExportMenu = Menu.i("Export Cancellation Data") / "admin" / "agencies" / "cancellation-data.csv" >>
+    adminUser >>
+    loggedIn >>
+    EarlyResponse(exportCancellationData _)
 
   def shipmentAmountPaid(shipment: Shipment) = {
     val amountPaid = tryo(shipment.amountPaid.get.toDouble).getOrElse(0D)
@@ -41,13 +45,17 @@ object Agencies extends Loggable {
     amountPaid - taxesPaid
   }
 
-  def exportGrossSales: Box[LiftResponse] = {
-    val currentDate = LocalDateTime.now()
-    val yearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
-    val fileNameYearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", Locale.ENGLISH))
-    val year = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
+  def findProcessDateOfShipment(shipment: Shipment) = {
+    shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+  }
 
-    val headers = "Year" :: "Month" :: "Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent" :: "Commision" :: Nil
+  val currentDate = LocalDateTime.now()
+  val yearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+  val fileNameYearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", Locale.ENGLISH))
+  val year = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
+
+  def exportGrossSales: Box[LiftResponse] = {
+    val headers = "Year" :: "Month" :: "Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent" :: "Commision" :: "Customer Status" :: Nil
 
     val csvRows: List[List[String]] = {
       for {
@@ -56,7 +64,7 @@ object Agencies extends Loggable {
         subscription <- customer.subscription
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
       } yield {
-        val processDate = shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        val processDate = findProcessDateOfShipment(shipment)
 
         val amountPaid = shipmentAmountPaid(shipment)
         val commision = amountPaid * .35 
@@ -69,11 +77,10 @@ object Agencies extends Loggable {
         s"$$${amountPaid}" ::
         customer.salesAgent.obj.map(_.name).openOr("") ::
         f"$$$commision%2.2f" ::
+        subscription.status.toString ::
         Nil
       }
     }
-
-    val spacerRow = List(List(","))
 
     val resultingCsv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
 
@@ -87,9 +94,73 @@ object Agencies extends Loggable {
         "Content-Type" -> "binary/octet-stream",
         "Content-Disposition" -> s"attachment; ${file}"
       ),
-    Nil,
-    200
-  ))
+      Nil,
+      200
+    ))
+  }
+
+  def exportCancellationData = {
+    val possibleAgency = Agency.find(By(Agency.name, "TPP"))
+    val customers = possibleAgency.map(_.customers.toList).openOr(Nil)
+
+    val customerStatusBreakdown = customers.groupBy { customer =>
+      customer.subscription.map(_.status.get)
+    }
+
+    val customerStatusTotals = customerStatusBreakdown.map { customer =>
+      s"${customer._1.toList.headOption.getOrElse("")} Users, ${customer._2.size.toString}"
+    }.toList
+
+    val headers = "Customer Id" :: "Start Month" :: "End Month" :: "Customer Status" :: "Shipment Count" :: "Total Gross Sales" :: "Total Commission" :: Nil
+
+    val csvRows: List[List[String]] = {
+      for {
+        agency <- possibleAgency.toList
+        customer <- customers.filter(_.status != Status.Active)
+        subscription <- customer.subscription
+        shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+        firstShipment <- shipments.headOption
+        lastShipment <- shipments.lastOption
+      } yield {
+        val firstShipmentDate = findProcessDateOfShipment(firstShipment)
+        val lastShipmentDate = findProcessDateOfShipment(lastShipment)
+        val shipmentCount = shipments.size
+        val totalGrossSales = shipments.map(shipmentAmountPaid(_)).foldLeft(0D)(_+_)
+        val totalCommission = totalGrossSales * .35
+
+        customer.userId.toString ::
+        firstShipmentDate.getMonth.toString ::
+        lastShipmentDate.getMonth.toString::
+        subscription.status.toString ::
+        shipmentCount.toString ::
+        s"$$${totalGrossSales}" ::
+        f"$$$totalCommission%2.2f" ::
+        Nil
+      }
+    }
+
+    val spacerRow = List(List(","))
+
+    val resultingCsv = (
+      customerStatusTotals.map(_ :: (",") :: Nil) ++
+      spacerRow ++
+      List(headers) ++
+      csvRows
+    ).map(_.mkString(",")).mkString("\n")
+
+    val fileName = s"cancellations-${fileNameYearMonth}.csv"
+
+    val file = "filename=\"" + fileName + "\""
+
+    Some(new InMemoryResponse(
+      resultingCsv.getBytes("UTF-8"),
+      List(
+        "Content-Type" -> "binary/octet-stream",
+        "Content-Disposition" -> s"attachment; ${file}"
+      ),
+      Nil,
+      200
+    ))
   }
 }
 
@@ -146,7 +217,8 @@ class Agencies extends Loggable {
       ".actions .delete [onclick]" #> Confirm(s"Delete ${agency.name}? This will delete all members and coupons.",
         ajaxInvoke(deleteAgency(agency) _)
       ) &
-      ".actions .sales-export [href]" #> Agencies.salesDataExportMenu.loc.calcDefaultHref
+      ".actions .sales-export [href]" #> Agencies.salesDataExportMenu.loc.calcDefaultHref &
+      ".actions .cancellation-export [href]" #> Agencies.cancellationExportMenu.loc.calcDefaultHref
     }
   }
 }

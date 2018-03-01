@@ -135,6 +135,7 @@ object Paths {
     admin.Coupons.menu,
     admin.Agencies.menu,
     admin.Agencies.salesDataExportMenu,
+    admin.Agencies.cancellationExportMenu,
     admin.PhonePortal.menu,
     admin.Surveys.menu,
     Login.menu,
