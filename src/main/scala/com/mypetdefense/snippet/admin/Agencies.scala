@@ -108,8 +108,8 @@ object Agencies extends Loggable {
     }
 
     val customerStatusTotals = customerStatusBreakdown.map { customer =>
-      s"${customer._1.toList.headOption.getOrElse("")} Users, ${customer._2.size.toString}"
-    }.toList
+      s"${customer._1.headOption.getOrElse("")} Users, ${customer._2.size.toString}"
+    }.toList.sorted.map(_ :: "," :: Nil)
 
     val headers = "Customer Id" :: "Start Month" :: "End Month" :: "Customer Status" :: "Shipment Count" :: "Total Gross Sales" :: "Total Commission" :: Nil
 
@@ -142,7 +142,7 @@ object Agencies extends Loggable {
     val spacerRow = List(List(","))
 
     val resultingCsv = (
-      customerStatusTotals.map(_ :: (",") :: Nil) ++
+      customerStatusTotals ++
       spacerRow ++
       List(headers) ++
       csvRows
