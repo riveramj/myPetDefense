@@ -277,15 +277,35 @@ class Dashboard extends Loggable {
       shipmentRenderer = Full(renderer)
 
       ".shipment" #> subscriptionSet.sortBy(_.nextShipDate.get.getTime).map { subscription =>
+
+        val allShipments = subscription.shipments.toList
+        val user = subscription.user.obj
+        val agencyName = {
+          for {
+            parent <- user
+            agency <- parent.referer
+          } yield {
+            agency.name.get
+          }}.openOr("")
+
+
         val shipment = Shipment.find(
           By(Shipment.subscription, subscription),
           By(Shipment.expectedShipDate, subscription.nextShipDate.get)
         )
-        
+
         val paymentProcessed = paymentProcessed_?(shipment)
 
-        val user = subscription.user.obj
-
+        val insertNeeded = {
+          (paymentProcessed, allShipments.size, agencyName) match {
+            case (false, 0, "TPP") => "TPP+Welcome"
+            case (false, 0, _) => "Welcome"
+            case (true, 1, "TPP") => "TPP+Welcome"
+            case (true, 1, _) => "Welcome"
+            case (_, _, _) => "-"
+          }
+        }
+        
         val petsAndProducts = subscription.getPetAndProducts
         val dateFormat = new SimpleDateFormat("MMM dd")
 
@@ -298,14 +318,14 @@ class Dashboard extends Loggable {
         }
 
         ".ship-on *" #> dateFormat.format(subscription.nextShipDate.get) &
-        ".name *" #> user.map(_.nameAndEmail) &
+        ".name *" #> user.map(_.name) &
         ".address *" #> address &
         ".product" #> petsAndProducts.map { case (pet, product) =>
           ".pet-name *" #> pet.name.get &
           ".product-name *" #> product.map(_.name.get) &
           ".product-size *" #> product.map(_.size.get.toString)
         } &
-        ".payment-processed *" #> { if (paymentProcessed) "Yes" else "No" } &
+        ".insert *" #> insertNeeded &
         ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
           val updatedShipment = shipment.flatMap { possibleShipment =>
             Shipment.find(By(Shipment.shipmentId, possibleShipment.shipmentId.get))
