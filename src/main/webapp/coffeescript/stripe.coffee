@@ -19,7 +19,6 @@ window.myPetDefenseSite.groupon = -> false
     
 $(document).ready ->
   $("body").on "click", '.checkout, .update-billing', (event) ->
-    console.log("yep")
     event.preventDefault()
 
     myPetDefenseSite.event("validate-stripe-form",
