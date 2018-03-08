@@ -3,7 +3,7 @@ elements = stripe.elements()
 card = elements.create('card',{
   'style': {
     'base': {
-      'fontSize': '18px',
+      'fontSize': '17px',
       'fontFamily': '"Lato", Helvetica, Arial, sans-serif'
     }
   }
@@ -13,12 +13,13 @@ card.mount '#card-element'
 
 stripeCallback = (token) ->
   $("#stripe-token").val(token.id)
-  $(".checkout").submit()
+  $(".checkout, .update-billing").submit()
 
 window.myPetDefenseSite.groupon = -> false
     
 $(document).ready ->
-  $("body").on "click", '.checkout', (event) ->
+  $("body").on "click", '.checkout, .update-billing', (event) ->
+    console.log("yep")
     event.preventDefault()
 
     myPetDefenseSite.event("validate-stripe-form",

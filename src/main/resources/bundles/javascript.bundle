@@ -3,9 +3,8 @@ base.js
 stripe.js
 
 billing
-update-billing.js
-jquery.payment.js
 base.js
+stripe.js
 
 profile
 profile.js

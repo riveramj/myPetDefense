@@ -133,10 +133,6 @@ fieldset label {
       width: 21%;
     }
 
-    &.card-number {
-      width: 56%;
-    }
-
     &.expiration-date {
       width: 23%;
     }
@@ -167,14 +163,6 @@ fieldset label {
 
 .note {
   display: inline-block;
-}
-
-#card-month-expiry {
-  margin-right: rem(2px);
-}
-
-#card-year-expiry {
-  margin-right: rem(-4px);
 }
 
 #summary {
