@@ -298,10 +298,10 @@ class Dashboard extends Loggable {
 
         val insertNeeded = {
           (paymentProcessed, allShipments.size, agencyName) match {
-            case (false, 0, "TPP") => "TPP+Welcome"
-            case (false, 0, _) => "Welcome"
-            case (true, 1, "TPP") => "TPP+Welcome"
-            case (true, 1, _) => "Welcome"
+            case (false, 0, "TPP") => "TPP+Welcome Insert"
+            case (false, 0, _) => "Welcome Insert"
+            case (true, 1, "TPP") => "TPP+Welcome Insert"
+            case (true, 1, _) => "Welcome Insert"
             case (_, _, _) => "-"
           }
         }
@@ -311,15 +311,15 @@ class Dashboard extends Loggable {
 
         val shipAddressRaw = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
 
-        val address = shipAddressRaw.map { ship =>
-          s"""${ship.street1}
+        val nameAddress = shipAddressRaw.map { ship =>
+          s"""${user.map(_.name).getOrElse("")}
+          |${ship.street1}
           |${ship.street2}
           |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
         }
 
         ".ship-on *" #> dateFormat.format(subscription.nextShipDate.get) &
-        ".name *" #> user.map(_.name) &
-        ".address *" #> address &
+        ".name-address *" #> nameAddress &
         ".product" #> petsAndProducts.map { case (pet, product) =>
           ".pet-name *" #> pet.name.get &
           ".product-name *" #> product.map(_.name.get) &
@@ -340,7 +340,7 @@ class Dashboard extends Loggable {
             ".ship *" #> "Can't Ship Yet." &
             ".ship [disabled]" #> "disabled"
           } else 
-            ".ship [onclick]" #> SHtml.ajaxInvoke(shipProduct(subscription, user, shipment, address.openOr(""), shipButtonRenderer) _)
+            ".ship [onclick]" #> SHtml.ajaxInvoke(shipProduct(subscription, user, shipment, nameAddress.openOr(""), shipButtonRenderer) _)
         }
       }
     }
