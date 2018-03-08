@@ -28,7 +28,6 @@ admin.js
 base.js
 stripe.js
 promo-code.js
-jquery.payment.js
 
 products
 products.js
