@@ -27,6 +27,13 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+
+  def cancel = {
+    this
+      .address("")
+      .status(Status.Cancelled)
+      .saveMe
+  }
 }
 
 object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {

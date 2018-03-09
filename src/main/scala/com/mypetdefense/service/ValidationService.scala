@@ -95,24 +95,41 @@ object ValidationService extends Loggable {
     }
   }
 
-  def checkMonthAndPercent(months: (String, String), percent: (String, String)) = {
+  def checkMonthPercentDollar(months: (String, String), percent: (String, String), dollar: (String, String)) = {
     val hasMonths_? = months._1.nonEmpty
     val hasPercent_? = percent._1.nonEmpty
+    val hasDollar_? = dollar._1.nonEmpty
 
-    (hasMonths_?, hasPercent_?) match {
-      case (false, false) =>
+    (hasMonths_?, hasPercent_?, hasDollar_?) match {
+      case (false, false, false) =>
         List(
           Full(ValidationError(months._2, S ? "One of these is required.")),
-          Full(ValidationError(percent._2, S ? "One of these is required."))
+          Full(ValidationError(percent._2, S ? "One of these is required.")),
+          Full(ValidationError(dollar._2, S ? "One of these is required."))
         )
 
-      case (false, true) =>
+      case (_, true, true) =>
+        List(
+          Full(ValidationError(percent._2, S ? "One of these must be empty.")),
+          Full(ValidationError(dollar._2, S ? "One of these must be empty."))
+        )
+
+      case (false, true, false) =>
+        List(Empty)
+      
+      case (false, false, true) =>
         List(Empty)
 
-      case (true, false) =>
-        List(Full(ValidationError(percent._2, S ? "Need a percent with months.")))
+      case (true, false, false) =>
+        List(
+          Full(ValidationError(percent._2, S ? "Need a percent or dollar with months.")),
+          Full(ValidationError(dollar._2, S ? "Need a percent or dollar with months."))
+        )
 
-      case (true, true) =>
+      case (true, false, true) =>
+        List(Empty)
+
+      case (true, true, false) =>
         List(Empty)
     }
   }

@@ -24,7 +24,7 @@ object CouponService extends Loggable {
     tryo(possibleNumber.trim().toInt).openOr(0)
   }
 
-  def createStripeCoupon(couponCode: String, agency: Box[Agency], freeMonths: Int, percentOff: Int) = {
+  def createStripeCoupon(couponCode: String, agency: Box[Agency], freeMonths: Int, percentOff: Int, dollarOff: Int) = {
 
     val (durationType, durationMonths) = {
       if (freeMonths == 0)
@@ -33,24 +33,36 @@ object CouponService extends Loggable {
         ("repeating", Some(freeMonths))
     }
 
-    StripeCoupon.create(
-      id = Some(couponCode),
-      duration = durationType,
-      percentOff = Some(percentOff),
-      durationInMonths = durationMonths
-    )
+    if (dollarOff > 0) {
+      StripeCoupon.create(
+        id = Some(couponCode),
+        duration = durationType,
+        amountOff = Some(dollarOff * 100),
+        currency = Some("USD"),
+        durationInMonths = durationMonths
+      )
+    } else {
+      StripeCoupon.create(
+        id = Some(couponCode),
+        duration = durationType,
+        percentOff = Some(percentOff),
+        durationInMonths = durationMonths
+      )
+    }
   }
 
-  def createCoupon(couponCode: String, agency: Box[Agency], rawFreeMonths: String, rawPercentOff: String): Box[Coupon] = {
+  def createCoupon(couponCode: String, agency: Box[Agency], rawFreeMonths: String, rawPercentOff: String, rawDollarOff: String): Box[Coupon] = {
 
     val freeMonths = convertedString(rawFreeMonths)
     val percentOff = convertedString(rawPercentOff)
+    val dollarOff = convertedString(rawDollarOff)
 
     val newStripeCoupon = createStripeCoupon(
       couponCode,
       agency,
       freeMonths,
-      percentOff
+      percentOff,
+      dollarOff
     )
 
     Try(Await.result(newStripeCoupon, new DurationInt(3).seconds)) match {
@@ -59,7 +71,8 @@ object CouponService extends Loggable {
           couponCode,
           agency,
           freeMonths,
-          percentOff
+          percentOff,
+          dollarOff
         ))
 
       case TrySuccess(stripeFailure) =>

@@ -93,7 +93,7 @@ fieldset label {
     padding-bottom: 0;
   }
 
-  input {
+  input, .form-row {
     width: 100%;
     color: #4F4E4E;
     font-size: em(22px);
@@ -105,6 +105,16 @@ fieldset label {
       color: #949494;
     }
   }
+}
+
+.form-row {
+  width: 100%;
+  color: #4F4E4E;
+  font-size: em(22px);
+  border: 1px solid #CECECE;
+  padding: rem(7px) rem(10px);
+  border-radius: 3px;
+  background-color: #ffffff;
 }
 
 .short-field {
@@ -121,10 +131,6 @@ fieldset label {
 
     &.zip {
       width: 21%;
-    }
-
-    &.card-number {
-      width: 56%;
     }
 
     &.expiration-date {
@@ -157,14 +163,6 @@ fieldset label {
 
 .note {
   display: inline-block;
-}
-
-#card-month-expiry {
-  margin-right: rem(2px);
-}
-
-#card-year-expiry {
-  margin-right: rem(-4px);
 }
 
 #summary {

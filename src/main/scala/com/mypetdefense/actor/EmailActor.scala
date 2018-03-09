@@ -37,7 +37,7 @@ case class PetRemovedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class BillingUpdatedEmail(user: User) extends EmailActorMessage
 case class AccountCancelledEmail(user: User) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
-case class PetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
+case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
   user: User,
   amount: Double,
@@ -395,6 +395,23 @@ trait Send5kEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait SendAPIErrorEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case SendAPIErrorEmail(emailBody) =>
+      val template =
+        Templates("emails-hidden" :: "api-error-email" :: Nil) openOr NodeSeq.Empty
+      
+      val subject = "API Error - Manual Work Needed"
+      val hostUrl = Paths.serverUrl
+      
+      val transform = {
+        "#error *" #> emailBody
+      }
+
+      sendEmail(subject, "mike.rivera@mypetdefense.com", transform(template))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -476,6 +493,7 @@ trait EmailActor extends EmailHandlerChain
                     with ShipmentReadyEmailHandling 
                     with ContactUsEmailHandling
                     with Send5kEmailHandling
+                    with SendAPIErrorEmailHandling
                     with TestimonialEmailHandling {
 
   val baseEmailTemplate = 
