@@ -37,6 +37,7 @@ class Coupons extends Loggable {
   var codeName = ""
   var monthCount = "0"
   var percentOff = "0"
+  var dollarOff = "0"
   var chosenAgency: Box[Agency] = Empty
 
   def agencyDropdown = {
@@ -54,8 +55,10 @@ class Coupons extends Loggable {
         checkCouponValue(percentOff.trim(), "#percent-off"),
         checkCouponValue(monthCount.trim(), "#month-count"),
         checkDuplicateCoupon(codeName, "#code-name")
-      ) ++ checkMonthAndPercent(
-        (monthCount.trim(), "#month-count"), (percentOff.trim(), "#percent-off")
+      ) ++ checkMonthPercentDollar(
+        (monthCount.trim(), "#month-count"),
+        (percentOff.trim(), "#percent-off"),
+        (dollarOff.trim(), "#dollar-off")
       )).flatten
 
     if (validateFields.isEmpty) {
@@ -63,7 +66,8 @@ class Coupons extends Loggable {
         codeName.toLowerCase().trim(),
         chosenAgency,
         monthCount,
-        percentOff
+        percentOff,
+        dollarOff
       ) match { 
         case Full(coupon) =>
           S.redirectTo(Coupons.menu.loc.calcDefaultHref)
@@ -91,14 +95,24 @@ class Coupons extends Loggable {
     "#code-name" #> text(codeName, codeName = _) &
     "#month-count" #> text(monthCount, monthCount = _) &
     "#percent-off" #> text(percentOff, percentOff = _) &
+    "#dollar-off" #> text(dollarOff, dollarOff = _) &
     "#agency-container #agency-select" #> agencyDropdown &
     "#create-item" #> SHtml.ajaxSubmit("Create Coupon", () => createCoupon) &
     ".coupon" #> coupons.map { coupon =>
       val couponPercent = {
-        if (coupon.percentOff.get == 0)
+        if (coupon.dollarOff.get > 0)
+          "-"
+        else if (coupon.percentOff.get == 0)
           "100%"
-        else
+        else 
           s"${coupon.percentOff.get}%"
+      }
+
+      val couponDollar = {
+        if (coupon.dollarOff.get > 0)
+          s"$$${coupon.dollarOff.get}"
+        else
+          "-"
       }
 
       val monthCount = {
@@ -111,6 +125,7 @@ class Coupons extends Loggable {
       ".code *" #> coupon.couponCode &
       ".months *" #> monthCount &
       ".percent-off *" #> couponPercent &
+      ".dollar-off *" #> couponDollar &
       ".usage-count *" #> coupon.users.size &
       ".agency *" #> coupon.agency.obj.map(_.name.get) &
       ".actions .delete" #> ClearNodesIf(coupon.users.size > 0) &

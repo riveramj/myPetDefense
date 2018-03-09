@@ -116,7 +116,6 @@ class Profile extends Loggable {
     ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword _) &
     ".stauts" #> user.map(_.status.get.toString) &
     ".confirm-cancel-account" #> SHtml.ajaxSubmit("Yes, cancel my acount", cancelAccount _)
-    
   }
 }
 
