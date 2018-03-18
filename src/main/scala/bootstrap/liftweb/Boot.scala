@@ -84,6 +84,7 @@ class Boot {
     
     LiftRules.statelessDispatch.append(StripeHook)
     LiftRules.statelessDispatch.append(TPPApi)
+    LiftRules.statelessDispatch.append(PromikaAPI)
   }
 
   //Bundles
