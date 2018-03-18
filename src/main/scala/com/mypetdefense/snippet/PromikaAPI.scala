@@ -31,13 +31,10 @@ object PromikaAPI extends RestHelper with Loggable {
   val templateEmailUrl = url("https://api.postmarkapp.com/email/withTemplate")
 
   serve {
-    case req @ Req("api" :: "promika" :: "email" :: Nil, _, PostRequest) => {
+    case req @ Req("api" :: "promika" :: "email" :: Nil, _, GetRequest) => {
 
       for {
-        requestBody <- (req.body ?~ "No request body." ~> 400)
-        requestJson <- tryo(Serialization.read[JValue](new String(requestBody))) ?~! "Invalid JSON." ~> 400
-         emailJson <- Full(requestJson \ "email")
-        email <- tryo(emailJson.extract[String]) ?~ "Error in email json." ~> 400 
+        email <- req.param("email").filter(_.trim.nonEmpty) ?~! "Email was not specified." ~> 400
       } yield {
         val body = s"""{
           'TemplateId': 5333842,
