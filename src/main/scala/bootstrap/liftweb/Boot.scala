@@ -90,7 +90,6 @@ class Boot {
   //Bundles
   LiftRules.snippets.append(Bundles.snippetHandlers)
 
-
   LiftRules.responseTransformers.append {
     resp =>
       (for (req <- S.request) yield {
@@ -104,4 +103,13 @@ class Boot {
         }
       }) openOr resp
   }
+
+  LiftRules.supplementalHeaders.default.set(
+    List(
+      ("X-Lift-Version", LiftRules.liftVersion),
+      ("Access-Control-Allow-Origin", "https://promikallcresources.com"),
+      ("Access-Control-Allow-Content-Type", "application/json"),
+      ("Access-Control-Allow-Methods", "GET")
+    )
+  )
 }
