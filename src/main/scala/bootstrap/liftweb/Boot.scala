@@ -81,7 +81,9 @@ class Boot {
 
     // set DocType to HTML5
     LiftRules.htmlProperties.default.set((r: Req) =>new Html5Properties(r.userAgent))
+    
     LiftRules.statelessDispatch.append(StripeHook)
+    LiftRules.statelessDispatch.append(TPPApi)
     LiftRules.statelessDispatch.append(PromikaAPI)
   }
 

@@ -34,24 +34,6 @@
   @include outer-container;
 }
 
-.expires {
-  @include span-columns(4);
-  @media(min-width: $bp-large) {
-    @include span-columns(2);
-    width: 37.63%;
-  }
-}
-
-.cvv {
-  @include shift(1);
-  @include span-columns(4);
-  @media(min-width: $bp-large) {
-    @include shift(-2.7);
-    @include span-columns(2);
-    width: 29.41%;
-  }
-}
-
 .save-container {
   @include outer-container;
 }
@@ -151,4 +133,15 @@ input {
   .sign-out {
     display: none;
   }
+}
+
+.form-row {
+  width: 100%;
+  color: #4F4E4E;
+  font-size: em(22px);
+  border: 1px solid #CECECE;
+  padding: rem(7px) rem(10px);
+  border-radius: 3px;
+  background-color: #ffffff;
+  margin-bottom: 14px;
 }

@@ -54,7 +54,6 @@ class Checkout extends Loggable {
   var password = ""
   
   var firstName = ""
-  var cardholderName = ""
   var lastName = ""
   var street1 = ""
   var street2 = ""
@@ -103,7 +102,7 @@ class Checkout extends Loggable {
   }
 
   def signup() = {
-    val validateFieldsPartial = List(
+    val validateFields = List(
         checkEmail(email, "#email"),
         checkEmpty(firstName, "#first-name"),
         checkEmpty(lastName, "#last-name"),
@@ -113,13 +112,6 @@ class Checkout extends Loggable {
         checkEmpty(state, "#state"),
         checkEmpty(zip, "#zip")
       ).flatten
-
-    val validateFields = {
-      if (!groupon_?)
-        validateFieldsPartial ++ checkEmpty(cardholderName, "#cardholder-name")
-      else
-        validateFieldsPartial
-    }
 
     if(validateFields.isEmpty) {
       (coupon, petCount, groupons.isEmpty) match {
@@ -197,7 +189,7 @@ class Checkout extends Loggable {
 
   def createNewPets(user: User) = {
     cart.map { case (_, (name, product, _)) =>
-      Pet.createNewPet(user, name, product)
+      Pet.createNewPet(user, name, product, "")
     }
   }
 
@@ -302,7 +294,6 @@ class Checkout extends Loggable {
     "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
     "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
-    "#cardholder-name" #> text(cardholderName, cardholderName = _) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup) &
     ".agreement" #> ClearNodesIf(subtotalWithDiscount == 0)

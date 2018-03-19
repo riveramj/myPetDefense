@@ -71,23 +71,15 @@
     <div id="right-column">
       <fieldset class="billing-info">
         <legend>Billing Info</legend>
-        <div>
-          <label>
-            <div><span class="field-label cardholder-name">Cardholder Name</span></div>
-            <input type="text" id="cardholder-name">
-          </label>
-          <label class="short-field card-number">
-            <div><span class="field-label">Card Number</span></div>
-            <input id="card-number" class="inspectletIgnore" type="tel" data-stripe="number" autocomplete="cc-number" placeholder="•••• •••• •••• ••••">
-          </label>
-          <label class="short-field expiration-date">
-            <div><span class="field-label">Expires</span></div>
-            <input type="tel" id="card-expiry" class="inspectletIgnore" placeholder="MM/YY" autocomplete="cc-exp">
-          </label>
-          <label class="short-field cvc">
-            <span class="field-label">CVC</span>
-            <input placeholder="000" id="card-cvc" class="inspectletIgnore" size="4" type="text" data-stripe="cvc" autocomplete="off">            
-          </label>
+        <div class="billing-container">
+          <div class="form-row">
+            <div id="card-element">
+              <!-- a Stripe Element will be inserted here. -->
+            </div>
+
+            <!-- Used to display form errors -->
+            <div id="card-errors" role="alert"></div>
+          </div>
         </div>
       </fieldset>
 
@@ -115,7 +107,7 @@
   </form>
 
   <tail>
-    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
     <script type="text/javascript" data-lift="script-bundle?name=checkout"></script>
     <script>
       fbq('track', 'InitiateCheckout');
