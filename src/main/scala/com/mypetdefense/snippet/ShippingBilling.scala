@@ -177,9 +177,6 @@ class ShippingBilling extends Loggable {
         "#user-email *" #> user.email & 
         "#first-name" #> text(firstName, firstName = _) &
         "#last-name" #> text(lastName, lastName = _) &
-        "#cardholder-name" #> text(cardName, cardName = _) &
-        "#old-card-last4" #> hidden(cardNumber = _, "") &
-        "#card-expiry" #> text("", cardExpire = _) &
         "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
         "#promo-code" #> text(promoCode, promoCode = _) &
         ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBillingAddWinterCoupon(user) _)

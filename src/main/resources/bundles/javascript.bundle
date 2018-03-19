@@ -1,12 +1,10 @@
 checkout
 base.js
 stripe.js
-jquery.payment.js
 
 billing
-update-billing.js
-jquery.payment.js
 base.js
+stripe.js
 
 profile
 profile.js
@@ -30,7 +28,6 @@ admin.js
 base.js
 stripe.js
 promo-code.js
-jquery.payment.js
 
 products
 products.js

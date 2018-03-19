@@ -62,20 +62,20 @@ trait StripeHook extends RestHelper with Loggable {
           formatAmount(subtotal),
           formatAmount(tax)
         )
+      }
 
-        if (activePets_?) {
-          val shipment = Shipment.createShipment(
-            user,
-            invoicePaymentId,
-            formatAmount(amountPaid),
-            formatAmount(tax)
-          )
+      if (activePets_?) {
+        val shipment = Shipment.createShipment(
+          user,
+          invoicePaymentId,
+          formatAmount(amountPaid),
+          formatAmount(tax)
+        )
 
-          shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
+        shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
 
-          if (Props.mode != Props.RunModes.Pilot) {
-            emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
-          }
+        if (Props.mode != Props.RunModes.Pilot) {
+          emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
         }
       }
 

@@ -81,12 +81,14 @@ class Boot {
 
     // set DocType to HTML5
     LiftRules.htmlProperties.default.set((r: Req) =>new Html5Properties(r.userAgent))
+    
     LiftRules.statelessDispatch.append(StripeHook)
+    LiftRules.statelessDispatch.append(TPPApi)
+    LiftRules.statelessDispatch.append(PromikaAPI)
   }
 
   //Bundles
   LiftRules.snippets.append(Bundles.snippetHandlers)
-
 
   LiftRules.responseTransformers.append {
     resp =>
@@ -101,4 +103,13 @@ class Boot {
         }
       }) openOr resp
   }
+
+  LiftRules.supplementalHeaders.default.set(
+    List(
+      ("X-Lift-Version", LiftRules.liftVersion),
+      ("Access-Control-Allow-Origin", "https://promikallcresources.com"),
+      ("Access-Control-Allow-Content-Type", "application/json"),
+      ("Access-Control-Allow-Methods", "GET")
+    )
+  )
 }

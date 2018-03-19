@@ -32,7 +32,7 @@ object Users extends Loggable {
 }
 
 class Users extends Loggable {
-  val users = User.findAll()
+  val users = User.findAll(By(User.status, Status.Active))
   val allAgencies = Agency.findAll()
 
   var firstName = ""
@@ -58,15 +58,19 @@ class Users extends Loggable {
     ).flatten
 
     if(validateFields.isEmpty) {
-      val newUser = User.createNewPendingUser(
-        firstName,
-        lastName,
-        email,
-        UserType.Admin,
-        chosenAgency
-      )
+      val newUser = userType.map { selectedType =>
+        User.createNewPendingUser(
+          firstName,
+          lastName,
+          email,
+          selectedType,
+          chosenAgency,
+          None,
+          None
+        )
+      }
       
-      EmailActor ! SendNewUserEmail(newUser)
+      newUser.map(EmailActor ! SendNewUserEmail(_))
 
       S.redirectTo(Users.menu.loc.calcDefaultHref)
     } else {
