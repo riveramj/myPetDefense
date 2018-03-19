@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet 
+package com.mypetdefense.snippet
 
 import net.liftweb._
   import common._
