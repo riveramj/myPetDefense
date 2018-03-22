@@ -55,7 +55,7 @@ object Agencies extends Loggable {
   val year = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
 
   def exportGrossSales: Box[LiftResponse] = {
-    val headers = "Year" :: "Month" :: "Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent" :: "Commision" :: "Customer Status" :: Nil
+    val headers = "Year" :: "Month" :: "Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent Id" :: "Commision" :: "Customer Status" :: Nil
 
     val csvRows: List[List[String]] = {
       for {
@@ -75,7 +75,7 @@ object Agencies extends Loggable {
         customer.userId.toString ::
         customer.name ::
         s"$$${amountPaid}" ::
-        customer.salesAgent.obj.map(_.name).openOr("") ::
+        customer.salesAgentId.get ::
         f"$$$commision%2.2f" ::
         subscription.status.toString ::
         Nil
