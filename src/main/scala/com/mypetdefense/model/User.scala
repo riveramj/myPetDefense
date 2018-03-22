@@ -31,8 +31,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object resetPasswordKey extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
   object referer extends MappedLongForeignKey(this, Agency)
-  object salesAgent extends MappedLongForeignKey(this, User)
-  object sales extends MappedOneToMany(User, User.salesAgent)
+  object salesAgentId extends MappedString(this, 100)
   object coupon extends MappedLongForeignKey(this, Coupon)
   object agency extends MappedLongForeignKey(this, Agency)
   object survey extends MappedLongForeignKey(this, Survey)
@@ -104,7 +103,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     userType: UserType.Value,
     agency: Box[Agency],
     referer: Box[Agency],
-    salesAgent: Box[User]
+    salesAgentId: String
   ) = {
     User.create
       .userId(generateLongId)
@@ -115,14 +114,14 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .agency(agency)
       .userType(userType)
       .referer(referer)
-      .salesAgent(salesAgent)
+      .salesAgentId(salesAgentId)
       .saveMe
   }
 
   def createNewPendingUser(
     parentInfo: NewParent,
     referer: Box[Agency],
-    salesAgent: Box[User]
+    salesAgentId: String = ""
   ) = {
     User.create
       .userId(generateLongId)
@@ -133,7 +132,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .accessKey(createAccessKey)
       .userType(UserType.Parent)
       .referer(referer)
-      .salesAgent(salesAgent)
+      .salesAgentId(salesAgentId)
       .saveMe
   }
 
