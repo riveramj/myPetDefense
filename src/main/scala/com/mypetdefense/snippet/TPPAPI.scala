@@ -306,11 +306,9 @@ object TPPApi extends RestHelper with Loggable {
         possibleParent <- tryo(parentJson.extract[NewParent]) ?~ "Error in customer json." ~> 400
         petsJson <- Full(requestJson \ "pets")
         pets <- tryo(petsJson.extract[List[NewPet]]) ?~ "Error in pets json." ~> 400
-        phoneAgentEmail <- tryo(requestJson \ "phoneAgentEmail").map(_.extract[String]) ?~ "Phone agent is missing." ~> 400
+        agentId <- tryo(requestJson \ "agentId").map(_.extract[String]) ?~ "Phone agent is missing." ~> 400
         } yield {
-          val salesAgent= User.find(By(User.email, phoneAgentEmail), By(User.userType, UserType.Agent))
-
-          val salesAgency = salesAgent.flatMap(_.agency.obj)
+          val salesAgency = Agency.find(By(Agency.name, "TPP"))
           val existingUser = User.find(By(User.email, possibleParent.email), By(User.userType, UserType.Parent))
 
           existingUser match {
@@ -318,7 +316,7 @@ object TPPApi extends RestHelper with Loggable {
               val currentParent = User.createNewPendingUser(
                 possibleParent,
                 salesAgency,
-                salesAgent
+                agentId
               )
 
               val parentAddress = Address.createNewAddress(possibleParent.address, Full(currentParent))
@@ -388,8 +386,8 @@ object TPPApi extends RestHelper with Loggable {
                 pets:
                 ${pets}
                 
-                phoneAgentEmail:
-                ${phoneAgentEmail}
+                agentId:
+                ${agentId}
                 ===============
               """
 

@@ -66,7 +66,7 @@ class Users extends Loggable {
           selectedType,
           chosenAgency,
           None,
-          None
+          ""
         )
       }
       
