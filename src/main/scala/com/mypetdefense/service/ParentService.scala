@@ -6,8 +6,6 @@ import net.liftweb._
   import util._
   import util.Helpers._
 
-import com.mypetdefense.model._
-
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => StripeSubscription, _}
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
