@@ -75,7 +75,7 @@ trait StripeHook extends RestHelper with Loggable {
         shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
 
         if (Props.mode != Props.RunModes.Pilot) {
-          //emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
+          emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
         }
       }
 
@@ -130,7 +130,7 @@ trait StripeHook extends RestHelper with Loggable {
           objectJson = (dataJson \ "object")
         } yield {
           val result: Box[LiftResponse] = eventType match {
-            case "invoice.payment_succeeded" => invoicePaymentSucceeded(objectJson)
+            //case "invoice.payment_succeeded" => invoicePaymentSucceeded(objectJson)
             case "invoice.payment_failed" => invoicePaymentFailed(objectJson)
             case "customer.subscription.updated" => subscriptionPastDue(objectJson)
             case _ => Full(OkResponse())
