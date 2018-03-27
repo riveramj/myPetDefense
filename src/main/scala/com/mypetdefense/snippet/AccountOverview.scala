@@ -71,6 +71,11 @@ class AccountOverview extends Loggable {
 
   val taxDue = upcomingInvoice.flatMap(_.tax.map(_.toDouble/100D)).openOr(0D)
   val totalDue = upcomingInvoice.map(_.amountDue.toDouble/100D).openOr(0D)
+  val nextBillDateRaw = upcomingInvoice.map(_.date)
+
+  val nextBillDate = nextBillDateRaw.map { date =>
+    new Date(date * 1000)
+  }
 
   def render = {
     "#page-body-container" #> {
@@ -96,6 +101,7 @@ class AccountOverview extends Loggable {
         "#upcoming-order a [class+]" #> "current" &
         "#user-email *" #> parent.email &
         ".next-ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
+        ".next-bill-date *" #> nextBillDate.map(dateFormat.format(_)) &
         "#user-address" #> shippingAddress.map { address =>
           "#name *" #> parent.name &
           "#address-one *" #> address.street1.get &

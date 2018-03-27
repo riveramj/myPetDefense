@@ -5,6 +5,13 @@
     <h2>Dashboard</h2>
     <a href="#" id="csv-export">All Shimpents Ever CSV Export</a>
     <a href="#" id="shipments-export">Curent &amp; Pending labels Export</a>
+    <form id="upload-tracking-numbers-form" data-lift="admin.Dashboard.fileUpload">
+      <div class="fileUploadForm">
+        <p>Tracking Number Upload</p>
+        <input type="file" id="tracking-upload" />
+        <input type="submit" value="Submit" id="upload-tracking-numbers" />
+      </div>
+    </form>
     <div class="shipment-container">
       <ul class="dashboard-nav">
         <li class="active dashboard-current">
@@ -24,6 +31,6 @@
     <link rel="stylesheet" data-lift="style-bundle?name=dashboard">
   </head_merge>
   <tail>
-    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+    <script type="text/javascript" data-lift="script-bundle?name=dashboard"></script>
   </tail>
 </div>
