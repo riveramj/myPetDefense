@@ -117,6 +117,7 @@ object Paths {
     ValentinePicture.menu,
     LandingPage.woofstock,
     LandingPage.olympics,
+    LandingPage.atlantaExpo,
     CartReview.menu,
     Checkout.menu,
     Success.menu,

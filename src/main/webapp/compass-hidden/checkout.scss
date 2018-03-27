@@ -323,3 +323,12 @@ fieldset label {
     margin-bottom: rem(113px);
   }
 }
+
+#card-element iframe {
+  background-color: transparent !important;
+}
+
+.processing {
+  cursor: not-allowed;
+  background-color: #cccccc;
+}
