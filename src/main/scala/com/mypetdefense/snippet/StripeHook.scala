@@ -75,7 +75,7 @@ trait StripeHook extends RestHelper with Loggable {
         shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
 
         if (Props.mode != Props.RunModes.Pilot) {
-          emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
+          //emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
         }
       }
 
