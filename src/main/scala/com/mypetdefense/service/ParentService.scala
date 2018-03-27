@@ -6,8 +6,6 @@ import net.liftweb._
   import util._
   import util.Helpers._
 
-import com.mypetdefense.model._
-
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => StripeSubscription, _}
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
@@ -208,7 +206,7 @@ object ParentService extends Loggable {
     val updatedSubscription = changeStripeBillDate(
       user.map(_.stripeId.get).openOr(""),
       user.flatMap(_.getSubscription.map(_.stripeSubscriptionId.get)).getOrElse(""),
-      nextDate.getTime/1000
+      (new Date).getTime/1000
     )
 
     updatedSubscription match {
@@ -221,8 +219,7 @@ object ParentService extends Loggable {
     val updatedSubscription = StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
-      trialEnd = Some(date),
-      prorate = Some(false)
+      billingCycleAnchor = Some("now")
     )
 
     Try(Await.result(updatedSubscription, new DurationInt(10).seconds)) match {

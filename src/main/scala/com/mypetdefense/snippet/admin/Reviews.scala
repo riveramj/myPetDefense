@@ -51,7 +51,6 @@ class Reviews extends Loggable {
     var fileHolder: Box[FileParamHolder] = Empty
     
     def uploadFile(file: FileParamHolder): JsCmd = {
-      println("in upload")
       logger.info("Received: %s [size=%d, type=%s]" format(file.fileName, file.length, file.mimeType))
       val parsedFile = ReviewsUploadCSV.parse(file.file)
       newReviews = parsedFile.map(_.list).openOr(Nil)
@@ -66,7 +65,10 @@ class Reviews extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
-    "#review-upload" #> SHtml.fileUpload(fph => fileHolder = Full(fph)) andThen
+    "#review-upload" #> SHtml.fileUpload {fph => 
+      println("hi")
+      fileHolder = Full(fph)
+    } andThen
     "#upload-reviews" #> SHtml.ajaxOnSubmit(() => {
       fileHolder.map(uploadFile) openOr {
         logger.error("Got unexpected Empty when handling partner file upload.")
