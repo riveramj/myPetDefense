@@ -3,9 +3,13 @@ package admin
 
 import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml
+import net.liftweb.util._
 import net.liftweb.util.Helpers._
+import net.liftweb.http.js.JE._
+import net.liftweb.http.js.JsCmd._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js._
 import net.liftweb.common._
-import net.liftweb.util.ClearClearable
 import net.liftweb.http._
   import js.JsCmds._
 import net.liftweb.mapper.{BySql, IHaveValidatedThisSQL, By}
@@ -16,9 +20,9 @@ import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
 import com.mypetdefense.util.Paths._
+import com.mypetdefense.util._
 import com.mypetdefense.actor._
-import com.mypetdefense.service.ParentService
-import com.mypetdefense.util.ClearNodesIf
+import com.mypetdefense.service.{ParentService, ShipmentService}
 
 object Dashboard extends Loggable {
   import net.liftweb.sitemap._
@@ -111,25 +115,7 @@ object Dashboard extends Loggable {
     val csvRows: List[List[String]] = {
       val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-      val currentShipments = {
-        Subscription.findAll(
-          BySql(
-            "nextShipDate >= CURRENT_DATE and nextShipdate < current_date + interval '5 day'",
-            IHaveValidatedThisSQL("mike","2017-04-26")
-          )
-        )
-      }
-
-      val pendingShipments = {
-        Subscription.findAll(
-          BySql(
-            "nextShipDate > CURRENT_DATE - interval '5 day' and nextshipdate < current_date",
-            IHaveValidatedThisSQL("mike","2017-04-26")
-          )
-        )
-      }
-
-      val subscriptions = currentShipments ++ pendingShipments
+      val subscriptions = ShipmentService.getCurrentPendingPastDueShipments
 
       {
         for {
@@ -187,32 +173,11 @@ class Dashboard extends Loggable {
   var subscriptionSet: List[Subscription] = Nil
   var shipmentRenderer: Box[IdMemoizeTransform] = Empty
 
-  def currentShipments = {
-    Subscription.findAll(
-      BySql(
-        "nextShipDate >= CURRENT_DATE and nextShipdate < current_date + interval '5 day'",
-        IHaveValidatedThisSQL("mike","2017-04-26")
-      )
-    )
-  }
+  def currentShipments = ShipmentService.getCurrentShipments
 
-  def pendingShipments = {
-    Subscription.findAll(
-      BySql(
-        "nextShipDate > CURRENT_DATE - interval '5 day' and nextshipdate < current_date",
-        IHaveValidatedThisSQL("mike","2017-04-26")
-      )
-    )
-  }
+  def pendingShipments = ShipmentService.getPendingShipments
 
-  def pastDueShipments = {
-    Subscription.findAll(
-      BySql(
-        "nextShipDate + interval '5 day' < CURRENT_DATE and nextshipdate > current_date - interval '10 day'",
-        IHaveValidatedThisSQL("mike","2018-01-04")
-      )
-    )
-  }
+  def pastDueShipments = ShipmentService.getPastDueShipments
 
   def updateSubscriptionSet(subscriptions: List[Subscription]) = {
     subscriptions.filter { subscription =>
@@ -263,6 +228,62 @@ class Dashboard extends Loggable {
     }
 
     shippedDate.openOr(false)
+  }
+
+  def fileUpload = {
+    var fileHolder: Box[FileParamHolder] = Empty
+    
+    def uploadFile(file: FileParamHolder): JsCmd = {
+      logger.info("Received: %s [size=%d, type=%s]" format(file.fileName, file.length, file.mimeType))
+      val parsedFile = TrackingUploadCSV.parse(file.file)
+      val trackingInfos = parsedFile.map(_.list).openOr(Nil)
+
+      trackingInfos.map(updateShipment)
+
+      S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
+    }
+
+    def updateShipment(trackingInfo: TrackingInfo) = {
+      val subscriptions = ShipmentService.getCurrentPendingPastDueShipments
+      val shipments = subscriptions.map { subscription =>
+        Shipment.find(
+          By(Shipment.subscription, subscription),
+          By(Shipment.expectedShipDate, subscription.nextShipDate.get)
+        )
+      }.flatten
+
+      val trackingRecipient = trackingInfo.recipient
+      val name = trackingRecipient.split(",").map(_.trim).headOption.getOrElse("")
+
+      val matchingShipment: Option[Shipment] = shipments.find { shipment =>
+        val shipmentUserName = {
+          for {
+            subscription <- shipment.subscription.obj
+            user <- subscription.user.obj
+          } yield {
+            user.name
+          }
+        }.getOrElse("")
+
+        name == shipmentUserName
+      }
+
+      matchingShipment.map { shipment =>
+        shipment.trackingNumber(trackingInfo.trackingNumber).saveMe
+      }
+    }
+
+    SHtml.makeFormsAjax andThen
+    "#tracking-upload" #> SHtml.fileUpload { fph => 
+      fileHolder = Full(fph)
+    } andThen
+    "#upload-tracking-numbers" #> SHtml.ajaxOnSubmit(() => {
+
+      fileHolder.map(uploadFile) openOr {
+        logger.error("Got unexpected Empty when handling partner file upload.")
+        S.error("Missing file")
+      }
+    })  
   }
 
   def render = {
@@ -326,6 +347,7 @@ class Dashboard extends Loggable {
           ".product-size *" #> product.map(_.size.get.toString)
         } &
         ".insert *" #> insertNeeded &
+        ".tracking-number *" #> shipment.map(_.trackingNumber.get) &
         ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
           val updatedShipment = shipment.flatMap { possibleShipment =>
             Shipment.find(By(Shipment.shipmentId, possibleShipment.shipmentId.get))
