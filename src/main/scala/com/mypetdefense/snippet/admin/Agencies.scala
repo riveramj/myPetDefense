@@ -39,6 +39,11 @@ object Agencies extends Loggable {
     loggedIn >>
     EarlyResponse(ReportingService.exportRawSales _)
 
+  val monthToDateExportMenu = Menu.i("Export Month to Date Sales") / "admin" / "agencies" / "mtd-sales.csv" >>
+    adminUser >>
+    loggedIn >>
+    EarlyResponse(ReportingService.exportMonthToDateSales _)
+
   val cancellationExportMenu = Menu.i("Export Cancellation Data") / "admin" / "agencies" / "cancellation-data.csv" >>
     adminUser >>
     loggedIn >>
@@ -100,7 +105,8 @@ class Agencies extends Loggable {
       ) &
       ".actions .sales-export [href]" #> Agencies.salesDataExportMenu.loc.calcDefaultHref &
       ".actions .cancellation-export [href]" #> Agencies.cancellationExportMenu.loc.calcDefaultHref &
-      ".actions .total-sales-export [href]" #> Agencies.totalSalesExportMenu.loc.calcDefaultHref
+      ".actions .total-sales-export [href]" #> Agencies.totalSalesExportMenu.loc.calcDefaultHref &
+      ".actions .month-to-date-sales-export [href]" #> Agencies.monthToDateExportMenu.loc.calcDefaultHref
     }
   }
 }

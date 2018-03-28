@@ -219,4 +219,77 @@ object ReportingService extends Loggable {
     */
 
   }
+
+  def exportMonthToDateSales: Box[LiftResponse] = {
+    val allShipments = {
+      for {
+        agency <- Agency.find(By(Agency.name, "TPP")).toList
+        customer <- agency.customers.toList
+        subscription <- customer.subscription
+        shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+      } yield {
+        shipment
+      }
+    }
+
+    val currentYearShipments = allShipments.filter { shipment =>
+      val processDate = findProcessDateOfShipment(shipment)
+
+      processDate.getYear == currentDate.getYear
+    }
+
+    val currentYearTotal = totalSalesForShipments(currentYearShipments)
+
+    val yearCommisionAmount = currentYearTotal*.35
+
+    val currentYearSalesRow = f"Year To Date Totals,${currentYearShipments.size},$$$currentYearTotal,$$$yearCommisionAmount%3.2f"
+
+    val shipmentsByCurrentMonth = allShipments.filter { shipment =>
+      val processDate = findProcessDateOfShipment(shipment)
+
+      processDate.getMonth == currentDate.getMonth
+    }
+
+    val currentMonthTotal = totalSalesForShipments(shipmentsByCurrentMonth)
+
+    val monthCommisionAmount = currentMonthTotal*.35
+
+    val currentMonthSalesRow = f"Year To Date Totals,${shipmentsByCurrentMonth.size},$$$currentMonthTotal,$$$monthCommisionAmount%3.2f"
+
+    println("===============")
+    println(currentYearSalesRow)
+    println("========= year ^")
+    println("===============")
+    println(currentMonthSalesRow)
+    println("========= month ^")
+
+    Empty
+
+    /*
+    val processDate = findProcessDateOfShipment(shipment)
+
+    val amountPaid = shipmentAmountPaid(shipment)
+    val commision = amountPaid * .35 
+
+    processDate.getYear.toString ::
+    processDate.getMonth.toString ::
+    processDate.toString ::
+    customer.userId.toString ::
+    customer.name ::
+    s"$$${amountPaid}" ::
+    customer.salesAgentId.get ::
+    f"$$$commision%2.2f" ::
+    subscription.status.toString ::
+    Nil
+
+    val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
+
+    val fileName = s"salesData-${fileNameYearMonth}.csv"
+
+    val file = "filename=\"" + fileName + "\""
+
+    generateCSV(csv, file)
+    */
+
+  }
 }

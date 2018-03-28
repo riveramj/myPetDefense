@@ -139,6 +139,7 @@ object Paths {
     admin.Agencies.salesDataExportMenu,
     admin.Agencies.cancellationExportMenu,
     admin.Agencies.totalSalesExportMenu,
+    admin.Agencies.monthToDateExportMenu,
     admin.PhonePortal.menu,
     admin.Surveys.menu,
     Login.menu,
