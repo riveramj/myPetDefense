@@ -406,7 +406,8 @@ object TPPApi extends RestHelper with Loggable {
 
     case req @ Req("api" :: "v1" :: "customer" :: email :: Nil, _, DeleteRequest) => {
       for {
-          user <- (User.find(By(User.email, email), By(User.userType, UserType.Parent)):Box[User]) ?~! "User not found." ~> 404
+          sanitizedEmail <- Full(email.filterNot("\"".toSet))
+          user <- (User.find(By(User.email, sanitizedEmail), By(User.userType, UserType.Parent)):Box[User]) ?~! s"User not found: $sanitizedEmail." ~> 404
         } yield {
           ParentService.removeParent(user, true)
           OkResponse()
