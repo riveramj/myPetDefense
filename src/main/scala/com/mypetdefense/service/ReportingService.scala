@@ -21,6 +21,8 @@ object ReportingService extends Loggable {
   val yearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
   
   val fileNameYearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", Locale.ENGLISH))
+
+  val fileNameMonthDayYear = currentDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy", Locale.ENGLISH))
   
   val year = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
 
@@ -240,9 +242,9 @@ object ReportingService extends Loggable {
 
     val currentYearTotal = totalSalesForShipments(currentYearShipments)
 
-    val yearCommisionAmount = currentYearTotal*.35
+    val yearCommisionAmount = currentYearTotal * .35
 
-    val currentYearSalesRow = f"Year To Date Totals,${currentYearShipments.size},$$$currentYearTotal,$$$yearCommisionAmount%3.2f"
+    val currentYearMTDSalesRow = List(f"Year To Date Totals,${currentYearShipments.size},$$$currentYearTotal,$$$yearCommisionAmount%3.2f")
 
     val shipmentsByCurrentMonth = allShipments.filter { shipment =>
       val processDate = findProcessDateOfShipment(shipment)
@@ -252,18 +254,102 @@ object ReportingService extends Loggable {
 
     val currentMonthTotal = totalSalesForShipments(shipmentsByCurrentMonth)
 
-    val monthCommisionAmount = currentMonthTotal*.35
+    val monthCommisionAmount = currentMonthTotal * .35
 
-    val currentMonthSalesRow = f"Year To Date Totals,${shipmentsByCurrentMonth.size},$$$currentMonthTotal,$$$monthCommisionAmount%3.2f"
+    val currentMonthSalesRow = List(f"Year To Date Totals,${shipmentsByCurrentMonth.size},$$$currentMonthTotal,$$$monthCommisionAmount%3.2f")
+
+    val topHeaders = List(
+      "Sales Report",
+      "Gross YTD Sales by Qty",
+      "Gross YTD Sales by $",
+      "Estimated Commission"
+    )
+
+    val overviewRows = {
+      List(topHeaders) ++
+      List(currentYearMTDSalesRow) ++
+      List(currentMonthSalesRow)
+    }.map(_.mkString(",")).mkString("\n")
 
     println("===============")
-    println(currentYearSalesRow)
-    println("========= year ^")
-    println("===============")
-    println(currentMonthSalesRow)
-    println("========= month ^")
+    println(overviewRows)
+    println("========= overview Rows ^")
 
-    Empty
+    val monthByAgent = shipmentsByCurrentMonth.groupBy { shipment =>
+      val user = { 
+        for {
+          subscription <- shipment.subscription.obj
+          user <- subscription.user.obj
+        } yield {
+          user
+        }
+      }
+
+      user.map(_.salesAgentId.get).openOr("")
+    }
+
+    val agentSalesData: List[String] = monthByAgent.map { case (agentId, shipments) =>
+      val agentSalesMonthTotal = totalSalesForShipments(shipments)
+      val agentCommisionMonthAmount = agentSalesMonthTotal * .35
+
+      f"$agentId,${shipments.size},$$$agentSalesMonthTotal,$$$agentCommisionMonthAmount%3.2f"
+    }.toList
+
+    val agentHeaders = List(
+      "MTD Sales by Rep",
+      "Gross MTD Sales by Qty",
+      "Gross MTD Sales by $",
+      "Estimated Commission"
+    )
+
+    val agentRows = {
+      List(agentHeaders) ++
+      List(agentSalesData)
+    }.map(_.mkString(",")).mkString("\n")
+
+    println("===============")
+    println(agentRows)
+    println("========= agent ^")
+
+    val allSalesForMonthData = monthByAgent.map { case (agentId, shipments) =>
+      shipments.map { shipment =>
+        val customerId = { 
+          for {
+            subscription <- shipment.subscription.obj
+            user <- subscription.user.obj
+          } yield {
+              user.userId.toString
+          }
+        }.openOr("")
+        
+        val shipmentTotal = shipmentAmountPaid(shipment)
+        val commisionTotal = shipmentTotal * .35
+
+        f"$agentId,$customerId,${findProcessDateOfShipment(shipment)},$$$shipmentTotal%3.2f,$$$commisionTotal%3.2f"
+      }
+    }
+
+    val allSalesHeaders = List(
+      "Rep ID",
+      "Customer ID",
+      "Date",
+      "Value",
+      "Estimated Commission"
+    )
+    
+    val monthSalesRows = (List(allSalesHeaders) ++ allSalesForMonthData).map(_.mkString(",")).mkString("\n")
+
+    println("===============")
+    println(monthSalesRows)
+    println("========= all sales ^")
+
+    val csvRows = s"${overviewRows}\n${agentRows}\n,\n${monthSalesRows}"
+
+    val fileName = s"month-to-date-salesData-${fileNameMonthDayYear}.csv"
+
+    val file = "filename=\"" + fileName + "\""
+
+    generateCSV(csvRows, file)
 
     /*
     val processDate = findProcessDateOfShipment(shipment)
