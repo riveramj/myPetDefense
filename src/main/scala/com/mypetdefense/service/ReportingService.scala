@@ -323,6 +323,7 @@ object ReportingService extends Loggable {
       List(topHeaders) ++
       List(currentYearMTDSalesRow) ++
       List(currentMonthSalesRow) ++
+      spacerRow ++
       List(agentHeaders) ++
       agentSalesData ++
       spacerRow ++
