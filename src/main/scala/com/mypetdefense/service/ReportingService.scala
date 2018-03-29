@@ -28,6 +28,8 @@ object ReportingService extends Loggable {
 
   val monthHeaders = "January" :: "February" :: "March" :: "April" :: "May" :: "June" :: "July" :: "August" :: "September" :: "October" :: "November" :: "December" :: Nil
 
+  val spacerRow = List(List(","))
+
   def shipmentAmountPaid(shipment: Shipment) = {
     val amountPaid = tryo(shipment.amountPaid.get.toDouble).getOrElse(0D)
     val taxesPaid = tryo(shipment.taxPaid.get.toDouble).getOrElse(0D) 
@@ -132,8 +134,6 @@ object ReportingService extends Loggable {
         Nil
       }
     }
-
-    val spacerRow = List(List(","))
 
     val csv = (
       customerStatusTotals ++
@@ -265,16 +265,6 @@ object ReportingService extends Loggable {
       "Estimated Commission"
     )
 
-    val overviewRows = {
-      List(topHeaders) ++
-      List(currentYearMTDSalesRow) ++
-      List(currentMonthSalesRow)
-    }.map(_.mkString(",")).mkString("\n")
-
-    println("===============")
-    println(overviewRows)
-    println("========= overview Rows ^")
-
     val monthByAgent = shipmentsByCurrentMonth.groupBy { shipment =>
       val user = { 
         for {
@@ -288,11 +278,11 @@ object ReportingService extends Loggable {
       user.map(_.salesAgentId.get).openOr("")
     }
 
-    val agentSalesData: List[String] = monthByAgent.map { case (agentId, shipments) =>
+    val agentSalesData: List[List[String]] = monthByAgent.map { case (agentId, shipments) =>
       val agentSalesMonthTotal = totalSalesForShipments(shipments)
       val agentCommisionMonthAmount = agentSalesMonthTotal * .35
 
-      f"$agentId,${shipments.size},$$$agentSalesMonthTotal,$$$agentCommisionMonthAmount%3.2f"
+      List(f"$agentId,${shipments.size},$$$agentSalesMonthTotal,$$$agentCommisionMonthAmount%3.2f")
     }.toList
 
     val agentHeaders = List(
@@ -302,16 +292,8 @@ object ReportingService extends Loggable {
       "Estimated Commission"
     )
 
-    val agentRows = {
-      List(agentHeaders) ++
-      List(agentSalesData)
-    }.map(_.mkString(",")).mkString("\n")
 
-    println("===============")
-    println(agentRows)
-    println("========= agent ^")
-
-    val allSalesForMonthData = monthByAgent.map { case (agentId, shipments) =>
+    val allSalesForMonthData: String = monthByAgent.map { case (agentId, shipments) =>
       shipments.map { shipment =>
         val customerId = { 
           for {
@@ -320,14 +302,14 @@ object ReportingService extends Loggable {
           } yield {
               user.userId.toString
           }
-        }.openOr("")
+        }.openOr("-")
         
         val shipmentTotal = shipmentAmountPaid(shipment)
         val commisionTotal = shipmentTotal * .35
 
         f"$agentId,$customerId,${findProcessDateOfShipment(shipment)},$$$shipmentTotal%3.2f,$$$commisionTotal%3.2f"
-      }
-    }
+      }.mkString("\n")
+    }.mkString("\n")
 
     val allSalesHeaders = List(
       "Rep ID",
@@ -337,13 +319,15 @@ object ReportingService extends Loggable {
       "Estimated Commission"
     )
     
-    val monthSalesRows = (List(allSalesHeaders) ++ allSalesForMonthData).map(_.mkString(",")).mkString("\n")
-
-    println("===============")
-    println(monthSalesRows)
-    println("========= all sales ^")
-
-    val csvRows = s"${overviewRows}\n${agentRows}\n,\n${monthSalesRows}"
+    val csvRows = {
+      List(topHeaders) ++
+      List(currentYearMTDSalesRow) ++
+      List(currentMonthSalesRow) ++
+      List(agentHeaders) ++
+      agentSalesData ++
+      spacerRow ++
+      List(allSalesHeaders)
+    }.map(_.mkString(",")).mkString("\n") + "\n" + allSalesForMonthData
 
     val fileName = s"month-to-date-salesData-${fileNameMonthDayYear}.csv"
 
