@@ -256,7 +256,7 @@ object ReportingService extends Loggable {
 
     val monthCommisionAmount = currentMonthTotal * .35
 
-    val currentMonthSalesRow = List(f"Year To Date Totals,${shipmentsByCurrentMonth.size},$$$currentMonthTotal,$$$monthCommisionAmount%3.2f")
+    val currentMonthSalesRow = List(f"Month To Date Totals,${shipmentsByCurrentMonth.size},$$$currentMonthTotal,$$$monthCommisionAmount%3.2f")
 
     val topHeaders = List(
       "Sales Report",
