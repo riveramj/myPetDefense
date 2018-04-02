@@ -50,7 +50,7 @@ class Signup extends Loggable {
       case admin if admin == UserType.Admin => 
         S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
       case _ =>
-        S.redirectTo("/")
+        S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
     }
   }
 
