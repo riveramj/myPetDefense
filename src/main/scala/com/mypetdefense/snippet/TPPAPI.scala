@@ -321,8 +321,6 @@ object TPPApi extends RestHelper with Loggable {
       EmailActor ! SendAPIErrorEmail(errorMsg)
     }
 
-    EmailActor ! SendAPIErrorEmail(s"whelp Date: ${pet.whelpDate.getOrElse("")}")
-
       // TODO: add whelp date here based on format
       product.map(Pet.createNewPet(parent, pet.name, _, pet.breed))
     }).filter(_ != Empty)
@@ -339,6 +337,8 @@ object TPPApi extends RestHelper with Loggable {
         pets <- tryo(petsJson.extract[List[NewPet]]) ?~ "Error in pets json." ~> 400
         agentId <- tryo(requestJson \ "agentId").map(_.extract[String]) ?~ "Phone agent is missing." ~> 400
         } yield {
+          EmailActor ! SendTppApiJsonEmail(requestJson.toString)
+
           val salesAgency = Agency.find(By(Agency.name, "TPP"))
           val existingUser = User.find(By(User.email, possibleParent.email), By(User.userType, UserType.Parent))
 
