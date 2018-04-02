@@ -321,6 +321,8 @@ object TPPApi extends RestHelper with Loggable {
       EmailActor ! SendAPIErrorEmail(errorMsg)
     }
 
+    EmailActor ! SendAPIErrorEmail(s"whelp Date: ${pet.whelpDate.getOrElse("")}")
+
       // TODO: add whelp date here based on format
       product.map(Pet.createNewPet(parent, pet.name, _, pet.breed))
     }).filter(_ != Empty)
