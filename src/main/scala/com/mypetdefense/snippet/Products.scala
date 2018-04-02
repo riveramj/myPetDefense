@@ -148,7 +148,6 @@ class Products extends Loggable {
       PetFlowChoices.shoppingCart(Map())
       PetFlowChoices.coupon(Empty)
       PetFlowChoices.recentProduct(Empty)
-      PetFlowChoices.groupons(Nil)
       PetFlowChoices.subtotal(Empty)
       PetFlowChoices.discount(Empty)
       PetFlowChoices.purchased(Empty)

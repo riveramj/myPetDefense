@@ -36,10 +36,6 @@ class CartReview extends Loggable {
   var coupon: Box[Coupon] = PetFlowChoices.coupon.is
   var couponCode = coupon.map(_.couponCode.get).openOr("")
 
-  var groupons: List[Groupon] = PetFlowChoices.groupons.is
-  var grouponCodes = groupons.map(_.grouponCode.get)
-  var possibleGrouponCode = ""
-
   def getImageUrl(product: Box[Product]) = {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
   }
@@ -60,37 +56,6 @@ class CartReview extends Loggable {
     }
   }
 
-  def validateGrouponCode() = {
-    def shoppingCartDoesNotQualify = {
-      val cart = PetFlowChoices.shoppingCart.is
-
-      val productNames = cart.map(_._2._2.name.get)
-
-      val numberOfNonFrontlines = productNames.count { name =>
-        (name != "Frontline Plus for Dogs") && (name != "Frontline Plus for Cats")
-      }
-
-      (groupons.size + 1) > numberOfNonFrontlines
-    }
-
-    val possibleGroupon = Groupon.find(By(Groupon.grouponCode, possibleGrouponCode.toLowerCase()), NullRef(Groupon.user))
-
-    if (possibleGroupon.isEmpty || possibleGrouponCode.isEmpty) {
-      GrouponCodeMessage("error") 
-    } else if (shoppingCartDoesNotQualify) {
-      GrouponCodeMessage("frontline-error")
-    } else {
-      groupons = (groupons ++ possibleGroupon.toList).distinct
-      PetFlowChoices.groupons(groupons)
-      PetFlowChoices.freeMonths(groupons.headOption.map(_.freeMonths.get))
-
-      (
-        GrouponCodeMessage("success") &
-        cartRenderer.map(_.setHtml).openOr(Noop)
-      )
-    }
-  }
-
   def removePet(petId: Long)() = {
     shoppingCart(shoppingCart.is - petId)
     cartRenderer.map(_.setHtml).openOr(Noop)
@@ -104,19 +69,10 @@ class CartReview extends Loggable {
       val cart = shoppingCart.is
       val subtotal = cart.values.map(_._3).sum
       
-      val multiPetDiscount = cart.size match {
+      val discount = cart.size match {
         case 0 | 1 => 0
         case 2 => subtotal * 0.05
         case _ => subtotal * 0.1
-      }
-
-      val grouponDiscount = groupons.size * 12.99
-
-      val discount = {
-        if (grouponDiscount > 0) 
-          grouponDiscount
-        else
-          multiPetDiscount
       }
 
       PetFlowChoices.discount(Full(discount))
@@ -162,22 +118,9 @@ class CartReview extends Loggable {
             ""
         }
 
-        val successGroupon = {
-          if (!PetFlowChoices.groupons.isEmpty)
-            "groupon-success"
-          else
-            ""
-        }
-
         ".promotion-info [class+]" #> successCoupon &
-        ".groupon-info [class+]" #> successGroupon &
         "#promo-code" #> ajaxText(couponCode, couponCode = _) &
-        "#groupon-code" #> ajaxText(possibleGrouponCode, possibleGrouponCode = _) &
-        ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
-        ".apply-groupon [onClick]" #> SHtml.ajaxInvoke(() => validateGrouponCode()) &
-        ".groupon" #> groupons.map { groupon =>
-          ".code *" #> groupon.grouponCode.get
-        }
+        ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
       }
     }
   }

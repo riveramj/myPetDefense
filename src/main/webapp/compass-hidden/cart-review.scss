@@ -121,7 +121,7 @@
   color: #259490;
 }
 
-.promo-container, .groupon-container {
+.promo-container {
   padding: 15px 0;
 
   @media (min-width: $bp-medium) {
@@ -283,8 +283,8 @@
   display: block;
 }
 
-.promotion-info, .groupon-info {
-  #promo-success, #groupon-success {
+.promotion-info {
+  #promo-success {
     color: #259490;
     font-size: rem(12px);
     display: none;
@@ -299,8 +299,8 @@
     }
   }
 
-  &.promo-error, &.groupon-error, &.groupon-frontline-error {
-    #promo-code, #groupon-code {
+  &.promo-error {
+    #promo-code {
       border: 1px solid #FF9295;
     }
 
@@ -309,20 +309,8 @@
     }
   }
 
-  &.groupon-error #groupon-error {
-    display: inline-block;
-  }
-
-  &.groupon-frontline-error #groupon-frontline-error {
-    display: inline-block;
-  }
-
-  &.groupon-count-error #groupon-count-error {
-    display: inline-block;
-  }
-
-  &.promo-success, &.groupon-success {
-    #promo-success, #groupon-success {
+  &.promo-success {
+    #promo-success {
       display: inline-block;
     }
 
@@ -332,24 +320,18 @@
   }
 }
 
-#promo-error, #groupon-error, #groupon-frontline-error {
+#promo-error {
   font-size: rem(12px);
   display: none;
   color: #E52323;
   font-weight: $semibold;
 }
 
-#groupon-frontline-error {
-  margin-bottom: 5px;
-  line-height: 18px;
-}
-
-
 .apply-promo-container {
   display: flex;
 }
 
-.apply-promo, .apply-groupon {
+.apply-promo {
   padding: rem(9px) rem(15px);
   font-size: rem(14px);
   border: none;
@@ -384,7 +366,7 @@
   display: none;
 }
 
-#promo-code, #groupon-code {
+#promo-code {
   border-radius: 5px;
   border: 1px solid #CECECE;
   padding: 6px 9px;
@@ -448,8 +430,4 @@
       margin-right: 5px;
     }
   }
-}
-
-.groupons-applied li {
-  margin-top: 10px;
 }
