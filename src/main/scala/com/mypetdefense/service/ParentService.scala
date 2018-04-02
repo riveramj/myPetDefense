@@ -220,7 +220,7 @@ object ParentService extends Loggable {
     val updatedSubscription = StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
-      prorate = Some(true),
+      prorate = Some(false),
       billingCycleAnchor = Some("now")
     )
 
