@@ -25,7 +25,7 @@ import scala.concurrent.duration._
 
 import java.util.Date
 
-import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon}
+import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription}
 import dispatch.{Req => DispatchReq, _}, Defaults._
 
 case class NewAddress(street1: String, street2: Option[String], city: String, state: String, zip: String)
@@ -35,6 +35,50 @@ case class NewParent(firstName: String, lastName: String, email: String, address
 object TPPApi extends RestHelper with Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
+
+  def sendStripeErrorEmail(
+    failedStepMessage: String,
+    stripeFailure: Any,
+    parent: User,
+    stripeToken: String,
+    pennyCount: Int,
+    couponName: Option[String],
+    taxRate: Double
+  ) = {
+    val errorMsg = s"""
+      Something went wrong with stripe creation.
+
+      ${failedStepMessage}
+
+      Error given was:
+      ===============
+      ${stripeFailure}
+      ===============
+
+      stripe Info:
+      ===============
+      parent:
+      ${parent}
+
+      token:
+      ${stripeToken}
+
+      plan:
+      tpp-pennyPlan
+
+      quantity:
+      ${pennyCount}
+
+      coupon:
+      ${couponName}
+
+      taxPercent:
+      ${taxRate}
+      ===============
+    """
+
+    EmailActor ! SendAPIErrorEmail(errorMsg)
+  }
 
   def setupStripeSubscription(parent: User, stripeToken: String, pets: List[Pet], address: NewAddress) = {
     val products = pets.flatMap(_.product.obj)
@@ -115,119 +159,104 @@ object TPPApi extends RestHelper with Loggable {
     val stripeCustomer: Future[Box[Customer]] = Customer.create(
       email = Some(parent.email.get),
       card = Some(stripeToken),
-      plan = Some("tpp-pennyPlan"),
-      quantity = Some(pennyCount),
-      coupon = couponName,
-      taxPercent = Some(taxRate)
+      coupon = couponName
     )
 
     stripeCustomer onComplete {
       case TrySuccess(Full(customer)) =>
-        val refreshedParent = parent.refresh
-        val updatedParent = refreshedParent.map(_.stripeId(customer.id).saveMe)
 
-        val subscriptionId = (
-          for {
-            rawSubscriptions <- customer.subscriptions
-            subscription <- rawSubscriptions.data.headOption
-            } yield {
-              subscription.id
-            }).flatMap(identity).getOrElse("")
+        val stripeSubscription: Future[Box[StripeSubscription]] = StripeSubscription.create(
+          customerId = customer.id,
+          quantity = Some(pennyCount),
+          coupon = Some("tpp"),
+          taxPercent = Some(taxRate),
+          plan = "tpp-pennyPlan"
+        )
 
-        updatedParent.map { user =>
-          Subscription.createNewSubscription(
-            user,
-            subscriptionId,
-            new Date(),
-            new Date(),
-            Price.currentTppPriceCode
-          )
-        }
-        val coupon = Coupon.find(By(Coupon.couponCode, couponName.getOrElse("")))
-        val updatedUser = updatedParent.map(_.coupon(coupon).saveMe)
+        stripeSubscription onComplete {
+          case TrySuccess(Full(subscription)) =>
 
-        updatedUser.map { user =>
-          if (Props.mode == Props.RunModes.Production) {
-            EmailActor ! NewSaleEmail(user, pets.size, "TPP")
-          }
+            val refreshedParent = parent.refresh
+            val updatedParent = refreshedParent.map(_.stripeId(customer.id).saveMe)
 
-          EmailActor ! SendNewUserEmail(user)
+            val subscriptionId = subscription.id.getOrElse("")
+
+            updatedParent.map { user =>
+              Subscription.createNewSubscription(
+                user,
+                subscriptionId,
+                new Date(),
+                new Date(),
+                Price.currentTppPriceCode
+              )
+            }
+            val coupon = Coupon.find(By(Coupon.couponCode, couponName.getOrElse("")))
+            val updatedUser = updatedParent.map(_.coupon(coupon).saveMe)
+
+            updatedUser.map { user =>
+              if (Props.mode == Props.RunModes.Production) {
+                EmailActor ! NewSaleEmail(user, pets.size, "TPP")
+              }
+
+              EmailActor ! SendNewUserEmail(user)
+            }
+
+          case TrySuccess(stripeFailure) =>
+            logger.error("create customer failed with: " + stripeFailure + ". Email sent to log error.")
+
+            sendStripeErrorEmail(
+              "We did not create a Stripe subscription or an internal subscription.",
+              stripeFailure,
+              parent,
+              stripeToken,
+              pennyCount,
+              couponName,
+              taxRate
+            )
+
+            stripeFailure
+          case TryFail(throwable: Throwable) =>
+            logger.error("create customer failed with: " + throwable + ". Email sent to log error.")
+
+            sendStripeErrorEmail(
+              "We did not create a Stripe subscription or an internal subscription.",
+              throwable,
+              parent,
+              stripeToken,
+              pennyCount,
+              couponName,
+              taxRate
+            )
+
+            throwable
         }
 
       case TrySuccess(stripeFailure) =>
         logger.error("create customer failed with: " + stripeFailure + ". Email sent to log error.")
 
-        val errorMsg = s"""
-          Something went wrong with stripe creation.
-          
-          We did not create a Stripe subscription or an internal subscription.
-
-          Error given was:
-          ===============
-          ${stripeFailure}
-          ===============
-
-          stripe Info:
-          ===============
-          parent:
-          ${parent}
-          
-          token:
-          ${stripeToken}
-
-          plan:
-          tpp-pennyPlan
-          
-          quantity:
-          ${pennyCount}
-          
-          coupon:
-          ${couponName}
-          
-          taxPercent:
-          ${taxRate}
-          ===============
-        """
-
-        EmailActor ! SendAPIErrorEmail(errorMsg)
+        sendStripeErrorEmail(
+          "We did not create a Stripe subscription or an internal subscription.",
+          Left(stripeFailure),
+          parent,
+          stripeToken,
+          pennyCount,
+          couponName,
+          taxRate
+        )
 
         stripeFailure
       case TryFail(throwable: Throwable) =>
         logger.error("create customer failed with: " + throwable + ". Email sent to log error.")
-        
-        val errorMsg = s"""
-          Something went wrong with stripe creation.
-          
-          We did not create a Stripe subscription or an internal subscription.
 
-          Error given was:
-          ===============
-          ${throwable}
-          ===============
-
-          stripe Info:
-          ===============
-          parent:
-          ${parent}
-          
-          token:
-          ${stripeToken}
-          
-          plan:
-          tpp-pennyPlan
-          
-          quantity:
-          ${pennyCount}
-          
-          coupon:
-          ${couponName}
-          
-          taxPercent:
-          ${taxRate}
-          ===============
-        """
-
-        EmailActor ! SendAPIErrorEmail(errorMsg)
+        sendStripeErrorEmail(
+          "We did not create a Stripe subscription or an internal subscription.",
+          Right(throwable),
+          parent,
+          stripeToken,
+          pennyCount,
+          couponName,
+          taxRate
+        )
 
         throwable
     }
