@@ -207,7 +207,7 @@ object ParentService extends Loggable {
     val updatedSubscription = changeStripeBillDate(
       user.map(_.stripeId.get).openOr(""),
       user.flatMap(_.getSubscription.map(_.stripeSubscriptionId.get)).getOrElse(""),
-      (new Date).getTime/1000
+      nextDate.getTime/1000
     )
 
     updatedSubscription match {
@@ -220,8 +220,8 @@ object ParentService extends Loggable {
     val updatedSubscription = StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
+      trialEnd = Some(date),
       prorate = Some(false),
-      billingCycleAnchor = Some("now")
     )
 
     Try(Await.result(updatedSubscription, new DurationInt(10).seconds)) match {
