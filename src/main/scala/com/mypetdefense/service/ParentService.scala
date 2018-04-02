@@ -221,7 +221,7 @@ object ParentService extends Loggable {
       customerId = customerId,
       subscriptionId = subscriptionId,
       trialEnd = Some(date),
-      prorate = Some(false),
+      prorate = Some(false)
     )
 
     Try(Await.result(updatedSubscription, new DurationInt(10).seconds)) match {
