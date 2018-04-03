@@ -34,6 +34,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     animalType: AnimalType.Value,
     size: AnimalSize.Value,
     product: Product,
+    whelpDate: Box[Date] = Empty,
     breed: String = ""
   ) = {
     Pet.create
@@ -44,6 +45,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     .size(size)
     .product(product)
     .breed(breed)
+    .birthday(whelpDate.openOr(null))
     .saveMe
   }
 
@@ -51,7 +53,8 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     user: User,
     name: String,
     product: Product,
-    breed: String
+    breed: String,
+    whelpDate: Box[Date]
   ): Pet = {
     createNewPet(
       user,
@@ -59,6 +62,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
       product.animalType.get,
       product.size.get,
       product,
+      whelpDate,
       breed
     )
   }

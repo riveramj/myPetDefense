@@ -45,7 +45,6 @@ class Boot {
       Subscription,
       Agency,
       Coupon,
-      Groupon,
       Price,
       Review,
       Survey
@@ -53,7 +52,6 @@ class Boot {
 
     DataLoader.loadProducts
     DataLoader.loadAdmin
-    DataLoader.loadGroupons
     DataLoader.updateParentNoPets
     
     // where to search snippet
