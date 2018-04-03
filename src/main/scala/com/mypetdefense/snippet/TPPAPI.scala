@@ -24,6 +24,7 @@ import scala.concurrent.{Future, Await}
 import scala.concurrent.duration._
 
 import java.util.Date
+import java.text.SimpleDateFormat
 
 import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription}
 import dispatch.{Req => DispatchReq, _}, Defaults._
@@ -35,6 +36,8 @@ case class NewParent(firstName: String, lastName: String, email: String, address
 object TPPApi extends RestHelper with Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
+
+  val whelpDateFormat = new java.text.SimpleDateFormat("M/d/y")
 
   def sendStripeErrorEmail(
     failedStepMessage: String,
@@ -322,7 +325,14 @@ object TPPApi extends RestHelper with Loggable {
     }
 
       // TODO: add whelp date here based on format
-      product.map(Pet.createNewPet(parent, pet.name, _, pet.breed))
+      val possibleWhelpDate = pet.whelpDate.getOrElse("")
+      product.map(Pet.createNewPet(
+        parent,
+        pet.name,
+        _,
+        pet.breed,
+        tryo(whelpDateFormat.parse(possibleWhelpDate))
+      ))
     }).filter(_ != Empty)
   }
 
