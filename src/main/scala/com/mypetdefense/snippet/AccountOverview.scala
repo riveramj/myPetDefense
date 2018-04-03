@@ -51,22 +51,27 @@ class AccountOverview extends Loggable {
 
   val productSubtotal = upcomingInvoice.map(_.subtotal/100D).openOr(0D)
 
-  val discountPercent: Box[Double] = {
+  val discount: Box[Double] = {
     for {
       invoice <- upcomingInvoice
       discount <- invoice.discount
       coupon = discount.coupon
-      discount <- coupon.percentOff
     } yield {
-      discount.toDouble/100D
+      val percentOff = coupon.percentOff.getOrElse(0)
+      val amountOff = coupon.amountOff.getOrElse(0L)
+
+      if (percentOff > 0)
+        (percentOff.toDouble/100D) * productSubtotal
+      else if (amountOff > 0)
+        amountOff.toDouble/100D
+      else
+        0D
     }
   }
 
-  val discountAmountRaw = discountPercent.map(_ * productSubtotal).openOr(0D)
-  
-  val discountAmount = discountAmountRaw match {
-    case 0 => "-$0.00"
-    case _ => f"-$$$discountAmountRaw%2.2f"
+  val discountAmount = discount match {
+    case Full(discount) if discount > 0 => f"-$$$discount%2.2f"
+    case _ => "-$0.00"
   }
 
   val taxDue = upcomingInvoice.flatMap(_.tax.map(_.toDouble/100D)).openOr(0D)

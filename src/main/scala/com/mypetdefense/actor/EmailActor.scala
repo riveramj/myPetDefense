@@ -38,6 +38,7 @@ case class BillingUpdatedEmail(user: User) extends EmailActorMessage
 case class AccountCancelledEmail(user: User) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
+case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
   user: User,
   amount: Double,
@@ -412,6 +413,23 @@ trait SendAPIErrorEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait SendTppApiJsonEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case SendTppApiJsonEmail(emailBody) =>
+      val template =
+        Templates("emails-hidden" :: "tpp-api-json-email" :: Nil) openOr NodeSeq.Empty
+      
+      val subject = "[JSON] API Manual Backup"
+      val hostUrl = Paths.serverUrl
+      
+      val transform = {
+        "#json *" #> emailBody
+      }
+
+      sendEmail(subject, "mike.rivera@mypetdefense.com", transform(template))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -494,6 +512,7 @@ trait EmailActor extends EmailHandlerChain
                     with ContactUsEmailHandling
                     with Send5kEmailHandling
                     with SendAPIErrorEmailHandling
+                    with SendTppApiJsonEmailHandling
                     with TestimonialEmailHandling {
 
   val baseEmailTemplate = 

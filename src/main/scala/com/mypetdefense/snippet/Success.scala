@@ -31,15 +31,11 @@ class Success extends Loggable {
     val monthylTotal = total.is
     val freeMonthCount = freeMonths.is.openOr(0)
 
-    val subscriptionLength = groupons.headOption.map(_.freeMonths.get).getOrElse(0)
-
     "#count span *" #> petCount &
-    "#subscription-length" #> ClearNodesIf(groupons.isEmpty) &
-    "#subscription-length span *" #> s"${subscriptionLength} months" &
     "#monthly-total" #> ClearNodesIf(freeMonthCount == 0) &
     "#monthly-total span *" #> monthylTotal.map( paid => f"$$$paid%2.2f" ) &
     {
-      if (freeMonthCount == 0 || !groupons.isEmpty) {
+      if (freeMonthCount == 0) {
         "#checkout-total #amount *" #> monthylTotal.map( paid => f"$$$paid%2.2f" )
       } else if (freeMonthCount == 1) {
         "#checkout-total *" #> s"First Month Free"
