@@ -284,7 +284,7 @@ object TPPApi extends RestHelper with Loggable {
         case "small" => "Small"
         case "medium" => "Medium"
         case "large" => "Large"
-        case "xlarge" => "XLarge"
+        case "xlarge" => "X-Large"
         case size => size
       }
 
