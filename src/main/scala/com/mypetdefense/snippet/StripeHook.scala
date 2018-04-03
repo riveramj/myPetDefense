@@ -54,28 +54,28 @@ trait StripeHook extends RestHelper with Loggable {
       }
 
       if (notTrial_? && activePets_?) {
-        TaxJarService.processTaxesCharged(
-          invoicePaymentId,
-          city,
-          state,
-          zip,
-          formatAmount(subtotal),
-          formatAmount(tax)
-        )
-      }
+        if (activePets_?) {
+          TaxJarService.processTaxesCharged(
+            invoicePaymentId,
+            city,
+            state,
+            zip,
+            formatAmount(subtotal),
+            formatAmount(tax)
+          )
 
-      if (activePets_?) {
-        val shipment = Shipment.createShipment(
-          user,
-          invoicePaymentId,
-          formatAmount(amountPaid),
-          formatAmount(tax)
-        )
+          val shipment = Shipment.createShipment(
+            user,
+            invoicePaymentId,
+            formatAmount(amountPaid),
+            formatAmount(tax)
+          )
 
-        shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
+          shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
 
-        if (Props.mode != Props.RunModes.Pilot) {
-          emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
+          if (Props.mode != Props.RunModes.Pilot) {
+            emailActor ! PaymentReceivedEmail(user, tryo(amountPaid.toDouble/100.0).openOr(0D))
+          }
         }
       }
 
@@ -120,14 +120,14 @@ trait StripeHook extends RestHelper with Loggable {
 
   serve {
     case req @ Req("stripe-hook" :: Nil, _, PostRequest) =>
-      {
-        for {
-          requestBody <- req.body
-          requestJson <- tryo(Serialization.read[JValue](new String(requestBody)))
-          id <- (requestJson \ "id").extractOpt[String]
-          eventType <- (requestJson \ "type").extractOpt[String]
-          dataJson = (requestJson \ "data")
-          objectJson = (dataJson \ "object")
+    {
+      for {
+        requestBody <- req.body
+        requestJson <- tryo(Serialization.read[JValue](new String(requestBody)))
+        id <- (requestJson \ "id").extractOpt[String]
+        eventType <- (requestJson \ "type").extractOpt[String]
+        dataJson = (requestJson \ "data")
+        objectJson = (dataJson \ "object")
         } yield {
           val result: Box[LiftResponse] = eventType match {
             case "invoice.payment_succeeded" => invoicePaymentSucceeded(objectJson)
@@ -143,6 +143,6 @@ trait StripeHook extends RestHelper with Loggable {
             case Failure(msg, _, _) => PlainTextResponse(msg, Nil, 500)
           }
         }
-      }
+    }
   }
 }
