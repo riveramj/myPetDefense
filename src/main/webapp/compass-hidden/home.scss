@@ -40,7 +40,7 @@
 }
 
 .dog-park {
-  background: url(../../images/winter-dog-header-mobile@2x.jpg);
+  background: url(../../images/spring-dog-mobile.jpeg);
   background-repeat: no-repeat;
   background-size: contain;
   padding-top: 216px;
@@ -52,7 +52,7 @@
 
   @media (min-width: $bp-medium) {
     padding-top: 0;
-    background: url(../../images/winter-dog-header@2x.jpg);
+    background: url(../../images/spring-dog.jpeg);
     background-repeat: no-repeat;
     background-size: cover;
     height: 450px;
@@ -70,7 +70,7 @@
   @media (min-width: $bp-large) {
     background-color: #259490;
     height: 550px;
-    background: url(../../images/winter-dog-header@2x.jpg);
+    background: url(../../images/spring-dog.jpeg);
     background-size: cover;
     background-color: #259490;
     background-repeat: no-repeat;

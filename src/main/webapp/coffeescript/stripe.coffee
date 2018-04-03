@@ -15,8 +15,6 @@ stripeCallback = (token) ->
   $("#stripe-token").val(token.id)
   $(".checkout, .update-billing").submit()
 
-window.myPetDefenseSite.groupon = -> false
-    
 $(document).ready ->
   $("body").on "click", '.checkout, .update-billing', (event) ->
     event.preventDefault()
@@ -27,17 +25,10 @@ $(document).ready ->
       stripeCallback: stripeCallback
     )
 
-$(document).on 'groupon-only', (event) ->
-  window.myPetDefenseSite.groupon = -> true
-
 $(document).on "form-validation-error", (event) ->
   $(".checkout.submit").prop('value', 'Place Order').prop("disabled", false).removeClass("processing")
 
 $(document).on "validate-stripe-form", (event) ->
-  if (window.myPetDefenseSite.groupon ->)
-    $(".checkout").submit()
-    return false
-
   $(".validation-error").remove()
   $("input.error").removeClass("error")
 

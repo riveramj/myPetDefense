@@ -14,7 +14,6 @@ object PetFlowChoices extends Loggable {
   object discount extends SessionVar[Box[Double]](Empty)
   object subtotal extends SessionVar[Box[Double]](Empty)
   object priceCode extends SessionVar[Box[String]](Empty)
-  object groupons extends SessionVar[List[Groupon]](Nil)
   object coupon extends SessionVar[Box[Coupon]](Empty)
   object total extends SessionVar[Box[Double]](Empty)
   object recentProduct extends RequestVar[Box[Product]](Empty)

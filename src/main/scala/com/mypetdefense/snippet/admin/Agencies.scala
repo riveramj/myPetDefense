@@ -12,7 +12,7 @@ import net.liftweb.mapper.By
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.service.CouponService
+import com.mypetdefense.service.{CouponService, ReportingService}
 import com.mypetdefense.util.ClearNodesIf
 
 import java.text.SimpleDateFormat
@@ -29,139 +29,25 @@ object Agencies extends Loggable {
     adminUser >>
     loggedIn
 
-  val salesDataExportMenu = Menu.i("Export Gross Sales") / "admin" / "agencies" / "month-year-gross-sales.csv" >>
+  val totalSalesExportMenu = Menu.i("Export Total Sales") / "admin" / "agencies" / "month-year-gross-sales.csv" >>
     adminUser >>
     loggedIn >>
-    EarlyResponse(exportGrossSales _)
+    EarlyResponse(ReportingService.exportTotalSales _)
+
+  val salesDataExportMenu = Menu.i("Export Gross Sales") / "admin" / "agencies" / "raw-sales.csv" >>
+    adminUser >>
+    loggedIn >>
+    EarlyResponse(ReportingService.exportRawSales _)
+
+  val monthToDateExportMenu = Menu.i("Export Month to Date Sales") / "admin" / "agencies" / "mtd-sales.csv" >>
+    adminUser >>
+    loggedIn >>
+    EarlyResponse(ReportingService.exportMonthToDateSales _)
 
   val cancellationExportMenu = Menu.i("Export Cancellation Data") / "admin" / "agencies" / "cancellation-data.csv" >>
     adminUser >>
     loggedIn >>
-    EarlyResponse(exportCancellationData _)
-
-  def shipmentAmountPaid(shipment: Shipment) = {
-    val amountPaid = tryo(shipment.amountPaid.get.toDouble).getOrElse(0D)
-    val taxesPaid = tryo(shipment.taxPaid.get.toDouble).getOrElse(0D) 
-    amountPaid - taxesPaid
-  }
-
-  def findProcessDateOfShipment(shipment: Shipment) = {
-    shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-  }
-
-  val currentDate = LocalDateTime.now()
-  val yearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
-  val fileNameYearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", Locale.ENGLISH))
-  val year = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
-
-  def exportGrossSales: Box[LiftResponse] = {
-    val headers = "Year" :: "Month" :: "Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent Id" :: "Commision" :: "Customer Status" :: Nil
-
-    val csvRows: List[List[String]] = {
-      for {
-        agency <- Agency.find(By(Agency.name, "TPP")).toList
-        customer <- agency.customers.toList
-        subscription <- customer.subscription
-        shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
-      } yield {
-        val processDate = findProcessDateOfShipment(shipment)
-
-        val amountPaid = shipmentAmountPaid(shipment)
-        val commision = amountPaid * .35 
-
-        processDate.getYear.toString ::
-        processDate.getMonth.toString ::
-        processDate.toString ::
-        customer.userId.toString ::
-        customer.name ::
-        s"$$${amountPaid}" ::
-        customer.salesAgentId.get ::
-        f"$$$commision%2.2f" ::
-        subscription.status.toString ::
-        Nil
-      }
-    }
-
-    val resultingCsv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
-
-    val fileName = s"salesData-${fileNameYearMonth}.csv"
-
-    val file = "filename=\"" + fileName + "\""
-
-    Some(new InMemoryResponse(
-      resultingCsv.getBytes("UTF-8"),
-      List(
-        "Content-Type" -> "binary/octet-stream",
-        "Content-Disposition" -> s"attachment; ${file}"
-      ),
-      Nil,
-      200
-    ))
-  }
-
-  def exportCancellationData = {
-    val possibleAgency = Agency.find(By(Agency.name, "TPP"))
-    val customers = possibleAgency.map(_.customers.toList).openOr(Nil)
-
-    val customerStatusBreakdown = customers.groupBy { customer =>
-      customer.subscription.map(_.status.get)
-    }
-
-    val customerStatusTotals = customerStatusBreakdown.map { customer =>
-      s"${customer._1.headOption.getOrElse("")} Users, ${customer._2.size.toString}"
-    }.toList.sorted.map(_ :: "," :: Nil)
-
-    val headers = "Customer Id" :: "Start Month" :: "End Month" :: "Customer Status" :: "Shipment Count" :: "Total Gross Sales" :: "Total Commission" :: Nil
-
-    val csvRows: List[List[String]] = {
-      for {
-        agency <- possibleAgency.toList
-        customer <- customers.filter(_.status != Status.Active)
-        subscription <- customer.subscription
-        shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
-        firstShipment <- shipments.headOption
-        lastShipment <- shipments.lastOption
-      } yield {
-        val firstShipmentDate = findProcessDateOfShipment(firstShipment)
-        val lastShipmentDate = findProcessDateOfShipment(lastShipment)
-        val shipmentCount = shipments.size
-        val totalGrossSales = shipments.map(shipmentAmountPaid(_)).foldLeft(0D)(_+_)
-        val totalCommission = totalGrossSales * .35
-
-        customer.userId.toString ::
-        firstShipmentDate.getMonth.toString ::
-        lastShipmentDate.getMonth.toString::
-        subscription.status.toString ::
-        shipmentCount.toString ::
-        s"$$${totalGrossSales}" ::
-        f"$$$totalCommission%2.2f" ::
-        Nil
-      }
-    }
-
-    val spacerRow = List(List(","))
-
-    val resultingCsv = (
-      customerStatusTotals ++
-      spacerRow ++
-      List(headers) ++
-      csvRows
-    ).map(_.mkString(",")).mkString("\n")
-
-    val fileName = s"cancellations-${fileNameYearMonth}.csv"
-
-    val file = "filename=\"" + fileName + "\""
-
-    Some(new InMemoryResponse(
-      resultingCsv.getBytes("UTF-8"),
-      List(
-        "Content-Type" -> "binary/octet-stream",
-        "Content-Disposition" -> s"attachment; ${file}"
-      ),
-      Nil,
-      200
-    ))
-  }
+    EarlyResponse(ReportingService.exportCancellationData _)
 }
 
 class Agencies extends Loggable {
@@ -218,7 +104,9 @@ class Agencies extends Loggable {
         ajaxInvoke(deleteAgency(agency) _)
       ) &
       ".actions .sales-export [href]" #> Agencies.salesDataExportMenu.loc.calcDefaultHref &
-      ".actions .cancellation-export [href]" #> Agencies.cancellationExportMenu.loc.calcDefaultHref
+      ".actions .cancellation-export [href]" #> Agencies.cancellationExportMenu.loc.calcDefaultHref &
+      ".actions .total-sales-export [href]" #> Agencies.totalSalesExportMenu.loc.calcDefaultHref &
+      ".actions .month-to-date-sales-export [href]" #> Agencies.monthToDateExportMenu.loc.calcDefaultHref
     }
   }
 }
