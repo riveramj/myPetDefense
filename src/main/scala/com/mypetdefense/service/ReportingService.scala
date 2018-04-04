@@ -58,12 +58,12 @@ object ReportingService extends Loggable {
     }.foldLeft(0D)(_+_)
   }
 
-  def exportRawSales: Box[LiftResponse] = {
+  def exportRawSales(name: String): Box[LiftResponse] = {
     val headers = "Year" :: "Month" :: "Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent Id" :: "Commision" :: "Customer Status" :: Nil
 
     val csvRows: List[List[String]] = {
       for {
-        agency <- Agency.find(By(Agency.name, "TPP")).toList
+        agency <- Agency.find(By(Agency.name, name)).toList
         customer <- agency.customers.toList
         subscription <- customer.subscription
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
@@ -95,8 +95,8 @@ object ReportingService extends Loggable {
     generateCSV(csv, file)
   }
 
-  def exportCancellationData = {
-    val possibleAgency = Agency.find(By(Agency.name, "TPP"))
+  def exportCancellationData(name: String) = {
+    val possibleAgency = Agency.find(By(Agency.name, name))
     val customers = possibleAgency.map(_.customers.toList).openOr(Nil)
     val nonActiveCustomers = customers.filter(_.status != Status.Active)
 
@@ -205,10 +205,10 @@ object ReportingService extends Loggable {
     generateCSV(csvRows, file)
   }
 
-  def exportTotalSales: Box[LiftResponse] = {
+  def exportTotalSales(name: String): Box[LiftResponse] = {
     val allShipments = {
       for {
-        agency <- Agency.find(By(Agency.name, "TPP")).toList
+        agency <- Agency.find(By(Agency.name, name)).toList
         customer <- agency.customers.toList
         subscription <- customer.subscription
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
@@ -278,10 +278,10 @@ object ReportingService extends Loggable {
 
   }
 
-  def exportMonthToDateSales: Box[LiftResponse] = {
+  def exportMonthToDateSales(name: String): Box[LiftResponse] = {
     val allShipments = {
       for {
-        agency <- Agency.find(By(Agency.name, "TPP")).toList
+        agency <- Agency.find(By(Agency.name, name)).toList
         customer <- agency.customers.toList
         subscription <- customer.subscription
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)

@@ -25,29 +25,73 @@ object Agencies extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
+  def exportTotalSalesResponse: Box[LiftResponse] = {
+    totalSalesExportMenu.currentValue flatMap { name =>
+      ReportingService.exportTotalSales(name)
+    } 
+  }
+
+  def exportRawSalesResponse: Box[LiftResponse] = {
+    salesDataExportMenu.currentValue flatMap { name =>
+      ReportingService.exportRawSales(name)
+    } 
+  }
+
+  def exportMonthToDateSalesResponse: Box[LiftResponse] = {
+    monthToDateExportMenu.currentValue flatMap { name =>
+      ReportingService.exportMonthToDateSales(name)
+    } 
+  }
+
+  def exportCancellationDataResponse: Box[LiftResponse] = {
+    cancellationExportMenu.currentValue flatMap { name =>
+      ReportingService.exportCancellationData(name)
+    } 
+  }
+
   val menu = Menu.i("Agencies") / "admin" / "agencies" >>
     adminUser >>
     loggedIn
 
-  val totalSalesExportMenu = Menu.i("Export Total Sales") / "admin" / "agencies" / "month-year-gross-sales.csv" >>
+    val totalSalesExportMenu = Menu.param[String](
+      "Export Total Sales",
+      "Export Total Sales",
+      Full(_),
+      string => string
+    ) / "admin" / "agencies" / "month-year-gross-sales.csv" >>
     adminUser >>
     loggedIn >>
-    EarlyResponse(ReportingService.exportTotalSales _)
+    EarlyResponse(exportTotalSalesResponse _)
 
-  val salesDataExportMenu = Menu.i("Export Gross Sales") / "admin" / "agencies" / "raw-sales.csv" >>
+  val salesDataExportMenu = Menu.param[String](
+      "Export Gross Sales",
+      "Export Gross Sales",
+      Full(_),
+      string => string
+    ) / "admin" / "agencies" / "raw-sales.csv" >>
     adminUser >>
     loggedIn >>
-    EarlyResponse(ReportingService.exportRawSales _)
+    EarlyResponse(exportRawSalesResponse _)
 
-  val monthToDateExportMenu = Menu.i("Export Month to Date Sales") / "admin" / "agencies" / "mtd-sales.csv" >>
+  val monthToDateExportMenu = Menu.param[String](
+      "Export Month to Date Sales",
+      "Export Month to Date Sales",
+      Full(_),
+      string => string
+    ) / "admin" / "agencies" / "mtd-sales.csv" >>
     adminUser >>
     loggedIn >>
-    EarlyResponse(ReportingService.exportMonthToDateSales _)
+    EarlyResponse(exportMonthToDateSalesResponse _)
 
-  val cancellationExportMenu = Menu.i("Export Cancellation Data") / "admin" / "agencies" / "cancellation-data.csv" >>
+  val cancellationExportMenu = Menu.param[String](
+      "Export Cancellation Data",
+      "Export Cancellation Data",
+      Full(_),
+      string => string
+    ) / "admin" / "agencies" / "cancellation-data.csv" >>
     adminUser >>
     loggedIn >>
-    EarlyResponse(ReportingService.exportCancellationData _)
+    EarlyResponse(exportCancellationDataResponse _)
 }
 
 class Agencies extends Loggable {
@@ -103,10 +147,10 @@ class Agencies extends Loggable {
       ".actions .delete [onclick]" #> Confirm(s"Delete ${agency.name}? This will delete all members and coupons.",
         ajaxInvoke(deleteAgency(agency) _)
       ) &
-      ".actions .sales-export [href]" #> Agencies.salesDataExportMenu.loc.calcDefaultHref &
-      ".actions .cancellation-export [href]" #> Agencies.cancellationExportMenu.loc.calcDefaultHref &
-      ".actions .total-sales-export [href]" #> Agencies.totalSalesExportMenu.loc.calcDefaultHref &
-      ".actions .month-to-date-sales-export [href]" #> Agencies.monthToDateExportMenu.loc.calcDefaultHref
+      ".actions .sales-export [href]" #> Agencies.salesDataExportMenu.calcHref(agency.name.get) &
+      ".actions .cancellation-export [href]" #> Agencies.cancellationExportMenu.calcHref(agency.name.get) &
+      ".actions .total-sales-export [href]" #> Agencies.totalSalesExportMenu.calcHref(agency.name.get) &
+      ".actions .month-to-date-sales-export [href]" #> Agencies.monthToDateExportMenu.calcHref(agency.name.get)
     }
   }
 }
