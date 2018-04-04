@@ -311,7 +311,7 @@ trait ShipmentReadyEmailHandling extends EmailHandlerChain {
         "#amount *" #> ("$" + ("%1.2f" format amount))
       }
 
-      sendEmail(subject, "sales@mypetdefense.com", transform(paymentTemplate))
+      sendEmail(subject, "mike.rivera@mypetdefense.com", transform(paymentTemplate))
   }
 }
 
