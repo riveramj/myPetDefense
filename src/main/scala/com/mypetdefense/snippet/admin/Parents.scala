@@ -89,7 +89,8 @@ class Parents extends Loggable {
   val stripeSubscriptionBaseURL = s"${stripeBaseUrl}/subscriptions"
 
 
-  val nextShipDateFormat= new SimpleDateFormat("MM/dd/yyyy")
+  val nextShipDateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val birthdayFormat = new SimpleDateFormat("MM/dd/yyyy")
   val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
 
   var parentDetailsRenderer: Box[IdMemoizeTransform] = Empty
@@ -290,7 +291,11 @@ class Parents extends Loggable {
         )
 
         ".pet" #> pets.map { pet =>
+          val birthday = tryo(birthdayFormat.format(pet.birthday.get))
+
           ".pet-name *" #> pet.name &
+          ".pet-breed *" #> pet.breed &
+          ".pet-birthday *" #> birthday &
           ".pet-type *" #> pet.animalType.toString &
           ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
           ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",

@@ -324,7 +324,6 @@ object TPPApi extends RestHelper with Loggable {
       EmailActor ! SendAPIErrorEmail(errorMsg)
     }
 
-      // TODO: add whelp date here based on format
       val possibleWhelpDate = pet.whelpDate.getOrElse("")
       product.map(Pet.createNewPet(
         parent,
