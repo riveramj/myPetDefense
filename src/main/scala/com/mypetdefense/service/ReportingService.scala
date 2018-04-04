@@ -121,7 +121,8 @@ object ReportingService extends Loggable {
         customer <- nonActiveCustomers
         subscription <- customer.subscription
         shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
-        lastShipment <- shipments.lastOption if findProcessDateOfShipment(lastShipment).getYear == currentDate.getYear 
+        lastShipment <- shipments.lastOption
+          if findProcessDateOfShipment(lastShipment).getYear == currentDate.getYear
       } yield {
         subscription
       }
@@ -143,7 +144,9 @@ object ReportingService extends Loggable {
         customer <- nonActiveCustomers
         subscription <- customer.subscription
         shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
-        lastShipment <- shipments.lastOption if findProcessDateOfShipment(lastShipment).getMonth == currentDate.getMonth 
+        lastShipment <- shipments.lastOption
+        lastShipmentDate = findProcessDateOfShipment(lastShipment)
+          if (lastShipmentDate.getMonth == currentDate.getMonth) && (lastShipmentDate.getYear == currentDate.getYear)
       } yield {
         subscription
       }
@@ -305,7 +308,7 @@ object ReportingService extends Loggable {
     val shipmentsByCurrentMonth = allShipments.filter { shipment =>
       val processDate = findProcessDateOfShipment(shipment)
 
-      processDate.getMonth == currentDate.getMonth
+      (processDate.getMonth == currentDate.getMonth) && (processDate.getYear == currentDate.getYear)
     }
 
     val currentMonthTotal = totalSalesForShipments(shipmentsByCurrentMonth)
