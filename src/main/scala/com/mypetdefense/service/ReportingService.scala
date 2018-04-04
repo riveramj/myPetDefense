@@ -58,12 +58,12 @@ object ReportingService extends Loggable {
     }.foldLeft(0D)(_+_)
   }
 
-  def exportRawSales: Box[LiftResponse] = {
+  def exportRawSales(name: String): Box[LiftResponse] = {
     val headers = "Year" :: "Month" :: "Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent Id" :: "Commision" :: "Customer Status" :: Nil
 
     val csvRows: List[List[String]] = {
       for {
-        agency <- Agency.find(By(Agency.name, "TPP")).toList
+        agency <- Agency.find(By(Agency.name, name)).toList
         customer <- agency.customers.toList
         subscription <- customer.subscription
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
@@ -95,9 +95,10 @@ object ReportingService extends Loggable {
     generateCSV(csv, file)
   }
 
-  def exportCancellationData = {
-    val possibleAgency = Agency.find(By(Agency.name, "TPP"))
+  def exportCancellationData(name: String) = {
+    val possibleAgency = Agency.find(By(Agency.name, name))
     val customers = possibleAgency.map(_.customers.toList).openOr(Nil)
+    val nonActiveCustomers = customers.filter(_.status != Status.Active)
 
     val customerStatusBreakdown = customers.groupBy { customer =>
       customer.subscription.map(_.status.get)
@@ -107,11 +108,62 @@ object ReportingService extends Loggable {
       s"${customer._1.headOption.getOrElse("")} Users,${customer._2.size.toString}"
     }.toList.sorted.map(_ :: "," :: Nil)
 
+    val topHeaders = List(
+      "Cancellation Report",
+      "YTD Cancels by Qty",
+      "Avg Shipments",
+      "Gross YTD Cancels by $",
+      "Estimated Commission"
+    )
+
+    val currentYearCancels = {
+      for {
+        customer <- nonActiveCustomers
+        subscription <- customer.subscription
+        shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+        lastShipment <- shipments.lastOption if findProcessDateOfShipment(lastShipment).getYear == currentDate.getYear 
+      } yield {
+        subscription
+      }
+    }
+
+    val currentYearCancelShipments = currentYearCancels.map(_.shipments.toList).flatten
+
+    val cancelledShipmentCounts = currentYearCancels.map(_.shipments.toList.size)
+    val averageShipmentsPerCancelByYear = cancelledShipmentCounts.foldLeft(0D)(_+_)/cancelledShipmentCounts.size
+
+    val currentYearCancelTotal = totalSalesForShipments(currentYearCancelShipments)
+
+    val yearCancelCommisionAmount = currentYearCancelTotal * .35
+
+    val currentYearCancelSalesRow = List(f"Year To Date Totals,${currentYearCancels.size},${averageShipmentsPerCancelByYear},$$$currentYearCancelTotal,$$$yearCancelCommisionAmount%3.2f")
+
+    val currentMonthCancels = {
+      for {
+        customer <- nonActiveCustomers
+        subscription <- customer.subscription
+        shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+        lastShipment <- shipments.lastOption if findProcessDateOfShipment(lastShipment).getMonth == currentDate.getMonth 
+      } yield {
+        subscription
+      }
+    }
+
+    val currentMonthCancelShipments = currentMonthCancels.map(_.shipments.toList).flatten
+
+    val cancelledMonthShipmentCounts = currentMonthCancels.map(_.shipments.toList.size)
+    val averageShipmentsPerCancelByMonth = cancelledMonthShipmentCounts.foldLeft(0D)(_+_)/cancelledMonthShipmentCounts.size
+
+    val currentMonthCancelTotal = totalSalesForShipments(currentMonthCancelShipments)
+
+    val monthCancelCommisionAmount = currentMonthCancelTotal * .35
+
+    val currentMonthCancelSalesRow = List(f"Month To Date Totals,${currentMonthCancels.size},${averageShipmentsPerCancelByMonth},$$$currentMonthCancelTotal,$$$monthCancelCommisionAmount%3.2f")
+
     val headers = "Customer Id" :: "Start Month" :: "End Month" :: "Customer Status" :: "Shipment Count" :: "Total Gross Sales" :: "Total Commission" :: Nil
 
-    val csvRows: List[List[String]] = {
+    val allCancellationRows: List[List[String]] = {
       for {
-        agency <- possibleAgency.toList
         customer <- customers.filter(_.status != Status.Active)
         subscription <- customer.subscription
         shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
@@ -135,24 +187,28 @@ object ReportingService extends Loggable {
       }
     }
 
-    val csv = (
+    val csvRows = {
       customerStatusTotals ++
       spacerRow ++
+      List(topHeaders) ++
+      List(currentYearCancelSalesRow) ++
+      List(currentMonthCancelSalesRow) ++
+      spacerRow ++
       List(headers) ++
-      csvRows
-    ).map(_.mkString(",")).mkString("\n")
+      allCancellationRows
+    }.map(_.mkString(",")).mkString("\n")
 
     val fileName = s"cancellations-${fileNameYearMonth}.csv"
 
     val file = "filename=\"" + fileName + "\""
 
-    generateCSV(csv, file)
+    generateCSV(csvRows, file)
   }
 
-  def exportTotalSales: Box[LiftResponse] = {
+  def exportTotalSales(name: String): Box[LiftResponse] = {
     val allShipments = {
       for {
-        agency <- Agency.find(By(Agency.name, "TPP")).toList
+        agency <- Agency.find(By(Agency.name, name)).toList
         customer <- agency.customers.toList
         subscription <- customer.subscription
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
@@ -222,10 +278,10 @@ object ReportingService extends Loggable {
 
   }
 
-  def exportMonthToDateSales: Box[LiftResponse] = {
+  def exportMonthToDateSales(name: String): Box[LiftResponse] = {
     val allShipments = {
       for {
-        agency <- Agency.find(By(Agency.name, "TPP")).toList
+        agency <- Agency.find(By(Agency.name, name)).toList
         customer <- agency.customers.toList
         subscription <- customer.subscription
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
@@ -335,32 +391,5 @@ object ReportingService extends Loggable {
     val file = "filename=\"" + fileName + "\""
 
     generateCSV(csvRows, file)
-
-    /*
-    val processDate = findProcessDateOfShipment(shipment)
-
-    val amountPaid = shipmentAmountPaid(shipment)
-    val commision = amountPaid * .35 
-
-    processDate.getYear.toString ::
-    processDate.getMonth.toString ::
-    processDate.toString ::
-    customer.userId.toString ::
-    customer.name ::
-    s"$$${amountPaid}" ::
-    customer.salesAgentId.get ::
-    f"$$$commision%2.2f" ::
-    subscription.status.toString ::
-    Nil
-
-    val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
-
-    val fileName = s"salesData-${fileNameYearMonth}.csv"
-
-    val file = "filename=\"" + fileName + "\""
-
-    generateCSV(csv, file)
-    */
-
   }
 }
