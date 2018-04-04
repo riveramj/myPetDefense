@@ -79,6 +79,8 @@ class Parents extends Loggable {
   var petType: Box[AnimalType.Value] = Empty
   var chosenProduct: Box[Product] = Empty
   var petName = ""
+  var petBreed = ""
+  var petBirthday = ""
 
   val coupons = Coupon.findAll()
 
@@ -87,7 +89,8 @@ class Parents extends Loggable {
   val stripeSubscriptionBaseURL = s"${stripeBaseUrl}/subscriptions"
 
 
-  val nextShipDateFormat= new SimpleDateFormat("MM/dd/yyyy")
+  val nextShipDateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val birthdayFormat = new SimpleDateFormat("MM/dd/yyyy")
   val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
 
   var parentDetailsRenderer: Box[IdMemoizeTransform] = Empty
@@ -141,11 +144,15 @@ class Parents extends Loggable {
           name = petName,
           animalType = pet,
           size = size,
-          product = product
+          product = product,
+          breed = petBreed,
+          birthday = petBirthday
         )
       }).flatMap(identity) match {
         case Full(pet) =>
           petName = ""
+          petBreed = ""
+          petBirthday = ""
           petType = Empty
           chosenProduct = Empty
 
@@ -267,6 +274,8 @@ class Parents extends Loggable {
     ".parent-pets" #> idMemoize { renderer =>
       ".create" #> {
         ".new-pet-name" #> ajaxText(petName, petName = _) &
+        ".new-pet-breed" #> ajaxText(petBreed, petBreed = _) &
+        ".new-pet-birthday" #> ajaxText(petBirthday, petBirthday = _) &
         ".pet-type-select" #> petTypeRadio(renderer) &
         ".product-container .product-select" #> productDropdown &
         ".create-item-container .create-item" #> SHtml.ajaxSubmit("Add Pet", () => addPet(parent, renderer))
@@ -282,7 +291,11 @@ class Parents extends Loggable {
         )
 
         ".pet" #> pets.map { pet =>
+          val birthday = tryo(birthdayFormat.format(pet.birthday.get))
+
           ".pet-name *" #> pet.name &
+          ".pet-breed *" #> pet.breed &
+          ".pet-birthday *" #> birthday &
           ".pet-type *" #> pet.animalType.toString &
           ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
           ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
