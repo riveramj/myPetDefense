@@ -23,6 +23,8 @@ object ParentService extends Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
 
+  val whelpDateFormat = new java.text.SimpleDateFormat("M/d/y")
+
   def updateStripeCustomerCard(customerId: String, stripeToken: String) = {
     Customer.update(
       id = customerId,
@@ -250,15 +252,21 @@ object ParentService extends Loggable {
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value,
-    product: Product
+    product: Product,
+    breed: String = "",
+    birthday: String = ""
   ): Box[Pet] = {
+
+    val possibleBirthday = tryo(whelpDateFormat.parse(birthday))
 
     val newPet = Pet.createNewPet(
       user = oldUser,
       name = name,
       animalType = animalType,
       size = size,
-      product = product
+      product = product,
+      whelpDate = possibleBirthday,
+      breed = breed
     )
 
     val updatedSubscription = updateStripeSubscriptionTotal(oldUser)
