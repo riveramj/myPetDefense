@@ -101,7 +101,7 @@ class LandingPage extends Loggable {
       val possibleCoupon = Coupon.find(By(Coupon.couponCode, "firstmonthfree"))
       PetFlowChoices.coupon(possibleCoupon)
       PetFlowChoices.priceCode(Full(Price.defaultPriceCode))
-      ("Thanks!","Thank you for stopping by to talk with us! Your first free month has been added to your cart.")
+      ("It was nice to see you!","Thank you for stopping by to talk with us! Your first free month has been added to your cart.")
   }
 
   val monthCount = PetFlowChoices.coupon.is.map(_.freeMonths.get).openOr(0)
