@@ -118,6 +118,7 @@ object Paths {
     LandingPage.woofstock,
     LandingPage.olympics,
     LandingPage.atlantaExpo,
+    LandingPage.firstMonthFree,
     CartReview.menu,
     Checkout.menu,
     Success.menu,
