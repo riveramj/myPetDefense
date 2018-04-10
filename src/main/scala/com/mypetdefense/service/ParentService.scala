@@ -89,10 +89,10 @@ object ParentService extends Loggable {
             realUser.delete_!
           }
         } else {
+          user.map(_.cancel)
           shipments.map(_.cancel)
           addresses.map(_.cancel)
           subscription.map(_.cancel)
-          user.map(_.cancel)
         }
       case TrySuccess(stripeFailure) =>
         logger.error(s"remove customer failed with stipe error: ${stripeFailure}")

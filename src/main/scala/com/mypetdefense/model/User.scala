@@ -158,6 +158,22 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def nameAndEmail = s"${this.name} <${this.email}>"
 
   def cancel = {
+    val shipAddress = this.addresses.toList.filter(_.addressType == AddressType.Shipping).headOption
+
+    val address = shipAddress.map { ship =>
+      s"""${ship.street1}
+      |${ship.street2}
+      |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
+    }.getOrElse("")
+
+    CancelledUser.createNewCancelledUser(
+      this.firstName.get,
+      this.lastName.get,
+      this.email.get,
+      address,
+      this.userId.get
+    )
+
     this
       .firstName("")
       .lastName("")
