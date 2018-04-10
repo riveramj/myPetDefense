@@ -124,10 +124,20 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     referer: Box[Agency],
     salesAgentId: String = ""
   ) = {
+    val possibleLastName = TitleCase(parentInfo.lastName)
+    val andLocation = possibleLastName.indexOf(" And ")
+
+    val lastName = {
+      if (andLocation > 0)
+        possibleLastName.substring(0, andLocation)
+      else
+        possibleLastName
+    }
+
     User.create
       .userId(generateLongId)
       .firstName(TitleCase(parentInfo.firstName))
-      .lastName(TitleCase(parentInfo.lastName))
+      .lastName(lastName)
       .email(parentInfo.email)
       .phone(parentInfo.phone.getOrElse(""))
       .accessKey(createAccessKey)
