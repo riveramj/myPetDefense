@@ -355,7 +355,7 @@ class Dashboard extends Loggable {
 
           if (shipmentHasShipped_?(shipment)) {
             ".ship [class+]" #> "shipped" &
-            ".ship *" #> "Already Shipped." &
+            ".ship *" #> "Shipped" &
             ".ship [disabled]" #> "disabled"
           } else if (shipment.isEmpty || !paymentProcessed) {
             ".ship [class+]" #> "cant-ship" &
