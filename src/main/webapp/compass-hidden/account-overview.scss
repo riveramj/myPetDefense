@@ -11,11 +11,11 @@
 .arrival-date {
   @media (min-width: $bp-medium) {
     float: right;
-    margin-right: rem(121px);
+    margin-right: 20px;
   }
   
   @media (min-width: $bp-large) {
-    margin-right: 478px;
+    margin-right: 320px;
   }
 }
 
