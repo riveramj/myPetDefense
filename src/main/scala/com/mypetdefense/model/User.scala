@@ -8,6 +8,7 @@ import net.liftweb._
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.service.AccessKeyService._
 import com.mypetdefense.snippet.NewParent
+import com.mypetdefense.util.TitleCase
 
 import org.apache.shiro.crypto.hash.Sha256Hash
 import org.apache.shiro.crypto.SecureRandomNumberGenerator
@@ -67,8 +68,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   ) = {
     val user = User.create
       .userId(generateLongId)
-      .firstName(firstName)
-      .lastName(lastName)
+      .firstName(TitleCase(firstName))
+      .lastName(TitleCase(lastName))
       .stripeId(stripeId)
       .email(email)
       .phone(phone)
@@ -107,8 +108,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   ) = {
     User.create
       .userId(generateLongId)
-      .firstName(firstName)
-      .lastName(lastName)
+      .firstName(TitleCase(firstName))
+      .lastName(TitleCase(lastName))
       .email(email)
       .accessKey(createAccessKey)
       .agency(agency)
@@ -125,8 +126,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   ) = {
     User.create
       .userId(generateLongId)
-      .firstName(parentInfo.firstName)
-      .lastName(parentInfo.lastName)
+      .firstName(TitleCase(parentInfo.firstName))
+      .lastName(TitleCase(parentInfo.lastName))
       .email(parentInfo.email)
       .phone(parentInfo.phone.getOrElse(""))
       .accessKey(createAccessKey)
@@ -142,7 +143,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     lastName: String,
     password: String
   ) = {
-    val updateduser = user.firstName(firstName).lastName(lastName)
+    val updateduser = user.firstName(TitleCase(firstName)).lastName(TitleCase(lastName))
 
     setUserPassword(updateduser, password)
   }
