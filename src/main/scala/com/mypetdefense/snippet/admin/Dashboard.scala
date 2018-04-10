@@ -115,7 +115,7 @@ object Dashboard extends Loggable {
     val csvRows: List[List[String]] = {
       val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-      val subscriptions = ShipmentService.getCurrentPendingPastDueShipments
+      val subscriptions = ShipmentService.getPendingPastDueShipments
 
       {
         for {
