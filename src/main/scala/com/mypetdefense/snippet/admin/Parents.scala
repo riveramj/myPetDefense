@@ -175,6 +175,19 @@ class Parents extends Loggable {
   }
 
   def deleteParent(parent: User)() = {
+    ParentService.removeParent(parent, true) match {
+      case Full(_) =>
+        S.redirectTo(Parents.menu.loc.calcDefaultHref)
+      case _ =>
+        Alert("An error has occured. Please try again.")
+    }
+  }
+
+  def cancelParent(parent: User)() = {
+    val pets: List[Pet] = parent.pets.toList
+
+    pets.map(ParentService.removePet(parent, _))
+
     ParentService.removeParent(parent) match {
       case Full(_) =>
         S.redirectTo(Parents.menu.loc.calcDefaultHref)
@@ -368,6 +381,10 @@ class Parents extends Loggable {
           ".actions .delete [onclick]" #> Confirm(
             s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
             ajaxInvoke(deleteParent(parent) _)
+          ) &
+          ".actions .cancel [onclick]" #> Confirm(
+            s"Cancel ${parent.name}? This will cancel the user's account.",
+            ajaxInvoke(cancelParent(parent) _)
           ) &
           "^ [onclick]" #> ajaxInvoke(() => {
             if (currentParent.isEmpty) {
