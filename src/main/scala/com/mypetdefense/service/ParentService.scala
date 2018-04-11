@@ -28,12 +28,23 @@ object ParentService extends Loggable {
 
   def updateStripeCustomerCard(customerId: String, stripeToken: String, user: User) = {
     if (customerId == "") {
-      TPPApi.setupStripeSubscription(user, stripeToken, false)
+      TPPApi.setupStripeSubscription(
+        user,
+        stripeToken,
+        false
+      )
     } else {
       Customer.update(
         id = customerId,
         card = Some(stripeToken)
-      )
+      ) onComplete {
+        case TrySuccess(Full(customer)) =>
+        case TrySuccess(stripeFailure) =>
+          logger.error("update customer failed with: " + stripeFailure + ". Email sent to log error.")
+          
+        case TryFail(throwable: Throwable) =>
+          logger.error("update customer failed with: " + throwable + ". Email sent to log error.")
+      }
     }
   }
 

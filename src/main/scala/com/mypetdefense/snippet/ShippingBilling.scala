@@ -39,7 +39,7 @@ object ShippingBilling extends Loggable {
 }
 
 class ShippingBilling extends Loggable {
-  val user = currentUser
+  val user = currentUser.flatMap(_.refresh)
   val stripeCustomerId = user.map(_.stripeId.get).openOr("")
 
   var firstName = ""
@@ -50,17 +50,13 @@ class ShippingBilling extends Loggable {
   var state = ""
   var zip = ""
   
-  var cardName = ""
-  var cardNumber = ""
-  var cardExpire = ""
+  var cardNumberLastFour = ""
   var stripeToken = ""
   var promoCode = ""
 
   val customerCard = ParentService.getCustomerCard(stripeCustomerId)
 
-  cardNumber = customerCard.map(card => s"Ends in ${card.last4}").getOrElse("")
-  cardName = customerCard.flatMap(_.name).getOrElse("")
-  cardExpire = customerCard.map(card => s"${card.expMonth}/${card.expYear}").getOrElse("")
+  cardNumberLastFour = customerCard.map(card => card.last4.toString).getOrElse("Not Found")
 
   def updateCard(parent: User) = {
     ParentService.updateStripeCustomerCard(
@@ -77,6 +73,7 @@ class ShippingBilling extends Loggable {
       EmailActor ! BillingUpdatedEmail(parent)
     }
 
+    Thread.sleep(3000)
     S.redirectTo(ShippingBilling.menu.loc.calcDefaultHref)
   }
 
@@ -154,9 +151,7 @@ class ShippingBilling extends Loggable {
         "#city" #> text(city, city = _) &
         "#state" #> text(state, state = _) &
         "#zip" #> text(zip, zip = _) &
-        "#cardholder-name" #> text(cardName, cardName = _) &
-        "#old-card-last4" #> hidden(cardNumber = _, cardNumber) &
-        "#card-expiry" #> text(cardExpire, cardExpire = _) &
+        "#old-card-last4 span *" #> cardNumberLastFour &
         "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
         ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBilling(user) _) &
         ".save-changes" #> SHtml.ajaxSubmit("Update Address", updateAddress _)
