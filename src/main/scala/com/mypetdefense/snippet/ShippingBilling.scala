@@ -65,7 +65,8 @@ class ShippingBilling extends Loggable {
   def updateCard(parent: User) = {
     ParentService.updateStripeCustomerCard(
       stripeCustomerId,
-      stripeToken
+      stripeToken,
+      parent
     )
   }
 

@@ -9,6 +9,7 @@ import net.liftweb._
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => StripeSubscription, Product => StripeProduct, _}
 
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
+import com.mypetdefense.snippet.TPPApi
 
 import com.mypetdefense.model._
 
@@ -25,11 +26,15 @@ object ParentService extends Loggable {
 
   val whelpDateFormat = new java.text.SimpleDateFormat("M/d/y")
 
-  def updateStripeCustomerCard(customerId: String, stripeToken: String) = {
-    Customer.update(
-      id = customerId,
-      card = Some(stripeToken)
-    )
+  def updateStripeCustomerCard(customerId: String, stripeToken: String, user: User) = {
+    if (customerId == "") {
+      TPPApi.setupStripeSubscription(user, stripeToken, false)
+    } else {
+      Customer.update(
+        id = customerId,
+        card = Some(stripeToken)
+      )
+    }
   }
 
   def updateStripeSubscriptionQuantity(customerId: String, subscriptionId: String, quantity: Int): Box[StripeSubscription] = {
