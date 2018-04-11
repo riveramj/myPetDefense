@@ -40,6 +40,10 @@ object ReportingService extends Loggable {
     shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
+  def findCreatedDateOfUser(user: User) = {
+    user.createdAt.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+  }
+
   def generateCSV(csv: String, fileName: String) = {
     Some(new InMemoryResponse(
       csv.getBytes("UTF-8"),
@@ -293,6 +297,8 @@ object ReportingService extends Loggable {
       }
     }
 
+    val totalUsers = Agency.find(By(Agency.name, name)).headOption.map(_.customers.toList).getOrElse(Nil)
+
     val currentYearShipments = allShipments.filter { shipment =>
       val processDate = findProcessDateOfShipment(shipment)
 
@@ -303,7 +309,11 @@ object ReportingService extends Loggable {
 
     val yearCommisionAmount = currentYearTotal * .35
 
-    val currentYearMTDSalesRow = List(f"Year To Date Totals,${currentYearShipments.size},$$$currentYearTotal,$$$yearCommisionAmount%3.2f")
+    val currentYearMTDSalesRow = List(f"Year To Date Totals,${totalUsers.size},$$$currentYearTotal,$$$yearCommisionAmount%3.2f")
+
+    val usersByCurrentMonth = totalUsers.filter { user =>
+      (findCreatedDateOfUser(user).getMonth == currentDate.getMonth) && (findCreatedDateOfUser(user).getYear == currentDate.getYear)
+    }
 
     val shipmentsByCurrentMonth = allShipments.filter { shipment =>
       val processDate = findProcessDateOfShipment(shipment)
@@ -315,7 +325,7 @@ object ReportingService extends Loggable {
 
     val monthCommisionAmount = currentMonthTotal * .35
 
-    val currentMonthSalesRow = List(f"Month To Date Totals,${shipmentsByCurrentMonth.size},$$$currentMonthTotal,$$$monthCommisionAmount%3.2f")
+    val currentMonthSalesRow = List(f"Month To Date Totals,${usersByCurrentMonth.size},$$$currentMonthTotal,$$$monthCommisionAmount%3.2f")
 
     val topHeaders = List(
       "Sales Report",
