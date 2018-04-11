@@ -126,7 +126,7 @@ object Paths {
     ShippingBilling.menu,
     ShippingBilling.menuBilling,
     PetsAndProducts.menu,
-    Profile.menu,
+    ParentSubscription.menu,
     admin.Dashboard.menu,
     admin.Dashboard.exportMenu,
     admin.Dashboard.shipmentsCSVMenu,
