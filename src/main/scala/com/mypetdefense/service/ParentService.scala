@@ -9,6 +9,7 @@ import net.liftweb._
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => StripeSubscription, Product => StripeProduct, _}
 
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
+import com.mypetdefense.snippet.TPPApi
 
 import com.mypetdefense.model._
 
@@ -25,11 +26,26 @@ object ParentService extends Loggable {
 
   val whelpDateFormat = new java.text.SimpleDateFormat("M/d/y")
 
-  def updateStripeCustomerCard(customerId: String, stripeToken: String) = {
-    Customer.update(
-      id = customerId,
-      card = Some(stripeToken)
-    )
+  def updateStripeCustomerCard(customerId: String, stripeToken: String, user: User) = {
+    if (customerId == "") {
+      TPPApi.setupStripeSubscription(
+        user,
+        stripeToken,
+        false
+      )
+    } else {
+      Customer.update(
+        id = customerId,
+        card = Some(stripeToken)
+      ) onComplete {
+        case TrySuccess(Full(customer)) =>
+        case TrySuccess(stripeFailure) =>
+          logger.error("update customer failed with: " + stripeFailure + ". Email sent to log error.")
+          
+        case TryFail(throwable: Throwable) =>
+          logger.error("update customer failed with: " + throwable + ". Email sent to log error.")
+      }
+    }
   }
 
   def updateStripeSubscriptionQuantity(customerId: String, subscriptionId: String, quantity: Int): Box[StripeSubscription] = {
@@ -89,10 +105,10 @@ object ParentService extends Loggable {
             realUser.delete_!
           }
         } else {
+          user.map(_.cancel)
           shipments.map(_.cancel)
           addresses.map(_.cancel)
           subscription.map(_.cancel)
-          user.map(_.cancel)
         }
       case TrySuccess(stripeFailure) =>
         logger.error(s"remove customer failed with stipe error: ${stripeFailure}")

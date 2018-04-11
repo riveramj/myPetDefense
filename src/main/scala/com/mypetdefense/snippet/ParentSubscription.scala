@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet
+package com.mypetdefense.snippet 
 
 import net.liftweb.sitemap.Menu
 import net.liftweb._
@@ -24,17 +24,17 @@ import com.mypetdefense.util.SecurityContext._
 import com.mypetdefense.service._
   import ValidationService._
 
-object Profile extends Loggable {
+object ParentSubscription extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Profile") / "profile" >>
+  val menu = Menu.i("Subscription") / "subscription" >>
     loggedIn >>
     parent
 }
 
-class Profile extends Loggable {
+class ParentSubscription extends Loggable {
   val user = currentUser
   val stripeCustomerId = user.map(_.stripeId.get).openOr("")
 
@@ -55,7 +55,7 @@ class Profile extends Loggable {
             .email(email)
             .saveMe
         }
-        S.redirectTo(Profile.menu.loc.calcDefaultHref)
+        S.redirectTo(ParentSubscription.menu.loc.calcDefaultHref)
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
@@ -80,7 +80,7 @@ class Profile extends Loggable {
       }).openOr(false)
 
       if (passwordUpdated)
-        S.redirectTo(Profile.menu.loc.calcDefaultHref)
+        S.redirectTo(ParentSubscription.menu.loc.calcDefaultHref)
       else
         ValidationError("#old-password", "Incorrect old password")
 
@@ -107,14 +107,14 @@ class Profile extends Loggable {
 
   def render = {
     SHtml.makeFormsAjax andThen
-    ".profile a [class+]" #> "current" &
+    ".subscription a [class+]" #> "current" &
     "#user-email *" #> email &
     "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#old-password" #> SHtml.password(oldPassword, oldPass => oldPassword = oldPass.trim) &
     "#new-password" #> SHtml.password(newPassword, newPass => newPassword = newPass.trim) &
     ".update-email" #> SHtml.ajaxSubmit("Save Changes", updateEmail _) &
     ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword _) &
-    ".stauts" #> user.map(_.status.get.toString) &
+    ".status" #> user.map(_.status.get.toString) &
     ".confirm-cancel-account" #> SHtml.ajaxSubmit("Yes, cancel my acount", cancelAccount _)
   }
 }

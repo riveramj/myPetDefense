@@ -7,6 +7,8 @@ import net.liftweb._
 
 import com.mypetdefense.util.RandomIdGenerator._
 
+import com.mypetdefense.util.TitleCase
+
 import java.util.Date
 
 class Pet extends LongKeyedMapper[Pet] with IdPK {
@@ -40,7 +42,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     Pet.create
     .petId(generateLongId)
     .user(user)
-    .name(name)
+    .name(TitleCase(name))
     .animalType(animalType)
     .size(size)
     .product(product)
