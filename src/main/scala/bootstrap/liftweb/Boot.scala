@@ -37,6 +37,7 @@ class Boot {
       true,
       Schemifier.infoF _,
       User,
+      CancelledUser,
       Address,
       Pet,
       Product,

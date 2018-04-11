@@ -7,6 +7,7 @@ import net.liftweb._
 
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.snippet.NewAddress
+import com.mypetdefense.util.TitleCase
 
 import org.apache.shiro.crypto.hash.Sha256Hash
 import org.apache.shiro.crypto.SecureRandomNumberGenerator
@@ -44,10 +45,10 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     Address.create
     .addressId(generateLongId)
     .user(user)
-    .street1(street1)
-    .street2(street2)
-    .city(city)
-    .state(state)
+    .street1(TitleCase(street1))
+    .street2(TitleCase(street2))
+    .city(TitleCase(city))
+    .state(TitleCase(state))
     .zip(zip)
     .addressType(addressType)
     .saveMe
@@ -57,10 +58,10 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     Address.create
     .addressId(generateLongId)
     .user(user)
-    .street1(newAddress.street1)
-    .street2(newAddress.street2.getOrElse(""))
-    .city(newAddress.city)
-    .state(newAddress.state)
+    .street1(TitleCase(newAddress.street1))
+    .street2(TitleCase(newAddress.street2.getOrElse("")))
+    .city(TitleCase(newAddress.city))
+    .state(TitleCase(newAddress.state))
     .zip(newAddress.zip)
     .addressType(AddressType.Shipping)
     .saveMe
