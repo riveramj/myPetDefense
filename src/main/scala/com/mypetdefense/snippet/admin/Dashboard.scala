@@ -115,7 +115,7 @@ object Dashboard extends Loggable {
     val csvRows: List[List[String]] = {
       val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-      val subscriptions = ShipmentService.getCurrentPendingPastDueShipments
+      val subscriptions = ShipmentService.getPendingPastDueShipments
 
       {
         for {
@@ -355,7 +355,7 @@ class Dashboard extends Loggable {
 
           if (shipmentHasShipped_?(shipment)) {
             ".ship [class+]" #> "shipped" &
-            ".ship *" #> "Already Shipped." &
+            ".ship *" #> "Shipped" &
             ".ship [disabled]" #> "disabled"
           } else if (shipment.isEmpty || !paymentProcessed) {
             ".ship [class+]" #> "cant-ship" &

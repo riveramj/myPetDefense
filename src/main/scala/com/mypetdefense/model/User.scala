@@ -8,6 +8,7 @@ import net.liftweb._
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.service.AccessKeyService._
 import com.mypetdefense.snippet.NewParent
+import com.mypetdefense.util.TitleCase
 
 import org.apache.shiro.crypto.hash.Sha256Hash
 import org.apache.shiro.crypto.SecureRandomNumberGenerator
@@ -67,8 +68,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   ) = {
     val user = User.create
       .userId(generateLongId)
-      .firstName(firstName)
-      .lastName(lastName)
+      .firstName(TitleCase(firstName))
+      .lastName(TitleCase(lastName))
       .stripeId(stripeId)
       .email(email)
       .phone(phone)
@@ -107,8 +108,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   ) = {
     User.create
       .userId(generateLongId)
-      .firstName(firstName)
-      .lastName(lastName)
+      .firstName(TitleCase(firstName))
+      .lastName(TitleCase(lastName))
       .email(email)
       .accessKey(createAccessKey)
       .agency(agency)
@@ -123,10 +124,20 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     referer: Box[Agency],
     salesAgentId: String = ""
   ) = {
+    val possibleLastName = TitleCase(parentInfo.lastName)
+    val andLocation = possibleLastName.indexOf(" And ")
+
+    val lastName = {
+      if (andLocation > 0)
+        possibleLastName.substring(0, andLocation)
+      else
+        possibleLastName
+    }
+
     User.create
       .userId(generateLongId)
-      .firstName(parentInfo.firstName)
-      .lastName(parentInfo.lastName)
+      .firstName(TitleCase(parentInfo.firstName))
+      .lastName(lastName)
       .email(parentInfo.email)
       .phone(parentInfo.phone.getOrElse(""))
       .accessKey(createAccessKey)
@@ -142,7 +153,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     lastName: String,
     password: String
   ) = {
-    val updateduser = user.firstName(firstName).lastName(lastName)
+    val updateduser = user.firstName(TitleCase(firstName)).lastName(TitleCase(lastName))
 
     setUserPassword(updateduser, password)
   }
@@ -158,6 +169,22 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def nameAndEmail = s"${this.name} <${this.email}>"
 
   def cancel = {
+    val shipAddress = this.addresses.toList.filter(_.addressType == AddressType.Shipping).headOption
+
+    val address = shipAddress.map { ship =>
+      s"""${ship.street1}
+      |${ship.street2}
+      |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
+    }.getOrElse("")
+
+    CancelledUser.createNewCancelledUser(
+      this.firstName.get,
+      this.lastName.get,
+      this.email.get,
+      address,
+      this.userId.get
+    )
+
     this
       .firstName("")
       .lastName("")

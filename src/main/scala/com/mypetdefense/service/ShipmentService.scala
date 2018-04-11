@@ -39,4 +39,8 @@ object ShipmentService extends Loggable {
   def getCurrentPendingPastDueShipments = {
     getCurrentShipments ++ getPendingShipments ++ getPastDueShipments
   }
+
+  def getPendingPastDueShipments = {
+    getPendingShipments ++ getPastDueShipments
+  }
 }

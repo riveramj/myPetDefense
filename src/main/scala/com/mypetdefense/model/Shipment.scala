@@ -30,7 +30,6 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
 
   def cancel = {
     this
-      .address("")
       .status(Status.Cancelled)
       .saveMe
   }

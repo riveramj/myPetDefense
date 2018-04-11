@@ -18,15 +18,15 @@ stripeCallback = (token) ->
 $(document).ready ->
   $("body").on "click", '.checkout, .update-billing', (event) ->
     event.preventDefault()
-    $(".checkout.submit").prop('value', 'Please Wait')
-    $(".checkout.submit").prop('value', 'Please Wait').prop("disabled", true).addClass("processing")
+    $(".checkout.submit, input.update-billing").prop('value', 'Please Wait')
+    $(".checkout.submit, input.update-billing").prop('value', 'Please Wait').prop("disabled", true).addClass("processing")
 
     myPetDefenseSite.event("validate-stripe-form",
       stripeCallback: stripeCallback
     )
 
 $(document).on "form-validation-error", (event) ->
-  $(".checkout.submit").prop('value', 'Place Order').prop("disabled", false).removeClass("processing")
+  $(".checkout.submit, input.update-billing").prop('value', 'Place Order').prop("disabled", false).removeClass("processing")
 
 $(document).on "validate-stripe-form", (event) ->
   $(".validation-error").remove()
@@ -36,7 +36,7 @@ $(document).on "validate-stripe-form", (event) ->
     if (result.error)
       # Inform the user if there was an error
       $('#card-errors').val(result.error.message)
-      $(".checkout.submit").prop('value', 'Place Order').prop("disabled", false).removeClass("processing")
+      $(".checkout.submit, input.update-billing").prop('value', 'Place Order').prop("disabled", false).removeClass("processing")
     else
       # Send the token to your server
       event.stripeCallback(result.token)
