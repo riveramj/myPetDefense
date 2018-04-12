@@ -173,6 +173,7 @@ object ReportingService extends Loggable {
         subscription <- customer.subscription
         shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
         firstShipment <- shipments.headOption
+          if !findMailedDateOfShipment(firstShipment).isEmpty
         lastShipment <- shipments.lastOption
       } yield {
         val firstShipmentDate = findProcessDateOfShipment(firstShipment)
@@ -314,9 +315,10 @@ object ReportingService extends Loggable {
     }
 
     val shipmentsByCurrentMonth = allShipments.filter { shipment =>
-      val processDate = findProcessDateOfShipment(shipment)
+      val mailedDate = findMailedDateOfShipment(shipment)
 
-      (processDate.getMonth == currentDate.getMonth) && (processDate.getYear == currentDate.getYear)
+      mailedDate.map(_.getMonth == currentDate.getMonth).openOr(false) && 
+      mailedDate.map(_.getYear == currentDate.getYear).openOr(false)
     }
 
     val currentMonthTotal = totalSalesForShipments(shipmentsByCurrentMonth)
@@ -330,7 +332,7 @@ object ReportingService extends Loggable {
       "New Sales by Qty"
     )
 
-    val monthByAgent = shipmentsByCurrentMonth.groupBy { shipment =>
+    val shipmentMonthByAgent = shipmentsByCurrentMonth.groupBy { shipment =>
       val user = { 
         for {
           subscription <- shipment.subscription.obj
@@ -343,11 +345,12 @@ object ReportingService extends Loggable {
       user.map(_.salesAgentId.get).openOr("")
     }
 
-    val agentSalesData: List[List[String]] = monthByAgent.map { case (agentId, shipments) =>
-      val agentSalesMonthTotal = totalSalesForShipments(shipments)
-      val agentCommisionMonthAmount = agentSalesMonthTotal * .35
+    val usersMonthByAgent = usersByCurrentMonth.groupBy { user =>
+      user.salesAgentId.get
+    }
 
-      List(f"$agentId,${shipments.size}")
+    val agentSalesData: List[List[String]] = usersMonthByAgent.map { case (agentId, users) =>
+      List(f"$agentId,${users.size}")
     }.toList
 
     val agentHeaders = List(
@@ -356,7 +359,7 @@ object ReportingService extends Loggable {
     )
 
 
-    val allSalesForMonthData: String = monthByAgent.map { case (agentId, shipments) =>
+    val allSalesForMonthData: String = shipmentMonthByAgent.map { case (agentId, shipments) =>
       shipments.map { shipment =>
         val customerId = { 
           for {
