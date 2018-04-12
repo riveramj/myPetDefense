@@ -142,13 +142,13 @@ object ReportingService extends Loggable {
       !findMailedDateOfShipment(shipment).isEmpty
     }
 
-    val averageShipmentsPerCancelByYear = currentYearCancelShipments.size/currentYearSubscriptionCancels.size
+    val averageShipmentsPerCancelByYear = currentYearCancelShipments.size.toDouble/currentYearSubscriptionCancels.size.toDouble
 
     val currentYearCancelTotal = totalSalesForShipments(currentYearCancelShipments)
 
     val yearCancelCommisionAmount = currentYearCancelTotal * .35
 
-    val currentYearCancelSalesRow = List(f"Year To Date Totals,${currentYearSubscriptionCancels.size},${averageShipmentsPerCancelByYear},$$$currentYearCancelTotal,$$$yearCancelCommisionAmount%3.2f")
+    val currentYearCancelSalesRow = List(f"Year To Date Totals,${currentYearSubscriptionCancels.size},$averageShipmentsPerCancelByYear%3.2f,$$$currentYearCancelTotal,$$$yearCancelCommisionAmount%3.2f")
 
     val currentMonthSubscriptionCancels = currentYearSubscriptionCancels.filter { subscription =>
       val cancelDate = findCancelledDateOfSubscription(subscription)
@@ -157,13 +157,13 @@ object ReportingService extends Loggable {
 
     val currentMonthCancelShipments = currentMonthSubscriptionCancels.map(_.shipments.toList).flatten.filter(shipment => !findMailedDateOfShipment(shipment).isEmpty)
 
-    val averageShipmentsPerCancelByMonth: Double = currentMonthCancelShipments.size/currentMonthSubscriptionCancels.size
+    val averageShipmentsPerCancelByMonth = currentMonthCancelShipments.size.toDouble/currentMonthSubscriptionCancels.size.toDouble
 
     val currentMonthCancelTotal = totalSalesForShipments(currentMonthCancelShipments)
 
     val monthCancelCommisionAmount = currentMonthCancelTotal * .35
 
-    val currentMonthCancelSalesRow = List(f"Month To Date Totals,${currentMonthSubscriptionCancels.size},${averageShipmentsPerCancelByMonth},$$$currentMonthCancelTotal,$$$monthCancelCommisionAmount%3.2f")
+    val currentMonthCancelSalesRow = List(f"Month To Date Totals,${currentMonthSubscriptionCancels.size},$averageShipmentsPerCancelByMonth%3.2f,$$$currentMonthCancelTotal,$$$monthCancelCommisionAmount%3.2f")
 
     val headers = "Customer Id" :: "Start Month" :: "End Month" :: "Customer Status" :: "Shipment Count" :: "Total Gross Sales" :: "Total Commission" :: Nil
 
