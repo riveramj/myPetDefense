@@ -40,8 +40,16 @@ object ReportingService extends Loggable {
     shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
+  def findMailedDateOfShipment(shipment: Shipment) = {
+    tryo(shipment.dateShipped.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+  }
+
   def findCreatedDateOfUser(user: User) = {
     user.createdAt.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+  }
+
+  def findCancelledDateOfSubscription(subscription: Subscription) = {
+    subscription.cancellationDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
   def generateCSV(csv: String, fileName: String) = {
@@ -102,7 +110,7 @@ object ReportingService extends Loggable {
   def exportCancellationData(name: String) = {
     val possibleAgency = Agency.find(By(Agency.name, name))
     val customers = possibleAgency.map(_.customers.toList).openOr(Nil)
-    val nonActiveCustomers = customers.filter(_.status != Status.Active)
+    val cancelledCustomers = customers.filter(_.status == Status.Cancelled)
 
     val customerStatusBreakdown = customers.groupBy { customer =>
       customer.subscription.map(_.status.get)
@@ -120,32 +128,29 @@ object ReportingService extends Loggable {
       "Estimated Commission"
     )
 
-    val currentYearCancels = {
+    val currentYearSubscriptionCancels = {
       for {
-        customer <- nonActiveCustomers
+        customer <- cancelledCustomers
         subscription <- customer.subscription
-        shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
-        lastShipment <- shipments.lastOption
-          if findProcessDateOfShipment(lastShipment).getYear == currentDate.getYear
+          if findCancelledDateOfSubscription(subscription).getYear == currentDate.getYear
       } yield {
         subscription
       }
     }
 
-    val currentYearCancelShipments = currentYearCancels.map(_.shipments.toList).flatten
+    val currentYearCancelShipments = currentYearSubscriptionCancels.map(_.shipments.toList).flatten.filter(shipment => !findMailedDateOfShipment(shipment).isEmpty)
 
-    val cancelledShipmentCounts = currentYearCancels.map(_.shipments.toList.size)
-    val averageShipmentsPerCancelByYear = cancelledShipmentCounts.foldLeft(0D)(_+_)/cancelledShipmentCounts.size
+    val averageShipmentsPerCancelByYear = currentYearCancelShipments.size/currentYearSubscriptionCancels.size
 
     val currentYearCancelTotal = totalSalesForShipments(currentYearCancelShipments)
 
     val yearCancelCommisionAmount = currentYearCancelTotal * .35
 
-    val currentYearCancelSalesRow = List(f"Year To Date Totals,${currentYearCancels.size},${averageShipmentsPerCancelByYear},$$$currentYearCancelTotal,$$$yearCancelCommisionAmount%3.2f")
+    val currentYearCancelSalesRow = List(f"Year To Date Totals,${currentYearSubscriptionCancels.size},${averageShipmentsPerCancelByYear},$$$currentYearCancelTotal,$$$yearCancelCommisionAmount%3.2f")
 
     val currentMonthCancels = {
       for {
-        customer <- nonActiveCustomers
+        customer <- cancelledCustomers
         subscription <- customer.subscription
         shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
         lastShipment <- shipments.lastOption
@@ -309,7 +314,7 @@ object ReportingService extends Loggable {
 
     val yearCommisionAmount = currentYearTotal * .35
 
-    val currentYearMTDSalesRow = List(f"Year To Date Totals,${totalUsers.size},$$$currentYearTotal,$$$yearCommisionAmount%3.2f")
+    val currentYearMTDSalesRow = List(f"Year To Date Totals,${totalUsers.size}")
 
     val usersByCurrentMonth = totalUsers.filter { user =>
       (findCreatedDateOfUser(user).getMonth == currentDate.getMonth) && (findCreatedDateOfUser(user).getYear == currentDate.getYear)
@@ -325,13 +330,11 @@ object ReportingService extends Loggable {
 
     val monthCommisionAmount = currentMonthTotal * .35
 
-    val currentMonthSalesRow = List(f"Month To Date Totals,${usersByCurrentMonth.size},$$$currentMonthTotal,$$$monthCommisionAmount%3.2f")
+    val currentMonthSalesRow = List(f"Month To Date Totals,${usersByCurrentMonth.size}")
 
     val topHeaders = List(
       "Sales Report",
-      "Gross YTD Sales by Qty",
-      "Gross YTD Sales by $",
-      "Estimated Commission"
+      "New Sales by Qty"
     )
 
     val monthByAgent = shipmentsByCurrentMonth.groupBy { shipment =>
@@ -351,14 +354,12 @@ object ReportingService extends Loggable {
       val agentSalesMonthTotal = totalSalesForShipments(shipments)
       val agentCommisionMonthAmount = agentSalesMonthTotal * .35
 
-      List(f"$agentId,${shipments.size},$$$agentSalesMonthTotal,$$$agentCommisionMonthAmount%3.2f")
+      List(f"$agentId,${shipments.size}")
     }.toList
 
     val agentHeaders = List(
       "MTD Sales by Rep",
-      "Gross MTD Sales by Qty",
-      "Gross MTD Sales by $",
-      "Estimated Commission"
+      "New MTD Sales by Qty"
     )
 
 
@@ -376,7 +377,7 @@ object ReportingService extends Loggable {
         val shipmentTotal = shipmentAmountPaid(shipment)
         val commisionTotal = shipmentTotal * .35
 
-        f"$agentId,$customerId,${findProcessDateOfShipment(shipment)},$$$shipmentTotal%3.2f,$$$commisionTotal%3.2f"
+        f"$agentId,$customerId,${findProcessDateOfShipment(shipment)}"
       }.mkString("\n")
     }.mkString("\n")
 
