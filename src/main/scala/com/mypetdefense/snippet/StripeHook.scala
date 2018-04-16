@@ -64,6 +64,8 @@ trait StripeHook extends RestHelper with Loggable {
             formatAmount(tax)
           )
 
+          ParentService.updatePuppyProducts(user)
+
           val shipment = Shipment.createShipment(
             user,
             invoicePaymentId,
@@ -71,7 +73,7 @@ trait StripeHook extends RestHelper with Loggable {
             formatAmount(tax)
           )
 
-          shipment.map( ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
+          shipment.map(ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
         }
       }
 

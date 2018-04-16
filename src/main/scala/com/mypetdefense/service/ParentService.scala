@@ -19,6 +19,10 @@ import scala.concurrent.duration._
 import dispatch._, Defaults._
 
 import java.util.Date
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale}
+import java.time.{LocalDate, ZoneId, LocalDateTime, Period}
+import java.time.format.DateTimeFormatter
 
 object ParentService extends Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
@@ -351,6 +355,55 @@ object ParentService extends Loggable {
 
       case _ =>
         Empty
+    }
+  }
+
+  def getGrowthMonthNumber(growthRate: Box[GrowthRate], size: String) = {
+    size match {
+      case "medium" => 
+        growthRate.map(_.mediumProductMonth.get).openOr(0)
+      case "large" =>
+        growthRate.map(_.largeProductMonth.get).openOr(0)
+      case "xlarge" =>
+        growthRate.map(_.xlargeProductMonth.get).openOr(0)
+      case _ =>
+        0
+    }
+  }
+
+  def updatePuppyProducts(user: User) = {
+    val currentDate = LocalDate.now()
+
+    for {
+      pet <- user.pets.toList
+        if (pet.breed.get != null) && (pet.birthday.get != null)
+    } yield {
+      val birthday = tryo(pet.birthday.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+
+      val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
+      val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase))
+
+      currentMonth match {
+        case medium 
+            if medium == getGrowthMonthNumber(growthRate, "medium") => {
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
+          newProduct.map(pet.product(_).size(AnimalSize.DogMediumZo).saveMe)
+        }
+
+        case large 
+            if large == getGrowthMonthNumber(growthRate, "large") => {
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogLargeZo))
+          newProduct.map(pet.product(_).size(AnimalSize.DogLargeZo).saveMe)
+        }
+
+        case xlarge 
+            if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogXLargeZo))
+          newProduct.map(pet.product(_).size(AnimalSize.DogXLargeZo).saveMe)
+        }
+
+        case _ =>
+      }
     }
   }
 }
