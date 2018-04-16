@@ -47,6 +47,7 @@ class Boot {
       Agency,
       Coupon,
       Price,
+      GrowthRate,
       Review,
       Survey
     )
@@ -54,6 +55,7 @@ class Boot {
     DataLoader.loadProducts
     DataLoader.loadAdmin
     DataLoader.updateParentNoPets
+    DataLoader.createGrowthRateTest
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
