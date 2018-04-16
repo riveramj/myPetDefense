@@ -30,6 +30,8 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     override def defaultValue = new Date()
   }
 
+  def refresh = Pet.find(By(Pet.petId, petId.get))
+
   def createNewPet(
     user: User,
     name: String,
