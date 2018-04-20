@@ -20,15 +20,9 @@ object AgencyOverview extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  def exportMonthToDateSalesResponse: Box[LiftResponse] = {
-    agencyMonthToDateExportMenu.currentValue flatMap { name =>
-      ReportingService.exportMonthToDateSales(name)
-    } 
-  }
-
-  def exportCancellationDataResponse: Box[LiftResponse] = {
-    agencyCancellationExportMenu.currentValue flatMap { name =>
-      ReportingService.exportCancellationData(name)
+  def agencyMtdYtdExport: Box[LiftResponse] = {
+    agencyMtdYtdExportMenu.currentValue flatMap { name =>
+      ReportingService.exportAgencyMtdYtdSales(name)
     } 
   }
 
@@ -36,7 +30,7 @@ object AgencyOverview extends Loggable {
     agencyUser >>
     loggedIn
 
-  val agencyMonthToDateExportMenu = Menu.param[String](
+  val agencyMtdYtdExportMenu = Menu.param[String](
       "Agency Export Month to Date Sales",
       "Agency Export Month to Date Sales",
       Full(_),
@@ -44,17 +38,7 @@ object AgencyOverview extends Loggable {
     ) / "agency" / "agency-overview" / "mtd-sales.csv" >>
     agencyUser >>
     loggedIn >>
-    EarlyResponse(exportMonthToDateSalesResponse _)
-
-  val agencyCancellationExportMenu = Menu.param[String](
-      "Agency Export Cancellation Data",
-      "Agency Export Cancellation Data",
-      Full(_),
-      string => string
-    ) / "agency" / "agency-overview" / "cancellation-data.csv" >>
-    agencyUser >>
-    loggedIn >>
-    EarlyResponse(exportCancellationDataResponse _)
+    EarlyResponse(agencyMtdYtdExport _)
 }
 
 class AgencyOverview extends Loggable {
@@ -64,8 +48,7 @@ class AgencyOverview extends Loggable {
 
   def render = {
     ".overview [class+]" #> "current" &
-    ".cancellation-export [href]" #> AgencyOverview.agencyCancellationExportMenu.calcHref(agencyName) &
-    ".month-to-date-sales-export [href]" #> AgencyOverview.agencyMonthToDateExportMenu.calcHref(agencyName)
+    ".month-to-date-export [href]" #> AgencyOverview.agencyMtdYtdExportMenu.calcHref(agencyName)
   }
 }
 

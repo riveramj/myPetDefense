@@ -402,4 +402,222 @@ object ReportingService extends Loggable {
 
     generateCSV(csvRows, file)
   }
+
+
+  def exportAgencyMtdYtdSales(name: String): Box[LiftResponse] = {
+    val allShipments = {
+      for {
+        agency <- Agency.find(By(Agency.name, name)).toList
+        customer <- agency.customers.toList
+        subscription <- customer.subscription
+        shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+          if !findMailedDateOfShipment(shipment).isEmpty
+      } yield {
+        shipment
+      }
+    }
+
+    val totalUsers = Agency.find(By(Agency.name, name)).headOption.map(_.customers.toList).getOrElse(Nil)
+
+    val allPayingCustomers = totalUsers.filter { user =>
+      val subscription = user.subscription.headOption
+      subscription.map(_.shipments.toList.size > 1).getOrElse(false)
+    }
+
+    val activePayingCustomers = allPayingCustomers.filter(_.status.get == Status.Active)
+
+    val cancelledPayingCustomers = allPayingCustomers.filter(_.status.get == Status.Cancelled)
+
+    val payingShipments = allPayingCustomers.map { user =>
+      val subscription = user.subscription.headOption
+      subscription.map(_.shipments.toList).getOrElse(Nil)
+    }.flatten
+
+    val currentYearShipments = payingShipments.filter { shipment =>
+      findMailedDateOfShipment(shipment).map(_.getYear == currentDate.getYear).getOrElse(false)
+    }
+
+    val currentMonthShipments = currentYearShipments.filter { shipment =>
+      findMailedDateOfShipment(shipment).map(_.getMonth == currentDate.getMonth).getOrElse(false)
+    }
+
+    val currentYearCancelledPayingCustomers = cancelledPayingCustomers.filter { customer =>
+
+      val subscription = customer.subscription.headOption
+
+      subscription.map { subscription =>
+        val cancelDate = findCancelledDateOfSubscription(subscription)
+
+        cancelDate.getYear == currentDate.getYear
+      }.getOrElse(false)
+    }
+
+    val currentMonthCancelledPayingCustomers = currentYearCancelledPayingCustomers.filter { customer =>
+
+      val subscription = customer.subscription.headOption
+
+      subscription.map { subscription =>
+        val cancelDate = findCancelledDateOfSubscription(subscription)
+
+        cancelDate.getMonth == currentDate.getMonth
+      }.getOrElse(false)
+    }
+
+    val usersByCurrentYear = totalUsers.filter { user =>
+      findCreatedDateOfUser(user).getYear == currentDate.getYear
+    }
+
+    val usersByCurrentMonth = usersByCurrentYear.filter { user =>
+      (findCreatedDateOfUser(user).getMonth == currentDate.getMonth)
+    }
+
+    val usersCanceledByCurrentYear = usersByCurrentYear.filter(_.status == Status.Cancelled)
+
+    val activeUsersByCurrentYear = usersByCurrentYear.filter(_.status == Status.Active)
+
+    val usersCanceledByCurrentMonth = usersByCurrentMonth.filter(_.status == Status.Cancelled)
+
+    val activeUsersByCurrentMonth = usersByCurrentMonth.filter(_.status == Status.Active)
+
+    val netNewCustomersYtd = usersByCurrentYear.size - usersCanceledByCurrentYear.size
+
+    val netNewCustomersMtd = usersByCurrentMonth.size - usersCanceledByCurrentMonth.size
+    
+    val totalNetPetsMtd = activeUsersByCurrentMonth.map(_.pets.toList).flatten.size
+
+    val totalNetPetsYtd = activeUsersByCurrentYear.map(_.pets.toList).flatten.size
+
+    val newCustomerHeaders = List(
+      "",
+      "New Customers",
+      "Cancellations",
+      "Net New Customers",
+      "Total Pets"
+    )
+
+    val mtdNewCustomers = List(s"Month to Date,${usersByCurrentMonth.size},${usersCanceledByCurrentMonth.size},${netNewCustomersMtd},${totalNetPetsMtd}")
+
+    val ytdNewCustomers = List(s"Year to Date,${usersByCurrentYear.size},${usersCanceledByCurrentYear.size},${netNewCustomersYtd},${totalNetPetsYtd}")
+
+    val currentYearPaidShipments = currentYearShipments.filter(!_.amountPaid.get.isEmpty)
+
+    val currentMonthPaidShipments = currentMonthShipments.filter(!_.amountPaid.get.isEmpty)
+
+    val currentMonthPaidShipmentPets = currentMonthPaidShipments.map(_.shipmentLineItems.toList).flatten.size
+
+    val currentYearPaidShipmentPets = currentYearPaidShipments.map(_.shipmentLineItems.toList).flatten.size
+
+    val shipmentsByCurrentYear = currentYearPaidShipments.filter { shipment =>
+      val mailedDate = findMailedDateOfShipment(shipment)
+
+      mailedDate.map(_.getYear == currentDate.getYear).openOr(false)
+    }
+
+    val currentYearTotal = totalSalesForShipments(shipmentsByCurrentYear)
+
+    val yearCommisionAmount = currentYearTotal * .35
+
+    val shipmentsByCurrentMonth = currentYearPaidShipments.filter { shipment =>
+      val mailedDate = findMailedDateOfShipment(shipment)
+
+      mailedDate.map(_.getMonth == currentDate.getMonth).openOr(false)
+    }
+
+    val currentMonthTotal = totalSalesForShipments(shipmentsByCurrentMonth)
+
+    val monthCommisionAmount = currentMonthTotal * .35
+
+    val payingCustomerHeaders = List(
+      "",
+      "Paying Customers",
+      "Cancellations",
+      "Total Shipments",
+      "Total Pets Shipped",
+      "Gross Sales",
+      "Estimated Comission"
+    )
+
+    val mtdPayingCustomers = List(f"Month to Date,${activePayingCustomers.size},${currentMonthCancelledPayingCustomers.size},${currentMonthPaidShipments.size},$currentMonthPaidShipmentPets,$$$currentMonthTotal%2.2f,$$$monthCommisionAmount%2.2f")
+
+    val ytdPayingCustomers = List(f"Year to Date,${activePayingCustomers.size},${currentYearCancelledPayingCustomers.size},${currentYearPaidShipments.size},$currentYearPaidShipmentPets,$$$currentYearTotal%2.2f,$$$yearCommisionAmount%2.2f")
+
+    val shipmentPaidMonthByAgent = shipmentsByCurrentMonth.groupBy { shipment =>
+      val user = { 
+        for {
+          subscription <- shipment.subscription.obj
+          user <- subscription.user.obj
+        } yield {
+          user
+        }
+      }
+
+      user.map(_.salesAgentId.get).openOr("")
+    }
+
+    val usersMonthByAgent = usersByCurrentMonth.groupBy { user =>
+      user.salesAgentId.get
+    }
+
+    val agentSalesData: List[List[String]] = usersMonthByAgent.map { case (agentId, users) =>
+      List(f"$agentId,${users.size}")
+    }.toList
+
+    val agentPayingCustomerHeaders = List(
+      "MTD Sales by Agent",
+      "Total Customers",
+      "Cancellations",
+      "Net Total Customers",
+      "Total Pets",
+      "Gross Sales",
+      "Estimated Commission"
+    )
+
+    val allSalesForMonthData: String = shipmentPaidMonthByAgent.map { case (agentId, shipments) =>
+      val mailedShipmentsNotFree = shipments.filter { shipment => 
+        !findMailedDateOfShipment(shipment).isEmpty && (shipmentAmountPaid(shipment) > 0.0)
+      }
+
+        mailedShipmentsNotFree.map { shipment =>
+        val customerId = { 
+          for {
+            subscription <- shipment.subscription.obj
+            user <- subscription.user.obj
+          } yield {
+              user.userId.toString
+          }
+        }.openOr("-")
+        
+        val shipmentTotal = shipmentAmountPaid(shipment)
+        val commisionTotal = shipmentTotal * .35
+
+        f"$agentId,$customerId,${findMailedDateOfShipment(shipment)}"
+      }.mkString("\n")
+    }.mkString("\n")
+
+    val allSalesHeaders = List(
+      "Rep ID",
+      "Customer ID",
+      "Date",
+      "Value",
+      "Estimated Commission"
+    )
+    
+    val csvRows = {
+      List(newCustomerHeaders) ++
+      List(mtdNewCustomers) ++
+      List(ytdNewCustomers) ++
+      spacerRow ++
+      List(payingCustomerHeaders) ++
+      List(mtdPayingCustomers) ++
+      List(ytdPayingCustomers) ++
+      spacerRow ++
+      List(agentPayingCustomerHeaders)
+    }.map(_.mkString(",")).mkString("\n") + "\n" + allSalesForMonthData
+
+    val fileName = s"${name}-mtd-ytd-${fileNameMonthDayYear}.csv"
+
+    val file = "filename=\"" + fileName + "\""
+
+    generateCSV(csvRows, file)
+  }
 }
