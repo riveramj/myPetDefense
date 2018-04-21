@@ -657,6 +657,7 @@ object ReportingService extends Loggable {
       spacerRow ++
       List(agentPayingCustomerHeaders) ++
       paidCustomersByAgent ++
+      spacerRow ++
       List(agentNewCustomerHeaders) ++
       newCustomersByAgent
     }.map(_.mkString(",")).mkString("\n")
