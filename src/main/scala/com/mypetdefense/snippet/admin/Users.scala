@@ -70,7 +70,13 @@ class Users extends Loggable {
         )
       }
       
-      newUser.map(EmailActor ! SendNewUserEmail(_))
+      if (userType == Full(UserType.Admin))
+        newUser.map(EmailActor ! SendNewAdminEmail(_))
+      else if (userType == Full(UserType.Agent))
+        newUser.map(EmailActor ! SendNewAgentEmail(_))
+      else
+        newUser.map(EmailActor ! SendNewUserEmail(_))
+
 
       S.redirectTo(Users.menu.loc.calcDefaultHref)
     } else {
