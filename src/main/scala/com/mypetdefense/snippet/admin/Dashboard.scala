@@ -287,6 +287,16 @@ class Dashboard extends Loggable {
     })  
   }
 
+  def updateTrackingNumber(trackingNumber: String, shipment: Box[Shipment]) = {
+    if (!trackingNumber.trim.isEmpty) {
+      val refreshedShipment = shipment.flatMap(_.refresh)
+    
+      refreshedShipment.map(_.trackingNumber(trackingNumber).saveMe)
+    }
+
+    Noop
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".dashboard [class+]" #> "current" &
@@ -316,6 +326,7 @@ class Dashboard extends Loggable {
           By(Shipment.expectedShipDate, subscription.nextShipDate.get)
         )
 
+        var trackingNumber = shipment.map(_.trackingNumber.get).getOrElse("")
         val paymentProcessed = paymentProcessed_?(shipment)
 
         val insertNeeded = {
@@ -348,11 +359,9 @@ class Dashboard extends Loggable {
           ".product-size *" #> product.map(_.size.get.toString)
         } &
         ".insert *" #> insertNeeded &
-        ".tracking-number *" #> shipment.map(_.trackingNumber.get) &
+        ".tracking" #> SHtml.ajaxText(trackingNumber, possibleTracking => updateTrackingNumber(possibleTracking, shipment)) &
         ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
-          val updatedShipment = shipment.flatMap { possibleShipment =>
-            Shipment.find(By(Shipment.shipmentId, possibleShipment.shipmentId.get))
-          }
+          val updatedShipment = shipment.flatMap(_.refresh)
 
           if (shipmentHasShipped_?(shipment)) {
             ".ship [class+]" #> "shipped" &

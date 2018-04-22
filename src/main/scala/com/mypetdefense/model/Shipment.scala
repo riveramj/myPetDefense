@@ -33,6 +33,8 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
       .status(Status.Cancelled)
       .saveMe
   }
+
+  def refresh = Shipment.find(By(Shipment.shipmentId, shipmentId.get))
 }
 
 object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
