@@ -1,0 +1,44 @@
+#top-bar {
+  background-color: #FFFFFF;
+  display: block;
+  padding: 19px 50px 19px 110px;
+}
+
+#logo-name {
+  display: inline-block;
+}
+
+nav {
+  float: right;
+}
+
+#menu-entries {
+  margin-top: 8px;
+
+  li {
+    display: inline-block;
+  }
+}
+
+.entry {
+  margin-right: 25px;
+  padding-bottom: 3px;
+  
+  &.current {
+    border-bottom: 2px solid #2E9F9B;
+  }
+
+  a {
+    color: #454343;
+    font-weight: $semibold;
+    text-transform: uppercase;
+    text-decoration: none;
+    letter-spacing: 0.4px;
+    font-size: 14px;
+
+      &.visited {
+        color: #454343;
+    }
+  }
+}
+

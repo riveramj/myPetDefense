@@ -67,9 +67,21 @@
   margin-left: 15px;
 }
 
+#upload-tracking-numbers-form {
+  background-color: initial;
+}
+
+.fileUploadForm {
+  margin: 20px 0;
+}
+
 @media print {
+  @page { size: 58mm 100mm }
+
   body {
     background-color: #ffffff !important;
+    color: #000 !important;
+    width: 58mm;
   }
 
   #top-bar, .dashboard-nav {
@@ -101,8 +113,27 @@
 
   .shipment {
     border: 0;
-    display: block;
+    display: grid;
     page-break-after: always;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+    padding: 10mm;
+    width: 58mm; 
+    height: 75mm;
+
+    td {
+      padding: 10px;
+    }
+
+    .product {
+      padding-bottom: 10px
+    }
+  }
+
+  .pet-name {
+    font-size: 14px;
   }
 
   button.ship {
@@ -111,12 +142,8 @@
     border-color: #000000 !important;
     border: 1px solid !important;
   }
-}
 
-#upload-tracking-numbers-form {
-  background-color: initial;
-}
-
-.fileUploadForm {
-  margin: 20px 0;
+  #upload-tracking-numbers-form, .ship-it, .ship-on {
+    display: none;
+  }
 }
