@@ -262,7 +262,7 @@ class Dashboard extends Loggable {
             subscription <- shipment.subscription.obj
             user <- subscription.user.obj
           } yield {
-            user.name
+            user.name.trim
           }
         }.getOrElse("")
 
