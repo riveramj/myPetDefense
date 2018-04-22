@@ -61,7 +61,11 @@ object ReportingService extends Loggable {
   }
 
   def getShipments(subscriptions: List[Subscription]) = {
-    subscriptions.map(_.shipments.toList).flatten
+    val allShipments = subscriptions.map(_.shipments.toList).flatten
+
+    allShipments filter { shipment =>
+      !getMailedDateOfShipment(shipment).isEmpty
+    }
   }
 
   def getPetCount(shipments: List[Shipment]) = {
