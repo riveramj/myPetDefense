@@ -1,0 +1,31 @@
+@import "base";
+@import "admin-nav-bar";
+
+body {
+  background-color: #DCDBDB;
+}
+
+#item-container {
+  @include span-columns(10);
+  @include shift(1);
+}
+
+h2 {
+  padding: rem(43px) 0 rem(15px);
+  color: #605F5F;
+  font-size: em(27px);
+  font-weight: $semibold;
+}
+
+#reports {
+  background-color: #F1F1F1;
+  padding: 20px 35px;
+
+  a {
+    color: #454343;
+
+    &.visited {
+      color: #454343
+    }
+  }
+}

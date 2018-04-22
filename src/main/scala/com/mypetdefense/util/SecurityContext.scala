@@ -7,6 +7,7 @@ import net.liftweb.util.Helpers._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 import com.mypetdefense.snippet.admin._
+import com.mypetdefense.snippet.agency._
 
 object SecurityContext extends Loggable {
 
@@ -41,10 +42,17 @@ object SecurityContext extends Loggable {
           logger.info("Redirecting user to dashboard.")
           S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
         }
+      
       case parent if parent == UserType.Parent =>
         possibleRedirect.openOr {
           logger.info("Redirecting user to AccountOverview.")
           S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
+        }
+
+      case agent if agent == UserType.Agent =>
+        possibleRedirect.openOr {
+          logger.info("Redirecting user to Agency Overview.")
+          S.redirectTo(AgencyOverview.menu.loc.calcDefaultHref)
         }
     }
   }
