@@ -122,7 +122,8 @@ object Dashboard extends Loggable {
           subscription <- subscriptions
           shipment <- Shipment.find(
                         By(Shipment.subscription, subscription),
-                        By(Shipment.expectedShipDate, subscription.nextShipDate.get)
+                        By(Shipment.expectedShipDate, subscription.nextShipDate.get),
+                        By(Shipment.status, Status.Active)
                       )
           user <- subscription.user.obj
           address <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
