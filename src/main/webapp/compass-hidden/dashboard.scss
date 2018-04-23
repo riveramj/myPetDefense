@@ -95,7 +95,7 @@
 }
 
 @media print {
-  @page { size: 58mm 100mm }
+  @page { size: 75mm 100mm landscape}
 
   body {
     background-color: #ffffff !important;
@@ -139,7 +139,7 @@
     position: relative;
     box-sizing: border-box;
     padding: 10mm;
-    width: 58mm; 
+    width: 70mm; 
     height: 75mm;
 
     td {
@@ -152,7 +152,9 @@
   }
 
   .pet-name {
-    font-size: 14px;
+    font-size: 15px;
+    font-weight: $bold;
+    display: block;
   }
 
   button.ship {
