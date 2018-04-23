@@ -179,3 +179,21 @@ li.product {
 td.address {
   white-space: pre-line;
 }
+
+.address li {
+  .address-1, .address-2 {
+    width: 260px;
+  }
+
+  .city {
+    width: 125px;
+  }
+
+  .state {
+    width: 50px;
+  }
+
+  .zip {
+    width: 75px;
+  }
+}
