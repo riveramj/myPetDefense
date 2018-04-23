@@ -69,10 +69,29 @@
 
 #upload-tracking-numbers-form {
   background-color: initial;
+  margin-left: 20px;
+
+  h3 {
+    padding-bottom: 5px;
+  }
 }
 
 .fileUploadForm {
   margin: 20px 0;
+}
+
+.tracking-number {
+  form {
+    background-color: #ffffff;
+  }
+
+  .tracking {
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    margin: 0;
+    font-size: 13px;
+    padding: 3px 5px;
+  }
 }
 
 @media print {
@@ -143,7 +162,7 @@
     border: 1px solid !important;
   }
 
-  #upload-tracking-numbers-form, .ship-it, .ship-on {
+  #upload-tracking-numbers-form, .ship-it, .ship-on, .tracking-number {
     display: none;
   }
 }
