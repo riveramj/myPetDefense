@@ -33,60 +33,12 @@ object Dashboard extends Loggable {
     adminUser >>
     loggedIn
 
-  val exportMenu = Menu.i("Export CSV") / "admin" / "dashboard" / "export_data.csv" >>
+  val labelsExportMenu = Menu.i("Export Shipments") / "admin" / "dashboard" / "export_shipments.csv" >>
     adminUser >>
     loggedIn >>
-    EarlyResponse(exportCSV _)
+    EarlyResponse(exportUspsLabels _)
 
-  val shipmentsCSVMenu = Menu.i("Export Shipments") / "admin" / "dashboard" / "export_shipments.csv" >>
-    adminUser >>
-    loggedIn >>
-    EarlyResponse(exportShipments _)
-
-  def exportCSV: Box[LiftResponse] = {
-    val csvHeaders = "Name" :: "Email" :: "Address" :: "Shipped Date" :: "Amount Paid" :: "Items Shipped" :: Nil
-    
-    val csvRows: List[List[String]] = {
-      val parents = User.findAll(By(User.userType, UserType.Parent))
-      val shipments = Shipment.findAll()
-      val dateFormat = new SimpleDateFormat("MMM dd")
-      
-      {
-        for {
-          shipment <- shipments
-          subscription <- shipment.subscription.obj
-          user <- subscription.user.obj
-          address <- user.addresses.toList.headOption
-        } yield {
-          val itemsList: List[ShipmentLineItem] = ShipmentLineItem.findAll(By(ShipmentLineItem.shipment, shipment))
-
-          val itemsShipped: String = itemsList.flatMap(_.product.obj.map(_.getNameAndSize)).mkString("; ")
-
-          user.name ::
-          user.email.get ::
-          s"${address.street1.get} ${address.street2.get} ${address.city.get} ${address.state.get} ${address.zip.get}" ::
-          dateFormat.format(shipment.dateProcessed.get).toString ::
-          shipment.amountPaid.toString ::
-          itemsShipped.replaceAll(",","") :: 
-          Nil
-        }
-      }
-    }
-
-    val resultingCsv = (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
-
-      Some(new InMemoryResponse(
-        resultingCsv.getBytes("UTF-8"),
-        List(
-          "Content-Type" -> "binary/octet-stream",
-          "Content-Disposition" -> "attachment; filename=\"data.csv\""
-          ),
-        Nil,
-        200
-      ))
-  }
-
-  def exportShipments: Box[LiftResponse] = {
+  def exportUspsLabels: Box[LiftResponse] = {
     val csvHeaders = "Order ID (required)" ::
                      "Order Date" ::
                      "Order Value" ::
@@ -262,7 +214,7 @@ class Dashboard extends Loggable {
             subscription <- shipment.subscription.obj
             user <- subscription.user.obj
           } yield {
-            user.name
+            user.name.trim
           }
         }.getOrElse("")
 
@@ -287,11 +239,20 @@ class Dashboard extends Loggable {
     })  
   }
 
+  def updateTrackingNumber(trackingNumber: String, shipment: Box[Shipment]) = {
+    if (!trackingNumber.trim.isEmpty) {
+      val refreshedShipment = shipment.flatMap(_.refresh)
+    
+      refreshedShipment.map(_.trackingNumber(trackingNumber).saveMe)
+    }
+
+    Noop
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".dashboard [class+]" #> "current" &
-    "#csv-export [href]" #> Dashboard.exportMenu.loc.calcDefaultHref &
-    "#shipments-export [href]" #> Dashboard.shipmentsCSVMenu.loc.calcDefaultHref &
+    "#shipments-export [href]" #> Dashboard.labelsExportMenu.loc.calcDefaultHref &
     "#dashboard-current [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(currentShipments)) &
     "#dashboard-pending [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(pendingShipments)) &
     "#dashboard-past-due [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(pastDueShipments)) &
@@ -316,6 +277,7 @@ class Dashboard extends Loggable {
           By(Shipment.expectedShipDate, subscription.nextShipDate.get)
         )
 
+        var trackingNumber = shipment.map(_.trackingNumber.get).getOrElse("")
         val paymentProcessed = paymentProcessed_?(shipment)
 
         val insertNeeded = {
@@ -348,11 +310,9 @@ class Dashboard extends Loggable {
           ".product-size *" #> product.map(_.size.get.toString)
         } &
         ".insert *" #> insertNeeded &
-        ".tracking-number *" #> shipment.map(_.trackingNumber.get) &
+        ".tracking" #> SHtml.ajaxText(trackingNumber, possibleTracking => updateTrackingNumber(possibleTracking, shipment)) &
         ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
-          val updatedShipment = shipment.flatMap { possibleShipment =>
-            Shipment.find(By(Shipment.shipmentId, possibleShipment.shipmentId.get))
-          }
+          val updatedShipment = shipment.flatMap(_.refresh)
 
           if (shipmentHasShipped_?(shipment)) {
             ".ship [class+]" #> "shipped" &

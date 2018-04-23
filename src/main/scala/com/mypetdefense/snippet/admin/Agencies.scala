@@ -49,6 +49,12 @@ object Agencies extends Loggable {
     } 
   }
 
+  def agencyMtdYtdExport: Box[LiftResponse] = {
+    mtdYtdExportMenu.currentValue flatMap { name =>
+      ReportingService.exportAgencyMtdYtdSales(name)
+    } 
+  }
+
   val menu = Menu.i("Agencies") / "admin" / "agencies" >>
     adminUser >>
     loggedIn
@@ -78,7 +84,7 @@ object Agencies extends Loggable {
       "Export Month to Date Sales",
       Full(_),
       string => string
-    ) / "admin" / "agencies" / "mtd-sales.csv" >>
+    ) / "admin" / "agencies" / "mtd-sales-old.csv" >>
     adminUser >>
     loggedIn >>
     EarlyResponse(exportMonthToDateSalesResponse _)
@@ -92,6 +98,16 @@ object Agencies extends Loggable {
     adminUser >>
     loggedIn >>
     EarlyResponse(exportCancellationDataResponse _)
+
+    val mtdYtdExportMenu = Menu.param[String](
+      "Export Month to Date Sales New",
+      "Export Month to Date Sales New",
+      Full(_),
+      string => string
+    ) / "admin" / "agencies" / "mtd-sales.csv" >>
+    adminUser >>
+    loggedIn >>
+    EarlyResponse(agencyMtdYtdExport _)
 }
 
 class Agencies extends Loggable {
@@ -150,7 +166,8 @@ class Agencies extends Loggable {
       ".actions .sales-export [href]" #> Agencies.salesDataExportMenu.calcHref(agency.name.get) &
       ".actions .cancellation-export [href]" #> Agencies.cancellationExportMenu.calcHref(agency.name.get) &
       ".actions .total-sales-export [href]" #> Agencies.totalSalesExportMenu.calcHref(agency.name.get) &
-      ".actions .month-to-date-sales-export [href]" #> Agencies.monthToDateExportMenu.calcHref(agency.name.get)
+      ".actions .month-to-date-sales-export [href]" #> Agencies.monthToDateExportMenu.calcHref(agency.name.get) &
+      ".actions .month-to-date-export [href]" #> Agencies.mtdYtdExportMenu.calcHref(agency.name.get)
     }
   }
 }
