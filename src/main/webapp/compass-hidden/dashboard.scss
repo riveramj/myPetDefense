@@ -100,7 +100,7 @@
   body {
     background-color: #ffffff !important;
     color: #000 !important;
-    width: 58mm;
+    width: 70mm;
   }
 
   #top-bar, .dashboard-nav {
@@ -143,7 +143,8 @@
     height: 75mm;
 
     td {
-      padding: 10px;
+      padding: 0 0 10px;
+      font-size: 14px;
     }
 
     .product {
