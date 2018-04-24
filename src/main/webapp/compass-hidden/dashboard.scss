@@ -144,7 +144,7 @@
 
     td {
       padding: 0 0 10px;
-      font-size: 16px;
+      font-size: 18px;
     }
 
     .product {
@@ -153,9 +153,13 @@
   }
 
   .pet-name {
-    font-size: 18px;
+    font-size: 20px;
     font-weight: $bold;
     display: block;
+  }
+
+  .product-size {
+    font-weight: $bold;
   }
 
   button.ship {
