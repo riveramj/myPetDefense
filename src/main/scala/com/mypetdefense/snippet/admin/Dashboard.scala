@@ -67,7 +67,7 @@ object Dashboard extends Loggable {
     val csvRows: List[List[String]] = {
       val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-      val subscriptions = ShipmentService.getPendingPastDueShipments
+      val subscriptions = ShipmentService.getCurrentPastDueShipments
 
       {
         for {
@@ -126,11 +126,9 @@ class Dashboard extends Loggable {
   var subscriptionSet: List[Subscription] = Nil
   var shipmentRenderer: Box[IdMemoizeTransform] = Empty
 
-  def currentShipments = ShipmentService.getCurrentShipments
 
-  def pendingShipments = ShipmentService.getPendingShipments
-
-  def pastDueShipments = ShipmentService.getPastDueShipments
+  def upcomingShipments = ShipmentService.getUpcomingShipments
+  def currentAndPastDueShipments = ShipmentService.getCurrentPastDueShipments 
 
   def updateSubscriptionSet(subscriptions: List[Subscription]) = {
     subscriptions.filter { subscription =>
@@ -144,7 +142,7 @@ class Dashboard extends Loggable {
     shipmentRenderer.map(_.setHtml).openOr(Noop)
   }
 
-  subscriptionSet = updateSubscriptionSet(currentShipments)
+  subscriptionSet = updateSubscriptionSet(currentAndPastDueShipments)
 
   def paymentProcessed_?(shipment: Box[Shipment]) = {
     val paymentId = shipment.map(_.stripePaymentId.get).openOr("")
@@ -197,7 +195,7 @@ class Dashboard extends Loggable {
     }
 
     def updateShipment(trackingInfo: TrackingInfo) = {
-      val subscriptions = ShipmentService.getCurrentPendingPastDueShipments
+      val subscriptions = ShipmentService.getCurrentPastDueShipments
       val shipments = subscriptions.map { subscription =>
         Shipment.find(
           By(Shipment.subscription, subscription),
@@ -253,9 +251,8 @@ class Dashboard extends Loggable {
     SHtml.makeFormsAjax andThen
     ".dashboard [class+]" #> "current" &
     "#shipments-export [href]" #> Dashboard.labelsExportMenu.loc.calcDefaultHref &
-    "#dashboard-current [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(currentShipments)) &
-    "#dashboard-pending [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(pendingShipments)) &
-    "#dashboard-past-due [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(pastDueShipments)) &
+    "#dashboard-current [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(currentAndPastDueShipments)) &
+    "#dashboard-upcoming [onclick]" #> SHtml.ajaxInvoke(() => changeSubscriptionSet(upcomingShipments)) &
     ".dashboard-details" #> SHtml.idMemoize { renderer =>
       shipmentRenderer = Full(renderer)
 
