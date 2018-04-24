@@ -9,20 +9,20 @@ import net.liftweb._
 import com.mypetdefense.model._
 
 object ShipmentService extends Loggable {
-  def getCurrentShipments = {
+  def getCurrentPastDueShipments = {
     Subscription.findAll(
       BySql(
-        "nextShipDate >= CURRENT_DATE and nextShipdate < current_date + interval '5 day'",
-        IHaveValidatedThisSQL("mike","2017-04-26")
+        "nextShipDate <= CURRENT_DATE and nextshipdate > current_date - interval '5 day'",
+        IHaveValidatedThisSQL("mike","2018-04-24")
       )
     )
   }
 
-  def getPendingShipments = {
+  def getUpcomingShipments = {
     Subscription.findAll(
       BySql(
-        "nextShipDate > CURRENT_DATE - interval '5 day' and nextshipdate < current_date",
-        IHaveValidatedThisSQL("mike","2017-04-26")
+        "nextShipDate > CURRENT_DATE and nextShipDate < CURRENT_DATE + interval '10 day'",
+        IHaveValidatedThisSQL("mike","2018-04-24")
       )
     )
   }
@@ -34,13 +34,5 @@ object ShipmentService extends Loggable {
         IHaveValidatedThisSQL("mike","2018-01-04")
       )
     )
-  }
-
-  def getCurrentPendingPastDueShipments = {
-    getCurrentShipments ++ getPendingShipments ++ getPastDueShipments
-  }
-
-  def getPendingPastDueShipments = {
-    getPendingShipments ++ getPastDueShipments
   }
 }
