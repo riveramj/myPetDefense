@@ -115,13 +115,5 @@ class Boot {
     )
   )
 
-  println(new Date() + " current=========")
-
   TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
-
-  println(new Date() + " nyc=========")
-
-  TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
-
-  println(new Date() + " LA=========")
 }
