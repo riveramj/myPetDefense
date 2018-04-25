@@ -156,7 +156,8 @@ class Dashboard extends Loggable {
     address: String,
     renderer: IdMemoizeTransform
   )() = {
-    val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+
+    val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
 
     ParentService.updateNextShipBillDate(subscription, user, nextMonthDate)
@@ -167,7 +168,8 @@ class Dashboard extends Loggable {
       user,
       subscription,
       shipment.map(_.taxPaid.get).openOr(""),
-      shipment.map(_.amountPaid.get).openOr("")
+      shipment.map(_.amountPaid.get).openOr(""),
+      shipment.map(_.trackingNumber.get).openOr("")
     )
     
     renderer.setHtml
