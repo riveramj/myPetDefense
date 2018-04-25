@@ -37,23 +37,23 @@ object ReportingService extends Loggable {
   }
 
   def getProcessDateOfShipment(shipment: Shipment) = {
-    shipment.dateProcessed.get.toInstant().atZone(ZoneId.of("America/New_York")).toLocalDate()
+    shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
   def getMailedDateOfShipment(shipment: Shipment) = {
-    tryo(shipment.dateShipped.get.toInstant().atZone(ZoneId.of("America/New_York")).toLocalDate())
+    tryo(shipment.dateShipped.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
   }
 
   def getCreatedDateOfUser(user: User) = {
-    user.createdAt.get.toInstant().atZone(ZoneId.of("America/New_York")).toLocalDate()
+    user.createdAt.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
   def getCreatedDateOfSubscription(subscription: Subscription) = {
-    subscription.createdAt.get.toInstant().atZone(ZoneId.of("America/New_York")).toLocalDate()
+    subscription.createdAt.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
   def getCancelledDateOfSubscription(subscription: Subscription) = {
-    tryo(subscription.cancellationDate.get.toInstant().atZone(ZoneId.of("America/New_York")).toLocalDate())
+    tryo(subscription.cancellationDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
   }
 
   def getSubscriptions(users: List[User]) = {
