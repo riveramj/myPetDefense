@@ -65,10 +65,11 @@
 }
 
 .invoice-list {
-  @media (max-width: $bp-small) {
+  @media (max-width: $bp-medium) {
     display: none;
   }
-  @media (min-width: $bp-medium) {
+
+  @media (min-width: $bp-large) {
     width: 100%;
     margin-bottom: rem(16px);
   }
