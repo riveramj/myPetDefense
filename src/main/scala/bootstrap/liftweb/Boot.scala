@@ -11,7 +11,6 @@ import com.mypetdefense.util._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 
-import java.util.TimeZone
 import java.util.Date
 
 /**
