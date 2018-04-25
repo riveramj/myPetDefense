@@ -114,8 +114,8 @@ class ParentSubscription extends Loggable {
     "#new-password" #> SHtml.password(newPassword, newPass => newPassword = newPass.trim) &
     ".update-email" #> SHtml.ajaxSubmit("Save Changes", updateEmail _) &
     ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword _) &
-    ".status" #> user.map(_.status.get.toString) &
     ".confirm-cancel-account" #> SHtml.ajaxSubmit("Yes, cancel my acount", cancelAccount _)
+    ".status *" #> user.map(_.status.get.toString)
   }
 }
 
