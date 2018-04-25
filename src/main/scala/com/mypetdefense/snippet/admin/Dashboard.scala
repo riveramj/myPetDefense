@@ -170,7 +170,7 @@ class Dashboard extends Loggable {
       subscription,
       shipment.map(_.taxPaid.get).openOr(""),
       shipment.map(_.amountPaid.get).openOr(""),
-      shipment.map(_.trackingNumber.get)
+      shipment.map(_.trackingNumber.get).openOr("")
     )
     
     renderer.setHtml
