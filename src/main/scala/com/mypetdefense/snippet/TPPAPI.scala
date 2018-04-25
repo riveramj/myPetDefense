@@ -194,12 +194,16 @@ object TPPApi extends RestHelper with Loggable {
 
             val subscriptionId = subscription.id.getOrElse("")
 
+            val plusOneDayTime = LocalDate.now(ZoneId.of("America/New_York")).plusDays(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
+            
+            val plusOneDayDate = Date.from(plusOneDayTime)
+
             updatedParent.map { user =>
               Subscription.createNewSubscription(
                 user,
                 subscriptionId,
                 new Date(),
-                Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                plusOneDayDate,
                 Price.currentTppPriceCode
               )
             }
