@@ -199,7 +199,7 @@ object TPPApi extends RestHelper with Loggable {
                 user,
                 subscriptionId,
                 new Date(),
-                Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()),
+                Date.from(LocalDate.now().plusDays(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()),
                 Price.currentTppPriceCode
               )
             }
