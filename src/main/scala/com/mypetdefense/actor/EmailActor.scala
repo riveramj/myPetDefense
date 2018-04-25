@@ -536,9 +536,9 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
         } &
         "#tax #tax-due *" #> s"$$${taxPaid}" &
         "#total *" #> s"$$${amountPaid}" &
-        ".with-tracking-number" #> ClearNodesIf(possibleTrackingNumber.isEmpty) &
-        ".no-tracking-number" #> ClearNodesIf(!possibleTrackingNumber.isEmpty) &
-        ".tracking-link *" #> trackingNumber &
+        ".with-tracking-number" #> ClearNodesIf(possibleTrackingNumber.isEmpty) andThen
+        ".no-tracking-number" #> ClearNodesIf(!possibleTrackingNumber.isEmpty) andThen
+        ".tracking-link [href]" #> trackingLink &
         ".tracking-number *" #> trackingNumber
       }
       
