@@ -50,7 +50,8 @@ case class SendInvoicePaymentSucceededEmail(
   user: Box[User], 
   subscription: Subscription,
   taxPaid: String,
-  amountPaid: String
+  amountPaid: String,
+  possibleTrackingNumber: String
 ) extends EmailActorMessage
 case class ContactUsEmail(
   name: String,
@@ -483,7 +484,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
       Full(user),
       subscription,
       taxPaid,
-      amountPaid
+      amountPaid,
+      possibleTrackingNumber
     ) =>
       val subject = "My Pet Defense Receipt"
       val shipAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
@@ -495,6 +497,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
         else
           possibleBillAddress
       }
+
+      val trackingLink = s"https://tools.usps.com/go/TrackConfirmAction?tLabels=$possibleTrackingNumber"
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
@@ -530,7 +534,11 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
           ".amount-due *" #> s"$$${price}"
         } &
         "#tax #tax-due *" #> s"$$${taxPaid}" &
-        "#total *" #> s"$$${amountPaid}"
+        "#total *" #> s"$$${amountPaid}" &
+        ".with-tracking-number" #> ClearNodesIf(possibleTrackingNumber.isEmpty) andThen
+        ".no-tracking-number" #> ClearNodesIf(!possibleTrackingNumber.isEmpty) andThen
+        ".tracking-link [href]" #> trackingLink &
+        ".tracking-number *" #> possibleTrackingNumber
       }
       
       sendEmail(subject, user.email.get, transform(invoicePaymentSucceededEmailTemplate))
