@@ -152,10 +152,12 @@ class Dashboard extends Loggable {
   def shipProduct(
     subscription: Subscription,
     user: Box[User],
-    shipment: Box[Shipment],
+    oldShipment: Box[Shipment],
     address: String,
     renderer: IdMemoizeTransform
   )() = {
+    val shipment = oldShipment.flatMap(_.refresh)
+
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
 
