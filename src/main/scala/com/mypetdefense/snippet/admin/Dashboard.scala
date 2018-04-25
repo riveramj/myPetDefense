@@ -158,15 +158,12 @@ class Dashboard extends Loggable {
   )() = {
     val shipment = oldShipment.flatMap(_.refresh)
 
-    val currentLocalTime = LocalDate.now(ZoneId.of("America/New_York"))
-    val currentDate = Date.from(currentLocalTime.atStartOfDay(ZoneId.of("America/New_York")).toInstant())
-
-    val nextMonthLocalDate = currentLocalTime.plusMonths(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
+    val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
 
     ParentService.updateNextShipBillDate(subscription, user, nextMonthDate)
 
-    shipment.map(_.dateShipped(currentDate).address(address).saveMe)
+    shipment.map(_.dateShipped(new Date()).address(address).saveMe)
 
     EmailActor ! SendInvoicePaymentSucceededEmail(
       user,
