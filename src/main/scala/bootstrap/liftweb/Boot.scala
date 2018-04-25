@@ -11,7 +11,7 @@ import com.mypetdefense.util._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 
-import java.util.Date
+import java.util.TimeZone
 
 /**
  * A class that's instantiated early and run.  It allows the application
