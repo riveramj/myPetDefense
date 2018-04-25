@@ -11,6 +11,9 @@ import com.mypetdefense.util._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 
+import java.util.TimeZone
+import java.util.Date
+
 /**
  * A class that's instantiated early and run.  It allows the application
  * to modify lift's environment
@@ -111,4 +114,14 @@ class Boot {
       ("Access-Control-Allow-Methods", "GET")
     )
   )
+
+  println(new Date() + " current=========")
+
+  TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
+
+  println(new Date() + " nyc=========")
+
+  TimeZone.setDefault(TimeZone.getTimeZone("America/Los_Angeles"))
+
+  println(new Date() + " LA=========")
 }
