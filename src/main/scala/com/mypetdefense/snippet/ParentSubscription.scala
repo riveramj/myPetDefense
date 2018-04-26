@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet 
+package com.mypetdefense.snippet
 
 import net.liftweb.sitemap.Menu
 import net.liftweb._
@@ -30,6 +30,14 @@ object ParentSubscription extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Subscription") / "subscription" >>
+    loggedIn >>
+    parent
+
+  val manageSubscriptionMenu = Menu.i("Manage Subscription") / "manage-subscription" >>
+    loggedIn >>
+    parent
+
+  val cancelSurveySubscriptionMenu = Menu.i("Cancellation Survey") / "cancel-survey" >>
     loggedIn >>
     parent
 }
@@ -114,8 +122,20 @@ class ParentSubscription extends Loggable {
     "#new-password" #> SHtml.password(newPassword, newPass => newPassword = newPass.trim) &
     ".update-email" #> SHtml.ajaxSubmit("Save Changes", updateEmail _) &
     ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword _) &
-    ".confirm-cancel-account" #> SHtml.ajaxSubmit("Yes, cancel my acount", cancelAccount _) &
     ".status *" #> user.map(_.status.get.toString)
+  }
+
+  def manage = {
+    SHtml.makeFormsAjax andThen
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current"
+  }
+
+  def survey = {
+    SHtml.makeFormsAjax andThen
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current" &
+    ".sign-out" #> ClearNodes
   }
 }
 

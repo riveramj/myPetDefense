@@ -132,6 +132,8 @@ object Paths {
     ShippingBilling.menuBilling,
     PetsAndProducts.menu,
     ParentSubscription.menu,
+    ParentSubscription.manageSubscriptionMenu,
+    ParentSubscription.cancelSurveySubscriptionMenu,
     admin.Dashboard.menu,
     admin.Dashboard.labelsExportMenu,
     admin.Parents.menu,
