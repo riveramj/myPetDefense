@@ -41,13 +41,11 @@ object ParentSubscription extends Loggable {
   val cancelSurveySubscriptionMenu = Menu.i("Cancellation Survey") / "cancel-survey"
 
   val surveyCompleteSubscriptionMenu = Menu.i("Survey Complete") / "survey-complete"
+
+  object currentUserSubscription extends SessionVar[Box[Subscription]](Empty)
 }
 
 class ParentSubscription extends Loggable {
-  val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.headOption)
-
-  object currentUserSubscription extends SessionVar[Box[Subscription]](userSubscription)
-
   val user = currentUser
   val stripeCustomerId = user.map(_.stripeId.get).openOr("")
 
@@ -133,6 +131,10 @@ class ParentSubscription extends Loggable {
   }
 
   def manage = {
+    val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.headOption)
+
+    ParentSubscription.currentUserSubscription(userSubscription)
+
     SHtml.makeFormsAjax andThen
     "#user-email *" #> email &
     ".subscription a [class+]" #> "current" &
@@ -140,7 +142,7 @@ class ParentSubscription extends Loggable {
   }
 
   def survey = {
-    val updatedSubscription = currentUserSubscription.is.flatMap(_.refresh)
+    val updatedSubscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
 
     var selectedReason = ""
     var additionalComments = ""
