@@ -39,6 +39,8 @@ object ParentSubscription extends Loggable {
     parent
 
   val cancelSurveySubscriptionMenu = Menu.i("Cancellation Survey") / "cancel-survey"
+
+  val surveyCompleteSubscriptionMenu = Menu.i("Survey Complete") / "survey-complete"
 }
 
 class ParentSubscription extends Loggable {
@@ -153,7 +155,7 @@ class ParentSubscription extends Loggable {
     def submitSurvey() = {
       updatedSubscription.map(_.cancellationReason(selectedReason).cancellationComment(additionalComments).saveMe)
 
-      S.redirectTo(ParentSubscription.manageSubscriptionMenu.loc.calcDefaultHref)
+      S.redirectTo(ParentSubscription.surveyCompleteSubscriptionMenu.loc.calcDefaultHref)
     }
 
     val cancelChoices = SHtml.radio(cancelReasons, Empty, selectedReason = _).toForm 

@@ -298,3 +298,28 @@ body {
   letter-spacing: 0.4px;
   background-color: #45ADA9;
 }
+
+.thanks-container {
+  background-color: #ffffff;
+  margin: 25px;
+  height: 460px;
+  text: center;
+}
+
+.thanks {
+  font-size: 21px;
+  line-height: 25px;
+  color: #0A8A88;
+  font-weight: $bold;
+  width: 240px;
+  text-align: center;
+  margin: 65px auto 0;
+
+  &:before {
+    @extend %icon;
+    content: $fa-var-check-circle;
+    display: block;
+    font-size: 45px;
+    margin-bottom: 10px;
+  }
+}
