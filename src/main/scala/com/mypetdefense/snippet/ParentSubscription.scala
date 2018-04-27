@@ -17,6 +17,7 @@ import java.util.Date
 import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
+import com.mypetdefense.util.SecurityContext
 import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
 import com.mypetdefense.util.ClearNodesIf
@@ -37,12 +38,14 @@ object ParentSubscription extends Loggable {
     loggedIn >>
     parent
 
-  val cancelSurveySubscriptionMenu = Menu.i("Cancellation Survey") / "cancel-survey" >>
-    loggedIn >>
-    parent
+  val cancelSurveySubscriptionMenu = Menu.i("Cancellation Survey") / "cancel-survey"
 }
 
 class ParentSubscription extends Loggable {
+  val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.headOption)
+
+  object currentUserSubscription extends SessionVar[Box[Subscription]](userSubscription)
+
   val user = currentUser
   val stripeCustomerId = user.map(_.stripeId.get).openOr("")
 
@@ -110,7 +113,9 @@ class ParentSubscription extends Loggable {
       }
     }
 
-    S.redirectTo(homePage.loc.calcDefaultHref)
+    SecurityContext.logCurrentUserOut
+
+    S.redirectTo(ParentSubscription.cancelSurveySubscriptionMenu.loc.calcDefaultHref)
   }
 
   def render = {
@@ -128,14 +133,38 @@ class ParentSubscription extends Loggable {
   def manage = {
     SHtml.makeFormsAjax andThen
     "#user-email *" #> email &
-    ".subscription a [class+]" #> "current"
+    ".subscription a [class+]" #> "current" &
+    ".cancel" #> SHtml.ajaxSubmit("Finish Cancellation", cancelAccount _)
   }
 
   def survey = {
+    val updatedSubscription = currentUserSubscription.is.flatMap(_.refresh)
+
+    var selectedReason = ""
+    var additionalComments = ""
+
+    val cancelReasons = List(
+      "I use an oral brand.",
+      "I don't use flea and tick at all.",
+      "My vet said I don't need this.",
+      "I like my current product more."
+    )
+
+    def submitSurvey() = {
+      updatedSubscription.map(_.cancellationReason(selectedReason).cancellationComment(additionalComments).saveMe)
+
+      S.redirectTo(ParentSubscription.manageSubscriptionMenu.loc.calcDefaultHref)
+    }
+
+    val cancelChoices = SHtml.radio(cancelReasons, Empty, selectedReason = _).toForm 
+
     SHtml.makeFormsAjax andThen
-    "#user-email *" #> email &
-    ".subscription a [class+]" #> "current" &
-    ".sign-out" #> ClearNodes
+    ".sign-out" #> ClearNodes &
+    ".survey-answer" #> cancelChoices.map { radio =>
+      "input" #> radio
+    } &
+    ".comments" #> SHtml.textarea(additionalComments, additionalComments = _) &
+    ".submit-survey" #> SHtml.ajaxSubmit("Submit Survey", submitSurvey _)
   }
 }
 
