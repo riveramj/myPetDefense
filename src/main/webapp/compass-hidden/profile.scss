@@ -176,6 +176,11 @@
   .cancel {
     background-color: #45ADA9;
 
+    &.processing {
+      cursor: not-allowed;
+      background-color: #cccccc;
+    }
+
     @media (min-width: $bp-large) {
       width: 223px;
     }
