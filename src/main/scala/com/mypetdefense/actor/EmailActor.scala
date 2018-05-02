@@ -38,6 +38,7 @@ case class NewPetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class PetRemovedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class BillingUpdatedEmail(user: User) extends EmailActorMessage
 case class AccountCancelledEmail(user: User) extends EmailActorMessage
+case class ParentCancelledAccountEmail(user: User) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
@@ -180,6 +181,23 @@ trait AccountCancelledHandling extends EmailHandlerChain {
       }
 
       sendEmail(subject, "help@mypetdefense.com", transform(template))
+  }
+}
+
+trait ParentCancelledAccountHandling extends EmailHandlerChain {
+  addHandler {
+    case ParentCancelledAccountEmail(user) =>
+
+      val subject = "Subscription Cancelled"
+      val template = 
+        Templates("emails-hidden" :: "parent-account-cancelled-email" :: Nil) openOr NodeSeq.Empty
+
+      val transform = {
+        ".name *" #> user.firstName.get &
+        "#email *" #> user.email.get
+      }
+
+      sendEmail(subject, user.email.get, transform(template))
   }
 }
 
@@ -554,6 +572,7 @@ trait EmailActor extends EmailHandlerChain
                     with PetRemovedEmailHandling
                     with BillingUpdatedHandling
                     with AccountCancelledHandling
+                    with ParentCancelledAccountHandling
                     with SendNewAdminEmailHandling
                     with SendNewAgentEmailHandling
                     with SendNewUserEmailHandling

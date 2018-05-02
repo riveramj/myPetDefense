@@ -16,15 +16,15 @@ import java.time.{LocalDate, ZoneId, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
 object ReportingService extends Loggable {
-  val currentDate = LocalDateTime.now()
+  def currentDate = LocalDateTime.now()
   
-  val yearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+  def yearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
   
-  val fileNameYearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", Locale.ENGLISH))
+  def fileNameYearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", Locale.ENGLISH))
 
-  val fileNameMonthDayYear = currentDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy", Locale.ENGLISH))
+  def fileNameMonthDayYear = currentDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy", Locale.ENGLISH))
   
-  val year = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
+  def year = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
 
   val monthHeaders = "January" :: "February" :: "March" :: "April" :: "May" :: "June" :: "July" :: "August" :: "September" :: "October" :: "November" :: "December" :: Nil
 
