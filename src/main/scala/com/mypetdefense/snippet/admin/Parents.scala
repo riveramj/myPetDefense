@@ -20,6 +20,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
+import com.mypetdefense.actor._
 
 object Parents extends Loggable {
   import net.liftweb.sitemap._
@@ -190,6 +191,8 @@ class Parents extends Loggable {
 
     ParentService.removeParent(parent) match {
       case Full(_) =>
+        EmailActor ! ParentCancelledAccountEmail(parent)
+
         S.redirectTo(Parents.menu.loc.calcDefaultHref)
       case _ =>
         Alert("An error has occured. Please try again.")

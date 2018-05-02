@@ -1,0 +1,40 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+<div data-lift="ParentSubscription.survey?eager_eval=true">
+  <div data-lift="embed?what=parent-logo-bar"></div>
+  <div id="page-body-container">
+    <div class="account-section survey">
+      <form id="survey-container">
+        <ul class="account-block">
+          <li>
+            <h3 class="survey-header">Your account is now canceled.</h3>
+          </li>
+          <li class="survey-question">
+            <p>We’re sorry to see you go.</p>
+            <p>For our research and to better serve our future customers, can tell us why you are canceling?</p>
+          </li>
+          <li class="survey-answer">
+            <label>
+              <input type="radio" name="cancel-reason">
+            </label>
+          </li>
+          <li class="additional-comments">
+            <h4>Additional Comments?</h4>
+            <textarea class="comments"></textarea>
+          </li>
+          <li>
+            <button class="submit-survey">Submit Survey</button>
+          </li>
+        </ul>
+      </form>
+    </div>
+  </div>
+</div>
+
+<head_merge>
+  <link rel="stylesheet" data-lift="style-bundle?name=profile">
+</head_merge>
+<tail>
+  <script type="text/javascript" data-lift="script-bundle?name=profile"></script>
+</tail>
+</div>
+

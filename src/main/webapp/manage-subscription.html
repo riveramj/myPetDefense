@@ -1,0 +1,44 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+
+<div data-lift="ParentSubscription.manage?eager_eval=true">
+  <div data-lift="embed?what=parent-logo-bar"></div>
+  <div id="page-body-container">
+    <div data-lift="embed?what=parent-nav-bar"></div>
+    <div class="account-section">
+      <h2>Cancel Subscription</h2>
+      
+      <form id="pause-cancel-container">
+        <ul class="account-block">
+          <li class="cancel-account">
+            <h3 class="choice-header">Cancel your subscription</h3>
+            <div class="option-copy">
+              <ul class="cancel-notes">
+                <li>
+                  You will no longer be able to access your account.
+                </li>
+                <li>
+                  You will no longer receive monthly shipments.
+                </li>
+                <li>
+                  Cancellation is effective immediately.
+                </li>
+              </ul>
+            </div>
+          </li>
+          <li class="navigation-container">
+            <button class="go-back">Back</button>
+            <button class="cancel">Finish Cancellation</button>
+          </li>
+        </ul>
+      </form>
+    </div>
+  </div>
+</div>
+
+<head_merge>
+  <link rel="stylesheet" data-lift="style-bundle?name=profile">
+</head_merge>
+<tail>
+  <script type="text/javascript" data-lift="script-bundle?name=profile"></script>
+</tail>
+</div>
