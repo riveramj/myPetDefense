@@ -150,10 +150,11 @@ class ParentSubscription extends Loggable {
     var additionalComments = ""
 
     val cancelReasons = List(
-      "I use an oral brand.",
+      "I use a chewable pill.",
       "I don't use flea and tick at all.",
       "My vet said I don't need this.",
-      "I like my current product more."
+      "I like my current product more.",
+      "Other."
     )
 
     def submitSurvey() = {
