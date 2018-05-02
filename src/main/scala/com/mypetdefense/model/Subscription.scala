@@ -28,6 +28,10 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     override def defaultValue = new Date()
   }
   object cancellationDate extends MappedDateTime(this)
+  object cancellationReason extends MappedString(this, 100)
+  object cancellationComment extends MappedText(this)
+
+  def refresh = Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
 
   def getProducts = Pet.findAll(By(Pet.user, user.get)).flatMap(_.product.obj)
 
