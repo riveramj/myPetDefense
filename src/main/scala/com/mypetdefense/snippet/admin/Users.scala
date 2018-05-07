@@ -32,7 +32,9 @@ object Users extends Loggable {
 }
 
 class Users extends Loggable {
-  val users = User.findAll(By(User.status, Status.Active))
+  val users = User.findAll(
+    By(User.status, Status.Active)
+  ).filter(_.userType != UserType.Parent)
   val allAgencies = Agency.findAll()
 
   var firstName = ""
@@ -70,7 +72,13 @@ class Users extends Loggable {
         )
       }
       
-      newUser.map(EmailActor ! SendNewUserEmail(_))
+      if (userType == Full(UserType.Admin))
+        newUser.map(EmailActor ! SendNewAdminEmail(_))
+      else if (userType == Full(UserType.Agent))
+        newUser.map(EmailActor ! SendNewAgentEmail(_))
+      else
+        newUser.map(EmailActor ! SendNewUserEmail(_))
+
 
       S.redirectTo(Users.menu.loc.calcDefaultHref)
     } else {

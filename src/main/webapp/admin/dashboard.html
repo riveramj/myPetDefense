@@ -3,11 +3,10 @@
   <div data-lift="embed?what=admin/admin-nav-bar"></div>
   <div id="item-container">
     <h2>Dashboard</h2>
-    <a href="#" id="csv-export">All Shimpents Ever CSV Export</a>
     <a href="#" id="shipments-export">Pending &amp; Past Due labels Export</a>
     <form id="upload-tracking-numbers-form" data-lift="admin.Dashboard.fileUpload">
       <div class="fileUploadForm">
-        <p>Tracking Number Upload</p>
+        <h3>Tracking Number Upload</h3>
         <input type="file" id="tracking-upload" />
         <input type="submit" value="Submit" id="upload-tracking-numbers" />
       </div>
@@ -15,13 +14,10 @@
     <div class="shipment-container">
       <ul class="dashboard-nav">
         <li class="active dashboard-current">
-          <button type="button" id="dashboard-current">Current</button>
+          <button type="button" id="dashboard-current">Ready To Ship</button>
         </li>
-        <li class="dashboard-pending">
-          <button type="button" id="dashboard-pending">Pending</button>
-        </li>
-        <li class="dashboard-late">
-          <button type="button" id="dashboard-past-due">Past Due</button>
+        <li class="dashboard-upcoming">
+          <button type="button" id="dashboard-upcoming">Upcoming Shipments</button>
         </li>
       </ul>
       <div data-lift="embed?what=admin/dashboard-shipments"></div>

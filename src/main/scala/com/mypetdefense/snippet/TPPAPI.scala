@@ -24,7 +24,7 @@ import scala.concurrent.{Future, Await}
 import scala.concurrent.duration._
 
 import java.util.Date
-import java.text.SimpleDateFormat
+import java.time.{LocalDate, ZoneId}
 
 import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription}
 import dispatch.{Req => DispatchReq, _}, Defaults._
@@ -194,12 +194,16 @@ object TPPApi extends RestHelper with Loggable {
 
             val subscriptionId = subscription.id.getOrElse("")
 
+            val plusOneDayTime = LocalDate.now(ZoneId.of("America/New_York")).plusDays(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
+            
+            val plusOneDayDate = Date.from(plusOneDayTime)
+
             updatedParent.map { user =>
               Subscription.createNewSubscription(
                 user,
                 subscriptionId,
                 new Date(),
-                new Date(),
+                plusOneDayDate,
                 Price.currentTppPriceCode
               )
             }

@@ -116,10 +116,22 @@ object ParentService extends Loggable {
         }
       case TrySuccess(stripeFailure) =>
         logger.error(s"remove customer failed with stipe error: ${stripeFailure}")
+        
+        user.map(_.cancel)
+        shipments.map(_.cancel)
+        addresses.map(_.cancel)
+        subscription.map(_.cancel)
+
         Empty
 
       case TryFail(throwable: Throwable) =>
         logger.error(s"remove customer failed with other error: ${throwable}")
+        
+        user.map(_.cancel)
+        shipments.map(_.cancel)
+        addresses.map(_.cancel)
+        subscription.map(_.cancel)
+
         Empty
     }
   }

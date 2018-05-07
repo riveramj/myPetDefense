@@ -20,6 +20,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
+import com.mypetdefense.actor._
 
 object Parents extends Loggable {
   import net.liftweb.sitemap._
@@ -190,6 +191,8 @@ class Parents extends Loggable {
 
     ParentService.removeParent(parent) match {
       case Full(_) =>
+        EmailActor ! ParentCancelledAccountEmail(parent)
+
         S.redirectTo(Parents.menu.loc.calcDefaultHref)
       case _ =>
         Alert("An error has occured. Please try again.")
@@ -224,12 +227,38 @@ class Parents extends Loggable {
       }
     }
 
+    val street1 = address.map(_.street1.get).openOr("")
+    val street2 = address.map(_.street2.get).openOr("")
+    val city = address.map(_.city.get).openOr("")
+    val state = address.map(_.state.get).openOr("")
+    val zip = address.map(_.zip.get).openOr("")
+
+    def updateAddress(updatedAddressPart: String, addressPart: String, address: Box[Address]) = {
+      
+      addressPart match {
+        case "street1" => 
+          address.map(_.street1(updatedAddressPart).saveMe)
+        case "street2" => 
+          address.map(_.street2(updatedAddressPart).saveMe)
+        case "city" => 
+          address.map(_.city(updatedAddressPart).saveMe)
+        case "state" => 
+          address.map(_.state(updatedAddressPart).saveMe)
+        case "zip" => 
+          address.map(_.zip(updatedAddressPart).saveMe)
+        case _ =>
+          address
+      }
+
+      Noop
+    }
+
     ".parent-information .address" #> {
-      ".address-1 *" #> address.map(_.street1.get) &
-      ".address-2 *" #> address.map(_.street2.get) &
-      ".city *" #> address.map(_.city.get) &
-      ".state *" #> address.map(_.state.get) &
-      ".zip *" #> address.map(_.zip.get) 
+      ".address-1" #> SHtml.ajaxText(street1, possibleAddress => updateAddress(possibleAddress, "street1", address)) &
+      ".address-2" #> SHtml.ajaxText(street2, possibleAddress => updateAddress(possibleAddress, "street2", address)) &
+      ".city" #> SHtml.ajaxText(city, possibleAddress => updateAddress(possibleAddress, "city", address)) &
+      ".state" #> SHtml.ajaxText(state, possibleAddress => updateAddress(possibleAddress, "state", address)) &
+      ".zip" #> SHtml.ajaxText(zip, possibleAddress => updateAddress(possibleAddress, "zip", address))
     } &
     ".parent-information .billing-status" #> subscription.map { oldSubscription =>
       val oldStatus = oldSubscription.status.get

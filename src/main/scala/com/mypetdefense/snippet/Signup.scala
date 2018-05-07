@@ -14,6 +14,7 @@ import com.mypetdefense.service._
 import com.mypetdefense._
   import model.{User, UserType}
   import snippet.admin.Dashboard
+  import snippet.agency.AgencyOverview
 import com.mypetdefense.util.SecurityContext
 
 object Signup extends Loggable {
@@ -49,6 +50,8 @@ class Signup extends Loggable {
     user.userType match {
       case admin if admin == UserType.Admin => 
         S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
+      case agent if agent == UserType.Agent => 
+        S.redirectTo(AgencyOverview.menu.loc.calcDefaultHref)
       case _ =>
         S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
     }

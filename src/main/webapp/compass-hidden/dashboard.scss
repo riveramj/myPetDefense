@@ -67,9 +67,40 @@
   margin-left: 15px;
 }
 
+#upload-tracking-numbers-form {
+  background-color: initial;
+  margin-left: 20px;
+
+  h3 {
+    padding-bottom: 5px;
+  }
+}
+
+.fileUploadForm {
+  margin: 20px 0;
+}
+
+.tracking-number {
+  form {
+    background-color: #ffffff;
+  }
+
+  .tracking {
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    margin: 0;
+    font-size: 13px;
+    padding: 3px 5px;
+  }
+}
+
 @media print {
+  @page { size: 75mm 100mm landscape}
+
   body {
     background-color: #ffffff !important;
+    color: #000 !important;
+    width: 70mm;
   }
 
   #top-bar, .dashboard-nav {
@@ -101,8 +132,34 @@
 
   .shipment {
     border: 0;
-    display: block;
+    display: grid;
     page-break-after: always;
+    margin: 0;
+    overflow: hidden;
+    position: relative;
+    box-sizing: border-box;
+    padding-bottom: 10mm;
+    width: 70mm; 
+    height: 75mm;
+
+    td {
+      padding: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .product {
+      padding-bottom: 10px
+    }
+  }
+
+  .pet-name {
+    font-size: 20px;
+    font-weight: $bold;
+    display: block;
+  }
+
+  .product-size {
+    font-weight: $bold;
   }
 
   button.ship {
@@ -111,12 +168,8 @@
     border-color: #000000 !important;
     border: 1px solid !important;
   }
-}
 
-#upload-tracking-numbers-form {
-  background-color: initial;
-}
-
-.fileUploadForm {
-  margin: 20px 0;
+  #upload-tracking-numbers-form, .ship-it, .ship-on, .tracking-number {
+    display: none;
+  }
 }

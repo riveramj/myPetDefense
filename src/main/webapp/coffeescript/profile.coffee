@@ -1,6 +1,7 @@
 $(document).ready ->
-  $(".cancel-account").on "click", (event) ->
-    $(".cancel-confirm").addClass("active")
+  $(".go-back").on "click", (event) ->
+    window.history.back()
 
-  $(".cancel-confirm .close").on "click", (event) ->
-    $(".cancel-confirm").removeClass("active")
+  $("body").on "click", '.cancel', (event) ->
+    $(".cancel").prop('value', 'Please Wait').prop("disabled", true).addClass("processing")
+    $(".cancel").submit()

@@ -1,22 +1,5 @@
 @import "base";
-@import "nav-bar";
-
-#logo-name { 
-  @media (min-width: $bp-med) {
-    padding-left: 123px;
-    padding-top: rem(19px);
-  }
-}
-
-nav {
-  @media (min-width: $bp-large) {
-    @include span-columns(8);
-    @include shift(0);
-    @include omega;
-
-    text-align: right;
-  }
-}
+@import "admin-nav-bar";
 
 body {
   background-color: #DCDBDB;
@@ -195,4 +178,22 @@ li.product {
 
 td.address {
   white-space: pre-line;
+}
+
+.address li {
+  .address-1, .address-2 {
+    width: 260px;
+  }
+
+  .city {
+    width: 125px;
+  }
+
+  .state {
+    width: 50px;
+  }
+
+  .zip {
+    width: 75px;
+  }
 }

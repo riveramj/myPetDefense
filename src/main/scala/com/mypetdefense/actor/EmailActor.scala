@@ -28,6 +28,8 @@ import Mailer._
 sealed trait EmailActorMessage
 case class SendWelcomeEmail(user: User) extends EmailActorMessage
 case class SendFeedbackEmail(user: User) extends EmailActorMessage
+case class SendNewAdminEmail(user: User) extends EmailActorMessage
+case class SendNewAgentEmail(user: User) extends EmailActorMessage
 case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class SendPasswordResetEmail(user: User) extends EmailActorMessage
 case class SendPasswordUpdatedEmail(user: User) extends EmailActorMessage
@@ -36,6 +38,7 @@ case class NewPetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class PetRemovedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class BillingUpdatedEmail(user: User) extends EmailActorMessage
 case class AccountCancelledEmail(user: User) extends EmailActorMessage
+case class ParentCancelledAccountEmail(user: User) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
@@ -48,7 +51,8 @@ case class SendInvoicePaymentSucceededEmail(
   user: Box[User], 
   subscription: Subscription,
   taxPaid: String,
-  amountPaid: String
+  amountPaid: String,
+  possibleTrackingNumber: String
 ) extends EmailActorMessage
 case class ContactUsEmail(
   name: String,
@@ -180,6 +184,23 @@ trait AccountCancelledHandling extends EmailHandlerChain {
   }
 }
 
+trait ParentCancelledAccountHandling extends EmailHandlerChain {
+  addHandler {
+    case ParentCancelledAccountEmail(user) =>
+
+      val subject = "Subscription Cancelled"
+      val template = 
+        Templates("emails-hidden" :: "parent-account-cancelled-email" :: Nil) openOr NodeSeq.Empty
+
+      val transform = {
+        ".name *" #> user.firstName.get &
+        "#email *" #> user.email.get
+      }
+
+      sendEmail(subject, user.email.get, transform(template))
+  }
+}
+
 trait FeedbackEmailHandling extends EmailHandlerChain {
   val feedbackEmailSubject = "We Value Your Feedback - Free Month"
   val feedbackEmailTemplate = 
@@ -198,21 +219,63 @@ trait FeedbackEmailHandling extends EmailHandlerChain {
   }
 }
 
-trait SendNewUserEmailHandling extends EmailHandlerChain {
-  val newUserSubject = "Your Account on My Pet Defense!"
-  val newUserTemplate = 
-    Templates("emails-hidden" :: "new-user-email" :: Nil) openOr NodeSeq.Empty
-  
+trait SendNewAdminEmailHandling extends EmailHandlerChain {
   addHandler {
-    case SendNewUserEmail(user) =>
+    case SendNewAdminEmail(user) =>
+      val subject = "Your Admin Account on My Pet Defense"
+      val template = 
+        Templates("emails-hidden" :: "new-user-email" :: Nil) openOr NodeSeq.Empty
+
       val signupLink = Paths.serverUrl + Signup.menu.toLoc.calcHref(user)
 
       val transform = {
+        ".customer" #> ClearNodes &
+        ".agent" #> ClearNodes &
         "#first-name" #> user.firstName.get &
         "#signup [href]" #> signupLink
       }
 
-      sendEmail(newUserSubject, user.email.get, transform(newUserTemplate))
+      sendEmail(subject, user.email.get, transform(template))
+  }
+}
+
+trait SendNewAgentEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case SendNewAgentEmail(user) =>
+      val subject = "Your Account on My Pet Defense"
+      val template = 
+        Templates("emails-hidden" :: "new-user-email" :: Nil) openOr NodeSeq.Empty
+
+      val signupLink = Paths.serverUrl + Signup.menu.toLoc.calcHref(user)
+
+      val transform = {
+        ".customer" #> ClearNodes &
+        ".admin" #> ClearNodes &
+        "#first-name" #> user.firstName.get &
+        "#signup [href]" #> signupLink
+      }
+
+      sendEmail(subject, user.email.get, transform(template))
+  }
+}
+
+trait SendNewUserEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case SendNewUserEmail(user) =>
+      val subject = "Your Account on My Pet Defense!"
+      val template = 
+        Templates("emails-hidden" :: "new-user-email" :: Nil) openOr NodeSeq.Empty
+
+      val signupLink = Paths.serverUrl + Signup.menu.toLoc.calcHref(user)
+
+      val transform = {
+        ".admin" #> ClearNodes &
+        ".agent" #> ClearNodes &
+        "#first-name" #> user.firstName.get &
+        "#signup [href]" #> signupLink
+      }
+
+      sendEmail(subject, user.email.get, transform(template))
   }
 }
 
@@ -409,7 +472,7 @@ trait SendAPIErrorEmailHandling extends EmailHandlerChain {
         "#error *" #> emailBody
       }
 
-      sendEmail(subject, "mike.rivera@mypetdefense.com", transform(template))
+      sendEmail(subject, "help@mypetdefense.com", transform(template))
   }
 }
 
@@ -439,7 +502,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
       Full(user),
       subscription,
       taxPaid,
-      amountPaid
+      amountPaid,
+      possibleTrackingNumber
     ) =>
       val subject = "My Pet Defense Receipt"
       val shipAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
@@ -451,6 +515,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
         else
           possibleBillAddress
       }
+
+      val trackingLink = s"https://tools.usps.com/go/TrackConfirmAction?tLabels=$possibleTrackingNumber"
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
@@ -486,7 +552,11 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
           ".amount-due *" #> s"$$${price}"
         } &
         "#tax #tax-due *" #> s"$$${taxPaid}" &
-        "#total *" #> s"$$${amountPaid}"
+        "#total *" #> s"$$${amountPaid}" &
+        ".with-tracking-number" #> ClearNodesIf(possibleTrackingNumber.isEmpty) andThen
+        ".no-tracking-number" #> ClearNodesIf(!possibleTrackingNumber.isEmpty) andThen
+        ".tracking-link [href]" #> trackingLink &
+        ".tracking-number *" #> possibleTrackingNumber
       }
       
       sendEmail(subject, user.email.get, transform(invoicePaymentSucceededEmailTemplate))
@@ -502,6 +572,9 @@ trait EmailActor extends EmailHandlerChain
                     with PetRemovedEmailHandling
                     with BillingUpdatedHandling
                     with AccountCancelledHandling
+                    with ParentCancelledAccountHandling
+                    with SendNewAdminEmailHandling
+                    with SendNewAgentEmailHandling
                     with SendNewUserEmailHandling
                     with InvoicePaymentFailedEmailHandling
                     with InvoicePaymentSucceededEmailHandling 

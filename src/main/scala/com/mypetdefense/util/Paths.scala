@@ -70,6 +70,11 @@ object Paths {
     storeAndRedirect _
   )
 
+  val agencyUser = If(
+    () => SecurityContext.agent_?,
+    storeAndRedirect _
+  )
+
   val parent = If(
     () => SecurityContext.parent_?,
     storeAndRedirect _
@@ -127,9 +132,11 @@ object Paths {
     ShippingBilling.menuBilling,
     PetsAndProducts.menu,
     ParentSubscription.menu,
+    ParentSubscription.manageSubscriptionMenu,
+    ParentSubscription.cancelSurveySubscriptionMenu,
+    ParentSubscription.surveyCompleteSubscriptionMenu,
     admin.Dashboard.menu,
-    admin.Dashboard.exportMenu,
-    admin.Dashboard.shipmentsCSVMenu,
+    admin.Dashboard.labelsExportMenu,
     admin.Parents.menu,
     admin.Parents.activeParentsCsvMenu,
     admin.Users.menu,
@@ -141,8 +148,11 @@ object Paths {
     admin.Agencies.cancellationExportMenu,
     admin.Agencies.totalSalesExportMenu,
     admin.Agencies.monthToDateExportMenu,
+    admin.Agencies.mtdYtdExportMenu,
     admin.PhonePortal.menu,
     admin.Surveys.menu,
+    agency.AgencyOverview.agencyMtdYtdExportMenu,
+    agency.AgencyOverview.menu,
     Login.menu,
     ForgotPassword.menu,
     ResetPassword.menu,
