@@ -472,7 +472,7 @@ trait SendAPIErrorEmailHandling extends EmailHandlerChain {
         "#error *" #> emailBody
       }
 
-      sendEmail(subject, "help@mypetdefense.com", transform(template))
+      sendEmail(subject, "help@mypetdefense.com", transform(template), "error@mypetdefense.com")
   }
 }
 
@@ -594,7 +594,6 @@ trait EmailActor extends EmailHandlerChain
   val valentineEmailTemplate = 
     Templates("emails-hidden" :: "valentine-email-template" :: Nil) openOr NodeSeq.Empty
 
-  val fromEmail = "sales@mypetdefense.com"
   val fromName = "My Pet Defense"
 
   val envTag = {
@@ -607,7 +606,7 @@ trait EmailActor extends EmailHandlerChain
     }
   }
 
-  def sendEmail(subject: String, to: String, message: NodeSeq) {
+  def sendEmail(subject: String, to: String, message: NodeSeq, fromEmail: String) {
     val emailTemplate = subject match {
       case valentine if subject.contains("Valentine") => valentineEmailTemplate
       case _ => baseEmailTemplate

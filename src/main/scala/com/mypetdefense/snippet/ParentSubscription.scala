@@ -108,10 +108,6 @@ class ParentSubscription extends Loggable {
     user.map(ParentService.removeParent(_))
 
     user.map { parent =>
-      if (Props.mode != Props.RunModes.Pilot) {
-        EmailActor ! AccountCancelledEmail(parent)
-      }
-
       EmailActor ! ParentCancelledAccountEmail(parent)
     }
 
