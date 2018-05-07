@@ -72,6 +72,7 @@ object Dashboard extends Loggable {
       {
         for {
           subscription <- subscriptions
+            if subscription.status == Status.Active
           shipment <- Shipment.find(
                         By(Shipment.subscription, subscription),
                         By(Shipment.expectedShipDate, subscription.nextShipDate.get),
