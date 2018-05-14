@@ -162,7 +162,7 @@ class Dashboard extends Loggable {
     ".dashboard-details" #> SHtml.idMemoize { renderer =>
       shipmentRenderer = Full(renderer)
 
-      ".shipment" #> paidShipments.sortBy(_.dateProcessed.get.getTime).map { shipment =>
+      ".shipment" #> paidShipments.sortBy(_.nextShipDate.get.getTime).map { shipment =>
 
         val subscription = shipment.subscription.obj
         val user = subscription.flatMap(_.user.obj)
