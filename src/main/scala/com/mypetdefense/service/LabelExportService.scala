@@ -74,8 +74,8 @@ object LabelExportService extends Loggable {
                      "Ship To - Address 1" ::
                      "Ship To - Address 2" ::
                      "Ship To - Address 3" ::
-                     "Ship To - State/Province" ::
                      "Ship To - City" ::
+                     "Ship To - State/Province" ::
                      "Ship To - Postal Code" ::
                      "Ship To - Country" ::
                      "Ship To - Phone" ::
@@ -112,7 +112,7 @@ object LabelExportService extends Loggable {
           address.city.get ::
           address.state.get ::
           address.zip.get ::
-          "" ::
+          "US" ::
           "" ::
           "" ::
           "4" ::
