@@ -49,7 +49,7 @@ case class SendInvoicePaymentFailedEmail(
 ) extends EmailActorMessage
 case class SendInvoicePaymentSucceededEmail(
   user: Box[User], 
-  subscription: Subscription,
+  subscription: Box[Subscription],
   taxPaid: String,
   amountPaid: String,
   possibleTrackingNumber: String
@@ -472,7 +472,7 @@ trait SendAPIErrorEmailHandling extends EmailHandlerChain {
         "#error *" #> emailBody
       }
 
-      sendEmail(subject, "help@mypetdefense.com", transform(template))
+      sendEmail(subject, "help@mypetdefense.com", transform(template), "error@mypetdefense.com")
   }
 }
 
@@ -520,8 +520,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val products = subscription.getProducts
-      val priceCode = subscription.priceCode.get
+      val products = subscription.map(_.getProducts).openOr(Nil)
+      val priceCode = subscription.map(_.priceCode.get).openOr("")
 
       val transform = {
         "#ship-date" #> dateFormatter.format(new Date()) &
@@ -594,7 +594,6 @@ trait EmailActor extends EmailHandlerChain
   val valentineEmailTemplate = 
     Templates("emails-hidden" :: "valentine-email-template" :: Nil) openOr NodeSeq.Empty
 
-  val fromEmail = "sales@mypetdefense.com"
   val fromName = "My Pet Defense"
 
   val envTag = {
@@ -607,7 +606,7 @@ trait EmailActor extends EmailHandlerChain
     }
   }
 
-  def sendEmail(subject: String, to: String, message: NodeSeq) {
+  def sendEmail(subject: String, to: String, message: NodeSeq, fromEmail: String) {
     val emailTemplate = subject match {
       case valentine if subject.contains("Valentine") => valentineEmailTemplate
       case _ => baseEmailTemplate
