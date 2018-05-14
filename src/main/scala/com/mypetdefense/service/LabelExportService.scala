@@ -16,14 +16,55 @@ import java.time.{LocalDate, ZoneId, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
 object LabelExportService extends Loggable {
+  def legacyInsertCheck(shipment: Shipment) = {
+    val subscription = shipment.subscription.obj
+    val allShipments = subscription.map(_.shipments.toList).openOr(Nil)
+
+    allShipments.size match {
+      case 1 => true
+      case _ => false
+    }
+  }
+
   def exportNewUspsLabels() = {
+    val allShipments = ShipmentService.getCurrentPastDueShipments
+
+    val newLabels = allShipments.filter { shipment =>
+      val welcomeInsert_? = tryo(
+        shipment.insert.get.contains("Welcome")
+      ).openOr(false)
+      val nullInsert = tryo(shipment.insert.get == null).openOr(false)
+
+      if (nullInsert) {
+        legacyInsertCheck(shipment)
+      } else {
+        welcomeInsert_?
+      }
+    }
+
+    exportLabelSet(newLabels)
   }
 
   def exportExistingUspsLabels() = {
+    val allShipments = ShipmentService.getCurrentPastDueShipments
 
+    val existingLabels = allShipments.filter { shipment =>
+      val welcomeInsert_? = tryo(
+        shipment.insert.get.contains("Welcome")
+      ).openOr(false)
+      val nullInsert = tryo(shipment.insert.get == null).openOr(false)
+
+      if (nullInsert) {
+        !legacyInsertCheck(shipment)
+      } else {
+        !welcomeInsert_?
+      }
+    }
+
+    exportLabelSet(existingLabels)
   }
 
-  def exportLabelSet(): Box[LiftResponse] = {
+  def exportLabelSet(shipments: List[Shipment]): Box[LiftResponse] = {
     val csvHeaders = "Order ID (required)" ::
                      "Order Date" ::
                      "Order Value" ::
@@ -51,8 +92,6 @@ object LabelExportService extends Loggable {
 
     val csvRows: List[List[String]] = {
       val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-
-      val shipments = ShipmentService.getCurrentPastDueShipments
 
       {
         for {

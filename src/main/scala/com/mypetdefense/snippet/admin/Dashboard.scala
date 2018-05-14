@@ -44,11 +44,11 @@ object Dashboard extends Loggable {
     EarlyResponse(exportExistingUspsLabels _)
 
   def exportNewUspsLabels: Box[LiftResponse] = {
-    LabelExportService.exportLabelSet()
+    LabelExportService.exportNewUspsLabels()
   }
 
   def exportExistingUspsLabels: Box[LiftResponse] = {
-    LabelExportService.exportLabelSet()
+    LabelExportService.exportExistingUspsLabels()
   }
 }
 
@@ -176,17 +176,14 @@ class Dashboard extends Loggable {
 
 
         var trackingNumber = shipment.trackingNumber.get
-        val paymentProcessed = paymentProcessed_?(shipment)
 
         val allShipments = subscription.map(_.shipments.toList).openOr(Nil)
 
         val possibleInsertNeeded = {
-          (paymentProcessed, allShipments.size, agencyName) match {
-            case (false, 0, "TPP") => "TPP+Welcome Insert"
-            case (false, 0, _) => "Welcome Insert"
-            case (true, 1, "TPP") => "TPP+Welcome Insert"
-            case (true, 1, _) => "Welcome Insert"
-            case (_, _, _) => "-"
+          (allShipments.size, agencyName) match {
+            case (1, "TPP") => "TPP+Welcome Insert"
+            case (1, _) => "Welcome Insert"
+            case (_, _) => "-"
           }
         }
 
