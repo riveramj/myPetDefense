@@ -49,7 +49,7 @@ case class SendInvoicePaymentFailedEmail(
 ) extends EmailActorMessage
 case class SendInvoicePaymentSucceededEmail(
   user: Box[User], 
-  subscription: Subscription,
+  subscription: Box[Subscription],
   taxPaid: String,
   amountPaid: String,
   possibleTrackingNumber: String
@@ -520,8 +520,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val products = subscription.getProducts
-      val priceCode = subscription.priceCode.get
+      val products = subscription.map(_.getProducts).openOr(Nil)
+      val priceCode = subscription.map(_.priceCode.get).openOr("")
 
       val transform = {
         "#ship-date" #> dateFormatter.format(new Date()) &

@@ -10,11 +10,12 @@ import com.mypetdefense.model._
 
 object ShipmentService extends Loggable {
   def getCurrentPastDueShipments = {
-    Subscription.findAll(
+    Shipment.findAll(
       BySql(
-        "nextShipDate <= CURRENT_DATE and nextshipdate > current_date - interval '5 day'",
+        "dateProcessed > current_date - interval '15 day'",
         IHaveValidatedThisSQL("mike","2018-04-24")
-      )
+      ),
+      NullRef(Shipment.dateShipped)
     )
   }
 
