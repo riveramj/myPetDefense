@@ -15,7 +15,8 @@ object ShipmentService extends Loggable {
         "expectedShipDate < current_date and expectedShipDate > current_date - interval '15 day'",
         IHaveValidatedThisSQL("mike","2018-04-24")
       ),
-      NullRef(Shipment.dateShipped)
+      NullRef(Shipment.dateShipped),
+      NotBy(Shipment.status, Status.Cancelled)
     )
   }
 
