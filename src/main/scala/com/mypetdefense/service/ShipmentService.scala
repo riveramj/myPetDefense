@@ -12,7 +12,7 @@ object ShipmentService extends Loggable {
   def getCurrentPastDueShipments = {
     Shipment.findAll(
       BySql(
-        "dateProcessed > current_date - interval '15 day'",
+        "expectedShipDate < current_date and expectedShipDate > current_date - interval '15 day'",
         IHaveValidatedThisSQL("mike","2018-04-24")
       ),
       NullRef(Shipment.dateShipped)
