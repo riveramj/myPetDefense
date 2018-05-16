@@ -162,7 +162,7 @@ class Dashboard extends Loggable {
     ".dashboard-details" #> SHtml.idMemoize { renderer =>
       shipmentRenderer = Full(renderer)
 
-      ".shipment" #> paidShipments.sortBy(_.expectedShipDate.get.getTime).map { shipment =>
+      ".shipment" #> paidShipments.sortBy(_.insert.get).sortBy(_.expectedShipDate.get.getTime).map { shipment =>
 
         val subscription = shipment.subscription.obj
         val user = subscription.flatMap(_.user.obj)
@@ -179,21 +179,6 @@ class Dashboard extends Loggable {
 
         val allShipments = subscription.map(_.shipments.toList).openOr(Nil)
 
-        val possibleInsertNeeded = {
-          (allShipments.size, agencyName) match {
-            case (1, "TPP") => "TPP+Welcome Insert"
-            case (1, _) => "Welcome Insert"
-            case (_, _) => "-"
-          }
-        }
-
-        val insertNeeded = {
-          if (shipment.insert.get != null)
-            shipment.insert.get
-          else
-            possibleInsertNeeded
-        }
-        
         val petsAndProducts = subscription.map(_.getPetAndProducts).openOr(Nil)
         val dateFormat = new SimpleDateFormat("MMM dd")
 
@@ -206,16 +191,13 @@ class Dashboard extends Loggable {
           |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
         }
 
-        val nextShipDate = subscription.map(_.nextShipDate.get)
-
-        ".ship-on *" #> nextShipDate.map(dateFormat.format(_)) &
         ".name-address *" #> nameAddress &
         ".product" #> petsAndProducts.map { case (pet, product) =>
           ".pet-name *" #> pet.name.get &
           ".product-name *" #> product.map(_.name.get) &
           ".product-size *" #> product.map(_.size.get.toString)
         } &
-        ".insert *" #> insertNeeded &
+        ".insert *" #> shipment.insert.get &
         ".tracking" #> SHtml.ajaxText(trackingNumber, possibleTracking => updateTrackingNumber(possibleTracking, shipment)) &
         ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
           if (shipmentHasShipped_?(shipment)) {
