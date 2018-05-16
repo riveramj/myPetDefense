@@ -95,7 +95,7 @@
 }
 
 @media print {
-  @page { size: 75mm 100mm landscape}
+  @page { size: 75mm 150mm landscape}
 
   body {
     background-color: #ffffff !important;
@@ -140,7 +140,12 @@
     box-sizing: border-box;
     padding-bottom: 10mm;
     width: 70mm; 
-    height: 75mm;
+
+    &:before {
+      content: url(../../images/logo/logo-bw.jpg);
+      margin-bottom: 10px;
+    }
+
 
     td {
       padding: 0 0 10px;
