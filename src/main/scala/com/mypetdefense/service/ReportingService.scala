@@ -166,11 +166,27 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentYearCancelledSubscriptions(subscriptions: List[Subscription]) = {
-    subscriptions filter { subscription =>
-      val cancelDate = getCancelledDateOfSubscription(subscription)
+  def findCancelledSubscriptions(subscriptions: List[Subscription]) = {
+    subscriptions.filter(_.status == Status.Cancelled)
+  }
 
-      cancelDate.map(_.getYear == currentDate.getYear).openOr(false)
+  def findCurrentYearPayingCancelledSubscriptions(subscriptions: List[Subscription]) = {
+    subscriptions.filter { subscription =>
+      val createdDate = getCreatedDateOfSubscription(subscription)
+      val cancellationDate = getCancelledDateOfSubscription(subscription)
+      if (cancellationDate.isEmpty) {
+        false
+      } else {
+        val createdDateMonth = createdDate.getMonth
+        val createdDateYear = createdDate.getYear
+
+        val cancelDateMonth = cancellationDate.map(_.getMonth)
+        val cancelDateYear = cancellationDate.map(_.getYear)
+
+        (cancelDateYear.map(_ == currentDate.getYear).openOr(false) &&
+          cancelDateMonth.map(_ != createdDateMonth).openOr(false)
+        )
+      }
     }
   }
 
@@ -601,10 +617,9 @@ object ReportingService extends Loggable {
     val allPayingSubscriptions = getSubscriptions(allPayingCustomers)
     val allPayingActiveSubscriptions = findActiveSubscriptions(allPayingSubscriptions)
     
-    val allPayingCancelledSubscriptions = allPayingSubscriptions diff allPayingActiveSubscriptions 
-    val paidSubscriptionYearCancelled = findCurrentYearCancelledSubscriptions(allPayingCancelledSubscriptions)
+    val allPayingCancelledSubscriptions = findCancelledSubscriptions(allPayingSubscriptions)
+    val paidSubscriptionYearCancelled = findCurrentYearPayingCancelledSubscriptions(allPayingCancelledSubscriptions)
     val paidSubscriptionMonthCancelled = findCurrentMonthCancelledSubscriptions(allPayingCancelledSubscriptions)
-
 
     val allPaidShipments = findPaidShipments(allPayingSubscriptions)
     
