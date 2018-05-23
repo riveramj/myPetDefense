@@ -156,8 +156,10 @@ class Agencies extends Loggable {
     "#name" #> text(name, name = _) &
     "#create-item" #> SHtml.ajaxSubmit("Create Agency", () => createAgency) &
     ".agency" #> agencies.map { agency =>
+      val activeCustomers = agency.customers.filter(_.status == Status.Active)
+
       ".name *" #> agency.name &
-      ".customer-count *" #> agency.customers.size &
+      ".customer-count *" #> activeCustomers.size &
       ".coupon-count *" #> agency.coupons.size &
       ".actions .delete" #> ClearNodesIf(agency.customers.size > 0) &
       ".actions .delete [onclick]" #> Confirm(s"Delete ${agency.name}? This will delete all members and coupons.",
