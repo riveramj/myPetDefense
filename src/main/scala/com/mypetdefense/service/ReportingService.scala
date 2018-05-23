@@ -60,6 +60,14 @@ object ReportingService extends Loggable {
     users.map(_.subscription.toList).flatten
   }
 
+  def getFirstShipments(subscriptions: List[Subscription]) = {
+    val firstShipments = subscriptions.map(_.shipments.headOption).flatten
+
+    firstShipments filter { shipment =>
+      !getMailedDateOfShipment(shipment).isEmpty
+    }
+  }
+
   def getShipments(subscriptions: List[Subscription]) = {
     val allShipments = subscriptions.map(_.shipments.toList).flatten
 
@@ -109,6 +117,26 @@ object ReportingService extends Loggable {
     }
   }
 
+  def findActiveSubscriptionsFirstMonth(subscriptions: List[Subscription]) = {
+    subscriptions.filter { subscription =>
+      val createdDate = getCreatedDateOfSubscription(subscription)
+      val cancellationDate = getCancelledDateOfSubscription(subscription)
+      if (cancellationDate.isEmpty) {
+        true
+      } else {
+        val createdDateMonth = createdDate.getMonth
+        val createdDateYear = createdDate.getYear
+
+        val cancelDateMonth = cancellationDate.map(_.getMonth)
+        val cancelDateYear = cancellationDate.map(_.getYear)
+
+        !(cancelDateYear.map(_ == createdDateYear).openOr(false) &&
+          cancelDateMonth.map(_ == createdDateMonth).openOr(false)
+        )
+      }
+    }
+  }
+
   def findActiveSubscriptions(subscriptions: List[Subscription]) = {
     subscriptions.filter { subscription =>
       (subscription.status == Status.Active) || (subscription.status == Status.UserSuspended)
@@ -138,11 +166,27 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentYearCancelledSubscriptions(subscriptions: List[Subscription]) = {
-    subscriptions filter { subscription =>
-      val cancelDate = getCancelledDateOfSubscription(subscription)
+  def findCancelledSubscriptions(subscriptions: List[Subscription]) = {
+    subscriptions.filter(_.status == Status.Cancelled)
+  }
 
-      cancelDate.map(_.getYear == currentDate.getYear).openOr(false)
+  def findCurrentYearPayingCancelledSubscriptions(subscriptions: List[Subscription]) = {
+    subscriptions.filter { subscription =>
+      val createdDate = getCreatedDateOfSubscription(subscription)
+      val cancellationDate = getCancelledDateOfSubscription(subscription)
+      if (cancellationDate.isEmpty) {
+        false
+      } else {
+        val createdDateMonth = createdDate.getMonth
+        val createdDateYear = createdDate.getYear
+
+        val cancelDateMonth = cancellationDate.map(_.getMonth)
+        val cancelDateYear = cancellationDate.map(_.getYear)
+
+        (cancelDateYear.map(_ == currentDate.getYear).openOr(false) &&
+          cancelDateMonth.map(_ != createdDateMonth).openOr(false)
+        )
+      }
     }
   }
 
@@ -546,35 +590,36 @@ object ReportingService extends Loggable {
       getCreatedDateOfUser(user).getYear == currentDate.getYear
     }
 
+    val newUsersMonth = newUsersYear.filter { user =>
+      getCreatedDateOfUser(user).getMonth == currentDate.getMonth
+    }
+
     val newUsersYearSubscriptions = getSubscriptions(newUsersYear)
     
-    val newUsersYearShipments = getShipments(newUsersYearSubscriptions)
+    val newUsersYearShipments = getFirstShipments(newUsersYearSubscriptions)
     val newUsersMonthShipments = findCurrentMonthShipments(newUsersYearShipments)
 
     val newUsersYearShippedPetCount = getPetCount(newUsersYearShipments)
     val newUsersMonthShippedPetCount = getPetCount(newUsersMonthShipments)
 
-    val newUsersYearSubscriptionActive = findActiveSubscriptions(newUsersYearSubscriptions)
-    val newUsersYearSubscriptionCancelled = newUsersYearSubscriptions diff newUsersYearSubscriptionActive
+    val newUsersYearSubscriptionFirstMonthActive = findActiveSubscriptionsFirstMonth(newUsersYearSubscriptions)
+    val newUsersYearSubscriptionCancelled = newUsersYearSubscriptions diff newUsersYearSubscriptionFirstMonthActive
 
-    val newUsersMonthSubscriptionActive = findCurrentMonthSubscriptions(newUsersYearSubscriptionActive)
+    val newUsersMonthSubscriptionActive = findCurrentMonthSubscriptions(newUsersYearSubscriptionFirstMonthActive)
     val newUsersMonthSubscriptionCancelled = findCurrentMonthSubscriptions(newUsersYearSubscriptionCancelled)
 
-    val newUsersMonthSubscription = newUsersMonthSubscriptionActive ++ newUsersYearSubscriptionCancelled
+    val mtdNewCustomers = List(s"Month to Date,${newUsersMonth.size},${newUsersMonthSubscriptionCancelled.size},${newUsersMonthSubscriptionActive.size},${newUsersMonthShipments.size},${newUsersMonthShippedPetCount}")
 
-    val mtdNewCustomers = List(s"Month to Date,${newUsersMonthSubscription.size},${newUsersMonthSubscriptionCancelled.size},${newUsersMonthSubscriptionActive.size},${newUsersMonthShipments.size},${newUsersMonthShippedPetCount}")
-
-    val ytdNewCustomers = List(s"Year to Date,${newUsersYearSubscriptions.size},${newUsersYearSubscriptionCancelled.size},${newUsersYearSubscriptionActive.size},${newUsersYearShipments.size},${newUsersYearShippedPetCount}")
+    val ytdNewCustomers = List(s"Year to Date,${newUsersYearSubscriptions.size},${newUsersYearSubscriptionCancelled.size},${newUsersYearSubscriptionFirstMonthActive.size},${newUsersYearShipments.size},${newUsersYearShippedPetCount}")
 
     val allPayingCustomers = findPayingUsers(totalUsers)
 
     val allPayingSubscriptions = getSubscriptions(allPayingCustomers)
     val allPayingActiveSubscriptions = findActiveSubscriptions(allPayingSubscriptions)
     
-    val allPayingCancelledSubscriptions = allPayingSubscriptions diff allPayingActiveSubscriptions 
-    val paidSubscriptionYearCancelled = findCurrentYearCancelledSubscriptions(allPayingCancelledSubscriptions)
+    val allPayingCancelledSubscriptions = findCancelledSubscriptions(allPayingSubscriptions)
+    val paidSubscriptionYearCancelled = findCurrentYearPayingCancelledSubscriptions(allPayingCancelledSubscriptions)
     val paidSubscriptionMonthCancelled = findCurrentMonthCancelledSubscriptions(allPayingCancelledSubscriptions)
-
 
     val allPaidShipments = findPaidShipments(allPayingSubscriptions)
     
@@ -590,9 +635,9 @@ object ReportingService extends Loggable {
     val paidYearCommission = totalCommissionForSales(paidYearGrossSales)
     val paidMonthCommission = totalCommissionForSales(paidMonthGrossSales)
 
-    val mtdPayingCustomers = List(f"Month to Date,${allPayingSubscriptions.size},${paidSubscriptionMonthCancelled.size},${paidMonthShipments.size},$paidMonthPetsShippedCount,$$$paidMonthGrossSales%2.2f,$$$paidMonthCommission%2.2f")
+    val mtdPayingCustomers = List(f"Month to Date,${allPayingActiveSubscriptions.size},${paidSubscriptionMonthCancelled.size},${paidMonthShipments.size},$paidMonthPetsShippedCount,$$$paidMonthGrossSales%2.2f,$$$paidMonthCommission%2.2f")
 
-    val ytdPayingCustomers = List(f"Year to Date,${allPayingSubscriptions.size},${paidSubscriptionYearCancelled.size},${paidYearShipments.size},$paidYearPetsShippedCount,$$$paidYearGrossSales%2.2f,$$$paidYearCommission%2.2f")
+    val ytdPayingCustomers = List(f"Year to Date,${allPayingActiveSubscriptions.size},${paidSubscriptionYearCancelled.size},${paidYearShipments.size},$paidYearPetsShippedCount,$$$paidYearGrossSales%2.2f,$$$paidYearCommission%2.2f")
 
     val paidMonthShipmentByAgent = paidMonthShipments.groupBy { shipment =>
       val user = { 

@@ -66,14 +66,31 @@ trait StripeHook extends RestHelper with Loggable {
 
           ParentService.updatePuppyProducts(user)
 
-          val shipment = Shipment.createShipment(
-            user,
-            invoicePaymentId,
-            formatAmount(amountPaid),
-            formatAmount(tax)
-          )
+          for {
+            subscription <- user.getSubscription
+            shipmentCount = subscription.shipments.toList.size
+          } yield {
 
-          shipment.map(ship => ShipmentLineItem.find(By(ShipmentLineItem.shipment, ship)))
+            val agency = user.referer.obj
+            val agencyName = agency.map(_.name.get).openOr("")
+
+            val insert = {
+              (shipmentCount, agencyName) match {
+                case (0, "TPP") => "TPP+Welcome Insert"
+                case (0, _) => "Welcome Insert"
+                case (_, _) => "-"
+              }
+            }
+
+            val shipment = Shipment.createShipment(
+              user,
+              subscription,
+              invoicePaymentId,
+              formatAmount(amountPaid),
+              formatAmount(tax),
+              insert
+            )
+          }
         }
       }
 

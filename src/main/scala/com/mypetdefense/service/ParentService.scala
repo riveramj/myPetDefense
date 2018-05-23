@@ -240,7 +240,7 @@ object ParentService extends Loggable {
   def updateNextShipBillDate(subscription: Subscription, user: Box[User], nextDate: Date) = {
     val updatedSubscription = changeStripeBillDate(
       user.map(_.stripeId.get).openOr(""),
-      user.flatMap(_.getSubscription.map(_.stripeSubscriptionId.get)).getOrElse(""),
+      subscription.stripeSubscriptionId.get,
       nextDate.getTime/1000
     )
 
@@ -258,6 +258,7 @@ object ParentService extends Loggable {
       prorate = Some(false)
     )
 
+    //TODO actually use this result or do something, not just yelling into the void
     Try(Await.result(updatedSubscription, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(updatedSubscription)) =>
         Full(updatedSubscription)
