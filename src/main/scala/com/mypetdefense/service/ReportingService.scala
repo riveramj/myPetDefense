@@ -717,4 +717,37 @@ object ReportingService extends Loggable {
 
     generateCSV(csvRows, file)
   }
+
+  def findPreviousWeekSales(agency: String) = {
+    val totalUsers = Agency.find(By(Agency.name, agency)).map(_.customers.toList).getOrElse(Nil)
+
+    val lastWeekNewUsers = totalUsers.filter { user =>
+      val createdDayOfYear = getCreatedDateOfUser(user).getDayOfYear
+      val currentDayOfYear = currentDate.getDayOfYear
+      
+      (currentDayOfYear - createdDayOfYear) < 8
+    }
+
+    val lastWeekNewSubscriptions = lastWeekNewUsers.map(_.getSubscription).flatten
+
+    val lastWeekNewSubscriptionCancels = lastWeekNewSubscriptions filter { subscription =>
+      val cancellationDate = getCancelledDateOfSubscription(subscription)
+      !cancellationDate.isEmpty
+    }
+  }
+
+  def findYesterdaySalesByAgent(agency: String): List[(String, Int)] = {
+    val totalUsers = Agency.find(By(Agency.name, agency)).map(_.customers.toList).getOrElse(Nil)
+
+    val newUsersYesterday = totalUsers.filter { user =>
+      val createdDayOfYear = getCreatedDateOfUser(user).getDayOfYear
+      val yesterdayDayOfYear = currentDate.getDayOfYear - 1
+      
+      createdDayOfYear == yesterdayDayOfYear
+    }
+
+    newUsersYesterday.groupBy(_.salesAgentId.get).map { agentCustomers =>
+      (agentCustomers._1 -> agentCustomers._2.size)
+    }.toList.sortBy(_._1)
+  }
 }
