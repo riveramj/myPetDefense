@@ -46,6 +46,6 @@ object FrequentSalesReportEmailJob extends TriggeredJob {
   val trigger = TriggerBuilder.newTrigger()
     .withIdentity("FrequentSalesReportEmailTrigger")
     .startNow
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 1 minute
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * ? * *")) // fire every 5 minutes
     .build
 }
