@@ -529,7 +529,7 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
         }
       }
 
-      sendEmail(subject, "mike.rivera@mypetdefense.com", transform(template))
+      sendEmail(subject, email, transform(template))
   }
 }
 
