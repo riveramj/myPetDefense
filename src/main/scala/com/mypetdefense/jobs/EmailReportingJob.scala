@@ -2,11 +2,16 @@ package com.mypetdefense.jobs
 
 import org.quartz.{CronScheduleBuilder, TriggerBuilder, JobBuilder, JobExecutionContext}
 
+import com.mypetdefense.service.ReportingService
+import com.mypetdefense.actor._
+
 class SalesReportEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
     println("job!")
 
-    //emailActor ! SendRoomSummaryNotificationEmail(notificationInterval(context), frequency)
+    val agentData = ReportingService.findYesterdaySalesByAgent("TPP")
+    
+    EmailActor ! DailySalesEmail(agentData, "mike.rivera@mypetdefense.com")
   }
 }
 

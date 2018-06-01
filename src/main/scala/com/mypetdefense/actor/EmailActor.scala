@@ -20,7 +20,10 @@ import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
 
-import java.util.Date
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale}
+import java.time.{ZoneId, LocalDateTime}
+import java.time.format.DateTimeFormatter
 
 import net.liftweb.util.Mailer
 import Mailer._
@@ -42,6 +45,10 @@ case class ParentCancelledAccountEmail(user: User) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
+case class DailySalesEmail(
+  agentNameAndCount: Map[String, Int],
+  email: String
+) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
   user: User,
   amount: Double,
@@ -493,6 +500,36 @@ trait SendTppApiJsonEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait DailySalesEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case DailySalesEmail(
+      agentNameAndCount,
+      email
+    ) =>
+      val template =
+        Templates("emails-hidden" :: "daily-agent-report-email" :: Nil) openOr NodeSeq.Empty
+
+      val yesterdayDate = LocalDateTime.now().minusDays(1)
+
+      val subjectDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH))
+      val headerDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH))
+      
+      val subject = s"[$subjectDate] Daily My Pet Defense Sales Report"
+      val hostUrl = Paths.serverUrl
+      
+      val transform = {
+        ".new-sales *" #> agentNameAndCount.values.toList.sum &
+        ".date *" #> headerDate &
+        ".agent" #> agentNameAndCount.map { case (agent, count) =>
+          ".agent-name *" #> agent &
+          ".sale-count *" #> count
+        }
+      }
+
+      sendEmail(subject, "mike.rivera@mypetdefense.com", transform(template))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -586,6 +623,7 @@ trait EmailActor extends EmailHandlerChain
                     with Send5kEmailHandling
                     with SendAPIErrorEmailHandling
                     with SendTppApiJsonEmailHandling
+                    with DailySalesEmailHandling
                     with TestimonialEmailHandling {
 
   val baseEmailTemplate = 
@@ -593,6 +631,9 @@ trait EmailActor extends EmailHandlerChain
 
   val valentineEmailTemplate = 
     Templates("emails-hidden" :: "valentine-email-template" :: Nil) openOr NodeSeq.Empty
+
+  val reportingEmailTemplate = 
+    Templates("emails-hidden" :: "reporting-email-template" :: Nil) openOr NodeSeq.Empty
 
   val fromName = "My Pet Defense"
 
@@ -608,8 +649,12 @@ trait EmailActor extends EmailHandlerChain
 
   def sendEmail(subject: String, to: String, message: NodeSeq, fromEmail: String) {
     val emailTemplate = subject match {
-      case valentine if subject.contains("Valentine") => valentineEmailTemplate
-      case _ => baseEmailTemplate
+      case valentine if subject.contains("Valentine") => 
+        valentineEmailTemplate
+      case dailyReport if subject.contains("Report") => 
+        reportingEmailTemplate
+      case _ => 
+        baseEmailTemplate
     }
 
     val emailTransform = {
