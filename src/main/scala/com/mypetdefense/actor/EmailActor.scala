@@ -520,6 +520,7 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
       val totalSales = agentNameAndCount.map(_._2).sum
       
       val transform = {
+        "#shield-logo [src]" #> (hostUrl + "/images/logo/shield-logo@2x.png") &
         ".new-sales *" #> totalSales &
         ".date *" #> headerDate &
         ".agent" #> agentNameAndCount.map { case (agent, count) =>
