@@ -46,7 +46,7 @@ case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMe
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
 case class DailySalesEmail(
-  agentNameAndCount: Map[String, Int],
+  agentNameAndCount: List[(String, Int)],
   email: String
 ) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
@@ -516,9 +516,11 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
       
       val subject = s"[$subjectDate] Daily My Pet Defense Sales Report"
       val hostUrl = Paths.serverUrl
+
+      val totalSales = agentNameAndCount.map(_._2).sum
       
       val transform = {
-        ".new-sales *" #> agentNameAndCount.values.toList.sum &
+        ".new-sales *" #> totalSales &
         ".date *" #> headerDate &
         ".agent" #> agentNameAndCount.map { case (agent, count) =>
           ".agent-name *" #> agent &

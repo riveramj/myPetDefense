@@ -736,7 +736,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findYesterdaySalesByAgent(agency: String): Map[String, Int] = {
+  def findYesterdaySalesByAgent(agency: String): List[(String, Int)] = {
     val totalUsers = Agency.find(By(Agency.name, agency)).map(_.customers.toList).getOrElse(Nil)
 
     val newUsersYesterday = totalUsers.filter { user =>
@@ -748,6 +748,6 @@ object ReportingService extends Loggable {
 
     newUsersYesterday.groupBy(_.salesAgentId.get).map { agentCustomers =>
       (agentCustomers._1 -> agentCustomers._2.size)
-    }
+    }.toList.sortBy(_._1)
   }
 }

@@ -7,7 +7,6 @@ import com.mypetdefense.actor._
 
 class SalesReportEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
-    println("job!")
 
     val agentData = ReportingService.findYesterdaySalesByAgent("TPP")
     
