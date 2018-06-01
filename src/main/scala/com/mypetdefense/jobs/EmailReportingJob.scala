@@ -5,7 +5,7 @@ import org.quartz.{CronScheduleBuilder, TriggerBuilder, JobBuilder, JobExecution
 import com.mypetdefense.service.ReportingService
 import com.mypetdefense.actor._
 
-class SalesReportEmailJob extends ManagedJob {
+class DailyAgentReportEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
 
     val agentData = ReportingService.findYesterdaySalesByAgent("TPP")
@@ -15,7 +15,7 @@ class SalesReportEmailJob extends ManagedJob {
 }
 
 object WeeklySalesReportEmailJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[SalesReportEmailJob])
+  val detail = JobBuilder.newJob(classOf[DailyAgentReportEmailJob])
     .withIdentity("WeeklySalesReportEmailJob")
     .build()
 
@@ -26,8 +26,20 @@ object WeeklySalesReportEmailJob extends TriggeredJob {
     .build()
 }
 
+object DailySalesReportEmailJob extends TriggeredJob {
+  val detail = JobBuilder.newJob(classOf[DailyAgentReportEmailJob])
+    .withIdentity("DailySalesReportEmailJob")
+    .build()
+
+  val trigger = TriggerBuilder.newTrigger()
+    .withIdentity("DailySalesReportEmailJobTrigger")
+    .startNow()
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 23 ? * * *"))
+    .build()
+}
+
 object FrequentSalesReportEmailJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[SalesReportEmailJob])
+  val detail = JobBuilder.newJob(classOf[DailyAgentReportEmailJob])
     .withIdentity("FrequentSalesReportEmailJob")
     .build
 
