@@ -4,6 +4,8 @@ import com.mypetdefense.model._
 import net.liftweb._
   import common._
   import util._
+  
+import net.liftweb.util.Helpers._
 import net.liftweb.mapper.By
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
 import dispatch._, Defaults._
@@ -223,5 +225,33 @@ object DataLoader extends Loggable {
       if (pets.size == 0)
         parent.getSubscription.map(_.status(Status.UserSuspended).saveMe)
     }
+  }
+
+  def findCancellationRates = {
+    val tpp = Agency.find(By(Agency.name, "TPP"))
+
+    val users = tpp.map(_.customers.toList).openOr(Nil)
+    val subscriptions = users.map(_.subscription).flatten
+    val cancellations = subscriptions.filter { subscription =>
+      subscription.status.get == Status.Cancelled
+    }
+
+    val cancelsByShipmentsRaw = cancellations.map(_.shipments.toList)
+
+    val cancelsByDateShipped = cancelsByShipmentsRaw.map { shipments => 
+      shipments.map { shipment => 
+        tryo(shipment.dateShipped.get)
+      }.flatten
+    }
+
+    val cancelledByShipDateCount = cancelsByDateShipped.groupBy(_.size)
+
+    val cancelsByShipments = cancelledByShipDateCount.map { case (count, shipments) =>
+      (count, shipments.size)
+    }
+
+    println(s"Total customer count: ${subscriptions.size}")
+    println("Customers by shipment count:")
+    println(cancelsByShipments)
   }
 }
