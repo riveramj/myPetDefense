@@ -100,14 +100,16 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentMonthShipments(shipments: List[Shipment], month: String = "") = {
-    val date = {
-      if (month == "") {
-        currentDate
-      } else {
-        convertMonthToDate(month)
-      }
+  def getDateRange(month: String) = {
+    if (month == "") {
+      currentDate
+    } else {
+      convertMonthToDate(month)
     }
+  }
+
+  def findCurrentMonthShipments(shipments: List[Shipment], month: String = "") = {
+    val date = getDateRange(month)
 
     shipments.filter { shipment =>
       val mailedDate = getMailedDateOfShipment(shipment)
@@ -163,13 +165,7 @@ object ReportingService extends Loggable {
   }
 
   def findSubscriptionMonthCancellations(subscriptions: List[Subscription], month: String = "") = {
-    val date = {
-      if (month == "") {
-        currentDate
-      } else {
-        convertMonthToDate(month)
-      }
-    }
+    val date = getDateRange(month)
 
     subscriptions.filter { subscription =>
       val cancelDate = getCancelledDateOfSubscription(subscription)
@@ -182,13 +178,7 @@ object ReportingService extends Loggable {
   }
 
   def findNewCustomersMonth(users: List[User], month: String = "") = {
-    val date = {
-      if (month == "") {
-        currentDate
-      } else {
-        convertMonthToDate(month)
-      }
-    }
+    val date = getDateRange(month)
 
     users filter { user =>
       val userCreatedDate = getCreatedDateOfUser(user)
@@ -201,13 +191,7 @@ object ReportingService extends Loggable {
   }
 
   def findPayingUsers(users: List[User], month: String = "") = {
-    val date = {
-      if (month == "") {
-        currentDate
-      } else {
-        convertMonthToDate(month)
-      }
-    }
+    val date = getDateRange(month)
 
     users filter { user =>
       val userCreatedDate = getCreatedDateOfUser(user)
@@ -252,13 +236,7 @@ object ReportingService extends Loggable {
   }
 
   def findCurrentMonthCancelledSubscriptions(subscriptions: List[Subscription], month: String = "") = {
-    val date = {
-      if (month == "") {
-        currentDate
-      } else {
-        convertMonthToDate(month)
-      }
-    }
+    val date = getDateRange(month)
 
     subscriptions filter { subscription =>
       val cancelDate = getCancelledDateOfSubscription(subscription)
