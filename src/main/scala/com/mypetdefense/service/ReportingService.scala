@@ -112,9 +112,9 @@ object ReportingService extends Loggable {
     shipments.filter { shipment =>
       val mailedDate = getMailedDateOfShipment(shipment)
       
-      mailedDate map { date =>
-        (date.getYear == date.getYear) &&
-        (date.getMonth == date.getMonth)
+      mailedDate map { mailDate =>
+        (mailDate.getYear == date.getYear) &&
+        (mailDate.getMonth == date.getMonth)
       } openOr(false)
     }
   }
@@ -826,7 +826,7 @@ object ReportingService extends Loggable {
     val totalSubscriptions = getSubscriptions(totalUsers)
     val totalCancelledSubscriptions = findCurrentMonthCancelledSubscriptions(totalSubscriptions, month)
 
-    val newUsersMonth = findNewCustomersMonth(totalUsers)
+    val newUsersMonth = findNewCustomersMonth(totalUsers, month)
     val netNewUsersMonth = newUsersMonth.filter(_.status != Status.Cancelled)
     val payingUsers = findPayingUsers(totalUsers, month)
 
@@ -835,18 +835,22 @@ object ReportingService extends Loggable {
 
     val allPaidShipments = findPaidShipments(allPayingSubscriptions)
     val paidMonthShipments = findCurrentMonthShipments(allPaidShipments, month)
+    val paidMonthPetsShippedCount = getPetCount(paidMonthShipments)
     val paidMonthGrossSales = totalSalesForShipments(paidMonthShipments)
+    val discountCount = (paidMonthPetsShippedCount * 12.99) - paidMonthGrossSales
 
     val csvRows = {
       List(List("Time Period", month)) ++
       spacerRow ++
       List(List("Net New Users", netNewUsersMonth.size)) ++
       List(List("Total Cancellations", totalCancelledSubscriptions.size)) ++
-      List(List("Expected Paying Customers", payingUsers.size)) ++
+      List(List("Paid Shipments", paidMonthShipments.size)) ++
+      List(List("Paid Pets", paidMonthPetsShippedCount)) ++
+      List(List("Multi Pet Discount", f"$$$discountCount%2.0f")) ++
       List(List("Gross Sales", f"$$$paidMonthGrossSales%2.2f"))
     }.map(_.mkString(",")).mkString("\n")
 
-    val fileName = s"${name}-mtd-ytd-${fileNameMonthDayYear}.csv"
+    val fileName = s"${name}-${month}-sales-summary.csv"
 
     val file = "filename=\"" + fileName + "\""
 
