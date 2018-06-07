@@ -26,6 +26,12 @@ object AgencyOverview extends Loggable {
     } 
   }
 
+  def agencyMonthExport: Box[LiftResponse] = {
+    exportTPPMontSalesMenu.currentValue flatMap { month =>
+      ReportingService.exportAgencyMonthSales("TPP", month)
+    } 
+  }
+
   val menu = Menu.i("Agency Overview") / "agency" / "agency-overview" >>
     agencyUser >>
     loggedIn
@@ -39,6 +45,16 @@ object AgencyOverview extends Loggable {
     agencyUser >>
     loggedIn >>
     EarlyResponse(agencyMtdYtdExport _)
+
+  val exportTPPMontSalesMenu = Menu.param[String](
+      "Agency Export Month Sales",
+      "Agency Export Month  Sales",
+      Full(_),
+      string => string
+    ) / "agency" / "agency-overview" / "month-sales.csv" >>
+    agencyUser >>
+    loggedIn >>
+    EarlyResponse(agencyMonthExport _)
 }
 
 class AgencyOverview extends Loggable {
@@ -48,6 +64,9 @@ class AgencyOverview extends Loggable {
 
   def render = {
     ".overview [class+]" #> "current" &
+    ".april [href]" #> AgencyOverview.exportTPPMontSalesMenu.calcHref("April") &
+    ".may [href]" #> AgencyOverview.exportTPPMontSalesMenu.calcHref("May") &
+    ".june [href]" #> AgencyOverview.exportTPPMontSalesMenu.calcHref("June") &
     ".month-to-date-export [href]" #> AgencyOverview.agencyMtdYtdExportMenu.calcHref(agencyName)
   }
 }

@@ -153,6 +153,7 @@ object Paths {
     admin.PhonePortal.menu,
     admin.Surveys.menu,
     agency.AgencyOverview.agencyMtdYtdExportMenu,
+    agency.AgencyOverview.exportTPPMontSalesMenu,
     agency.AgencyOverview.menu,
     Login.menu,
     ForgotPassword.menu,
