@@ -837,6 +837,7 @@ object ReportingService extends Loggable {
     val paidMonthShipments = findCurrentMonthShipments(allPaidShipments, month)
     val paidMonthPetsShippedCount = getPetCount(paidMonthShipments)
     val paidMonthGrossSales = totalSalesForShipments(paidMonthShipments)
+    val paidMonthCommission = totalCommissionForSales(paidMonthGrossSales)
     val discountCount = (paidMonthPetsShippedCount * 12.99) - paidMonthGrossSales
 
     val csvRows = {
@@ -847,7 +848,8 @@ object ReportingService extends Loggable {
       List(List("Paid Shipments", paidMonthShipments.size)) ++
       List(List("Paid Pets", paidMonthPetsShippedCount)) ++
       List(List("Multi Pet Discount", f"$$$discountCount%2.0f")) ++
-      List(List("Gross Sales", f"$$$paidMonthGrossSales%2.2f"))
+      List(List("Gross Sales", f"$$$paidMonthGrossSales%2.2f")) ++
+      List(List("Estimated Commission", f"$$$paidMonthCommission%2.2f"))
     }.map(_.mkString(",")).mkString("\n")
 
     val fileName = s"${name}-${month}-sales-summary.csv"
