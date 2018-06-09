@@ -798,6 +798,25 @@ object ReportingService extends Loggable {
     }.toList.sortBy(_._1)
   }
 
+  def findMTDSalesByAgent(agency: String): List[(String, Int)] = {
+    val yesterday = LocalDate.now(ZoneId.of("America/New_York")).minusDays(1)
+    val totalUsers = Agency.find(By(Agency.name, agency)).map(_.customers.toList).getOrElse(Nil)
+
+    val newUsersThisMonth = totalUsers.filter { user =>
+      val createdDayDate = getCreatedDateOfUser(user)
+      val yesterdayDayOfYear = currentDate.getDayOfYear - 1
+      
+      (
+        createdDayDate.getYear == yesterday.getYear &&
+        createdDayDate.getMonth == yesterday.getMonth
+      )
+    }
+
+    newUsersThisMonth.groupBy(_.salesAgentId.get).map { agentCustomers =>
+      (agentCustomers._1 -> agentCustomers._2.size)
+    }.toList.sortBy(_._1)
+  }
+
   def exportAgencyMonthSales(name: String, month: String): Box[LiftResponse] = {
     val totalUsers = Agency.find(By(Agency.name, name)).map(_.customers.toList).getOrElse(Nil)
 
