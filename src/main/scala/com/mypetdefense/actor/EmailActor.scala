@@ -47,6 +47,7 @@ case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
 case class DailySalesEmail(
   agentNameAndCount: List[(String, Int)],
+  monthAgentNameAndCount: List[(String, Int)],
   email: String
 ) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
@@ -504,6 +505,7 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
   addHandler {
     case DailySalesEmail(
       agentNameAndCount,
+      monthAgentNameAndCount,
       email
     ) =>
       val template =
@@ -513,17 +515,25 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
 
       val subjectDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH))
       val headerDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH))
+      val monthYear = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
       
       val subject = s"[$subjectDate] Daily My Pet Defense Sales Report"
       val hostUrl = Paths.serverUrl
 
       val totalSales = agentNameAndCount.map(_._2).sum
+      val monthlySales = monthAgentNameAndCount.map(_._2).sum
       
       val transform = {
         "#shield-logo [src]" #> (hostUrl + "/images/logo/shield-logo@2x.png") &
         ".new-sales *" #> totalSales &
+        ".month-sales *" #> monthlySales &
         ".date *" #> headerDate &
+        ".month *" #> monthYear &
         ".agent" #> agentNameAndCount.map { case (agent, count) =>
+          ".agent-name *" #> agent &
+          ".sale-count *" #> count
+        } &
+        ".monthly-agent" #> monthAgentNameAndCount.map { case (agent, count) =>
           ".agent-name *" #> agent &
           ".sale-count *" #> count
         }
