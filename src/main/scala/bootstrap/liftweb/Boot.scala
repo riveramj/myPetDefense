@@ -10,6 +10,7 @@ import net.liftweb._
 import com.mypetdefense.util._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
+import com.mypetdefense.jobs.JobManager
 
 import java.util.TimeZone
 
@@ -116,4 +117,8 @@ class Boot {
   )
 
   TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
+
+  // startup quartz scheduler
+  JobManager.init()
+
 }
