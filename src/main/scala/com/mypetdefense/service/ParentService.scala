@@ -384,6 +384,48 @@ object ParentService extends Loggable {
     }
   }
 
+  def timeToGrow_?(subscription: Subscription) = {
+    val currentDate = LocalDate.now()
+
+    for {
+      user <- subscription.user.obj
+      pet <- user.pets.toList
+        if (pet.breed.get != null) &&
+             (pet.birthday.get != null) &&
+             (pet.product.obj.map(_.isZoGuard_?).openOr(false))
+    } yield {
+      val birthday = tryo(pet.birthday.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+
+      val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
+
+      val growthDelay = tryo(pet.nextGrowthDelay.get).openOr(0)
+
+      val actualGrowthMonth = currentMonth - growthDelay
+
+      val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase)
+
+      actualGrowthMonth match {
+        case medium 
+            if medium == getGrowthMonthNumber(growthRate, "medium") => {
+          true
+        }
+
+        case large 
+            if large == getGrowthMonthNumber(growthRate, "large") => {
+          true
+        }
+
+        case xlarge 
+            if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
+          true
+        }
+
+        case _ =>
+          false
+      }
+    }
+  }
+
   def updatePuppyProducts(user: User) = {
     val currentDate = LocalDate.now()
 

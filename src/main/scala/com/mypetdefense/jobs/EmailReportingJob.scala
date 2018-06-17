@@ -18,18 +18,6 @@ class DailyAgentReportEmailJob extends ManagedJob {
   }
 }
 
-object WeeklySalesReportEmailJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[DailyAgentReportEmailJob])
-    .withIdentity("WeeklySalesReportEmailJob")
-    .build()
-
-  val trigger = TriggerBuilder.newTrigger()
-    .withIdentity("WeeklySalesReportEmailTrigger")
-    .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 8 ? * 2 *"))
-    .build()
-}
-
 object DailySalesReportEmailJob extends TriggeredJob {
   val detail = JobBuilder.newJob(classOf[DailyAgentReportEmailJob])
     .withIdentity("DailySalesReportEmailJob")
