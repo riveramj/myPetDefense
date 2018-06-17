@@ -389,30 +389,55 @@ object ParentService extends Loggable {
 
     for {
       pet <- user.pets.toList
-        if (pet.breed.get != null) && (pet.birthday.get != null)
+        if (pet.breed.get != null) &&
+             (pet.birthday.get != null) &&
+             (pet.product.obj.map(_.isZoGuard_?).openOr(false))
     } yield {
       val birthday = tryo(pet.birthday.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
 
       val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
+
+      val growthDelay = tryo(pet.nextGrowthDelay.get).openOr(0)
+
+      val actualGrowthMonth = currentMonth - growthDelay
+
       val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase))
 
-      currentMonth match {
+      actualGrowthMonth match {
         case medium 
             if medium == getGrowthMonthNumber(growthRate, "medium") => {
           val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
-          newProduct.map(pet.product(_).size(AnimalSize.DogMediumZo).saveMe)
+          newProduct.map { product => 
+            pet
+              .product(product)
+              .size(AnimalSize.DogMediumZo)
+              .nextGrowthDelay(0)
+              .saveMe
+          }
         }
 
         case large 
             if large == getGrowthMonthNumber(growthRate, "large") => {
           val newProduct = Product.find(By(Product.size, AnimalSize.DogLargeZo))
-          newProduct.map(pet.product(_).size(AnimalSize.DogLargeZo).saveMe)
+          newProduct.map { product => 
+            pet
+              .product(product)
+              .size(AnimalSize.DogLargeZo)
+              .nextGrowthDelay(0)
+              .saveMe
+          }
         }
 
         case xlarge 
             if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
           val newProduct = Product.find(By(Product.size, AnimalSize.DogXLargeZo))
-          newProduct.map(pet.product(_).size(AnimalSize.DogXLargeZo).saveMe)
+          newProduct.map { product => 
+            pet
+              .product(product)
+              .size(AnimalSize.DogXLargeZo)
+              .nextGrowthDelay(0)
+              .saveMe
+          }
         }
 
         case _ =>

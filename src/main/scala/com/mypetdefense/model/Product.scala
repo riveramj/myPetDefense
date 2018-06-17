@@ -43,6 +43,8 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     .imageName(imageName)
     .saveMe
   }
+
+  def isZoGuard_? = this.name.get.contains("Zoguard")
 }
 
 object Product extends Product with LongKeyedMetaMapper[Product]
