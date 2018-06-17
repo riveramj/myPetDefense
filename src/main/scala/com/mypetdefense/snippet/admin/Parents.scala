@@ -313,6 +313,17 @@ class Parents extends Loggable {
       )
     }
 
+    def updateGrowthDelay(possibleDelay: String, pet: Pet) = {
+      val sanitizedDelay = possibleDelay.replaceAll("[ months]","")
+      val updatedDelay = tryo(sanitizedDelay.toInt).openOr(0)
+
+      if (updatedDelay != 0) {
+        pet.nextGrowthDelay(updatedDelay).saveMe
+      }
+
+      Noop
+    }
+
     ".parent-pets" #> idMemoize { renderer =>
       ".create" #> {
         ".new-pet-name" #> ajaxText(petName, petName = _) &
@@ -334,12 +345,14 @@ class Parents extends Loggable {
 
         ".pet" #> pets.map { pet =>
           val birthday = tryo(birthdayFormat.format(pet.birthday.get))
+          var nextGrowthDelay = tryo(pet.nextGrowthDelay.get.toString).openOr("")
 
           ".pet-name *" #> pet.name &
           ".pet-breed *" #> pet.breed &
           ".pet-birthday *" #> birthday &
           ".pet-type *" #> pet.animalType.toString &
           ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
+          ".pet-delay-growth input" #> ajaxText(s"$nextGrowthDelay months", possibleDelay => updateGrowthDelay(possibleDelay, pet)) & 
           ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
             ajaxInvoke(deletePet(parent, pet, renderer) _)
           )
