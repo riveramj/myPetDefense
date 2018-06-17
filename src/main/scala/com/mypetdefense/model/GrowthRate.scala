@@ -20,7 +20,7 @@ class GrowthRate extends LongKeyedMapper[GrowthRate] with IdPK with OneToMany[Lo
     override def defaultValue = new Date()
   }
 
-  def createNewGrowthRate(
+  def createGrowthRate(
     breed: String,
     medium: Option[Int] = None,
     large: Option[Int] = None,

@@ -141,6 +141,7 @@ object Paths {
     admin.Parents.menu,
     admin.Parents.activeParentsCsvMenu,
     admin.Users.menu,
+    admin.GrowthRates.menu,
     admin.Prices.menu,
     admin.Reviews.menu,
     admin.Coupons.menu,
