@@ -45,6 +45,7 @@ case class ParentCancelledAccountEmail(user: User) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
+case class NotifyParentGrowthRate(pet: Pet, user: User) extends EmailActorMessage
 case class DailySalesEmail(
   agentNameAndCount: List[(String, Int)],
   monthAgentNameAndCount: List[(String, Int)],
@@ -501,6 +502,27 @@ trait SendTppApiJsonEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait NotifyParentGrowthRateHandling extends EmailHandlerChain {
+  addHandler {
+    case NotifyParentGrowthRate(pet, user) =>
+      val template =
+        Templates("emails-hidden" :: "notify-growth-rate" :: Nil) openOr NodeSeq.Empty
+      
+      val petName = pet.name.get
+      val subject = s"$petName is growing up! Help us protect him!"
+      val hostUrl = Paths.serverUrl
+      
+      val email = user.email.get
+      
+      val transform = {
+        "#parent-name *" #> user.firstName.get &
+        "#pet-name *" #> petName
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
 trait DailySalesEmailHandling extends EmailHandlerChain {
   addHandler {
     case DailySalesEmail(
@@ -636,6 +658,7 @@ trait EmailActor extends EmailHandlerChain
                     with Send5kEmailHandling
                     with SendAPIErrorEmailHandling
                     with SendTppApiJsonEmailHandling
+                    with NotifyParentGrowthRateHandling
                     with DailySalesEmailHandling
                     with TestimonialEmailHandling {
 

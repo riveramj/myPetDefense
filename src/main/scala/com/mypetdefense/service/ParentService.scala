@@ -384,68 +384,64 @@ object ParentService extends Loggable {
     }
   }
 
-  def timeToGrow_?(subscription: Subscription) = {
+  def findGrowthMonth(pet: Pet) = {
     val currentDate = LocalDate.now()
 
-    for {
-      user <- subscription.user.obj
+    val birthday = tryo(pet.birthday.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+
+    val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
+
+    val growthDelay = tryo(pet.nextGrowthDelay.get).openOr(0)
+
+    currentMonth - growthDelay
+  }
+
+  def findGrowingPets(subscription: Subscription) = {
+    (for {
+      user <- subscription.user.obj.toList
       pet <- user.pets.toList
         if (pet.breed.get != null) &&
              (pet.birthday.get != null) &&
              (pet.product.obj.map(_.isZoGuard_?).openOr(false))
     } yield {
-      val birthday = tryo(pet.birthday.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+      val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase))
 
-      val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
+      val growthMonth = findGrowthMonth(pet)
 
-      val growthDelay = tryo(pet.nextGrowthDelay.get).openOr(0)
-
-      val actualGrowthMonth = currentMonth - growthDelay
-
-      val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase)
-
-      actualGrowthMonth match {
+      growthMonth match {
         case medium 
             if medium == getGrowthMonthNumber(growthRate, "medium") => {
-          true
+          Full(pet, user)
         }
 
         case large 
             if large == getGrowthMonthNumber(growthRate, "large") => {
-          true
+          Full(pet, user)
         }
 
         case xlarge 
             if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
-          true
+          Full(pet, user)
         }
 
         case _ =>
-          false
+          Empty
       }
-    }
+    }).flatten
   }
 
   def updatePuppyProducts(user: User) = {
-    val currentDate = LocalDate.now()
-
     for {
       pet <- user.pets.toList
         if (pet.breed.get != null) &&
              (pet.birthday.get != null) &&
              (pet.product.obj.map(_.isZoGuard_?).openOr(false))
-    } yield {
-      val birthday = tryo(pet.birthday.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
-
-      val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
-
-      val growthDelay = tryo(pet.nextGrowthDelay.get).openOr(0)
-
-      val actualGrowthMonth = currentMonth - growthDelay
-
+    } yield {      
       val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase))
 
-      actualGrowthMonth match {
+      val growthMonth = findGrowthMonth(pet)
+
+      growthMonth match {
         case medium 
             if medium == getGrowthMonthNumber(growthRate, "medium") => {
           val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
