@@ -5,7 +5,7 @@ import org.quartz.{CronScheduleBuilder, TriggerBuilder, JobBuilder, JobExecution
 import com.mypetdefense.service.ReportingService
 import com.mypetdefense.actor._
 
-class DailyAgentReportEmailJob extends ManagedJob {
+class SalesAgentReportEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
 
     val dailAgentData = ReportingService.findYesterdaySalesByAgent("TPP")
@@ -18,37 +18,25 @@ class DailyAgentReportEmailJob extends ManagedJob {
   }
 }
 
-object WeeklySalesReportEmailJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[DailyAgentReportEmailJob])
-    .withIdentity("WeeklySalesReportEmailJob")
+object DailyAgentSalesReportEmailJob extends TriggeredJob {
+  val detail = JobBuilder.newJob(classOf[SalesAgentReportEmailJob])
+    .withIdentity("DailyAgentSalesReportEmailJob")
     .build()
 
   val trigger = TriggerBuilder.newTrigger()
-    .withIdentity("WeeklySalesReportEmailTrigger")
-    .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 8 ? * 2 *"))
-    .build()
-}
-
-object DailySalesReportEmailJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[DailyAgentReportEmailJob])
-    .withIdentity("DailySalesReportEmailJob")
-    .build()
-
-  val trigger = TriggerBuilder.newTrigger()
-    .withIdentity("DailySalesReportEmailJobTrigger")
+    .withIdentity("DailyAgentSalesReportEmailJobTrigger")
     .startNow()
     .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * * *"))
     .build()
 }
 
-object FrequentSalesReportEmailJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[DailyAgentReportEmailJob])
-    .withIdentity("FrequentSalesReportEmailJob")
+object FrequentAgentSalesReportEmailJob extends TriggeredJob {
+  val detail = JobBuilder.newJob(classOf[SalesAgentReportEmailJob])
+    .withIdentity("FrequentAgentSalesReportEmailJob")
     .build
 
   val trigger = TriggerBuilder.newTrigger()
-    .withIdentity("FrequentSalesReportEmailTrigger")
+    .withIdentity("FrequentAgentSalesReportEmailJobTrigger")
     .startNow
     .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 5 minutes
     .build
