@@ -1,6 +1,7 @@
 package com.mypetdefense.util
 
 import com.mypetdefense.model._
+import com.mypetdefense.service.ReportingService
 import net.liftweb._
   import common._
   import util._
@@ -240,17 +241,28 @@ object DataLoader extends Loggable {
 
     val cancelsByDateShipped = cancelsByShipmentsRaw.map { shipments => 
       shipments.map { shipment => 
-        tryo(shipment.dateShipped.get)
+        val shipDate = tryo(shipment.dateShipped.get)
+
+        if (shipDate == Full(null))
+          Empty
+        else
+          shipDate
+
       }.flatten
     }
+
+    println(cancelsByDateShipped)
 
     val cancelledByShipDateCount = cancelsByDateShipped.groupBy(_.size)
 
     val cancelsByShipments = cancelledByShipDateCount.map { case (count, shipments) =>
+
       (count, shipments.size)
     }
 
     println(s"Total customer count: ${subscriptions.size}")
+    println(s"Total cancellations count: ${cancellations.size}")
+    println()
     println("Customers by shipment count:")
     println(cancelsByShipments)
   }
