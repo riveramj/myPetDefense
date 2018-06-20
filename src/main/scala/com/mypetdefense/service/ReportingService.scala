@@ -17,6 +17,9 @@ import java.time.format.DateTimeFormatter
 
 object ReportingService extends Loggable {
   def currentDate = LocalDateTime.now()
+
+  def yesterdayStart = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant())
+  def yesterdayEnd = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).toInstant())
   
   def yearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
   
@@ -781,6 +784,36 @@ object ReportingService extends Loggable {
       val cancellationDate = getCancelledDateOfSubscription(subscription)
       !cancellationDate.isEmpty
     }
+  }
+
+  def findYesterdayNewSales = {
+     User.findAll(
+       By_>(User.createdAt, yesterdayStart),
+       By_<(User.createdAt, yesterdayEnd)
+     )
+  }
+
+  def yesterdayShipments = {
+    println("yesterdayStart: " + yesterdayStart)
+    println("yesterdayEnd: " + yesterdayEnd)
+
+     val yesterdayShipments = Shipment.findAll(
+       By_>(Shipment.dateShipped, yesterdayStart),
+       By_<(Shipment.dateShipped, yesterdayEnd)
+     )
+
+     val paidShipments = yesterdayShipments.filter(_.amountPaid.get != "0")
+     val newShipments = yesterdayShipments diff paidShipments
+     val paidGrossSales = totalSalesForShipments(paidShipments)
+    
+     (newShipments.size, paidShipments.size, paidGrossSales)
+  }
+
+  def yesterdayCancels = {
+    Subscription.findAll(
+      By_>(Subscription.cancellationDate, yesterdayStart),
+      By_<(Subscription.cancellationDate, yesterdayEnd)
+    )
   }
 
   def findYesterdaySalesByAgent(agency: String): List[(String, Int)] = {
