@@ -100,13 +100,23 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentMonthShipments(shipments: List[Shipment]) = {
+  def getDateRange(month: String) = {
+    if (month == "") {
+      currentDate
+    } else {
+      convertMonthToDate(month)
+    }
+  }
+
+  def findCurrentMonthShipments(shipments: List[Shipment], month: String = "") = {
+    val date = getDateRange(month)
+
     shipments.filter { shipment =>
       val mailedDate = getMailedDateOfShipment(shipment)
       
-      mailedDate map { date =>
-        (date.getYear == currentDate.getYear) &&
-        (date.getMonth == currentDate.getMonth)
+      mailedDate map { mailDate =>
+        (mailDate.getYear == date.getYear) &&
+        (mailDate.getMonth == date.getMonth)
       } openOr(false)
     }
   }
@@ -139,7 +149,7 @@ object ReportingService extends Loggable {
 
   def findActiveSubscriptions(subscriptions: List[Subscription]) = {
     subscriptions.filter { subscription =>
-      (subscription.status == Status.Active) || (subscription.status == Status.UserSuspended)
+      subscription.status != Status.Cancelled
     }
   }
 
@@ -147,13 +157,48 @@ object ReportingService extends Loggable {
     customers.filter(_.salesAgentId == agentId)
   }
 
-  def findPayingUsers(users: List[User]) = {
+  def convertMonthToDate(month: String) = {
+    val dateFormat = new SimpleDateFormat("MMMM yyyy")
+    val monthDate = dateFormat.parse(s"$month 2018")
+
+    monthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+  }
+
+  def findSubscriptionMonthCancellations(subscriptions: List[Subscription], month: String = "") = {
+    val date = getDateRange(month)
+
+    subscriptions.filter { subscription =>
+      val cancelDate = getCancelledDateOfSubscription(subscription)
+      
+      (
+        cancelDate.map(_.getYear == date.getYear).openOr(false) &&
+        cancelDate.map(_.getMonth == date.getMonth).openOr(false)
+      )
+    }
+  }
+
+  def findNewCustomersMonth(users: List[User], month: String = "") = {
+    val date = getDateRange(month)
+
+    users filter { user =>
+      val userCreatedDate = getCreatedDateOfUser(user)
+
+      (
+        (getCreatedDateOfUser(user).getYear == date.getYear) &&
+        (getCreatedDateOfUser(user).getMonth == date.getMonth)
+      )
+    }
+  }
+
+  def findPayingUsers(users: List[User], month: String = "") = {
+    val date = getDateRange(month)
+
     users filter { user =>
       val userCreatedDate = getCreatedDateOfUser(user)
 
       !(
-        (userCreatedDate.getYear == currentDate.getYear) &&
-        (userCreatedDate.getMonth == currentDate.getMonth)
+        (userCreatedDate.getYear == date.getYear) &&
+        (userCreatedDate.getMonth == date.getMonth)
       )
     }
   }
@@ -190,13 +235,15 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentMonthCancelledSubscriptions(subscriptions: List[Subscription]) = {
+  def findCurrentMonthCancelledSubscriptions(subscriptions: List[Subscription], month: String = "") = {
+    val date = getDateRange(month)
+
     subscriptions filter { subscription =>
       val cancelDate = getCancelledDateOfSubscription(subscription)
 
       cancelDate.map { cancelDate => 
-        (cancelDate.getYear == currentDate.getYear) &&
-        (cancelDate.getMonth == currentDate.getMonth)
+        (cancelDate.getYear == date.getYear) &&
+        (cancelDate.getMonth == date.getMonth)
       }.openOr(false)
     }
   }
@@ -749,5 +796,63 @@ object ReportingService extends Loggable {
     newUsersYesterday.groupBy(_.salesAgentId.get).map { agentCustomers =>
       (agentCustomers._1 -> agentCustomers._2.size)
     }.toList.sortBy(_._1)
+  }
+
+  def findMTDSalesByAgent(agency: String): List[(String, Int)] = {
+    val yesterday = LocalDate.now(ZoneId.of("America/New_York")).minusDays(1)
+    val totalUsers = Agency.find(By(Agency.name, agency)).map(_.customers.toList).getOrElse(Nil)
+
+    val newUsersThisMonth = totalUsers.filter { user =>
+      val createdDayDate = getCreatedDateOfUser(user)
+      val yesterdayDayOfYear = currentDate.getDayOfYear - 1
+      
+      (
+        createdDayDate.getYear == yesterday.getYear &&
+        createdDayDate.getMonth == yesterday.getMonth
+      )
+    }
+
+    newUsersThisMonth.groupBy(_.salesAgentId.get).map { agentCustomers =>
+      (agentCustomers._1 -> agentCustomers._2.size)
+    }.toList.sortBy(_._1)
+  }
+
+  def exportAgencyMonthSales(name: String, month: String): Box[LiftResponse] = {
+    val totalUsers = Agency.find(By(Agency.name, name)).map(_.customers.toList).getOrElse(Nil)
+
+    val totalSubscriptions = getSubscriptions(totalUsers)
+    val totalCancelledSubscriptions = findCurrentMonthCancelledSubscriptions(totalSubscriptions, month)
+
+    val newUsersMonth = findNewCustomersMonth(totalUsers, month)
+    val netNewUsersMonth = newUsersMonth.filter(_.status != Status.Cancelled)
+    val payingUsers = findPayingUsers(totalUsers, month)
+
+    val allPayingSubscriptions = getSubscriptions(payingUsers)
+    val allPayingActiveSubscriptions = findActiveSubscriptions(allPayingSubscriptions)
+
+    val allPaidShipments = findPaidShipments(allPayingSubscriptions)
+    val paidMonthShipments = findCurrentMonthShipments(allPaidShipments, month)
+    val paidMonthPetsShippedCount = getPetCount(paidMonthShipments)
+    val paidMonthGrossSales = totalSalesForShipments(paidMonthShipments)
+    val paidMonthCommission = totalCommissionForSales(paidMonthGrossSales)
+    val discountCount = (paidMonthPetsShippedCount * 12.99) - paidMonthGrossSales
+
+    val csvRows = {
+      List(List("Time Period", month)) ++
+      spacerRow ++
+      List(List("Net New Users", netNewUsersMonth.size)) ++
+      List(List("Total Cancellations", totalCancelledSubscriptions.size)) ++
+      List(List("Paid Shipments", paidMonthShipments.size)) ++
+      List(List("Paid Pets", paidMonthPetsShippedCount)) ++
+      List(List("Multi Pet Discount", f"$$$discountCount%2.0f")) ++
+      List(List("Gross Sales", f"$$$paidMonthGrossSales%2.2f")) ++
+      List(List("Estimated Commission", f"$$$paidMonthCommission%2.2f"))
+    }.map(_.mkString(",")).mkString("\n")
+
+    val fileName = s"${name}-${month}-sales-summary.csv"
+
+    val file = "filename=\"" + fileName + "\""
+
+    generateCSV(csvRows, file)
   }
 }

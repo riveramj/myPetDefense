@@ -8,10 +8,13 @@ import com.mypetdefense.actor._
 class DailyAgentReportEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
 
-    val agentData = ReportingService.findYesterdaySalesByAgent("TPP")
+    val dailAgentData = ReportingService.findYesterdaySalesByAgent("TPP")
+    val monthlyAgentData = ReportingService.findMTDSalesByAgent("TPP")
     
-    EmailActor ! DailySalesEmail(agentData, "mike.rivera@mypetdefense.com")
-    EmailActor ! DailySalesEmail(agentData, "silvia@thirdpartypet.com")
+    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "mike.rivera@mypetdefense.com")
+    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "silvia@thirdpartypet.com")
+    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "mike@canineregistrations.com")
+    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "melissa@thirdpartypet.com")
   }
 }
 
@@ -47,6 +50,6 @@ object FrequentSalesReportEmailJob extends TriggeredJob {
   val trigger = TriggerBuilder.newTrigger()
     .withIdentity("FrequentSalesReportEmailTrigger")
     .startNow
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * ? * *")) // fire every 5 minutes
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 5 minutes
     .build
 }
