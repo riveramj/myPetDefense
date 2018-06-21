@@ -50,6 +50,13 @@ case class DailySalesEmail(
   monthAgentNameAndCount: List[(String, Int)],
   email: String
 ) extends EmailActorMessage
+case class InternalDailyEmail(
+  newShipmentCount: Int,
+  paidShipmentCount: Int,
+  grossSales: Double,
+  cancelsCount: Int,
+  email: String
+) extends EmailActorMessage
 case class SendInvoicePaymentFailedEmail(
   user: User,
   amount: Double,
@@ -543,6 +550,41 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait InternalDailyEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case InternalDailyEmail(
+      newShipmentCount,
+      paidShipmentCount,
+      grossSales,
+      cancelsCount,
+      email
+    ) =>
+      val template =
+        Templates("emails-hidden" :: "internal-daily-email" :: Nil) openOr NodeSeq.Empty
+      
+      val yesterdayDate = LocalDateTime.now().minusDays(1)
+
+      val subjectDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH))
+      val headerDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH))
+      val monthYear = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+      
+      val subject = s"[$subjectDate] MPD Sales Report"
+      val hostUrl = Paths.serverUrl
+
+      val transform = {
+        "#shield-logo [src]" #> (hostUrl + "/images/logo/shield-logo@2x.png") &
+        ".date *" #> headerDate &
+        ".total-shipments *" #> (newShipmentCount + paidShipmentCount) &
+        ".gross-sales *" #> f"$$$grossSales%3.2f" &
+        ".new-shipments *" #> newShipmentCount &
+        ".paid-shipments *" #> paidShipmentCount &
+        ".total-cancellations *" #> cancelsCount
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -637,6 +679,7 @@ trait EmailActor extends EmailHandlerChain
                     with SendAPIErrorEmailHandling
                     with SendTppApiJsonEmailHandling
                     with DailySalesEmailHandling
+                    with InternalDailyEmailHandling
                     with TestimonialEmailHandling {
 
   val baseEmailTemplate = 
