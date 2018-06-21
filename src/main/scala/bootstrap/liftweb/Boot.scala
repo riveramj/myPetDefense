@@ -57,7 +57,6 @@ class Boot {
     DataLoader.loadProducts
     DataLoader.loadAdmin
     DataLoader.updateParentNoPets
-    //DataLoader.findCancellationRates
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")

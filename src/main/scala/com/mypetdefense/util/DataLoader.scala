@@ -227,43 +227,4 @@ object DataLoader extends Loggable {
         parent.getSubscription.map(_.status(Status.UserSuspended).saveMe)
     }
   }
-
-  def findCancellationRates = {
-    val tpp = Agency.find(By(Agency.name, "TPP"))
-
-    val users = tpp.map(_.customers.toList).openOr(Nil)
-    val subscriptions = users.map(_.subscription).flatten
-    val cancellations = subscriptions.filter { subscription =>
-      subscription.status.get == Status.Cancelled
-    }
-
-    val cancelsByShipmentsRaw = cancellations.map(_.shipments.toList)
-
-    val cancelsByDateShipped = cancelsByShipmentsRaw.map { shipments => 
-      shipments.map { shipment => 
-        val shipDate = tryo(shipment.dateShipped.get)
-
-        if (shipDate == Full(null))
-          Empty
-        else
-          shipDate
-
-      }.flatten
-    }
-
-    println(cancelsByDateShipped)
-
-    val cancelledByShipDateCount = cancelsByDateShipped.groupBy(_.size)
-
-    val cancelsByShipments = cancelledByShipDateCount.map { case (count, shipments) =>
-
-      (count, shipments.size)
-    }
-
-    println(s"Total customer count: ${subscriptions.size}")
-    println(s"Total cancellations count: ${cancellations.size}")
-    println()
-    println("Customers by shipment count:")
-    println(cancelsByShipments)
-  }
 }

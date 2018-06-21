@@ -33,6 +33,11 @@ object ReportingService extends Loggable {
 
   val spacerRow = List(List(","))
 
+  def getUsersForAgency(agencyName: String) = {
+    val agency = Agency.find(By(Agency.name, agencyName))
+    agency.map(_.customers.toList).openOr(Nil)
+  }
+
   def getShipmentAmountPaid(shipment: Shipment) = {
     val amountPaid = tryo(shipment.amountPaid.get.toDouble).getOrElse(0D)
     val taxesPaid = tryo(shipment.taxPaid.get.toDouble).getOrElse(0D) 
@@ -75,7 +80,11 @@ object ReportingService extends Loggable {
     val allShipments = subscriptions.map(_.shipments.toList).flatten
 
     allShipments filter { shipment =>
-      !getMailedDateOfShipment(shipment).isEmpty
+      val dateProcessed = getProcessDateOfShipment(shipment)
+
+      val legacyShipment_? = dateProcessed.isBefore(LocalDate.parse("2018-01-01"))
+
+      (!getMailedDateOfShipment(shipment).isEmpty || legacyShipment_?)
     }
   }
 
@@ -448,32 +457,6 @@ object ReportingService extends Loggable {
     println("========= month ^")
 
     Empty
-
-    /*
-    val processDate = getProcessDateOfShipment(shipment)
-
-    val amountPaid = getShipmentAmountPaid(shipment)
-    val commision = amountPaid * .35 
-
-    processDate.getYear.toString ::
-    processDate.getMonth.toString ::
-    processDate.toString ::
-    customer.userId.toString ::
-    customer.name ::
-    s"$$${amountPaid}" ::
-    customer.salesAgentId.get ::
-    f"$$$commision%2.2f" ::
-    subscription.status.toString ::
-    Nil
-
-    val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
-
-    val fileName = s"salesData-${fileNameYearMonth}.csv"
-
-    val file = "filename=\"" + fileName + "\""
-
-    generateCSV(csv, file)
-    */
 
   }
 
@@ -887,5 +870,34 @@ object ReportingService extends Loggable {
     val file = "filename=\"" + fileName + "\""
 
     generateCSV(csvRows, file)
+  }
+
+  def cancelsByShipment(subscriptions: List[Subscription]) = {
+    val cancellations = subscriptions.filter { subscription =>
+      subscription.status.get == Status.Cancelled
+    }
+
+    val cancelsByShipmentsRaw = cancellations.map(_.shipments.toList)
+
+    val cancelsByDateShipped = cancelsByShipmentsRaw.map { shipments => 
+      shipments.map { shipment => 
+        val shipDate = tryo(shipment.dateShipped.get)
+
+        if (shipDate == Full(null))
+          Empty
+        else
+          shipDate
+
+      }.flatten
+    }
+
+    val cancelledByShipDateCount = cancelsByDateShipped.groupBy(_.size)
+
+    val cancelsByShipments = cancelledByShipDateCount.map { case (count, shipments) =>
+
+      (count, shipments.size)
+    }
+
+    cancelsByShipments
   }
 }
