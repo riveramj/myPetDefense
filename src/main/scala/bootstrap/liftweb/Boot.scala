@@ -119,5 +119,4 @@ class Boot {
 
   // startup quartz scheduler
   JobManager.init()
-
 }

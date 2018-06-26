@@ -1,9 +1,12 @@
 package com.mypetdefense.util
 
 import com.mypetdefense.model._
+import com.mypetdefense.service.ReportingService
 import net.liftweb._
   import common._
   import util._
+  
+import net.liftweb.util.Helpers._
 import net.liftweb.mapper.By
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
 import dispatch._, Defaults._

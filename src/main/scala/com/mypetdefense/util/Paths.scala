@@ -144,6 +144,7 @@ object Paths {
     admin.Prices.menu,
     admin.Reviews.menu,
     admin.Coupons.menu,
+    admin.Reporting.menu,
     admin.Agencies.menu,
     admin.Agencies.salesDataExportMenu,
     admin.Agencies.cancellationExportMenu,
