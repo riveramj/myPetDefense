@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 import java.time.{LocalDate, ZoneId, LocalDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 object ReportingService extends Loggable {
   def currentDate = LocalDateTime.now()
@@ -64,6 +65,10 @@ object ReportingService extends Loggable {
     tryo(subscription.cancellationDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
   }
 
+  def getNextShipDate(subscription: Subscription) = {
+    subscription.nextShipDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+  }
+
   def getSubscriptions(users: List[User]) = {
     users.map(_.subscription.toList).flatten
   }
@@ -76,16 +81,20 @@ object ReportingService extends Loggable {
     }
   }
 
-  def getShipments(subscriptions: List[Subscription]) = {
-    val allShipments = subscriptions.map(_.shipments.toList).flatten
-
-    allShipments filter { shipment =>
+  def filterMailedShipments (shipments: List[Shipment]) = {
+    shipments filter { shipment =>
       val dateProcessed = getProcessDateOfShipment(shipment)
 
       val legacyShipment_? = dateProcessed.isBefore(LocalDate.parse("2018-01-01"))
 
       (!getMailedDateOfShipment(shipment).isEmpty || legacyShipment_?)
     }
+  }
+
+  def getShipments(subscriptions: List[Subscription]) = {
+    val allShipments = subscriptions.map(_.shipments.toList).flatten
+
+    filterMailedShipments(allShipments)
   }
 
   def getPetCount(shipments: List[Shipment]) = {
@@ -873,31 +882,28 @@ object ReportingService extends Loggable {
   }
 
   def cancelsByShipment(subscriptions: List[Subscription]) = {
-    val cancellations = subscriptions.filter { subscription =>
-      subscription.status.get == Status.Cancelled
+    def findCancellationShipmentSize(subscriptions: List[Subscription]) = {
+      subscriptions.map { subscription =>
+        val shipments = subscription.shipments.toList
+
+        val mailedShipments = filterMailedShipments(shipments)
+
+        mailedShipments.size
+      }
     }
 
-    val cancelsByShipmentsRaw = cancellations.map(_.shipments.toList)
+    val cancellations = subscriptions.filter(_.status.get == Status.Cancelled)
+    
+    val cancellationCount: Double = cancellations.size
 
-    val cancelsByDateShipped = cancelsByShipmentsRaw.map { shipments => 
-      shipments.map { shipment => 
-        val shipDate = tryo(shipment.dateShipped.get)
+    val cancellationShipments = findCancellationShipmentSize(cancellations)
+    
+    val cancellationTimes = (List(0, 1, 3).map { count =>
+      val totalForCount = cancellationShipments.filter(_ == count).size
+      
+      (count.toString, totalForCount)
+    }) ++ List(("3+", cancellationShipments.filter(_ > 3).size))
 
-        if (shipDate == Full(null))
-          Empty
-        else
-          shipDate
-
-      }.flatten
-    }
-
-    val cancelledByShipDateCount = cancelsByDateShipped.groupBy(_.size)
-
-    val cancelsByShipments = cancelledByShipDateCount.map { case (count, shipments) =>
-
-      (count, shipments.size)
-    }
-
-    cancelsByShipments
+    cancellationTimes
   }
 }
