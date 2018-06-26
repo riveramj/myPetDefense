@@ -62,7 +62,7 @@ class Reporting extends Loggable {
 
     val sanitizedNamesSorted = ListMap(upcomingCounts.toSeq.sortBy(_._1):_*)
 
-    ".forecast-dates *" #> s"$currentDate to $endForecastDate Exiting Users" &
+    ".forecast-dates span *" #> s"$currentDate to $endForecastDate" &
     ".product-info " #> sanitizedNamesSorted.map { case (productName, count) =>
       ".product *" #> productName &
       ".count *" #> count

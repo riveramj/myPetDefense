@@ -232,7 +232,10 @@ section.agency {
 .forecast-dates {
   margin-bottom: 7px;
   font-size: 14px;
-  color: #2E9F9B;
+  
+  span {
+    color: #2E9F9B;
+  }
 }
 
 .forecasting h3 {
