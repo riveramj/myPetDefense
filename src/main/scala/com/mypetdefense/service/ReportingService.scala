@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 import java.time.{LocalDate, ZoneId, LocalDateTime}
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 object ReportingService extends Loggable {
   def currentDate = LocalDateTime.now()
@@ -32,6 +33,11 @@ object ReportingService extends Loggable {
   val monthHeaders = "January" :: "February" :: "March" :: "April" :: "May" :: "June" :: "July" :: "August" :: "September" :: "October" :: "November" :: "December" :: Nil
 
   val spacerRow = List(List(","))
+
+  def getUsersForAgency(agencyName: String) = {
+    val agency = Agency.find(By(Agency.name, agencyName))
+    agency.map(_.customers.toList).openOr(Nil)
+  }
 
   def getShipmentAmountPaid(shipment: Shipment) = {
     val amountPaid = tryo(shipment.amountPaid.get.toDouble).getOrElse(0D)
@@ -59,6 +65,10 @@ object ReportingService extends Loggable {
     tryo(subscription.cancellationDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
   }
 
+  def getNextShipDate(subscription: Subscription) = {
+    subscription.nextShipDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+  }
+
   def getSubscriptions(users: List[User]) = {
     users.map(_.subscription.toList).flatten
   }
@@ -71,12 +81,20 @@ object ReportingService extends Loggable {
     }
   }
 
+  def filterMailedShipments (shipments: List[Shipment]) = {
+    shipments filter { shipment =>
+      val dateProcessed = getProcessDateOfShipment(shipment)
+
+      val legacyShipment_? = dateProcessed.isBefore(LocalDate.parse("2018-01-01"))
+
+      (!getMailedDateOfShipment(shipment).isEmpty || legacyShipment_?)
+    }
+  }
+
   def getShipments(subscriptions: List[Subscription]) = {
     val allShipments = subscriptions.map(_.shipments.toList).flatten
 
-    allShipments filter { shipment =>
-      !getMailedDateOfShipment(shipment).isEmpty
-    }
+    filterMailedShipments(allShipments)
   }
 
   def getPetCount(shipments: List[Shipment]) = {
@@ -448,32 +466,6 @@ object ReportingService extends Loggable {
     println("========= month ^")
 
     Empty
-
-    /*
-    val processDate = getProcessDateOfShipment(shipment)
-
-    val amountPaid = getShipmentAmountPaid(shipment)
-    val commision = amountPaid * .35 
-
-    processDate.getYear.toString ::
-    processDate.getMonth.toString ::
-    processDate.toString ::
-    customer.userId.toString ::
-    customer.name ::
-    s"$$${amountPaid}" ::
-    customer.salesAgentId.get ::
-    f"$$$commision%2.2f" ::
-    subscription.status.toString ::
-    Nil
-
-    val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
-
-    val fileName = s"salesData-${fileNameYearMonth}.csv"
-
-    val file = "filename=\"" + fileName + "\""
-
-    generateCSV(csv, file)
-    */
 
   }
 
@@ -887,5 +879,31 @@ object ReportingService extends Loggable {
     val file = "filename=\"" + fileName + "\""
 
     generateCSV(csvRows, file)
+  }
+
+  def cancelsByShipment(subscriptions: List[Subscription]) = {
+    def findCancellationShipmentSize(subscriptions: List[Subscription]) = {
+      subscriptions.map { subscription =>
+        val shipments = subscription.shipments.toList
+
+        val mailedShipments = filterMailedShipments(shipments)
+
+        mailedShipments.size
+      }
+    }
+
+    val cancellations = subscriptions.filter(_.status.get == Status.Cancelled)
+    
+    val cancellationCount: Double = cancellations.size
+
+    val cancellationShipments = findCancellationShipmentSize(cancellations)
+    
+    val cancellationTimes = (List(0, 1, 3).map { count =>
+      val totalForCount = cancellationShipments.filter(_ == count).size
+      
+      (count.toString, totalForCount)
+    }) ++ List(("3+", cancellationShipments.filter(_ > 3).size))
+
+    cancellationTimes
   }
 }
