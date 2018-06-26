@@ -211,11 +211,6 @@ object TPPApi extends RestHelper with Loggable {
             val updatedUser = updatedParent.map(_.coupon(coupon).saveMe)
 
             updatedUser.map { user =>
-              if (Props.mode == Props.RunModes.Production) {
-                if (newUser)
-                  EmailActor ! NewSaleEmail(user, pets.size, "TPP")
-              }
-
               if (newUser)
                 EmailActor ! SendNewUserEmail(user)
             }
