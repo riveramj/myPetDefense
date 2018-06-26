@@ -1,0 +1,57 @@
+<div id="main" data-lift="surround?with=default-template;at=content"> 
+<div data-lift="admin.Reporting.render?eager_eval=true">
+  <div data-lift="embed?what=admin/admin-nav-bar"></div>
+  <div id="item-container" class="reporting">
+    <h2>Reporting</h2>
+    <h3 class="cancellation-rates">Cancellation Rates</h2>
+    <section class="agency">
+      <h3 class="agency-name">TPP</h3>
+      <div class="average-shipments">
+        Avg Shipments: <span class="shipments">1.0</span>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <td>Shipment Count</td>
+            <td>Cancellations</td>
+            <td>% of Total Cancels</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="cancel-detail">
+            <td class="shipment-count">0</td>
+            <td class="cancellations">150</td>
+            <td class="cancel-rate">15%</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="forecasting">
+      <h3>Forecasting</h3>
+      <h4 class="forecast-dates"><span>Jan 1 - Feb 15</span> Existing Users</h4>
+      <table>
+        <thead>
+          <tr>
+            <td>Product</td>
+            <td>Count</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="product-info">
+            <td class="product">zoguard plus 4-22</td>
+            <td class="count">100</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=admin">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+  </tail>
+</div></div>
+
