@@ -2,6 +2,7 @@
 @import "nav-bar";
 @import "shopping-bar";
 @import "flow";
+@import "footer";
 
 .pet-count {
   @media (min-width: $bp-medium) {
@@ -13,6 +14,10 @@
 
 .current-step {
   text-align: left;
+
+  @media (min-width: $bp-large) {
+    margin-bottom: 60px;
+  }
 }
 
 .step-choice.pet-details {
@@ -286,7 +291,7 @@ fieldset label {
 }
 
 .signup-container {
-  margin-bottom: rem(37px);
+  margin-bottom: rem(50px);
   @include span-columns(10);
   @include shift(1);
 
