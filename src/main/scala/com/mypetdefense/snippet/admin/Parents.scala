@@ -313,6 +313,17 @@ class Parents extends Loggable {
       )
     }
 
+    def updatePetInfo(newInfo: String, infoType: String, pet: Pet) = {
+
+      infoType match {
+        case "name" => pet.name(newInfo).saveMe
+        case "breed" => pet.breed(newInfo).saveMe
+        case _ => pet
+      }
+      
+      Noop
+    }
+
     ".parent-pets" #> idMemoize { renderer =>
       ".create" #> {
         ".new-pet-name" #> ajaxText(petName, petName = _) &
@@ -335,8 +346,8 @@ class Parents extends Loggable {
         ".pet" #> pets.map { pet =>
           val birthday = tryo(birthdayFormat.format(pet.birthday.get))
 
-          ".pet-name *" #> pet.name &
-          ".pet-breed *" #> pet.breed &
+          ".pet-name" #> SHtml.ajaxText(pet.name.get, possiblePetName => updatePetInfo(possiblePetName, "name", pet)) &
+          ".pet-breed" #> SHtml.ajaxText(pet.breed.get, possibleBreed => updatePetInfo(possibleBreed, "breed", pet)) &
           ".pet-birthday *" #> birthday &
           ".pet-type *" #> pet.animalType.toString &
           ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &

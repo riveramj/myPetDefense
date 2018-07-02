@@ -118,19 +118,6 @@ fieldset.add-pet, fieldset.add-coupon {
     display: inline-block;
   }
 
-  input {
-    width: 100%;
-    color: #4F4E4E;
-    font-size: em(22px);
-    border: 1px solid #CECECE;
-    padding: rem(7px) rem(10px);
-    border-radius: 3px;
-
-    @include placeholder {
-      color: #949494;
-    }
-  }
-
   form {
     background-color: inherit;
     width: 100%;
@@ -226,4 +213,17 @@ button.create-item.change-to-billing-suspended, button.create-item.change-to-use
 
 .change-stripe-subscription label {
   width: 208px;
+}
+
+input[type="text"] {
+  width: 100%;
+  color: #4F4E4E;
+  font-size: em(22px);
+  border: 1px solid #CECECE;
+  padding: rem(7px) rem(10px);
+  border-radius: 3px;
+
+  @include placeholder {
+    color: #949494;
+  }
 }
