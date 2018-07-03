@@ -1,9 +1,13 @@
 <div class="parent-details parent-information active">
   <ul class="information">
     <li>
-      <h3>Address</h3>
+      <h3>Address <button class="copy-address">Copy Address</button></h3>
       <form class="address">
         <ul>
+          <li class="parent-name">
+            <input type="text" class="first-name">
+            <input type="text" class="last-name">
+          </li>
           <li>
             <input type="text" class="address-1">
           </li>
@@ -16,6 +20,16 @@
         </ul>
       </form>
     </li>
+    <li class="stripe-subscription">
+      <h3>Stripe Subscription</h3>
+      <form class="change-stripe-subscription">
+        <label>
+          <span class="field-label">Change Subscription Id</span>
+          <input class="stripe-subscription-id" type="text" value="sub_12345">            
+        </label>
+        <button type="submit" class="create-item change-id">Change Stripe Id</button>
+      </form>
+    </li>
     <li class="billing-status">
       <h3>Billing Status</h3>
       <form class="change-billing">
@@ -25,16 +39,6 @@
         <button type="submit" class="create-item change-billing-status change-to-active">Change to Active</button>
         <button type="submit" class="create-item change-billing-status change-to-user-suspended">Change to <span class="suspend-type">User</span> Suspended</button>
         <button type="submit" class="create-item change-billing-status change-to-billing-suspended">Change to <span class="suspend-type">Billing</span> Suspended</button>
-      </form>
-    </li>
-    <li class="stripe-subscription">
-      <h3>Stripe Subscription</h3>
-      <form class="change-stripe-subscription">
-        <label>
-          <span class="field-label">Change Subscription Id</span>
-          <input class="stripe-subscription-id" type="text" value="sub_12345">            
-        </label>
-        <button type="submit" class="create-item change-id">Change Stripe Id</button>
       </form>
     </li>
   </ul>

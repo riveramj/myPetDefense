@@ -91,6 +91,8 @@ fieldset.add-pet, fieldset.add-coupon {
 }
 
 .information {
+  display: inline-block;
+
   .address {
     span {
       font-size: em(18px);
@@ -109,26 +111,13 @@ fieldset.add-pet, fieldset.add-coupon {
 
   > li {
     display: inline-block;
-    margin-right: 35px;
     vertical-align: top;
+    float: left
   }
 
   label {
     width: 160px;
     display: inline-block;
-  }
-
-  input {
-    width: 100%;
-    color: #4F4E4E;
-    font-size: em(22px);
-    border: 1px solid #CECECE;
-    padding: rem(7px) rem(10px);
-    border-radius: 3px;
-
-    @include placeholder {
-      color: #949494;
-    }
   }
 
   form {
@@ -138,6 +127,11 @@ fieldset.add-pet, fieldset.add-coupon {
 
   .stripe-subscription {
     margin-right: 0;
+    float: right;
+  }
+
+  .billing-status {
+    float: right;
   }
 }
 
@@ -226,4 +220,32 @@ button.create-item.change-to-billing-suspended, button.create-item.change-to-use
 
 .change-stripe-subscription label {
   width: 208px;
+}
+
+input[type="text"] {
+  width: 100%;
+  color: #4F4E4E;
+  font-size: em(22px);
+  border: 1px solid #CECECE;
+  padding: rem(7px) rem(10px);
+  border-radius: 3px;
+
+  @include placeholder {
+    color: #949494;
+  }
+}
+
+.parent-name {
+  input {
+    width: 48%;
+    display: inline-block;
+  }
+}
+
+.copy-address {
+  background-color: initial;
+  border: none;
+  text-decoration: underline;
+  color: #2E9F9B;
+  cursor: pointer;
 }
