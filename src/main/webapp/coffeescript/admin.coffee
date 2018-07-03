@@ -24,3 +24,22 @@ $(document).ready ->
   $('.dashboard-nav').on "click", 'button', (event) ->
     $(event.target).parent().siblings().removeClass('active')
     $(event.target).parent().addClass('active')
+
+  $("body").on "click", ".copy-address", (event) ->
+    firstName = $(event.target).parent().siblings().find('.first-name').val()
+    lastName = $(event.target).parent().siblings().find('.last-name').val()
+    address1 = $(event.target).parent().siblings().find('.address-1').val()
+    address2 = $(event.target).parent().siblings().find('.address-2').val()
+    city = $(event.target).parent().siblings().find('.city').val()
+    state = $(event.target).parent().siblings().find('.state').val()
+    zip = $(event.target).parent().siblings().find('.zip').val()
+
+    address = "#{firstName} #{lastName}\n#{address1}\n#{address2}\n#{city},#{state} #{zip}"
+    
+    dummyInput = $('<textarea>').val(address).appendTo('body').select()
+
+    document.execCommand('copy')
+   
+    dummyInput.remove()
+
+    alert "Address copied to clipboard"

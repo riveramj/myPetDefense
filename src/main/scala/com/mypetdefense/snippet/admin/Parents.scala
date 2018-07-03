@@ -253,7 +253,22 @@ class Parents extends Loggable {
       Noop
     }
 
+    def updateParentName(name: String, namePart: String, parent: Box[User]) = {
+      namePart match {
+        case "firstName" => parent.map(_.firstName(name).saveMe)
+        case "lastName" => parent.map(_.lastName(name).saveMe)
+        case _ => Full(parent)
+      }
+    
+      Noop
+    }
+
     ".parent-information .address" #> {
+      val firstName = parent.map(_.firstName.get).openOr("")
+      val lastName = parent.map(_.lastName.get).openOr("")
+
+      ".first-name" #> SHtml.ajaxText(firstName, possibleName => updateParentName(possibleName, "firstName", parent)) &
+      ".last-name" #> SHtml.ajaxText(lastName, possibleName => updateParentName(possibleName, "lastName", parent)) &
       ".address-1" #> SHtml.ajaxText(street1, possibleAddress => updateAddress(possibleAddress, "street1", address)) &
       ".address-2" #> SHtml.ajaxText(street2, possibleAddress => updateAddress(possibleAddress, "street2", address)) &
       ".city" #> SHtml.ajaxText(city, possibleAddress => updateAddress(possibleAddress, "city", address)) &
@@ -313,6 +328,17 @@ class Parents extends Loggable {
       )
     }
 
+    def updatePetInfo(newInfo: String, infoType: String, pet: Pet) = {
+
+      infoType match {
+        case "name" => pet.name(newInfo).saveMe
+        case "breed" => pet.breed(newInfo).saveMe
+        case _ => pet
+      }
+      
+      Noop
+    }
+
     ".parent-pets" #> idMemoize { renderer =>
       ".create" #> {
         ".new-pet-name" #> ajaxText(petName, petName = _) &
@@ -335,8 +361,8 @@ class Parents extends Loggable {
         ".pet" #> pets.map { pet =>
           val birthday = tryo(birthdayFormat.format(pet.birthday.get))
 
-          ".pet-name *" #> pet.name &
-          ".pet-breed *" #> pet.breed &
+          ".pet-name" #> SHtml.ajaxText(pet.name.get, possiblePetName => updatePetInfo(possiblePetName, "name", pet)) &
+          ".pet-breed" #> SHtml.ajaxText(pet.breed.get, possibleBreed => updatePetInfo(possibleBreed, "breed", pet)) &
           ".pet-birthday *" #> birthday &
           ".pet-type *" #> pet.animalType.toString &
           ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
