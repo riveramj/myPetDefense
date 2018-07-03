@@ -241,3 +241,11 @@ input[type="text"] {
     display: inline-block;
   }
 }
+
+.copy-address {
+  background-color: initial;
+  border: none;
+  text-decoration: underline;
+  color: #2E9F9B;
+  cursor: pointer;
+}
