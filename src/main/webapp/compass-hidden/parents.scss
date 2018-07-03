@@ -91,6 +91,8 @@ fieldset.add-pet, fieldset.add-coupon {
 }
 
 .information {
+  display: inline-block;
+
   .address {
     span {
       font-size: em(18px);
@@ -109,8 +111,8 @@ fieldset.add-pet, fieldset.add-coupon {
 
   > li {
     display: inline-block;
-    margin-right: 35px;
     vertical-align: top;
+    float: left
   }
 
   label {
@@ -125,6 +127,11 @@ fieldset.add-pet, fieldset.add-coupon {
 
   .stripe-subscription {
     margin-right: 0;
+    float: right;
+  }
+
+  .billing-status {
+    float: right;
   }
 }
 
@@ -225,5 +232,12 @@ input[type="text"] {
 
   @include placeholder {
     color: #949494;
+  }
+}
+
+.parent-name {
+  input {
+    width: 48%;
+    display: inline-block;
   }
 }

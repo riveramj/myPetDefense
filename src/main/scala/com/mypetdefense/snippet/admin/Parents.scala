@@ -253,7 +253,23 @@ class Parents extends Loggable {
       Noop
     }
 
+    def updateParentName(name: String, namePart: String, parent: Box[User]) = {
+      namePart match {
+        case "firstName" => parent.map(_.firstName(name).saveMe)
+        case "lastName" => parent.map(_.lastName(name).saveMe)
+        case _ => Full(parent)
+      }
+    
+      Noop
+    }
+
     ".parent-information .address" #> {
+      val firstName = parent.map(_.firstName.get).openOr("")
+      val lastName = parent.map(_.lastName.get).openOr("")
+
+      ".first-name" #> SHtml.ajaxText(firstName, possibleName => updateParentName(possibleName, "firstName", parent)) &
+      ".last-name" #> SHtml.ajaxText(lastName, possibleName => updateParentName(possibleName, "lastName", parent)) &
+      ".address-1" #> SHtml.ajaxText(street1, possibleAddress => updateAddress(possibleAddress, "street1", address)) &
       ".address-1" #> SHtml.ajaxText(street1, possibleAddress => updateAddress(possibleAddress, "street1", address)) &
       ".address-2" #> SHtml.ajaxText(street2, possibleAddress => updateAddress(possibleAddress, "street2", address)) &
       ".city" #> SHtml.ajaxText(city, possibleAddress => updateAddress(possibleAddress, "city", address)) &
