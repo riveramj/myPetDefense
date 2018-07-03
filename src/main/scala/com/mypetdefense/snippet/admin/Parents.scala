@@ -270,7 +270,6 @@ class Parents extends Loggable {
       ".first-name" #> SHtml.ajaxText(firstName, possibleName => updateParentName(possibleName, "firstName", parent)) &
       ".last-name" #> SHtml.ajaxText(lastName, possibleName => updateParentName(possibleName, "lastName", parent)) &
       ".address-1" #> SHtml.ajaxText(street1, possibleAddress => updateAddress(possibleAddress, "street1", address)) &
-      ".address-1" #> SHtml.ajaxText(street1, possibleAddress => updateAddress(possibleAddress, "street1", address)) &
       ".address-2" #> SHtml.ajaxText(street2, possibleAddress => updateAddress(possibleAddress, "street2", address)) &
       ".city" #> SHtml.ajaxText(city, possibleAddress => updateAddress(possibleAddress, "city", address)) &
       ".state" #> SHtml.ajaxText(state, possibleAddress => updateAddress(possibleAddress, "state", address)) &
