@@ -30,7 +30,10 @@
 
     <section class="forecasting">
       <h3>Forecasting</h3>
-      <h4 class="forecast-dates"><span>Jan 1 - Feb 15</span> Existing Users</h4>
+      <div class="forecast-dates">
+        From: <input type="text" class="from-date" placeholder="MM/DD/YYYY">
+        To: <input type="text" class="to-date" placeholder="MM/DD/YYYY">
+      </div>
       <table>
         <thead>
           <tr>
@@ -38,7 +41,7 @@
             <td>Count</td>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="product-forecasting">
           <tr class="product-info">
             <td class="product">zoguard plus 4-22</td>
             <td class="count">100</td>
