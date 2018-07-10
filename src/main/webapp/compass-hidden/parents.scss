@@ -164,7 +164,7 @@ div.create-item-container.create-coupon-container {
   padding-bottom: 20px;
 }
 
-.stripe-payment {
+.stripe-payment, .tracking-number a {
   color: #259490;
 
   &:visited {

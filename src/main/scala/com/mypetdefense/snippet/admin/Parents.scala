@@ -459,7 +459,8 @@ class Parents extends Loggable {
         ".pet-product *" #> itemShipped
       }} &
       ".address *" #> shipment.address.get &
-      ".tracking-number *" #> shipment.trackingNumber.get &
+      ".tracking-number a [href]" #> s"https://tools.usps.com/go/TrackConfirmAction?tLabels=${shipment.trackingNumber.get}" &
+      ".tracking-number a *" #> shipment.trackingNumber.get &
       ".shipment-actions .delete [onclick]" #> Confirm(
         "Delete this shipment? This cannot be undone!",
         ajaxInvoke(deleteShipment(detailsRenderer, shipment) _)
