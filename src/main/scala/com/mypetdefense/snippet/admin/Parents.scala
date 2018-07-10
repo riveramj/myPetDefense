@@ -445,7 +445,7 @@ class Parents extends Loggable {
       } else {
         ".parent-shipments" #> PassThru
       }
-    } &
+    } andThen
     ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
     ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
     ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
@@ -459,8 +459,8 @@ class Parents extends Loggable {
         ".pet-product *" #> itemShipped
       }} &
       ".address *" #> shipment.address.get &
-      ".tracking-number a [href]" #> s"https://tools.usps.com/go/TrackConfirmAction?tLabels=${shipment.trackingNumber.get}" &
-      ".tracking-number a *" #> shipment.trackingNumber.get &
+      ".tracking-number-container .tracking-number [href]" #> s"https://tools.usps.com/go/TrackConfirmAction?tLabels=${shipment.trackingNumber.get}" &
+      ".tracking-number-container .tracking-number *" #> shipment.trackingNumber.get &
       ".shipment-actions .delete [onclick]" #> Confirm(
         "Delete this shipment? This cannot be undone!",
         ajaxInvoke(deleteShipment(detailsRenderer, shipment) _)
@@ -509,8 +509,8 @@ class Parents extends Loggable {
         "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
         ".parent-info" #> {
           if (!currentParent.isEmpty) {
-            petBindings &
-            shipmentBindings(detailsRenderer, subscription) &
+            petBindings andThen
+            shipmentBindings(detailsRenderer, subscription) andThen
             parentInformationBinding(detailsRenderer, subscription)
           }
           else {
