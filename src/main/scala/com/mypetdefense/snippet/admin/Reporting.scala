@@ -13,8 +13,11 @@ import scala.collection.immutable.ListMap
 import com.mypetdefense.model._
 import com.mypetdefense.service.ReportingService
 
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale}
+import java.time.{LocalDate, ZoneId}
+import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import java.time.LocalDate
 
 object Reporting extends Loggable {
   import net.liftweb.sitemap._
@@ -27,45 +30,70 @@ object Reporting extends Loggable {
 }
 
 class Reporting extends Loggable {
-  val currentDate = LocalDate.now()
-  val endForecastDate = currentDate.plusDays(14)
-
   val agencies = Agency.findAll().map(_.name.get)
   val allSubscriptions = Subscription.findAll(By(Subscription.status, Status.Active))
 
+  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val localDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
+  val currentDate = LocalDate.now()
+
+  var fromDate = currentDate.format(localDateFormat)
+  var toDate = currentDate.plusDays(14).format(localDateFormat)
+
   def convertToPercentage(percent: Double) = f"${percent*100}%.1f%%"
 
+  def convertForecastingDates(date: String) = {
+    
+    val parsedDate = dateFormat.parse(date)
+
+    parsedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+  }
+
   val forecastingCounts = {
-    val upcomingSubscriptions = allSubscriptions.filter { subscription =>
+    def upcomingSubscriptionProducts = {
+      val startDate = convertForecastingDates(fromDate)
+      val endDate = convertForecastingDates(toDate)
 
-      val nextShipDate = ReportingService.getNextShipDate(subscription)
-      
-      nextShipDate.isBefore(endForecastDate)
-    }
-  
-    val upcomingProducts = upcomingSubscriptions.flatMap(_.getProducts).map(_.getNameAndSize)
+      val upcomingSubscriptions = allSubscriptions.filter { subscription =>
 
-    val sanitizedNames = upcomingProducts.map { name =>
-      name match {
-        case product if product.contains("4-22") =>
-          "ZoGuard Plus for Dogs 04-22 lbs"
-        case product if product.contains("3-10") =>
-          "Adventure Plus for Dogs, 3-10 lbs"
-        case product if product.contains("5-15") =>
-          "ShieldTec Plus for Dogs, 05-15 lbs"
-        case product => 
-          product
+        val nextShipDate = ReportingService.getNextShipDate(subscription)
+
+        (nextShipDate.isAfter(startDate.minusDays(1)) && nextShipDate.isBefore(endDate.plusDays(1)))
       }
+
+      upcomingSubscriptions.flatMap(_.getProducts).map(_.getNameAndSize)
     }
 
-    val upcomingCounts = sanitizedNames.groupBy(identity).mapValues(_.size).toList
+    ".forecasting" #> idMemoize { renderer =>
+      val sanitizedNames = upcomingSubscriptionProducts.map { name =>
+        name match {
+          case product if product.contains("4-22") =>
+            "ZoGuard Plus for Dogs 04-22 lbs"
+          case product if product.contains("3-10") =>
+            "Adventure Plus for Dogs, 3-10 lbs"
+          case product if product.contains("5-15") =>
+            "ShieldTec Plus for Dogs, 05-15 lbs"
+          case product => 
+            product
+        }
+      }
 
-    val sanitizedNamesSorted = ListMap(upcomingCounts.toSeq.sortBy(_._1):_*)
+      val upcomingCounts = sanitizedNames.groupBy(identity).mapValues(_.size).toList
 
-    ".forecast-dates span *" #> s"$currentDate to $endForecastDate" &
-    ".product-info " #> sanitizedNamesSorted.map { case (productName, count) =>
-      ".product *" #> productName &
-      ".count *" #> count
+      val sanitizedNamesSorted = ListMap(upcomingCounts.toSeq.sortBy(_._1):_*)
+      
+      ".from-date" #> SHtml.ajaxText(fromDate, possibleFromDate => {
+        fromDate = possibleFromDate
+        renderer.setHtml
+      }) &
+      ".to-date" #> SHtml.ajaxText(toDate, possibleToDate => {
+        toDate = possibleToDate
+        renderer.setHtml
+      }) &
+      ".product-info " #> sanitizedNamesSorted.map { case (productName, count) =>
+        ".product *" #> productName &
+        ".count *" #> count
+      }
     }
   }
 

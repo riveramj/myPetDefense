@@ -7,7 +7,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.util.Props
 import net.liftweb.util.ClearNodes
 import net.liftweb.common._
-import net.liftweb.util.ClearClearable
+import net.liftweb.util._
 import net.liftweb.http._
   import js.JsCmds._
 import net.liftweb.mapper.By
@@ -75,7 +75,7 @@ object Parents extends Loggable {
 }
 
 class Parents extends Loggable {
-  val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
+  val parents = User.findAll(By(User.userType, UserType.Parent))
   
   var petType: Box[AnimalType.Value] = Empty
   var chosenProduct: Box[Product] = Empty
@@ -96,6 +96,33 @@ class Parents extends Loggable {
 
   var parentDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var currentParent: Box[User] = Empty
+
+  def isCancelled_?(parent: Box[User]): Boolean = {
+    parent.map(isCancelled_?).openOr(false)
+  }
+
+  def isCancelled_?(parent: User): Boolean = {
+    parent.status.get == Status.Cancelled
+  }
+
+  def findCancelledUser(parent: User) = {
+    CancelledUser.find(By(CancelledUser.user, parent.userId.get))
+  }
+
+  def getParentInfo(parent: User, info: String) = {
+    (isCancelled_?(parent), info) match {
+      case (true, "name") =>
+        findCancelledUser(parent).map(_.name).openOr("")
+      case (true, "email") =>
+        findCancelledUser(parent).map(_.email.get).openOr("")
+      case (false, "name") =>
+        parent.name
+      case (false, "email") =>
+        parent.email.get
+      case (_, _) =>
+        ""
+    }
+  }
 
   def petTypeRadio(renderer: IdMemoizeTransform) = {
     ajaxRadio(
@@ -206,6 +233,13 @@ class Parents extends Loggable {
     detailsRenderer.setHtml
   }
 
+  def displayNextShipDate(shipmentDate: Option[String], cancelled: Boolean) = {
+    if (cancelled)
+      "-"
+    else
+      shipmentDate.getOrElse("")
+  }
+
   def parentInformationBinding(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]) = {
     val parent = currentParent
     val address = parent.flatMap(_.addresses.toList.headOption)
@@ -263,6 +297,14 @@ class Parents extends Loggable {
       Noop
     }
 
+    { 
+      if (isCancelled_?(parent)) {
+        ".parent-information" #> ClearNodes &
+        ".parent-information [class-]" #> "active"
+      } else {
+        ".parent-information" #> PassThru
+      }
+    } &
     ".parent-information .address" #> {
       val firstName = parent.map(_.firstName.get).openOr("")
       val lastName = parent.map(_.lastName.get).openOr("")
@@ -339,6 +381,7 @@ class Parents extends Loggable {
       Noop
     }
 
+    ".parent-pets" #> ClearNodesIf(isCancelled_?(parent)) &
     ".parent-pets" #> idMemoize { renderer =>
       ".create" #> {
         ".new-pet-name" #> ajaxText(petName, petName = _) &
@@ -395,6 +438,14 @@ class Parents extends Loggable {
       detailsRenderer.setHtml
     }
 
+    { 
+      if (isCancelled_?(parent)) {
+        ".parent-shipments [class+]" #> "active" &
+        ".change-ship-date-container" #> ClearNodes
+      } else {
+        ".parent-shipments" #> PassThru
+      }
+    } andThen
     ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
     ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
     ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
@@ -408,7 +459,8 @@ class Parents extends Loggable {
         ".pet-product *" #> itemShipped
       }} &
       ".address *" #> shipment.address.get &
-      ".tracking-number *" #> shipment.trackingNumber.get &
+      ".tracking-number-container .tracking-number [href]" #> s"https://tools.usps.com/go/TrackConfirmAction?tLabels=${shipment.trackingNumber.get}" &
+      ".tracking-number-container .tracking-number *" #> shipment.trackingNumber.get &
       ".shipment-actions .delete [onclick]" #> Confirm(
         "Delete this shipment? This cannot be undone!",
         ajaxInvoke(deleteShipment(detailsRenderer, shipment) _)
@@ -427,12 +479,14 @@ class Parents extends Loggable {
         val nextShipDate = subscription.map(_.nextShipDate.get)
 
         ".parent" #> {
-          ".name *" #> parent.name &
-          ".email *" #> parent.email &
+          ".name *" #> getParentInfo(parent, "name") &
+          ".email *" #> getParentInfo(parent, "email") &
           ".billing-status *" #> subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
           ".referer *" #> refererName &
-          ".ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
+          ".ship-date *" #> displayNextShipDate(nextShipDate.map(dateFormat.format(_)), isCancelled_?(parent)) &
           ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
+          ".actions .delete" #> ClearNodesIf(isCancelled_?(parent)) &
+          ".actions .cancel" #> ClearNodesIf(isCancelled_?(parent)) &
           ".actions .delete [onclick]" #> Confirm(
             s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
             ajaxInvoke(deleteParent(parent) _)
@@ -455,8 +509,8 @@ class Parents extends Loggable {
         "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
         ".parent-info" #> {
           if (!currentParent.isEmpty) {
-            petBindings &
-            shipmentBindings(detailsRenderer, subscription) &
+            petBindings andThen
+            shipmentBindings(detailsRenderer, subscription) andThen
             parentInformationBinding(detailsRenderer, subscription)
           }
           else {
