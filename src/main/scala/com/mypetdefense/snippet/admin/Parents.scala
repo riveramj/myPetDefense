@@ -105,6 +105,25 @@ class Parents extends Loggable {
     parent.status.get == Status.Cancelled
   }
 
+  def findCancelledUser(parent: User) = {
+    CancelledUser.find(By(CancelledUser.user, parent.userId.get))
+  }
+
+  def getParentInfo(parent: User, info: String) = {
+    (isCancelled_?(parent), info) match {
+      case (true, "name") =>
+        findCancelledUser(parent).map(_.name).openOr("")
+      case (true, "email") =>
+        findCancelledUser(parent).map(_.email.get).openOr("")
+      case (false, "name") =>
+        parent.name
+      case (false, "email") =>
+        parent.email.get
+      case (_, _) =>
+        ""
+    }
+  }
+
   def petTypeRadio(renderer: IdMemoizeTransform) = {
     ajaxRadio(
       List(AnimalType.Dog, AnimalType.Cat),
@@ -459,8 +478,8 @@ class Parents extends Loggable {
         val nextShipDate = subscription.map(_.nextShipDate.get)
 
         ".parent" #> {
-          ".name *" #> parent.name &
-          ".email *" #> parent.email &
+          ".name *" #> getParentInfo(parent, "name") &
+          ".email *" #> getParentInfo(parent, "email") &
           ".billing-status *" #> subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
           ".referer *" #> refererName &
           ".ship-date *" #> displayNextShipDate(nextShipDate.map(dateFormat.format(_)), isCancelled_?(parent)) &
