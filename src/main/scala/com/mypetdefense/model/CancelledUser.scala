@@ -29,6 +29,8 @@ class CancelledUser extends LongKeyedMapper[CancelledUser] with IdPK with OneToM
     override def defaultValue = new Date()
   }
 
+  def name = s"${firstName} ${lastName}"
+
   def createNewCancelledUser(
     firstName: String,
     lastName: String,
