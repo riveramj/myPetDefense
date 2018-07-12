@@ -91,10 +91,14 @@ object ReportingService extends Loggable {
     }
   }
 
-  def getShipments(subscriptions: List[Subscription]) = {
-    val allShipments = subscriptions.map(_.shipments.toList).flatten
+  def getShipments(subscriptions: List[Subscription]): List[Shipment] = {
+    subscriptions.map(getShipments).flatten
+  }
 
-    filterMailedShipments(allShipments)
+  def getShipments(subscription: Subscription) = {
+    val shipments = subscription.shipments.toList
+
+    filterMailedShipments(shipments)
   }
 
   def getPetCount(shipments: List[Shipment]) = {
@@ -180,7 +184,7 @@ object ReportingService extends Loggable {
 
   def convertMonthToDate(month: String) = {
     val dateFormat = new SimpleDateFormat("MMMM yyyy")
-    val monthDate = dateFormat.parse(s"$month 2018")
+    val monthDate = dateFormat.parse(s"$month 2018") //TODO: dynanmic year
 
     monthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
   }
@@ -786,9 +790,6 @@ object ReportingService extends Loggable {
   }
 
   def yesterdayShipments = {
-    println("yesterdayStart: " + yesterdayStart)
-    println("yesterdayEnd: " + yesterdayEnd)
-
      val yesterdayShipments = Shipment.findAll(
        By_>(Shipment.dateShipped, yesterdayStart),
        By_<(Shipment.dateShipped, yesterdayEnd)
@@ -818,8 +819,9 @@ object ReportingService extends Loggable {
       createdDayOfYear == yesterdayDayOfYear
     }
 
-    newUsersYesterday.groupBy(_.salesAgentId.get).map { agentCustomers =>
-      (agentCustomers._1 -> agentCustomers._2.size)
+    newUsersYesterday.groupBy(_.salesAgentId.get).map { case (agentId, users) =>
+      val pets = users.flatMap(_.activePets)
+      (agentId -> pets.size)
     }.toList.sortBy(_._1)
   }
 
@@ -837,8 +839,9 @@ object ReportingService extends Loggable {
       )
     }
 
-    newUsersThisMonth.groupBy(_.salesAgentId.get).map { agentCustomers =>
-      (agentCustomers._1 -> agentCustomers._2.size)
+    newUsersThisMonth.groupBy(_.salesAgentId.get).map { case (agentId, users) =>
+      val pets = users.flatMap(_.pets)
+      (agentId -> pets.size)
     }.toList.sortBy(_._1)
   }
 
@@ -898,7 +901,7 @@ object ReportingService extends Loggable {
 
     val cancellationShipments = findCancellationShipmentSize(cancellations)
     
-    val cancellationTimes = (List(0, 1, 3).map { count =>
+    val cancellationTimes = (List(0, 1, 2, 3).map { count =>
       val totalForCount = cancellationShipments.filter(_ == count).size
       
       (count.toString, totalForCount)
