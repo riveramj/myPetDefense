@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet
+package com.mypetdefense.snippet 
 
 import net.liftweb._
   import common._
@@ -155,18 +155,14 @@ object TPPApi extends RestHelper with Loggable {
     }
 
     val (taxDue, taxRate) = {
-      if (address.map(_.state.get.toLowerCase()).getOrElse("") == "ga") {
-        address.map { address => 
-          TaxJarService.findTaxAmoutAndRate(
-            address.city.get,
-            address.state.get,
-            address.zip.get,
-            subtotalWithDiscount
-          )
-        }.getOrElse((0D, 0D))
-      } else {
-        (0D, 0D)
-      }
+      address.map { address => 
+        TaxJarService.findTaxAmoutAndRate(
+          address.city.get,
+          address.state.get,
+          address.zip.get,
+          subtotalWithDiscount
+        )
+      }.getOrElse((0D, 0D))
     }
 
     val stripeCustomer: Future[Box[Customer]] = Customer.create(
