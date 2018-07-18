@@ -13,6 +13,7 @@ class FriendsFamilyOrder extends LongKeyedMapper[FriendsFamilyOrder] with IdPK w
   }
   object name extends MappedString(this, 100)
   object email extends MappedString(this, 100)
+  object stripeOrderId extends MappedString(this, 100)
   object total extends MappedDouble(this)
   object tax extends MappedDouble(this)
   object donation extends MappedDouble(this)
@@ -29,7 +30,7 @@ class FriendsFamilyOrder extends LongKeyedMapper[FriendsFamilyOrder] with IdPK w
   def createOrder(
     name: String,
     email: String,
-    stripeId: String,
+    stripeOrderId: String,
     address: NewAddress,
     total: Double,
     tax: Double,
@@ -40,6 +41,7 @@ class FriendsFamilyOrder extends LongKeyedMapper[FriendsFamilyOrder] with IdPK w
       .orderId(generateLongId)
       .name(name)
       .email(email)
+      .stripeOrderId(stripeOrderId)
       .street1(address.street1)
       .street2(address.street2.getOrElse(""))
       .city(address.city)
