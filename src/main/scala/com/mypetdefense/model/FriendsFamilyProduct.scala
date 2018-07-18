@@ -29,4 +29,3 @@ class FriendsFamilyProduct extends LongKeyedMapper[FriendsFamilyProduct] with Id
 }
 
 object FriendsFamilyProduct extends FriendsFamilyProduct with LongKeyedMetaMapper[FriendsFamilyProduct]
-
