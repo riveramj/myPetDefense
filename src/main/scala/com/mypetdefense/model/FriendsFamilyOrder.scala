@@ -34,7 +34,6 @@ class FriendsFamilyOrder extends LongKeyedMapper[FriendsFamilyOrder] with IdPK w
     address: NewAddress,
     total: Double,
     tax: Double,
-    donation: Double,
     products: List[(Int, FriendsFamilyProduct)]
   ) = {
     val order = FriendsFamilyOrder.create
@@ -49,7 +48,6 @@ class FriendsFamilyOrder extends LongKeyedMapper[FriendsFamilyOrder] with IdPK w
       .zip(address.zip)
       .total(total)
       .tax(tax)
-      .donation(donation)
       .saveMe
 
       FriendsFamilyOrderLineItem.createFriendsFamilyOrderLineItems(products, order)
