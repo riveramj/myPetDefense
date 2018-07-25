@@ -820,7 +820,7 @@ object ReportingService extends Loggable {
     }
 
     newUsersYesterday.groupBy(_.salesAgentId.get).map { case (agentId, users) =>
-      val pets = users.flatMap(_.activePets)
+      val pets = users.flatMap(_.pets.toList)
       (agentId -> pets.size)
     }.toList.sortBy(_._1)
   }
