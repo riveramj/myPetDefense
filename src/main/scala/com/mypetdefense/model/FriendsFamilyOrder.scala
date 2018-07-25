@@ -16,7 +16,6 @@ class FriendsFamilyOrder extends LongKeyedMapper[FriendsFamilyOrder] with IdPK w
   object stripeOrderId extends MappedString(this, 100)
   object total extends MappedDouble(this)
   object tax extends MappedDouble(this)
-  object donation extends MappedDouble(this)
   object street1 extends MappedString(this, 100)
   object street2 extends MappedString(this, 100)
   object city extends MappedString(this, 100)
