@@ -37,7 +37,6 @@ object FriendsFamilyAPI extends RestHelper with Loggable {
         name <- tryo((requestJson \ "name").extract[String]) ?~! "Name is missing." ~> 400
         email <- tryo((requestJson \ "email").extract[String]) ?~! "Email is missing." ~> 400
         stripeOrderId <- tryo((requestJson \ "stripeOrderId").extract[String]) ?~! "stripeOrderId is missing." ~> 400
-        donation <- tryo((requestJson \ "donation").extract[Double]) ?~! "Donation is missing." ~> 400
         tax <- tryo((requestJson \ "tax").extract[Double]) ?~! "Tax is missing." ~> 400
         total <- tryo((requestJson \ "total").extract[Double]) ?~! "Total is missing." ~> 400
         shippingJson <- Full(requestJson \ "shipping")
@@ -71,7 +70,6 @@ object FriendsFamilyAPI extends RestHelper with Loggable {
             shipping,
             total,
             tax,
-            donation,
             products
           )
 
