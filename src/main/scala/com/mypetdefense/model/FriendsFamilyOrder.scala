@@ -25,6 +25,7 @@ class FriendsFamilyOrder extends LongKeyedMapper[FriendsFamilyOrder] with IdPK w
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+  object shippedDate extends MappedDateTime(this)
 
   def createOrder(
     name: String,

@@ -1,0 +1,33 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+<div data-lift="friendsfamily.Products.render?eager_eval=true">
+  <div data-lift="embed?what=friendsfamily/nav-bar"></div>
+  <div id="item-container">
+    <h2>Orders</h2>
+    <div class="item-container">
+      <div class="dashboard-details">
+        <table>
+          <thead>
+            <tr>
+              <td>Sku
+              <td>Description
+             </tr>
+           </thead>
+           <tbody>
+             <tr class="product">
+               <td class="sku">12345
+               <td class="description">2 pk collar
+             </tr>
+           </tbody>
+         </table>
+       </div>
+     </div>
+   </div>
+ </div>
+ <head_merge>
+   <link rel="stylesheet" data-lift="style-bundle?name=admin">
+ </head_merge>
+ <tail>
+   <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+ </tail>
+</div>
+
