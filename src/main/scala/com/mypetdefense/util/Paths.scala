@@ -173,6 +173,8 @@ object Paths {
     ProductDetail.adventureCatsMenu,
     Login.logoutMenu,
     friendsfamily.Dashboard.menu,
-    friendsfamily.Dashboard.friendsFamilyLabelsExportMenu
+    friendsfamily.Dashboard.friendsFamilyLabelsExportMenu,
+    friendsfamily.Orders.menu,
+    friendsfamily.Products.menu
   )
 }

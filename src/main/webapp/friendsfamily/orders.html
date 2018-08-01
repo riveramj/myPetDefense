@@ -1,0 +1,40 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+<div data-lift="friendsfamily.Orders.render?eager_eval=true">
+  <div data-lift="embed?what=friendsfamily/nav-bar"></div>
+  <div id="item-container">
+    <h2>Orders</h2>
+    <div class="shipment-container">
+      <div class="dashboard-details">
+        <table>
+          <thead>
+            <tr>
+              <td>Name/Address
+              <td>Product
+              <td>Shipped Date
+             </tr>
+           </thead>
+           <tbody>
+             <tr class="shipment">
+               <td class="name-address">Mike Rivera 123 Main St
+               <td class="products">
+                 <ul>
+                   <li class="product">
+                    <span class="count">0.5</span> x <span class="name">collar 2pk</span>
+                   </li>
+                 </ul>
+               </td>
+               <td class="shipped-date">Feb 29, 2019</td>
+             </tr>
+           </tbody>
+         </table>
+       </div>
+     </div>
+   </div>
+ </div>
+ <head_merge>
+   <link rel="stylesheet" data-lift="style-bundle?name=admin">
+ </head_merge>
+ <tail>
+   <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+ </tail>
+</div>

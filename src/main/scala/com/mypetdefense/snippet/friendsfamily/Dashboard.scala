@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet 
+package com.mypetdefense.snippet
 package friendsfamily 
 
 import net.liftweb.sitemap.Menu
