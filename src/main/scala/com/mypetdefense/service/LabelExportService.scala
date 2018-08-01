@@ -140,4 +140,8 @@ object LabelExportService extends Loggable {
       200
     ))
   }
+
+  def exportFriendsFamilyUspsLabels() = {
+    Empty
+  }
 }

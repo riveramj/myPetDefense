@@ -171,6 +171,8 @@ object Paths {
     ProductDetail.frontlineCatsMenu,
     ProductDetail.zoguardCatsMenu,
     ProductDetail.adventureCatsMenu,
-    Login.logoutMenu
+    Login.logoutMenu,
+    friendsfamily.Dashboard.menu,
+    friendsfamily.Dashboard.friendsFamilyLabelsExportMenu
   )
 }
