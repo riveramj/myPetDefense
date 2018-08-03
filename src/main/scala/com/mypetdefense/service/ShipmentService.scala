@@ -23,7 +23,7 @@ object ShipmentService extends Loggable {
   def getUpcomingSubscriptions = {
     Subscription.findAll(
       BySql(
-        "nextShipDate > CURRENT_DATE and nextShipDate < CURRENT_DATE + interval '4 day'",
+        "nextShipDate > CURRENT_DATE and nextShipDate < CURRENT_DATE + interval '20 day'",
         IHaveValidatedThisSQL("mike","2018-04-24")
       ),
       By(Subscription.status, Status.Active)
