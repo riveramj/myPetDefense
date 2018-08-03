@@ -272,6 +272,8 @@ class Dashboard extends Loggable {
         toDate = possibleToDate
         renderer.setHtml
       }) &
+      ".tracking-header" #> ClearNodes &
+      ".ship-header" #> ClearNodes &
       ".shipment" #> selectedFutureSubscriptions.sortBy(_.nextShipDate.get.getTime).map { subscription =>
 
           val user = subscription.user.obj
