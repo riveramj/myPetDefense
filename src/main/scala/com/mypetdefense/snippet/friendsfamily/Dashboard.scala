@@ -45,7 +45,7 @@ object Dashboard extends Loggable {
 
 class Dashboard extends Loggable {
   
-  val newOrders = FriendsFamilyOrder.findAll(NullRef(FriendsFamilyOrder.shippedDate))
+  val newOrders = FriendsFamilyOrder.newOrders
 
   def orderHasShipped_?(order: FriendsFamilyOrder) = {
     !tryo(order.shippedDate.get.toString).isEmpty
@@ -59,6 +59,7 @@ class Dashboard extends Loggable {
   def render = {
     SHtml.makeFormsAjax andThen
     ".dashboard [class+]" #> "current" &
+    ".orders-export [href]" #> Dashboard.friendsFamilyLabelsExportMenu.loc.calcDefaultHref &
     ".shipment" #> newOrders.map { order =>
       val products = order.products
       val nameAddress =
