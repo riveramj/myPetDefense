@@ -121,7 +121,6 @@ object Paths {
     LandingPage.landing3Free,
     LandingPage.cold5k,
     LandingPage.doggiePalooza,
-    ValentinePicture.menu,
     LandingPage.woofstock,
     LandingPage.olympics,
     LandingPage.atlantaExpo,
