@@ -54,6 +54,8 @@ class FriendsFamilyOrder extends LongKeyedMapper[FriendsFamilyOrder] with IdPK w
 
       order
   }
+
+  def newOrders = FriendsFamilyOrder.findAll(NullRef(FriendsFamilyOrder.shippedDate))
 }
 
 object FriendsFamilyOrder extends FriendsFamilyOrder with LongKeyedMetaMapper[FriendsFamilyOrder]
