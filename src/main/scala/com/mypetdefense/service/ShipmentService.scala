@@ -25,7 +25,8 @@ object ShipmentService extends Loggable {
       BySql(
         "nextShipDate > CURRENT_DATE and nextShipDate < CURRENT_DATE + interval '4 day'",
         IHaveValidatedThisSQL("mike","2018-04-24")
-      )
+      ),
+      By(Subscription.status, Status.Active)
     )
   }
 

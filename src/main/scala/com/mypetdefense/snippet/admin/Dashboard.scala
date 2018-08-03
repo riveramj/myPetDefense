@@ -316,7 +316,7 @@ class Dashboard extends Loggable {
             ".product-size *" #> product.map(_.size.get.toString)
           } &
           ".insert *" #> insertNeeded &
-          ".tracking" #> ClearNodes &
+          ".tracking-number" #> ClearNodes &
           ".ship-it" #> ClearNodes
         }
       }
