@@ -15,8 +15,9 @@ import net.liftweb.http._
 import net.liftweb.mapper.{BySql, IHaveValidatedThisSQL, By}
 
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.{Date, Locale}
 import java.time.{LocalDate, ZoneId}
+import java.time.format.DateTimeFormatter
 
 import com.mypetdefense.model._
 import com.mypetdefense.util.Paths._
@@ -56,8 +57,16 @@ class Dashboard extends Loggable {
   var shipmentRenderer: Box[IdMemoizeTransform] = Empty
   var future = false
 
+  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val localDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
+  
+  val currentDate = LocalDate.now()
+
+  var fromDate = currentDate.format(localDateFormat)
+  var toDate = currentDate.plusDays(3).format(localDateFormat)
+
   def paidShipments = ShipmentService.getCurrentPastDueShipments
-  def futureShipments = ShipmentService.getUpcomingShipments
+  def futureSubscriptions = ShipmentService.getUpcomingSubscriptions
 
   def changeDataSet(dataSet: String) = {
     dataSet match {
@@ -164,6 +173,13 @@ class Dashboard extends Loggable {
     Noop
   }
 
+  def convertForecastingDates(date: String) = {
+    
+    val parsedDate = dateFormat.parse(date)
+
+    parsedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+  }
+
   def render = {
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
 
@@ -179,6 +195,7 @@ class Dashboard extends Loggable {
       shipmentRenderer = Full(renderer)
       
       def currentShipmentBindings = {
+        ".forecast-dates" #> ClearNodes &
         ".shipment" #> paidShipments.sortBy(_.insert.get).sortBy(_.expectedShipDate.get.getTime).map { shipment =>
 
           val subscription = shipment.subscription.obj
@@ -238,7 +255,26 @@ class Dashboard extends Loggable {
       }
 
       def futureShipmentBindings = {
-      ".shipment" #> futureShipments.sortBy(_.nextShipDate.get.getTime).map { subscription =>
+        val startDate = convertForecastingDates(fromDate)
+        val endDate = convertForecastingDates(toDate)
+
+        val selectedFutureSubscriptions = futureSubscriptions.filter { subscription =>
+          
+          val nextShipDate = ReportingService.getNextShipDate(subscription)
+          (nextShipDate.isAfter(startDate.minusDays(1)) && nextShipDate.isBefore(endDate.plusDays(1)))
+        }
+
+        ".from-date" #> SHtml.ajaxText(fromDate, possibleFromDate => {
+        fromDate = possibleFromDate
+        renderer.setHtml
+      }) &
+      ".to-date" #> SHtml.ajaxText(toDate, possibleToDate => {
+        toDate = possibleToDate
+        renderer.setHtml
+      }) &
+      ".tracking-header" #> ClearNodes &
+      ".ship-header" #> ClearNodes &
+      ".shipment" #> selectedFutureSubscriptions.sortBy(_.nextShipDate.get.getTime).map { subscription =>
 
           val user = subscription.user.obj
 

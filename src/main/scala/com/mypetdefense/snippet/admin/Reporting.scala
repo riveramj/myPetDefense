@@ -31,7 +31,7 @@ object Reporting extends Loggable {
 
 class Reporting extends Loggable {
   val agencies = Agency.findAll().map(_.name.get)
-  val allSubscriptions = Subscription.findAll(By(Subscription.status, Status.Active))
+  val allSubscriptions = Subscription.findAll(By(Subscription.status, Status.Active)) //TODO: make this use the dynamic dates
 
   val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
   val localDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
