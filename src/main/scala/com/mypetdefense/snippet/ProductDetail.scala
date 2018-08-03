@@ -28,11 +28,9 @@ object ProductDetail extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val frontlineDogsMenu = Menu.i("Frontline Plus for Dogs") / "frontline-dog-detail"
   val zoguardDogsMenu = Menu.i("ZoGuard Plus for Dogs") / "zoguard-dog-detail"
   val adventureDogsMenu = Menu.i("Adventure Plus for Dogs") / "adventure-dog-detail"
   val sheieldtecDogsMenu = Menu.i("ShieldTec Plus for Dogs") / "shieldtec-dog-detail"
-  val frontlineCatsMenu = Menu.i("Frontline Plus for Cats") / "frontline-cat-detail"
   val zoguardCatsMenu = Menu.i("ZoGuard Plus for Cats") / "zoguard-cat-detail"
   val adventureCatsMenu = Menu.i("Adventure Plus for Cats") / "adventure-cat-detail"
 }
@@ -50,11 +48,9 @@ class ProductDetail extends Loggable {
   var chosenPrice = 0D
 
   val products = path match {
-    case "frontline-dog-detail" => Product.findAll(By(Product.name, "Frontline Plus for Dogs"))
     case "adventure-dog-detail" => Product.findAll(By(Product.name, "Adventure Plus for Dogs"))
     case "shieldtec-dog-detail" => Product.findAll(By(Product.name, "ShieldTec Plus for Dogs"))
     case "zoguard-dog-detail" => Product.findAll(By(Product.name, "ZoGuard Plus for Dogs"))
-    case "frontline-cat-detail" => Product.findAll(By(Product.name, "Frontline Plus for Cats"))
     case "adventure-cat-detail" => Product.findAll(By(Product.name, "Adventure Plus for Cats"))
     case "zoguard-cat-detail" => Product.findAll(By(Product.name, "ZoGuard Plus for Cats"))
   }
@@ -86,12 +82,6 @@ class ProductDetail extends Loggable {
   }
 
   val productImages = products.map(product => getImageUrl(Full(product)))
-
-  val switchSaveProduct = path match {
-    case "frontline-dog-detail" => "/zoguard-dog-detail"
-    case "frontline-cat-detail" => "/zoguard-cat-detail"
-    case _ => ""
-  }
 
   def updateProductChoice(product: Product, price: Double) = {
     chosenProduct = Full(product)
@@ -200,8 +190,6 @@ class ProductDetail extends Loggable {
     ".product-shot-container" #> productImages.map { productImage =>
       ".product-shot [src]" #> productImage
     } &
-    "#switch-save" #> ClearNodesIf(switchSaveProduct.isEmpty) &
-    "#switch-save [href]" #> switchSaveProduct &
     ratingBinding(products) &
     ".product-name *" #> productName &
     ".dollar-value *" #> f"$$$defaultPrice%2.2f" &
