@@ -154,9 +154,6 @@ class Products extends Loggable {
       PetFlowChoices.shoppingCart(Map())
     }
 
-    ".products .frontline-dogs" #> {
-      imagePriceRatingBinding("Frontline Plus for Dogs")
-    } &
     ".products .zoguard-dogs" #> {
       imagePriceRatingBinding("ZoGuard Plus for Dogs")
     } &
@@ -165,9 +162,6 @@ class Products extends Loggable {
     } &
     ".products .shieldtec-dogs" #> {
       imagePriceRatingBinding("ShieldTec Plus for Dogs")
-    } &
-    ".products .frontline-cats" #> {
-      imagePriceRatingBinding("Frontline Plus for Cats")
     } &
     ".products .zoguard-cats" #> {
       imagePriceRatingBinding("ZoGuard Plus for Cats")

@@ -1,0 +1,59 @@
+@import "base";
+@import "nav-bar";
+@import "footer";
+
+#logo-name { 
+  padding: em(20px) 0;
+  text-align: center;
+  
+  display: block;
+  float: none;
+}
+
+.header-dog {
+  width: 100%;
+
+  img {
+    width: inherit;
+    padding-top: 10px;
+  }
+}
+
+h1 {
+  margin-top: 30px;
+  font-weight: $bold;
+  font-size: 35px;
+}
+
+h3 {
+  margin-top: 30px;
+  font-weight: $bold;
+  font-size: 16px;
+}
+
+p {
+  margin-top: 15px;
+  line-height: 19px;
+}
+
+.copy {
+  margin: 0 20px;
+  padding-bottom: 30px;
+
+  @media (min-width: $bp-medium) {
+    margin: 0 50px;
+    padding-bottom: 40px;
+  }
+
+  @media (min-width: $bp-large) {
+    margin: 0 100px;
+    padding-bottom: 50px;
+  }
+
+  ul {
+    list-style: disc;
+    margin-top: 15px;
+    margin-left: 32px;
+    line-height: 19px;
+  }
+}
