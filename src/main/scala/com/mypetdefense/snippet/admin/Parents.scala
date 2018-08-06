@@ -386,6 +386,9 @@ class Parents extends Loggable {
       infoType match {
         case "name" => pet.name(newInfo).saveMe
         case "breed" => pet.breed(newInfo).saveMe
+        case "birthday" =>
+          val possibleBirthday = ParentService.parseWhelpDate(newInfo)
+          pet.birthday(possibleBirthday.openOr(null)).saveMe
         case _ => pet
       }
       
@@ -413,12 +416,12 @@ class Parents extends Loggable {
         )
 
         ".pet" #> pets.map { pet =>
-          val birthday = tryo(birthdayFormat.format(pet.birthday.get))
+          val birthday = tryo(birthdayFormat.format(pet.birthday.get)).map(_.toString).openOr("")
           var nextGrowthDelay = tryo(pet.nextGrowthDelay.get.toString).openOr("")
 
           ".pet-name" #> SHtml.ajaxText(pet.name.get, possiblePetName => updatePetInfo(possiblePetName, "name", pet)) &
           ".pet-breed" #> SHtml.ajaxText(pet.breed.get, possibleBreed => updatePetInfo(possibleBreed, "breed", pet)) &
-          ".pet-birthday *" #> birthday &
+          ".pet-birthday *" #> SHtml.ajaxText(birthday, possibleBirthday => updatePetInfo(possibleBirthday, "birthday", pet)) &
           ".pet-type *" #> pet.animalType.toString &
           ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
           ".pet-delay-growth input" #> ajaxText(s"$nextGrowthDelay months", possibleDelay => updateGrowthDelay(possibleDelay, pet)) & 
