@@ -280,6 +280,17 @@ object ParentService extends Loggable {
     trialStatus != "trialing"
   }
 
+  def parseWhelpDate(whelpDate: String): Box[Date] = {
+    val whelpDateFormats = List(
+      new java.text.SimpleDateFormat("M/d/y"),
+      new java.text.SimpleDateFormat("y-M-d")
+    )
+
+    whelpDateFormats.map { dateFormat =>
+      tryo(dateFormat.parse(whelpDate))
+    }.filter(_.isDefined).headOption.getOrElse(Empty)
+  }
+
   def addNewPet(
     oldUser: User,
     name: String,
@@ -290,7 +301,7 @@ object ParentService extends Loggable {
     birthday: String = ""
   ): Box[Pet] = {
 
-    val possibleBirthday = tryo(whelpDateFormat.parse(birthday))
+    val possibleBirthday = parseWhelpDate(birthday)
 
     val newPet = Pet.createNewPet(
       user = oldUser,
