@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 
 class GrowthNotifyJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
-    val currentDate = LocalDateTime.now()
+    def currentDate = LocalDateTime.now()
 
     val allActiveSubscriptions = Subscription.findAll(
       By(Subscription.status, Status.Active),
@@ -35,13 +35,13 @@ class GrowthNotifyJob extends ManagedJob {
       (nextShipDateDayOfYear - currentDate.getDayOfYear == 7)
     }
 
-    val readyToGrowPetsUsers: List[(Pet,User)] = (upcomingSubscription.map { subscription =>
+    val readyToGrowPetsUsers: List[(Pet, String, User)] = (upcomingSubscription.map { subscription =>
       ParentService.findGrowingPets(subscription)
     }).flatten
 
 
-    readyToGrowPetsUsers.map { case (pet, user) =>
-      EmailActor ! NotifyParentGrowthRate(pet, user)
+    readyToGrowPetsUsers.map { case (pet, newProduct, user) =>
+      EmailActor ! NotifyParentGrowthRate(pet, newProduct, user)
     }
   }
 }

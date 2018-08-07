@@ -390,7 +390,7 @@ class Parents extends Loggable {
           val possibleBirthday = ParentService.parseWhelpDate(newInfo)
           pet.birthday(possibleBirthday.openOr(null)).saveMe
         case "product" => product.map { prod =>
-          pet.product(prod).size(prod.size).saveMe
+          pet.product(prod).size(prod.size.get).saveMe
         }
         case _ => pet
       }

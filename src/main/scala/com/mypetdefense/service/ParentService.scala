@@ -422,17 +422,20 @@ object ParentService extends Loggable {
       growthMonth match {
         case medium 
             if medium == getGrowthMonthNumber(growthRate, "medium") => {
-          Full(pet, user)
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
+          Full(pet, newProduct.map(_.getNameAndSize).openOr(""), user)
         }
 
         case large 
             if large == getGrowthMonthNumber(growthRate, "large") => {
-          Full(pet, user)
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogLargeZo))
+          Full(pet, newProduct.map(_.getNameAndSize).openOr(""), user)
         }
 
         case xlarge 
             if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
-          Full(pet, user)
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogXLargeZo))
+          Full(pet, newProduct.map(_.getNameAndSize).openOr(""), user)
         }
 
         case _ =>
