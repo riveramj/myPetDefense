@@ -372,9 +372,9 @@ class Parents extends Loggable {
     
     def updateGrowthDelay(possibleDelay: String, pet: Pet) = {
       val sanitizedDelay = possibleDelay.replaceAll("[ months]","")
-      val updatedDelay = tryo(sanitizedDelay.toInt).openOr(0)
+      val updatedDelay = tryo(sanitizedDelay.toInt).openOr(-1)
 
-      if (updatedDelay != 0) {
+      if (updatedDelay != -1) {
         pet.nextGrowthDelay(updatedDelay).saveMe
       }
 
