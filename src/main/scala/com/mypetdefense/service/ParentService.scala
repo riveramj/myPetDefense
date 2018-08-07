@@ -407,6 +407,13 @@ object ParentService extends Loggable {
     currentMonth - growthDelay
   }
 
+  def checkForNewProduct(pet: Pet, newProduct: Box[Product], user: User) = {
+    if (pet.product.obj != newProduct)
+      Full((pet, newProduct.map(_.getNameAndSize).openOr(""), user))
+    else
+      Empty
+  }
+
   def findGrowingPets(subscription: Subscription) = {
     (for {
       user <- subscription.user.obj.toList
@@ -423,19 +430,19 @@ object ParentService extends Loggable {
         case medium 
             if medium == getGrowthMonthNumber(growthRate, "medium") => {
           val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
-          Full(pet, newProduct.map(_.getNameAndSize).openOr(""), user)
+          checkForNewProduct(pet, newProduct, user)
         }
 
         case large 
             if large == getGrowthMonthNumber(growthRate, "large") => {
           val newProduct = Product.find(By(Product.size, AnimalSize.DogLargeZo))
-          Full(pet, newProduct.map(_.getNameAndSize).openOr(""), user)
+          checkForNewProduct(pet, newProduct, user)
         }
 
         case xlarge 
             if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
           val newProduct = Product.find(By(Product.size, AnimalSize.DogXLargeZo))
-          Full(pet, newProduct.map(_.getNameAndSize).openOr(""), user)
+          checkForNewProduct(pet, newProduct, user)
         }
 
         case _ =>
