@@ -37,7 +37,7 @@ class Reporting extends Loggable {
   val localDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
   val currentDate = LocalDate.now()
 
-  var fromDate = currentDate.format(localDateFormat)
+  var fromDate = currentDate.plusDays(14).format(localDateFormat)
   var toDate = currentDate.plusDays(14).format(localDateFormat)
 
   def convertToPercentage(percent: Double) = f"${percent*100}%.1f%%"
