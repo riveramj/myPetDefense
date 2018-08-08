@@ -45,6 +45,7 @@ object JobManager extends SimpleInjector with Loggable {
   }
 
   private def nonproductionJobs: List[TriggeredJob] = {
+<<<<<<< HEAD
     FrequentNotifyGrowthJob ::
     //FrequentAgentSalesReportEmailJob ::
     Nil
