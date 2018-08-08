@@ -23,12 +23,15 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   object size extends MappedEnum(this, AnimalSize)
   object birthday extends MappedDateTime(this)
   object product extends MappedLongForeignKey(this, Product)
+  object nextGrowthDelay extends MappedInt(this)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
   }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+
+  def refresh = Pet.find(By(Pet.petId, petId.get))
 
   def createNewPet(
     user: User,

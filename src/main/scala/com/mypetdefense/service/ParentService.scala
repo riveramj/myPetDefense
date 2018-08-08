@@ -19,6 +19,10 @@ import scala.concurrent.duration._
 import dispatch._, Defaults._
 
 import java.util.Date
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale}
+import java.time.{LocalDate, ZoneId, LocalDateTime, Period}
+import java.time.format.DateTimeFormatter
 
 object ParentService extends Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
@@ -276,6 +280,17 @@ object ParentService extends Loggable {
     trialStatus != "trialing"
   }
 
+  def parseWhelpDate(whelpDate: String): Box[Date] = {
+    val whelpDateFormats = List(
+      new java.text.SimpleDateFormat("M/d/y"),
+      new java.text.SimpleDateFormat("y-M-d")
+    )
+
+    whelpDateFormats.map { dateFormat =>
+      tryo(dateFormat.parse(whelpDate))
+    }.filter(_.isDefined).headOption.getOrElse(Empty)
+  }
+
   def addNewPet(
     oldUser: User,
     name: String,
@@ -286,7 +301,7 @@ object ParentService extends Loggable {
     birthday: String = ""
   ): Box[Pet] = {
 
-    val possibleBirthday = tryo(whelpDateFormat.parse(birthday))
+    val possibleBirthday = parseWhelpDate(birthday)
 
     val newPet = Pet.createNewPet(
       user = oldUser,
@@ -364,6 +379,128 @@ object ParentService extends Loggable {
 
       case _ =>
         Empty
+    }
+  }
+
+  def getGrowthMonthNumber(growthRate: Box[GrowthRate], size: String) = {
+    size match {
+      case "medium" => 
+        growthRate.map(_.mediumProductMonth.get).openOr(0)
+      case "large" =>
+        growthRate.map(_.largeProductMonth.get).openOr(0)
+      case "xlarge" =>
+        growthRate.map(_.xlargeProductMonth.get).openOr(0)
+      case _ =>
+        0
+    }
+  }
+
+  def findGrowthMonth(pet: Pet) = {
+    val currentDate = LocalDate.now()
+
+    val birthday = tryo(pet.birthday.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+
+    val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
+
+    val growthDelay = tryo(pet.nextGrowthDelay.get).openOr(0)
+
+    currentMonth - growthDelay
+  }
+
+  def checkForNewProduct(pet: Pet, newProduct: Box[Product], user: User) = {
+    if (pet.product.obj != newProduct)
+      Full((pet, newProduct.map(_.getNameAndSize).openOr(""), user))
+    else
+      Empty
+  }
+
+  def findGrowingPets(subscription: Subscription) = {
+    (for {
+      user <- subscription.user.obj.toList
+      pet <- user.pets.toList
+        if (pet.breed.get != null) &&
+             (pet.birthday.get != null) &&
+             (pet.product.obj.map(_.isZoGuard_?).openOr(false))
+    } yield {
+      val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase))
+
+      val growthMonth = findGrowthMonth(pet)
+
+      growthMonth match {
+        case medium 
+            if medium == getGrowthMonthNumber(growthRate, "medium") => {
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
+          checkForNewProduct(pet, newProduct, user)
+        }
+
+        case large 
+            if large == getGrowthMonthNumber(growthRate, "large") => {
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogLargeZo))
+          checkForNewProduct(pet, newProduct, user)
+        }
+
+        case xlarge 
+            if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogXLargeZo))
+          checkForNewProduct(pet, newProduct, user)
+        }
+
+        case _ =>
+          Empty
+      }
+    }).flatten
+  }
+
+  def updatePuppyProducts(user: User) = {
+    for {
+      pet <- user.pets.toList
+        if (pet.breed.get != null) &&
+             (pet.birthday.get != null) &&
+             (pet.product.obj.map(_.isZoGuard_?).openOr(false))
+    } yield {      
+      val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase))
+
+      val growthMonth = findGrowthMonth(pet)
+
+      growthMonth match {
+        case medium 
+            if medium == getGrowthMonthNumber(growthRate, "medium") => {
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
+          newProduct.map { product => 
+            pet
+              .product(product)
+              .size(AnimalSize.DogMediumZo)
+              .nextGrowthDelay(0)
+              .saveMe
+          }
+        }
+
+        case large 
+            if large == getGrowthMonthNumber(growthRate, "large") => {
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogLargeZo))
+          newProduct.map { product => 
+            pet
+              .product(product)
+              .size(AnimalSize.DogLargeZo)
+              .nextGrowthDelay(0)
+              .saveMe
+          }
+        }
+
+        case xlarge 
+            if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
+          val newProduct = Product.find(By(Product.size, AnimalSize.DogXLargeZo))
+          newProduct.map { product => 
+            pet
+              .product(product)
+              .size(AnimalSize.DogXLargeZo)
+              .nextGrowthDelay(0)
+              .saveMe
+          }
+        }
+
+        case _ =>
+      }
     }
   }
 }

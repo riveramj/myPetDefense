@@ -188,7 +188,7 @@ class PetsAndProducts extends Loggable {
       ".cancel [onclick]" #> Confirm(s"Remove ${pet.name} and cancel future shipments?",
         ajaxInvoke(deletePet(pet) _)
       ) &
-      ".save" #> ajaxSubmit("Update", () => savePet(pet, currentPetName, currentProduct))
+      ".save" #> ajaxSubmit("Save Changes", () => savePet(pet, currentPetName, currentProduct))
     }
   }
 }

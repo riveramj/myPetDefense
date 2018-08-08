@@ -50,6 +50,7 @@ class Boot {
       Agency,
       Coupon,
       Price,
+      GrowthRate,
       Review,
       Survey,
       FriendsFamilyProduct,
