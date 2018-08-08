@@ -37,8 +37,6 @@ object TPPApi extends RestHelper with Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
 
-  val whelpDateFormat = new java.text.SimpleDateFormat("M/d/y")
-
   def sendStripeErrorEmail(
     failedStepMessage: String,
     stripeFailure: Any,
@@ -341,7 +339,7 @@ object TPPApi extends RestHelper with Loggable {
         pet.name,
         _,
         pet.breed,
-        tryo(whelpDateFormat.parse(possibleWhelpDate))
+        ParentService.parseWhelpDate(possibleWhelpDate)
       ))
     }).filter(_ != Empty)
   }

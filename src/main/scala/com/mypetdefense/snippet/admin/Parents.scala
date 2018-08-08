@@ -369,16 +369,48 @@ class Parents extends Loggable {
         (possibleCoupon: Box[Coupon]) => chosenCoupon = possibleCoupon
       )
     }
+    
+    def updateGrowthDelay(possibleDelay: String, pet: Pet) = {
+      val sanitizedDelay = possibleDelay.replaceAll("[ months]","")
+      val updatedDelay = tryo(sanitizedDelay.toInt).openOr(-1)
 
-    def updatePetInfo(newInfo: String, infoType: String, pet: Pet) = {
+      if (updatedDelay != -1) {
+        pet.nextGrowthDelay(updatedDelay).saveMe
+      }
+
+      Noop
+    }
+
+    def updatePetInfo(newInfo: String, infoType: String, pet: Pet, product: Box[Product] = Empty) = {
 
       infoType match {
         case "name" => pet.name(newInfo).saveMe
         case "breed" => pet.breed(newInfo).saveMe
+        case "birthday" =>
+          val possibleBirthday = ParentService.parseWhelpDate(newInfo)
+          pet.birthday(possibleBirthday.openOr(null)).saveMe
+        case "product" => product.map { prod =>
+          pet.product(prod).size(prod.size.get).saveMe
+        }
         case _ => pet
       }
       
       Noop
+    }
+
+    def changePetProduct(
+      petType: AnimalType.Value,
+      currentProduct: Box[Product],
+      pet: Pet
+    ) = {
+      val products = Product.findAll(By(Product.animalType, petType))
+
+      SHtml.ajaxSelectObj(
+        products.map(product => (product, product.getNameAndSize)),
+        currentProduct,
+        (possibleProduct: Product) => 
+          updatePetInfo("", "product", pet, Full(possibleProduct))
+      )
     }
 
     ".parent-pets" #> ClearNodesIf(isCancelled_?(parent)) &
@@ -402,13 +434,15 @@ class Parents extends Loggable {
         )
 
         ".pet" #> pets.map { pet =>
-          val birthday = tryo(birthdayFormat.format(pet.birthday.get))
+          val birthday = tryo(birthdayFormat.format(pet.birthday.get)).map(_.toString).openOr("")
+          var nextGrowthDelay = tryo(pet.nextGrowthDelay.get.toString).openOr("")
 
           ".pet-name" #> SHtml.ajaxText(pet.name.get, possiblePetName => updatePetInfo(possiblePetName, "name", pet)) &
           ".pet-breed" #> SHtml.ajaxText(pet.breed.get, possibleBreed => updatePetInfo(possibleBreed, "breed", pet)) &
-          ".pet-birthday *" #> birthday &
+          ".pet-birthday *" #> SHtml.ajaxText(birthday, possibleBirthday => updatePetInfo(possibleBirthday, "birthday", pet)) &
           ".pet-type *" #> pet.animalType.toString &
-          ".pet-product *" #> pet.product.obj.map(_.getNameAndSize) &
+          ".pet-product *" #> changePetProduct(pet.animalType.get, pet.product.obj, pet) &
+          ".pet-delay-growth input" #> ajaxText(s"$nextGrowthDelay months", possibleDelay => updateGrowthDelay(possibleDelay, pet)) & 
           ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
             ajaxInvoke(deletePet(parent, pet, renderer) _)
           )

@@ -64,6 +64,8 @@ trait StripeHook extends RestHelper with Loggable {
             formatAmount(tax)
           )
 
+          ParentService.updatePuppyProducts(user)
+
           for {
             subscription <- user.getSubscription
             shipmentCount = subscription.shipments.toList.size
