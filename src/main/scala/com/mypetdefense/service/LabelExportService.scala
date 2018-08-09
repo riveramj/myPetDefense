@@ -260,10 +260,10 @@ object LabelExportService extends Loggable {
           val petNameProduct = s"${pet.name.get} - ${product.getNameAndSize}"
 
           val productSku = product.getNameAndSize match {
-            case name if (name.contains("ZoGuard Plus for Dogs, 4-22")) =>
+            case name if (name.contains("ZoGuard Plus for Dogs 4-22")) =>
               "zgSMall"
             
-            case name if (name.contains("ZoGuard Plus for Dogs, 23-44")) =>
+            case name if (name.contains("ZoGuard Plus for Dogs 23-44")) =>
               "zgMedium"
            
             case other =>
