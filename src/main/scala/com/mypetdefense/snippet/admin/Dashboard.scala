@@ -151,7 +151,7 @@ class Dashboard extends Loggable {
           }
         }.getOrElse("")
 
-        name == shipmentUserName
+        name.toLowerCase == shipmentUserName.toLowerCase
       }
 
       matchingShipment.map { shipment =>
