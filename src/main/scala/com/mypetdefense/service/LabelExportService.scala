@@ -289,7 +289,7 @@ object LabelExportService extends Loggable {
           "" ::
           "My Pet Defense" ::
           "" ::
-          petNamesProducts ::
+          s"""${petNamesProducts}""" ::
           shipment.insert.get ::
           "" ::
           "false" ::
