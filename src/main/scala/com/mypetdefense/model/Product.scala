@@ -24,7 +24,7 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     override def defaultValue = new Date()
   }
 
-  def getNameAndSize = s"${this.name}, ${this.size.toString()} lbs"
+  def getNameAndSize = s"${this.name} ${this.size.toString()} lbs"
   
   def getSizeAndSizeName = s"${this.sizeName}, ${this.size.toString()} lbs"
 

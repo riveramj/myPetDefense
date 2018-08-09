@@ -41,7 +41,7 @@ object LabelExportService extends Loggable {
                      "Gift Message" ::
                      Nil
 
-  val shipStationHeaders = "Order Number" ::
+  val shipStationHeaders = "Order #" ::
                            "Order Created Date" ::
                            "Order Date Paid" ::
                            "Order Total" ::
@@ -216,8 +216,13 @@ object LabelExportService extends Loggable {
     createCsvForLabels(csvRows)
   }
 
-  def createCsvForLabels(csvRows: List[List[String]]) = {
-    val resultingCsv = (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
+  def createCsvForLabels(csvRows: List[List[String]], shipStation: Boolean = false) = {
+    val resultingCsv = {
+      if (shipStation)
+        (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
+      else
+        (List(shipStationHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
+    }
 
     Some(new InMemoryResponse(
       resultingCsv.getBytes("UTF-8"),
@@ -272,7 +277,6 @@ object LabelExportService extends Loggable {
           "0" ::
           "0" ::
           "0" ::
-          "" ::
           "standard shipping" ::
           "4" ::
           "" ::
@@ -281,7 +285,6 @@ object LabelExportService extends Loggable {
           "My Pet Defense" ::
           "" ::
           petNameProduct ::
-          "" ::
           "" ::
           "" ::
           "false" ::
@@ -305,6 +308,7 @@ object LabelExportService extends Loggable {
           "US" ::
           productSku ::
           "1" ::
+          "0" ::
           "0" ::
           "0" ::
           "" ::
