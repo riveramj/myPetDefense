@@ -262,7 +262,7 @@ object LabelExportService extends Loggable {
             val lineItemProductName = lineItem.product.obj.map(_.getNameAndSize).openOr("")
 
             s"${lineItemPetName} - ${lineItemProductName}"
-          }.mkString("\n")
+          }.mkString(". ")
 
           val productSku = product.getNameAndSize match {
             case name if (name.contains("ZoGuard Plus for Dogs 4-22")) =>
@@ -289,7 +289,7 @@ object LabelExportService extends Loggable {
           "" ::
           "My Pet Defense" ::
           "" ::
-          s"""${petNamesProducts}""" ::
+          petNamesProducts ::
           shipment.insert.get ::
           "" ::
           "false" ::
