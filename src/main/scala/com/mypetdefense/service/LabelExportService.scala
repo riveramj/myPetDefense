@@ -269,7 +269,7 @@ object LabelExportService extends Loggable {
               "zgSMall"
             
             case name if (name.contains("ZoGuard Plus for Dogs 23-44")) =>
-              "zgMedium"
+              "ZgMedium"
            
             case other =>
               other
@@ -312,8 +312,8 @@ object LabelExportService extends Loggable {
           address.zip.get ::
           "US" ::
           productSku ::
+          "" ::
           "1" ::
-          "0" ::
           "0" ::
           "0" ::
           "" ::
