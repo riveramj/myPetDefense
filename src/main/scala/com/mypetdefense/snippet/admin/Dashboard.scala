@@ -44,12 +44,21 @@ object Dashboard extends Loggable {
     loggedIn >>
     EarlyResponse(exportExistingUspsLabels _)
 
+  val mpdShipstationExportMenu = Menu.i("Export MPD Shipstation Labels") / "admin" / "dashboard" / "export_MPD_shipstation.csv" >>
+    adminUser >>
+    loggedIn >>
+    EarlyResponse(exportMpdShipstationLabels _)
+
   def exportNewUspsLabels: Box[LiftResponse] = {
     LabelExportService.exportNewUspsLabels()
   }
 
   def exportExistingUspsLabels: Box[LiftResponse] = {
     LabelExportService.exportExistingUspsLabels()
+  }
+
+  def exportMpdShipstationLabels: Box[LiftResponse] = {
+    LabelExportService.exportMpdShipStationLabels()
   }
 }
 
@@ -189,6 +198,7 @@ class Dashboard extends Loggable {
     ".dashboard [class+]" #> "current" &
     ".new-export [href]" #> Dashboard.newLabelsExportMenu.loc.calcDefaultHref &
     ".existing-export [href]" #> Dashboard.existingLabelsExportMenu.loc.calcDefaultHref &
+    ".shipstation-export [href]" #> Dashboard.mpdShipstationExportMenu.loc.calcDefaultHref &
     "#dashboard-current [onclick]" #> SHtml.ajaxInvoke(() => changeDataSet("current")) &
     "#dashboard-future [onclick]" #> SHtml.ajaxInvoke(() => changeDataSet("future")) &
     ".dashboard-details" #> SHtml.idMemoize { renderer =>
