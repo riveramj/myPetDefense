@@ -139,6 +139,7 @@ object Paths {
     admin.Dashboard.menu,
     admin.Dashboard.newLabelsExportMenu,
     admin.Dashboard.existingLabelsExportMenu,
+    admin.Dashboard.mpdShipstationExportMenu,
     admin.Parents.menu,
     admin.Parents.activeParentsCsvMenu,
     admin.Users.menu,
