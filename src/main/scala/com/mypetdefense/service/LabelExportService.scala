@@ -270,6 +270,9 @@ object LabelExportService extends Loggable {
             
             case name if (name.contains("ZoGuard Plus for Dogs 23-44")) =>
               "ZgMedium"
+
+            case name if (name.contains("ZoGuard Plus for Dogs 45-88")) =>
+              "ZgLarge"
            
             case other =>
               other
