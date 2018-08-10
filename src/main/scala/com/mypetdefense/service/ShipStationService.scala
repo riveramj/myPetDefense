@@ -28,13 +28,12 @@ object ShipStationService extends Loggable {
 
   val basicAuthentication = Base64.getEncoder.encodeToString(s"${shipStationKey}:${shipStationSecret}".getBytes(StandardCharsets.UTF_8))
 
-  println(basicAuthentication)
 
   def getOrder(orderId: String) = {
-    val orderUrl = url(s"${baseShipStationUrl}/orders/${orderId}")
+    val getOrderUrl = url(s"${baseShipStationUrl}/orders/${orderId}")
 
     def getOrderResponse = {
-      Http(orderUrl <:< Map("Authorization" -> s"Basic ${basicAuthentication}") OK as.String).either.map {
+      Http(getOrderUrl <:< Map("Authorization" -> s"Basic ${basicAuthentication}") OK as.String).either.map {
         case Left(throwable) =>
           logger.error(s"error from ShipStation: ${throwable}")
           Failure("Error occured while talking to shipstation.", Full(throwable), Empty)
@@ -60,7 +59,41 @@ object ShipStationService extends Loggable {
 
     val order = rawOrder(retryAttempts)
 
-    println(order)
     order
+  }
+
+  def createOrder(orderDetails: ShipStationOrder) = {
+    val creatOrderUrl = url(s"${baseShipStationUrl}/orders/createorder")
+
+    def getOrderResponse = {
+      Http(creatOrderUrl << Map(
+        ) <:< Map("Authorization" -> s"Basic ${basicAuthentication}") OK as.String).either.map {
+        case Left(throwable) =>
+          logger.error(s"error from ShipStation: ${throwable}")
+          Failure("Error occured while talking to shipstation.", Full(throwable), Empty)
+        case Right(possibleOrder) =>
+          Full(possibleOrder)
+      }
+    }
+
+    def rawOrder(attemptsLeft: Int): Box[String] = {
+      Try(Await.result(getOrderResponse, 1 seconds)) match {
+        case Success(orderResponse) => 
+          orderResponse
+        case TryFail(throwable: Throwable) =>
+          if (attemptsLeft > 0)
+            rawOrder(attemptsLeft - 1)
+          else {
+            logger.error(s"Timeout occured while talking to shipStation for get order with ${throwable}")
+            Failure("Timeout occured while talking to shipStation for get order.", Full(throwable), Empty)
+          }
+
+      }
+    }
+
+    val order = rawOrder(retryAttempts)
+
+    order
+    
   }
 }
