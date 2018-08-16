@@ -51,11 +51,60 @@ object ShipStationService extends Loggable {
     val billShipTo = ShipStationAddress(
       name = Some(user.name),
       street1 = userAddress.map(_.street1.get).openOr(""),
-      street2 = userAddress.map(_.street1.get),
+      street2 = userAddress.map(_.street2.get),
       city = userAddress.map(_.city.get).openOr(""),
       state = userAddress.map(_.state.get).openOr(""),
       postalCode = userAddress.map(_.zip.get).openOr("")
     )
+
+    val shipmentLineItems = shipment.shipmentLineItems.toList
+    
+    val petNamesProducts = shipmentLineItems.map { lineItem =>
+      val lineItemPetName = lineItem.petName.get
+      val lineItemProductName = lineItem.product.obj.map(_.getNameAndSize).openOr("")
+
+      s"${lineItemPetName} - ${lineItemProductName}"
+    }.mkString(". ")
+
+    val products = shipmentLineItems.map { lineItem =>
+      lineItem.product.obj
+    }.flatten
+
+    val shipStationProductIds = products.map { product =>
+
+      product.getNameAndSize match {
+        case name if (name.contains("ZoGuard Plus for Dogs 4-22")) =>
+          28322349
+
+        case name if (name.contains("ZoGuard Plus for Dogs 23-44")) =>
+          30196793
+
+        case name if (name.contains("ZoGuard Plus for Dogs 45-88")) =>
+          30270887
+
+        case _ =>
+          0
+      }
+    }
+
+    val possibleInsertOrderItem = shipment.insert.get match {
+      case "TPP+Welcome Insert" => 
+        OrderItem(
+          orderItemId = 30198041
+          quantity = 1,
+        ) ::
+        Nil
+      case _ => Nil
+    }
+
+    val shipStationProducts = shipStationProductIds.map { id =>
+      OrderItem(
+        orderItemId = id
+        quantity = 1,
+      )
+    }
+
+    val 
 
     val newOrder = Order.create(
       orderNumber = s"${shipment.shipmentId}",
@@ -63,7 +112,9 @@ object ShipStationService extends Loggable {
       shipByDate = Some(dateFormat.format(shipment.expectedShipDate.get)),
       orderStatus = "on_hold",
       billTo = billShipTo,
-      shipTo = billShipTo
+      shipTo = billShipTo,
+      items = Some(shipStationProducts ++ possibleInsertOrderItem),
+      customerNotes = petNamesProducts
     )
 
     Try (
