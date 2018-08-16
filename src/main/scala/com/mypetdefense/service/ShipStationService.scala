@@ -61,7 +61,7 @@ object ShipStationService extends Loggable {
     val newOrder = Order.create(
       orderNumber = s"${shipment.shipmentId}",
       orderDate = dateFormat.format(new Date()),
-      shipByDate = Some(dateFormat.format(shipment.expectedShipDate.get.toString)),
+      shipByDate = Some(dateFormat.format(shipment.expectedShipDate.get)),
       orderStatus = "on_hold",
       billTo = billShipTo,
       shipTo = billShipTo
