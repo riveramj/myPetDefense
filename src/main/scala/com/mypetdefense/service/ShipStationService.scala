@@ -59,47 +59,40 @@ object ShipStationService extends Loggable {
 
     val shipmentLineItems = shipment.shipmentLineItems.toList
     
-    val petNamesProducts = shipmentLineItems.map { lineItem =>
-      val lineItemPetName = lineItem.petName.get
-      val lineItemProductName = lineItem.product.obj.map(_.getNameAndSize).openOr("")
+    val petNamesProducts = shipmentLineItems.map(_.getShipmentItem).mkString(". ")
 
-      s"${lineItemPetName} - ${lineItemProductName}"
-    }.mkString(". ")
-
-    val products = shipmentLineItems.map { lineItem =>
-      lineItem.product.obj
-    }.flatten
+    val products = shipmentLineItems.map(_.product.obj).flatten
 
     val shipStationProductIds = products.map { product =>
 
       product.getNameAndSize match {
         case name if (name.contains("ZoGuard Plus for Dogs 4-22")) =>
-          28322349
+          "zgSMall"
 
         case name if (name.contains("ZoGuard Plus for Dogs 23-44")) =>
-          30196793
+          "ZgMedium"
 
         case name if (name.contains("ZoGuard Plus for Dogs 45-88")) =>
-          30270887
+          "ZgLarge"
 
-        case _ =>
-          0
+        case other =>
+          other
       }
     }
 
     val possibleInsertOrderItem = shipment.insert.get match {
       case "TPP+Welcome Insert" => 
         List(OrderItem(
-          orderItemId = 30198041,
-          quantity = 1
+          quantity = 1,
+          sku = "WelcomeTPP"
         ))
       case _ => Nil
     }
 
-    val shipStationProducts = shipStationProductIds.map { id =>
+    val shipStationProducts = shipStationProductIds.map { sku =>
       OrderItem(
-        orderItemId = id,
-        quantity = 1
+        quantity = 1,
+        sku = sku
       )
     }
 
