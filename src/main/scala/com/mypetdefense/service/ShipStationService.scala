@@ -25,8 +25,9 @@ import com.mypetdefense.model._
 object ShipStationService extends Loggable {
   val key = Props.get("shipstation.key") openOr ""
   val secret = Props.get("shipstation.secret") openOr ""
+  val url = Props.get("shipstation.secret") openOr ""
 
-  implicit val shipStationExecutor = new ShipStationExecutor(key, secret)
+  implicit val shipStationExecutor = new ShipStationExecutor(key, secret, url)
 
   def getOrder(orderId: String) = {
     Try(
