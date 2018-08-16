@@ -65,6 +65,13 @@ object ShipStationService extends Loggable {
 
     val products = shipmentLineItems.map(_.product.obj).flatten
 
+    println("========")
+    println(products)
+    println("========")
+    println("========")
+    println(products.map(_.getNameAndSize))
+    println("========")
+
     val shipStationProductIds = products.map { product =>
 
       product.getNameAndSize match {
@@ -91,12 +98,22 @@ object ShipStationService extends Loggable {
       case _ => Nil
     }
 
+    println("==== sku")
+    println(shipStationProductIds)
+    println("==== sku")
+
     val shipStationProducts = shipStationProductIds.map { sku =>
       OrderItem(
         quantity = 1,
         sku = sku
       )
     }
+
+    val allOrderItems = shipStationProducts ++ possibleInsertOrderItem
+
+    println("==== order items")
+    println(allOrderItems)
+    println("==== order items")
 
     val newOrder = Order.create(
       orderNumber = s"${shipment.shipmentId}",
@@ -105,7 +122,7 @@ object ShipStationService extends Loggable {
       orderStatus = "on_hold",
       billTo = billShipTo,
       shipTo = billShipTo,
-      items = Some(shipStationProducts ++ possibleInsertOrderItem),
+      items = Some(allOrderItems),
       customerNotes = Some(petNamesProducts)
     )
 
