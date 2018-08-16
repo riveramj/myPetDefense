@@ -46,7 +46,6 @@ object ShipStationService extends Loggable {
     }
   }
 
-  def createShipStationOrder(shipment: Shipment, user: User) = {
   def createShipStationOrder(oldShipment: Shipment, user: User) = {
     val userAddress = user.shippingAddress
     val billShipTo = ShipStationAddress(
