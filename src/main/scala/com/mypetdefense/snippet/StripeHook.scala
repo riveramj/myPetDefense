@@ -12,7 +12,7 @@ import net.liftweb._
     import Extraction._
 
 import com.mypetdefense.model._
-import com.mypetdefense.service.{TaxJarService, ParentService}
+import com.mypetdefense.service._
 import com.mypetdefense.actor._
 
 import me.frmr.stripe
@@ -90,6 +90,8 @@ trait StripeHook extends RestHelper with Loggable {
               formatAmount(tax),
               insert
             )
+
+            val shipStationOrder = ShipStationService.createShipStationOrder(shipment, user)
           }
         }
       }
