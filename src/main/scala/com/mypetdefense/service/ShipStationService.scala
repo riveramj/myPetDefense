@@ -15,8 +15,7 @@ import scala.collection.concurrent.TrieMap
 import scala.math.BigDecimal
 
 import java.util.Date
-import java.util.Base64
-import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
 import com.mypetdefense.shipstation.{Address => ShipStationAddress, _}
@@ -26,6 +25,7 @@ object ShipStationService extends Loggable {
   val key = Props.get("shipstation.key") openOr ""
   val secret = Props.get("shipstation.secret") openOr ""
   val url = Props.get("shipstation.url") openOr ""
+  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
   implicit val shipStationExecutor = new ShipStationExecutor(key, secret, url)
 
@@ -60,8 +60,8 @@ object ShipStationService extends Loggable {
 
     val newOrder = Order.create(
       orderNumber = s"${shipment.shipmentId}",
-      orderDate = new Date().toString,
-      shipByDate = Some(shipment.expectedShipDate.get.toString),
+      orderDate = dateFormat.format(new Date()),
+      shipByDate = Some(dateFormat.format(shipment.expectedShipDate.get.toString)),
       orderStatus = "on_hold",
       billTo = billShipTo,
       shipTo = billShipTo
