@@ -49,6 +49,7 @@ object ShipStationService extends Loggable {
   def createShipStationOrder(shipment: Shipment, user: User) = {
     val userAddress = user.shippingAddress
     val billShipTo = ShipStationAddress(
+      name = user.name,
       street1 = userAddress.map(_.street1.get).openOr(""),
       street2 = userAddress.map(_.street1.get),
       city = userAddress.map(_.city.get).openOr(""),
