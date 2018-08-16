@@ -89,22 +89,19 @@ object ShipStationService extends Loggable {
 
     val possibleInsertOrderItem = shipment.insert.get match {
       case "TPP+Welcome Insert" => 
-        OrderItem(
-          orderItemId = 30198041
-          quantity = 1,
-        ) ::
-        Nil
+        List(OrderItem(
+          orderItemId = 30198041,
+          quantity = 1
+        ))
       case _ => Nil
     }
 
     val shipStationProducts = shipStationProductIds.map { id =>
       OrderItem(
-        orderItemId = id
-        quantity = 1,
+        orderItemId = id,
+        quantity = 1
       )
     }
-
-    val 
 
     val newOrder = Order.create(
       orderNumber = s"${shipment.shipmentId}",
@@ -114,7 +111,7 @@ object ShipStationService extends Loggable {
       billTo = billShipTo,
       shipTo = billShipTo,
       items = Some(shipStationProducts ++ possibleInsertOrderItem),
-      customerNotes = petNamesProducts
+      customerNotes = Some(petNamesProducts)
     )
 
     Try (
