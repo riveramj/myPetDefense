@@ -47,8 +47,7 @@ object ShipStationService extends Loggable {
   }
 
   def createShipStationOrder(shipment: Shipment, user: User) = {
-    logger.error("in create order")
-
+  def createShipStationOrder(oldShipment: Shipment, user: User) = {
     val userAddress = user.shippingAddress
     val billShipTo = ShipStationAddress(
       name = Some(user.name),
@@ -59,7 +58,8 @@ object ShipStationService extends Loggable {
       postalCode = userAddress.map(_.zip.get).openOr("")
     )
 
-    val shipmentLineItems = shipment.shipmentLineItems.toList
+    val shipment = oldShipment.refresh
+    val shipmentLineItems = shipment.toList.map(_.shipmentLineItems.toList).flatten
     
     val petNamesProducts = shipmentLineItems.map(_.getShipmentItem).mkString(". ")
 
@@ -89,8 +89,8 @@ object ShipStationService extends Loggable {
       }
     }
 
-    val possibleInsertOrderItem = shipment.insert.get match {
-      case "TPP+Welcome Insert" => 
+    val possibleInsertOrderItem = shipment.map(_.insert.get) match {
+      case Full("TPP+Welcome Insert") => 
         List(OrderItem(
           quantity = 1,
           sku = "WelcomeTPP"
@@ -116,9 +116,9 @@ object ShipStationService extends Loggable {
     println("==== order items")
 
     val newOrder = Order.create(
-      orderNumber = s"${shipment.shipmentId}",
+      orderNumber = s"${shipment.map(_.shipmentId.get).openOr("")}",
       orderDate = dateFormat.format(new Date()),
-      shipByDate = Some(dateFormat.format(shipment.expectedShipDate.get)),
+      shipByDate = shipment.map(s => dateFormat.format(s.expectedShipDate.get)),
       orderStatus = "on_hold",
       billTo = billShipTo,
       shipTo = billShipTo,
