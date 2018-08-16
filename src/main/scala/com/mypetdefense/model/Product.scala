@@ -20,6 +20,7 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   object reviewCount extends MappedInt(this)
   object imageName extends MappedString(this, 100)
   object sku extends MappedString(this, 100)
+  object shipStationId extends MappedInt(Int)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
