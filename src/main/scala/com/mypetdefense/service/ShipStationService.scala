@@ -46,6 +46,8 @@ object ShipStationService extends Loggable {
   }
 
   def createShipStationOrder(shipment: Shipment, user: User) = {
+    logger.error("in create order")
+
     val userAddress = user.shippingAddress
     val billShipTo = ShipStationAddress(
       street1 = userAddress.map(_.street1.get).openOr(""),
@@ -68,12 +70,18 @@ object ShipStationService extends Loggable {
       Await.result(newOrder, new DurationInt(10).seconds)
     ) match {
       case TrySuccess(Full(shipStationOrder)) =>
+        logger.error("created Order")
+        logger.error(shipStationOrder)
         Full(shipStationOrder)
 
       case TrySuccess(shipStationFailure) =>
+        logger.error("ShipStation failure")
+        logger.error(shipStationFailure)
         shipStationFailure
 
       case TryFail(throwable: Throwable) =>
+        logger.error("errror:")
+        logger.error(throwable)
         Empty
     }  
   }
