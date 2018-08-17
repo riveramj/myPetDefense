@@ -132,9 +132,11 @@ object ShipStationService extends Loggable {
       Await.result(orderHold, new DurationInt(10).seconds)
     ) match {
       case TrySuccess(Full(holdOrderResults)) =>
+        println(holdOrderResults)
         Full(holdOrderResults)
 
       case TrySuccess(shipStationFailure) =>
+        println(shipStationFailure)
         shipStationFailure
 
       case TryFail(throwable: Throwable) =>

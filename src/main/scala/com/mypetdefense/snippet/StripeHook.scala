@@ -101,6 +101,12 @@ trait StripeHook extends RestHelper with Loggable {
 
             val shipStationOrder = ShipStationService.createShipStationOrder(shipment, user)
 
+            println("______")
+            println(shipStationOrder)
+            println(new Date())
+            println(shipment.expectedShipDate.get)
+            println("______")
+
             if (!sameDateComparison(
               new Date(),
               shipment.expectedShipDate.get
