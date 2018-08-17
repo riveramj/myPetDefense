@@ -18,6 +18,8 @@ import com.mypetdefense.actor._
 import me.frmr.stripe
 import org.joda.time._
 import scala.language.postfixOps
+import java.text.SimpleDateFormat
+import java.util.Date
 
 object StripeHook extends StripeHook {
   override val emailActor = EmailActor
@@ -25,6 +27,12 @@ object StripeHook extends StripeHook {
 
 trait StripeHook extends RestHelper with Loggable {
   def emailActor: EmailActor
+
+  def sameDateComparison(date1: Date, date2: Date) = {
+    val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+    
+    dateFormat.format(date1) == dateFormat.format(date2)
+  }
 
   def invoicePaymentSucceeded(objectJson: JValue) = {
     for {
@@ -92,6 +100,16 @@ trait StripeHook extends RestHelper with Loggable {
             )
 
             val shipStationOrder = ShipStationService.createShipStationOrder(shipment, user)
+
+            if (!sameDateComparison(
+              new Date(),
+              shipment.expectedShipDate.get
+            )) {
+              ShipStationService.holdOrderUntil(
+                shipStationOrder.map(_.orderId).openOr(-1),
+                shipment.expectedShipDate.get
+              )
+            }
           }
         }
       }

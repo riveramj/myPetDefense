@@ -64,13 +64,6 @@ object ShipStationService extends Loggable {
 
     val products = shipmentLineItems.map(_.product.obj).flatten
 
-    println("========")
-    println(products)
-    println("========")
-    println("========")
-    println(products.map(_.getNameAndSize))
-    println("========")
-
     val shipStationProductIds = products.map { product =>
 
       product.getNameAndSize match {
@@ -97,10 +90,6 @@ object ShipStationService extends Loggable {
       case _ => Nil
     }
 
-    println("==== sku")
-    println(shipStationProductIds)
-    println("==== sku")
-
     val shipStationProducts = shipStationProductIds.map { sku =>
       OrderItem(
         quantity = 1,
@@ -110,15 +99,10 @@ object ShipStationService extends Loggable {
 
     val allOrderItems = shipStationProducts ++ possibleInsertOrderItem
 
-    println("==== order items")
-    println(allOrderItems)
-    println("==== order items")
-
     val newOrder = Order.create(
       orderNumber = s"${shipment.map(_.shipmentId.get).openOr("")}",
       orderDate = dateFormat.format(new Date()),
-      holdUntilDate = shipment.map(s => dateFormat.format(s.expectedShipDate.get)),
-      orderStatus = "on_hold",
+      orderStatus = "awaiting_shipment",
       billTo = billShipTo,
       shipTo = billShipTo,
       items = Some(allOrderItems),
@@ -130,6 +114,25 @@ object ShipStationService extends Loggable {
     ) match {
       case TrySuccess(Full(shipStationOrder)) =>
         Full(shipStationOrder)
+
+      case TrySuccess(shipStationFailure) =>
+        shipStationFailure
+
+      case TryFail(throwable: Throwable) =>
+        Empty
+    }  
+  }
+
+  def holdOrderUntil(orderId: Int, date: Date) = {
+    val holdDate = dateFormat.format(date)
+
+    val orderHold = Order.holdUntil(orderId, holdDate)
+
+    Try (
+      Await.result(orderHold, new DurationInt(10).seconds)
+    ) match {
+      case TrySuccess(Full(holdOrderResults)) =>
+        Full(holdOrderResults)
 
       case TrySuccess(shipStationFailure) =>
         shipStationFailure
