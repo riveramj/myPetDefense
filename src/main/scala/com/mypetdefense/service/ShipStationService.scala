@@ -18,7 +18,7 @@ import java.util.Date
 import java.text.SimpleDateFormat
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
-import com.mypetdefense.shipstation.{Address => ShipStationAddress, _}
+import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => ShipStationShipment, _}
 import com.mypetdefense.model._
 
 object ShipStationService extends Loggable {
@@ -46,7 +46,61 @@ object ShipStationService extends Loggable {
     }
   }
 
-  def createShipStationOrder(oldShipment: Shipment, user: User) = {
+  def getReadyOrders(): Box[OrderList] = {
+    Try(
+      Await.result(Order.list(List(("orderStatus","awaiting_shipment"))), new DurationInt(10).seconds)
+    ) match {
+      case TrySuccess(Full(shipStationOrder)) =>
+        Full(shipStationOrder)
+      
+      case TrySuccess(shipStationFailure) =>
+        logger.error(s"get order failed with shipStation error: ${shipStationFailure}")
+        shipStationFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"get order failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
+  def createOrderLabel(
+    orderId: Int,
+    carrierCode: String,
+    serviceCode: String,
+    packageCode: String,
+    shipDate: String,
+    weight: Weight,
+    testLabel: Boolean = false
+  ) = {
+    val createLabel = Order.createLabelForOrder(
+      orderId = orderId,
+      carrierCode = carrierCode,
+      serviceCode = serviceCode,
+      packageCode = packageCode,
+      shipDate = shipDate,
+      weight = Some(weight),
+      testLabel = testLabel
+    )
+
+    Try(
+      Await.result(createLabel, new DurationInt(10).seconds)
+    ) match {
+      case TrySuccess(Full(shipStationLabel)) =>
+        println(shipStationLabel)
+        Full(shipStationLabel)
+      
+      case TrySuccess(shipStationFailure) =>
+        println(shipStationFailure)
+        logger.error(s"get order failed with shipStation error: ${shipStationFailure}")
+        shipStationFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"get order failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
+  def createShipStationOrder(shipment: Shipment, user: User) = {
     val userAddress = user.shippingAddress
     val billShipTo = ShipStationAddress(
       name = Some(user.name),
@@ -57,8 +111,8 @@ object ShipStationService extends Loggable {
       postalCode = userAddress.map(_.zip.get).openOr("")
     )
 
-    val shipment = oldShipment.refresh
-    val shipmentLineItems = shipment.toList.map(_.shipmentLineItems.toList).flatten
+    val refreshedShipment = shipment.refresh
+    val shipmentLineItems = refreshedShipment.toList.map(_.shipmentLineItems.toList).flatten
     
     val petNamesProducts = shipmentLineItems.map(_.getShipmentItem).mkString(". ")
 
@@ -81,7 +135,7 @@ object ShipStationService extends Loggable {
       }
     }
 
-    val possibleInsertOrderItem = shipment.map(_.insert.get) match {
+    val possibleInsertOrderItem = refreshedShipment.map(_.insert.get) match {
       case Full("TPP+Welcome Insert") => 
         List(OrderItem(
           quantity = 1,
@@ -100,7 +154,7 @@ object ShipStationService extends Loggable {
     val allOrderItems = shipStationProducts ++ possibleInsertOrderItem
 
     val newOrder = Order.create(
-      orderNumber = s"${shipment.map(_.shipmentId.get).openOr("")}",
+      orderNumber = s"${refreshedShipment.map(_.shipmentId.get).openOr("")}",
       orderDate = dateFormat.format(new Date()),
       orderStatus = "awaiting_shipment",
       billTo = billShipTo,
@@ -138,15 +192,37 @@ object ShipStationService extends Loggable {
       Await.result(orderHold, new DurationInt(10).seconds)
     ) match {
       case TrySuccess(Full(holdOrderResults)) =>
-        println(holdOrderResults)
         Full(holdOrderResults)
 
       case TrySuccess(shipStationFailure) =>
-        println(shipStationFailure)
         shipStationFailure
 
       case TryFail(throwable: Throwable) =>
         Empty
     }  
+  }
+
+  def getTodaysShipments() = {
+    val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+    val shipDate = dateFormat.format(new Date())
+
+    Try(
+      Await.result(ShipStationShipment.list(
+        List(
+          ("shipDateStart",shipDate),
+          ("shipDateEnd",shipDate)
+      )), new DurationInt(10).seconds)
+    ) match {
+      case TrySuccess(Full(shipStationShipments)) =>
+        Full(shipStationShipments)
+      
+      case TrySuccess(shipStationFailure) =>
+        logger.error(s"get order failed with shipStation error: ${shipStationFailure}")
+        shipStationFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"get order failed with other error: ${throwable}")
+        Empty
+    }
   }
 }
