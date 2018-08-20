@@ -25,3 +25,8 @@ taxjar.api.key=a898d7a70fb3f3d948b7aac38779e42d
 [Price]
 default.price.code=default-jan-29-2018
 tpp.price.code=tpp-apr-01-2018
+
+[ShipStation]
+shipstation.url=http://ssapi.shipstation.com
+shipstation.key=bf894cddafcd4b8baafb442f393d360f
+shipstation.secret=e9bce4e4286a43c68395776506d1866f
