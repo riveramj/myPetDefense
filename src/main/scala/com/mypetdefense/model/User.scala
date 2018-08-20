@@ -54,6 +54,13 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
 
   def refresh = User.find(By(User.userId, userId.get))
 
+  def shippingAddress = {
+    Address.find(
+      By(Address.user, this),
+      By(Address.addressType, AddressType.Shipping)
+    )
+  }
+
   def createNewUser(
     firstName: String,
     lastName: String,
