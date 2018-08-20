@@ -24,7 +24,7 @@ class SendTrackingEmailJob extends ManagedJob {
     val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
     val nextMonthDate = Date.from(nextMonthLocalDate)
 
-    val labels = ShipStationService.getTodaysShipments().map(_.shipments).openOr(Nil)
+    val labels = ShipStationService.getYesterdayShipments().map(_.shipments).openOr(Nil)
 
     labels map { label =>
       val orderNumber = tryo(label.orderNumber.toLong).openOr(0L)
@@ -68,7 +68,7 @@ object DailyTrackingEmailJob extends TriggeredJob {
   val trigger = TriggerBuilder.newTrigger()
     .withIdentity("DailyTrackingEmailJobTrigger")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 23 ? * * *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 8 ? * * *"))
     .build()
 }
 

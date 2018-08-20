@@ -196,9 +196,10 @@ object ShipStationService extends Loggable {
     }  
   }
 
-  def getTodaysShipments() = {
+  def getYesterdayShipments() = {
     val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-    val shipDate = dateFormat.format(new Date())
+    val yesterdayDate = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant())
+    val shipDate = dateFormat.format(yesterdayDate)
 
     Try(
       Await.result(ShipStationShipment.list(
