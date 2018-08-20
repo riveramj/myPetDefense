@@ -32,6 +32,7 @@ class SendTrackingEmailJob extends ManagedJob {
 
       for {
         shipment <- possibleShipment
+          if shipment.dateShipped.get == null
         subscription <- shipment.subscription.obj
         user <- subscription.user.obj
         address <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
