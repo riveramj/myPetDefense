@@ -1,6 +1,5 @@
 package com.mypetdefense.jobs
 
-
 import net.liftweb._
   import common._
   import mapper._
