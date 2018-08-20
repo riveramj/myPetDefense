@@ -164,7 +164,7 @@ object ShipStationService extends Loggable {
     )
 
     Try (
-      Await.result(newOrder, new DurationInt(10).seconds)
+      Await.result(newOrder, new DurationInt(15).seconds)
     ) match {
       case TrySuccess(Full(shipStationOrder)) =>
         logger.error("created Order")
@@ -189,7 +189,7 @@ object ShipStationService extends Loggable {
     val orderHold = Order.holdUntil(orderId, holdDate)
 
     Try (
-      Await.result(orderHold, new DurationInt(10).seconds)
+      Await.result(orderHold, new DurationInt(15).seconds)
     ) match {
       case TrySuccess(Full(holdOrderResults)) =>
         Full(holdOrderResults)
