@@ -20,7 +20,7 @@ object JobManager extends SimpleInjector with Loggable {
     Props.mode match {
       case Production => productionJobs
       case Staging => Nil
-      case Pilot => Nil
+      case Pilot => nonproductionJobs
       case _ => nonproductionJobs
     }
   }

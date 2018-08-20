@@ -209,8 +209,9 @@ object ShipStationService extends Loggable {
     Try(
       Await.result(ShipStationShipment.list(
         List(
-          ("shipDateStart",shipDate),
-          ("shipDateEnd",shipDate)
+          ("shipDateStart", shipDate),
+          ("shipDateEnd", shipDate),
+          ("pageSize", "150")
       )), new DurationInt(10).seconds)
     ) match {
       case TrySuccess(Full(shipStationShipments)) =>
