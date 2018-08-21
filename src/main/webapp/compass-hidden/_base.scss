@@ -7,10 +7,12 @@
 @import "compass";
 
 $fa-font-path: "/static/fonts";
-@import "font-awesome/scss/variables";
-@import "font-awesome/scss/mixins";
-@import "font-awesome/scss/path";
-@import "font-awesome/scss/core";
+@import "font-awesome/scss/fontawesome";
+
+@import "font-awesome/scss/light";
+@import "font-awesome/scss/regular";
+@import "font-awesome/scss/solid";
+@import "font-awesome/scss/brands";
 
 %icon {
   font-family: 'FontAwesome';

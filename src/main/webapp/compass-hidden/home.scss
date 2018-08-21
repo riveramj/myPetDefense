@@ -362,12 +362,14 @@ li.feature-info {
   }
 
   &.half:after {
-    content: $fa-var-star-half-o ;
+    @extend .fas;
+    content: $fa-var-star-half-alt;
     color: #FE9900;
   }
 
   &.empty:after {
-    content: $fa-var-star-o;
+    @extend .far;
+    content: $fa-var-star;
     color: #FE9900;
   }
 }

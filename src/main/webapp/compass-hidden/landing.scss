@@ -47,7 +47,8 @@
   
   &:after {
     @extend %icon;
-    content: $fa-var-close;
+    @extend .fas;
+    content: $fa-var-times;
   }
 }
 
