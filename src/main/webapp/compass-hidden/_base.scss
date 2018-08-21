@@ -15,7 +15,12 @@ $fa-font-path: "/static/fonts";
 @import "font-awesome/scss/brands";
 
 %icon {
-  font-family: 'FontAwesome';
+  @include fa-icon;
+  @extend .far;
+}
+
+%icon-solid {
+  @include fa-icon;
 }
 
 /// Weights

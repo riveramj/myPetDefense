@@ -40,7 +40,7 @@
 
     &:after {
       @extend %icon;
-      content: $fa-var-heart;
+      content: fa-content($fa-var-heart);
       color: #FF616C;
     }
 
@@ -101,7 +101,7 @@ a.signup {
   &:after {
     margin-left: 7px;
     @extend %icon;
-    content: $fa-var-caret-right;
+    content: fa-content($fa-var-caret-right);
   }
 
   @media (min-width: $bp-medium) {

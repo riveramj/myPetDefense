@@ -176,7 +176,7 @@ fieldset label {
 
   &:before {
     @extend %icon;
-    content: $fa-var-shopping-cart;
+    content: fa-content($fa-var-shopping-cart);
     color: #1D8884;
     font-size: rem(18px);
     padding-left: rem(14px);

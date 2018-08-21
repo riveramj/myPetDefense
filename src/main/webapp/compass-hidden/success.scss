@@ -153,7 +153,7 @@
 
 .flow-step .step-info:before {
   @extend %icon;
-  content: $fa-var-check;
+  content: fa-content($fa-var-check);
   position: absolute;
   left: 18px;
   color: #1C8884;
