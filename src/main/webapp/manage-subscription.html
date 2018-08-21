@@ -5,14 +5,40 @@
   <div id="page-body-container">
     <div data-lift="embed?what=parent-nav-bar"></div>
     <div class="account-section">
-      <h2>Cancel Subscription</h2>
+      <h2>Pause or Cancel Subscription</h2>
       
       <form id="pause-cancel-container">
         <ul class="account-block">
+          <li class="pause-account">
+            <button class="pause-cancel-select" id="pause-account">Pause</button>
+            <h3 class="choice-header">Pause your subscription</h3>
+            <div class="option-copy">
+              <ul class="notes">
+                <li>
+                  Shipments and Billing will be disabled while your account is suspended.
+                </li>
+                <li>
+                  Shipments and billing will automatically resume on the date you set.
+                </li>
+                <li>
+                  There is no cost to suspend.
+                </li>
+              </ul>
+            </div>
+            <ul class="set-resume-date">
+              <li>
+                <h4>Set Next Shipment Date</h4>
+              </li>
+              <li>
+                <input class="next-shipment" type="text" placeholder="MM/DD/YYYY">
+              </li>
+            </ul>
+          </li>
           <li class="cancel-account">
+            <button class="pause-cancel-select" id="cancel-account">Cancel</button>
             <h3 class="choice-header">Cancel your subscription</h3>
             <div class="option-copy">
-              <ul class="cancel-notes">
+              <ul class="notes">
                 <li>
                   You will no longer be able to access your account.
                 </li>
@@ -27,7 +53,7 @@
           </li>
           <li class="navigation-container">
             <button class="go-back">Back</button>
-            <button class="cancel">Finish Cancellation</button>
+            <button class="cancel">Continue</button>
           </li>
         </ul>
       </form>

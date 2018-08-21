@@ -99,9 +99,52 @@
   }
 }
 
+.pause-cancel-select {
+  width: auto;
+  margin: 0 6px 0 -30px;
+  border: none;
+  background-color: #ffffff;
+  padding: 0;
+
+  overflow: hidden;
+  width: 18px;
+  height: 18px;
+
+  &:before {
+    @extend %icon;
+    content: fa-content($fa-var-circle);
+    font-size: 18px;
+  }
+
+  &.selected:before {
+    color: #45ADA9;
+    content: fa-content($fa-var-dot-circle);
+  }
+}
+
 #pause-cancel-container {
   @media (min-width: $bp-large) {
     margin-top: -9px;
+  }
+
+  .set-resume-date {
+    margin-top: 16px;
+    
+    h4 {
+      font-size: 14px;
+      color: #4F4E4E;
+      font-weight: $bold;
+      padding-bottom: 4px;
+      line-height: 16px;
+    }
+  }
+
+  .cancel-account {
+    margin-top: 16px;
+  }
+
+  .pause-account, .cancel-account {
+    padding-left: 30px;
   }
 
   .choice-option {
@@ -167,8 +210,8 @@
     }
 
     &:before {
-      @extend %icon;
-      content: $fa-var-chevron-left;
+      @extend .fas;
+      content: fa-content($fa-var-chevron-left);
       margin-right: 10px;
       font-size: 14px;
     }
@@ -187,7 +230,7 @@
     }
   }
 
-  .cancel-notes li {
+  .notes li {
     list-style: disc;
   }
 }
@@ -339,7 +382,7 @@ body {
 
   &:before {
     @extend %icon;
-    content: $fa-var-check-circle;
+    content: fa-content($fa-var-check-circle);
     display: block;
     font-size: 45px;
     margin-bottom: 10px;

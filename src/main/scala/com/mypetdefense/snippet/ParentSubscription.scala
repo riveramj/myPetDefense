@@ -46,13 +46,18 @@ object ParentSubscription extends Loggable {
 }
 
 class ParentSubscription extends Loggable {
+  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+
   val user = currentUser
   val stripeCustomerId = user.map(_.stripeId.get).openOr("")
 
   var email = user.map(_.email.get).openOr("")
   var oldPassword = ""
   var newPassword = ""
+  val currentNextShipDate = user.flatMap(_.getSubscription).map(_.nextShipDate.get)
 
+  var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
+  
   def updateEmail() = {
     val validateFields = List(
         checkEmail(email, "#email")
@@ -131,12 +136,36 @@ class ParentSubscription extends Loggable {
   def manage = {
     val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.headOption)
 
+    var cancelAccount = false
+    var pauseAccount = false
+
+    def updateSubscriptionStatus(action: String, renderer: IdMemoizeTransform)() = {
+      action match {
+        case "cancel" =>
+          cancelAccount = true
+          pauseAccount = false
+          renderer.setHtml
+        
+        case _ =>
+          cancelAccount = false
+          pauseAccount = true
+          renderer.setHtml
+      }
+    }
+
     ParentSubscription.currentUserSubscription(userSubscription)
 
     SHtml.makeFormsAjax andThen
     "#user-email *" #> email &
     ".subscription a [class+]" #> "current" &
-    ".cancel" #> SHtml.ajaxSubmit("Finish Cancellation", cancelAccount _)
+    ".account-block" #> idMemoize { renderer =>
+      ".next-shipment" #> text(nextShipDate, possibleShipDate => nextShipDate = possibleShipDate.trim) &
+      "#pause-account [class+]" #> (if (pauseAccount) "selected" else "" ) &
+      "#cancel-account [class+]" #> (if (cancelAccount) "selected" else "" ) &
+      "#pause-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("pause", renderer)) &
+      "#cancel-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("cancel", renderer))
+      //".cancel" #> SHtml.ajaxSubmit("Continue", cancelAccount _)
+    }
   }
 
   def survey = {
@@ -159,7 +188,7 @@ class ParentSubscription extends Loggable {
       S.redirectTo(ParentSubscription.surveyCompleteSubscriptionMenu.loc.calcDefaultHref)
     }
 
-    val cancelChoices = SHtml.radio(cancelReasons, Empty, selectedReason = _).toForm 
+    val cancelChoices = SHtml.radio(List("Pause", "Cancel"), Empty, selectedReason = _).toForm 
 
     SHtml.makeFormsAjax andThen
     ".sign-out" #> ClearNodes &
