@@ -155,12 +155,11 @@
   }
 
   &:after {
-    @include fa-icon;
     @extend .fas;
-
     content: fa-content($fa-var-caret-right);
     margin-left: 7px;
     font-size: rem(20px);
+    vertical-align: text-bottom;
   }
 }
 

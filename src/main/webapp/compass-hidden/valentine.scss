@@ -100,7 +100,7 @@ a.signup {
 
   &:after {
     margin-left: 7px;
-    @extend %icon;
+    @extend .fas;
     content: fa-content($fa-var-caret-right);
   }
 

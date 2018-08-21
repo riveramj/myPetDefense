@@ -425,7 +425,7 @@
     text-decoration: none;
 
     &:before {
-      @extend %icon;
+      @extend .fas;
       content: fa-content($fa-var-caret-left);
       margin-right: 5px;
     }

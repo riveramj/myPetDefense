@@ -36,7 +36,7 @@
   }
 
   &:before {
-    @extend %icon;
+    @extend .fas;
     content: fa-content($fa-var-shopping-cart);
     margin-right: 2px;
   
