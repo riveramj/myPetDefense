@@ -136,6 +136,8 @@ class ParentSubscription extends Loggable {
   }
 
   def render = {
+    val userSubscription = SecurityContext.currentUser.flatMap(_.getSubscription).flatMap(_.refresh)
+
     SHtml.makeFormsAjax andThen
     ".subscription a [class+]" #> "current" &
     "#user-email *" #> email &
@@ -144,7 +146,7 @@ class ParentSubscription extends Loggable {
     "#new-password" #> SHtml.password(newPassword, newPass => newPassword = newPass.trim) &
     ".update-email" #> SHtml.ajaxSubmit("Save Changes", updateEmail _) &
     ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword _) &
-    ".status *" #> user.map(_.status.get.toString)
+    ".status *" #> userSubscription.map(_.status.get.toString)
   }
 
   def manage = {
@@ -196,7 +198,7 @@ class ParentSubscription extends Loggable {
       val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
 
       val newShipDate = dateFormat.parse(nextShipDate)
-      val updatedShipDateSubscription = subscription.map(_.nextShipDate(newShipDate).saveMe)
+      val updatedShipDateSubscription = subscription.map(_.nextShipDate(newShipDate).status(Status.Paused).saveMe)
       ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
      
       for {
@@ -267,4 +269,3 @@ class ParentSubscription extends Loggable {
     ".submit-survey" #> SHtml.ajaxSubmit("Submit Survey", submitSurvey _)
   }
 }
-
