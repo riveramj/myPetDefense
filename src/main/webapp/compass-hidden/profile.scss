@@ -108,6 +108,7 @@
   overflow: hidden;
   width: 18px;
   height: 18px;
+  vertical-align: text-top;
 
   display: inline-block;
 
@@ -133,7 +134,7 @@
   }
 
   .set-resume-date {
-    margin-top: 16px;
+    margin-top: 5px;
     
     h4 {
       font-size: 14px;
@@ -145,7 +146,7 @@
   }
 
   .cancel-account {
-    margin-top: 16px;
+    margin-top: 20px;
   }
 
   .pause-account, .cancel-account {
@@ -186,7 +187,7 @@
     }
   }
 
-  .go-back, .continue-account-changes, .confirm-pause {
+  .go-back, .continue-account-changes, .confirm-pause, .confirm-cancel {
     width: 100%;
     padding: 12px 0;
     text-transform: uppercase;
@@ -222,7 +223,7 @@
     }
   }
 
-  .continue-account-changes, .confirm-pause {
+  .continue-account-changes, .confirm-pause, .confirm-cancel {
     background-color: #45ADA9;
 
     @media (min-width: $bp-large) {
@@ -249,10 +250,12 @@
 
   .notes li {
     list-style: disc;
+    line-height: 19px;
+    padding-bottom: 10px;
   }
 }
 
-.confirm-pause-account {
+.confirm-pause-account, .confirm-cancel-account {
   color: #605F5F;
   font-size: 20px;
   line-height: 24px;
@@ -263,6 +266,10 @@
 
   .next-shipment-container {
     font-size: 19px;
+  }
+
+  .email-confirmation {
+    font-size: 18px;
   }
 
   .next-shipment {

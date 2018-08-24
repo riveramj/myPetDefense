@@ -228,6 +228,14 @@ class ParentSubscription extends Loggable {
     ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
   }
 
+  def confirmCancelSubscription = {
+    SHtml.makeFormsAjax andThen
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current" &
+    ".confirm-pause" #> SHtml.ajaxSubmit("Pause Subscription", cancelUserAccount _)
+    
+  }
+
   def survey = {
     val updatedSubscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
 
