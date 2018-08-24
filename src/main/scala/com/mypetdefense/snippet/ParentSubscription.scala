@@ -51,7 +51,11 @@ object ParentSubscription extends Loggable {
     loggedIn >>
     parent
 
-  val cancelSurveySubscriptionMenu = Menu.i("Cancellation Survey") / "cancel-survey"
+    val successfulPauseMenu = Menu.i("Subscription Paused") / "subscription-paused" >>
+    loggedIn >>
+    parent
+  
+    val cancelSurveySubscriptionMenu = Menu.i("Cancellation Survey") / "cancel-survey"
 
   val surveyCompleteSubscriptionMenu = Menu.i("Survey Complete") / "survey-complete"
 
@@ -67,9 +71,6 @@ class ParentSubscription extends Loggable {
   var email = user.map(_.email.get).openOr("")
   var oldPassword = ""
   var newPassword = ""
-  val currentNextShipDate = user.flatMap(_.getSubscription).map(_.nextShipDate.get)
-
-  var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
   
   def updateEmail() = {
     val validateFields = List(
@@ -147,6 +148,14 @@ class ParentSubscription extends Loggable {
   }
 
   def manage = {
+    val userSubscription = SecurityContext.currentUser.flatMap(_.getSubscription).flatMap(_.refresh)
+
+    ParentSubscription.currentUserSubscription(userSubscription)
+
+    val currentNextShipDate = userSubscription.map(_.nextShipDate.get)
+
+    var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
+
     var cancelAccount = false
     var pauseAccount = false
 
@@ -157,34 +166,27 @@ class ParentSubscription extends Loggable {
         S.redirectTo(ParentSubscription.confirmPauseMenu.toLoc.calcHref(nextShipDate))
     }
 
-    def updateSubscriptionStatus(action: String, renderer: IdMemoizeTransform)() = {
+    def updateSubscriptionStatus(action: String)() = {
       action match {
         case "cancel" =>
           cancelAccount = true
           pauseAccount = false
-          renderer.setHtml
         
         case _ =>
           cancelAccount = false
           pauseAccount = true
-          renderer.setHtml
       }
+      
+    Noop
     }
-
-    val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.headOption)
-    ParentSubscription.currentUserSubscription(userSubscription)
 
     SHtml.makeFormsAjax andThen
     "#user-email *" #> email &
     ".subscription a [class+]" #> "current" &
-    ".account-block" #> idMemoize { renderer =>
-      ".next-shipment" #> text(nextShipDate, possibleShipDate => nextShipDate = possibleShipDate.trim) &
-      "#pause-account [class+]" #> (if (pauseAccount) "selected" else "" ) &
-      "#cancel-account [class+]" #> (if (cancelAccount) "selected" else "" ) &
-      "#pause-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("pause", renderer)) &
-      "#cancel-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("cancel", renderer)) &
-      ".continue-account-changes" #> SHtml.ajaxSubmit("Continue", confirmAction _)
-    }
+    ".next-shipment" #> text(nextShipDate, possibleShipDate => nextShipDate = possibleShipDate.trim) &
+    "#pause-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("pause")) &
+    "#cancel-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("cancel")) &
+    ".continue-account-changes" #> SHtml.ajaxSubmit("Continue", confirmAction _)
   }
 
   def pauseSubscription = {
@@ -194,15 +196,28 @@ class ParentSubscription extends Loggable {
       val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
 
       val newShipDate = dateFormat.parse(nextShipDate)
-      subscription.map(_.nextShipDate(newShipDate).saveMe)
-      Noop
+      val updatedShipDate = subscription.map(_.nextShipDate(newShipDate).saveMe)
+      ParentSubscription.currentUserSubscription(updatedShipDate)
+      S.redirectTo(ParentSubscription.successfulPauseMenu.loc.calcDefaultHref)
     }
 
     SHtml.makeFormsAjax andThen
     "#user-email *" #> email &
     ".subscription a [class+]" #> "current" &
-    ".next-shipment *" #> nextShipDate
+    ".next-shipment *" #> nextShipDate &
     ".confirm-pause" #> SHtml.ajaxSubmit("Pause Subscription", confirmPause _)
+  }
+
+  def successfulPause = {
+    val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+    val currentNextShipDate = subscription.map(_.nextShipDate.get)
+
+    var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
+
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current" &
+    ".next-shipment *" #> nextShipDate &
+    ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
   }
 
   def survey = {

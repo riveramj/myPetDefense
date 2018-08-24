@@ -100,7 +100,6 @@
 }
 
 .pause-cancel-select {
-  width: auto;
   margin: 0 6px 0 -30px;
   border: none;
   background-color: #ffffff;
@@ -109,6 +108,8 @@
   overflow: hidden;
   width: 18px;
   height: 18px;
+
+  display: inline-block;
 
   &:before {
     @extend %icon;
@@ -230,8 +231,10 @@
   }
 
   .continue-account-changes {
-    cursor: disabled;
-    background-color: #cccccc;
+    &.disabled {
+      cursor: not-allowed;
+      background-color: #cccccc;
+    }
 
     &.processing {
       cursor: not-allowed;
@@ -424,4 +427,24 @@ body {
       margin-bottom: 15px;
     }
   }
+}
+
+.successful-pause {
+  h4 {
+    font-size: 17px;
+    margin-bottom: 20px;
+  }
+
+  li {
+    margin-bottom: 15px;
+  }
+
+  a {
+    color: #2E9F9B;
+    
+    &:visited {
+      color: #2E9F9B;
+    }
+  }
+
 }

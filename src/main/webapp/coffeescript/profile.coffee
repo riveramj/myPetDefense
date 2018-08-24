@@ -9,11 +9,11 @@ $(document).ready ->
   $(".account-block").on "click", ".pause-account, .cancel-account", (event) ->
     accountAction = $(this)
 
-    accountAction.children('button').addClass("selected")
+    accountAction.children('.pause-cancel-select').addClass("selected")
 
     if accountAction.hasClass("pause-account")
-      $('button#cancel-account').removeClass("selected")
+      $('span.cancel').removeClass("selected")
     else
-      $('button#pause-account').removeClass("selected")
+      $('span.pause').removeClass("selected")
 
-  $('.continue-account-changes').addClass("selected")
+    $('.continue-account-changes').prop("disabled","").addClass("selected").removeClass("disabled")
