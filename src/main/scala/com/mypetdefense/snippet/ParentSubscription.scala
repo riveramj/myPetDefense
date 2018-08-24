@@ -196,8 +196,16 @@ class ParentSubscription extends Loggable {
       val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
 
       val newShipDate = dateFormat.parse(nextShipDate)
-      val updatedShipDate = subscription.map(_.nextShipDate(newShipDate).saveMe)
-      ParentSubscription.currentUserSubscription(updatedShipDate)
+      val updatedShipDateSubscription = subscription.map(_.nextShipDate(newShipDate).saveMe)
+      ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
+     
+      for {
+        parent <- user
+        subscription <- updatedShipDateSubscription
+      } yield {
+        EmailActor ! ParentPauseSubscriptionEmail(parent, subscription)
+      }
+
       S.redirectTo(ParentSubscription.successfulPauseMenu.loc.calcDefaultHref)
     }
 
