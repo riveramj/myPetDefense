@@ -134,6 +134,8 @@ object Paths {
     PetsAndProducts.menu,
     ParentSubscription.menu,
     ParentSubscription.manageSubscriptionMenu,
+    ParentSubscription.confirmCancelMenu,
+    ParentSubscription.confirmPauseMenu,
     ParentSubscription.cancelSurveySubscriptionMenu,
     ParentSubscription.surveyCompleteSubscriptionMenu,
     admin.Dashboard.menu,

@@ -1,0 +1,32 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+
+<div data-lift="ParentSubscription.pauseSubscription?eager_eval=true">
+  <div data-lift="embed?what=parent-logo-bar"></div>
+  <div id="page-body-container">
+    <div data-lift="embed?what=parent-nav-bar"></div>
+    <div class="account-section">
+      <h2>Pause Subscription</h2>
+      
+      <form id="pause-cancel-container">
+        <ul class="account-block">
+          <li class="confirm-pause-account">
+            <div>Click "Pause Subscription" below to finish pausing your subscription.</div>
+            <div class="next-shipment-container">Your next bill date will be <span class="next-shipment">March 03, 2018</span>.</div>
+          </li>
+          <li class="navigation-container">
+            <button class="go-back">Back</button>
+            <button class="confirm-pause">Pause Subscription</button>
+          </li>
+        </ul>
+      </form>
+    </div>
+  </div>
+</div>
+
+<head_merge>
+  <link rel="stylesheet" data-lift="style-bundle?name=profile">
+</head_merge>
+<tail>
+  <script type="text/javascript" data-lift="script-bundle?name=profile"></script>
+</tail>
+</div>
