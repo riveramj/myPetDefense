@@ -111,7 +111,7 @@ object ShipStationService extends Loggable {
       street1 = userAddress.map(_.street1.get).openOr(""),
       street2 = userAddress.map(_.street2.get),
       city = userAddress.map(_.city.get).openOr(""),
-      state = userAddress.map(_.state.get).openOr(""),
+      state = userAddress.map(_.state.get).openOr("").toUpperCase,
       postalCode = userAddress.map(_.zip.get).openOr("")
     )
 
