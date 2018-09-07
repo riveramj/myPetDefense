@@ -21,6 +21,10 @@ import scala.language.postfixOps
 import java.text.SimpleDateFormat
 import java.util.Date
 
+import dispatch.{Req => DispatchReq, _} , Defaults._
+
+import scala.util.{Failure => TryFail, Success => TrySuccess, _}
+
 object StripeHook extends StripeHook {
   override val emailActor = EmailActor
 }
@@ -101,14 +105,33 @@ trait StripeHook extends RestHelper with Loggable {
 
             val shipStationOrder = ShipStationService.createShipStationOrder(shipment, user)
 
-            if (!sameDateComparison(
-              new Date(),
-              shipment.expectedShipDate.get
-            )) {
-              ShipStationService.holdOrderUntil(
-                shipStationOrder.map(_.orderId).openOr(-1),
-                shipment.expectedShipDate.get
-              )
+            shipStationOrder.onComplete {
+              case TrySuccess(Full(order)) =>
+                if (!sameDateComparison(
+                    new Date(),
+                    shipment.expectedShipDate.get
+                )) {
+                  ShipStationService.holdOrderUntil(
+                    order.orderId,
+                    shipment.expectedShipDate.get
+                  ).onComplete {
+                    case TrySuccess(Full(_)) =>
+
+                    case TrySuccess(shipStationFailure) =>
+                      logger.error(s"hold order failed with shipStation error: ${shipStationFailure}")
+
+                    case TryFail(throwable: Throwable) =>
+                      logger.error(s"hold order failed with other error: ${throwable}")
+                  }
+                }
+
+              case TrySuccess(shipStationFailure) =>
+                logger.error(s"create order failed with shipStation error: ${shipStationFailure}")
+                shipStationFailure
+
+              case TryFail(throwable: Throwable) =>
+                logger.error(s"create order failed with other error: ${throwable}")
+                Empty
             }
           }
         }

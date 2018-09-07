@@ -104,7 +104,7 @@ object ShipStationService extends Loggable {
     }
   }
 
-  def createShipStationOrder(shipment: Shipment, user: User) = {
+  def createShipStationOrder(shipment: Shipment, user: User): Future[Box[Order]] = {
     val userAddress = user.shippingAddress
     val billShipTo = ShipStationAddress(
       name = Some(user.name),
@@ -157,7 +157,7 @@ object ShipStationService extends Loggable {
 
     val allOrderItems = shipStationProducts ++ possibleInsertOrderItem
 
-    val newOrder = Order.create(
+    Order.create(
       orderNumber = s"${refreshedShipment.map(_.shipmentId.get).openOr("")}",
       orderDate = dateFormat.format(new Date()),
       orderStatus = "awaiting_shipment",
@@ -166,38 +166,12 @@ object ShipStationService extends Loggable {
       items = Some(allOrderItems),
       customerNotes = Some(petNamesProducts)
     )
-
-    Try (
-      Await.result(newOrder, new DurationInt(15).seconds)
-    ) match {
-      case TrySuccess(Full(shipStationOrder)) =>
-        Full(shipStationOrder)
-
-      case TrySuccess(shipStationFailure) =>
-        shipStationFailure
-
-      case TryFail(throwable: Throwable) =>
-        Empty
-    }  
   }
 
-  def holdOrderUntil(orderId: Int, date: Date) = {
+  def holdOrderUntil(orderId: Int, date: Date): Future[Box[HoldOrderResults]] = {
     val holdDate = dateFormat.format(date)
 
-    val orderHold = Order.holdUntil(orderId, holdDate)
-
-    Try (
-      Await.result(orderHold, new DurationInt(15).seconds)
-    ) match {
-      case TrySuccess(Full(holdOrderResults)) =>
-        Full(holdOrderResults)
-
-      case TrySuccess(shipStationFailure) =>
-        shipStationFailure
-
-      case TryFail(throwable: Throwable) =>
-        Empty
-    }  
+    Order.holdUntil(orderId, holdDate)
   }
 
   def getYesterdayShipments() = {
