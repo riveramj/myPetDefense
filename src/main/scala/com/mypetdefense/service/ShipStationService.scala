@@ -90,11 +90,9 @@ object ShipStationService extends Loggable {
       Await.result(createLabel, new DurationInt(10).seconds)
     ) match {
       case TrySuccess(Full(shipStationLabel)) =>
-        println(shipStationLabel)
         Full(shipStationLabel)
       
       case TrySuccess(shipStationFailure) =>
-        println(shipStationFailure)
         logger.error(s"get order failed with shipStation error: ${shipStationFailure}")
         shipStationFailure
 
