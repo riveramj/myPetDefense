@@ -6,7 +6,7 @@ import net.liftweb._
   import util._
 
 import com.mypetdefense.util.RandomIdGenerator._
-import com.mypetdefense.service.AccessKeyService._
+import com.mypetdefense.service.KeyService._
 import com.mypetdefense.snippet.NewParent
 import com.mypetdefense.util.TitleCase
 

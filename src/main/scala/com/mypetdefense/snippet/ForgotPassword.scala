@@ -32,11 +32,11 @@ class ForgotPassword extends Loggable {
   def submitPasswordReset() = {
     User.findByEmail(userEmail) match {
       case Full(user) => 
-        val userWithResetKey = ResetKeyService.createResetKey(user)
+        val userWithResetKey = KeyService.createResetKey(user)
         EmailActor ! SendPasswordResetEmail(userWithResetKey)
         S.redirectTo(ResetPasswordSent.menu.toLoc.calcHref(userWithResetKey))
       case _ => 
-        println(userEmail)
+        logger.error(userEmail)
     }
   }
   def render = {
