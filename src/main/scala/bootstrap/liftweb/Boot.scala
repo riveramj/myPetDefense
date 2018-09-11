@@ -55,7 +55,8 @@ class Boot {
       Survey,
       FriendsFamilyProduct,
       FriendsFamilyOrder,
-      FriendsFamilyOrderLineItem
+      FriendsFamilyOrderLineItem,
+      BoxOrder
     )
 
     DataLoader.loadProducts
