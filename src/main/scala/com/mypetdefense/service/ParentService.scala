@@ -280,6 +280,33 @@ object ParentService extends Loggable {
     trialStatus != "trialing"
   }
 
+  def chargeStripeCustomer(
+    amount: Long,
+    stripeCustomerId: Option[String],
+    description: String): Box[Charge] = {
+
+    val charge: Future[Box[Charge]] = Charge.create(
+      amount = amount,
+      currency = "USD",
+      customer = stripeCustomerId,
+      description = Some(description),
+      capture = Some(true)
+    )
+
+    Try(Await.result(charge, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(charge)) =>
+        Full(charge)
+
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"charge customer failed with stipe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"charge customer failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
   def parseWhelpDate(whelpDate: String): Box[Date] = {
     val whelpDateFormats = List(
       new java.text.SimpleDateFormat("M/d/y"),
