@@ -27,7 +27,7 @@ class Success extends Loggable {
   purchased.is
 
   def render() = {
-    if (boxSalesInfo.is != Empty) {
+    if (boxSalesInfo.is == Empty) {
       val petCount = shoppingCart.is.size
       val monthylTotal = total.is
       val freeMonthCount = freeMonths.is.openOr(0)
