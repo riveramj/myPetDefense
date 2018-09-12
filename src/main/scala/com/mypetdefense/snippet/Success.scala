@@ -53,7 +53,7 @@ class Success extends Loggable {
       "#order-summary [class+]" #> "box-sale" &
       "#order-total h3 [class+]" #> "box-sale" andThen
       "#box-count span *" #> boxQuantity &
-      "#monthly-total span *" #> f"$$$boxSalesTotal%2.2f" &
+      "#checkout-total #amount *" #> f"$$$boxSalesTotal%2.2f" &
       "#pet-count" #> ClearNodes &
       "#monthly-total" #> ClearNodes &
       "#checkout-total .per-month" #> ClearNodes
