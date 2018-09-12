@@ -1,13 +1,13 @@
 package com.mypetdefense.util
 
 import com.mypetdefense.model._
-import com.mypetdefense.service.ReportingService
+import com.mypetdefense.service.{KeyService, ReportingService}
 import net.liftweb._
   import common._
   import util._
   
 import net.liftweb.util.Helpers._
-import net.liftweb.mapper.By
+import net.liftweb.mapper.{By, NullRef}
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
 import dispatch._, Defaults._
 
@@ -235,6 +235,28 @@ object DataLoader extends Loggable {
       products.map { case (sku, description) =>
         FriendsFamilyProduct.createProduct(sku, description)
       }
+    }
+  }
+
+  def createBoxAccessKey = {
+    val possibleActiveParentsWithoutKey = User.findAll(
+      By(User.userType, UserType.Parent),
+      By(User.status, Status.Active),
+      NullRef(User.boxSalesKey)
+    )
+
+    val activeParentsWithoutKey = possibleActiveParentsWithoutKey.filter { parent =>
+      val subscription = parent.getSubscription
+      val subscriptionIsActive_? = subscription.map(_.status.get == Status.Active).getOrElse(false)
+      val userHasPets_? = parent.activePets.size > 0
+
+      (subscriptionIsActive_? && userHasPets_?)
+    }
+
+    activeParentsWithoutKey.map { parent =>
+      val boxKey = KeyService.createBoxSalesKey
+
+      parent.boxSalesKey(boxKey).saveMe
     }
   }
 }

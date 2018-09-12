@@ -64,6 +64,7 @@ class Boot {
     DataLoader.updateParentNoPets
     DataLoader.updateParentNoPets
     DataLoader.createFriendsFamilyProducts
+    DataLoader.createBoxAccessKey
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
