@@ -43,6 +43,10 @@ class BoxDetails extends Loggable {
   import BoxDetails._
 
   val user = BoxDetails.thanksgivingBoxMenu.currentValue
+  val address = user.flatMap(_.shippingAddress)
+  val state = address.map(_.state.get).openOr("")
+  val zip = address.map(_.zip.get).openOr("")
+
   val email = user.map(_.email.get).openOr("")
 
   var quantity = 1
@@ -50,6 +54,25 @@ class BoxDetails extends Loggable {
   var taxPaid = 0
 
   user.map(SecurityContext.logIn(_))
+
+  def calculateTax = {
+    if (zip.length() > 4) {
+      val taxInfo = TaxJarService.findTaxAmoutAndRate(
+        city,
+        state,
+        zip,
+        subtotalWithDiscount
+      )
+
+      taxDue = taxInfo._1
+      taxRate = taxInfo._2
+    } else {
+      taxDue = 0D
+      taxRate = 0D
+    }
+
+    //priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+  }
 
   def orderBox() = {
     val stripeId = user.map(_.stripeId.get).openOr("")

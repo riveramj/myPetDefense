@@ -78,7 +78,7 @@ class Checkout extends Loggable {
     state = possibleState
     zip = possibleZip
 
-    if ((zip.length() > 4) && (state.toLowerCase() == "ga")) {
+    if (zip.length() > 4) {
       val taxInfo = TaxJarService.findTaxAmoutAndRate(
         city,
         state,
