@@ -85,6 +85,20 @@ object ParentService extends Loggable {
     }
   }
 
+  def cancelOpenOrders(oldUser: User) = {
+    val openShipments = {
+      for {
+        subscription <- oldUser.getSubscription.toList
+        shipment <- subscription.shipments
+          if shipment.dateShipped == null
+      } yield {
+        shipment
+      }
+    }
+
+    openShipments.map(ShipStationService.cancelShipstationOrder(_))
+  }
+
   def removeParent(oldUser: User, fullDelete: Boolean = false) = {
     val user = oldUser.refresh
     val stripeCustomerId = user.map(_.stripeId.get).openOr("")
@@ -93,6 +107,7 @@ object ParentService extends Loggable {
     val shipments = subscription.map(_.shipments.toList).openOr(Nil)
     val addresses = user.map(_.addresses.toList).openOr(Nil)
 
+    cancelOpenOrders(oldUser)
     val removeCustomer = Customer.delete(stripeCustomerId)
 
     Try(Await.result(removeCustomer, new DurationInt(10).seconds)) match {
