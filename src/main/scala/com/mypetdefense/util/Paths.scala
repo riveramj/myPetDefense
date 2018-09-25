@@ -50,6 +50,7 @@ object Paths {
   }
 
   val homePage = Menu.i("Home") / "index"
+  val termsOfService = Menu.i("Terms of Service") / "terms-of-service"
   
   val thanksPage = Menu.i("Thanks") / "thanks"
   val billingThanksPage = Menu.i("Success!") / "update-success"
@@ -111,6 +112,7 @@ object Paths {
 
   def siteMap = SiteMap(
     homePage,
+    termsOfService,
     thanksPage,
     billingThanksPage,
     testimonial,
@@ -119,7 +121,6 @@ object Paths {
     LandingPage.landing3Free,
     LandingPage.cold5k,
     LandingPage.doggiePalooza,
-    ValentinePicture.menu,
     LandingPage.woofstock,
     LandingPage.olympics,
     LandingPage.atlantaExpo,
@@ -138,12 +139,15 @@ object Paths {
     admin.Dashboard.menu,
     admin.Dashboard.newLabelsExportMenu,
     admin.Dashboard.existingLabelsExportMenu,
+    admin.Dashboard.mpdShipstationExportMenu,
     admin.Parents.menu,
     admin.Parents.activeParentsCsvMenu,
     admin.Users.menu,
+    admin.GrowthRates.menu,
     admin.Prices.menu,
     admin.Reviews.menu,
     admin.Coupons.menu,
+    admin.Reporting.menu,
     admin.Agencies.menu,
     admin.Agencies.salesDataExportMenu,
     admin.Agencies.cancellationExportMenu,
@@ -161,13 +165,15 @@ object Paths {
     ResetPasswordSent.menu,
     Signup.menu,
     Products.menu,
-    ProductDetail.frontlineDogsMenu,
     ProductDetail.zoguardDogsMenu,
     ProductDetail.adventureDogsMenu,
     ProductDetail.sheieldtecDogsMenu,
-    ProductDetail.frontlineCatsMenu,
     ProductDetail.zoguardCatsMenu,
     ProductDetail.adventureCatsMenu,
-    Login.logoutMenu
+    Login.logoutMenu,
+    friendsfamily.Dashboard.menu,
+    friendsfamily.Dashboard.friendsFamilyLabelsExportMenu,
+    friendsfamily.Orders.menu,
+    friendsfamily.Products.menu
   )
 }

@@ -50,14 +50,19 @@ class Boot {
       Agency,
       Coupon,
       Price,
+      GrowthRate,
       Review,
-      Survey
+      Survey,
+      FriendsFamilyProduct,
+      FriendsFamilyOrder,
+      FriendsFamilyOrderLineItem
     )
 
-    DataLoader.loadProducts
-    DataLoader.loadAdmin
-    DataLoader.updateParentNoPets
-    //DataLoader.findCancellationRates
+    //DataLoader.loadProducts
+    //DataLoader.loadAdmin
+    DataLoader.findCancellationRates
+    //DataLoader.updateParentNoPets
+    //DataLoader.createFriendsFamilyProducts
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
@@ -87,6 +92,7 @@ class Boot {
     
     LiftRules.statelessDispatch.append(StripeHook)
     LiftRules.statelessDispatch.append(TPPApi)
+    LiftRules.statelessDispatch.append(FriendsFamilyAPI)
     LiftRules.statelessDispatch.append(PromikaAPI)
   }
 

@@ -1,10 +1,11 @@
-<div id="main" data-lift="surround?with=default-template;at=content"> 
+<div id="main" data-lift="surround?with=default-template;at=content">
 <div data-lift="admin.Dashboard.render?eager_eval=true">
   <div data-lift="embed?what=admin/admin-nav-bar"></div>
   <div id="item-container">
     <h2>Dashboard</h2>
     <a href="#" class="shipments-export new-export">Export New Order Labels</a>
     <a href="#" class="shipments-export existing-export">Export Existing Order Labels</a>
+    <a href="#" class="shipments-export shipstation-export">Export Shipstation Labels</a>
     <form id="upload-tracking-numbers-form" data-lift="admin.Dashboard.fileUpload">
       <div class="fileUploadForm">
         <h3>Tracking Number Upload</h3>
@@ -16,6 +17,9 @@
       <ul class="dashboard-nav">
         <li class="active dashboard-current">
           <button type="button" id="dashboard-current">Ready To Ship</button>
+        </li>
+        <li class="dashboard-future">
+          <button type="button" id="dashboard-future">Future Shipments</button>
         </li>
       </ul>
       <div data-lift="embed?what=admin/dashboard-shipments"></div>
