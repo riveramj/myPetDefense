@@ -192,7 +192,7 @@ object ShipStationService extends Loggable {
       billTo = billShipTo,
       shipTo = billShipTo,
       items = Some(allOrderItems),
-      customerNotes = Some(petNamesProducts)
+      giftMessage = Some(petNamesProducts)
     )
   }
 
