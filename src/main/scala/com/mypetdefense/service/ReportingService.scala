@@ -908,8 +908,32 @@ object ReportingService extends Loggable {
       val totalForCount = cancellationShipments.filter(_ == count).size
       
       (count.toString, totalForCount)
-    }) ++ List(("3+", cancellationShipments.filter(_ > 3).size))
+    }) ++ List(("3+", cancellationShipments.filter(_ >= 3).size))
 
     cancellationTimes
+  }
+
+  def sameDayCancelsByMonth(subscriptions: List[Subscription]) = {
+    def findSameDayCancellations(subscriptions: List[Subscription]) = {
+      subscriptions.filter { subscription =>
+        val shipments = subscription.shipments.toList
+
+        val mailedShipments = filterMailedShipments(shipments)
+
+        mailedShipments.size == 0
+      }
+    }
+
+    val cancellations = subscriptions.filter(_.status.get == Status.Cancelled)
+    
+    val sameDayCancels = findSameDayCancellations(cancellations)
+
+    val cancelsByMonth = sameDayCancels.groupBy { subscription =>
+      getCreatedDateOfSubscription(subscription).getMonth
+    }
+
+    cancelsByMonth.map { case (month, subscriptions) =>
+      (month, subscriptions.size)
+    }
   }
 }

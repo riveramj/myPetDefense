@@ -60,7 +60,8 @@ class Boot {
 
     //DataLoader.loadProducts
     //DataLoader.loadAdmin
-    DataLoader.findCancellationRates
+    //DataLoader.findCancellationRates
+    DataLoader.findSameDayCancellationsByMonth
     //DataLoader.updateParentNoPets
     //DataLoader.createFriendsFamilyProducts
     
