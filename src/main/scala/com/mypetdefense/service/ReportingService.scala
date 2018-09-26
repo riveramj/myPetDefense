@@ -901,11 +901,11 @@ object ReportingService extends Loggable {
 
     val cancellationShipments = findCancellationShipmentSize(cancellations)
     
-    val cancellationTimes = (List(0, 1, 2, 3).map { count =>
+    val cancellationTimes = (List(0, 1, 2, 3, 4, 5).map { count =>
       val totalForCount = cancellationShipments.filter(_ == count).size
       
       (count.toString, totalForCount)
-    }) ++ List(("3+", cancellationShipments.filter(_ > 3).size))
+    }) ++ List(("6+", cancellationShipments.filter(_ >= 6).size))
 
     cancellationTimes
   }
