@@ -12,6 +12,7 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   }
   object subscription extends MappedLongForeignKey(this, Subscription)
   object stripePaymentId extends MappedString(this, 100)
+  object shipStationOrderId extends MappedInt(this)
   object trackingNumber extends MappedString(this, 100)
   object address extends MappedString(this, 200)
   object dateProcessed extends MappedDateTime(this)

@@ -105,7 +105,7 @@ object ShipStationService extends Loggable {
   }
 
   def cancelShipstationOrder(shipment: Shipment) = {
-    val possibleOrder = getOrder(shipment.shipmentId.get.toString)
+    val possibleOrder = getOrder(shipment.shipStationOrderId.get.toString)
 
     val cancelOrder = possibleOrder.map { order =>
       Order.create(

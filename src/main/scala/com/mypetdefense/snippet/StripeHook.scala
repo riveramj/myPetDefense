@@ -107,6 +107,8 @@ trait StripeHook extends RestHelper with Loggable {
 
             shipStationOrder.onComplete {
               case TrySuccess(Full(order)) =>
+                shipment.shipStationOrderId(order.orderId).saveMe
+
                 if (!sameDateComparison(
                     new Date(),
                     shipment.expectedShipDate.get
