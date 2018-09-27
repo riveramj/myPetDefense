@@ -294,7 +294,6 @@ object ReportingService extends Loggable {
         customer <- agency.customers.toList
         subscription <- customer.subscription
         shipment <- subscription.shipments.toList.sortBy(_.dateShipped.get.getTime)
-          if shipment.dateShipped.get != null
         mailedDate <- getMailedDateOfShipment(shipment)
       } yield {
         val amountPaid = getShipmentAmountPaid(shipment)
