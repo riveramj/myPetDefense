@@ -156,7 +156,7 @@ class Agencies extends Loggable {
     "#name" #> text(name, name = _) &
     "#create-item" #> SHtml.ajaxSubmit("Create Agency", () => createAgency) &
     ".agency" #> agencies.map { agency =>
-      val activeCustomers = agency.customers.filter(_.status == Status.Active)
+      val activeCustomers = agency.customers.flatMap(_.getSubscription).filter(_.status == Status.Active)
 
       ".name *" #> agency.name &
       ".customer-count *" #> activeCustomers.size &
