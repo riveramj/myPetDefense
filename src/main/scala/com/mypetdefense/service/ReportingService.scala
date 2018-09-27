@@ -286,7 +286,7 @@ object ReportingService extends Loggable {
   }
 
   def exportRawSales(name: String): Box[LiftResponse] = {
-    val headers = "Year" :: "Month" :: "Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent Id" :: "Commision" :: "Customer Status" :: Nil
+    val headers = "Year" :: "Month" :: "Mailed Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent Id" :: "Commision" :: "Customer Status" :: Nil
 
     val csvRows: List[List[String]] = {
       for {
@@ -294,15 +294,16 @@ object ReportingService extends Loggable {
         customer <- agency.customers.toList
         subscription <- customer.subscription
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+        if !getMailedDateOfShipment(shipment).isEmpty
       } yield {
-        val processDate = getProcessDateOfShipment(shipment)
+        val mailedDate = getMailedDateOfShipment(shipment)
 
         val amountPaid = getShipmentAmountPaid(shipment)
         val commision = amountPaid * .35 
 
-        processDate.getYear.toString ::
-        processDate.getMonth.toString ::
-        processDate.toString ::
+        mailedDate.getYear.toString ::
+        mailedDate.getMonth.toString ::
+        mailedDate.toString ::
         customer.userId.toString ::
         customer.name ::
         s"$$${amountPaid}" ::
