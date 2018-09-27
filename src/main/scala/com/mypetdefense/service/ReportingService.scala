@@ -286,23 +286,23 @@ object ReportingService extends Loggable {
   }
 
   def exportRawSales(name: String): Box[LiftResponse] = {
-    val headers = "Year" :: "Month" :: "Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent Id" :: "Commision" :: "Customer Status" :: Nil
+    val headers = "Year" :: "Month" :: "Mailed Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent Id" :: "Commision" :: "Customer Status" :: Nil
 
     val csvRows: List[List[String]] = {
       for {
         agency <- Agency.find(By(Agency.name, name)).toList
         customer <- agency.customers.toList
         subscription <- customer.subscription
-        shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+        shipment <- subscription.shipments.toList.sortBy(_.dateShipped.get.getTime)
+          if shipment.dateShipped.get != null
+        mailedDate <- getMailedDateOfShipment(shipment)
       } yield {
-        val processDate = getProcessDateOfShipment(shipment)
-
         val amountPaid = getShipmentAmountPaid(shipment)
         val commision = amountPaid * .35 
 
-        processDate.getYear.toString ::
-        processDate.getMonth.toString ::
-        processDate.toString ::
+        mailedDate.getYear.toString ::
+        mailedDate.getMonth.toString ::
+        mailedDate.toString ::
         customer.userId.toString ::
         customer.name ::
         s"$$${amountPaid}" ::
@@ -884,6 +884,31 @@ object ReportingService extends Loggable {
     generateCSV(csvRows, file)
   }
 
+  def exportSameDayCancels(name: String): Box[LiftResponse] = {
+    val headers = "Month" :: "Cancel Count" :: Nil
+
+    val csvRows: List[List[String]] = {
+      for {
+        agency <- Agency.find(By(Agency.name, name)).toList
+        customers = agency.customers.toList
+        subscriptions = customers.map(_.getSubscription.toList).flatten
+        cancelsByMonth <- sameDayCancelsByMonth(subscriptions)
+      } yield {
+        cancelsByMonth._1.toString ::
+        cancelsByMonth._2.toString ::
+        Nil
+      }
+    }
+
+    val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
+
+    val fileName = s"sameDayCancels-${LocalDate.now()}.csv"
+
+    val file = "filename=\"" + fileName + "\""
+
+    generateCSV(csv, file)
+  }
+
   def cancelsByShipment(subscriptions: List[Subscription]) = {
     def findCancellationShipmentSize(subscriptions: List[Subscription]) = {
       subscriptions.map { subscription =>
@@ -908,5 +933,29 @@ object ReportingService extends Loggable {
     }) ++ List(("6+", cancellationShipments.filter(_ >= 6).size))
 
     cancellationTimes
+  }
+
+  def sameDayCancelsByMonth(subscriptions: List[Subscription]) = {
+    def findSameDayCancellations(subscriptions: List[Subscription]) = {
+      subscriptions.filter { subscription =>
+        val shipments = subscription.shipments.toList
+
+        val mailedShipments = filterMailedShipments(shipments)
+
+        mailedShipments.size == 0
+      }
+    }
+
+    val cancellations = subscriptions.filter(_.status.get == Status.Cancelled)
+    
+    val sameDayCancels = findSameDayCancellations(cancellations)
+
+    val cancelsByMonth = sameDayCancels.groupBy { subscription =>
+      getCreatedDateOfSubscription(subscription).getMonth
+    }
+
+    cancelsByMonth.map { case (month, subscriptions) =>
+      (month, subscriptions.size)
+    }
   }
 }
