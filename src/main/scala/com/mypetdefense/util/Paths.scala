@@ -152,6 +152,7 @@ object Paths {
     admin.Agencies.salesDataExportMenu,
     admin.Agencies.cancellationExportMenu,
     admin.Agencies.totalSalesExportMenu,
+    admin.Agencies.sameDayCancelExportMenu,
     admin.Agencies.monthToDateExportMenu,
     admin.Agencies.mtdYtdExportMenu,
     admin.PhonePortal.menu,
