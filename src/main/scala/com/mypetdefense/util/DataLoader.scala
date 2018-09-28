@@ -237,4 +237,12 @@ object DataLoader extends Loggable {
       }
     }
   }
+
+  def updateShipmentStripePaymentId = {
+    val allShipments = Shipment.findAll()
+
+    val mailedShipments = ReportingService.filterMailedShipments(allShipments)
+
+    mailedShipments.map(_.shipstationOrderKey("-").saveMe)
+  }
 }
