@@ -32,7 +32,7 @@ class CreateShipStationOrderJob extends ManagedJob {
 
     val newShipments = Shipment.findAll(By(Shipment.id, 337))
 
-    newShipments.map(println(_.shipstationOrderKey.get))
+    newShipments.map(foo => println(foo.shipstationOrderKey.get))
     newShipments.map(println(_))
 
     for {
