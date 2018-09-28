@@ -30,8 +30,7 @@ class CreateShipStationOrderJob extends ManagedJob {
       dateFormat.format(date1) == dateFormat.format(date2)
     }
 
-    val newShipments = Shipment.findAll(NullRef(Shipment.shipstationOrderKey))
-
+    val newShipments = Shipment.findAll(By(Shipment.shipstationOrderKey, ""))
 
     for {
       shipment <- newShipments
