@@ -58,11 +58,11 @@ class Boot {
       FriendsFamilyOrderLineItem
     )
 
-    DataLoader.loadProducts
-    DataLoader.loadAdmin
+    //DataLoader.loadProducts
+    //DataLoader.loadAdmin
     DataLoader.updateParentNoPets
-    DataLoader.updateParentNoPets
-    DataLoader.createFriendsFamilyProducts
+    //DataLoader.createFriendsFamilyProducts
+    DataLoader.updateShipmentShipStationId
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
