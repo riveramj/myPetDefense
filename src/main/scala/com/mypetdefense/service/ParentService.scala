@@ -90,7 +90,7 @@ object ParentService extends Loggable {
       for {
         subscription <- oldUser.getSubscription.toList
         shipment <- subscription.shipments
-          if shipment.dateShipped == null
+          if (shipment.dateShipped.get == null && shipment.shipstationOrderKey.get != "")
       } yield {
         shipment
       }
