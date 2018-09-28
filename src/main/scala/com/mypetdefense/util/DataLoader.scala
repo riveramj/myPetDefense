@@ -238,7 +238,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def updateShipmentStripePaymentId = {
+  def updateShipmentShipStationId = {
     val allShipments = Shipment.findAll()
 
     allShipments.map(_.shipstationOrderKey("-").saveMe)
