@@ -41,6 +41,7 @@ object JobManager extends SimpleInjector with Loggable {
     OneWeekNotifyGrowthJob ::
     DailyAgentSalesReportEmailJob ::
     DailyInternalReportEmailJob ::
+    DailyTrackingEmailJob ::
     HalfHourCreateOrderJob ::
     Nil
   }

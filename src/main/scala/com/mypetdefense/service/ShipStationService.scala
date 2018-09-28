@@ -212,7 +212,7 @@ object ShipStationService extends Loggable {
         List(
           ("shipDateStart", shipDate),
           ("shipDateEnd", shipDate),
-          ("pageSize", "150")
+          ("pageSize", "300")
       )), new DurationInt(10).seconds)
     ) match {
       case TrySuccess(Full(shipStationShipments)) =>
