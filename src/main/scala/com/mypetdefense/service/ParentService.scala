@@ -214,7 +214,7 @@ object ParentService extends Loggable {
 
   def getStripeSubscription(stripeCustomerId: String, subscriptionId: String): Box[StripeSubscription] = {
     Try(
-      Await.result(StripeSubscription.get(stripeCustomerId, subscriptionId), new DurationInt(10).seconds)
+      Await.result(StripeSubscription.get(stripeCustomerId, subscriptionId), new DurationInt(15).seconds)
     ) match {
       case TrySuccess(Full(stripeSubscription)) => Full(stripeSubscription)
 

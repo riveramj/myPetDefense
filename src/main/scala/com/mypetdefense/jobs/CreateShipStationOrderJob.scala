@@ -42,7 +42,9 @@ class CreateShipStationOrderJob extends ManagedJob {
 
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>
-          shipment.shipstationOrderKey(order.orderKey.getOrElse("")).saveMe
+          val refreshedShipment = shipment.refresh
+          val foo = refreshedShipment.map(_.shipstationOrderKey(order.orderKey.getOrElse("")).saveMe)
+          println(foo)
 
           if (!sameDateComparison(
             new Date(),
