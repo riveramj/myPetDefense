@@ -24,16 +24,15 @@ import dispatch.{Req => DispatchReq, _} , Defaults._
 class CreateShipStationOrderJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
 
-    println("in job =====")
-    
     def sameDateComparison(date1: Date, date2: Date) = {
       val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
       dateFormat.format(date1) == dateFormat.format(date2)
     }
 
-    val newShipments = Shipment.findAll(NullRef(Shipment.shipstationOrderKey))
+    val newShipments = Shipment.findAll(By(Shipment.id, 337))
 
+    newShipments.map(println(_.shipstationOrderKey.get))
     newShipments.map(println(_))
 
     for {
