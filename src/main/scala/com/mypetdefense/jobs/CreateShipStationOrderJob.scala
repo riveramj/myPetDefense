@@ -30,7 +30,7 @@ class CreateShipStationOrderJob extends ManagedJob {
       dateFormat.format(date1) == dateFormat.format(date2)
     }
 
-    val newShipments = Shipment.findAll(By(Shipment.shipstationOrderKey, ""))
+    val newShipments = Shipment.findAll(NullRef(Shipment.shipStationOrderId))
 
     for {
       shipment <- newShipments
@@ -42,7 +42,7 @@ class CreateShipStationOrderJob extends ManagedJob {
 
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>
-          shipment.shipstationOrderKey(order.orderKey.getOrElse("")).saveMe
+          shipment.shipStationOrderId(order.orderId).saveMe
 
           if (!sameDateComparison(
             new Date(),

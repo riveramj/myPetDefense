@@ -33,9 +33,9 @@ object ShipStationService extends Loggable {
 
   implicit val shipStationExecutor = new ShipStationExecutor(key, secret, url)
 
-  def getOrder(orderId: String) = {
+  def getOrder(orderId: Int) = {
     Try(
-      Await.result(Order.get(orderId), new DurationInt(10).seconds)
+      Await.result(Order.get(orderId.toString), new DurationInt(10).seconds)
     ) match {
       case TrySuccess(Full(shipStationOrder)) =>
         Full(shipStationOrder)
@@ -105,7 +105,7 @@ object ShipStationService extends Loggable {
   }
 
   def cancelShipstationOrder(shipment: Shipment) = {
-    val possibleOrder = getOrder(shipment.shipstationOrderKey.get)
+    val possibleOrder = getOrder(shipment.shipStationOrderId.get)
 
     val cancelOrder = possibleOrder.map { order =>
       Order.create(
