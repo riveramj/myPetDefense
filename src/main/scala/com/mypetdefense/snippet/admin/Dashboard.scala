@@ -99,11 +99,10 @@ class Dashboard extends Loggable {
     user: Box[User],
     shipment: Shipment,
     address: String,
-    renderer: IdMemoizeTransform,
-    nextMonthDate: Date
+    renderer: IdMemoizeTransform
   )() = {
     subscription.map { subscription =>
-      ParentService.updateNextShipBillDate(subscription, user, nextMonthDate)
+      ParentService.updateNextShipDate(subscription, user)
     }
 
     shipment.dateShipped(new Date()).address(address).saveMe
@@ -190,10 +189,6 @@ class Dashboard extends Loggable {
   }
 
   def render = {
-    val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
-
-    val nextMonthDate = Date.from(nextMonthLocalDate)
-
     SHtml.makeFormsAjax andThen
     ".dashboard [class+]" #> "current" &
     ".new-export [href]" #> Dashboard.newLabelsExportMenu.loc.calcDefaultHref &
@@ -255,8 +250,7 @@ class Dashboard extends Loggable {
                   user,
                   shipment,
                   nameAddress.openOr(""),
-                  shipButtonRenderer,
-                  nextMonthDate
+                  shipButtonRenderer
                 )
               _)
             }
