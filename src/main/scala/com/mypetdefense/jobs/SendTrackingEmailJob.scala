@@ -21,9 +21,6 @@ import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => 
 class SendTrackingEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
     
-    val nextMonthLocalDate = LocalDate.now().plusMonths(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
-    val nextMonthDate = Date.from(nextMonthLocalDate)
-
     val labels = ShipStationService.getYesterdayShipments().map(_.shipments).openOr(Nil)
 
     labels map { label =>
@@ -46,7 +43,7 @@ class SendTrackingEmailJob extends ManagedJob {
 
         shipment.dateShipped(new Date()).address(nameAddress).trackingNumber(label.trackingNumber).saveMe
 
-        ParentService.updateNextShipBillDate(subscription, Full(user), nextMonthDate)
+        ParentService.updateNextShipDate(subscription, Full(user))
 
         EmailActor ! SendInvoicePaymentSucceededEmail(
           Full(user),
