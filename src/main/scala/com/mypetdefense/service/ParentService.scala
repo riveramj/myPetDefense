@@ -265,6 +265,21 @@ object ParentService extends Loggable {
     }
   }
 
+  def updateNextShipDate(subscription: Subscription, user: Box[User]) = {
+    val stripeUserId = user.map(_.stripeId.get).openOr("")
+    val stripeSubscriptionId = subscription.stripeSubscriptionId.get
+
+    getStripeSubscription(stripeUserId, stripeSubscriptionId) match {
+      case Full(stripeSubscription) =>
+        val currentPeriodEnd = stripeSubscription.currentPeriodEnd.getOrElse(0l)
+        val nextMonthDate = new Date(currentPeriodEnd * 1000L)
+
+        subscription.nextShipDate(nextMonthDate).saveMe
+
+      case (_) => Empty
+    }
+  }
+
   def changeStripeBillDate(customerId: String, subscriptionId: String, date: Long) = {
     val updatedSubscription = StripeSubscription.update(
       customerId = customerId,
