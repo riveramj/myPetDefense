@@ -18,8 +18,8 @@ import scala.math.BigDecimal
 import java.util.Date
 
 object TaxJarService extends Loggable {
-  val calculateTaxUrl = host("api.taxjar.com/v2/taxes").secure
-  val createOrderTaxUrl = url("api.taxjar.com/v2/transactions/orders").secure
+  val calculateTaxUrl = host("https://api.taxjar.com/v2/taxes").secure
+  val createOrderTaxUrl = host("https://api.taxjar.com/v2/transactions/orders").secure
 
   val authKey = Props.get("taxjar.api.key") openOr ""
 
