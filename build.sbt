@@ -53,7 +53,7 @@ libraryDependencies ++= {
     "net.sf.opencsv"      %  "opencsv"            % "2.3",
     "org.postgresql"      %  "postgresql"         % "9.4-1201-jdbc41",
     "org.quartz-scheduler" % "quartz"             % "2.3.0",
-    "org.eclipse.jetty"   %  "jetty-webapp"       % "9.2.13.v20150730" % "container; compile->default",
+    "org.eclipse.jetty"   %  "jetty-webapp"       % "9.4.12.v20180830" % "container; compile->default",
     "net.liftweb"         %% "lift-common"        % liftVersion % "compile",
     "net.liftweb"         %% "lift-webkit"        % liftVersion % "compile",
     "net.liftweb"         %% "lift-testkit"       % liftVersion % "test",
