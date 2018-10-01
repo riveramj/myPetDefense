@@ -99,20 +99,6 @@ class Boot {
   //Bundles
   LiftRules.snippets.append(Bundles.snippetHandlers)
 
-  LiftRules.responseTransformers.append {
-    resp =>
-      (for (req <- S.request) yield {
-        resp.toResponse match {
-          case InMemoryResponse(data, headers, cookies, code)
-          if req.param("liftIFrameUpload") === req.path.wholePath.last &&
-          req.path.wholePath.head == LiftRules.ajaxPath =>
-            val contentlessHeaders = headers.filterNot(_._1.toLowerCase == "content-type")
-            InMemoryResponse(data, ("Content-Type", "text/plain; charset=utf-8") :: contentlessHeaders, cookies, code)
-          case _ => resp
-        }
-      }) openOr resp
-  }
-
   LiftRules.supplementalHeaders.default.set(
     List(
       ("X-Lift-Version", LiftRules.liftVersion),
@@ -126,4 +112,28 @@ class Boot {
 
   // startup quartz scheduler
   JobManager.init()
+
+  //Lift CSP settings see http://content-security-policy.com/ and 
+  //Lift API for more information.  
+  LiftRules.securityRules = () => {
+    SecurityRules(content = Some(ContentSecurityPolicy(           
+      scriptSources = List(
+        ContentSourceRestriction.Self,
+        ContentSourceRestriction.Host("https://ajax.googleapis.com")
+      ),
+      styleSources = List(
+        ContentSourceRestriction.Self,
+        ContentSourceRestriction.Host("https://fonts.googleapis.com")
+      ),
+      fontSources = List(
+        ContentSourceRestriction.Self,
+        ContentSourceRestriction.Host("https://fonts.googleapis.com"),
+        ContentSourceRestriction.Host("https://fonts.gstatic.com"),
+        ContentSourceRestriction.Host("data:")
+      ),
+      frameSources = List(
+        ContentSourceRestriction.Host("https://www.youtube.com"),
+      )
+    )))
+  }      
 }
