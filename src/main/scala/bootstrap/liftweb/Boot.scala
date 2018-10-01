@@ -62,7 +62,7 @@ class Boot {
     //DataLoader.loadAdmin
     DataLoader.updateParentNoPets
     //DataLoader.createFriendsFamilyProducts
-    DataLoader.updateShipmentShipStationId
+    //DataLoader.updateShipmentShipStationId
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
