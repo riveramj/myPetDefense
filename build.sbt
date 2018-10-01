@@ -58,9 +58,9 @@ libraryDependencies ++= {
     "net.liftweb"         %% "lift-webkit"        % liftVersion % "compile",
     "net.liftweb"         %% "lift-testkit"       % liftVersion % "test",
     "net.liftweb"         %% "lift-mapper"        % liftVersion % "compile",
-    "me.frmr.stripe"      %% "streifen"           % "0.0.7-SNAPSHOT",
-    "net.databinder.dispatch"   %% "dispatch-core"        % "0.13.3",
-    "net.databinder.dispatch"   %% "dispatch-lift-json"   % "0.13.3",
+    "me.frmr.stripe"      %% "streifen"           % "0.1.3-SNAPSHOT",
+    "org.dispatchhttp"   %% "dispatch-core"        % "0.14.0",
+    "org.dispatchhttp"   %% "dispatch-lift-json"   % "0.14.0",
     "com.mypetdefense.shipstation" %% "shipstation-scala" % "0.0.1-SNAPSHOT"
   )
 }
