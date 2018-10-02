@@ -533,4 +533,26 @@ object ParentService extends Loggable {
       }
     }
   }
+
+  def updateTaxRate(customerId: String, subscriptionId: String, taxRate: Double) = {
+    val updatedSubscription = StripeSubscription.update(
+      customerId = customerId,
+      subscriptionId = subscriptionId,
+      taxPercent = Some(taxRate)
+    )
+
+    //TODO actually use this result or do something, not just yelling into the void
+    Try(Await.result(updatedSubscription, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(updatedSubscription)) =>
+        Full(updatedSubscription)
+
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"update subscription tax rate failed with stipe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"update subscription tax rate failed with other error: ${throwable}")
+        throwable
+    }
+  }
 }

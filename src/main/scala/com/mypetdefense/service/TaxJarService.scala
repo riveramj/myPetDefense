@@ -67,6 +67,7 @@ object TaxJarService extends Loggable {
       amount <- tryo(taxDue.toDouble).toList
       rate <- tryo(taxRate.toDouble).toList
     } yield {
+      println(tax)
       val normalizedRate = tryo(BigDecimal(rate * 100).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble).openOr(0D)
 
       (amount, normalizedRate)
