@@ -99,6 +99,24 @@ class Boot {
   //Bundles
   LiftRules.snippets.append(Bundles.snippetHandlers)
 
+  // In cases where we have an AJAX request for IE with an uploaded file, we
+  // assume we served through an iframe (a fairly safe assumption) and serve
+  // up the response with a content type of text/plain so that IE does not
+  // attempt to save the file.
+  LiftRules.responseTransformers.append {
+    resp =>
+      (for (req <- S.request) yield {
+        resp.toResponse match {
+          case InMemoryResponse(data, headers, cookies, code)
+          if req.param("liftIFrameUpload") === req.path.wholePath.last &&
+          req.path.wholePath.head == LiftRules.liftPath =>
+            val contentlessHeaders = headers.filterNot(_._1.toLowerCase == "content-type")
+            InMemoryResponse(data, ("Content-Type", "text/plain; charset=utf-8") :: contentlessHeaders, cookies, code)
+          case _ => resp
+        }
+      }) openOr resp
+  }
+
   LiftRules.supplementalHeaders.default.set(
     List(
       ("X-Lift-Version", LiftRules.liftVersion),

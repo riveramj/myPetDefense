@@ -2,6 +2,8 @@
 # especially 'liftIFrameUpload' is used to identify iframe file upload
 window.myPetDefenseSite.ajaxifyFileUpload = ($form) ->
   iframeName = "#{$form.attr 'id'}-upload-iframe"
+
+  pageId = $('body').attr('data-lift-gc')
   iframe =
     $("<iframe name=\"#{iframeName}\" />")
       .css('display', 'none')
@@ -18,10 +20,11 @@ window.myPetDefenseSite.ajaxifyFileUpload = ($form) ->
     # Return if we've already set the form up.
     return if $form.children('[type=hidden][value=_]').length
 
+    pageId = lift.getPageId()
     $form
       .attr('target', iframeName)
       .removeAttr('onsubmit')
-      .attr('action', "/ajax_request/#{lift_page}?liftIFrameUpload=#{lift_page}")
+      .attr('action',  "/lift/ajax/#{pageId}?liftIFrameUpload=#{pageId}")
       .attr('method', 'post')
       .attr('encoding', 'multipart/form-data')
       .attr('enctype', 'multipart/form-data')
