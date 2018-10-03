@@ -37,6 +37,12 @@ object Agencies extends Loggable {
     } 
   }
 
+  def exportSameDayCancelResponse: Box[LiftResponse] = {
+    sameDayCancelExportMenu.currentValue flatMap { name =>
+      ReportingService.exportSameDayCancels(name)
+    } 
+  }
+
   def exportMonthToDateSalesResponse: Box[LiftResponse] = {
     monthToDateExportMenu.currentValue flatMap { name =>
       ReportingService.exportMonthToDateSales(name)
@@ -78,6 +84,16 @@ object Agencies extends Loggable {
     adminUser >>
     loggedIn >>
     EarlyResponse(exportRawSalesResponse _)
+
+    val sameDayCancelExportMenu = Menu.param[String](
+      "Export Same Day Cancellations",
+      "Export Same Day Cancellations",
+      Full(_),
+      string => string
+    ) / "admin" / "agencies" / "same-day-cancel.csv" >>
+    adminUser >>
+    loggedIn >>
+    EarlyResponse(exportSameDayCancelResponse _)
 
   val monthToDateExportMenu = Menu.param[String](
       "Export Month to Date Sales",
@@ -156,7 +172,7 @@ class Agencies extends Loggable {
     "#name" #> text(name, name = _) &
     "#create-item" #> SHtml.ajaxSubmit("Create Agency", () => createAgency) &
     ".agency" #> agencies.map { agency =>
-      val activeCustomers = agency.customers.filter(_.status == Status.Active)
+      val activeCustomers = agency.customers.flatMap(_.getSubscription).filter(_.status == Status.Active)
 
       ".name *" #> agency.name &
       ".customer-count *" #> activeCustomers.size &
@@ -166,6 +182,7 @@ class Agencies extends Loggable {
         ajaxInvoke(deleteAgency(agency) _)
       ) &
       ".actions .sales-export [href]" #> Agencies.salesDataExportMenu.calcHref(agency.name.get) &
+      ".actions .same-day-cancel [href]" #> Agencies.sameDayCancelExportMenu.calcHref(agency.name.get) &
       ".actions .cancellation-export [href]" #> Agencies.cancellationExportMenu.calcHref(agency.name.get) &
       ".actions .total-sales-export [href]" #> Agencies.totalSalesExportMenu.calcHref(agency.name.get) &
       ".actions .month-to-date-sales-export [href]" #> Agencies.monthToDateExportMenu.calcHref(agency.name.get) &

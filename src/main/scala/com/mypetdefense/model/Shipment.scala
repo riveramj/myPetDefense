@@ -11,6 +11,7 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
     override def dbIndexed_? = true
   }
   object subscription extends MappedLongForeignKey(this, Subscription)
+  object shipStationOrderId extends MappedInt(this)
   object stripePaymentId extends MappedString(this, 100)
   object trackingNumber extends MappedString(this, 100)
   object address extends MappedString(this, 200)

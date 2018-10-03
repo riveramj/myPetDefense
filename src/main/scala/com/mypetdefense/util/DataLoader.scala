@@ -237,4 +237,10 @@ object DataLoader extends Loggable {
       }
     }
   }
+
+  def updateShipmentShipStationId = {
+    val allShipments = Shipment.findAll()
+
+    allShipments.map(_.shipStationOrderId(-1).saveMe)
+  }
 }
