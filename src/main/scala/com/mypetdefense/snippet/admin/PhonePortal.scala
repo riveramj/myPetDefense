@@ -88,20 +88,16 @@ class PhonePortal extends Loggable {
     state = possibleState
     zip = possibleZip
 
-    if ((zip.length() > 4) && (state.toLowerCase() == "ga")) {
-      val taxInfo = TaxJarService.findTaxAmoutAndRate(
-        city,
-        state,
-        zip,
-        12.99
-      )
+    val taxInfo = TaxJarService.findTaxAmoutAndRate(
+      city,
+      state,
+      zip,
+      12.99
+    )
 
-      taxDue = taxInfo._1
-      taxRate = taxInfo._2
-    } else {
-      taxDue = 0D
-      taxRate = 0D
-    }
+    taxDue = taxInfo._1
+    taxRate = taxInfo._2
+
 
     priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
   }

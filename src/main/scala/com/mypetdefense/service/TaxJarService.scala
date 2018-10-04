@@ -18,8 +18,8 @@ import scala.math.BigDecimal
 import java.util.Date
 
 object TaxJarService extends Loggable {
-  val calculateTaxUrl = url("http://api.taxjar.com/v2/taxes")
-  val createOrderTaxUrl = url("http://api.taxjar.com/v2/transactions/orders")
+  val calculateTaxUrl = url("https://api.taxjar.com/v2/taxes").secure
+  val createOrderTaxUrl = url("https://api.taxjar.com/v2/transactions/orders").secure
 
   val authKey = Props.get("taxjar.api.key") openOr ""
 
@@ -27,7 +27,7 @@ object TaxJarService extends Loggable {
   
   def findTaxAmoutAndRate(city: String, state: String, zip: String, amount: Double): (Double, Double) = {
     def taxResponse = {
-      Http(calculateTaxUrl << Map(
+      Http.default(calculateTaxUrl << Map(
         "to_country" -> "US",
         "to_zip" -> zip,
         "to_state" -> state,
@@ -58,14 +58,16 @@ object TaxJarService extends Loggable {
       }
     }
 
-    val parsedTax = parse(rawTax(retryAttempts).openOr("")) 
+    val parsedTax = parse(rawTax(retryAttempts).openOr(""))
 
     (for {
-      JField("amount_to_collect", JDouble(taxDue)) <- parsedTax
-      JField("rate", JDouble(taxRate)) <- parsedTax
+      JObject(tax) <- parsedTax
+      JField("amount_to_collect", JDouble(taxDue)) <- tax
+      JField("rate", JDouble(taxRate)) <- tax
       amount <- tryo(taxDue.toDouble).toList
       rate <- tryo(taxRate.toDouble).toList
     } yield {
+      println(tax)
       val normalizedRate = tryo(BigDecimal(rate * 100).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble).openOr(0D)
 
       (amount, normalizedRate)
@@ -88,7 +90,7 @@ object TaxJarService extends Loggable {
 
   def createTaxOrder(orderIdentifier: String, city: String, state: String, zip: String, amount: String, tax: String, date: String) = {
     def orderResponse = {
-      Http(createOrderTaxUrl << Map(
+      Http.default(createOrderTaxUrl << Map(
         "transaction_id" -> orderIdentifier,
         "transaction_date" -> date,
         "to_country" -> "US",
