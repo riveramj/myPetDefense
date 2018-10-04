@@ -243,6 +243,9 @@ class Parents extends Loggable {
   def parentInformationBinding(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]) = {
     val parent = currentParent
     val address = parent.flatMap(_.addresses.toList.headOption)
+    val agent = currentParent.map { user =>
+      tryo(user.salesAgentId.get).openOr("")
+    }
 
     var stripeSubscriptionId = subscription.map(_.stripeSubscriptionId.get).getOrElse("")
 
@@ -351,6 +354,7 @@ class Parents extends Loggable {
           ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))
       }
     } &
+    ".parent-information .agent-name .agent *" #> agent &
     ".parent-information .change-stripe-subscription .stripe-subscription-id" #> ajaxText(stripeSubscriptionId, stripeSubscriptionId = _) &
     ".parent-information .change-stripe-subscription .change-id [onClick]" #> Confirm(
       s"Update Stripe Subscription Id? This can really mess things up!",
