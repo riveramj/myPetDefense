@@ -1,13 +1,13 @@
 package com.mypetdefense.util
 
 import com.mypetdefense.model._
-import com.mypetdefense.service.ReportingService
+import com.mypetdefense.service.{ReportingService, TaxJarService, ParentService}
 import net.liftweb._
   import common._
   import util._
   
 import net.liftweb.util.Helpers._
-import net.liftweb.mapper.By
+import net.liftweb.mapper.{By, NotBy}
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
 import dispatch._, Defaults._
 
@@ -242,5 +242,32 @@ object DataLoader extends Loggable {
     val allShipments = Shipment.findAll()
 
     allShipments.map(_.shipStationOrderId(-1).saveMe)
+  }
+
+  def updateGeorgiaTaxRates = {
+    val activeUsers = User.findAll(
+      By(User.userType, UserType.Parent),
+      NotBy(User.status, Status.Cancelled)
+    )
+
+    for {
+      user <- activeUsers
+      address <- user.shippingAddress
+        if (address.state.get.toLowerCase == "ga")
+      subscription <- user.getSubscription
+    } yield {
+
+      val stripeId = user.stripeId.get
+      val subscriptionId = subscription.stripeSubscriptionId.get
+
+      val (amount, rate) = TaxJarService.findTaxAmoutAndRate(
+        address.city.get,
+        address.state.get,
+        address.zip.get,
+        12.99
+      )
+
+      ParentService.updateTaxRate(stripeId, subscriptionId, rate, user.email.get)
+    }
   }
 }
