@@ -544,9 +544,6 @@ object ParentService extends Loggable {
     //TODO actually use this result or do something, not just yelling into the void
     Try(Await.result(updatedSubscription, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(updatedSubscription)) =>
-        println(s"${customerId} updated with ${taxRate}- ${email}")
-        println(updatedSubscription)
-        println("^^^^^^")
         Full(updatedSubscription)
 
       case TrySuccess(stripeFailure) =>
