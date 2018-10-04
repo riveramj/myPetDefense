@@ -152,14 +152,23 @@ class ParentSubscription extends Loggable {
   def manage = {
     val userSubscription = SecurityContext.currentUser.flatMap(_.getSubscription).flatMap(_.refresh)
 
+    var cancelAccount = false
+    var pauseAccount = false
+    var resumeAccount = false
+
+    val currentStatus = userSubscription.map(_.status.get)
+
+    currentStatus match {
+      case Full(Status.Paused) => pauseAccount = true
+      case Full(Status.Cancelled) => cancelAccount = true
+      case Full(_) => resumeAccount = true
+      case _ =>
+    }
     ParentSubscription.currentUserSubscription(userSubscription)
 
     val currentNextShipDate = userSubscription.map(_.nextShipDate.get)
 
     var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
-
-    var cancelAccount = false
-    var pauseAccount = false
 
     def confirmAction() = {
       if (cancelAccount)
@@ -173,19 +182,30 @@ class ParentSubscription extends Loggable {
         case "cancel" =>
           cancelAccount = true
           pauseAccount = false
+          resumeAccount = false
+
+        case "pause" =>
+          cancelAccount = false
+          pauseAccount = true
+          resumeAccount = false
         
         case _ =>
           cancelAccount = false
-          pauseAccount = true
+          pauseAccount = false
+          resumeAccount = true
       }
       
-    Noop
+      Noop
     }
 
     SHtml.makeFormsAjax andThen
     "#user-email *" #> email &
     ".subscription a [class+]" #> "current" &
-    ".next-shipment" #> text(nextShipDate, possibleShipDate => nextShipDate = possibleShipDate.trim) &
+    "#resume-account" #> ClearNodesIf(currentStatus != Status.Paused) &
+    "#resume-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("resume")) &
+    "#pause-account [class+]" #> { if (pauseAccount) "selected" else "" } &
+    "#pause-account .pause [class+]" #> { if (pauseAccount) "selected" else "" } &
+    "#pause-account .next-shipment" #> text(nextShipDate, possibleShipDate => nextShipDate = possibleShipDate.trim) &
     "#pause-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("pause")) &
     "#cancel-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("cancel")) &
     ".continue-account-changes" #> SHtml.ajaxSubmit("Continue", confirmAction _)
