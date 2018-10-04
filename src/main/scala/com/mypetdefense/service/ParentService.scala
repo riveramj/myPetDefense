@@ -534,7 +534,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def updateTaxRate(customerId: String, subscriptionId: String, taxRate: Double) = {
+  def updateTaxRate(customerId: String, subscriptionId: String, taxRate: Double, email: String) = {
     val updatedSubscription = StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
@@ -544,6 +544,9 @@ object ParentService extends Loggable {
     //TODO actually use this result or do something, not just yelling into the void
     Try(Await.result(updatedSubscription, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(updatedSubscription)) =>
+        println(s"${customerId} updated with ${taxRate}- ${email}")
+        println(updatedSubscription)
+        println("^^^^^^")
         Full(updatedSubscription)
 
       case TrySuccess(stripeFailure) =>

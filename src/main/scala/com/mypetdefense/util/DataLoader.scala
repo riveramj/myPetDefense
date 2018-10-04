@@ -269,7 +269,7 @@ object DataLoader extends Loggable {
 
       println(s"${user.name} - ${rate} - ${address.state.get}")
 
-      ParentService.updateTaxRate(stripeId, subscriptionId, rate)
+      ParentService.updateTaxRate(stripeId, subscriptionId, rate, user.email.get)
     }
   }
 }
