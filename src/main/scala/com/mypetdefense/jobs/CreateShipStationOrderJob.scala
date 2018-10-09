@@ -59,15 +59,18 @@ class CreateShipStationOrderJob extends ManagedJob {
 
               case TryFail(throwable: Throwable) =>
                 logger.error(s"hold order failed with other error: ${throwable}")
+                logger.error(s"user email is ${user.email.get}")
             }
           }
 
               case TrySuccess(shipStationFailure) =>
-                logger.error(s"create order failed with shipStation error: ${shipStationFailure}")
-                shipStationFailure
+                logger.error(s"create order failed with shipStation error:")
+                logger.error(shipStationFailure)
+                logger.error(s"user email is ${user.email.get}")
 
               case TryFail(throwable: Throwable) =>
                 logger.error(s"create order failed with other error: ${throwable}")
+                logger.error(s"user email is ${user.email.get}")
                 throwable
       }
     }
