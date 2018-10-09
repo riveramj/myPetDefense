@@ -66,7 +66,6 @@ class Reviews extends Loggable {
 
     SHtml.makeFormsAjax andThen
     "#review-upload" #> SHtml.fileUpload {fph => 
-      println("hi")
       fileHolder = Full(fph)
     } andThen
     "#upload-reviews" #> SHtml.ajaxOnSubmit(() => {
