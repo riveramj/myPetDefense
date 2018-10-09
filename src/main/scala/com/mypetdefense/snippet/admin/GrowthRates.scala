@@ -40,7 +40,6 @@ class GrowthRates extends Loggable {
   val growthRates = GrowthRate.findAll()
 
   def createGrowthRate = {
-    println("in create")
     def convertAgeToInt(age: String) = tryo(age.trim().toInt)
 
     GrowthRate.createGrowthRate(

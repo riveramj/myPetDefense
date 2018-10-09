@@ -36,7 +36,6 @@ class ForgotPassword extends Loggable {
         EmailActor ! SendPasswordResetEmail(userWithResetKey)
         S.redirectTo(ResetPasswordSent.menu.toLoc.calcHref(userWithResetKey))
       case _ => 
-        println(userEmail)
     }
   }
   def render = {
