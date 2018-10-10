@@ -33,9 +33,9 @@ object ShipStationService extends Loggable {
 
   implicit val shipStationExecutor = new ShipStationExecutor(key, secret, url)
 
-  def getOrder(orderId: String) = {
+  def getOrder(orderId: Int) = {
     Try(
-      Await.result(Order.get(orderId), new DurationInt(10).seconds)
+      Await.result(Order.get(orderId.toString), new DurationInt(10).seconds)
     ) match {
       case TrySuccess(Full(shipStationOrder)) =>
         Full(shipStationOrder)
@@ -102,6 +102,34 @@ object ShipStationService extends Loggable {
     }
   }
 
+  def cancelShipstationOrder(shipment: Shipment) = {
+    val possibleOrder = getOrder(shipment.shipStationOrderId.get)
+
+    val cancelOrder = possibleOrder.map { order =>
+      Order.create(
+        orderNumber = order.orderNumber,
+        orderKey = order.orderKey,
+        orderDate = order.orderDate,
+        orderStatus = "cancelled",
+        billTo = order.billTo,
+        shipTo = order.shipTo
+      )
+    }.openOr(Future(Empty))
+
+    Try(Await.result(cancelOrder, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(order)) =>
+        Full(order)
+      
+      case TrySuccess(shipStationFailure) =>
+        logger.error(s"cancel order failed with shipStation error: ${shipStationFailure}")
+        shipStationFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"cancel order failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
   def createShipStationOrder(shipment: Shipment, user: User): Future[Box[Order]] = {
     val userAddress = user.shippingAddress
     val billShipTo = ShipStationAddress(
@@ -162,7 +190,7 @@ object ShipStationService extends Loggable {
       billTo = billShipTo,
       shipTo = billShipTo,
       items = Some(allOrderItems),
-      customerNotes = Some(petNamesProducts)
+      giftMessage = Some(petNamesProducts)
     )
   }
 
@@ -182,7 +210,7 @@ object ShipStationService extends Loggable {
         List(
           ("shipDateStart", shipDate),
           ("shipDateEnd", shipDate),
-          ("pageSize", "150")
+          ("pageSize", "300")
       )), new DurationInt(10).seconds)
     ) match {
       case TrySuccess(Full(shipStationShipments)) =>

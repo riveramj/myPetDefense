@@ -85,6 +85,20 @@ object ParentService extends Loggable {
     }
   }
 
+  def cancelOpenOrders(oldUser: User) = {
+    val openShipments = {
+      for {
+        subscription <- oldUser.getSubscription.toList
+        shipment <- subscription.shipments
+        if (shipment.dateShipped.get == null && shipment.shipStationOrderId.get > 0)
+      } yield {
+        shipment
+      }
+    }
+
+    openShipments.map(ShipStationService.cancelShipstationOrder(_))
+  }
+
   def removeParent(oldUser: User, fullDelete: Boolean = false) = {
     val user = oldUser.refresh
     val stripeCustomerId = user.map(_.stripeId.get).openOr("")
@@ -93,6 +107,7 @@ object ParentService extends Loggable {
     val shipments = subscription.map(_.shipments.toList).openOr(Nil)
     val addresses = user.map(_.addresses.toList).openOr(Nil)
 
+    cancelOpenOrders(oldUser)
     val removeCustomer = Customer.delete(stripeCustomerId)
 
     Try(Await.result(removeCustomer, new DurationInt(10).seconds)) match {
@@ -247,6 +262,21 @@ object ParentService extends Loggable {
     updatedSubscription match {
       case Full(stripeSubscription) => subscription.nextShipDate(nextDate).saveMe
       case _ => Empty
+    }
+  }
+
+  def updateNextShipDate(subscription: Subscription, user: Box[User]) = {
+    val stripeUserId = user.map(_.stripeId.get).openOr("")
+    val stripeSubscriptionId = subscription.stripeSubscriptionId.get
+
+    getStripeSubscription(stripeUserId, stripeSubscriptionId) match {
+      case Full(stripeSubscription) =>
+        val currentPeriodEnd = stripeSubscription.currentPeriodEnd.getOrElse(0l)
+        val nextMonthDate = new Date(currentPeriodEnd * 1000L)
+
+        subscription.nextShipDate(nextMonthDate).saveMe
+
+      case (_) => Empty
     }
   }
 
@@ -528,6 +558,28 @@ object ParentService extends Loggable {
 
         case _ =>
       }
+    }
+  }
+
+  def updateTaxRate(customerId: String, subscriptionId: String, taxRate: Double, email: String) = {
+    val updatedSubscription = StripeSubscription.update(
+      customerId = customerId,
+      subscriptionId = subscriptionId,
+      taxPercent = Some(taxRate)
+    )
+
+    //TODO actually use this result or do something, not just yelling into the void
+    Try(Await.result(updatedSubscription, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(updatedSubscription)) =>
+        Full(updatedSubscription)
+
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"update subscription tax rate failed with stipe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"update subscription tax rate failed with other error: ${throwable}")
+        throwable
     }
   }
 }

@@ -40,7 +40,6 @@ class ResetPassword {
 
       SecurityContext.loginRedirectUser(user)
     case _ =>
-      println("no user associated to this reset key")
       S.redirectTo(Login.menu.loc.calcDefaultHref)
   }
   def render = {

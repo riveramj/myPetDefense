@@ -44,6 +44,7 @@ class BoxDetails extends Loggable {
 
   val user = BoxDetails.thanksgivingBoxMenu.currentValue
   val address = user.flatMap(_.shippingAddress)
+  val city = address.map(_.city.get).openOr("")
   val state = address.map(_.state.get).openOr("")
   val zip = address.map(_.zip.get).openOr("")
 
@@ -51,25 +52,22 @@ class BoxDetails extends Loggable {
 
   var quantity = 1
   val boxCost = 19.99
-  var taxPaid = 0
+
+  var taxDue = 0D
+  var taxRate = 0D
 
   user.map(SecurityContext.logIn(_))
 
   def calculateTax = {
-    if (zip.length() > 4) {
-      val taxInfo = TaxJarService.findTaxAmoutAndRate(
-        city,
-        state,
-        zip,
-        subtotalWithDiscount
-      )
+    val taxInfo = TaxJarService.findTaxAmoutAndRate(
+      city,
+      state,
+      zip,
+      (quantity * boxCost)
+    )
 
-      taxDue = taxInfo._1
-      taxRate = taxInfo._2
-    } else {
-      taxDue = 0D
-      taxRate = 0D
-    }
+    taxDue = taxInfo._1
+    taxRate = taxInfo._2
 
     //priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
   }
@@ -78,10 +76,10 @@ class BoxDetails extends Loggable {
     val stripeId = user.map(_.stripeId.get).openOr("")
     val stripeCustomer = ParentService.getStripeCustomer(stripeId)
     val stripeCard = stripeCustomer.flatMap(_.defaultSource)
-    val amountPaid = quantity * boxCost + taxPaid
+    val amountPaid = quantity * boxCost + taxDue
     
     val boxCharge = ParentService.chargeStripeCustomer(
-      ((amountPaid + taxPaid) * 100).toLong,
+      ((amountPaid + taxDue) * 100).toLong,
       stripeCustomer.map(_.id),
       "Thanksgiving Box"
     )
@@ -99,7 +97,7 @@ class BoxDetails extends Loggable {
         address,
         charge.id.getOrElse(""),
         amountPaid,
-        taxPaid,
+        taxDue,
         quantity
       )
 

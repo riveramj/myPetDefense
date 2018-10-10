@@ -152,16 +152,14 @@ object TPPApi extends RestHelper with Loggable {
       EmailActor ! SendAPIErrorEmail(errorMsg)
     }
 
-    val (taxDue, taxRate) = {
-      address.map { address => 
-        TaxJarService.findTaxAmoutAndRate(
-          address.city.get,
-          address.state.get,
-          address.zip.get,
-          subtotalWithDiscount
-        )
-      }.getOrElse((0D, 0D))
-    }
+    val (taxDue, taxRate) = address.map { address => 
+      TaxJarService.findTaxAmoutAndRate(
+        address.city.get,
+        address.state.get,
+        address.zip.get,
+        subtotalWithDiscount
+      )
+    }.getOrElse((0D, 0D))
 
     val stripeCustomer: Future[Box[Customer]] = Customer.create(
       email = refreshedUser.map(_.email.get),
