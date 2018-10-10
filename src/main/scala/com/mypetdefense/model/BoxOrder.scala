@@ -28,7 +28,8 @@ class BoxOrder extends LongKeyedMapper[BoxOrder] with IdPK with OneToMany[Long, 
   object dateReceived extends MappedDateTime(this)
   object taxPaid extends MappedDouble(this)
   object amountPaid extends MappedDouble(this)
-  object quantity extends MappedInt(this)
+  object bigQuantity extends MappedInt(this)
+  object smallQuantity extends MappedInt(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -46,7 +47,8 @@ object BoxOrder extends BoxOrder with LongKeyedMetaMapper[BoxOrder] {
     stripeChargeId: String,
     amountPaid: Double,
     taxPaid: Double,
-    quantity: Int
+    bigQuantity: Int,
+    smallQuantity: Int
   ) = {
     val dateProcessed = new Date()
 
@@ -65,7 +67,8 @@ object BoxOrder extends BoxOrder with LongKeyedMetaMapper[BoxOrder] {
       .dateProcessed(dateProcessed)
       .amountPaid(amountPaid)
       .taxPaid(taxPaid)
-      .quantity(quantity)
+      .bigQuantity(bigQuantity)
+      .smallQuantity(smallQuantity)
       .saveMe
   }
 }

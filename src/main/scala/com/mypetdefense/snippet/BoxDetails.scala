@@ -50,20 +50,26 @@ class BoxDetails extends Loggable {
 
   val email = user.map(_.email.get).openOr("")
 
-  var quantity = 1
-  val boxCost = 19.99
+  var bigQuantity = 0
+  var smallQuantity = 0
+  val bigBoxCost = 29.99
+  val smallBoxCost = 19.99
 
   var taxDue = 0D
   var taxRate = 0D
 
   user.map(SecurityContext.logIn(_))
 
+  def findSubtotal = {
+    (bigQuantity * bigBoxCost) + (smallQuantity * smallBoxCost)
+  }
+
   def calculateTax = {
     val taxInfo = TaxJarService.findTaxAmoutAndRate(
       city,
       state,
       zip,
-      (quantity * boxCost)
+      findSubtotal
     )
 
     taxDue = taxInfo._1
@@ -76,7 +82,7 @@ class BoxDetails extends Loggable {
     val stripeId = user.map(_.stripeId.get).openOr("")
     val stripeCustomer = ParentService.getStripeCustomer(stripeId)
     val stripeCard = stripeCustomer.flatMap(_.defaultSource)
-    val amountPaid = quantity * boxCost + taxDue
+    val amountPaid = findSubtotal + taxDue
     
     val boxCharge = ParentService.chargeStripeCustomer(
       ((amountPaid + taxDue) * 100).toLong,
@@ -98,12 +104,13 @@ class BoxDetails extends Loggable {
         charge.id.getOrElse(""),
         amountPaid,
         taxDue,
-        quantity
+        bigQuantity,
+        smallQuantity
       )
 
       EmailActor ! BoxReceiptEmail(newBoxOrder)
 
-      boxSalesInfo(Full(quantity, amountPaid))
+      boxSalesInfo(Full((bigQuantity, smallQuantity, amountPaid)))
 
       S.redirectTo(Success.menu.loc.calcDefaultHref)
     }).openOr(Noop)
@@ -111,7 +118,8 @@ class BoxDetails extends Loggable {
 
   def render = {
     SHtml.makeFormsAjax andThen
-    ".quantity *" #> SHtml.text("1", possibleQuanity => quantity = tryo(possibleQuanity.toInt).openOr(0)) &
+    ".big-quantity" #> SHtml.text("", possibleQuanity => bigQuantity = tryo(possibleQuanity.toInt).openOr(0)) &
+    ".small-quantity" #> SHtml.text("", possibleQuanity => smallQuantity = tryo(possibleQuanity.toInt).openOr(0)) &
     ".buy-box" #> SHtml.ajaxSubmit("Place Order", () => orderBox)
   }
 }

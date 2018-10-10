@@ -47,12 +47,14 @@ class Success extends Loggable {
       "#box-count" #> ClearNodes &
       "#box-total" #> ClearNodes
     } else {
-      val boxQuantity = boxSalesInfo.is.map(_._1)
-      val boxSalesTotal = boxSalesInfo.is.map(_._2).openOr(0D)
+      val bigBoxQuantity = boxSalesInfo.is.map(_._1)
+      val smallBoxQuantity = boxSalesInfo.is.map(_._2)
+      val boxSalesTotal = boxSalesInfo.is.map(_._3).openOr(0D)
 
       "#order-summary [class+]" #> "box-sale" &
       "#order-total h3 [class+]" #> "box-sale" andThen
-      "#box-count span *" #> boxQuantity &
+      "#big-box-count span *" #> bigBoxQuantity &
+      "#small-box-count span *" #> smallBoxQuantity &
       "#checkout-total #amount *" #> f"$$$boxSalesTotal%2.2f" &
       "#pet-count" #> ClearNodes &
       "#monthly-total" #> ClearNodes &
