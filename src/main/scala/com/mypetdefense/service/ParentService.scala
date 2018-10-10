@@ -534,7 +534,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def updateTaxRate(customerId: String, subscriptionId: String, taxRate: Double) = {
+  def updateTaxRate(customerId: String, subscriptionId: String, taxRate: Double, email: String) = {
     val updatedSubscription = StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
