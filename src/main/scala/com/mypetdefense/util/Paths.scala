@@ -137,6 +137,8 @@ object Paths {
     ParentSubscription.confirmCancelMenu,
     ParentSubscription.confirmPauseMenu,
     ParentSubscription.successfulPauseMenu,
+    ParentSubscription.confirmResumeMenu,
+    ParentSubscription.successfulResumeMenu,
     ParentSubscription.cancelSurveySubscriptionMenu,
     ParentSubscription.surveyCompleteSubscriptionMenu,
     admin.Dashboard.menu,

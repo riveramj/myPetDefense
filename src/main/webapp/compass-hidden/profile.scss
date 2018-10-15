@@ -191,7 +191,7 @@
     }
   }
 
-  .go-back, .continue-account-changes, .confirm-pause, .confirm-cancel {
+  .go-back, .continue-account-changes, .confirm-pause, .confirm-cancel, .confirm-resume {
     width: 100%;
     padding: 12px 0;
     text-transform: uppercase;
@@ -227,7 +227,7 @@
     }
   }
 
-  .continue-account-changes, .confirm-pause, .confirm-cancel {
+  .continue-account-changes, .confirm-pause, .confirm-cancel, .confirm-resume {
     background-color: #45ADA9;
 
     @media (min-width: $bp-large) {
@@ -259,7 +259,7 @@
   }
 }
 
-.confirm-pause-account, .confirm-cancel-account {
+.confirm-pause-account, .confirm-cancel-account, .confirm-resume-account {
   color: #605F5F;
   font-size: 20px;
   line-height: 24px;
@@ -440,7 +440,7 @@ body {
   }
 }
 
-.successful-pause {
+.successful-pause, .successful-resume {
   h4 {
     font-size: 17px;
     margin-bottom: 20px;

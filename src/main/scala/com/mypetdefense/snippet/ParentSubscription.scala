@@ -42,6 +42,19 @@ object ParentSubscription extends Loggable {
     loggedIn >>
     parent
 
+  val confirmResumeMenu = Menu.param[String](
+      "Confirm Resume",
+      "Confirm Resume",
+      Full(_),
+      string => string
+    ) / "confirm-resume" >>
+    loggedIn >>
+    parent
+
+    val successfulResumeMenu = Menu.i("Subscription Resumed") / "subscription-resumed" >>
+    loggedIn >>
+    parent
+
   val confirmPauseMenu = Menu.param[String](
       "Confirm Pause",
       "Confirm Pause",
@@ -173,8 +186,10 @@ class ParentSubscription extends Loggable {
     def confirmAction() = {
       if (cancelAccount)
         S.redirectTo(ParentSubscription.confirmCancelMenu.loc.calcDefaultHref)
-      else
+      else if (pauseAccount)
         S.redirectTo(ParentSubscription.confirmPauseMenu.toLoc.calcHref(nextShipDate))
+      else
+        S.redirectTo(ParentSubscription.confirmResumeMenu.toLoc.calcHref(nextShipDate))
     }
 
     def updateSubscriptionStatus(action: String)() = {
@@ -209,6 +224,45 @@ class ParentSubscription extends Loggable {
     "#pause-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("pause")) &
     "#cancel-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("cancel")) &
     ".continue-account-changes" #> SHtml.ajaxSubmit("Continue", confirmAction _)
+  }
+
+  def resumeSubscription = {
+    val nextShipDate = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant())
+
+    def confirmResume() = {
+      val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+
+      val newShipDate = dateFormat.format(nextShipDate)
+      val updatedShipDateSubscription = subscription.map(_.nextShipDate(nextShipDate).status(Status.Active).saveMe)
+      ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
+     
+      for {
+        parent <- user
+        subscription <- updatedShipDateSubscription
+      } yield {
+        EmailActor ! ParentResumeSubscriptionEmail(parent, subscription)
+      }
+
+      S.redirectTo(ParentSubscription.successfulResumeMenu.loc.calcDefaultHref)
+    }
+
+    SHtml.makeFormsAjax andThen
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current" &
+    ".next-shipment *" #> dateFormat.format(nextShipDate) &
+    ".confirm-resume" #> SHtml.ajaxSubmit("Resume Subscription", confirmResume _)
+  }
+
+  def successfulResume = {
+    val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+    val currentNextShipDate = subscription.map(_.nextShipDate.get)
+
+    var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
+
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current" &
+    ".next-shipment *" #> nextShipDate &
+    ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
   }
 
   def pauseSubscription = {
