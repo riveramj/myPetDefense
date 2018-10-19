@@ -308,7 +308,7 @@ class ParentSubscription extends Loggable {
     SHtml.makeFormsAjax andThen
     "#user-email *" #> email &
     ".subscription a [class+]" #> "current" &
-    ".confirm-pause" #> SHtml.ajaxSubmit("Pause Subscription", cancelUserAccount _)
+    ".confirm-cancel" #> SHtml.ajaxSubmit("Cancel Subscription", cancelUserAccount _)
     
   }
 
@@ -332,7 +332,7 @@ class ParentSubscription extends Loggable {
       S.redirectTo(ParentSubscription.surveyCompleteSubscriptionMenu.loc.calcDefaultHref)
     }
 
-    val cancelChoices = SHtml.radio(List("Pause", "Cancel"), Empty, selectedReason = _).toForm 
+    val cancelChoices = SHtml.radio(cancelReasons, Empty, selectedReason = _).toForm
 
     SHtml.makeFormsAjax andThen
     ".sign-out" #> ClearNodes &
