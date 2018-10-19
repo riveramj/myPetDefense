@@ -38,9 +38,12 @@ trait StripeHook extends RestHelper with Loggable {
       tax <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
       amountPaid <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
       user <- User.find(By(User.stripeId, stripeCustomerId))
+      subscription <- user.getSubscription
       shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
+
+      subscription.status(Status.Active).saveMe
 
       val notTrial_? = ParentService.notTrialSubscription_?(stripeCustomerId, stripeSubscriptionId)
       val city = shippingAddress.city.get
