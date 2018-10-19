@@ -1,0 +1,29 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+
+<div data-lift="ParentSubscription.successfulPause?eager_eval=true">
+  <div data-lift="embed?what=parent-logo-bar"></div>
+  <div id="page-body-container">
+    <div data-lift="embed?what=parent-nav-bar"></div>
+    <div class="account-section">
+      <h2>Subscription Paused</h2>
+      <ul class="account-block successful-pause">
+        <li><h4>We'll see you soon!</h4></li>
+        <li>
+          <div class="next-shipment-container">Your next bill date is <span class="next-shipment">March 03, 2018</span>.</div>
+        </li>
+        <li>
+          <a href="/account-overview" class="to-account-overview">Go to Account Overview</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<head_merge>
+  <link rel="stylesheet" data-lift="style-bundle?name=profile">
+</head_merge>
+<tail>
+  <script type="text/javascript" data-lift="script-bundle?name=profile"></script>
+</tail>
+</div>
+

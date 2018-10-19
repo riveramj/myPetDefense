@@ -70,5 +70,5 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
 object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]
 
 object Status extends Enumeration {
-  val Active, Inactive, UserSuspended, BillingSuspended, Cancelled = Value
+  val Active, Inactive, UserSuspended, BillingSuspended, Cancelled, Paused = Value
 }

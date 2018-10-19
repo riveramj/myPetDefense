@@ -36,8 +36,8 @@
   }
 
   &:before {
-    @extend %icon;
-    content: $fa-var-shopping-cart;
+    @extend .fas;
+    content: fa-content($fa-var-shopping-cart);
     margin-right: 2px;
   
     @media (min-width: $bp-medium) {

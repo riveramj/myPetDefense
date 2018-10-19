@@ -175,8 +175,8 @@ fieldset label {
   border-bottom: 1px solid #70C9C6;
 
   &:before {
-    @extend %icon;
-    content: $fa-var-shopping-cart;
+    @extend .fas;
+    content: fa-content($fa-var-shopping-cart);
     color: #1D8884;
     font-size: rem(18px);
     padding-left: rem(14px);
