@@ -166,11 +166,17 @@ object ShipStationService extends Loggable {
     }
 
     val paidShipment_? = shipment.amountPaid != "0"
-
+    
     val dogTagOrderItems = {
       if (paidShipment_?) {
-        val dogProducts = products.map(_.getNameAndSize).filter(_.contains("Dogs"))
-        dogProducts.map { product =>
+        val dogsForTags = user.activePets.filter { dog =>
+          val needTag_? = !tryo(dog.sentDogTag.get).openOr(false)
+          ((dog.animalType.get == AnimalType.Dog) && needTag_?)
+        }
+
+        dogsForTags.map { dog =>
+          dog.sentDogTag(true).saveMe
+
           OrderItem(
             quantity = 1,
             sku = "dogTag"
