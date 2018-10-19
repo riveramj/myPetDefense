@@ -165,6 +165,22 @@ object ShipStationService extends Loggable {
       }
     }
 
+    val paidShipment_? = shipment.amountPaid != "0"
+
+    val dogTagOrderItems = {
+      if (paidShipment_?) {
+        val dogProducts = products.map(_.getNameAndSize).filter(_.contains("Dogs"))
+        dogProducts.map { product =>
+          OrderItem(
+            quantity = 1,
+            sku = "dogTag"
+          )
+        }
+      } else {
+        Nil
+      }
+    }
+
     val possibleInsertOrderItem = refreshedShipment.map(_.insert.get) match {
       case Full("TPP+Welcome Insert") => 
         List(OrderItem(
@@ -181,7 +197,7 @@ object ShipStationService extends Loggable {
       )
     }
 
-    val allOrderItems = shipStationProducts ++ possibleInsertOrderItem
+    val allOrderItems = shipStationProducts ++ possibleInsertOrderItem ++ dogTagOrderItems
 
     Order.create(
       orderNumber = s"${refreshedShipment.map(_.shipmentId.get).openOr("")}",
