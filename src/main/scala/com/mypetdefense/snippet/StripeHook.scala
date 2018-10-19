@@ -38,9 +38,12 @@ trait StripeHook extends RestHelper with Loggable {
       tax <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
       amountPaid <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
       user <- User.find(By(User.stripeId, stripeCustomerId))
+      subscription <- user.getSubscription
       shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
+
+      subscription.status(Status.Active).saveMe
 
       val notTrial_? = ParentService.notTrialSubscription_?(stripeCustomerId, stripeSubscriptionId)
       val city = shippingAddress.city.get
@@ -105,22 +108,26 @@ trait StripeHook extends RestHelper with Loggable {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
       user <- User.find(By(User.stripeId, stripeCustomerId))
+      subscription <- user.getSubscription
       totalAmountInCents <- tryo((objectJson \ "total").extract[Long]) ?~! "No total."
-      } yield {
-        val nextPaymentAttemptSecs: Option[Long] =
-          tryo((objectJson \ "next_payment_attempt").extract[Option[Long]]).openOr(None)
+    } yield {
+      val nextPaymentAttemptSecs: Option[Long] =
+        tryo((objectJson \ "next_payment_attempt").extract[Option[Long]]).openOr(None)
 
-        val nextPaymentAttempt = nextPaymentAttemptSecs.map { nextPaymentAttemptInSecs =>
-          new DateTime(nextPaymentAttemptInSecs * 1000)
-          } filter {
-            _ isAfterNow
-          }
-          val amount = totalAmountInCents / 100d
-
-          emailActor ! SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt)
-
-          OkResponse()
+      val nextPaymentAttempt = nextPaymentAttemptSecs.map { nextPaymentAttemptInSecs =>
+        new DateTime(nextPaymentAttemptInSecs * 1000)
+      } filter {
+        _ isAfterNow
       }
+      val amount = totalAmountInCents / 100d
+
+      if (!nextPaymentAttempt.isDefined)
+        ParentService.updateNextShipDate(subscription, Full(user))
+
+      emailActor ! SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt)
+
+      OkResponse()
+    }
   }
 
   def subscriptionPastDue(objectJson: JValue) = {
@@ -128,12 +135,12 @@ trait StripeHook extends RestHelper with Loggable {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
       user <- User.find(By(User.stripeId, stripeCustomerId))
       accountStatus <- tryo((objectJson \ "status").extract[String]) ?~! "No status."
-      } yield {
-        if (accountStatus == "past_due")
-          user.subscription.map(_.status(Status.BillingSuspended).saveMe)
+    } yield {
+      if (accountStatus == "past_due")
+        user.subscription.map(_.status(Status.BillingSuspended).saveMe)
 
-        OkResponse()
-      }
+      OkResponse()
+    }
   }
 
   serve {
@@ -146,21 +153,21 @@ trait StripeHook extends RestHelper with Loggable {
         eventType <- (requestJson \ "type").extractOpt[String]
         dataJson = (requestJson \ "data")
         objectJson = (dataJson \ "object")
-        } yield {
-          val result: Box[LiftResponse] = eventType match {
-            case "invoice.payment_succeeded" => invoicePaymentSucceeded(objectJson)
-            case "invoice.payment_failed" => invoicePaymentFailed(objectJson)
-            case "customer.subscription.updated" => subscriptionPastDue(objectJson)
-            case _ => Full(OkResponse())
-          }
-
-          result match {
-            case Full(resp) if resp.isInstanceOf[OkResponse] => resp
-            case Full(resp) => resp
-            case Empty => NotFoundResponse()
-            case Failure(msg, _, _) => PlainTextResponse(msg, Nil, 500)
-          }
+      } yield {
+        val result: Box[LiftResponse] = eventType match {
+          case "invoice.payment_succeeded" => invoicePaymentSucceeded(objectJson)
+          case "invoice.payment_failed" => invoicePaymentFailed(objectJson)
+          case "customer.subscription.updated" => subscriptionPastDue(objectJson)
+          case _ => Full(OkResponse())
         }
+
+        result match {
+          case Full(resp) if resp.isInstanceOf[OkResponse] => resp
+          case Full(resp) => resp
+          case Empty => NotFoundResponse()
+          case Failure(msg, _, _) => PlainTextResponse(msg, Nil, 500)
+        }
+      }
     }
   }
 }

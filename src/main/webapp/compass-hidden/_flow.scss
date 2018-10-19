@@ -116,7 +116,7 @@ html, body {
 
   &.complete:before {
     @extend %icon;
-    content: $fa-var-check;
+    content: fa-content($fa-var-check);
     padding-left: 18px;
     padding-top: 10px;
     
@@ -207,7 +207,7 @@ html, body {
 
   &.complete:before {
     @extend %icon;
-    content: $fa-var-check;
+    content: fa-content($fa-var-check);
   }
 }
 
@@ -216,7 +216,7 @@ li.complete {
 
   &:before {
     @extend %icon;
-    content: $fa-var-check;
+    content: fa-content($fa-var-check);
 
     @media (min-width: $bp-medium) {
       position: relative;
@@ -332,7 +332,7 @@ li.complete {
   
   &.complete:before {
     @extend %icon;
-    content: $fa-var-check;
+    content: fa-content($fa-var-check);
   }
 }
 

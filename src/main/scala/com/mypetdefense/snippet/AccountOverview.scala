@@ -35,7 +35,7 @@ class AccountOverview extends Loggable {
   val oldUser = currentUser
   val user = User.find(By(User.userId, oldUser.map(_.userId.get).openOr(0L)))
   val pets = user.map(_.activePets).openOr(Nil)
-  val subscription = user.flatMap(_.getSubscription)
+  val subscription = user.flatMap(_.getSubscription).flatMap(_.refresh)
   val priceCode = subscription.map(_.priceCode.get).getOrElse("")
 
   val shippingAddress = Address.find(
@@ -85,7 +85,6 @@ class AccountOverview extends Loggable {
   def render = {
     "#page-body-container" #> {
       user.map { parent =>
-        val subscription = parent.getSubscription
         val nextShipDate = subscription.map(_.nextShipDate.get)
 
         val petBindings = {
@@ -106,7 +105,7 @@ class AccountOverview extends Loggable {
         "#upcoming-order a [class+]" #> "current" &
         "#user-email *" #> parent.email &
         ".next-ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
-        ".status *" #> parent.status.get.toString &
+        ".status *" #> subscription.map(_.status.get.toString) &
         ".next-bill-date *" #> nextBillDate.map(dateFormat.format(_)) &
         "#user-address" #> shippingAddress.map { address =>
           "#name *" #> parent.name &
