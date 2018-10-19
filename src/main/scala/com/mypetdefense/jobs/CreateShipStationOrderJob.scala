@@ -97,6 +97,6 @@ object FrequentCreateOrderJob extends TriggeredJob {
     val trigger = TriggerBuilder.newTrigger()
       .withIdentity("FrequentCreateOrderJobTrigger")
       .startNow
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * ? * *")) // fire every 1 minutes
+      .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 1 minutes
       .build
 }
