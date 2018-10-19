@@ -165,7 +165,7 @@ object ShipStationService extends Loggable {
       }
     }
 
-    val paidShipment_? = shipment.amountPaid != "0"
+    val paidShipment_? = tryo(shipment.amountPaid.get.toDouble).openOr(0.0) > 0.0
     
     val dogTagOrderItems = {
       if (paidShipment_?) {
