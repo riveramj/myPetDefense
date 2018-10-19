@@ -14,7 +14,7 @@ li.complete {
 
 .complete .step-container:before {
   @extend %icon;
-  content: $fa-var-check;
+  content: fa-content($fa-var-check);
   display: inline-block;
 }
 
@@ -213,7 +213,7 @@ fieldset label {
 
   &:before {
     @extend %icon;
-    content: $fa-var-trash;
+    content: fa-content($fa-var-trash);
   }
 
   @media (min-width: $bp-medium) {

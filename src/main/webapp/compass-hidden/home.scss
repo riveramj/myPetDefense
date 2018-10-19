@@ -33,11 +33,6 @@
   text-transform: uppercase;
   font-weight: $semibold;
   font-size: rem(18px);
-
-  .fa-caret-right {
-    margin-left: 7px;
-    font-size: rem(20px);
-  }
 }
 
 .dog-park {
@@ -160,9 +155,11 @@
   }
 
   &:after {
-    @extend %icon;
-    content: $fa-var-caret-right;
-    margin-left: -2px;
+    @extend .fas;
+    content: fa-content($fa-var-caret-right);
+    margin-left: 7px;
+    font-size: rem(20px);
+    vertical-align: text-bottom;
   }
 }
 
@@ -357,17 +354,19 @@ li.feature-info {
   }
 
   &.filled:after {
-    content: $fa-var-star;
+    @extend .fas;
+    content: fa-content($fa-var-star);
     color: #FE9900;
   }
 
   &.half:after {
-    content: $fa-var-star-half-o ;
+    @extend .fas;
+    content: fa-content($fa-var-star-half-alt);
     color: #FE9900;
   }
 
   &.empty:after {
-    content: $fa-var-star-o;
+    content: fa-content($fa-var-star);
     color: #FE9900;
   }
 }

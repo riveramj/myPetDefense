@@ -5,14 +5,58 @@
   <div id="page-body-container">
     <div data-lift="embed?what=parent-nav-bar"></div>
     <div class="account-section">
-      <h2>Cancel Subscription</h2>
+      <h2>Pause or Cancel Subscription</h2>
       
       <form id="pause-cancel-container">
         <ul class="account-block">
-          <li class="cancel-account">
+          <li class="resume-account" id="resume-account">
+            <span class="pause-cancel-select resume">Resume</span>
+            <h3 class="choice-header">Resume your subscription</h3>
+            <div class="option-copy">
+              <ul class="notes">
+                <li>
+                  Your shipment will be sent out on the next business day.
+                </li>
+                <li>
+                  You will be billed before your shipment is set.
+                </li>
+                <li>
+                  Automatic shipping will continue next month.
+                </li>
+              </ul>
+            </div>
+          </li>
+
+          <li class="pause-account" id="pause-account">
+            <span class="pause-cancel-select pause">Pause</span>
+            <h3 class="choice-header">Pause your subscription</h3>
+            <div class="option-copy">
+              <ul class="notes">
+                <li>
+                  Shipments and Billing will be disabled while your account is suspended.
+                </li>
+                <li>
+                  Shipments and billing will automatically resume on the date you set.
+                </li>
+                <li>
+                  There is no cost to suspend.
+                </li>
+              </ul>
+            </div>
+            <ul class="set-resume-date">
+              <li>
+                <h4>Set Next Shipment Date</h4>
+              </li>
+              <li>
+                <input class="next-shipment" type="text" placeholder="MM/DD/YYYY">
+              </li>
+            </ul>
+          </li>
+          <li class="cancel-account" id="cancel-account">
+            <span class="pause-cancel-select cancel">Cancel</span>
             <h3 class="choice-header">Cancel your subscription</h3>
             <div class="option-copy">
-              <ul class="cancel-notes">
+              <ul class="notes">
                 <li>
                   You will no longer be able to access your account.
                 </li>
@@ -27,7 +71,7 @@
           </li>
           <li class="navigation-container">
             <button class="go-back">Back</button>
-            <button class="cancel">Finish Cancellation</button>
+            <button class="continue-account-changes disabled" disabled>Continue</button>
           </li>
         </ul>
       </form>

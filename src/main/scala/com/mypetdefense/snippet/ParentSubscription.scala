@@ -38,7 +38,37 @@ object ParentSubscription extends Loggable {
     loggedIn >>
     parent
 
-  val cancelSurveySubscriptionMenu = Menu.i("Cancellation Survey") / "cancel-survey"
+  val confirmCancelMenu = Menu.i("Confirm Cancel") / "confirm-cancel" >>
+    loggedIn >>
+    parent
+
+  val confirmResumeMenu = Menu.param[String](
+      "Confirm Resume",
+      "Confirm Resume",
+      Full(_),
+      string => string
+    ) / "confirm-resume" >>
+    loggedIn >>
+    parent
+
+    val successfulResumeMenu = Menu.i("Subscription Resumed") / "subscription-resumed" >>
+    loggedIn >>
+    parent
+
+  val confirmPauseMenu = Menu.param[String](
+      "Confirm Pause",
+      "Confirm Pause",
+      Full(_),
+      string => string
+    ) / "confirm-pause" >>
+    loggedIn >>
+    parent
+
+    val successfulPauseMenu = Menu.i("Subscription Paused") / "subscription-paused" >>
+    loggedIn >>
+    parent
+  
+    val cancelSurveySubscriptionMenu = Menu.i("Cancellation Survey") / "cancel-survey"
 
   val surveyCompleteSubscriptionMenu = Menu.i("Survey Complete") / "survey-complete"
 
@@ -46,13 +76,15 @@ object ParentSubscription extends Loggable {
 }
 
 class ParentSubscription extends Loggable {
+  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+
   val user = currentUser
   val stripeCustomerId = user.map(_.stripeId.get).openOr("")
 
   var email = user.map(_.email.get).openOr("")
   var oldPassword = ""
   var newPassword = ""
-
+  
   def updateEmail() = {
     val validateFields = List(
         checkEmail(email, "#email")
@@ -100,7 +132,7 @@ class ParentSubscription extends Loggable {
     }
   }
 
-  def cancelAccount() = {
+  def cancelUserAccount() = {
     val pets: List[Pet] = user.map(_.pets.toList).openOr(Nil)
 
     pets.map(ParentService.removePet(user, _))
@@ -117,6 +149,8 @@ class ParentSubscription extends Loggable {
   }
 
   def render = {
+    val userSubscription = SecurityContext.currentUser.flatMap(_.getSubscription).flatMap(_.refresh)
+
     SHtml.makeFormsAjax andThen
     ".subscription a [class+]" #> "current" &
     "#user-email *" #> email &
@@ -125,18 +159,157 @@ class ParentSubscription extends Loggable {
     "#new-password" #> SHtml.password(newPassword, newPass => newPassword = newPass.trim) &
     ".update-email" #> SHtml.ajaxSubmit("Save Changes", updateEmail _) &
     ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword _) &
-    ".status *" #> user.map(_.status.get.toString)
+    ".status *" #> userSubscription.map(_.status.get.toString)
   }
 
   def manage = {
-    val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.headOption)
+    val userSubscription = SecurityContext.currentUser.flatMap(_.getSubscription).flatMap(_.refresh)
 
+    var cancelAccount = false
+    var pauseAccount = false
+    var resumeAccount = false
+
+    val currentStatus = userSubscription.map(_.status.get)
+
+    currentStatus match {
+      case Full(Status.Paused) => pauseAccount = true
+      case Full(Status.Cancelled) => cancelAccount = true
+      case Full(_) => resumeAccount = true
+      case _ =>
+    }
     ParentSubscription.currentUserSubscription(userSubscription)
+
+    val currentNextShipDate = userSubscription.map(_.nextShipDate.get)
+
+    var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
+
+    def confirmAction() = {
+      if (cancelAccount)
+        S.redirectTo(ParentSubscription.confirmCancelMenu.loc.calcDefaultHref)
+      else if (pauseAccount)
+        S.redirectTo(ParentSubscription.confirmPauseMenu.toLoc.calcHref(nextShipDate))
+      else
+        S.redirectTo(ParentSubscription.confirmResumeMenu.toLoc.calcHref(nextShipDate))
+    }
+
+    def updateSubscriptionStatus(action: String)() = {
+      action match {
+        case "cancel" =>
+          cancelAccount = true
+          pauseAccount = false
+          resumeAccount = false
+
+        case "pause" =>
+          cancelAccount = false
+          pauseAccount = true
+          resumeAccount = false
+        
+        case _ =>
+          cancelAccount = false
+          pauseAccount = false
+          resumeAccount = true
+      }
+      
+      Noop
+    }
 
     SHtml.makeFormsAjax andThen
     "#user-email *" #> email &
     ".subscription a [class+]" #> "current" &
-    ".cancel" #> SHtml.ajaxSubmit("Finish Cancellation", cancelAccount _)
+    "#resume-account" #> ClearNodesIf(currentStatus != Status.Paused) &
+    "#resume-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("resume")) &
+    "#pause-account [class+]" #> { if (pauseAccount) "selected" else "" } &
+    "#pause-account .pause [class+]" #> { if (pauseAccount) "selected" else "" } &
+    "#pause-account .next-shipment" #> text(nextShipDate, possibleShipDate => nextShipDate = possibleShipDate.trim) &
+    "#pause-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("pause")) &
+    "#cancel-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("cancel")) &
+    ".continue-account-changes" #> SHtml.ajaxSubmit("Continue", confirmAction _)
+  }
+
+  def resumeSubscription = {
+    val nextShipDate = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant())
+
+    def confirmResume() = {
+      val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+
+      val newShipDate = dateFormat.format(nextShipDate)
+      val updatedShipDateSubscription = subscription.map(_.nextShipDate(nextShipDate).status(Status.Active).saveMe)
+      ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
+     
+      for {
+        parent <- user
+        subscription <- updatedShipDateSubscription
+      } yield {
+        EmailActor ! ParentResumeSubscriptionEmail(parent, subscription)
+      }
+
+      S.redirectTo(ParentSubscription.successfulResumeMenu.loc.calcDefaultHref)
+    }
+
+    SHtml.makeFormsAjax andThen
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current" &
+    ".next-shipment *" #> dateFormat.format(nextShipDate) &
+    ".confirm-resume" #> SHtml.ajaxSubmit("Resume Subscription", confirmResume _)
+  }
+
+  def successfulResume = {
+    val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+    val currentNextShipDate = subscription.map(_.nextShipDate.get)
+
+    var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
+
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current" &
+    ".next-shipment *" #> nextShipDate &
+    ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
+  }
+
+  def pauseSubscription = {
+    val nextShipDate = ParentSubscription.confirmPauseMenu.currentValue.openOr("")
+
+    def confirmPause() = {
+      val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+
+      val newShipDate = dateFormat.parse(nextShipDate)
+      val updatedShipDateSubscription = subscription.map(_.nextShipDate(newShipDate).status(Status.Paused).saveMe)
+      ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
+     
+      for {
+        parent <- user
+        subscription <- updatedShipDateSubscription
+      } yield {
+        EmailActor ! ParentPauseSubscriptionEmail(parent, subscription)
+      }
+
+      S.redirectTo(ParentSubscription.successfulPauseMenu.loc.calcDefaultHref)
+    }
+
+    SHtml.makeFormsAjax andThen
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current" &
+    ".next-shipment *" #> nextShipDate &
+    ".confirm-pause" #> SHtml.ajaxSubmit("Pause Subscription", confirmPause _)
+  }
+
+  def successfulPause = {
+    val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+    val currentNextShipDate = subscription.map(_.nextShipDate.get)
+
+    var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
+
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current" &
+    ".next-shipment *" #> nextShipDate &
+    ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
+  }
+
+  def confirmCancelSubscription = {
+    SHtml.makeFormsAjax andThen
+    "#user-email *" #> email &
+    ".subscription a [class+]" #> "current" &
+    ".confirm-cancel" #> SHtml.ajaxSubmit("Cancel Subscription", cancelUserAccount _)
+    
   }
 
   def survey = {
@@ -159,7 +332,7 @@ class ParentSubscription extends Loggable {
       S.redirectTo(ParentSubscription.surveyCompleteSubscriptionMenu.loc.calcDefaultHref)
     }
 
-    val cancelChoices = SHtml.radio(cancelReasons, Empty, selectedReason = _).toForm 
+    val cancelChoices = SHtml.radio(cancelReasons, Empty, selectedReason = _).toForm
 
     SHtml.makeFormsAjax andThen
     ".sign-out" #> ClearNodes &
@@ -170,4 +343,3 @@ class ParentSubscription extends Loggable {
     ".submit-survey" #> SHtml.ajaxSubmit("Submit Survey", submitSurvey _)
   }
 }
-
