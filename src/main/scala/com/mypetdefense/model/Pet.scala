@@ -24,6 +24,9 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   object birthday extends MappedDateTime(this)
   object product extends MappedLongForeignKey(this, Product)
   object nextGrowthDelay extends MappedInt(this)
+  object sentDogTag extends MappedBoolean(this) {
+    override def defaultValue = false
+  }
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
   }
