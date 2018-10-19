@@ -42,6 +42,8 @@ case class PetRemovedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class BillingUpdatedEmail(user: User) extends EmailActorMessage
 case class AccountCancelledEmail(user: User) extends EmailActorMessage
 case class ParentCancelledAccountEmail(user: User) extends EmailActorMessage
+case class ParentPauseSubscriptionEmail(user: User, subscription: Subscription) extends EmailActorMessage
+case class ParentResumeSubscriptionEmail(user: User, subscription: Subscription) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
@@ -213,6 +215,44 @@ trait ParentCancelledAccountHandling extends EmailHandlerChain {
       val transform = {
         ".name *" #> user.firstName.get &
         "#email *" #> user.email.get
+      }
+
+      sendEmail(subject, user.email.get, transform(template))
+  }
+}
+
+trait ParentPauseSubscriptionHandling extends EmailHandlerChain {
+  addHandler {
+    case ParentPauseSubscriptionEmail(user, subscription) =>
+
+      val dateFormatter = new SimpleDateFormat("MMMM dd, yyyy")
+      val subject = "Subscription Paused"
+      val template = 
+        Templates("emails-hidden" :: "parent-subscription-paused-email" :: Nil) openOr NodeSeq.Empty
+
+      val transform = {
+        ".name *" #> user.firstName.get &
+        "#email *" #> user.email.get &
+        ".next-ship-date *" #> dateFormatter.format(subscription.nextShipDate.get)
+      }
+
+      sendEmail(subject, user.email.get, transform(template))
+  }
+}
+
+trait ParentResumeSubscriptionHandling extends EmailHandlerChain {
+  addHandler {
+    case ParentResumeSubscriptionEmail(user, subscription) =>
+
+      val dateFormatter = new SimpleDateFormat("MMMM dd, yyyy")
+      val subject = "Subscription Active"
+      val template = 
+        Templates("emails-hidden" :: "parent-subscription-resumed-email" :: Nil) openOr NodeSeq.Empty
+
+      val transform = {
+        ".name *" #> user.firstName.get &
+        "#email *" #> user.email.get &
+        ".next-ship-date *" #> dateFormatter.format(subscription.nextShipDate.get)
       }
 
       sendEmail(subject, user.email.get, transform(template))
@@ -757,6 +797,8 @@ trait EmailActor extends EmailHandlerChain
                     with BillingUpdatedHandling
                     with AccountCancelledHandling
                     with ParentCancelledAccountHandling
+                    with ParentPauseSubscriptionHandling
+                    with ParentResumeSubscriptionHandling
                     with SendNewAdminEmailHandling
                     with SendNewAgentEmailHandling
                     with SendNewUserEmailHandling

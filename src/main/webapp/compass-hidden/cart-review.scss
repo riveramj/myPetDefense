@@ -292,7 +292,7 @@
 
     &:before {
       @extend %icon;
-      content: $fa-var-check;
+      content: fa-content($fa-var-check);
       font-size: rem(15px);
       color: #259490;
       margin-right: 2px;
@@ -425,8 +425,8 @@
     text-decoration: none;
 
     &:before {
-      @extend %icon;
-      content: $fa-var-caret-left;
+      @extend .fas;
+      content: fa-content($fa-var-caret-left);
       margin-right: 5px;
     }
   }
