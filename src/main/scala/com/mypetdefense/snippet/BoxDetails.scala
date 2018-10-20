@@ -102,54 +102,68 @@ class BoxDetails extends Loggable {
   }
 
   def orderBox() = {
-    val stripeId = user.map(_.stripeId.get).openOr("")
-    val stripeCustomer = ParentService.getStripeCustomer(stripeId)
-    val stripeCard = stripeCustomer.flatMap(_.defaultSource)
-    val amountPaid = findSubtotal + taxDue
-    
-    val boxCharge = ParentService.chargeStripeCustomer(
-      ((amountPaid + taxDue) * 100).toLong,
-      stripeCustomer.map(_.id),
-      "Thanksgiving Box"
-    )
+    val validateFields = (List(
+        validEmailFormat(email, "#email"),
+        checkEmpty(firstName, "#first-name"),
+        checkEmpty(lastName, "#last-name"),
+        checkEmpty(street1, "#street-1"),
+        checkEmpty(city, "#city"),
+        checkEmpty(state, "#state"),
+        checkEmpty(zip, "#zip")
+      ) ++ checkNonZero(bigQuantity, smallQuantity, "#big-quantity", "#small-quantity")).flatten
 
-    (for {
-      parent <- user
-      charge <- boxCharge
-    } yield {
-      val address = Address.create
-        .street1(street1)
-        .street2(street2)
-        .city(city)
-        .state(state.toUpperCase)
-        .zip(zip)
+    if(!validateFields.isEmpty) {
+      validateFields.foldLeft(Noop)(_ & _)
+    } else {
+      val stripeId = user.map(_.stripeId.get).openOr("")
+      val stripeCustomer = ParentService.getStripeCustomer(stripeId)
+      val stripeCard = stripeCustomer.flatMap(_.defaultSource)
+      val amountPaid = findSubtotal + taxDue
 
-      val realEmail = {
-        if (existingUser_?)
-          parent.email.get
-        else
-          email
-      }
-
-      val newBoxOrder = BoxOrder.createBoxOrder(
-        parent,
-        firstName,
-        lastName,
-        realEmail,
-        address,
-        charge.id.getOrElse(""),
-        amountPaid,
-        taxDue,
-        bigQuantity,
-        smallQuantity
+      val boxCharge = ParentService.chargeStripeCustomer(
+        ((amountPaid + taxDue) * 100).toLong,
+        stripeCustomer.map(_.id),
+        "Thanksgiving Box"
       )
 
-      EmailActor ! BoxReceiptEmail(newBoxOrder)
+      (for {
+        parent <- user
+        charge <- boxCharge
+      } yield {
+        val address = Address.create
+          .street1(street1)
+          .street2(street2)
+          .city(city)
+          .state(state.toUpperCase)
+          .zip(zip)
 
-      boxSalesInfo(Full((bigQuantity, smallQuantity, amountPaid)))
+        val realEmail = {
+          if (existingUser_?)
+            parent.email.get
+          else
+            email
+        }
 
-      S.redirectTo(Success.menu.loc.calcDefaultHref)
-    }).openOr(Noop)
+        val newBoxOrder = BoxOrder.createBoxOrder(
+          parent,
+          firstName,
+          lastName,
+          realEmail,
+          address,
+          charge.id.getOrElse(""),
+          amountPaid,
+          taxDue,
+          bigQuantity,
+          smallQuantity
+        )
+
+        EmailActor ! BoxReceiptEmail(newBoxOrder)
+
+        boxSalesInfo(Full((bigQuantity, smallQuantity, amountPaid)))
+
+        S.redirectTo(Success.menu.loc.calcDefaultHref)
+      }).openOr(Noop)
+    }
   }
 
   def useNewCard() = {
@@ -176,8 +190,8 @@ class BoxDetails extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
-    ".big-quantity" #> ajaxText("", possibleQuantity => calculateSubtotal("big", possibleQuantity)) &
-    ".small-quantity" #> ajaxText("", possibleQuantity => calculateSubtotal("small", possibleQuantity)) &
+    "#big-quantity" #> ajaxText("0", possibleQuantity => calculateSubtotal("big", possibleQuantity)) &
+    "#small-quantity" #> ajaxText("0", possibleQuantity => calculateSubtotal("small", possibleQuantity)) &
     orderSummary &
     "#first-name" #> text(firstName, firstName = _) &
     "#last-name" #> text(lastName, lastName = _) &
@@ -196,16 +210,16 @@ class BoxDetails extends Loggable {
       }
     } &
     ".billing-container" #> SHtml.idMemoize { renderer =>
-        billingCardRenderer = Full(renderer)
+      billingCardRenderer = Full(renderer)
 
-        ".form-row [class+]" #> {
-          if (existingUser_? && useExistingCard)
-            "hide-card"
-          else
-            ""
-        } &
-        ".existing-card" #> ClearNodesIf(!existingUser_? || !useExistingCard) &
-        ".existing-card .change-card [onclick]" #> ajaxInvoke(useNewCard _)
+      ".form-row [class+]" #> {
+        if (existingUser_? && useExistingCard)
+          "hide-card"
+        else
+          ""
+      } &
+      ".existing-card" #> ClearNodesIf(!existingUser_? || !useExistingCard) &
+      ".existing-card .change-card [onclick]" #> ajaxInvoke(useNewCard _)
     } &
     ".buy-box" #> ajaxSubmit("Place Order", () => orderBox)
   }
