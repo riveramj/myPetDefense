@@ -6,6 +6,10 @@ billing
 base.js
 stripe.js
 
+box-landing
+base.js
+stripe.js
+
 profile
 profile.js
 base.js
