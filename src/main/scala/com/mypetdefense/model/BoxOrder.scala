@@ -1,6 +1,7 @@
 package com.mypetdefense.model
 
 import net.liftweb.mapper._
+import net.liftweb.common.Box
 
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
@@ -39,7 +40,7 @@ class BoxOrder extends LongKeyedMapper[BoxOrder] with IdPK with OneToMany[Long, 
 
 object BoxOrder extends BoxOrder with LongKeyedMetaMapper[BoxOrder] {
   def createBoxOrder(
-    user: User,
+    user: Box[User],
     firstName: String,
     lastName: String,
     email: String,

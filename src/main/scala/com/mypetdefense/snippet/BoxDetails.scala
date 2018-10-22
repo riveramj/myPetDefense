@@ -66,6 +66,8 @@ class BoxDetails extends Loggable {
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
   var billingCardRenderer: Box[IdMemoizeTransform] = None
 
+  var stripeToken = ""
+
   user.map(SecurityContext.logIn(_))
 
   def findSubtotal = {
@@ -116,18 +118,39 @@ class BoxDetails extends Loggable {
       validateFields.foldLeft(Noop)(_ & _)
     } else {
       val stripeId = user.map(_.stripeId.get).openOr("")
-      val stripeCustomer = ParentService.getStripeCustomer(stripeId)
-      val stripeCard = stripeCustomer.flatMap(_.defaultSource)
       val amountPaid = findSubtotal + taxDue
 
-      val boxCharge = ParentService.chargeStripeCustomer(
-        ((amountPaid + taxDue) * 100).toLong,
-        stripeCustomer.map(_.id),
-        "Thanksgiving Box"
-      )
+      val boxCharge = {
+        val stripeAmount = (amountPaid * 100).toLong
+        val internalSaleDescription = "Thanksgiving Box"
+
+        if (existingUser_? && useExistingCard) {
+          val stripeCustomer = ParentService.getStripeCustomer(stripeId)
+
+          ParentService.chargeStripeCustomer(
+            stripeAmount,
+            stripeCustomer.map(_.id),
+            internalSaleDescription
+          )
+        } else if (existingUser_?) {
+          val stripeCustomer = ParentService.getStripeCustomer(stripeId)
+
+          ParentService.chargeStripeCustomerNewCard(
+            stripeAmount,
+            stripeCustomer.map(_.id),
+            stripeToken,
+            internalSaleDescription
+          )
+        } else {
+          ParentService.chargeGuestCard(
+            stripeAmount,
+            stripeToken,
+            internalSaleDescription
+          )
+        }
+      }
 
       (for {
-        parent <- user
         charge <- boxCharge
       } yield {
         val address = Address.create
@@ -139,13 +162,13 @@ class BoxDetails extends Loggable {
 
         val realEmail = {
           if (existingUser_?)
-            parent.email.get
+            user.map(_.email.get).openOr("")
           else
             email
         }
 
         val newBoxOrder = BoxOrder.createBoxOrder(
-          parent,
+          user,
           firstName,
           lastName,
           realEmail,
@@ -169,8 +192,7 @@ class BoxDetails extends Loggable {
   def useNewCard() = {
     useExistingCard = false
 
-    UseNewCard &
-    billingCardRenderer.map(_.setHtml).openOr(Noop)
+    UseNewCard
   }
 
   def render = {
@@ -209,9 +231,7 @@ class BoxDetails extends Loggable {
         "^ [class+]" #> ""
       }
     } &
-    ".billing-container" #> SHtml.idMemoize { renderer =>
-      billingCardRenderer = Full(renderer)
-
+    ".billing-container" #> {
       ".form-row [class+]" #> {
         if (existingUser_? && useExistingCard)
           "hide-card"
@@ -221,6 +241,7 @@ class BoxDetails extends Loggable {
       ".existing-card" #> ClearNodesIf(!existingUser_? || !useExistingCard) &
       ".existing-card .change-card [onclick]" #> ajaxInvoke(useNewCard _)
     } &
+    "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
     ".buy-box" #> ajaxSubmit("Place Order", () => orderBox)
   }
 }

@@ -313,7 +313,8 @@ object ParentService extends Loggable {
   def chargeStripeCustomer(
     amount: Long,
     stripeCustomerId: Option[String],
-    description: String): Box[Charge] = {
+    description: String
+  ): Box[Charge] = {
 
     val charge: Future[Box[Charge]] = Charge.create(
       amount = amount,
@@ -323,7 +324,65 @@ object ParentService extends Loggable {
       capture = Some(true)
     )
 
-    Try(Await.result(charge, new DurationInt(10).seconds)) match {
+    processStripeCharge(charge)
+  }
+
+  def chargeStripeCustomerNewCard(
+    amount: Long,
+    stripeCustomerId: Option[String],
+    stripeToken: String,
+    internalDescription: String
+  ): Box[Charge] = {
+
+    val newCard = Card.create(stripeCustomerId.getOrElse(""), stripeToken)
+
+    val card = processNewCard(newCard).map(_.id)
+
+    val charge: Future[Box[Charge]] = Charge.create(
+      amount = amount,
+      currency = "USD",
+      customer = stripeCustomerId,
+      card = card,
+      description = Some(internalDescription),
+      capture = Some(true)
+    )
+
+    processStripeCharge(charge)
+  }
+
+  def chargeGuestCard(
+    amount: Long,
+    stripeToken: String,
+    internalDescription: String
+  ): Box[Charge] = {
+    val charge: Future[Box[Charge]] = Charge.create(
+      amount = amount,
+      currency = "USD",
+      card = Some(stripeToken),
+      description = Some(internalDescription),
+      capture = Some(true)
+    )
+
+    processStripeCharge(charge)
+  }
+
+  def processNewCard(newCard: Future[Box[Card]]) = {
+    Try(Await.result(newCard, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(card)) =>
+        Full(card)
+
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"create card failed with stipe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"create card failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
+  def processStripeCharge(newCharge: Future[Box[Charge]]) = {
+    Try(Await.result(newCharge, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(charge)) =>
         Full(charge)
 
