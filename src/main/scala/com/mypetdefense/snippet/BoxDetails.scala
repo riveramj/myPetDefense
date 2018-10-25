@@ -42,19 +42,21 @@ case object UseNewCard extends MyPetDefenseEvent("use-new-card")
 class BoxDetails extends Loggable {
   import BoxDetails._
 
-  val user = BoxDetails.thanksgivingBoxMenu.currentValue
-  val existingUser_? =  if (user.isDefined) true else false
+  var user = BoxDetails.thanksgivingBoxMenu.currentValue
+  var existingUser_? =  if (user.isDefined) true else false
   var useExistingCard = true
 
   var email = user.map(_.email.get).openOr("")
   var firstName = user.map(_.firstName.get).openOr("")
   var lastName = user.map(_.lastName.get).openOr("")
-  val address = user.flatMap(_.shippingAddress)
+  var address = user.flatMap(_.shippingAddress)
   var street1 = address.map(_.street1.get).openOr("")
   var street2 = address.map(_.street2.get).openOr("")
   var city = address.map(_.city.get).openOr("")
   var state = address.map(_.state.get).openOr("")
   var zip = address.map(_.zip.get).openOr("")
+
+  var password = ""
 
   var bigQuantity = 0
   var smallQuantity = 0
@@ -65,6 +67,7 @@ class BoxDetails extends Loggable {
   var taxRate = 0D
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
   var billingCardRenderer: Box[IdMemoizeTransform] = None
+  var checkoutRenderer: Box[IdMemoizeTransform] = None
 
   var stripeToken = ""
 
@@ -195,6 +198,26 @@ class BoxDetails extends Loggable {
     UseNewCard
   }
 
+  def login = {
+    val loginResult = LoginService.login(email, password, true)
+
+    if (loginResult == Noop) {
+      println("true")
+      checkoutRenderer.map(_.setHtml).openOr(Noop)
+    } else {
+      println("false")
+      loginResult
+    }
+  }
+
+  val loginBindings = {
+    "#login-container" #> {
+      "#email" #> SHtml.text(email, email = _) &
+      "#password" #> SHtml.password(password, password = _) &
+      "#login" #> SHtml.ajaxSubmit("Log In", () => login)
+    }
+  }
+
   def render = {
     val orderSummary = {
       "#order-summary" #> SHtml.idMemoize { renderer =>
@@ -212,36 +235,54 @@ class BoxDetails extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
+    loginBindings &
     "#big-quantity" #> ajaxText("0", possibleQuantity => calculateSubtotal("big", possibleQuantity)) &
     "#small-quantity" #> ajaxText("0", possibleQuantity => calculateSubtotal("small", possibleQuantity)) &
-    orderSummary &
-    "#first-name" #> text(firstName, firstName = _) &
-    "#last-name" #> text(lastName, lastName = _) &
-    "#street-1" #> text(street1, street1 = _) &
-    "#street-2" #> text(street2, street2 = _) &
-    "#city" #> ajaxText(city, city = _) &
-    "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
-    "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
-    "#email" #> text(email, userEmail => email = userEmail.trim) &
-    "#email" #> {
-      if (existingUser_?) {
-        "^ [class+]" #> "disabled" &
-        "^ [disabled]" #> "disabled"
-      } else {
-        "^ [class+]" #> ""
-      }
-    } &
-    ".billing-container" #> {
-      ".form-row [class+]" #> {
-        if (existingUser_? && useExistingCard)
-          "hide-card"
-        else
-          ""
+    ".current-step" #> SHtml.idMemoize { renderer =>
+      user = SecurityContext.currentUser
+      existingUser_? =  if (user.isDefined) true else false
+      useExistingCard = true
+
+      email = user.map(_.email.get).openOr("")
+      firstName = user.map(_.firstName.get).openOr("")
+      lastName = user.map(_.lastName.get).openOr("")
+      address = user.flatMap(_.shippingAddress)
+      street1 = address.map(_.street1.get).openOr("")
+      street2 = address.map(_.street2.get).openOr("")
+      city = address.map(_.city.get).openOr("")
+      state = address.map(_.state.get).openOr("")
+      zip = address.map(_.zip.get).openOr("")
+
+      checkoutRenderer = Full(renderer)
+      orderSummary &
+      "#first-name" #> text(firstName, firstName = _) &
+      "#last-name" #> text(lastName, lastName = _) &
+      "#street-1" #> text(street1, street1 = _) &
+      "#street-2" #> text(street2, street2 = _) &
+      "#city" #> ajaxText(city, city = _) &
+      "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
+      "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
+      "#checkout-email" #> text(email, userEmail => email = userEmail.trim) &
+      "#checkout-email" #> {
+        if (existingUser_?) {
+          "^ [class+]" #> "disabled" &
+          "^ [disabled]" #> "disabled"
+        } else {
+          "^ [class+]" #> ""
+        }
       } &
-      ".existing-card" #> ClearNodesIf(!existingUser_? || !useExistingCard) &
-      ".existing-card .change-card [onclick]" #> ajaxInvoke(useNewCard _)
-    } &
-    "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    ".buy-box" #> ajaxSubmit("Place Order", () => orderBox)
+      ".billing-container" #> {
+        ".form-row [class+]" #> {
+          if (existingUser_? && useExistingCard)
+            "hide-card"
+          else
+            ""
+        } &
+        ".existing-card" #> ClearNodesIf(!existingUser_? || !useExistingCard) &
+        ".existing-card .change-card [onclick]" #> ajaxInvoke(useNewCard _)
+      } &
+      "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
+      ".buy-box" #> ajaxSubmit("Place Order", () => orderBox)
+    }
   }
 }
