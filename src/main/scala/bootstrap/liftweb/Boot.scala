@@ -55,7 +55,10 @@ class Boot {
       Survey,
       FriendsFamilyProduct,
       FriendsFamilyOrder,
-      FriendsFamilyOrderLineItem
+      FriendsFamilyOrderLineItem,
+      SkuReconciliation,
+      ReconcilationEvent,
+      Sku
     )
 
     //DataLoader.loadProducts
