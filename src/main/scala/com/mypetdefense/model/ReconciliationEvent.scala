@@ -11,17 +11,24 @@ import com.mypetdefense.util.TitleCase
 
 import java.util.Date
 
-class ReconcilationEvent extends LongKeyedMapper[ReconcilationEvent] with IdPK with OneToMany[Long, ReconcilationEvent] {
-  def getSingleton = ReconcilationEvent
-  object reconcilationEventId extends MappedLong(this) {
+class ReconciliationEvent extends LongKeyedMapper[ReconciliationEvent] with IdPK with OneToMany[Long, ReconciliationEvent] {
+  def getSingleton = ReconciliationEvent
+  object reconciliationEventId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
   object eventDate extends MappedDateTime(this)
-  object reconcilations extends MappedOneToMany(SkuReconciliation, SkuReconciliation.reconcilationEvent)
+  object reconcilations extends MappedOneToMany(SkuReconciliation, SkuReconciliation.reconciliationEvent)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+
+  def createNewReconciliationEvent(eventDate: Date) = {
+    ReconciliationEvent.create
+    .reconciliationEventId(generateLongId)
+    .eventDate(eventDate)
+    .saveMe
+  }
 }
 
-object ReconcilationEvent extends ReconcilationEvent with LongKeyedMetaMapper[ReconcilationEvent]
+object ReconciliationEvent extends ReconciliationEvent with LongKeyedMetaMapper[ReconciliationEvent]
 

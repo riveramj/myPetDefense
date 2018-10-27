@@ -57,7 +57,7 @@ class Boot {
       FriendsFamilyOrder,
       FriendsFamilyOrderLineItem,
       SkuReconciliation,
-      ReconcilationEvent,
+      ReconciliationEvent,
       Sku
     )
 

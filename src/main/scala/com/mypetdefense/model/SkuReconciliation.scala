@@ -14,12 +14,27 @@ class SkuReconciliation extends LongKeyedMapper[SkuReconciliation] with IdPK wit
   object skuReconciliationId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-  object reconcilationEvent extends MappedLongForeignKey(this, ReconcilationEvent)
+  object reconciliationEvent extends MappedLongForeignKey(this, ReconciliationEvent)
   object sku extends MappedLongForeignKey(this, Sku)
   object expectedCount extends MappedInt(this)
   object actualCount extends MappedInt(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
+  }
+
+  def createNewSkuReconciliation(
+    sku: Sku,
+    event: ReconciliationEvent,
+    actualCount: Int,
+    expectedCount: Int
+  ) = {
+    SkuReconciliation.create
+    .skuReconciliationId(generateLongId)
+    .reconciliationEvent(event)
+    .sku(sku)
+    .expectedCount(expectedCount)
+    .actualCount(actualCount)
+    .saveMe
   }
 }
 
