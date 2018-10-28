@@ -14,7 +14,6 @@ class Sku extends LongKeyedMapper[Sku] with IdPK with OneToMany[Long, Sku] {
   object skuId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-  object name extends MappedString(this, 100)
   object sku extends MappedString(this, 100)
   object description extends MappedString(this, 100)
   object total extends MappedInt(this)
@@ -22,16 +21,10 @@ class Sku extends LongKeyedMapper[Sku] with IdPK with OneToMany[Long, Sku] {
     override def defaultValue = new Date()
   }
 
-  def createNewSku(
-    sku: String,
-    name: String,
-    description: String,
-    total: Int
-  ) = {
+  def createNewSku(sku: String, description: String, total: Int) = {
     Sku.create
     .skuId(generateLongId)
     .sku(sku)
-    .name(name)
     .description(description)
     .total(total)
     .saveMe

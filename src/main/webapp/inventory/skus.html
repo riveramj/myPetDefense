@@ -1,0 +1,75 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div data-lift="inventory.Skus.render?eager_eval=true">
+    <div data-lift="embed?what=inventory/nav-bar"></div>
+    <div id="item-container">
+      <h2>Skus</h2>
+      <form>
+        <fieldset class="create">
+          <legend>Create Sku</legend>
+          <label>
+            <span class="field-label">Sku</span>
+            <input id="new-sku" type="text">            
+          </label>
+          <label>
+            <span class="field-label">description</span>
+            <input id="new-description" type="text">
+          </label>
+          <label>
+            <span class="field-label">Count</span>
+            <input id="new-count" type="text">
+          </label>
+          <div class="create-item">
+            <button type="submit" id="create-item">Create</button>
+          </div>
+        </fieldset>
+      </form>
+      <table>
+        <thead>
+          <tr>
+            <td>Sku</td>
+            <td>Description</td>
+            <td>Count</td>
+            <td>Actions</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="sku-entry">
+            <td class="sku">12345</td>
+            <td class="description">product back</td>
+            <td class="count">-1</td>
+            <td class="actions">
+              <button class="add">+1</button>
+              <button class="subtract">-1</button>
+            </td>
+          </tr>
+          <tr class="info">
+            <td colspan=4 class="sku-info">
+              <form class="sku-details">
+                <ul class="information">
+                  <li>
+                    <span class="field-label">Sku</span>
+                    <input type="text" class="change-sku">
+                  </li>
+                  <li class="sku-description">
+                    <span class="field-label">Description</span>
+                    <input type="text" class="change-description">
+                  </li>
+                  <li>
+                    <span class="field-label">Count</span>
+                    <input type="text" class="change-count">
+                  </li>
+                </ul>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=skus">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+  </tail>
+</div>
