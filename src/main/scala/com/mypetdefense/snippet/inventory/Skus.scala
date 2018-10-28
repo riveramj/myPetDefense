@@ -89,6 +89,24 @@ class Skus extends Loggable {
       Noop
   }
 
+  def adjustCount(
+    adjustmentType: String,
+    sku: Sku,
+    detailsRenderer: IdMemoizeTransform
+  )() = {
+    val count = sku.total.get
+
+    adjustmentType match {
+      case "subtract" =>
+        sku.total(count - 1).saveMe
+      case "add" =>
+        sku.total(count + 1).saveMe
+      case _ =>
+    }
+
+    detailsRenderer.setHtml
+  }
+
   def skuDetailBindings(detailsRenderer: IdMemoizeTransform, sku: Sku) = {
     val actualSku = sku.sku.get
     val description = sku.description.get
@@ -114,7 +132,9 @@ class Skus extends Loggable {
           ".sku *" #> sku.sku.get &
           ".description *" #> sku.description.get &
           ".count *" #> sku.total.get &
-          "^ [onclick]" #> ajaxInvoke(() => {
+          ".subtract-one [onclick]" #> ajaxInvoke(adjustCount("subtract", sku, detailsRenderer) _) &
+          ".add-one [onclick]" #> ajaxInvoke(adjustCount("add", sku, detailsRenderer) _) &
+          ".expand-row [onclick]" #> ajaxInvoke(() => {
             if (currentSku.isEmpty) {
               currentSku = Full(sku)
             } else {

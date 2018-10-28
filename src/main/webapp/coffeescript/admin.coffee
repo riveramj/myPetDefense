@@ -43,3 +43,11 @@ $(document).ready ->
     dummyInput.remove()
 
     alert "Address copied to clipboard"
+
+  $("body").on "click", '.sku-entry', (event) ->
+    target = $(event.target)
+
+    if !target.hasClass('add-one') &&
+        !target.hasClass('subtract-one') &&
+        !target.hasClass('expand-row')
+      target.parent('.sku-entry').find('.expand-row').click()

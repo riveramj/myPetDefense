@@ -6,7 +6,7 @@
 
 .sku-details {
   padding: 20px;
-  background-color: #F1F1F1;
+  background-color: #ccc;
 
   thead {
     background-color: #818080;
@@ -65,4 +65,33 @@ fieldset.create label {
   width: 30%;
   margin-right: 15px;
   padding-bottom: 0;
+}
+
+.add-one, .subtract-one {
+  border: none;
+  background: none;
+  background-color: #2E9F9B;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 3px 10px;
+}
+
+.subtract-one {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+.add-one {
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  margin-left: -2px;
+}
+
+tbody:nth-child(odd) {
+  background-color: #F1F1F1;
+}
+
+.expand-row {
+  display: none;
 }
