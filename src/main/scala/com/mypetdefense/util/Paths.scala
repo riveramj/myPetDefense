@@ -182,6 +182,7 @@ object Paths {
     friendsfamily.Orders.menu,
     friendsfamily.Products.menu,
     inventory.InventoryItems.menu,
-    inventory.Reconciliations.menu
+    inventory.Reconciliations.menu,
+    inventory.InventoryChangeAudits.menu
   )
 }

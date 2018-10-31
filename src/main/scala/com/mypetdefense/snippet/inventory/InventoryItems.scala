@@ -53,7 +53,15 @@ class InventoryItems extends Loggable {
       val realCount = tryo(newCount.toInt).openOr(0)
 
       chosenUnit.map { unit =>
-        InventoryItem.createNewInventoryItem(newItemNumber, newDescription, realCount, unit)
+        val newItem = InventoryItem.createNewInventoryItem(newItemNumber, newDescription, realCount, unit)
+
+        InventoryChangeAudit.newChangeAudit(
+          inventoryItem = newItem,
+          newItemNumber = newItemNumber,
+          newCount = realCount,
+          newDescription = newDescription,
+          newUnitOfMeasure = unit.toString
+        )
       }
 
       S.redirectTo(InventoryItems.menu.loc.calcDefaultHref)
@@ -73,15 +81,36 @@ class InventoryItems extends Loggable {
     var badCount = false
 
     partName match {
-      case "itemNumber" => item.itemNumber(partValue).saveMe
-      case "description" => item.description(partValue).saveMe
+      case "itemNumber" =>
+        InventoryChangeAudit.newChangeAudit(
+          inventoryItem = item,
+          originalItemNumber = item.itemNumber.get,
+          newItemNumber = partValue
+        )
+
+        item.itemNumber(partValue).saveMe
+      case "description" =>
+        InventoryChangeAudit.newChangeAudit(
+          inventoryItem = item,
+          originalDescription = item.description.get,
+          newDescription = partValue
+        )
+
+        item.description(partValue).saveMe
       case "count" =>
         val realCount = tryo(partValue.toInt)
 
         if (realCount.isEmpty)
           badCount = true
-        else 
+        else {
+          InventoryChangeAudit.newChangeAudit(
+            inventoryItem = item,
+            originalCount = item.total.get,
+            newCount = realCount.openOr(0)
+          )
+
           item.total(realCount.openOr(0)).saveMe
+        }
       case _ => Full(item)
     }
 
@@ -101,8 +130,21 @@ class InventoryItems extends Loggable {
 
     adjustmentType match {
       case "subtract" =>
+        InventoryChangeAudit.newChangeAudit(
+          inventoryItem = item,
+          originalCount = count,
+          newCount = count - 1
+        )
+
         item.total(count - 1).saveMe
       case "add" =>
+
+        InventoryChangeAudit.newChangeAudit(
+          inventoryItem = item,
+          originalCount = count,
+          newCount = count + 1
+        )
+        
         item.total(count + 1).saveMe
       case _ =>
     }

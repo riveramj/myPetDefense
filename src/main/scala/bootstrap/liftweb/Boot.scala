@@ -58,7 +58,8 @@ class Boot {
       FriendsFamilyOrderLineItem,
       ItemReconciliation,
       ReconciliationEvent,
-      InventoryItem
+      InventoryItem,
+      InventoryChangeAudit
     )
 
     //DataLoader.loadProducts

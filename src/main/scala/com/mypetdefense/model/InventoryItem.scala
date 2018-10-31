@@ -1,4 +1,4 @@
-package com.mypetdefense.model 
+package com.mypetdefense.model
 
 import net.liftweb._
   import mapper._
