@@ -9,33 +9,33 @@ import com.mypetdefense.util.RandomIdGenerator._
 
 import java.util.Date
 
-class SkuReconciliation extends LongKeyedMapper[SkuReconciliation] with IdPK with OneToMany[Long, SkuReconciliation] {
-  def getSingleton = SkuReconciliation
-  object skuReconciliationId extends MappedLong(this) {
+class ItemReconciliation extends LongKeyedMapper[ItemReconciliation] with IdPK with OneToMany[Long, ItemReconciliation] {
+  def getSingleton = ItemReconciliation
+  object itemReconciliationId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
   object reconciliationEvent extends MappedLongForeignKey(this, ReconciliationEvent)
-  object sku extends MappedLongForeignKey(this, Sku)
+  object inventoryItem extends MappedLongForeignKey(this, InventoryItem)
   object expectedCount extends MappedInt(this)
   object actualCount extends MappedInt(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
-  def createNewSkuReconciliation(
-    sku: Sku,
+  def createNewItemReconciliation(
+    inventoryItem: InventoryItem,
     event: ReconciliationEvent,
     actualCount: Int,
     expectedCount: Int
   ) = {
-    SkuReconciliation.create
-    .skuReconciliationId(generateLongId)
+    ItemReconciliation.create
+    .itemReconciliationId(generateLongId)
     .reconciliationEvent(event)
-    .sku(sku)
+    .inventoryItem(inventoryItem)
     .expectedCount(expectedCount)
     .actualCount(actualCount)
     .saveMe
   }
 }
 
-object SkuReconciliation extends SkuReconciliation with LongKeyedMetaMapper[SkuReconciliation]
+object ItemReconciliation extends ItemReconciliation with LongKeyedMetaMapper[ItemReconciliation]

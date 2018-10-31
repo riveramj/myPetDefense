@@ -44,10 +44,10 @@ $(document).ready ->
 
     alert "Address copied to clipboard"
 
-  $("body").on "click", '.sku-entry', (event) ->
+  $("body").on "click", '.item-entry', (event) ->
     target = $(event.target)
 
     if !target.hasClass('add-one') &&
         !target.hasClass('subtract-one') &&
         !target.hasClass('expand-row')
-      target.parent('.sku-entry').find('.expand-row').click()
+      target.parent('.item-entry').find('.expand-row').click()

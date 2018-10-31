@@ -1,10 +1,10 @@
 @import "base";
 
-.sku-entry {
+.item-entry {
   cursor: pointer;
 }
 
-.sku-details {
+.item-details {
   padding: 20px;
   background-color: #ccc;
 
@@ -52,19 +52,28 @@ input[type="text"] {
   }
 }
 
-.sku-entry.expanded {
+.item-entry.expanded {
   border-bottom: none;
 }
 
-.sku-description {
+.item-description {
   width: 350px;
 }
 
-fieldset.create label {
-  display: inline-block;
-  width: 30%;
-  margin-right: 15px;
-  padding-bottom: 0;
+fieldset.create {
+  label {
+    display: inline-block;
+    width: 30%;
+    margin-right: 15px;
+    padding-bottom: 0;
+  }
+  .unit-of-measure-container {
+    width: 130px;
+  }
+
+  .count-container {
+    width: 160px;
+  }
 }
 
 .add-one, .subtract-one {

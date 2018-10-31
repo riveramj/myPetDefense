@@ -56,9 +56,9 @@ class Boot {
       FriendsFamilyProduct,
       FriendsFamilyOrder,
       FriendsFamilyOrderLineItem,
-      SkuReconciliation,
+      ItemReconciliation,
       ReconciliationEvent,
-      Sku
+      InventoryItem
     )
 
     //DataLoader.loadProducts

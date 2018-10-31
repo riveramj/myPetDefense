@@ -1,21 +1,28 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
-  <div data-lift="inventory.Skus.render?eager_eval=true">
+  <div data-lift="inventory.InventoryItems.render?eager_eval=true">
     <div data-lift="embed?what=inventory/nav-bar"></div>
     <div id="item-container">
-      <h2>Skus</h2>
+      <h2>Inventory Items</h2>
       <form>
         <fieldset class="create">
-          <legend>Create Sku</legend>
+          <legend>Create Inventory Item</legend>
           <label>
-            <span class="field-label">Sku</span>
-            <input id="new-sku" data-lpignore="true" type="text">
+            <span class="field-label">Item Number</span>
+            <input id="new-item-number" data-lpignore="true" type="text">
           </label>
           <label>
             <span class="field-label">Description</span>
             <input id="new-description" data-lpignore="true" type="text">
           </label>
-          <label>
-            <span class="field-label">Count</span>
+          <label class="unit-of-measure-container">
+            <span class="field-label">Unit of Measure</span>
+            <span id="new-unit-of-measure-select">
+              <input type="radio" value="12345">ea
+              <input type="radio" value="5678">carton
+            </span>
+          </label>
+          <label class="count-container">
+            <span class="field-label short-field">Count</span>
             <input id="new-count" data-lpignore="true" type="text">
           </label>
           <div class="create-item">
@@ -26,16 +33,18 @@
       <table>
         <thead>
           <tr>
-            <td>Sku</td>
+            <td>Item Number</td>
             <td>Description</td>
+            <td>Unit Of Measure</td>
             <td>Count</td>
             <td>Actions</td>
           </tr>
         </thead>
         <tbody>
-          <tr class="sku-entry">
-            <td class="sku">12345</td>
+          <tr class="item-entry">
+            <td class="item-number">12345</td>
             <td class="description">product back</td>
+            <td class="unit-of-measure">Envelope</td>
             <td class="count">-1</td>
             <td class="actions">
               <button class="expand-row">Expand Row</button>
@@ -44,14 +53,14 @@
             </td>
           </tr>
           <tr class="info">
-            <td colspan=4 class="sku-info">
-              <form class="sku-details">
+            <td colspan=5 class="item-info">
+              <form class="item-details">
                 <ul class="information">
                   <li>
-                    <span class="field-label">Sku</span>
-                    <input type="text" data-lpignore="true" class="change-sku">
+                    <span class="field-label">Item Number</span>
+                    <input type="text" data-lpignore="true" class="change-item-number">
                   </li>
-                  <li class="sku-description">
+                  <li class="item-description">
                     <span class="field-label">Description</span>
                     <input type="text" data-lpignore="true" class="change-description">
                   </li>
@@ -68,7 +77,7 @@
     </div>
   </div>
   <head_merge>
-    <link rel="stylesheet" data-lift="style-bundle?name=skus">
+    <link rel="stylesheet" data-lift="style-bundle?name=inventory-items">
   </head_merge>
   <tail>
     <script type="text/javascript" data-lift="script-bundle?name=admin"></script>

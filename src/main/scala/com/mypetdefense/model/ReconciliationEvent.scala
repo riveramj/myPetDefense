@@ -17,7 +17,7 @@ class ReconciliationEvent extends LongKeyedMapper[ReconciliationEvent] with IdPK
     override def dbIndexed_? = true
   }
   object eventDate extends MappedDateTime(this)
-  object reconcilations extends MappedOneToMany(SkuReconciliation, SkuReconciliation.reconciliationEvent)
+  object reconcilations extends MappedOneToMany(ItemReconciliation, ItemReconciliation.reconciliationEvent)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
