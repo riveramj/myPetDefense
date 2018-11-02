@@ -106,6 +106,8 @@ class Dashboard extends Loggable {
     }
 
     shipment.dateShipped(new Date()).address(address).saveMe
+    
+    InventoryService.deductProducts(shipment)
 
     EmailActor ! SendInvoicePaymentSucceededEmail(
       user,
