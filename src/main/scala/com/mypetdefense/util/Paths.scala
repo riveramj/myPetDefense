@@ -180,6 +180,9 @@ object Paths {
     friendsfamily.Dashboard.menu,
     friendsfamily.Dashboard.friendsFamilyLabelsExportMenu,
     friendsfamily.Orders.menu,
-    friendsfamily.Products.menu
+    friendsfamily.Products.menu,
+    inventory.InventoryItems.menu,
+    inventory.Reconciliations.menu,
+    inventory.InventoryChangeAudits.menu
   )
 }

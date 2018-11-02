@@ -148,22 +148,7 @@ object ShipStationService extends Loggable {
 
     val products = shipmentLineItems.map(_.product.obj).flatten
 
-    val shipStationProductIds = products.map { product =>
-
-      product.getNameAndSize match {
-        case name if (name.contains("ZoGuard Plus for Dogs 4-22")) =>
-          "zgSMall"
-
-        case name if (name.contains("ZoGuard Plus for Dogs 23-44")) =>
-          "ZgMedium"
-
-        case name if (name.contains("ZoGuard Plus for Dogs 45-88")) =>
-          "ZgLarge"
-
-        case other =>
-          other
-      }
-    }
+    val shipStationProductIds = products.map(_.sku.get)
 
     val paidShipment_? = tryo(shipment.amountPaid.get.toDouble).openOr(0.0) > 0.0
     

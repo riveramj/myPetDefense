@@ -55,7 +55,11 @@ class Boot {
       Survey,
       FriendsFamilyProduct,
       FriendsFamilyOrder,
-      FriendsFamilyOrderLineItem
+      FriendsFamilyOrderLineItem,
+      ItemReconciliation,
+      ReconciliationEvent,
+      InventoryItem,
+      InventoryChangeAudit
     )
 
     //DataLoader.loadProducts
@@ -64,6 +68,7 @@ class Boot {
     //DataLoader.createFriendsFamilyProducts
     //DataLoader.updateShipmentShipStationId
     //DataLoader.updateGeorgiaTaxRates
+    DataLoader.updateProductSku
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
