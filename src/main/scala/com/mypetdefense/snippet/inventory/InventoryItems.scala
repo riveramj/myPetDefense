@@ -18,6 +18,7 @@ import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
 import com.mypetdefense.util.ClearNodesIf
+import com.mypetdefense.service.InventoryService
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.actor._
 
@@ -103,13 +104,7 @@ class InventoryItems extends Loggable {
         if (realCount.isEmpty)
           badCount = true
         else {
-          InventoryChangeAudit.newChangeAudit(
-            inventoryItem = item,
-            originalCount = item.total.get,
-            newCount = realCount.openOr(0)
-          )
-
-          item.total(realCount.openOr(0)).saveMe
+          InventoryService.updateItemCount(item, item.total.get, realCount.openOr(0))
         }
       case _ => Full(item)
     }
@@ -130,22 +125,9 @@ class InventoryItems extends Loggable {
 
     adjustmentType match {
       case "subtract" =>
-        InventoryChangeAudit.newChangeAudit(
-          inventoryItem = item,
-          originalCount = count,
-          newCount = count - 1
-        )
-
-        item.total(count - 1).saveMe
+        InventoryService.updateItemCount(item, count, count - 1)
       case "add" =>
-
-        InventoryChangeAudit.newChangeAudit(
-          inventoryItem = item,
-          originalCount = count,
-          newCount = count + 1
-        )
-        
-        item.total(count + 1).saveMe
+        InventoryService.updateItemCount(item, count, count + 1)
       case _ =>
     }
 
