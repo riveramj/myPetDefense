@@ -44,7 +44,7 @@ class SendTrackingEmailJob extends ManagedJob {
         shipment.dateShipped(new Date()).address(nameAddress).trackingNumber(label.trackingNumber).saveMe
 
         ParentService.updateNextShipDate(subscription, Full(user))
-        InventoryService.deductProducts(shipment)
+        InventoryService.deductShipmentItems(shipment)
 
         EmailActor ! SendInvoicePaymentSucceededEmail(
           Full(user),

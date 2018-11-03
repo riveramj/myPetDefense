@@ -107,7 +107,7 @@ class Dashboard extends Loggable {
 
     shipment.dateShipped(new Date()).address(address).saveMe
     
-    InventoryService.deductProducts(shipment)
+    InventoryService.deductShipmentItems(shipment)
 
     EmailActor ! SendInvoicePaymentSucceededEmail(
       user,
@@ -203,7 +203,7 @@ class Dashboard extends Loggable {
       
       def currentShipmentBindings = {
         ".forecast-dates" #> ClearNodes &
-        ".shipment" #> paidShipments.sortBy(_.insert.get).sortBy(_.expectedShipDate.get.getTime).map { shipment =>
+        ".shipment" #> paidShipments.sortBy(_.expectedShipDate.get.getTime).map { shipment =>
 
           val subscription = shipment.subscription.obj
           val user = subscription.flatMap(_.user.obj)
@@ -284,25 +284,6 @@ class Dashboard extends Loggable {
 
           val user = subscription.user.obj
 
-          val agencyName = {
-            for {
-              parent <- user
-              agency <- parent.referer
-              } yield {
-                agency.name.get
-          }}.openOr("")
-
-
-          val allShipments = subscription.shipments.toList
-
-          val insertNeeded = {
-           (allShipments.size, agencyName) match {
-             case (0, "TPP") => "TPP+Welcome Insert"
-             case (0, _) => "Welcome Insert"
-             case (_, _) => "-"
-           }
-         }
-
           val petsAndProducts = subscription.getPetAndProducts
           val dateFormat = new SimpleDateFormat("MMM dd")
 
@@ -321,7 +302,6 @@ class Dashboard extends Loggable {
             ".product-name *" #> product.map(_.name.get) &
             ".product-size *" #> product.map(_.size.get.toString)
           } &
-          ".insert *" #> insertNeeded &
           ".tracking-number" #> ClearNodes &
           ".ship-it" #> ClearNodes
         }

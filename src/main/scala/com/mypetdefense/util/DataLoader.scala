@@ -181,14 +181,25 @@ object DataLoader extends Loggable {
       ("ShieldTec Plus for Dogs", AnimalSize.DogXLargeShld, "100010"),
     )
 
-    for {
-      (productName, size, sku) <- productsToUpdate
-      product <- Product.find(
-        By(Product.name, productName),
-        By(Product.size, size)
-      )
-    } yield {
-      product.sku(sku).saveMe 
+    val productSku = Product.find(By(Product.sku, "100011"))
+    
+    if (productSku.isEmpty) {
+      for {
+        (productName, size, sku) <- productsToUpdate
+        product <- Product.find(
+          By(Product.name, productName),
+          By(Product.size, size)
+        )
+      } yield {
+        product.sku(sku).saveMe 
+      }
+    }
+  }
+
+  def loadWelcomeInserts = {
+    if (Insert.findAll().isEmpty) {
+      Insert.createNewInsert("Welcome Brochure", "100017")
+      Insert.createNewInsert("TPP Welcome Insert", "100018")
     }
   }
 
