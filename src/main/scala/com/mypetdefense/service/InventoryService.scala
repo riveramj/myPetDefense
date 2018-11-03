@@ -24,18 +24,29 @@ object InventoryService extends Loggable {
 
     item.total(newCount).saveMe
   }
-  def deductProducts(shipment: Shipment) = {
+
+  def deductShipmentItems(shipment: Shipment) = {
     val shipmentLineItems = shipment.shipmentLineItems.toList
     
-    shipmentLineItems.map { lineItem =>
-      for {
-        product <- lineItem.product.obj
-        itemNumber = product.sku.get
-        inventoryItem <- InventoryItem.find(By(InventoryItem.itemNumber, itemNumber))
-      } yield {
-        val currentCount = inventoryItem.total.get
-        updateItemCount(inventoryItem, currentCount, currentCount -1)
-      }
+    val products = shipmentLineItems.flatMap(_.product.obj)
+    val inserts = shipmentLineItems.map(_.insert.toList).flatten
+
+    for {
+      product <- products
+      itemNumber = product.sku.get
+      inventoryItem <- InventoryItem.find(By(InventoryItem.itemNumber, itemNumber))
+    } yield {
+      val currentCount = inventoryItem.total.get
+      updateItemCount(inventoryItem, currentCount, currentCount -1)
+    }
+
+    for {
+      insert <- inserts
+      itemNumber = insert.itemNumber.get
+      inventoryItem <- InventoryItem.find(By(InventoryItem.itemNumber, itemNumber))
+    } yield {
+      val currentCount = inventoryItem.total.get
+      updateItemCount(inventoryItem, currentCount, currentCount -1)
     }
   }
 }

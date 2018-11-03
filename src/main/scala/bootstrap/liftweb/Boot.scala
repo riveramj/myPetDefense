@@ -59,7 +59,8 @@ class Boot {
       ItemReconciliation,
       ReconciliationEvent,
       InventoryItem,
-      InventoryChangeAudit
+      InventoryChangeAudit,
+      Insert
     )
 
     //DataLoader.loadProducts
@@ -69,6 +70,7 @@ class Boot {
     //DataLoader.updateShipmentShipStationId
     //DataLoader.updateGeorgiaTaxRates
     DataLoader.updateProductSku
+    DataLoader.loadWelcomeInserts
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
