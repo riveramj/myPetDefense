@@ -147,8 +147,12 @@ object ShipStationService extends Loggable {
     val petNamesProducts = shipmentLineItems.map(_.getShipmentItem).mkString(". ")
 
     val products = shipmentLineItems.map(_.product.obj).flatten
+    val inserts = shipmentLineItems.map(_.insert.obj).flatten
 
     val shipStationProductIds = products.map(_.sku.get)
+    val shipStationInsertsIds = inserts.map(_.itemNumber.get)
+
+    val allShipStationItems = shipStationProductIds ++ shipStationInsertsIds
 
     val paidShipment_? = tryo(shipment.amountPaid.get.toDouble).openOr(0.0) > 0.0
     
@@ -172,23 +176,14 @@ object ShipStationService extends Loggable {
       }
     }
 
-    val possibleInsertOrderItem = refreshedShipment.map(_.insert.get) match {
-      case Full("TPP+Welcome Insert") => 
-        List(OrderItem(
-          quantity = 1,
-          sku = "WelcomeTPP"
-        ))
-      case _ => Nil
-    }
-
-    val shipStationProducts = shipStationProductIds.map { sku =>
+    val shipStationItems = allShipStationItems.map { sku =>
       OrderItem(
         quantity = 1,
         sku = sku
       )
     }
 
-    val allOrderItems = shipStationProducts ++ possibleInsertOrderItem ++ dogTagOrderItems
+    val allOrderItems = shipStationItems ++ dogTagOrderItems
 
     Order.create(
       orderNumber = s"${refreshedShipment.map(_.shipmentId.get).openOr("")}",
