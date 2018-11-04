@@ -272,7 +272,12 @@ class ParentSubscription extends Loggable {
       val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
 
       val newShipDate = dateFormat.parse(nextShipDate)
-      val updatedShipDateSubscription = subscription.map(_.nextShipDate(newShipDate).status(Status.Paused).saveMe)
+      val updatedShipDateSubscription = subscription.flatMap { sub =>
+        val updatedSubscriptionWithStripe = ParentService.updateNextShipBillDate(sub, user, newShipDate)
+
+        updatedSubscriptionWithStripe.map(_.status(Status.Paused).saveMe)
+      }
+
       ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
      
       for {

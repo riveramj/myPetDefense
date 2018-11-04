@@ -252,7 +252,7 @@ object ParentService extends Loggable {
     }).headOption
   }
 
-  def updateNextShipBillDate(subscription: Subscription, user: Box[User], nextDate: Date) = {
+  def updateNextShipBillDate(subscription: Subscription, user: Box[User], nextDate: Date): Box[Subscription] = {
     val updatedSubscription = changeStripeBillDate(
       user.map(_.stripeId.get).openOr(""),
       subscription.stripeSubscriptionId.get,
@@ -260,7 +260,8 @@ object ParentService extends Loggable {
     )
 
     updatedSubscription match {
-      case Full(stripeSubscription) => subscription.nextShipDate(nextDate).saveMe
+      case Full(stripeSubscription) => 
+        Full(subscription.nextShipDate(nextDate).saveMe)
       case _ => Empty
     }
   }

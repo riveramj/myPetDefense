@@ -1,0 +1,107 @@
+@import "base";
+
+.reconciliation-entry {
+  cursor: pointer;
+}
+
+.reconciliation-details {
+  padding: 20px;
+  background-color: #ccc;
+
+  thead {
+    background-color: #818080;
+  }
+}
+
+.information {
+  display: inline-block;
+  
+  h3 {
+    font-size: rem(18px);
+    padding-bottom: 15px;
+    color: #4F4E4E;
+  }
+
+  > li {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 15px;
+  }
+
+  label {
+    width: 160px;
+    display: inline-block;
+  }
+
+  form {
+    background-color: inherit;
+    width: 100%;
+  }
+}
+
+input[type="text"] {
+  width: 100%;
+  color: #4F4E4E;
+  font-size: em(22px);
+  border: 1px solid #CECECE;
+  padding: rem(7px) rem(10px);
+  border-radius: 3px;
+
+  @include placeholder {
+    color: #949494;
+  }
+}
+
+.reconciliation-entry.expanded {
+  border-bottom: none;
+}
+
+.sku-description {
+  width: 350px;
+}
+
+fieldset.create label {
+  display: inline-block;
+  width: 30%;
+  margin-right: 15px;
+  padding-bottom: 0;
+}
+
+tbody:nth-child(odd) {
+  background-color: #F1F1F1;
+}
+
+.event-container {
+  padding: 20px;
+  background-color: #cecece;
+  display: grid;
+
+  thead {
+    background-color: #818080;
+  }
+}
+
+.add-sku-container legend {
+  margin-bottom: 10px;
+  padding-top: 0;
+}
+
+.sku-container {
+  display: inline-block;
+  margin-right: 40px;
+}
+
+.add-item-container {
+  .item-container, .count-container {
+    display: inline-block;
+  }
+
+  .item-container {
+    margin-right: 20px;
+  }
+
+  legend {
+    padding-top: 0;
+    padding-bottom: 20px;
+  }
+}
