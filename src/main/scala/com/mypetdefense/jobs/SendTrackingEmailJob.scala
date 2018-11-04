@@ -5,7 +5,7 @@ import net.liftweb._
   import mapper._
   import util.Helpers._ 
 
-import com.mypetdefense.service.{ShipStationService, ParentService}
+import com.mypetdefense.service.{ShipStationService, ParentService, InventoryService}
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 
@@ -44,6 +44,7 @@ class SendTrackingEmailJob extends ManagedJob {
         shipment.dateShipped(new Date()).address(nameAddress).trackingNumber(label.trackingNumber).saveMe
 
         ParentService.updateNextShipDate(subscription, Full(user))
+        InventoryService.deductShipmentItems(shipment)
 
         EmailActor ! SendInvoicePaymentSucceededEmail(
           Full(user),

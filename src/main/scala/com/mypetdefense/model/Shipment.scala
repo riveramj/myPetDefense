@@ -46,7 +46,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
     stripePaymentId: String,
     amountPaid: String,
     taxPaid: String,
-    insert: String = ""
+    inserts: List[Insert]
   ) = {
     val dateProcessed = new Date()
 
@@ -58,10 +58,9 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
       .dateProcessed(dateProcessed)
       .amountPaid(amountPaid)
       .taxPaid(taxPaid)
-      .insert(insert)
       .saveMe
 
-    ShipmentLineItem.createShipmentItems(shipment, user)
+    ShipmentLineItem.createShipmentItems(shipment, user, inserts)
 
     shipment
   }
@@ -71,20 +70,20 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
   def getSingleton = ShipmentLineItem
   object shipmentLineItemId extends MappedLong(this){
     override def dbIndexed_? = true
+    override def defaultValue = generateLongId
   }
   object shipment extends MappedLongForeignKey(this, Shipment)
   object product extends MappedLongForeignKey(this, Product)
   object petName extends MappedString(this, 100)
   object pet extends MappedLongForeignKey(this, Pet)
+  object insert extends MappedLongForeignKey(this, Insert)
 
   def getShipmentItem = {
     val productNameSize = this.product.obj.map(_.getNameAndSize).openOr("")
     s"${this.petName.get} - ${productNameSize}".replace("null", "")
   }
-}
 
-object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem] {
-  def createShipmentItems(shipment: Shipment, user: User) = {
+  def createShipmentItems(shipment: Shipment, user: User, inserts: List[Insert]) = {
     val pets = Pet.findAll(By(Pet.user, user), By(Pet.status, Status.Active))
     val products = pets.map(_.product.obj)
 
@@ -100,6 +99,14 @@ object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[Shipme
         .petName(pet.name.get)
         .saveMe
     }
+
+    inserts.map { insert =>
+      ShipmentLineItem.create
+        .shipment(shipment)
+        .insert(insert)
+        .saveMe
+    }
   }
 }
 
+object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem]

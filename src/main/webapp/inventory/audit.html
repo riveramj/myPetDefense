@@ -1,0 +1,42 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div data-lift="inventory.InventoryChangeAudits.render?eager_eval=true">
+    <div data-lift="embed?what=inventory/nav-bar"></div>
+    <div id="item-container">
+      <h2>Inventory Audit</h2>
+      <table>
+        <thead>
+          <tr>
+            <td>Inventory Item</td>
+            <td>Old Item Number</td>
+            <td>New Item Number</td>
+            <td>Old Description</td>
+            <td>New Description</td>
+            <td>Old UoM</td>
+            <td>New UoM</td>
+            <td>Old Count</td>
+            <td>New Count</td>
+          </tr>
+        </thead>
+        <tbody>
+        <tr class="audit-entry">
+          <td class="inventory-item">Item foo</td>
+          <td class="old-number">12345</td>
+          <td class="new-number">09876</td>
+          <td class="old-description">cardboard back</td>
+          <td class="new-description">paper back</td>
+          <td class="old-uom">unit</td>
+          <td class="new-uom">piece</td>
+          <td class="old-count">-1</td>
+          <td class="new-count">-2</td>
+        </tr>
+      </tbody>
+      </table>
+    </div>
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=inventory-items">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+  </tail>
+</div>

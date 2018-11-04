@@ -1,0 +1,117 @@
+<div id="main" data-lift="surround?with=default-template;at=content"> 
+  <div data-lift="inventory.ItemProduction.render?eager_eval=true">
+    <div data-lift="embed?what=inventory/nav-bar"></div>
+    <div id="item-container">
+      <h2>Item Production</h2>
+      <form>
+        <fieldset class="create">
+          <legend>Build Inventory Item</legend>
+          
+          <label class="item-recipe-container">
+            <span class="field-label">Item Name</span>
+            <span id="recipe-item-select">
+              <input type="radio" value="12345">zoguard 4-22
+              <input type="radio" value="5678">zoguard 23-44
+            </span>
+          </label>
+
+          <label class="count-container">
+            <span class="field-label short-field">Count</span>
+            <input id="build-item-count" data-lpignore="true" type="text">
+          </label>
+
+          <div class="create-item">
+            <button type="submit" id="create-item">Create</button>
+          </div>
+        </fieldset>
+      </form>
+
+      <form class="new-recipe">
+        <fieldset class="create">
+          <legend>Start New Item Build</legend>
+          <div class="add-item-container">
+            <label class="new-recipe-container">
+              <span class="field-label">Finished Item Name</span>
+              <span id="new-recipe-select">
+                <input type="radio" value="12345">zoguard 4-22
+                <input type="radio" value="5678">zoguard 23-44
+              </span>
+            </label>
+
+            <label class="new-recipe-item-container">
+              <span class="field-label">Item Part Name</span>
+              <span id="new-recipe-item-select">
+                <input type="radio" value="12345">zoguard 4-22
+                <input type="radio" value="5678">zoguard 23-44
+              </span>
+            </label>
+
+            <div class="create-item">
+              <button type="submit" class="create-item" id="create-new-recipe">Start</button>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+      <table>
+        <thead>
+          <tr>
+            <td>Item Number</td>
+            <td>Item Name</td>
+            <td>Count</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="item-entry">
+            <td class="finished-item-number">zoguard 4-22</td>
+            <td class="finished-item-description">zoguard 4-22</td>
+            <td class="finished-item-count">-1</td>
+          </tr>
+          <tr class="info">
+            <td colspan=3 class="item-parts">
+              <table>
+                <thead>
+                  <tr>
+                    <td>Item Number</td>
+                    <td>Item Name</td>
+                    <td>Actions</td>
+                  </tr>
+                </thead>
+                <tr class="item-part">
+                  <td class="part-item-number">10001</td>
+                  <td class="part-item-description">plastic back</td>
+                  <td class="actions"><button class="delete">Delete</button></td>
+                </tr>
+              </table>
+              <form class="add-item-container">
+                <ul class="create">
+                  <li><legend>Add Item to Build</legend></li>
+                  <li>
+                    <label>
+                      <span class="field-label">Item Part Name</span>
+                      <span class="part-item-select">
+                        <input type="radio" value="12345">zoguard 4-22
+                        <input type="radio" value="5678">zoguard 23-44
+                      </span>
+                    </label>
+                  </li>
+                  <li>
+
+                    <div class="create-item">
+                      <button type="submit" class="add-item-part create-item">Add Item Part</button>
+                    </div>
+                  </li>
+                </ul>
+              </form>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=item-production">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+  </tail>
+</div>
