@@ -149,10 +149,6 @@ class Reconciliations extends Loggable {
           }
         }
       }
-      //".actions .delete" #> ClearNodesIf(user.userType == UserType.Parent) &
-      //".actions .delete [onclick]" #> Confirm(s"Delete ${user.name}?",
-      //  ajaxInvoke(deleteUser(user) _)
-      //)
     }
   }
 }
