@@ -16,11 +16,14 @@ class InventoryItem extends LongKeyedMapper[InventoryItem] with IdPK with OneToM
   }
   object itemNumber extends MappedString(this, 100)
   object description extends MappedString(this, 100)
+  object itemParts extends MappedOneToMany(InventoryItemPart, InventoryItemPart.finishedItem)
   object unitOfMeasure extends MappedEnum(this, UnitOfMeasure)
   object total extends MappedInt(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+
+  def refresh = InventoryItem.find(By(InventoryItem.inventoryItemId, inventoryItemId.get))
 
   def createNewInventoryItem(itemNumber: String, description: String, total: Int, unitOfMeasure: UnitOfMeasure.Value) = {
     InventoryItem.create
