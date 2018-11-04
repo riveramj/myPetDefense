@@ -60,7 +60,8 @@ class Boot {
       ReconciliationEvent,
       InventoryItem,
       InventoryChangeAudit,
-      Insert
+      Insert,
+      InventoryItemPart
     )
 
     //DataLoader.loadProducts
