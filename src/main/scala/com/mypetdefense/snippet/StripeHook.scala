@@ -80,13 +80,16 @@ trait StripeHook extends RestHelper with Loggable {
             val agency = user.referer.obj
             val agencyName = agency.map(_.name.get).openOr("")
 
-            val insert = {
+            val inserts = {
               (shipmentCount, agencyName) match {
-                case (0, "TPP") => "TPP+Welcome Insert"
-                case (0, _) => "Welcome Insert"
-                case (_, _) => "-"
+                case (0, "TPP") =>
+                  List(Insert.welcomeInsert.toList, Insert.tppWelcomeInsert.toList)
+                case (0, _) =>
+                  List(Insert.welcomeInsert.toList)
+                case (_, _) =>
+                  Nil
               }
-            }
+            }.flatten
 
             val shipment = Shipment.createShipment(
               user,
@@ -94,7 +97,7 @@ trait StripeHook extends RestHelper with Loggable {
               invoicePaymentId,
               formatAmount(amountPaid),
               formatAmount(tax),
-              insert
+              inserts
             )
           }
         }
