@@ -37,7 +37,7 @@ object InventoryService extends Loggable {
       inventoryItem <- InventoryItem.find(By(InventoryItem.itemNumber, itemNumber))
     } yield {
       val currentCount = inventoryItem.total.get
-      updateItemCount(inventoryItem, currentCount, currentCount -1)
+      updateItemCount(inventoryItem, currentCount, currentCount - 1)
     }
 
     for {
@@ -46,7 +46,7 @@ object InventoryService extends Loggable {
       inventoryItem <- InventoryItem.find(By(InventoryItem.itemNumber, itemNumber))
     } yield {
       val currentCount = inventoryItem.total.get
-      updateItemCount(inventoryItem, currentCount, currentCount -1)
+      updateItemCount(inventoryItem, currentCount, currentCount - 1)
     }
   }
 }
