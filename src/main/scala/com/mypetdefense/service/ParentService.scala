@@ -275,6 +275,8 @@ object ParentService extends Loggable {
         val currentPeriodEnd = stripeSubscription.currentPeriodEnd.getOrElse(0l)
         val nextMonthDate = new Date(currentPeriodEnd * 1000L)
 
+        println(s"new date is ${nextMonthDate.getTime/1000} =======")
+
         val updatedSubscription = changeStripeBillDate(
           user.map(_.stripeId.get).openOr(""),
           subscription.stripeSubscriptionId.get,
