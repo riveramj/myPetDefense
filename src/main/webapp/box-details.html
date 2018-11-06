@@ -3,17 +3,41 @@
     <div id="logo-name">
       <a href="/">
         <picture>
-          <source srcset="../images/logo/logo-name-white.png, ../images/logo/logo-name-white@2x.png 2x" media="(min-width: 46.8em)">
-        <img srcset="../images/logo/logo-name-white.png, ../images/logo/logo-name-white@2x.png 2x" src="../images/logo/logo-name-white.png">
+          <source srcset="../images/logo/logo-name-white-small.png, ../images/logo/logo-name-white-small@2x.png 2x" media="(min-width: 46.8em)">
+        <img srcset="../images/logo/logo-name-white-small.png, ../images/logo/logo-name-white-small@2x.png 2x" src="../images/logo/logo-name-white-small.png">
         </picture>
       </a>
     </div>
     <nav>
       <ul id="menu-entries">
-        <li class="login"><a href="./login">Login</a></li>
+        <li class="cart-container"><button class="open-cart">Cart</button></li>
       </ul>
     </nav>
   </div>
+
+  <div class="page-header">
+    <ul>
+      <li>
+        <picture>
+          <source srcset="../images/treat-boxes/open-box@1x.png, ../images/treat-boxes/open-box@2x.png 2x" media="(min-width: 46.8em)">
+        <img srcset="../images/treat-boxes/open-box@1x.png, ../images/treat-boxes/open-box@2x.png 2x" src="../images/treat-boxes/open-box@1x.png">
+        </picture>
+      </li>
+      <li><h1>Dog Treat Boxes</h1></li>
+      <li class="treat-dog">
+          Treat your dog! Our boxes include a variety of healthy goodies for your furry friend.
+      </li>
+    </ul>
+  </div>
+
+  <section class="product-slider">
+    <div class="product-small-images">
+      <div index="0"><img src="../images/treat-boxes/mosaic-product-group-small.jpg"/></div>
+      <div index="1"><img src="../images/treat-boxes/mosaic-product-1-small.jpg"/></div>
+      <div index="2"><img src="../images/treat-boxes/mosaic-product-2-small.jpg"/></div>
+      <div index="3"><img src="../images/treat-boxes/placeholder-small.jpg"/></div>
+    </div>
+  </section>
 
   <section class="product-list" data-lift="BoxDetails.render">
     Big Box:
@@ -152,8 +176,9 @@
   </div>
 
   <tail>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
-    <script type="text/javascript" data-lift="script-bundle?name=box-landing"></script>
+    <script type="text/javascript" data-lift="script-bundle?name=treat-box"></script>
   </tail>
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=box-landing">

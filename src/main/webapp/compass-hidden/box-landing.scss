@@ -1,8 +1,72 @@
 @import "base";
-@import "nav-bar";
-@import "shopping-bar";
-@import "flow";
-@import "footer";
+
+#top-bar {
+  background: url(../../images/treat-boxes/mobile-running-header-background@2x.jpg);
+  background-size: 100%;
+  background-repeat: no-repeat;
+  padding-bottom: 38%;
+
+  nav {
+    display: inline-block;
+    float: right;
+    margin: 14px 19px 0 0;
+  }
+}
+
+#logo-name {
+  padding: 14px 0 11px 15px;
+  display: inline-block;
+}
+
+.open-cart {
+  background-color: #1D8884;
+  color: #ffffff;
+  font-weight: $bold;
+  border: none;
+  text-transform: uppercase;
+  font-size: 14px;
+  padding: 5px 10px;
+
+  @media (min-width: $bp-medium) {
+    font-size: 16px;
+    padding: 13px 30px;
+  }
+
+  &:before {
+    @extend .fas;
+    content: fa-content($fa-var-shopping-cart);
+    margin-right: 6px;
+  
+    @media (min-width: $bp-medium) {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+  }
+}
+
+.page-header {
+  background-color: rgba(18, 18, 18, 0.8);
+  color: #ffffff;
+
+  padding: 29px 23px;
+
+  ul {
+    text-align: center;
+    font-size: 18px;
+  }
+
+  h1 {
+    margin: 6px 0;
+    font-size: 28px;
+    font-weight: $bold;
+  }
+
+  .treat-dog {
+    line-height: 23px;
+    font-size: 16px;
+    letter-spacing: 0.4px;
+  }
+}
 
 .pet-count {
   @media (min-width: $bp-medium) {

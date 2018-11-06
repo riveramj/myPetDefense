@@ -59,3 +59,8 @@ base.js
 dashboard
 admin
 ajax-file-upload.js
+
+treat-box
+slick/slick.min.js
+treat-box.js
+base.js
