@@ -284,7 +284,7 @@ object ParentService extends Loggable {
         val updatedSubscription = changeStripeBillDate(
           user.map(_.stripeId.get).openOr(""),
           subscription.stripeSubscriptionId.get,
-          startOfDayDate
+          startOfDayDate/1000000
         )
           
         subscription.nextShipDate(nextMonthDate).saveMe
