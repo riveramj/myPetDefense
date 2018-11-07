@@ -279,8 +279,6 @@ object ParentService extends Loggable {
 
         val startOfDayDate = nextMonthLocaldate.atStartOfDay(ZoneId.of("America/New_York")).toInstant().getEpochSecond()
 
-        println(s"new date is ${startOfDayDate} =======")
-
         val updatedSubscription = changeStripeBillDate(
           user.map(_.stripeId.get).openOr(""),
           subscription.stripeSubscriptionId.get,
