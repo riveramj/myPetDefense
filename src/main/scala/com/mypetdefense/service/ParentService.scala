@@ -275,10 +275,14 @@ object ParentService extends Loggable {
         val currentPeriodEnd = stripeSubscription.currentPeriodEnd.getOrElse(0l)
         val nextMonthDate = new Date(currentPeriodEnd * 1000L)
 
+        val nextMonthLocaldate = nextMonthDate.toInstant().atZone(ZoneId.of("America/New_York")).toLocalDate()
+
+        val startOfDayDate = nextMonthLocaldate.atStartOfDay(ZoneId.of("America/New_York")).toInstant().getEpochSecond()
+
         val updatedSubscription = changeStripeBillDate(
           user.map(_.stripeId.get).openOr(""),
           subscription.stripeSubscriptionId.get,
-          nextMonthDate.getTime/1000
+          startOfDayDate
         )
           
         subscription.nextShipDate(nextMonthDate).saveMe
