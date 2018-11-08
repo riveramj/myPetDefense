@@ -67,8 +67,8 @@ class Reporting extends Loggable {
     ".forecasting" #> idMemoize { renderer =>
       val sanitizedNames = upcomingSubscriptionProducts.map { name =>
         name match {
-          case product if product.contains("4-22") =>
-            "ZoGuard Plus for Dogs 04-22 lbs"
+          case product if product.contains("5-22") =>
+            "ZoGuard Plus for Dogs 05-22 lbs"
           case product if product.contains("3-10") =>
             "Adventure Plus for Dogs, 3-10 lbs"
           case product if product.contains("5-15") =>

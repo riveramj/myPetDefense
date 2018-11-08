@@ -74,6 +74,7 @@ class Boot {
     //DataLoader.updateGeorgiaTaxRates
     DataLoader.updateProductSku
     DataLoader.loadWelcomeInserts
+    DataLoader.resetUpcomingBillingCylces
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")

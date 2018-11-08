@@ -7,7 +7,7 @@ import net.liftweb._
   import util._
   
 import net.liftweb.util.Helpers._
-import net.liftweb.mapper.{By, NullRef, NotBy}
+import net.liftweb.mapper._
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
 import dispatch._, Defaults._
 
@@ -293,6 +293,23 @@ object DataLoader extends Loggable {
       )
 
       ParentService.updateTaxRate(stripeId, subscriptionId, rate, user.email.get)
+    }
+  }
+
+  def resetUpcomingBillingCylces = {
+    val upcomingSubscriptions = Subscription.findAll(
+      BySql(
+        "nextShipDate > CURRENT_DATE and nextShipDate < CURRENT_DATE + interval '3 day'",
+        IHaveValidatedThisSQL("mike","2018-04-24")
+      ),
+      By(Subscription.status, Status.Active)
+    )
+
+    for {
+      subscription <- upcomingSubscriptions
+      user <- subscription.user.obj
+    } yield {
+      ParentService.updateNextShipDate(subscription, Full(user))
     }
   }
 }
