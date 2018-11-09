@@ -110,6 +110,14 @@ class BoxDetails extends Loggable {
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
+  def removeBoxFromCart(box: PetBox) = {
+    val cart = BoxDetailsFlow.shoppingCart.is
+
+    BoxDetailsFlow.shoppingCart(cart - box)
+
+    cartRenderer.map(_.setHtml).openOr(Noop)
+  }
+
   def render = {
     "#shopping-cart" #> idMemoize { renderer =>
       val cart = BoxDetailsFlow.shoppingCart.is
@@ -125,6 +133,7 @@ class BoxDetails extends Loggable {
 
         ".cart-box-name *" #> box.name.get &
         ".selected-quantity *" #> quantity &
+        ".remove-box [onclick]" #> ajaxInvoke(() => removeBoxFromCart(box)) &
         ".selected-quantity *" #> exoticCount &
         ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity - 1)) &
         ".add [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity + 1)) &
