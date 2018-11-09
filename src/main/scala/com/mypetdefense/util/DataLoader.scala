@@ -198,8 +198,8 @@ object DataLoader extends Loggable {
 
   def loadWelcomeInserts = {
     if (Insert.findAll().isEmpty) {
-      Insert.createNewInsert("Welcome Insert", "100017")
-      Insert.createNewInsert("TPP Registrations Welcome Insert", "100018")
+      Insert.createNewInsert("Welcome Insert", "450006")
+      Insert.createNewInsert("TPP Registrations Welcome Insert", "450027")
     }
   }
 
