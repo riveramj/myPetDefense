@@ -312,4 +312,12 @@ object DataLoader extends Loggable {
       ParentService.updateNextShipDate(subscription, Full(user))
     }
   }
+
+  def createPetBoxes = {
+    if (PetBox.findAll().isEmpty) {
+      PetBox.createNewPetBox("Exotic Proteins Box", 19.99)
+      PetBox.createNewPetBox("Wellness Box", 24.99)
+      PetBox.createNewPetBox("Multivitamin Box", 24.99)
+    }
+  }
 }
