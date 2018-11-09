@@ -78,11 +78,35 @@ class BoxDetails extends Loggable {
     boxRenderer.setHtml
   }
 
-  def addToCart(box: Box[PetBox], count: Int) = {
-    box.map { petBox =>
-      BoxDetailsFlow.shoppingCart(BoxDetailsFlow.shoppingCart ++ List((count, petBox)))
+  def updateCartCount(box: PetBox, newQuantity: Int) = {
+    val cart = BoxDetailsFlow.shoppingCart.is
+
+    val updatedCart = {
+      if (newQuantity < 1)
+        cart - box
+      else
+        cart + (box -> newQuantity)
     }
 
+    BoxDetailsFlow.shoppingCart(updatedCart)
+
+    cartRenderer.map(_.setHtml).openOr(Noop)
+  }
+
+  def addToCart(box: Box[PetBox], count: Int) = {
+    box.map { petBox =>
+      val cart = BoxDetailsFlow.shoppingCart.is
+
+      val updatedCart = {
+        if (cart.contains(petBox))
+          cart + (petBox -> (cart(petBox) + count))
+        else
+          cart + (petBox -> count)
+      }
+
+      BoxDetailsFlow.shoppingCart(updatedCart)
+    }
+    
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
@@ -92,19 +116,22 @@ class BoxDetails extends Loggable {
 
       cartRenderer = Full(renderer)
       
-      val subtotal = cart.map { case (quantity, box) =>
+      val subtotal = cart.map { case (box, quantity) =>
         quantity * box.price.get
       }.foldLeft(0D)(_ + _)
 
-      ".cart-item" #> cart.map { case (quantity, box) =>
+      ".cart-item" #> cart.map { case (box, quantity) =>
         val itemPrice = box.price.get * quantity
 
         ".cart-box-name *" #> box.name.get &
         ".selected-quantity *" #> quantity &
+        ".selected-quantity *" #> exoticCount &
+        ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity - 1)) &
+        ".add [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity + 1)) &
         ".item-price *" #> f"$$$itemPrice%2.2f"
       } &
-      ".subtotal *" #> f"$$$subtotal%2.2f"
-      //".checkout [href]" #> BoxCheckout.menu.loc.calcDefaultHref
+      ".subtotal *" #> f"$$$subtotal%2.2f" &
+      ".checkout [href]" #> BoxCheckout.menu.loc.calcDefaultHref
     } andThen
     ".exotic-box .box-quantity-checkout" #> idMemoize { renderer => 
       ".selected-quantity *" #> exoticCount &

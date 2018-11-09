@@ -23,5 +23,5 @@ object PetFlowChoices extends Loggable {
 }
 
 object BoxDetailsFlow extends Loggable {
-  object shoppingCart extends SessionVar[List[(Int, PetBox)]](Nil)
+  object shoppingCart extends SessionVar[Map[PetBox, Int]](Map())
 }
