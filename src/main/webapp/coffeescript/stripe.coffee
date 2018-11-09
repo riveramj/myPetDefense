@@ -45,6 +45,7 @@ $(document).on "validate-stripe-form", (event) ->
   console.log newCard
 
   if newCard
+    console.log "in true"
     stripe.createToken(card).then((result) ->
       if (result.error)
         # Inform the user if there was an error

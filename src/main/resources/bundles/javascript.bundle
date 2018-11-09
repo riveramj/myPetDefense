@@ -64,3 +64,8 @@ treat-box
 slick/slick.min.js
 treat-box.js
 base.js
+
+box-checkout
+treat-box.js
+base.js
+stripe.js

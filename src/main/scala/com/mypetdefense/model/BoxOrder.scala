@@ -48,7 +48,7 @@ object BoxOrder extends BoxOrder with LongKeyedMetaMapper[BoxOrder] {
     stripeChargeId: String,
     amountPaid: Double,
     taxPaid: Double,
-    boxes: List[(Int, PetBox)]
+    boxes: List[(PetBox, Int)]
   ) = {
     val dateProcessed = new Date()
 
@@ -92,10 +92,10 @@ class BoxOrderLineItem extends LongKeyedMapper[BoxOrderLineItem] with IdPK {
   }
 
   def createBoxOrderLineItems(
-    boxes: List[(Int, PetBox)],
+    boxes: List[(PetBox, Int)],
     order: BoxOrder
   ) = {
-    boxes.map { case (quantity, box) =>
+    boxes.map { case (box, quantity) =>
       BoxOrderLineItem.create
       .quantity(quantity)
       .box(box)

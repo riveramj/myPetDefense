@@ -139,8 +139,8 @@ class BoxDetails extends Loggable {
         ".add [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity + 1)) &
         ".item-price *" #> f"$$$itemPrice%2.2f"
       } &
-      ".subtotal *" #> f"$$$subtotal%2.2f"
-      //".checkout [href]" #> BoxCheckout.menu.loc.calcDefaultHref
+      ".subtotal *" #> f"$$$subtotal%2.2f" &
+      ".checkout [href]" #> BoxCheckout.menu.loc.calcDefaultHref
     } andThen
     ".exotic-box .box-quantity-checkout" #> idMemoize { renderer => 
       ".selected-quantity *" #> exoticCount &
