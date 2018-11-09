@@ -182,6 +182,7 @@ object Paths {
     friendsfamily.Orders.menu,
     friendsfamily.Products.menu,
     BoxDetails.thanksgivingBoxMenu,
+    BoxCheckout.menu,
     inventory.InventoryItems.menu,
     inventory.Reconciliations.menu,
     inventory.InventoryChangeAudits.menu,

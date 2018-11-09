@@ -1,0 +1,133 @@
+@import "base";
+@import "shopping-cart";
+@import "footer";
+
+#top-bar {
+  background-color: #404040;
+
+  nav {
+    display: inline-block;
+    float: right;
+    margin: 14px 19px 0 0;
+  }
+}
+
+#logo-name {
+  padding: 14px 0 11px 15px;
+  display: inline-block;
+}
+
+.checkout-container {
+  padding: 25px 17px;
+
+  h2 {
+    color: #5D5D5D;
+    font-weight: $bold;
+    font-size: 26px;
+    line-height: 28px;
+    text-align: center;
+    padding-bottom: 20px;
+  }
+}
+
+section {
+  padding: 20px 14px;
+  margin-bottom: 25px;
+
+  border: solid 1px #E5E6E6;
+  box-shadow: 0px 2px 5px -2px rgba(71, 71, 71, 10);
+  
+  legend, h3 {
+    color: #5D5D5D;
+    font-size: 14px;
+    font-weight: $bold;
+    line-height: 24px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+  }
+
+  input {
+    border: 1px solid #CECECE;
+    border-radius: 3px;
+    display: block;
+
+    font-size: 16px;
+    padding: 6px 9px;
+
+    width: 100%;
+  }
+
+  label {
+    padding-bottom: 18px;
+    display: block;
+  }
+}
+
+.field-label {
+  color: #7E7E7E;
+  font-weight: $semibold;
+  font-size: 16px;
+  line-height: 24px;
+  display: block;
+  padding-bottom: 4px;
+}
+
+#street-1 {
+  margin-bottom: 5px;
+}
+
+.existing-card, .form-row {
+  border: 1px solid #CECECE;
+  border-radius: 3px;
+
+  font-size: 16px;
+  padding: 7px 9px 5px;
+
+  width: 100%;
+}
+
+#order-details li {
+  display: flex;
+  justify-content: space-between;
+
+  color: #7E7E7E;
+  line-height: 24px;
+  font-size: 16px;
+}
+
+#order-details {
+  li:first-child {
+    padding-bottom: 8px;
+  }
+
+  li#subtotal {
+    padding-top: 15px;
+  }
+
+  li:first-child {
+    font-weight: $semibold;
+  }
+
+  li.order {
+    font-weight: $bold;
+  }
+}
+
+.box-ordered {
+  font-size: 14px;
+  line-height: 20px;
+}
+
+input.checkout {
+  background-color: #1D8884;
+  color: #ffffff;
+  font-size: 16px;
+  letter-spacing: 1px;
+  font-weight: $bold;
+  padding: 22px 0 20px;
+  width: 100%;
+  max-width: 339px;
+  border: none;
+  text-transform: uppercase;
+}

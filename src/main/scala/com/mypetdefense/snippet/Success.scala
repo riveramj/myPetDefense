@@ -9,6 +9,8 @@ import net.liftweb.http._
 import net.liftweb.mapper.{By, NullRef}
 
 import com.mypetdefense.service.PetFlowChoices._
+import com.mypetdefense.service.BoxDetailsFlow
+
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.model._
 
@@ -27,7 +29,7 @@ class Success extends Loggable {
   purchased.is
 
   def render() = {
-    if (boxSalesInfo.is == Empty) {
+    if (BoxDetailsFlow.boxSale.is == Empty) {
       val petCount = shoppingCart.is.size
       val monthylTotal = total.is
       val freeMonthCount = freeMonths.is.openOr(0)
@@ -47,14 +49,12 @@ class Success extends Loggable {
       "#box-count" #> ClearNodes &
       "#box-total" #> ClearNodes
     } else {
-      val bigBoxQuantity = boxSalesInfo.is.map(_._1)
-      val smallBoxQuantity = boxSalesInfo.is.map(_._2)
-      val boxSalesTotal = boxSalesInfo.is.map(_._3).openOr(0D)
+      val boxSalesTotal = BoxDetailsFlow.boxSale.is.map(_._1).openOr(0D)
 
       "#order-summary [class+]" #> "box-sale" &
       "#order-total h3 [class+]" #> "box-sale" andThen
-      "#big-box-count span *" #> bigBoxQuantity &
-      "#small-box-count span *" #> smallBoxQuantity &
+      //"#big-box-count span *" #> bigBoxQuantity &
+      //"#small-box-count span *" #> smallBoxQuantity &
       "#checkout-total #amount *" #> f"$$$boxSalesTotal%2.2f" &
       "#pet-count" #> ClearNodes &
       "#monthly-total" #> ClearNodes &
