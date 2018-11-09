@@ -1,4 +1,69 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
+  <div id="shopping-cart" class="opened">
+    <div class="cart-contents">
+      <h3>Great Choice!</h3>
+      
+      <h4>Current Products</h4>
+
+      <ul id="items-in-cart">
+        <li class="cart-item">
+          <div class="cart-product-shot">
+            <img class="cart-product-image" src="../images/treat-boxes/mosaic-product-group-small.jpg">
+          </div>
+          <ul class="cart-box">
+            <li class="remove-box"></li>
+            <li>
+              <span class="cart-box-name">Good for you Box</span>
+            </li>
+          </ul>
+          <ul class="quantity-price">
+            <li class="box-quantity">
+              <button class="subtract"></button><div class="selected-quantity">1</div><button class="add"></button>
+            </li>
+            <li class="item-price">
+              $19.99
+            </li>
+          </ul>
+        </li>
+        <li class="cart-item">
+          <div class="cart-product-shot">
+            <img class="cart-product-image" src="../images/treat-boxes/mosaic-product-group-small.jpg">
+          </div>
+          <ul class="cart-box">
+            <li class="remove-box"></li>
+            <li>
+              <span class="cart-box-name">Tasty Box</span>
+            </li>
+          </ul>
+          <ul class="quantity-price">
+            <li class="box-quantity">
+              <button class="subtract"></button><div class="selected-quantity">1</div><button class="add"></button>
+            </li>
+            <li class="item-price">
+              $19.99
+            </li>
+          </ul>
+        </li>
+      </ul>
+      <ul class="cart-footer">
+        <ul class="cart-totals">
+          <li>
+            <div>Subtotal</div><div class="subtotal">$22.99</div>
+          </li>
+        </ul>
+        <ul class="cart-actions">
+          <li>
+            <button type="button" class="continue-shopping">Continue Shopping</button>
+          </li>
+          <li>
+            <a href="/cart-review" class="checkout">Checkout</a>
+          </li>
+        </ul>
+      </ul>
+    </div>
+    <div class="mobile-close"></div>
+  </div>
+
   <div id="top-bar">
     <div id="logo-name">
       <a href="/">
@@ -30,128 +95,142 @@
     </ul>
   </div>
 
-  <section class="product-slider">
-    <div class="product-small-images">
-      <div index="0"><img src="../images/treat-boxes/mosaic-product-group-small.jpg"/></div>
-      <div index="1"><img src="../images/treat-boxes/mosaic-product-1-small.jpg"/></div>
-      <div index="2"><img src="../images/treat-boxes/mosaic-product-2-small.jpg"/></div>
-      <div index="3"><img src="../images/treat-boxes/placeholder-small.jpg"/></div>
-    </div>
-  </section>
+  <section class="treat-boxes">
+    <ul>
 
-  <section class="product-list" data-lift="BoxDetails.render">
-    Big Box:
-    <input id="big-quantity" type="text">
-    Small Box:
-    <input id="small-quantity" type="text">
-    
-    <h1 class="step-header">Log In</h1>
-
-    <button>Continue as Guest</button>
-
-    <form id="login-container" class="guest-log-in">
-      <h3>Sign in to use your existing account.</h3>
-      <label>
-        <div><span class="field-label">Email</span></div>
-        <input id="email" type="text">
-      </label>
-      <label>
-        <div><span class="field-label">Password</span></div>
-        <input id="password" type="password">
-      </label>
-      <div>
-        <div id="forgot-password-container">
-          <a href="/forgot-password">Forgot Password?</a>
+      <li class="exotic-box">
+        <div class="product-big-images">
+          <div index="0"><img src="../images/treat-boxes/mosaic-product-group.jpg"/></div>
         </div>
-        <div id="login-button-container">
-          <button id="login">log in</button>
+        <div class="product-small-images">
+          <div index="0"><img src="../images/treat-boxes/mosaic-product-group-small.jpg"/></div>
+          <div index="1"><img src="../images/treat-boxes/mosaic-product-1-small.jpg"/></div>
+          <div index="2"><img src="../images/treat-boxes/mosaic-product-2-small.jpg"/></div>
+          <div index="3"><img src="../images/treat-boxes/placeholder-small.jpg"/></div>
         </div>
-      </div>
-    </form>
-
-    <form class="current-step">
-      <h1 class="step-header">Checkout</h1>
-      <h2 class="step-question">
-        Please take a moment to fill out the following information.
-      </h2>
-      <input type="hidden" id="stripe-token">
-      <div id="left-column">
-        <fieldset class="account-info">
-          <legend>Account Info</legend>
-          <div>
-            <label>
-              <div><span class="field-label">Email</span></div>
-              <input id="checkout-email" type="text">
-            </label>
-          </div>
-        </fieldset>
-        <fieldset class="shipping-info">
-          <legend>Shipping Info</legend>
-          <div>
-            <label>
-              <span class="field-label">First name</span>
-              <input id="first-name" type="text">            
-            </label>
-            <label>
-              <span class="field-label">Last name</span>
-              <input id="last-name" type="text">
-            </label>
-            <label>
-              <span class="field-label">Street Address</span>
-              <input id="street-1" type="text">
-              <input id="street-2" type="text">
-            </label>
-            <label class="short-field city">
-              <span class="field-label">City</span>
-              <input id="city" type="text">
-            </label>
-            <label class="short-field state">
-              <span class="field-label">State</span>
-              <input id="state" type="text" maxlength="2">
-            </label>
-            <label class="short-field zip">
-              <span class="field-label">Zip</span>
-              <input id="zip" type="tel" maxlength="5">
-            </label>
-          </div>
-        </fieldset>
-      </div>
-      <div id="right-column">
-        <fieldset class="billing-info">
-          <legend>Billing Info</legend>
-          <div class="billing-container">
-            <div class="existing-card">
-              <span>Card ending in 3452</span>
-              <button class="change-card">Use different card</button>
+        <section class="box-details">
+          <ul>
+            <li class="box-title">
+              Exotic Proteins Box
+            </li>
+            <li class="box-contents">
+              Pamper your pup with treats high in protein and low in fat. This box includes <span class="box-product">1 Ostrich Burgers Banana &amp; Flaxseed (4 oz)</span> and <span class="box-product">1 Ostrich Burgers Pumpkin &amp; Chia Seed (4 oz)</span>.
+            </li>
+            <li class="box-price-highlights">
+              <div class="box-price">
+                <div>$<span class="price-dollar">19</span><span class="price-cents">99</span></div>
+                <div class="quantity-included">2 bags included</div>
               </div>
-            <div class="form-row">
-              <div id="card-element">
-                <!-- a Stripe Element will be inserted here. -->
+              <div class="box-highlights">
+                <ul>
+                  <li><span>Product Highlights</span></li>
+                  <li><span>Free of corn, grains, &amp; gluten</span></li>
+                  <li><span>USA sourced ingredients</span></li>
+                  <li><span>Made from Omega-3 rich ostrich burgers</span></li>
+                </ul>
               </div>
-
-              <!-- Used to display form errors -->
-              <div id="card-errors" role="alert"></div>
-            </div>
-          </div>
-        </fieldset>
-
-        <div id="order-summary">
-          <div id="summary">
-            <h2>Order Summary</h2>
-          </div>
-          <ul id="order-details">
-            <li id="subtotal">Subtotal <span>$1.99</span></li>
-            <li id="tax">GA Sales Tax <span>$0.04</span></li>
+            </li>
+            <li class="box-quantity-checkout">
+              <div class="box-quantity">
+                <button class="subtract"></button><div  class="selected-quantity">1</div><button class="add"></button>
+              </div>
+              <div class="add-to-cart">
+                <button>Add to Cart</button>
+              </div>
+            </li>
           </ul>
-          <div id="order">Order Total <span>$1.71</span></div>
-        </div>
+        </section>
+      </li>
 
-        <div class="signup-container">
-          <button type="submit" class="buy-box checkout submit select-choice">Place Order</button>
+      <li class="multivitamin-box">
+        <div class="product-big-images">
+          <div index="0"><img src="../images/treat-boxes/mosaic-product-group.jpg"/></div>
         </div>
-      </div>
-    </form>
+        <div class="product-small-images">
+          <div index="0"><img src="../images/treat-boxes/mosaic-product-group-small.jpg"/></div>
+          <div index="1"><img src="../images/treat-boxes/mosaic-product-1-small.jpg"/></div>
+          <div index="2"><img src="../images/treat-boxes/mosaic-product-2-small.jpg"/></div>
+          <div index="3"><img src="../images/treat-boxes/placeholder-small.jpg"/></div>
+        </div>
+        <section class="box-details">
+          <ul>
+            <li class="box-title">
+              Multivitamin Box
+            </li>
+            <li class="box-contents">
+              These tasty treats are full of multivitamins for your dog’s immune and digestive health. This box includes <span class="box-product">1 Duck Jerky Multivitamin &amp; Immune Maintenance (7 oz)</span> and <span class="box-product">1 Lamb Jerky Digestive Health &amp; Probiotic</span>.
+            </li>
+            <li class="box-price-highlights">
+              <div class="box-price">
+                <div>$<span class="price-dollar">24</span><span class="price-cents">99</span></div>
+                <div class="quantity-included">2 bags included</div>
+              </div>
+              <div class="box-highlights">
+                <ul>
+                  <li><span>Product Highlights</span></li>
+                  <li><span>Free of corn, grains, &amp; gluten</span></li>
+                  <li><span>USA sourced ingredients</span></li>
+                  <li><span>Soft chew for all size dogs</span></li>
+                </ul>
+              </div>
+            </li>
+            <li class="box-quantity-checkout">
+              <div class="box-quantity">
+                <button class="subtract"></button><div>1</div><button class="add"></button>
+              </div>
+              <div class="add-to-cart">
+                <button>Add to Cart</button>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </li>
 
+            <li class="wellness-box">
+        <div class="product-big-images">
+          <div index="0"><img src="../images/treat-boxes/mosaic-product-group.jpg"/></div>
+        </div>
+        <div class="product-small-images">
+          <div index="0"><img src="../images/treat-boxes/mosaic-product-group-small.jpg"/></div>
+          <div index="1"><img src="../images/treat-boxes/mosaic-product-1-small.jpg"/></div>
+          <div index="2"><img src="../images/treat-boxes/mosaic-product-2-small.jpg"/></div>
+          <div index="3"><img src="../images/treat-boxes/placeholder-small.jpg"/></div>
+        </div>
+        <section class="box-details">
+          <ul>
+            <li class="box-title">
+              Wellness Box
+            </li>
+            <li class="box-contents">
+              Treat your pup to these goodies that are great for hip, joint, skin and coat health. This box includes <span class="box-product">1 Beef Jerky Hip &amp; Joint Formula (7 oz)</span> and <span class="box-product">1 Chicken Jerky Skin &amp; Coat Formula (7 oz)</span>.
+            </li>
+            <li class="box-price-highlights">
+              <div class="box-price">
+                <div>$<span class="price-dollar">24</span><span class="price-cents">99</span></div>
+                <div class="quantity-included">2 bags included</div>
+              </div>
+              <div class="box-highlights">
+                <ul>
+                  <li><span>Product Highlights</span></li>
+                  <li><span>Free of corn, grains, &amp; gluten</span></li>
+                  <li><span>USA sourced ingredients</span></li>
+                  <li><span>Soft chew for all size dogs</span></li>
+                </ul>
+              </div>
+            </li>
+            <li class="box-quantity-checkout">
+              <div class="box-quantity">
+                <button class="subtract"></button><div>1</div><button class="add"></button>
+              </div>
+              <div class="add-to-cart">
+                <button>Add to Cart</button>
+              </div>
+            </li>
+          </ul>
+        </section>
+      </li>
+
+    </ul>
   </section>
 
   <div id="footer">
