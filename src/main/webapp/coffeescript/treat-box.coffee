@@ -5,7 +5,7 @@ $(document).ready ->
     $('.product-choice').prop("checked", false)
     $('.product').removeClass('selected')
 
-  $('.add-to-cart').on 'click', (event) ->
+  $('.add-to-cart button').on 'click', (event) ->
     $('#shopping-cart').addClass('opened')
 
   $('#main').on 'click', '.mobile-close, .continue-shopping', (event) ->

@@ -5,6 +5,7 @@ import net.liftweb._
   import util._
     import Helpers._
   import http._
+  import mapper.{By}
   import common._
   import sitemap.Menu
   import js._
@@ -41,6 +42,10 @@ class BoxDetails extends Loggable {
   import BoxDetails._
 
   var user = BoxDetails.thanksgivingBoxMenu.currentValue
+  
+  val exoticBox = PetBox.find(By(PetBox.name, "Exotic Proteins Box"))
+  val wellnessBox = PetBox.find(By(PetBox.name, "Wellness Box"))
+  val multivitaminBox = PetBox.find(By(PetBox.name, "Multivitamin Box"))
 
   var exoticCount = 1
   var wellnessCount = 1
@@ -73,6 +78,14 @@ class BoxDetails extends Loggable {
     boxRenderer.setHtml
   }
 
+  def addToCart(box: Box[PetBox], count: Int) = {
+    box.map { petBox =>
+      BoxDetailsFlow.shoppingCart(BoxDetailsFlow.shoppingCart ++ List((count, petBox)))
+    }
+
+    cartRenderer.map(_.setHtml).openOr(Noop)
+  }
+
   def render = {
     "#shopping-cart" #> idMemoize { renderer =>
       val cart = BoxDetailsFlow.shoppingCart.is
@@ -96,17 +109,20 @@ class BoxDetails extends Loggable {
     ".exotic-box .box-quantity-checkout" #> idMemoize { renderer => 
       ".selected-quantity *" #> exoticCount &
       ".subtract [onclick]" #> ajaxInvoke(() => updateCount("exotic", -1, renderer)) &
-      ".add [onclick]" #> ajaxInvoke(() => updateCount("exotic", 1, renderer)) 
+      ".add [onclick]" #> ajaxInvoke(() => updateCount("exotic", 1, renderer)) &
+      ".add-to-cart button [onclick]" #> ajaxInvoke(() => addToCart(exoticBox, exoticCount))
     } &
     ".wellness-box .box-quantity-checkout" #> idMemoize { renderer =>
       ".selected-quantity *" #> wellnessCount &
       ".subtract [onclick]" #> ajaxInvoke(() => updateCount("wellness", -1, renderer)) &
-      ".add [onclick]" #> ajaxInvoke(() => updateCount("wellness", 1, renderer)) 
+      ".add [onclick]" #> ajaxInvoke(() => updateCount("wellness", 1, renderer)) &
+      ".add-to-cart button [onclick]" #> ajaxInvoke(() => addToCart(wellnessBox, wellnessCount))
     } &
     ".multivitamin-box .box-quantity-checkout" #> idMemoize { renderer =>
       ".selected-quantity *" #> multivitaminCount &
       ".subtract [onclick]" #> ajaxInvoke(() => updateCount("multivitamin", -1, renderer)) &
-      ".add [onclick]" #> ajaxInvoke(() => updateCount("multivitamin", 1, renderer)) 
+      ".add [onclick]" #> ajaxInvoke(() => updateCount("multivitamin", 1, renderer)) &
+      ".add-to-cart button [onclick]" #> ajaxInvoke(() => addToCart(multivitaminBox, multivitaminCount))
     }
   }
 }
