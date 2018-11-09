@@ -1,4 +1,5 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
+  <div data-lift="BoxDetails.render">
   <div id="shopping-cart" class="opened">
     <div class="cart-contents">
       <h3>Great Choice!</h3>
@@ -14,25 +15,6 @@
             <li class="remove-box"></li>
             <li>
               <span class="cart-box-name">Good for you Box</span>
-            </li>
-          </ul>
-          <ul class="quantity-price">
-            <li class="box-quantity">
-              <button class="subtract"></button><div class="selected-quantity">1</div><button class="add"></button>
-            </li>
-            <li class="item-price">
-              $19.99
-            </li>
-          </ul>
-        </li>
-        <li class="cart-item">
-          <div class="cart-product-shot">
-            <img class="cart-product-image" src="../images/treat-boxes/mosaic-product-group-small.jpg">
-          </div>
-          <ul class="cart-box">
-            <li class="remove-box"></li>
-            <li>
-              <span class="cart-box-name">Tasty Box</span>
             </li>
           </ul>
           <ul class="quantity-price">
@@ -132,7 +114,7 @@
             </li>
             <li class="box-quantity-checkout">
               <div class="box-quantity">
-                <button class="subtract"></button><div  class="selected-quantity">1</div><button class="add"></button>
+                <button class="subtract"></button><div class="selected-quantity">1</div><button class="add"></button>
               </div>
               <div class="add-to-cart">
                 <button>Add to Cart</button>
@@ -176,7 +158,7 @@
             </li>
             <li class="box-quantity-checkout">
               <div class="box-quantity">
-                <button class="subtract"></button><div>1</div><button class="add"></button>
+                <button class="subtract"></button><div class="selected-quantity">1</div><button class="add"></button>
               </div>
               <div class="add-to-cart">
                 <button>Add to Cart</button>
@@ -220,7 +202,7 @@
             </li>
             <li class="box-quantity-checkout">
               <div class="box-quantity">
-                <button class="subtract"></button><div>1</div><button class="add"></button>
+                <button class="subtract"></button><div class="selected-quantity">1</div><button class="add"></button>
               </div>
               <div class="add-to-cart">
                 <button>Add to Cart</button>
@@ -262,5 +244,6 @@
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=box-landing">
   </head_merge>
+</div>
 </div>
 

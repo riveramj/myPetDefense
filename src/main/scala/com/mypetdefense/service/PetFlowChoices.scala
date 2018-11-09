@@ -21,3 +21,7 @@ object PetFlowChoices extends Loggable {
   object purchased extends SessionVar[Box[Boolean]](Empty)
   object boxSalesInfo extends SessionVar[Box[(Int, Int, Double)]](Empty)
 }
+
+object BoxDetailsFlow extends Loggable {
+  object shoppingCart extends SessionVar[List[(Int, PetBox)]](Nil)
+}

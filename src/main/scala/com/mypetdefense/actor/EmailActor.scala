@@ -670,8 +670,8 @@ trait BoxReceiptEmailHandling extends EmailHandlerChain {
         "#ship-city *" #> order.city.get &
         "#ship-state *" #> order.state.get &
         "#ship-zip *" #> order.zip.get &
-        ".big-quantity *" #> order.bigQuantity.get &
-        ".small-quantity *" #> order.smallQuantity.get &
+        //".big-quantity *" #> order.bigQuantity.get &
+        //".small-quantity *" #> order.smallQuantity.get &
         ".amount-due *" #> (order.amountPaid.get - order.taxPaid.get) &
         "#tax-due *" #> order.taxPaid.get &
         "#total *" #> order.amountPaid.get 
@@ -707,8 +707,8 @@ trait BoxShippedEmailHandling extends EmailHandlerChain {
         "#ship-city" #> order.city.get &
         "#ship-state" #> order.state.get &
         "#ship-zip" #> order.zip.get &
-        ".big-quantity *" #> order.bigQuantity &
-        ".small-quantity *" #> order.smallQuantity &
+        //".big-quantity *" #> order.bigQuantity &
+        //".small-quantity *" #> order.smallQuantity &
         ".tax *" #> order.taxPaid &
         ".total *" #> order.amountPaid 
       }
