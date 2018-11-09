@@ -1,7 +1,7 @@
 package com.mypetdefense.util
 
 import com.mypetdefense.model._
-import com.mypetdefense.service.{ReportingService, TaxJarService, ParentService}
+import com.mypetdefense.service._
 import net.liftweb._
   import common._
   import util._
@@ -238,6 +238,28 @@ object DataLoader extends Loggable {
       products.map { case (sku, description) =>
         FriendsFamilyProduct.createProduct(sku, description)
       }
+    }
+  }
+
+  def createBoxAccessKey = {
+    val possibleActiveParentsWithoutKey = User.findAll(
+      By(User.userType, UserType.Parent),
+      By(User.status, Status.Active),
+      NullRef(User.boxSalesKey)
+    )
+
+    val activeParentsWithoutKey = possibleActiveParentsWithoutKey.filter { parent =>
+      val subscription = parent.getSubscription
+      val subscriptionIsActive_? = subscription.map(_.status.get == Status.Active).getOrElse(false)
+      val userHasPets_? = parent.activePets.size > 0
+
+      (subscriptionIsActive_? && userHasPets_?)
+    }
+
+    activeParentsWithoutKey.map { parent =>
+      val boxKey = KeyService.createBoxSalesKey
+
+      parent.boxSalesKey(boxKey).saveMe
     }
   }
 

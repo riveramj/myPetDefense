@@ -181,6 +181,7 @@ object Paths {
     friendsfamily.Dashboard.friendsFamilyLabelsExportMenu,
     friendsfamily.Orders.menu,
     friendsfamily.Products.menu,
+    BoxDetails.thanksgivingBoxMenu,
     inventory.InventoryItems.menu,
     inventory.Reconciliations.menu,
     inventory.InventoryChangeAudits.menu,

@@ -56,6 +56,7 @@ class Boot {
       FriendsFamilyProduct,
       FriendsFamilyOrder,
       FriendsFamilyOrderLineItem,
+      BoxOrder,
       ItemReconciliation,
       ReconciliationEvent,
       InventoryItem,
@@ -67,6 +68,7 @@ class Boot {
     //DataLoader.loadProducts
     //DataLoader.loadAdmin
     DataLoader.updateParentNoPets
+    DataLoader.createBoxAccessKey
     //DataLoader.createFriendsFamilyProducts
     //DataLoader.updateShipmentShipStationId
     //DataLoader.updateGeorgiaTaxRates

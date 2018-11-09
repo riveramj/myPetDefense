@@ -6,7 +6,7 @@ import net.liftweb._
   import util._
 
 import com.mypetdefense.util.RandomIdGenerator._
-import com.mypetdefense.service.AccessKeyService._
+import com.mypetdefense.service.KeyService._
 import com.mypetdefense.snippet.NewParent
 import com.mypetdefense.util.TitleCase
 
@@ -30,6 +30,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object phone extends MappedString(this, 100)
   object accessKey extends MappedString(this, 100)
   object resetPasswordKey extends MappedString(this, 100)
+  object boxSalesKey extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
   object referer extends MappedLongForeignKey(this, Agency)
   object salesAgentId extends MappedString(this, 100)
@@ -79,6 +80,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .lastName(TitleCase(lastName))
       .stripeId(stripeId)
       .email(email)
+      .boxSalesKey(createAccessKey)
       .phone(phone)
       .coupon(coupon)
       .referer(referer)
@@ -119,6 +121,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .lastName(TitleCase(lastName))
       .email(email)
       .accessKey(createAccessKey)
+      .boxSalesKey(createAccessKey)
       .agency(agency)
       .userType(userType)
       .referer(referer)
@@ -148,6 +151,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .email(parentInfo.email)
       .phone(parentInfo.phone.getOrElse(""))
       .accessKey(createAccessKey)
+      .boxSalesKey(createAccessKey)
       .userType(UserType.Parent)
       .referer(referer)
       .salesAgentId(salesAgentId)
@@ -201,6 +205,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .phone("")
       .accessKey("")
       .resetPasswordKey("")
+      .boxSalesKey("")
       .status(Status.Cancelled)
       .saveMe
   }

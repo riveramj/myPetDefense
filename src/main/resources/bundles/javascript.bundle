@@ -6,6 +6,10 @@ billing
 base.js
 stripe.js
 
+box-landing
+base.js
+stripe.js
+
 profile
 profile.js
 base.js
@@ -55,3 +59,8 @@ base.js
 dashboard
 admin
 ajax-file-upload.js
+
+treat-box
+slick/slick.min.js
+treat-box.js
+base.js

@@ -48,6 +48,8 @@ case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMe
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
 case class NotifyParentGrowthRate(pet: Pet, newProduct: String, user: User) extends EmailActorMessage
+case class BoxReceiptEmail(order: BoxOrder) extends EmailActorMessage
+case class BoxShippedEmail(order: BoxOrder) extends EmailActorMessage
 case class DailySalesEmail(
   agentNameAndCount: List[(String, Int)],
   monthAgentNameAndCount: List[(String, Int)],
@@ -648,6 +650,73 @@ trait InternalDailyEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait BoxReceiptEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case BoxReceiptEmail(
+      order
+    ) =>
+      val template =
+    Templates("emails-hidden" :: "box-receipt-email" :: Nil) openOr NodeSeq.Empty
+
+      val subject = "My Pet Defense Receipt"
+      val email = order.email.get
+
+      val transform = {
+        "#parent-name *" #> order.firstName &
+        ".name *" #> (order.firstName + " " + order.lastName) &
+        "#ship-address-1 *" #> order.street1.get &
+        "#ship-address-2" #> ClearNodesIf(order.street2.get == "") andThen
+        "#ship-address-2-content *" #> order.street2.get &
+        "#ship-city *" #> order.city.get &
+        "#ship-state *" #> order.state.get &
+        "#ship-zip *" #> order.zip.get &
+        ".big-quantity *" #> order.bigQuantity.get &
+        ".small-quantity *" #> order.smallQuantity.get &
+        ".amount-due *" #> (order.amountPaid.get - order.taxPaid.get) &
+        "#tax-due *" #> order.taxPaid.get &
+        "#total *" #> order.amountPaid.get 
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
+trait BoxShippedEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case BoxShippedEmail(
+      order
+    ) =>
+      val template =
+    Templates("emails-hidden" :: "box-shipped-email" :: Nil) openOr NodeSeq.Empty
+
+      val subject = "My Pet Defense Box Shipped!"
+      val email = order.email.get
+      val trackingNumber = order.trackingNumber.get
+
+      val trackingLink = s"https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}"
+
+      val transform = {
+        "#ship-date" #> dateFormatter.format(new Date()) &
+        ".tracking-link [href]" #> trackingLink &
+        ".tracking-number *" #> trackingNumber &
+        "#parent-name" #> order.firstName &
+        ".name" #> (order.firstName + " " + order.lastName) &
+        "#ship-address-1" #> order.street1.get &
+        "#ship-address-2" #> ClearNodesIf(order.street2.get == "") andThen
+        "#ship-address-2-content" #> order.street2.get &
+        "#ship-city" #> order.city.get &
+        "#ship-state" #> order.state.get &
+        "#ship-zip" #> order.zip.get &
+        ".big-quantity *" #> order.bigQuantity &
+        ".small-quantity *" #> order.smallQuantity &
+        ".tax *" #> order.taxPaid &
+        ".total *" #> order.amountPaid 
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -746,6 +815,8 @@ trait EmailActor extends EmailHandlerChain
                     with NotifyParentGrowthRateHandling
                     with DailySalesEmailHandling
                     with InternalDailyEmailHandling
+                    with BoxReceiptEmailHandling
+                    with BoxShippedEmailHandling
                     with TestimonialEmailHandling {
 
   val baseEmailTemplate = 
