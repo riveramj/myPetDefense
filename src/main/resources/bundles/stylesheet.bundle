@@ -79,6 +79,9 @@ legal.css
 box-landing
 box-landing.css
 
+box-checkout
+box-checkout.css
+
 inventory-items
 inventory-items.css
 admin.css
