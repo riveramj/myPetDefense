@@ -62,7 +62,9 @@ class Boot {
       InventoryItem,
       InventoryChangeAudit,
       Insert,
-      InventoryItemPart
+      InventoryItemPart,
+      PetBox,
+      BoxOrderLineItem
     )
 
     //DataLoader.loadProducts
@@ -75,6 +77,7 @@ class Boot {
     DataLoader.updateProductSku
     DataLoader.loadWelcomeInserts
     DataLoader.resetUpcomingBillingCylces
+    DataLoader.createPetBoxes
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")

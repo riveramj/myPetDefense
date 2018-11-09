@@ -11,6 +11,7 @@ class BoxOrder extends LongKeyedMapper[BoxOrder] with IdPK with OneToMany[Long, 
   def getSingleton = BoxOrder
   object boxOrderId extends MappedLong(this){
     override def dbIndexed_? = true
+    override def defaultValue = generateLongId
   }
   object user extends MappedLongForeignKey(this, User)
   object firstName extends MappedString(this, 100)
@@ -29,8 +30,7 @@ class BoxOrder extends LongKeyedMapper[BoxOrder] with IdPK with OneToMany[Long, 
   object dateReceived extends MappedDateTime(this)
   object taxPaid extends MappedDouble(this)
   object amountPaid extends MappedDouble(this)
-  object bigQuantity extends MappedInt(this)
-  object smallQuantity extends MappedInt(this)
+  object boxesOrdered extends MappedOneToMany(BoxOrderLineItem, BoxOrderLineItem.order)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -48,12 +48,11 @@ object BoxOrder extends BoxOrder with LongKeyedMetaMapper[BoxOrder] {
     stripeChargeId: String,
     amountPaid: Double,
     taxPaid: Double,
-    bigQuantity: Int,
-    smallQuantity: Int
+    boxes: List[(Int, PetBox)]
   ) = {
     val dateProcessed = new Date()
 
-    BoxOrder.create
+    val newBoxOrder = BoxOrder.create
       .boxOrderId(generateLongId)
       .stripeChargeId(stripeChargeId)
       .user(user)
@@ -68,8 +67,42 @@ object BoxOrder extends BoxOrder with LongKeyedMetaMapper[BoxOrder] {
       .dateProcessed(dateProcessed)
       .amountPaid(amountPaid)
       .taxPaid(taxPaid)
-      .bigQuantity(bigQuantity)
-      .smallQuantity(smallQuantity)
       .saveMe
+
+    boxesOrdered.map { box =>
+      BoxOrderLineItem.createBoxOrderLineItems(boxes, newBoxOrder)
+    }
+
+    newBoxOrder
   }
 }
+
+class BoxOrderLineItem extends LongKeyedMapper[BoxOrderLineItem] with IdPK {
+  def getSingleton = BoxOrderLineItem
+  object orderLineItemId extends MappedLong(this){
+    override def dbIndexed_? = true
+    override def defaultValue = generateLongId
+  }
+
+  object order extends MappedLongForeignKey(this, BoxOrder)
+  object box extends MappedLongForeignKey(this, PetBox)
+  object quantity extends MappedInt(this)
+  object createdAt extends MappedDateTime(this) {
+    override def defaultValue = new Date()
+  }
+
+  def createBoxOrderLineItems(
+    boxes: List[(Int, PetBox)],
+    order: BoxOrder
+  ) = {
+    boxes.map { case (quantity, box) =>
+      BoxOrderLineItem.create
+      .quantity(quantity)
+      .box(box)
+      .order(order)
+      .saveMe
+    }
+  }
+}
+
+object BoxOrderLineItem extends BoxOrderLineItem with LongKeyedMetaMapper[BoxOrderLineItem]

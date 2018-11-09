@@ -198,8 +198,8 @@ object DataLoader extends Loggable {
 
   def loadWelcomeInserts = {
     if (Insert.findAll().isEmpty) {
-      Insert.createNewInsert("Welcome Brochure", "100017")
-      Insert.createNewInsert("TPP Welcome Insert", "100018")
+      Insert.createNewInsert("Welcome Insert", "450006")
+      Insert.createNewInsert("TPP Registrations Welcome Insert", "450027")
     }
   }
 
@@ -310,6 +310,14 @@ object DataLoader extends Loggable {
       user <- subscription.user.obj
     } yield {
       ParentService.updateNextShipDate(subscription, Full(user))
+    }
+  }
+
+  def createPetBoxes = {
+    if (PetBox.findAll().isEmpty) {
+      PetBox.createNewPetBox("Exotic Proteins Box", 19.99)
+      PetBox.createNewPetBox("Wellness Box", 24.99)
+      PetBox.createNewPetBox("Multivitamin Box", 24.99)
     }
   }
 }

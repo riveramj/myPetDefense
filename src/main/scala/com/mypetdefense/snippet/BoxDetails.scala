@@ -5,6 +5,7 @@ import net.liftweb._
   import util._
     import Helpers._
   import http._
+  import mapper.{By}
   import common._
   import sitemap.Menu
   import js._
@@ -37,252 +38,91 @@ object BoxDetails extends Loggable {
     MatchWithoutCurrentValue
 }
 
-case object UseNewCard extends MyPetDefenseEvent("use-new-card")
-
 class BoxDetails extends Loggable {
   import BoxDetails._
 
   var user = BoxDetails.thanksgivingBoxMenu.currentValue
-  var existingUser_? =  if (user.isDefined) true else false
-  var useExistingCard = true
+  
+  val exoticBox = PetBox.find(By(PetBox.name, "Exotic Proteins Box"))
+  val wellnessBox = PetBox.find(By(PetBox.name, "Wellness Box"))
+  val multivitaminBox = PetBox.find(By(PetBox.name, "Multivitamin Box"))
 
-  var email = user.map(_.email.get).openOr("")
-  var firstName = user.map(_.firstName.get).openOr("")
-  var lastName = user.map(_.lastName.get).openOr("")
-  var address = user.flatMap(_.shippingAddress)
-  var street1 = address.map(_.street1.get).openOr("")
-  var street2 = address.map(_.street2.get).openOr("")
-  var city = address.map(_.city.get).openOr("")
-  var state = address.map(_.state.get).openOr("")
-  var zip = address.map(_.zip.get).openOr("")
+  var exoticCount = 1
+  var wellnessCount = 1
+  var multivitaminCount = 1
 
-  var password = ""
-
-  var bigQuantity = 0
-  var smallQuantity = 0
-  val bigBoxCost = 29.99
-  val smallBoxCost = 19.99
-
-  var taxDue = 0D
-  var taxRate = 0D
-  var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
-  var billingCardRenderer: Box[IdMemoizeTransform] = None
-  var checkoutRenderer: Box[IdMemoizeTransform] = None
-
-  var stripeToken = ""
+  var cartRenderer: Box[IdMemoizeTransform] = Empty
 
   user.map(SecurityContext.logIn(_))
 
-  def findSubtotal = {
-    (bigQuantity * bigBoxCost) + (smallQuantity * smallBoxCost)
-  }
-
-  def calculateTax(possibleState: String, possibleZip: String) = {
-    state = possibleState
-    zip = possibleZip
-
-    val taxInfo = TaxJarService.findTaxAmoutAndRate(
-      city,
-      state,
-      zip,
-      findSubtotal
-    )
-
-    taxDue = taxInfo._1
-    taxRate = taxInfo._2
-
-    priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
-  }
-
-  def calculateSubtotal(boxSize: String, possibleQuantity: String) = {
-    boxSize match {
-      case "big" =>
-        bigQuantity = tryo(possibleQuantity.toInt).openOr(0)
-      case "small" =>
-        smallQuantity = tryo(possibleQuantity.toInt).openOr(0)
+  def updateCount(boxName: String, amount: Int, boxRenderer: IdMemoizeTransform) = {
+    boxName match {
+      case "exotic" =>
+        exoticCount = exoticCount + amount
+        
+        if (exoticCount < 1)
+          exoticCount = 1
+      case "wellness" =>
+        wellnessCount = wellnessCount + amount
+        
+        if (wellnessCount < 1)
+          wellnessCount = 1
+      case "multivitamin" =>
+        multivitaminCount = multivitaminCount + amount
+        
+        if (multivitaminCount < 1)
+          multivitaminCount = 1
       case _ =>
     }
 
-    priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+    boxRenderer.setHtml
   }
 
-  def orderBox() = {
-    val validateFields = (List(
-        validEmailFormat(email, "#email"),
-        checkEmpty(firstName, "#first-name"),
-        checkEmpty(lastName, "#last-name"),
-        checkEmpty(street1, "#street-1"),
-        checkEmpty(city, "#city"),
-        checkEmpty(state, "#state"),
-        checkEmpty(zip, "#zip")
-      ) ++ checkNonZero(bigQuantity, smallQuantity, "#big-quantity", "#small-quantity")).flatten
-
-    if(!validateFields.isEmpty) {
-      validateFields.foldLeft(Noop)(_ & _)
-    } else {
-      val stripeId = user.map(_.stripeId.get).openOr("")
-      val amountPaid = findSubtotal + taxDue
-
-      val boxCharge = {
-        val stripeAmount = (amountPaid * 100).toLong
-        val internalSaleDescription = "Thanksgiving Box"
-
-        if (existingUser_? && useExistingCard) {
-          val stripeCustomer = ParentService.getStripeCustomer(stripeId)
-
-          ParentService.chargeStripeCustomer(
-            stripeAmount,
-            stripeCustomer.map(_.id),
-            internalSaleDescription
-          )
-        } else if (existingUser_?) {
-          val stripeCustomer = ParentService.getStripeCustomer(stripeId)
-
-          ParentService.chargeStripeCustomerNewCard(
-            stripeAmount,
-            stripeCustomer.map(_.id),
-            stripeToken,
-            internalSaleDescription
-          )
-        } else {
-          ParentService.chargeGuestCard(
-            stripeAmount,
-            stripeToken,
-            internalSaleDescription
-          )
-        }
-      }
-
-      (for {
-        charge <- boxCharge
-      } yield {
-        val address = Address.create
-          .street1(street1)
-          .street2(street2)
-          .city(city)
-          .state(state.toUpperCase)
-          .zip(zip)
-
-        val realEmail = {
-          if (existingUser_?)
-            user.map(_.email.get).openOr("")
-          else
-            email
-        }
-
-        val newBoxOrder = BoxOrder.createBoxOrder(
-          user,
-          firstName,
-          lastName,
-          realEmail,
-          address,
-          charge.id.getOrElse(""),
-          amountPaid,
-          taxDue,
-          bigQuantity,
-          smallQuantity
-        )
-
-        EmailActor ! BoxReceiptEmail(newBoxOrder)
-
-        boxSalesInfo(Full((bigQuantity, smallQuantity, amountPaid)))
-
-        S.redirectTo(Success.menu.loc.calcDefaultHref)
-      }).openOr(Noop)
+  def addToCart(box: Box[PetBox], count: Int) = {
+    box.map { petBox =>
+      BoxDetailsFlow.shoppingCart(BoxDetailsFlow.shoppingCart ++ List((count, petBox)))
     }
-  }
 
-  def useNewCard() = {
-    useExistingCard = false
-
-    UseNewCard
-  }
-
-  def login = {
-    val loginResult = LoginService.login(email, password, true)
-
-    if (loginResult == Noop) {
-      println("true")
-      checkoutRenderer.map(_.setHtml).openOr(Noop)
-    } else {
-      println("false")
-      loginResult
-    }
-  }
-
-  val loginBindings = {
-    "#login-container" #> {
-      "#email" #> SHtml.text(email, email = _) &
-      "#password" #> SHtml.password(password, password = _) &
-      "#login" #> SHtml.ajaxSubmit("Log In", () => login)
-    }
+    cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def render = {
-    val orderSummary = {
-      "#order-summary" #> SHtml.idMemoize { renderer =>
-        priceAdditionsRenderer = Full(renderer)
+    "#shopping-cart" #> idMemoize { renderer =>
+      val cart = BoxDetailsFlow.shoppingCart.is
 
-        val subtotal = findSubtotal
+      cartRenderer = Full(renderer)
+      
+      val subtotal = cart.map { case (quantity, box) =>
+        quantity * box.price.get
+      }.foldLeft(0D)(_ + _)
 
-        val total = subtotal + taxDue
+      ".cart-item" #> cart.map { case (quantity, box) =>
+        val itemPrice = box.price.get * quantity
 
-        "#subtotal span *" #> f"$$$subtotal%2.2f" &
-        "#tax" #> ClearNodesIf(taxDue == 0D) &
-        "#tax span *" #> f"$$$taxDue%2.2f" &
-        "#order span *" #> f"$$$total%2.2f"
-      }
-    }
-
-    SHtml.makeFormsAjax andThen
-    loginBindings &
-    "#big-quantity" #> ajaxText("0", possibleQuantity => calculateSubtotal("big", possibleQuantity)) &
-    "#small-quantity" #> ajaxText("0", possibleQuantity => calculateSubtotal("small", possibleQuantity)) &
-    ".current-step" #> SHtml.idMemoize { renderer =>
-      user = SecurityContext.currentUser
-      existingUser_? =  if (user.isDefined) true else false
-      useExistingCard = true
-
-      email = user.map(_.email.get).openOr("")
-      firstName = user.map(_.firstName.get).openOr("")
-      lastName = user.map(_.lastName.get).openOr("")
-      address = user.flatMap(_.shippingAddress)
-      street1 = address.map(_.street1.get).openOr("")
-      street2 = address.map(_.street2.get).openOr("")
-      city = address.map(_.city.get).openOr("")
-      state = address.map(_.state.get).openOr("")
-      zip = address.map(_.zip.get).openOr("")
-
-      checkoutRenderer = Full(renderer)
-      orderSummary &
-      "#first-name" #> text(firstName, firstName = _) &
-      "#last-name" #> text(lastName, lastName = _) &
-      "#street-1" #> text(street1, street1 = _) &
-      "#street-2" #> text(street2, street2 = _) &
-      "#city" #> ajaxText(city, city = _) &
-      "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
-      "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
-      "#checkout-email" #> text(email, userEmail => email = userEmail.trim) &
-      "#checkout-email" #> {
-        if (existingUser_?) {
-          "^ [class+]" #> "disabled" &
-          "^ [disabled]" #> "disabled"
-        } else {
-          "^ [class+]" #> ""
-        }
+        ".cart-box-name *" #> box.name.get &
+        ".selected-quantity *" #> quantity &
+        ".item-price *" #> f"$$$itemPrice%2.2f"
       } &
-      ".billing-container" #> {
-        ".form-row [class+]" #> {
-          if (existingUser_? && useExistingCard)
-            "hide-card"
-          else
-            ""
-        } &
-        ".existing-card" #> ClearNodesIf(!existingUser_? || !useExistingCard) &
-        ".existing-card .change-card [onclick]" #> ajaxInvoke(useNewCard _)
-      } &
-      "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-      ".buy-box" #> ajaxSubmit("Place Order", () => orderBox)
+      ".subtotal *" #> f"$$$subtotal%2.2f"
+      //".checkout [href]" #> BoxCheckout.menu.loc.calcDefaultHref
+    } andThen
+    ".exotic-box .box-quantity-checkout" #> idMemoize { renderer => 
+      ".selected-quantity *" #> exoticCount &
+      ".subtract [onclick]" #> ajaxInvoke(() => updateCount("exotic", -1, renderer)) &
+      ".add [onclick]" #> ajaxInvoke(() => updateCount("exotic", 1, renderer)) &
+      ".add-to-cart button [onclick]" #> ajaxInvoke(() => addToCart(exoticBox, exoticCount))
+    } &
+    ".wellness-box .box-quantity-checkout" #> idMemoize { renderer =>
+      ".selected-quantity *" #> wellnessCount &
+      ".subtract [onclick]" #> ajaxInvoke(() => updateCount("wellness", -1, renderer)) &
+      ".add [onclick]" #> ajaxInvoke(() => updateCount("wellness", 1, renderer)) &
+      ".add-to-cart button [onclick]" #> ajaxInvoke(() => addToCart(wellnessBox, wellnessCount))
+    } &
+    ".multivitamin-box .box-quantity-checkout" #> idMemoize { renderer =>
+      ".selected-quantity *" #> multivitaminCount &
+      ".subtract [onclick]" #> ajaxInvoke(() => updateCount("multivitamin", -1, renderer)) &
+      ".add [onclick]" #> ajaxInvoke(() => updateCount("multivitamin", 1, renderer)) &
+      ".add-to-cart button [onclick]" #> ajaxInvoke(() => addToCart(multivitaminBox, multivitaminCount))
     }
   }
 }
