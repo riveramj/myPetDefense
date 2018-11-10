@@ -36,6 +36,8 @@ case object UseNewCard extends MyPetDefenseEvent("use-new-card")
 class BoxCheckout extends Loggable {
   import BoxCheckout._
 
+  var cartRenderer: Box[IdMemoizeTransform] = Empty
+
   var user = BoxDetails.thanksgivingBoxMenu.currentValue
   var existingUser_? =  if (user.isDefined) true else false
   var useExistingCard = true
@@ -109,7 +111,6 @@ class BoxCheckout extends Loggable {
         val internalSaleDescription = "Thanksgiving Box"
 
         if (existingUser_? && useExistingCard) {
-          println("in if")
           val stripeCustomer = ParentService.getStripeCustomer(stripeId)
 
           ParentService.chargeStripeCustomer(
@@ -118,7 +119,6 @@ class BoxCheckout extends Loggable {
             internalSaleDescription
           )
         } else if (existingUser_?) {
-          println("in if else")
           val stripeCustomer = ParentService.getStripeCustomer(stripeId)
 
           ParentService.chargeStripeCustomerNewCard(
@@ -128,7 +128,6 @@ class BoxCheckout extends Loggable {
             internalSaleDescription
           )
         } else {
-          println("in else")
           ParentService.chargeGuestCard(
             stripeAmount,
             stripeToken,
@@ -183,6 +182,35 @@ class BoxCheckout extends Loggable {
     UseNewCard
   }
 
+  def removeBoxFromCart(box: PetBox) = {
+    val cart = BoxDetailsFlow.shoppingCart.is
+
+    BoxDetailsFlow.shoppingCart(cart - box)
+
+    (
+      cartRenderer.map(_.setHtml).openOr(Noop) &
+      priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+    )
+  }
+
+  def updateCartCount(box: PetBox, newQuantity: Int) = {
+    val cart = BoxDetailsFlow.shoppingCart.is
+
+    val updatedCart = {
+      if (newQuantity < 1)
+        cart - box
+      else
+        cart + (box -> newQuantity)
+    }
+
+    BoxDetailsFlow.shoppingCart(updatedCart)
+
+    (
+      cartRenderer.map(_.setHtml).openOr(Noop) &
+      priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+    )
+  }
+
   def login = {
     val loginResult = LoginService.login(email, password, true)
 
@@ -207,11 +235,18 @@ class BoxCheckout extends Loggable {
     val orderSummary = {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
+        val cart = BoxDetailsFlow.shoppingCart.is
 
         val subtotal = findSubtotal
 
         val total = subtotal + taxDue
 
+        ".box-ordered" #> cart.map { case (box, quantity) =>
+          val boxTotal = quantity * box.price.get
+          ".ordered-quantity *" #> quantity &
+          ".ordered-box-name *" #> box.name.get &
+          ".box-total *" #> f"$$$boxTotal%2.2f"
+        } &
         ".subtotal-amount *" #> f"$$$subtotal%2.2f" &
         "#tax" #> ClearNodesIf(taxDue == 0D) &
         ".tax-amount *" #> f"$$$taxDue%2.2f" &
@@ -221,6 +256,28 @@ class BoxCheckout extends Loggable {
 
     SHtml.makeFormsAjax andThen
     loginBindings &
+    "#shopping-cart" #> idMemoize { renderer =>
+      val cart = BoxDetailsFlow.shoppingCart.is
+
+      cartRenderer = Full(renderer)
+      
+      val subtotal = cart.map { case (box, quantity) =>
+        quantity * box.price.get
+      }.foldLeft(0D)(_ + _)
+
+      ".cart-item" #> cart.map { case (box, quantity) =>
+        val itemPrice = box.price.get * quantity
+
+        ".cart-box-name *" #> box.name.get &
+        ".selected-quantity *" #> quantity &
+        ".remove-box [onclick]" #> ajaxInvoke(() => removeBoxFromCart(box)) &
+        ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity - 1)) &
+        ".add [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity + 1)) &
+        ".item-price *" #> f"$$$itemPrice%2.2f"
+      } &
+      ".subtotal *" #> f"$$$subtotal%2.2f" &
+      ".continue-shopping [href]" #> BoxDetails.thanksgivingBoxMenu.loc.calcDefaultHref
+    } &
     ".checkout-container" #> SHtml.idMemoize { renderer =>
       user = SecurityContext.currentUser
       existingUser_? =  if (user.isDefined) true else false

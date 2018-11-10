@@ -134,7 +134,6 @@ class BoxDetails extends Loggable {
         ".cart-box-name *" #> box.name.get &
         ".selected-quantity *" #> quantity &
         ".remove-box [onclick]" #> ajaxInvoke(() => removeBoxFromCart(box)) &
-        ".selected-quantity *" #> exoticCount &
         ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity - 1)) &
         ".add [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity + 1)) &
         ".item-price *" #> f"$$$itemPrice%2.2f"

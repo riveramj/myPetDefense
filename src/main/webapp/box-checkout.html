@@ -2,7 +2,7 @@
   <div data-lift="BoxCheckout.render">
   <div id="shopping-cart">
     <div class="cart-contents">
-      <h3>Great Choice!</h3>
+      <h3>Cart</h3>
       
       <h4>Current Products</h4>
 
@@ -83,18 +83,20 @@
             <input id="street-1" type="text">
             <input id="street-2" type="text">
           </label>
-          <label class="short-field city">
-            <span class="field-label">City</span>
-            <input id="city" type="text">
-          </label>
-          <label class="short-field state">
-            <span class="field-label">State</span>
-            <input id="state" type="text" maxlength="2">
-          </label>
-          <label class="short-field zip">
-            <span class="field-label">Zip</span>
-            <input id="zip" type="tel" maxlength="5">
-          </label>
+          <div class="city-state-zip">
+            <label class="short-field city">
+              <span class="field-label">City</span>
+              <input id="city" type="text">
+            </label>
+            <label class="short-field state">
+              <span class="field-label">State</span>
+              <input id="state" type="text" maxlength="2">
+            </label>
+            <label class="short-field zip">
+              <span class="field-label">Zip</span>
+              <input id="zip" type="tel" maxlength="5">
+            </label>
+          </div>
         </fieldset>
       </section>
       <section class="billing-information">
@@ -128,7 +130,7 @@
           <li>Boxes Ordered</li>
           <li class="box-ordered">
             <div class="ordered-box">
-              <span class="ordered-quantity">1</span> x <span class="ordered-name">goody box</span></div><div>$11.99</div>
+              <span class="ordered-quantity">1</span> x <span class="ordered-box-name">goody box</span></div><div class="box-total">$11.99</div>
           </li>
           <li id="subtotal">
             <div>Subtotal</div><div class="subtotal-amount">$1.99</div>

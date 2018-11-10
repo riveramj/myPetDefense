@@ -17,6 +17,72 @@
   display: inline-block;
 }
 
+.open-cart {
+  background-color: #ffffff;
+  color: #1D8884;
+  font-weight: $bold;
+  border: none;
+  text-transform: uppercase;
+  font-size: 14px;
+  padding: 5px 10px;
+
+  @media (min-width: $bp-medium) {
+    font-size: 16px;
+    padding: 13px 30px;
+  }
+
+  &:before {
+    @extend .fas;
+    content: fa-content($fa-var-shopping-cart);
+    margin-right: 6px;
+  
+    @media (min-width: $bp-medium) {
+      font-size: 20px;
+      margin-right: 8px;
+    }
+  }
+}
+
+.box-quantity {
+  flex-direction: row;
+
+  .selected-quantity {
+    padding: 9px 15px 8px;
+    font-size: 16px;
+    line-height: 26px;
+  }
+
+  button.subtract, button.add, .selected-quantity {
+    background-color: #F2F2F2;
+    display: inline-block;
+    vertical-align: middle;
+    border: solid 1px #CECECE;
+  }
+  
+  button.subtract, button.add {
+    width: 40px;
+    height: 45px;
+  }
+
+  button.subtract {
+    border-right: none;
+    
+    &:after {
+      @extend .fas;
+      content: fa-content($fa-var-minus);
+    }
+  }
+
+  button.add {
+    border-left: none;
+
+    &:after {
+      @extend .fas;
+      content: fa-content($fa-var-plus);
+    }
+  }
+}
+
 .checkout-container {
   padding: 25px 17px;
 
@@ -77,6 +143,10 @@ section {
   margin-bottom: 5px;
 }
 
+.hide-card {
+  display: none;
+}
+
 .existing-card, .form-row {
   border: 1px solid #CECECE;
   border-radius: 3px;
@@ -130,4 +200,40 @@ input.checkout {
   max-width: 339px;
   border: none;
   text-transform: uppercase;
+
+  &.processing {
+    cursor: not-allowed;
+    background-color: #cccccc;
+  }
+}
+
+#card-element iframe {
+  background-color: transparent !important;
+}
+
+.processing {
+  cursor: not-allowed;
+  background-color: #cccccc;
+}
+
+.disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.city-state-zip {
+  display: flex;
+  justify-content: space-between;
+}
+
+.city {
+  width: 175px;
+}
+
+.state {
+  width: 45px;
+}
+
+.zip {
+  width: 70px;
 }
