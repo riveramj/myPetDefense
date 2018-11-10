@@ -38,7 +38,7 @@ class BoxCheckout extends Loggable {
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
-  var user = BoxDetails.thanksgivingBoxMenu.currentValue
+  var user = SecurityContext.currentUser
   var existingUser_? =  if (user.isDefined) true else false
   var useExistingCard = true
 

@@ -5,24 +5,17 @@ import net.liftweb._
   import util._
     import Helpers._
   import http._
-  import mapper.{By}
+  import mapper.By
   import common._
   import sitemap.Menu
   import js._
       import JsCmds._
 
 import com.mypetdefense.service._
-    import ValidationService._
-    import PetFlowChoices._
 
 import com.mypetdefense._
   import model._
-  import snippet.admin.Dashboard
-  import snippet.agency.AgencyOverview
-import com.mypetdefense.util.{SecurityContext, ClearNodesIf}
-import com.mypetdefense.actor._
-
-import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription}
+import com.mypetdefense.util.SecurityContext
 
 object BoxDetails extends Loggable {
   import net.liftweb.sitemap._
@@ -119,6 +112,7 @@ class BoxDetails extends Loggable {
   }
 
   def render = {
+    "#logo-name a [href]" #> BoxDetails.thanksgivingBoxMenu.loc.calcDefaultHref &
     "#shopping-cart" #> idMemoize { renderer =>
       val cart = BoxDetailsFlow.shoppingCart.is
 
