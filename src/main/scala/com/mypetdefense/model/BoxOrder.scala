@@ -69,7 +69,7 @@ object BoxOrder extends BoxOrder with LongKeyedMetaMapper[BoxOrder] {
       .taxPaid(taxPaid)
       .saveMe
 
-    boxesOrdered.map { box =>
+    boxes.map { box =>
       BoxOrderLineItem.createBoxOrderLineItems(boxes, newBoxOrder)
     }
 

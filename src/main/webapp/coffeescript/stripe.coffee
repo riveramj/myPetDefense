@@ -42,10 +42,7 @@ $(document).on "validate-stripe-form", (event) ->
   $(".validation-error").remove()
   $("input.error").removeClass("error")
 
-  console.log newCard
-
   if newCard
-    console.log "in true"
     stripe.createToken(card).then((result) ->
       if (result.error)
         # Inform the user if there was an error
@@ -56,5 +53,4 @@ $(document).on "validate-stripe-form", (event) ->
         event.stripeCallback(result.token)
     )
   else
-    console.log "in else"
     event.stripeCallback("")
