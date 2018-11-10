@@ -1,5 +1,5 @@
 $(document).ready ->
-  $('#main').on 'click', '.mobile-close, .continue-shopping', (event) ->
+  $('#main').on 'click', '.mobile-close, .continue-shopping, .continue-checkout', (event) ->
     $('#shopping-cart').removeClass('opened')
 
   $('#main').on 'click', '.add-to-cart button, .open-cart', (event) ->

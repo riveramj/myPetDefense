@@ -275,8 +275,7 @@ class BoxCheckout extends Loggable {
         ".add [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity + 1)) &
         ".item-price *" #> f"$$$itemPrice%2.2f"
       } &
-      ".subtotal *" #> f"$$$subtotal%2.2f" &
-      ".continue-shopping [href]" #> BoxDetails.thanksgivingBoxMenu.loc.calcDefaultHref
+      ".subtotal *" #> f"$$$subtotal%2.2f"
     } &
     ".checkout-container" #> SHtml.idMemoize { renderer =>
       user = SecurityContext.currentUser

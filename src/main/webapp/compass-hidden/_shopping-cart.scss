@@ -94,20 +94,29 @@
     font-size: 15px;
   }
 
-  .continue-shopping {
+  .continue-shopping, .go-to-boxes {
     background: #ffffff;
     border: 1px solid #1D8884;
     color: #1D8884;
+    text-decoration: none;
+    display: block;
   }
 
   .checkout {
-    text-decoration: none;
     background: #259490;
     border: 1px solid #259490;
     color: #F7F7F7;
     letter-spacing: 0.8px;
     display: block;
     padding: 9px 9px 10px;
+  }
+
+  .go-to-boxes {
+    padding: 9.5px 8px;
+  }
+
+  .continue-checkout {
+    padding: 7px 9px 9px;
   }
 }
 
