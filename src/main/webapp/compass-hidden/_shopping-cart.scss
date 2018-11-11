@@ -8,14 +8,20 @@
   overflow-x: hidden;
   transition: 0.3s;
 
+  background-color: #ffffff;
+
   &.opened {
     width: 100%;
   }
 
-  .mobile-close {
-    background: rgba(0,0,0,0.5);
-    height: 100%;
-    overflow: hidden;
+  .desktop-close {
+    display: none;
+
+    @media (min-width: $bp-medium) {
+      background: rgba(0,0,0,0.5);
+      height: 100%;
+      overflow: hidden;
+    }
   }
 }
 
@@ -26,7 +32,7 @@
   float: right;
   height: 88%;
   height: calc(100% - 85px);
-  width: 300px;
+  width: 100%;
   overflow: scroll;
 
   @media (min-width: $bp-medium) {
@@ -51,7 +57,7 @@
   bottom: 0;
   margin: 0 -15px;
   border-top: 2px solid #CECECE;
-  width: 300px;
+  width: 100%;
   padding: 0 15px;
   background: #ffffff;
 
@@ -137,9 +143,15 @@
 .cart-box {
   display: inline-block;
   vertical-align: top;
-  margin: 17px 0 0 15px;
+  margin: 25px 0 0 15px;
+  width: calc(100% - 90px);
 
-  > li {
+  ul:first-child {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  li {
     padding-bottom: 5px;
   }
 }
@@ -150,9 +162,11 @@
 
 .remove-box {
   font-size: 13px;
-  position: absolute;
-  right: 17px;
   margin-top: -20px;
+  border: none;
+  background-color: #ffffff;
+  margin: 0;
+  padding: 0;
 
   &:after {
     @extend .fas;
@@ -167,10 +181,6 @@
 
   @media (min-width: $bp-medium) {
     margin: 0 -30px;
-  }
-
-  &:last-child {
-    border-bottom: 1px solid #CECECE;
   }
 
   .quantity-price {
