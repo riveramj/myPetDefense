@@ -59,10 +59,9 @@ class BoxCheckout extends Loggable {
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
   var billingCardRenderer: Box[IdMemoizeTransform] = None
   var checkoutRenderer: Box[IdMemoizeTransform] = None
+  var loginRenderer: Box[IdMemoizeTransform] = None
 
   var stripeToken = ""
-
-  user.map(SecurityContext.logIn(_))
 
   def findSubtotal = {
     val cart = BoxDetailsFlow.shoppingCart.is
@@ -215,19 +214,27 @@ class BoxCheckout extends Loggable {
     val loginResult = LoginService.login(email, password, true)
 
     if (loginResult == Noop) {
-      println("true")
-      checkoutRenderer.map(_.setHtml).openOr(Noop)
+
+      (
+        checkoutRenderer.map(_.setHtml).openOr(Noop) &
+        loginRenderer.map(_.setHtml).openOr(Noop)
+      )
     } else {
-      println("false")
       loginResult
     }
   }
 
   val loginBindings = {
-    "#login-container" #> {
-      "#email" #> SHtml.text(email, email = _) &
-      "#password" #> SHtml.password(password, password = _) &
-      "#login" #> SHtml.ajaxSubmit("Log In", () => login)
+    ".login-popover-container" #> SHtml.idMemoize { renderer =>
+      loginRenderer = Full(renderer)
+      val user = SecurityContext.currentUser
+
+      ".login-popover" #> ClearNodesIf(!user.isEmpty) &
+      ".login-popover #login-container" #> {
+        "#email" #> SHtml.text(email, email = _) &
+        "#password" #> SHtml.password(password, password = _) &
+        "#login" #> SHtml.ajaxSubmit("Log In", () => login)
+      }
     }
   }
 
@@ -318,6 +325,7 @@ class BoxCheckout extends Loggable {
             ""
         } &
         ".existing-card" #> ClearNodesIf(!existingUser_? || !useExistingCard) &
+        ".existing-card span *" #> "Card on file" &
         ".existing-card .change-card [onclick]" #> ajaxInvoke(useNewCard _)
       } &
       "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
