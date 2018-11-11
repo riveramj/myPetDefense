@@ -36,7 +36,7 @@
   margin-left: auto;
   float: right;
   height: 88%;
-  height: calc(100% - 85px);
+  height: calc(100% - 110px);
   width: 100%;
   overflow: scroll;
 
@@ -117,13 +117,14 @@
   }
 
   .continue-shopping, .go-to-boxes {
+    font-size: 14px;
     background: #ffffff;
     border: 1px solid #1D8884;
     color: #1D8884;
     text-decoration: none;
     display: block;
-    width: 175px;
-    padding: 10px 0 9px;
+    width: 166px;
+    padding: 10px 0 10px;
     text-transform: uppercase;
 
     @media (min-width: $bp-medium) {
@@ -140,7 +141,7 @@
     display: block;
     padding: 11px 0 11px;
     text-decoration: none;
-    width: 175px;
+    width: 166px;
     text-align: center;
     text-transform: uppercase;
 
@@ -163,12 +164,20 @@
   }
 
   .go-to-boxes {
-    padding: 9.5px 8px;
+    padding: 11.5px 8px;
     text-align: center;
+
+    @media (min-width: $bp-medium) {
+      padding: 16px 14px;
+    }
   }
 
   .continue-checkout {
-    padding: 7px 9px 9px;
+    padding: 10px 9px 9px;
+
+    @media (min-width: $bp-medium) {
+      padding: 14px 15px;
+    }
   }
 }
 
