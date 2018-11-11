@@ -29,7 +29,6 @@
   background-color: #404040;
 
   @media (min-width: $bp-medium) {
-    margin-top: -25px;
     padding-top: 60px;
 
     li {
@@ -160,6 +159,7 @@ li.box-price-highlights {
   text-align: left;
 
   @media (min-width: $bp-medium) {
+    justify-content: space-between;
     margin-bottom: 21px;
   }
 }
@@ -174,6 +174,7 @@ li.box-price-highlights {
 
   @media (min-width: $bp-medium) {
     margin-top: -15px;
+    width: auto;
   }
 
   .price-dollar {
@@ -205,6 +206,10 @@ li.box-price-highlights {
   flex-direction: row;
   vertical-align: top;
 
+  @media (min-width: $bp-medium) {
+    margin-right: 25px;
+  }
+
   li {
     margin-bottom: 4px;
     color: #B3E7E5;
@@ -214,7 +219,7 @@ li.box-price-highlights {
     max-width: 185px;
 
     @media (min-width: $bp-medium) {
-      max-width: 245px;
+      max-width: auto;
       text-align: left;
     }
 
@@ -343,9 +348,9 @@ li.box-quantity-checkout {
 
   @media (min-width: $bp-medium) {
     width: 500px;
-    margin: -255px auto 67px;
+    margin: -265px auto 65px;
     background-color: rgba(18,18,18,.8);
-    padding: 40px 60px 56px;
+    padding: 40px 60px;
   }
 
   ul {
