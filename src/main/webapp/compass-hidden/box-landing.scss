@@ -8,6 +8,10 @@
   background-repeat: no-repeat;
   padding-bottom: 38%;
 
+  @media (min-width: $bp-medium) {
+    padding-bottom: 45%;
+  }
+
   nav {
     display: inline-block;
     float: right;
@@ -24,14 +28,44 @@
   padding: 0 10px 10px;
   background-color: #404040;
 
-  li {
-    margin-bottom: 40px;
+  @media (min-width: $bp-medium) {
+    margin-top: -25px;
+    padding-top: 60px;
+
+    li {
+      text-align: center;
+    }
   }
+}
+
+.treat-your-dog {
+  display: none;
+
+  @media (min-width: $bp-medium) {
+    display: block;
+    color: #ffffff;
+    line-height: 26px;
+    font-size: 28px;
+    font-weight: $bold;
+    text-align: center;
+    margin-bottom: 27px;
+  }
+
 }
 
 .product-big-images {
   img {
     width: 100%;
+  }
+
+  @media (min-width: $bp-medium) {
+    display: inline-block;
+    vertical-align: text-bottom;
+
+    img {
+      height: 300px;
+      width: 200px;
+    }
   }
 }
 
@@ -43,9 +77,31 @@
     display: inline-block;
   }
 
+  @media (min-width: $bp-medium) {
+    padding: 0 15px;
+    display: inline-block;
+    position: relative;
+    top: 0;
+    margin-left: -4px;
+    background-color: #5D5D5D;
+    
+    > div {
+      display: block;
+      margin-bottom: 11px;
+
+      &:last-child {
+        margin-bottom: -1px;
+      }
+    }
+  }
+
   img {
     width: 65px;
     margin: 0 10px;
+
+    @media (min-width: $bp-medium) {
+      margin: 0
+    }
   }
 }
 
@@ -53,9 +109,19 @@
   background-color: #5D5D5D;
   box-shadow: 0px 2px 12px 0px #000000;
   padding: 15px;
+
+  @media (min-width: $bp-medium) {
+    display: inline-block;
+    box-shadow: none;
+    margin-left: -4px;
+    padding: 23px 0 25px;
+    vertical-align: top;
+
+    padding: 15px 30px 15px 15px;
+  }
 }
 
-.box-title {
+li.box-title {
   color: #B3E7E5;
   font-weight: $bold;
   font-size: 20px;
@@ -63,13 +129,25 @@
   padding-bottom: 8px;
   text-align: center;
   letter-spacing: 0.8px;
+
+  @media (min-width: $bp-medium) {
+    margin-bottom: 5px;
+    padding-bottom: 0;
+  }
 }
 
-.box-contents {
+li.box-contents {
   color: #ffffff;
   font-size: 14px;
   line-height: 17px;
   padding-bottom: 22px;
+  text-align: left;
+
+  @media (min-width: $bp-medium) {
+    width: 405px;
+    margin-bottom: 20px;
+    padding-bottom: 0;
+  }
 
   .box-product {
     font-weight: $bold;
@@ -77,8 +155,13 @@
   }
 }
 
-.box-price-highlights {
+li.box-price-highlights {
   display: flex;
+  text-align: left;
+
+  @media (min-width: $bp-medium) {
+    margin-bottom: 21px;
+  }
 }
 
 .box-price {
@@ -88,6 +171,10 @@
   
   width: 160px;
   flex-direction: row;
+
+  @media (min-width: $bp-medium) {
+    margin-top: -15px;
+  }
 
   .price-dollar {
     font-weight: $bold;
@@ -126,6 +213,11 @@
     list-style: disc;
     max-width: 185px;
 
+    @media (min-width: $bp-medium) {
+      max-width: 245px;
+      text-align: left;
+    }
+
     span {
       position: relative;
       left: -5px;
@@ -147,9 +239,15 @@
   }
 }
 
-.box-quantity-checkout {
+li.box-quantity-checkout {
   display: flex;
+  justify-content: space-between;
   padding-top: 32px;
+
+  @media (min-width: $bp-medium) {
+    padding-top: 0;
+    margin-bottom: 0;
+  }
 }
 
 .box-quantity {
@@ -193,7 +291,6 @@
 }
 
 .add-to-cart {
-  margin-left: 46px;
   flex-direction: row;
 
   button {
@@ -205,6 +302,10 @@
     font-weight: $bold;
     padding: 12px 29px 14px 30px;
     border: none;
+
+    @media (min-width: $bp-medium) {
+      width: 225px
+    }
   }
 }
 
@@ -228,7 +329,7 @@
     margin-right: 6px;
   
     @media (min-width: $bp-medium) {
-      font-size: 20px;
+      font-size: 14px;
       margin-right: 8px;
     }
   }
@@ -239,6 +340,13 @@
   color: #ffffff;
 
   padding: 29px 23px;
+
+  @media (min-width: $bp-medium) {
+    width: 500px;
+    margin: -255px auto 67px;
+    background-color: rgba(18,18,18,.8);
+    padding: 40px 60px 56px;
+  }
 
   ul {
     text-align: center;
@@ -260,4 +368,8 @@
 
 #footer, .legal, #need-help {
   background-color: #5D5D5D;
+}
+
+.box {
+  margin-bottom: 30px;
 }
