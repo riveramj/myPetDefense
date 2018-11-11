@@ -245,6 +245,10 @@ input.checkout {
   background-color: rgba(0,0,0,.6);
   width: 100%;
   padding-top: 15%;
+
+  &.logged-in {
+    display: none;
+  }
 }
 
 #login-container {
@@ -283,6 +287,7 @@ input.checkout {
     background-color: #1D8884;
     color: #ffffff;
     padding: 10px 0 11px;
+    width: 100%;
   }
 
   #login-button-container {

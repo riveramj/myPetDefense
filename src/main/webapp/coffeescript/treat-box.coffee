@@ -10,3 +10,11 @@ $(document).ready ->
     $('.pet-name').val('')
     $('.product-choice').prop("checked", false)
     $('.product').removeClass('selected')
+
+  $('#main').on 'click', '.continue-as-guest', (event) ->
+    $('.login-popover-container').remove()
+
+  $('#main').on 'click', '.login-popover', (event) ->
+    if (event.target.closest('.guest-log-in, .guest-continue') == null)
+      $('.login-popover-container').remove()
+
