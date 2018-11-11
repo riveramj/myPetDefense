@@ -1,9 +1,36 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
   <div data-lift="BoxCheckout.render">
+  <div class="login-popover">
+    <form id="login-container" class="guest-log-in">
+      <h3>Account Login</h3>
+      <section>
+        <label>
+          <div><span class="field-label">Email</span></div>
+          <input id="email" type="text">
+        </label>
+        <label class="password-container">
+          <div><span class="field-label">Password</span></div>
+          <input id="password" type="password">
+        </label>
+        <div>
+          <div class="forgot-password-container">
+            <a href="/forgot-password" class="forgot-password">Forgot Password?</a>
+          </div>
+          <div id="login-button-container">
+            <button id="login">log in</button>
+          </div>
+        </div>
+      </section>
+    </form>
+    <div class="guest-continue">
+      <h4>No Account?</h4>
+      <button>Continue as Guest</button>
+    </div>
+  </div>
   <div id="shopping-cart">
     <div class="cart-contents">
       <h3>Shopping Cart</h3>
-      
+
       <h4>Current Products</h4>
 
       <ul id="items-in-cart">
