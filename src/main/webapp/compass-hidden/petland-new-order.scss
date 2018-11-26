@@ -14,27 +14,16 @@
 }
 
 .details > h2 {
-  color: #605F5F;
+  color: #000000;
   font-size: 32px;
   line-height: 33px;
   font-weight: $bold;
   text-align: center;
   margin-top: 50px;
-}
 
-.plus {
-  color: #ffffff;
-  font-size: 28px;
-  font-weight: $bold;
-  line-height: 33px;
-  vertical-align: top;
-  padding: 0 10px;
-}
-
-.petland-logo {
-  display: block;
-  width: 130px;
-  display: inline-block;
+  span {
+    vertical-align: super;
+  }
 }
 
 #pricing {
@@ -43,6 +32,10 @@
     display: inline-block;
     text-align: left;
   }
+}
+
+.petland-logo {
+  width: 215px;
 }
 
 .pet-info {
