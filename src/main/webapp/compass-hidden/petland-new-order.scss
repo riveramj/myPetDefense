@@ -9,13 +9,17 @@
   }
 }
 
+.details {
+  margin-top: 0;
+}
+
 .details > h2 {
   color: #605F5F;
   font-size: 32px;
   line-height: 33px;
   font-weight: $bold;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 50px;
 }
 
 .plus {
@@ -76,106 +80,9 @@
   line-height: 33px;
 }
 
-.price-container {
-  color: #454343;
-  font-weight: $bold;
-  font-size: 18px;
-  line-height: 24px;
-  margin-bottom: 12px;
-  margin-top: 14px;
-}
-
 .zoguard-product-family {
   width: 395px;
   padding-top: 14px;
-}
-
-.amount {
-  line-height: 23px;
-  font-size: 16px;
-  font-weight: $normal;
-  text-transform: uppercase;
-  display: inline-block;
-
-  span {
-    color: #259490;
-    font-size: 24px;
-    font-weight: $bold;
-    line-height: 42px;
-  }
-
-  .strike {
-    font-size: 20px;
-  }
-
-  .sale-price {
-    color: #ff0000;
-    padding-right: 5px;
-  }
-}
-
-.size-header {
-  color: #454343;
-  font-weight: $bold;
-  font-size: 18px;
-  line-height: 24px;
-  margin: 32px 0 6px;
-}
-
-.product {
-  padding: 14px 0;
-  text-align: center;
-  border: 1px solid #B2B0B0;
-  margin: 0 0 14px 0;
-  border-radius: 31px;
-  cursor: pointer;
-  display: inline-block;
-  width: 160px;
-
-  &:nth-child(even) {
-    margin-right: 15px;
-  }
-
-  @media (min-width: $bp-medium) {
-    width: 300px;
-  }
-
-  @media (min-width: $bp-large) {
-    width: 230px;
-  }
-
-  &:hover {
-    border: 1px solid #57B8B4;
-    background-color: #1D8884;
-
-    .size {
-      color: #ffffff;
-    }
-  }
-
-  &.selected {
-    border: 1px solid #57B8B4;
-    background-color: #1D8884;
-    color: #ffffff;
-
-    .size {
-      color: #ffffff;
-    }
-  }
-
-  &.error {
-    border: 1px solid #E52323;
-  }
-}
-
-.product-choice {
-  display: none;
-}
-
-.size {
-  color: #000000;
-  font-size: 16px;
-  line-height: 24px;
 }
 
 .add-to-cart {
@@ -256,28 +163,81 @@
     line-height: 24px;
     color: #4C4C4C;
     font-weight: $bold;
-    margin: 55px 0 30px;
+    margin:60px 0 0;
+    text-align: center;
+  }
+
+  > h3 {
+    color: #454343;
+    font-size: 20px;
+    line-height: 33px;
+    margin: 2px 0 25px;
+    text-align: center;
   }
 }
 
 .subscription-details {
-  width: 422px;
-  display: inline-block;
+  width: 884px;
 
-  .headers {
+  thead td {
+    color: #1D8884;
+    background-color: #CDF5F4;
+    padding: 20px 24px;
     line-height: 24px;
-    color: #4C4C4C;
-    font-size: 15px;
+    font-size: 16px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
     font-weight: $bold;
-    background-color: #F2F2F2;
-    padding: 20px 23px 19px 20px;
-    display: flex;
-    justify-content: space-between;
 
-    div {
-      display: inline-block;
+    &:last-child {
+      text-align: right;
     }
   }
+
+  .pet-entry td {
+    padding: 20px 24px;
+    color: #454343;
+    font-size: 18px;
+    line-height: 20px;
+
+    &.price-container {
+      text-align: right;
+    }
+  }
+
+  .pet-entry {
+    border-bottom: 1px solid #F2F2F2;
+  }
+  
+  .birthday-container {
+    color: #818181;
+    line-height: 18px;
+    font-size: 15px;
+    margin-top: 5px;
+  }
+
+  .remove {
+    background: none;
+    border: none;
+    color: #1D8884;
+    padding: 0;
+    margin: 3px 0 0;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: $bold;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+
+    &:before {
+      @extend %icon;
+      @extend .fas;
+      content: fa-content($fa-var-trash-alt);
+      padding-right: 4px;
+      font-size: 13px;
+      vertical-align: baseline;
+    }
+}
+
 }
 
 .pet-summary {
@@ -319,34 +279,6 @@
   .summary-breed {
     font-size: 13px;
   }
-}
-
-.remove {
-  background: none;
-  border: none;
-  color: #1D8884;
-  padding: 0;
-  margin: 0;
-  font-size: 13px;
-  line-height: 24px;
-  font-weight: $bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-
-  &:before {
-    @extend %icon;
-    @extend .fas;
-    content: fa-content($fa-var-trash-alt);
-    padding-right: 6px;
-    font-size: 11px;
-    vertical-align: baseline;
-  }
-}
-
-.subscription-entry li.subscription-price {
-  font-size: 16px;
-  line-height: 28px;
-  padding-bottom: 18px;
 }
 
 .order-summary {
