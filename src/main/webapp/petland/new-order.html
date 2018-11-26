@@ -7,6 +7,8 @@
         <img srcset="/images/logo/logo-name-white-small.png, /images/logo/logo-name-white-small@2x.png 2x" src="/images/logo/logo-name-white-small.png">
         </picture>
       </a>
+      <span class="plus">+</span>
+      <img class="petland-logo" src="/images/logo/petland-logo-white.png">
     </div>
     <nav>
       <ul id="menu-entries">
@@ -15,41 +17,17 @@
     </nav>
   </div>
   <section class="details">
-    <picture class="petland-logo">
-      <source srcset="/images/logo/petland-logo.png, /images/logo/petland-logo@2x.png 2x" media="(min-width: 46.8em)">
-      <img srcset="/images/logo/petland-logo.png, /images/logo/petland-logo@2x.png 2x" src="/images/logo/petland-logo.png">
-    </picture>
+    <h2>Order Form</h2>
 
     <div id="pricing">
       <ul id="price-list">
-        <li class="product-name">Zoguard Plus for Dogs</li>
-        <li class="price-container">
-          Price:&nbsp;&nbsp;<div class="amount"><span class="dollar-value">$14.99</span>&nbsp;&nbsp;/&nbsp;&nbsp;month</div>
-        </li>
-        <li class="size-header">Choose Pet Size</li>
-        <li class="product selected">
-          <input type="radio" name="product" class="product-choice">
-          <div class="size">
-            Small, 4-22 lbs
-          </div>
-        </li>
-        <li class="product">
-          <input type="radio" name="product" class="product-choice">
-          <div class="size">
-            Medium, 23-44 lbs
-          </div>
-        </li>
-        <li class="product">
-          <input type="radio" name="product" class="product-choice">
-          <div class="size">
-            Large, 23-44 lbs
-          </div>
-        </li>
-        <li class="product">
-          <input type="radio" name="product" class="product-choice">
-          <div class="size">
-            X-Large, 23-44 lbs
-          </div>
+        <li class="product-family">Zoguard Plus</li>
+        <li class="product-production">Flea &amp; Tick Protection for Cats and Dogs</li>
+        <li>
+          <picture class="zoguard-product-family">
+            <source srcset="/images/products/ZoGuard-Plus-For-Dogs-Group@1x.jpg, /images/products/ZoGuard-Plus-For-Dogs-Group@2x.jpg 2x" media="(min-width: 46.8em)">
+            <img srcset="/images/products/ZoGuard-Plus-For-Dogs-Group@1x.jpg, /images/products/ZoGuard-Plus-For-Dogs-Group@2x.jpg 2x" src="/images/products/ZoGuard-Plus-For-Dogs-Group@1x.jpg">
+          </picture>
         </li>
       </ul>
     </div>
@@ -60,20 +38,87 @@
             <ul class="name-cart">
               <li>
                 <label>
-                  <div>Pet Name</div>
+                  <div>Choose Pet Type</div>
+                  <select class="pet-type" required>
+                    <option value="" disabled selected hidden></option>
+                    <option value="cat">Cat</option>
+                    <option value="dog">Dog</option>
+                  </select>
+                </label>
+              </li>
+              <li class="current-size-container">
+                <label>
+                  <div>Current Pet Size</div>
+                  <select class="current-size" required>
+                    <option value="" disabled selected hidden></option>
+                    <option value="small">Small, 4-22 lbs</option>
+                    <option value="medium">Medium, 23-44 lbs</option>
+                    <option value="large">Large, 45-88 lbs</option>
+                    <option value="xlarge">XLarge, 89-132 lbs</option>
+                  </select>
+                </label>
+              </li>
+              <li class="adult-size-container">
+                <label>
+                  <div>Adult Pet Size</div>
+                  <select class="adult-size" required>
+                    <option value="" disabled selected hidden></option>
+                    <option value="small">Small, 4-22 lbs</option>
+                    <option value="medium">Medium, 23-44 lbs</option>
+                    <option value="large">Large, 45-88 lbs</option>
+                    <option value="xlarge">XLarge, 89-132 lbs</option>
+                  </select>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <div>Pet Birthday</div>
+                  <select class="birthday-month" required>
+                    <option value="" disabled selected hidden>Month</option>
+                    <option value="january">January</option>
+                    <option value="february">February</option>
+                    <option value="march">March</option>
+                    <option value="april">April</option>
+                    <option value="may">May</option>
+                    <option value="june">June</option>
+                    <option value="july">July</option>
+                    <option value="august">August</option>
+                    <option value="september">September</option>
+                    <option value="october">October</option>
+                    <option value="november">November</option>
+                    <option value="December">December</option>
+                  </select>
+
+                  <select class="birthday-year" required>
+                    <option value="" disabled selected hidden>Year</option>
+                    <option value="1998">1998</option>
+                    <option value="1999">1999</option>
+                    <option value="2000">20001</option>
+                    <option value="2001">20002</option>
+                    <option value="2002">20003</option>
+                    <option value="2003">20003</option>
+                    <option value="2004">20004</option>
+                    <option value="2005">20005</option>
+                    <option value="2006">20006</option>
+                    <option value="2007">20007</option>
+                    <option value="2008">20008</option>
+                    <option value="2009">20009</option>
+                    <option value="2010">20010</option>
+                    <option value="2011">20011</option>
+                    <option value="2012">20012</option>
+                    <option value="2013">20013</option>
+                    <option value="2014">20014</option>
+                    <option value="2015">20015</option>
+                    <option value="2016">20016</option>
+                    <option value="2017">20017</option>
+                    <option value="2018">20018</option>
+                  </select>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <div>Pet Name <span class="optional"> (optional)</span></div>
                   <input class="pet-name">
-                </label>
-              </li>
-              <li>
-                <label>
-                  <div>Breed</div>
-                  <input class="pet-breed">
-                </label>
-              </li>
-              <li>
-                <label>
-                  <div>Whelp Date</div>
-                  <input class="whelp-date" placeholder="MM/DD/YYYY">
                 </label>
               </li>
             </ul>
@@ -81,7 +126,7 @@
         </li>
       </ul>
     </div>
-    <button class="add-to-cart" type="submit">Add to Cart</button>
+    <button class="add-to-cart" type="submit">Add to Order</button>
   </section>
 
   <section class="order-details">
@@ -89,7 +134,7 @@
     <ul class="subscription-details">
       <li class="headers">
         <div>Pet Details</div>
-        <div>Subscription Price</div>
+        <div>Price</div>
       </li>
       <li class="pet-summary">
         <div>
@@ -101,12 +146,12 @@
               ZoGuard Plus for Dogs, Small
             </li>
             <li>
-              Whelp: Oct 12, 2018
+              Birthday: Oct 12, 2018
             </li>
           </ul>
           <ul class="subscription-entry">
             <li class="subscription-price">
-              $89.94/6 months
+              $89.94
             </li>
             <li class="remove-from-order">
               <button class="remove">Remove</button>
@@ -124,12 +169,12 @@
               ZoGuard Plus for Dogs, Large
             </li>
             <li>
-              Whelp: -
+              Birthday: -
             </li>
           </ul>
           <ul class="subscription-entry">
             <li class="subscription-price">
-              $89.94/6 months
+              $89.94
             </li>
             <li class="remove-from-order">
               <button class="remove">Remove</button>
@@ -142,7 +187,7 @@
     <div class="order-summary">
       <h3>Order Summary</h3>
       <ul class="order-totals">
-        <li id="subtotal"><span>Subscription</span><span>$179.88</span></li>
+        <li id="subtotal"><span>Subtotal</span><span>$179.88</span></li>
         <li id="discount"><span>Multipet Discount</span><span>$6.00</span></li>
         <li id="tax"><span>Tax</span><span>$12.17</span></li>
         <li id="order"><span class="order-total">Total</span><span>$174.89</span></li>
@@ -153,7 +198,7 @@
 
   <section class="checkout">
     <form>
-      <h2>Checkout Information</h2>
+      <h2>Customer Information</h2>
       <input type="hidden" id="stripe-token">
       <fieldset class="shipping-info">
         <h3>Shipping Information</h3>
@@ -185,11 +230,15 @@
               <input id="zip" type="tel" maxlength="5">
             </label>
           </div>
+          <label>
+            <span class="field-label">Phone</span>
+            <input id="phone" type="text">
+          </label>
         </div>
       </fieldset>
       <div class="billing-info">
       <fieldset>
-        <h3>Billing Information</h3>
+        <h3>Payment Information</h3>
         <div class="billing-container">
           <label>
             <span class="field-label">Card Info</span>
@@ -208,7 +257,7 @@
           </label>
         </div>
       </fieldset>
-      <button type="submit" class="checkout submit select-choice">Place Order</button>
+      <button type="submit" class="checkout submit select-choice">Submit</button>
     </div>
     </form>
   </section>

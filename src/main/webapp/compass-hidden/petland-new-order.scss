@@ -5,18 +5,37 @@
 .details, .order-details, section.checkout {
   @media (min-width: $bp-large) {
     max-width: 884px;
-    margin: 30px auto 100px;
+    margin: 30px auto 60px;
   }
+}
+
+.details > h2 {
+  color: #605F5F;
+  font-size: 32px;
+  line-height: 33px;
+  font-weight: $bold;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.plus {
+  color: #ffffff;
+  font-size: 28px;
+  font-weight: $bold;
+  line-height: 33px;
+  vertical-align: top;
+  padding: 0 10px;
 }
 
 .petland-logo {
   display: block;
-  width: 215px;
+  width: 130px;
+  display: inline-block;
 }
 
 #pricing {
   @media (min-width: $bp-large) {
-    margin-top: 70px;
+    margin-top: 50px;
     display: inline-block;
     text-align: left;
   }
@@ -24,29 +43,37 @@
 
 .pet-info {
   @media (min-width: $bp-large) {
-    margin-top: 70px;
-    margin-left: 69px;
+    margin-top: 50px;
+    margin-left: 67px;
     display: inline-block;
     text-align: left;
-    width: 330px;
+    width: 417px;
     vertical-align: top;
   }
 }
 
 #price-list {
   @media (min-width: $bp-med-large) {
-    width: 480px;
+    width: 395px;
   }
 }
 
-.product-name {
-  color: #605F5F;
+.product-family {
+  color: #1D8884;
   font-weight: $bold;
   font-size: 27px;
 
   @media (min-width: $bp-medium) {
-    font-size: 32px;
+    font-size: 30px;
+    line-height: 33px;
   }
+}
+
+.product-production {
+  margin-top: 2px;
+  font-size: 20px;
+  color: #454343;
+  line-height: 33px;
 }
 
 .price-container {
@@ -56,6 +83,11 @@
   line-height: 24px;
   margin-bottom: 12px;
   margin-top: 14px;
+}
+
+.zoguard-product-family {
+  width: 395px;
+  padding-top: 14px;
 }
 
 .amount {
@@ -147,21 +179,21 @@
 }
 
 .add-to-cart {
-  background-color: #259490;
-  color: #F7F7F7;
+  background-color: #1D8884;
+  color: #FFFFFF;
   
   font-weight: $bold;
-  font-size: 17px;
+  font-size: 20px;
   text-transform: uppercase;
   
   padding: 14px 0;
-  margin: 54px auto 0;
-  width: 487px;
+  margin: 28px auto 0;
+  width: 359px;
 
   display: block;
 
-  letter-spacing: 0.4px;
-  line-height: 22px;
+  letter-spacing: 1.5px;
+  line-height: 24px;
 
   border: none;
   border-radius: 30px;
@@ -181,7 +213,7 @@
       line-height: 24px;
     }
 
-    input {
+    input, select {
       border-radius: 3px;
       border: 1px solid #CECECE;
       padding: 6px 9px;
@@ -189,7 +221,30 @@
       width: 100%;
       margin-bottom: 30px;
     }
+
+    select {
+      height: 33px;
+      background-color: #ffffff;
+
+      &:required:invalid {
+        color: #A0A0A0; 
+      }
+    }
   }
+}
+
+.current-size-container, .name-cart select.birthday-month {
+  margin-right: 19px;
+}
+
+.adult-size-container, .current-size-container, .name-cart select.birthday-month, .name-cart select.birthday-year {
+  display: inline-block;
+  width: 47%;
+}
+
+.optional {
+  color: #A0A0A0;
+  font-weight: $normal;
 }
 
 .order-details {
