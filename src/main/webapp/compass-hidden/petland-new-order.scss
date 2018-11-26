@@ -281,48 +281,52 @@
   }
 }
 
-.order-summary {
+.billing-info .order-summary {
   display: inline-block;
-  vertical-align: top;
-  margin-left: 118px;
-  background-color: #F9FFFF;
-  width: 278px;
+  background-color: #CDF5F4;
+  width: 422px;
+  margin-top: 40px;
 
-  h3 {
-    text-align: center;
-    font-size: 18px;
+  > h3 {
+    text-align: left;
+    font-size: 16px;
     line-height: 24px;
-    color: #4C4C4C;
-    padding: 20px 0;
-    border-bottom: 1px solid #CDF5F4;
+    color: #1D8884;
+    padding: 20px 0 20px 25px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #57B8B4;
   }
 }
 
 .order-totals {
-  padding: 15px 25px 20px;
-  color: #4C4C4C;
-  font-size: 15px;
+  padding: 15px 25px 26px;
+  color: #454343;
+  font-size: 18px;
   line-height: 24px;
   
   li {
     display: flex;
     justify-content: space-between;
-    padding-bottom: 2px;
+    padding-bottom: 5px;
   }
+}
+
+.discount-amount {
+  color: #D11F2F;
 }
 
 #order {
   margin-top: 4px;
 }
 
-.order-total {
-  background-color: #57B8B4;
-  font-size: 14px;
-  padding: 4px 9px 4px 10px;
-  line-height: 17px;
-  letter-spacing: 1px;
-  color: #ffffff;
+.order-total, .total-price {
+  font-size: 17px;
+  line-height: 21px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
+  font-weight: $bold;
+  padding-top: 28px;
 }
 
 .checkout {
@@ -331,7 +335,8 @@
     line-height: 24px;
     color: #4C4C4C;
     font-weight: $bold;
-    margin: 55px 0 30px;
+    margin: 55px 0 25px;
+    text-align: center;
   }
 }
 
@@ -430,15 +435,26 @@
 }
 
 button.checkout {
-  width: 100%;
+  width: 418px;
   background-color: #1D8884;
   border: none;
   text-align: center;
   padding: 18px 0;
-  margin: 43px 0 0;
+  margin: 50px auto 0;
   color: #ffffff;
   border-radius: 30px;
   line-height: 24px;
   font-weight: $bold;
   font-size: 20px;
+  letter-spacing: 1.5px;
+  display: block;
+}
+
+.legalese {
+  color: #818181;
+  font-size: 13px;
+  line-height: 17px;
+  width: 501px;
+  margin: 15px auto 0;
+  text-align: center;
 }
