@@ -156,26 +156,6 @@ object ShipStationService extends Loggable {
 
     val paidShipment_? = tryo(shipment.amountPaid.get.toDouble).openOr(0.0) > 0.0
     
-    val dogTagOrderItems = {
-      if (paidShipment_?) {
-        val dogsForTags = user.activePets.filter { dog =>
-          val needTag_? = !tryo(dog.sentDogTag.get).openOr(false)
-          ((dog.animalType.get == AnimalType.Dog) && needTag_?)
-        }
-
-        dogsForTags.map { dog =>
-          dog.sentDogTag(true).saveMe
-
-          OrderItem(
-            quantity = 1,
-            sku = "dogTag"
-          )
-        }
-      } else {
-        Nil
-      }
-    }
-
     val shipStationItems = allShipStationItems.map { sku =>
       OrderItem(
         quantity = 1,
@@ -183,15 +163,13 @@ object ShipStationService extends Loggable {
       )
     }
 
-    val allOrderItems = shipStationItems ++ dogTagOrderItems
-
     Order.create(
       orderNumber = s"${refreshedShipment.map(_.shipmentId.get).openOr("")}",
       orderDate = dateFormat.format(new Date()),
       orderStatus = "awaiting_shipment",
       billTo = billShipTo,
       shipTo = billShipTo,
-      items = Some(allOrderItems),
+      items = Some(shipStationItems),
       giftMessage = Some(petNamesProducts)
     )
   }
