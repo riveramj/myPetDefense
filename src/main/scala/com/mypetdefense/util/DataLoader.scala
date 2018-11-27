@@ -277,7 +277,7 @@ object DataLoader extends Loggable {
   def resetUpcomingBillingCylces = {
     val upcomingSubscriptions = Subscription.findAll(
       BySql(
-        "nextShipDate > CURRENT_DATE and nextShipDate < CURRENT_DATE + interval '5 day'",
+        "nextShipDate > CURRENT_DATE + interval '1 day' and nextShipDate < CURRENT_DATE + interval '3 day'",
         IHaveValidatedThisSQL("mike","2018-04-24")
       ),
       By(Subscription.status, Status.Active)
