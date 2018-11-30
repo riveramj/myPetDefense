@@ -76,6 +76,11 @@ object Paths {
     storeAndRedirect _
   )
 
+  val petlandUser = If(
+    () => SecurityContext.petlandAgent_?,
+    storeAndRedirect _
+  )
+
   val parent = If(
     () => SecurityContext.parent_?,
     storeAndRedirect _
@@ -185,6 +190,7 @@ object Paths {
     inventory.Reconciliations.menu,
     inventory.InventoryChangeAudits.menu,
     inventory.ItemProduction.menu,
-    petland.NewOrder.menu
+    petland.NewOrder.menu,
+    petland.PetlandOverview.menu
   )
 }

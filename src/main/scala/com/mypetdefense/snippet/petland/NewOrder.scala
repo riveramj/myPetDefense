@@ -45,7 +45,7 @@ object NewOrder extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Petland New Order") / "petland" / "new-order" >>
-    adminUser >>
+    petlandUser >>
     loggedIn
 }
 
@@ -434,6 +434,7 @@ class NewOrder extends Loggable {
 
   def render = {
     SHtml.makeFormsAjax andThen
+    ".new-order [class+]" #> "current" &
     addPetBindings &
     orderBindings &
     totalSummaryBindings &

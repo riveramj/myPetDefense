@@ -1,0 +1,29 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+<div data-lift="petland.PetlandOverview.render?eager_eval=true">
+  <div data-lift="embed?what=petland/petland-nav-bar"></div>
+  <div id="item-container">
+    <h2>Petland Atlanta</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <td>Name</td>
+          <td>Status</td>
+          <td>Cancellation / Suspend Date</td>
+          <td>Number of Shipments</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="user">
+          <td class="name">Mike Rivera</td>
+          <td class="status">Good to Go</td>
+          <td class="cancel-suspend-date">-</td>
+          <td class="shipment-count">0</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=petland-store-overview">
+  </head_merge>
+</div>

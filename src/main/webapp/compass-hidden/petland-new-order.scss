@@ -1,6 +1,21 @@
 @import "base";
-@import "nav-bar";
+@import "admin-nav-bar";
 @import "footer";
+
+#top-bar {
+  background-color: #259490;
+}
+
+nav .entry {
+  &.current {
+    border-bottom: 2px solid #ffffff;
+  }
+
+  a {
+    color: #ffffff;
+    letter-spacing: 0.4px;
+  }
+}
 
 .details, .order-details, section.checkout-container {
   @media (min-width: $bp-large) {
