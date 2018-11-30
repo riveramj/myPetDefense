@@ -14,8 +14,8 @@
 }
 
 .details form > h2 {
-  color: #000000;
-  font-size: 32px;
+  color: #605F5F;
+  font-size: 28px;
   line-height: 33px;
   font-weight: $bold;
   text-align: center;
@@ -70,8 +70,12 @@
 }
 
 .zoguard-product-family {
-  width: 395px;
   padding-top: 14px;
+  margin-left: -33px;
+
+  img {
+    width: 465px;
+  }
 }
 
 #add-to-order {

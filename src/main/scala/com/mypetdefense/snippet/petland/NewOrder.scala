@@ -91,6 +91,7 @@ class NewOrder extends Loggable {
   var stripeToken = ""
 
   var orderDetailsRenderer: Box[IdMemoizeTransform] = Empty
+  var totalsRenderer: Box[IdMemoizeTransform] = Empty
 
   val birthdayDateFormat = new SimpleDateFormat("MMM yyyy")
 
@@ -268,7 +269,7 @@ class NewOrder extends Loggable {
     }.openOr(Nil)
 
     SHtml.ajaxSelectObj(
-      (Empty, "Choose Size") +: products.map(product => (Full(product.size.get), product.sizeName.get)),
+      (Empty, "Choose Size") +: products.map(product => (Full(product.size.get), product.getSizeAndSizeName)),
       Empty,
       (possibleSize: Box[AnimalSize.Value]) => {
         if (petSize == "current") {
@@ -342,7 +343,10 @@ class NewOrder extends Loggable {
     pets = pets ++ newPet
     petsOrdered(pets)
 
-    orderDetailsRenderer.map(_.setHtml).openOr(Noop)
+    (
+      orderDetailsRenderer.map(_.setHtml).openOr(Noop) &
+      totalsRenderer.map(_.setHtml).openOr(Noop)
+    )
   }
 
   def removePet(pet: Pet) = {
@@ -350,7 +354,10 @@ class NewOrder extends Loggable {
 
     petsOrdered(pets)
 
-    orderDetailsRenderer.map(_.setHtml).openOr(Noop)
+    (
+      orderDetailsRenderer.map(_.setHtml).openOr(Noop) &
+      totalsRenderer.map(_.setHtml).openOr(Noop)
+    )
   }
 
   def addPetBindings = {
@@ -377,10 +384,30 @@ class NewOrder extends Loggable {
     }
   }
 
+  def totalSummaryBindings = {
+    ".order-totals" #> idMemoize { renderer =>
+      totalsRenderer = Full(renderer)
+
+      val subtotal = pets.size.toDouble * 89.94
+      val discount = {
+        if (pets.size <= 1)
+          0.00
+        else
+          (pets.size - 1).toDouble * 6.00
+      }
+      val total = subtotal - discount
+
+      ".subtotal-amount *" #> f"$$$subtotal%2.2f" &
+      ".discount-amount *" #> f"$$$discount%2.2f" &
+      ".total-price *" #> f"$$$total%2.2f"
+    }
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     addPetBindings &
     orderBindings &
+    totalSummaryBindings &
     "#first-name" #> text(firstName, firstName = _) &
     "#last-name" #> text(lastName, lastName = _) &
     "#street-1" #> text(street1, street1 = _) &
