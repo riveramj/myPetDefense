@@ -35,6 +35,8 @@ import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscri
 
 import dispatch._, Defaults._
 
+object petsOrdered extends RequestVar[List[Pet]](Nil)
+
 object NewOrder extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
@@ -64,7 +66,7 @@ class NewOrder extends Loggable {
     By(Product.size, AnimalSize.CatAllSize)
   )
 
-  var pets: List[Pet] = Nil
+  var pets = petsOrdered.is
   var email = ""
   var phone = ""
   var firstName = ""
@@ -87,6 +89,10 @@ class NewOrder extends Loggable {
   var petName = ""
 
   var stripeToken = ""
+
+  var orderDetailsRenderer: Box[IdMemoizeTransform] = Empty
+
+  val birthdayDateFormat = new SimpleDateFormat("MMM yyyy")
 
   val petlandPlan = ParentService.getCurrentPetlandProductPlan
   val petlandPlanId = petlandPlan.map(_.id).openOr("")
@@ -253,6 +259,27 @@ class NewOrder extends Loggable {
     )
   }
 
+  def petSizeDropdown(petSize: String) = {
+    val products = newPetType.map { animal =>
+      if (animal == AnimalType.Cat)
+        catZoguardProduct
+      else
+        dogZoguardProduct
+    }.openOr(Nil)
+
+    SHtml.ajaxSelectObj(
+      (Empty, "Choose Size") +: products.map(product => (Full(product.size.get), product.sizeName.get)),
+      Empty,
+      (possibleSize: Box[AnimalSize.Value]) => {
+        if (petSize == "current") {
+          newPetCurrentSize = possibleSize
+        } else {
+          newPetAdultSize = possibleSize
+        }
+      }
+    )
+  }
+
   def birthdayMonthDropdown = {
     SHtml.ajaxSelect(
       List(("", "Month")) ++ monthsOfyear.map(month => (month, month)),
@@ -269,26 +296,6 @@ class NewOrder extends Loggable {
     )
   }
 
-  def petSizeDropdown(petSize: String) = {
-    val products = newPetType.map { animal =>
-      if (animal == "Cat")
-        catZoguardProduct
-      else
-        dogZoguardProduct
-    }.openOr(Nil)
-
-    SHtml.ajaxSelectObj(
-      (Empty, "Choose Size") +: products.map(product => (Full(product.size.get), product.sizeName.get)),
-      Empty,
-      (possibleSize: Box[AnimalSize.Value]) => {
-        if (petSize == "current")
-          newPetCurrentSize = possibleSize
-        else
-          newPetAdultSize = possibleSize
-      }
-    )
-  }
-
   def addPet() = {
     val product = {
       if (newPetType == Full(AnimalType.Cat)) {
@@ -300,7 +307,7 @@ class NewOrder extends Loggable {
       }
     }.headOption
 
-    val birthday = new SimpleDateFormat("MMM yyyy").parse(s"$birthdayMonth $birthdayYear")
+    val birthday = tryo(birthdayDateFormat.parse(s"$birthdayMonth $birthdayYear"))
 
     val newPet = { 
       for {
@@ -316,17 +323,34 @@ class NewOrder extends Loggable {
             petName
         }
 
-        Pet.create
-          .name(petName)
-          .animalType(animal)
-          .size(currentSize)
-          .adultSize(adultSize)
-          .birthday(birthday)
-          .product(neededProduct)
+        val possiblePet = {
+          Pet.create
+            .name(realPetName)
+            .animalType(animal)
+            .size(currentSize)
+            .adultSize(adultSize)
+            .product(neededProduct)
+        }
+
+        if (birthday.isEmpty)
+          Full(possiblePet)
+        else
+          birthday.map(possiblePet.birthday(_))
       }
-    }
+    }.toList.flatten
 
     pets = pets ++ newPet
+    petsOrdered(pets)
+
+    orderDetailsRenderer.map(_.setHtml).openOr(Noop)
+  }
+
+  def removePet(pet: Pet) = {
+    pets = pets.filter(_ != pet)
+
+    petsOrdered(pets)
+
+    orderDetailsRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def addPetBindings = {
@@ -341,9 +365,22 @@ class NewOrder extends Loggable {
     }
   }
 
+  def orderBindings = {
+    ".subscription-details" #> idMemoize { renderer =>
+      orderDetailsRenderer = Full(renderer)
+      ".pet-entry" #> pets.map { pet =>
+        ".pet-name *" #> pet.name.get &
+        ".pet-birthday *" #> tryo(pet.birthday.get.toString).openOr("") &
+        ".pet-current-product *" #> pet.product.obj.map(_.getNameAndSize) &
+        ".remove [onclick]" #> ajaxInvoke(() => removePet(pet))
+      }
+    }
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     addPetBindings &
+    orderBindings &
     "#first-name" #> text(firstName, firstName = _) &
     "#last-name" #> text(lastName, lastName = _) &
     "#street-1" #> text(street1, street1 = _) &
