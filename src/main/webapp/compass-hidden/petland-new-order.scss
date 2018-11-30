@@ -74,7 +74,7 @@
   padding-top: 14px;
 }
 
-.add-to-cart {
+#add-to-order {
   background-color: #1D8884;
   color: #FFFFFF;
   
@@ -129,11 +129,11 @@
   }
 }
 
-.current-size-container, .name-cart select.birthday-month {
+.current-size-container, .name-cart select#birthday-month {
   margin-right: 19px;
 }
 
-.adult-size-container, .current-size-container, .name-cart select.birthday-month, .name-cart select.birthday-year {
+.adult-size-container, .current-size-container, .name-cart select#birthday-month, .name-cart select#birthday-year {
   display: inline-block;
   width: 47%;
 }
@@ -423,7 +423,7 @@
   background-color: #ffffff;
 }
 
-button.checkout {
+input.checkout {
   width: 418px;
   background-color: #1D8884;
   border: none;

@@ -50,7 +50,6 @@ object Paths {
   }
 
   val homePage = Menu.i("Home") / "index"
-  val petlandNewOrder = Menu.i("Petland New Order") / "petland" / "new-order"
   val termsOfService = Menu.i("Terms of Service") / "terms-of-service"
   
   val thanksPage = Menu.i("Thanks") / "thanks"
@@ -113,7 +112,6 @@ object Paths {
 
   def siteMap = SiteMap(
     homePage,
-    petlandNewOrder,
     termsOfService,
     thanksPage,
     billingThanksPage,
@@ -186,6 +184,7 @@ object Paths {
     inventory.InventoryItems.menu,
     inventory.Reconciliations.menu,
     inventory.InventoryChangeAudits.menu,
-    inventory.ItemProduction.menu
+    inventory.ItemProduction.menu,
+    petland.NewOrder.menu
   )
 }

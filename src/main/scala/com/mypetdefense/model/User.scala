@@ -98,10 +98,14 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     val salt = getSalt
     val hashedPassword = hashPassword(password, salt)
 
-    user
-      .password(hashedPassword)
-      .salt(salt)
-      .saveMe
+    if (password != "") {
+      user
+        .password(hashedPassword)
+        .salt(salt)
+        .saveMe
+    } else {
+      user.accessKey(createAccessKey).saveMe
+    }
   }
 
   def createNewPendingUser(

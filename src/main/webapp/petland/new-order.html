@@ -1,4 +1,5 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
+  <div data-lift="petland.NewOrder.render">
   <div id="top-bar">
     <div id="logo-name">
       <a href="/">
@@ -15,6 +16,7 @@
     </nav>
   </div>
   <section class="details">
+    <form id="new-pet">
     <h2>
       <picture class="petland-logo">
         <source srcset="/images/logo/petland-logo.png, /images/logo/petland-logo@2x.png 2x" media="(min-width: 46.8em)">
@@ -38,114 +40,113 @@
     <div class="pet-info">
       <ul>
         <li class="add-product">
-          <form>
-            <ul class="name-cart">
-              <li>
-                <label>
-                  <div>Choose Pet Type</div>
-                  <select class="pet-type" required>
-                    <option value="" disabled selected hidden></option>
-                    <option value="cat">Cat</option>
-                    <option value="dog">Dog</option>
-                  </select>
-                </label>
-              </li>
-              <li class="current-size-container">
-                <label>
-                  <div>Current Pet Size</div>
-                  <select class="current-size" required>
-                    <option value="" disabled selected hidden></option>
-                    <option value="small">Small, 4-22 lbs</option>
-                    <option value="medium">Medium, 23-44 lbs</option>
-                    <option value="large">Large, 45-88 lbs</option>
-                    <option value="xlarge">XLarge, 89-132 lbs</option>
-                  </select>
-                </label>
-              </li>
-              <li class="adult-size-container">
-                <label>
-                  <div>Adult Pet Size</div>
-                  <select class="adult-size" required>
-                    <option value="" disabled selected hidden></option>
-                    <option value="small">Small, 4-22 lbs</option>
-                    <option value="medium">Medium, 23-44 lbs</option>
-                    <option value="large">Large, 45-88 lbs</option>
-                    <option value="xlarge">XLarge, 89-132 lbs</option>
-                  </select>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <div>Pet Birthday</div>
-                  <select class="birthday-month" required>
-                    <option value="" disabled selected hidden>Month</option>
-                    <option value="january">January</option>
-                    <option value="february">February</option>
-                    <option value="march">March</option>
-                    <option value="april">April</option>
-                    <option value="may">May</option>
-                    <option value="june">June</option>
-                    <option value="july">July</option>
-                    <option value="august">August</option>
-                    <option value="september">September</option>
-                    <option value="october">October</option>
-                    <option value="november">November</option>
-                    <option value="December">December</option>
-                  </select>
+          <ul class="name-cart">
+            <li>
+              <label>
+                <div>Choose Pet Type</div>
+                <select id="pet-type" required>
+                  <option value="" disabled selected hidden></option>
+                  <option value="cat">Cat</option>
+                  <option value="dog">Dog</option>
+                </select>
+              </label>
+            </li>
+            <li class="current-size-container">
+              <label>
+                <div>Current Pet Size</div>
+                <select id="current-size" required>
+                  <option value="" disabled selected hidden></option>
+                  <option value="small">Small, 4-22 lbs</option>
+                  <option value="medium">Medium, 23-44 lbs</option>
+                  <option value="large">Large, 45-88 lbs</option>
+                  <option value="xlarge">XLarge, 89-132 lbs</option>
+                </select>
+              </label>
+            </li>
+            <li class="adult-size-container">
+              <label>
+                <div>Adult Pet Size</div>
+                <select id="adult-size" required>
+                  <option value="" disabled selected hidden></option>
+                  <option value="small">Small, 4-22 lbs</option>
+                  <option value="medium">Medium, 23-44 lbs</option>
+                  <option value="large">Large, 45-88 lbs</option>
+                  <option value="xlarge">XLarge, 89-132 lbs</option>
+                </select>
+              </label>
+            </li>
+            <li>
+              <label>
+                <div>Pet Birthday</div>
+                <select id="birthday-month" required>
+                  <option value="" disabled selected hidden>Month</option>
+                  <option value="january">January</option>
+                  <option value="february">February</option>
+                  <option value="march">March</option>
+                  <option value="april">April</option>
+                  <option value="may">May</option>
+                  <option value="june">June</option>
+                  <option value="july">July</option>
+                  <option value="august">August</option>
+                  <option value="september">September</option>
+                  <option value="october">October</option>
+                  <option value="november">November</option>
+                  <option value="December">December</option>
+                </select>
 
-                  <select class="birthday-year" required>
-                    <option value="" disabled selected hidden>Year</option>
-                    <option value="1998">1998</option>
-                    <option value="1999">1999</option>
-                    <option value="2000">20001</option>
-                    <option value="2001">20002</option>
-                    <option value="2002">20003</option>
-                    <option value="2003">20003</option>
-                    <option value="2004">20004</option>
-                    <option value="2005">20005</option>
-                    <option value="2006">20006</option>
-                    <option value="2007">20007</option>
-                    <option value="2008">20008</option>
-                    <option value="2009">20009</option>
-                    <option value="2010">20010</option>
-                    <option value="2011">20011</option>
-                    <option value="2012">20012</option>
-                    <option value="2013">20013</option>
-                    <option value="2014">20014</option>
-                    <option value="2015">20015</option>
-                    <option value="2016">20016</option>
-                    <option value="2017">20017</option>
-                    <option value="2018">20018</option>
-                  </select>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <div>Pet Name <span class="optional"> (optional)</span></div>
-                  <input class="new-pet-name">
-                </label>
-              </li>
-            </ul>
-          </form>
+                <select id="birthday-year" required>
+                  <option value="" disabled selected hidden>Year</option>
+                  <option value="1998">1998</option>
+                  <option value="1999">1999</option>
+                  <option value="2000">20001</option>
+                  <option value="2001">20002</option>
+                  <option value="2002">20003</option>
+                  <option value="2003">20003</option>
+                  <option value="2004">20004</option>
+                  <option value="2005">20005</option>
+                  <option value="2006">20006</option>
+                  <option value="2007">20007</option>
+                  <option value="2008">20008</option>
+                  <option value="2009">20009</option>
+                  <option value="2010">20010</option>
+                  <option value="2011">20011</option>
+                  <option value="2012">20012</option>
+                  <option value="2013">20013</option>
+                  <option value="2014">20014</option>
+                  <option value="2015">20015</option>
+                  <option value="2016">20016</option>
+                  <option value="2017">20017</option>
+                  <option value="2018">20018</option>
+                </select>
+              </label>
+            </li>
+            <li>
+              <label>
+                <div>Pet Name <span class="optional"> (optional)</span></div>
+                <input id="new-pet-name">
+              </label>
+            </li>
+          </ul>
         </li>
       </ul>
     </div>
-    <button class="add-to-cart" type="submit">Add to Order</button>
-  </section>
+    <button id="add-to-order" type="submit">Add to Order</button>
+  </form>
+</section>
 
-  <section class="order-details">
-    <h2>Order Details</h2>
-    <h3>6 month service agreement</h3>
+<section class="order-details">
+  <h2>Order Details</h2>
+  <h3>6 month service agreement</h3>
 
-    <table class="subscription-details">
-      <thead>
-        <tr>
-          <td>Pet Details</td>
-          <td>Product</td>
-          <td>Price</td>
-        </tr>
-      </thead>
-      <tbody>
+  <table class="subscription-details">
+    <thead>
+      <tr>
+        <td>Pet Details</td>
+        <td>Product</td>
+        <td>Price</td>
+      </tr>
+    </thead>
+    <tbody>
         <tr class="pet-entry">
           <td class="pet-details">
             <div class="pet-name">Pet 1</div>
@@ -248,13 +249,14 @@
         </ul>
       </div>
     </div>
-    <button type="submit" class="checkout submit select-choice">Submit</button>
+    <button type="submit" class="checkout submit">Submit</button>
     <p class="legalese">
       By clicking submit, the customer acknowledges My Pet Defense agrees to supply the selected Flea &amp; Tick preventative for a period of 6 months from the current date. Service may be canceled at any time upon request, however, this agreement is not eligible for refund. Upon the completion of the initial 6-month period, this agreement will convert to a monthly agreement and will be automatically renewed at the monthly rate of $14.99 per pet on an ongoing monthly basis.
     </p>
     </form>
   </section>
 
+  </div>
   <div id="need-help">Need help? Email us at <a href="mailto:help@mypetdefense.com?Subject=Help">help@mypetdefense.com</a></div>
   <div class="legal">
     &copy;2018 My Pet Defense. All rights reserved. <a class="terms" href="/terms-of-service">Terms of Service</a>

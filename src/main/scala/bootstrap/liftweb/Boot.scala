@@ -73,6 +73,7 @@ class Boot {
     DataLoader.updateProductSku
     DataLoader.loadWelcomeInserts
     DataLoader.resetUpcomingBillingCylces
+    DataLoader.createOneSizeCat
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")

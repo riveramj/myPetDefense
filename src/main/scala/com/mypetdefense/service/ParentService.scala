@@ -29,6 +29,7 @@ object ParentService extends Loggable {
   implicit val e = new StripeExecutor(stripeSecretKey)
 
   val whelpDateFormat = new java.text.SimpleDateFormat("M/d/y")
+  val currentPentlandPlan = Props.get("current.petland.plan") openOr ""
 
   def updateStripeCustomerCard(customerId: String, stripeToken: String, user: User) = {
     if (customerId == "") {
@@ -565,5 +566,26 @@ object ParentService extends Loggable {
         logger.error(s"update subscription tax rate failed with other error: ${throwable}")
         throwable
     }
+  }
+
+  def getStripeProductPlan(planId: String) = {
+    Try(
+      Await.result(Plan.get(planId), new DurationInt(10).seconds)
+    ) match {
+      case TrySuccess(Full(stripePlan)) =>
+        Full(stripePlan)
+      
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"get plan failed with stripe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"get plan failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
+  def getCurrentPetlandProductPlan = {
+    getStripeProductPlan(currentPentlandPlan)
   }
 }
