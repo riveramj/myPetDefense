@@ -1,5 +1,15 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
   <div data-lift="petland.NewOrder.render">
+    <div class="success-popover">
+      <img class="success-check" src="/images/success-check@2x.png">
+      <h3>
+        Your order was placed!
+      </h3>
+      <div>
+        An email was sent to you with your order details.
+      </div>
+      <button type="button" class="new-order">New Order</button>
+    </div>
   <div id="top-bar">
     <div id="logo-name">
       <a href="/">
@@ -11,7 +21,7 @@
     </div>
     <nav>
       <ul id="menu-entries">
-        <li class="login"><a href="./login">Logout</a></li>
+        <li class="login"><a href="/logout">Logout</a></li>
       </ul>
     </nav>
   </div>
@@ -164,7 +174,7 @@
     </table>
   </section>
 
-  <section class="checkout">
+  <section class="checkout-container">
     <form>
       <h2>Customer Information</h2>
       <input type="hidden" id="stripe-token">
@@ -257,4 +267,3 @@
     <link rel="stylesheet" data-lift="style-bundle?name=petland-new-order">
   </head_merge>
 </div>
-

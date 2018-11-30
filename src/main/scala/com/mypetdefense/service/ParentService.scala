@@ -29,7 +29,7 @@ object ParentService extends Loggable {
   implicit val e = new StripeExecutor(stripeSecretKey)
 
   val whelpDateFormat = new java.text.SimpleDateFormat("M/d/y")
-  val currentPentlandPlan = Props.get("current.petland.plan") openOr ""
+  val currentPentlandPlan = Props.get("petland.6month.payment") openOr ""
 
   def updateStripeCustomerCard(customerId: String, stripeToken: String, user: User) = {
     if (customerId == "") {

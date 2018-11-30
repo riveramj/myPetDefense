@@ -37,6 +37,8 @@ import dispatch._, Defaults._
 
 object petsOrdered extends RequestVar[List[Pet]](Nil)
 
+case class OrderSubmitted(email: String) extends MyPetDefenseEvent("order-submitted")
+
 object NewOrder extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
@@ -90,6 +92,7 @@ class NewOrder extends Loggable {
 
   var stripeToken = ""
 
+  var addPetRenderer: Box[IdMemoizeTransform] = Empty
   var orderDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var totalsRenderer: Box[IdMemoizeTransform] = Empty
 
@@ -160,25 +163,39 @@ class NewOrder extends Loggable {
 
               val total = subtotalWithDiscount + taxDue
 
-              S.redirectTo(Success.menu.loc.calcDefaultHref)
+              pets = Nil
+              petsOrdered(Nil)
+              email = ""
+              phone = ""
+              firstName = ""
+              lastName = ""
+              street1 = ""
+              street2 = ""
+              city = ""
+              state = ""
+              zip = ""
+
+              OrderSubmitted(user.email.get)
 
             case TrySuccess(stripeFailure) =>
               logger.error(s"create subscription failed with stripe error: ${stripeFailure}")
               stripeFailure
+              Noop
 
             case TryFail(throwable: Throwable) =>
               logger.error(s"create subscription failed with other error: ${throwable}")
               Empty
+              Noop
           }
             case TrySuccess(stripeFailure) =>
               logger.error(s"create customer failed with stripe error: ${stripeFailure}")
               stripeFailure
+              Noop
 
             case TryFail(throwable: Throwable) =>
               logger.error(s"create customer failed with other error: ${throwable}")
+              Noop
       }
-
-      Noop
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
@@ -343,7 +360,17 @@ class NewOrder extends Loggable {
     pets = pets ++ newPet
     petsOrdered(pets)
 
+    newPetType = Empty
+    newPetCurrentSize = Empty
+    newPetAdultSize = Empty
+
+    birthdayMonth = ""
+    birthdayYear = ""
+    petName = ""
+
+
     (
+      addPetRenderer.map(_.setHtml).openOr(Noop) &
       orderDetailsRenderer.map(_.setHtml).openOr(Noop) &
       totalsRenderer.map(_.setHtml).openOr(Noop)
     )
@@ -362,6 +389,8 @@ class NewOrder extends Loggable {
 
   def addPetBindings = {
     "#new-pet" #> SHtml.idMemoize { renderer =>
+      addPetRenderer = Full(renderer)
+
       "#pet-type" #> petTypeDropdown(renderer) &
       "#current-size" #> petSizeDropdown("current") &
       "#adult-size" #> petSizeDropdown("adult") &
