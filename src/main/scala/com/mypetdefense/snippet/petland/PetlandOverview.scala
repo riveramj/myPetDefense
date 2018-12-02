@@ -32,7 +32,7 @@ class PetlandOverview extends Loggable {
   val currentUser = SecurityContext.currentUser
   val agency = currentUser.flatMap(_.agency.obj)
   val agencyName = agency.map(_.name.get).openOr("")
-  val cancellationDateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
   
   var currentParent: Box[User] = Empty
 
@@ -78,21 +78,28 @@ class PetlandOverview extends Loggable {
       idMemoize { detailsRenderer =>
 
         ".user" #> {
+          val subscription = parent.getSubscription
+
+          val signupDate = subscription.map { sub =>
+            signupCancelDateFormat.format(sub.startDate.get)
+          }.getOrElse("")
+
           val cancellationDate = {
             if (parent.status.get == Status.Cancelled) {
-              val possibleCancelDate = parent.getSubscription.map(_.cancellationDate.get)
+              val possibleCancelDate = subscription.map(_.cancellationDate.get)
               possibleCancelDate.flatMap { date =>
-                tryo(cancellationDateFormat.format(date))
+                tryo(signupCancelDateFormat.format(date))
               }.getOrElse("")
             } else {
               "-"
             }
           }
-
-          val shipmentCount = parent.getSubscription.map(_.shipments.toList.size).getOrElse(0)
+          
+          val shipmentCount = subscription.map(_.shipments.toList.size).getOrElse(0)
 
           ".name *" #> getName(parent) &
           ".status *" #> findStatus(parent.status.get) &
+          ".signup-date *" #> signupDate &
           ".cancel-date *" #> cancellationDate &
           ".shipment-count *" #> shipmentCount
         } &
