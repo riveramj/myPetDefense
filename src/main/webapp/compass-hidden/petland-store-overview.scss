@@ -1,3 +1,18 @@
 @import "base";
 @import "admin";
 
+.pets {
+  display: none;
+
+  &.expanded {
+    display: table-row;
+  }
+}
+
+.user.expanded {
+  border-bottom: none;
+}
+
+.pet:last-child {
+  border-bottom: none;
+}
