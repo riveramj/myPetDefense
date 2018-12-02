@@ -89,9 +89,12 @@ class PetlandOverview extends Loggable {
             }
           }
 
+          val shipmentCount = parent.getSubscription.map(_.shipments.toList.size).getOrElse(0)
+
           ".name *" #> getName(parent) &
           ".status *" #> findStatus(parent.status.get) &
-          ".cancel-date *" #> cancellationDate
+          ".cancel-date *" #> cancellationDate &
+          ".shipment-count *" #> shipmentCount
         } &
         "^ [onclick]" #> ajaxInvoke(() => {
           if (currentParent.isEmpty) {
