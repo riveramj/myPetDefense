@@ -8,7 +8,29 @@
   padding: 15px 0 15px;
   text-align: center;
 
-  display: inline-block;
+  @media (min-width: $bp-medium) {
+    padding-left: 25px;
+    text-align: left;
+  }
+}
+
+#menu-entries {
+  margin: 8px 15px 0;
+  display: flex;
+  justify-content: space-between;
+  
+  @media (min-width: $bp-medium) {
+    margin: 8px 0 0 0;
+    display: block;
+  }
+}
+
+nav {
+  float: none;
+
+  @media (min-width: $bp-medium) {
+    float: right;
+  }
 }
 
 #logo-name {
@@ -16,6 +38,13 @@
 }
 
 nav .entry {
+  margin-right: 0;
+
+  @media (min-width: $bp-medium) {
+    margin-right: 25px;
+  }
+
+
   &.current {
     border-bottom: 2px solid #ffffff;
   }
@@ -69,6 +98,9 @@ nav .entry {
 
 .pet-info {
   padding: 0 15px;
+
+  max-width: 500px;
+  margin: 0 auto;
 
   @media (min-width: $bp-large) {
     margin-top: 50px;
@@ -178,6 +210,11 @@ nav .entry {
   }
 }
 
+.size-container, .birthday-container {
+  display: flex;
+  justify-content: space-between;
+}
+
 .current-size-container, .name-cart select#birthday-month {
   margin-right: 19px;
 }
@@ -198,10 +235,12 @@ nav .entry {
 }
 
 .order-details {
-  margin: 50px 15px 55px;
+  margin: 50px auto 55px;
   border-top: 1px solid #CECECE;
+  max-width: 500px;
+  padding: 0 15px;
 
-  @media (min-width: $bp-medium) {
+  @media (min-width: $bp-large) {
     margin: 0 0 55px;
   }
 
@@ -225,6 +264,10 @@ nav .entry {
 
 .subscription-details {
   margin: 0 auto;
+
+  @media (min-width: $bp-medium) {
+    min-width: 470px;
+  }
 
   @media (min-width: $bp-large) {
     width: 884px;
@@ -404,7 +447,9 @@ nav .entry {
 }
 
 .checkout-container {
-  margin: 0 15px;
+  margin: 0 auto;
+  max-width: 500px;
+  padding: 0 15px;
 
   h2 {
     font-size: 24px;
