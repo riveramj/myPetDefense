@@ -404,6 +404,8 @@ nav .entry {
 }
 
 .checkout-container {
+  margin: 0 15px;
+
   h2 {
     font-size: 24px;
     line-height: 24px;
@@ -420,14 +422,12 @@ nav .entry {
 
 .shipping-info, .billing-info {
   color: #4C4C4C;
-  display: inline-block;
+  display: block;
   vertical-align: top;
 
-  margin: 0 15px;
-
   @media (min-width: $bp-large) {
+    display: inline-block;
     width: 422px;
-    margin: 0;
   }
 
   h3 {
@@ -458,7 +458,11 @@ nav .entry {
 }
 
 #first-name, #last-name {
-  width: 177px;
+  width: 139px;
+
+  @media (min-width: $bp-medium) {
+    width: 177px;
+  }
 }
 
 #first-name {
@@ -488,7 +492,11 @@ nav .entry {
 }
 
 .city {
-  width: 185px;
+  width: 155px;
+
+  @media (min-width: $bp-large) {
+    width: 185px;
+  }
 }
 
 .state {
@@ -500,8 +508,11 @@ nav .entry {
 }
 
 .billing-info {
+  margin-top: 30px;
+
   @media (min-width: $bp-large) {
     margin-left: 35px;
+    margin-top: 0;
   }
 }
 
@@ -531,6 +542,7 @@ input.checkout {
   letter-spacing: 1.5px;
   display: block;
   cursor: pointer;
+  text-transform: uppercase;
 
   @media (min-width: $bp-large) {
     width: 418px;
@@ -550,7 +562,7 @@ input.checkout {
   color: #818181;
   font-size: 13px;
   line-height: 17px;
-  margin: 15px auto 0;
+  margin: 15px auto 15px;
   text-align: center;
 }
 
@@ -571,7 +583,7 @@ input.checkout {
   width: 100%;
   text-align: center;
 
-  padding-top: 10%;
+  padding: 10% 15px;
 
   h3 {
     color: #4C4C4C;
@@ -595,7 +607,7 @@ input.checkout {
 }
 
 .new-order {
-  width: 418px;
+  width: 200px;
   background-color: #1D8884;
   border: none;
   text-align: center;
@@ -609,4 +621,8 @@ input.checkout {
   letter-spacing: 1.5px;
   display: block;
   cursor: pointer;
+
+  @media (min-width: $bp-medium) {
+    width: 418px;
+  }
 }

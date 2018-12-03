@@ -35,7 +35,8 @@ import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscri
 
 import dispatch._, Defaults._
 
-object petsOrdered extends RequestVar[List[Pet]](Nil)
+
+object petsOrdered extends SessionVar[List[Pet]](Nil)
 
 case class OrderSubmitted(email: String) extends MyPetDefenseEvent("order-submitted")
 
