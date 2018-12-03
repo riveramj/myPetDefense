@@ -4,6 +4,15 @@
 
 #top-bar {
   background-color: #259490;
+
+  padding: 15px 0 15px;
+  text-align: center;
+
+  display: inline-block;
+}
+
+#logo-name {
+  padding-bottom: 5px;
 }
 
 nav .entry {
@@ -38,18 +47,29 @@ nav .entry {
 }
 
 #pricing {
+  margin-top: 40px;
+  text-align: center;
+  padding: 0 15px;
+
   @media (min-width: $bp-large) {
+    padding: 0;
     margin-top: 50px;
     display: inline-block;
     text-align: left;
   }
 }
 
-.petland-logo {
-  width: 215px;
+.petland-logo img {
+  width: 200px;
+
+  @media (min-width: $bp-medium) {
+    width: 215px;
+  }
 }
 
 .pet-info {
+  padding: 0 15px;
+
   @media (min-width: $bp-large) {
     margin-top: 50px;
     margin-left: 67px;
@@ -57,6 +77,8 @@ nav .entry {
     text-align: left;
     width: 417px;
     vertical-align: top;
+
+    padding: 0;
   }
 }
 
@@ -89,7 +111,11 @@ nav .entry {
   margin-left: -33px;
 
   img {
-    width: 465px;
+    width: 100%;
+
+    @media (min-width: $bp-large) {
+      width: 465px;
+    }
   }
 }
 
@@ -103,7 +129,7 @@ nav .entry {
   
   padding: 14px 0;
   margin: 28px auto 0;
-  width: 359px;
+  width: 250px;
 
   display: block;
 
@@ -114,6 +140,10 @@ nav .entry {
   border-radius: 30px;
 
   cursor: pointer;
+
+  @media (min-width: $bp-large) {
+    width: 359px;
+  }
 }
 
 .name-cart {
@@ -154,7 +184,12 @@ nav .entry {
 
 .adult-size-container, .current-size-container, .name-cart select#birthday-month, .name-cart select#birthday-year {
   display: inline-block;
-  width: 47%;
+
+  width: 45%;
+
+  @media (min-width: $bp-medium) {
+    width: 47%;
+  }
 }
 
 .optional {
@@ -163,8 +198,12 @@ nav .entry {
 }
 
 .order-details {
+  margin: 50px 15px 55px;
   border-top: 1px solid #CECECE;
-  margin-bottom: 55px;
+
+  @media (min-width: $bp-medium) {
+    margin: 0 0 55px;
+  }
 
   h2 {
     font-size: 24px;
@@ -185,17 +224,26 @@ nav .entry {
 }
 
 .subscription-details {
-  width: 884px;
+  margin: 0 auto;
+
+  @media (min-width: $bp-large) {
+    width: 884px;
+    margin: 0;
+  }
 
   thead td {
     color: #1D8884;
     background-color: #CDF5F4;
-    padding: 20px 24px;
+    padding: 20px 11px;
     line-height: 24px;
     font-size: 16px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     font-weight: $bold;
+
+    @media (min-width: $bp-medium) {
+      padding: 20px 24px;
+    }
 
     &:last-child {
       text-align: right;
@@ -203,13 +251,21 @@ nav .entry {
   }
 
   .pet-entry td {
-    padding: 20px 24px;
+    padding: 20px 11px;
     color: #454343;
     font-size: 18px;
     line-height: 20px;
 
+    @media (min-width: $bp-medium) {
+      padding: 20px 24px;
+    }
+
     &.price-container {
       text-align: right;
+    }
+
+    &.pet-current-product {
+      font-size: 16px;
     }
   }
 
@@ -239,10 +295,15 @@ nav .entry {
     &:before {
       @extend %icon;
       @extend .fas;
-      content: fa-content($fa-var-trash-alt);
       padding-right: 4px;
       font-size: 13px;
       vertical-align: baseline;
+    }
+
+    @media (min-width: $bp-medium) {
+      &:before {
+        content: fa-content($fa-var-trash-alt);
+      }
     }
 }
 
@@ -292,8 +353,13 @@ nav .entry {
 .billing-info .order-summary {
   display: inline-block;
   background-color: #CDF5F4;
-  width: 422px;
   margin-top: 40px;
+
+  width: 100%;
+
+  @media (min-width: $bp-large) {
+    width: 422px;
+  }
 
   > h3 {
     text-align: left;
@@ -353,10 +419,16 @@ nav .entry {
 }
 
 .shipping-info, .billing-info {
-  width: 422px;
   color: #4C4C4C;
   display: inline-block;
   vertical-align: top;
+
+  margin: 0 15px;
+
+  @media (min-width: $bp-large) {
+    width: 422px;
+    margin: 0;
+  }
 
   h3 {
     padding: 20px 25px;
@@ -416,7 +488,7 @@ nav .entry {
 }
 
 .city {
-  width: 235px;
+  width: 185px;
 }
 
 .state {
@@ -428,7 +500,9 @@ nav .entry {
 }
 
 .billing-info {
-  margin-left: 35px;
+  @media (min-width: $bp-large) {
+    margin-left: 35px;
+  }
 }
 
 .form-row {
@@ -443,7 +517,7 @@ nav .entry {
 }
 
 input.checkout {
-  width: 418px;
+  width: 300px;
   background-color: #1D8884;
   border: none;
   text-align: center;
@@ -458,6 +532,10 @@ input.checkout {
   display: block;
   cursor: pointer;
 
+  @media (min-width: $bp-large) {
+    width: 418px;
+  }
+
   &.processing {
     cursor: not-allowed;
     background-color: #cccccc;
@@ -465,10 +543,13 @@ input.checkout {
 }
 
 .legalese {
+  @media (min-width: $bp-medium) {
+    width: 501px;
+  }
+
   color: #818181;
   font-size: 13px;
   line-height: 17px;
-  width: 501px;
   margin: 15px auto 0;
   text-align: center;
 }

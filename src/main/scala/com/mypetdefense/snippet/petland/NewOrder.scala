@@ -405,8 +405,10 @@ class NewOrder extends Loggable {
     ".subscription-details" #> idMemoize { renderer =>
       orderDetailsRenderer = Full(renderer)
       ".pet-entry" #> pets.map { pet =>
+        val birthday = tryo(birthdayDateFormat.format(pet.birthday.get))
+
         ".pet-name *" #> pet.name.get &
-        ".pet-birthday *" #> tryo(pet.birthday.get.toString).openOr("") &
+        ".pet-birthday *" #> birthday &
         ".pet-current-product *" #> pet.product.obj.map(_.getNameAndSize) &
         ".remove [onclick]" #> ajaxInvoke(() => removePet(pet))
       }
