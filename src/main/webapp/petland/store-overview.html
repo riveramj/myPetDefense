@@ -21,8 +21,19 @@
         </ul>
       </section>
 
-      <canvas id="myChart" width="400" height="400"></canvas>
+      <section class="charts">
+        <div class="chart active-inactive">
+          <canvas id="active-inactive-chart"></canvas>
+        </div>
 
+        <div class="chart">
+          <canvas id="total-active-chart"></canvas>
+        </div>
+
+        <div class="chart">
+          <canvas id="signup-chart"></canvas>
+        </div>
+      </section>
 
       <table>
         <thead>
@@ -64,6 +75,11 @@
       </table>
     </div>
   </div>
+
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=petland-store-overview"></script>
+  </tail>
+
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=petland-store-overview">
   </head_merge>
