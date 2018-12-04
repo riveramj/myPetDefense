@@ -1,0 +1,57 @@
+@import "base";
+@import "admin";
+
+.pets {
+  display: none;
+
+  &.expanded {
+    display: table-row;
+  }
+}
+
+.user.expanded {
+  border-bottom: none;
+}
+
+.pet:last-child {
+  border-bottom: none;
+}
+
+.user {
+  cursor: pointer;
+}
+
+.account-snapshot {
+  ul {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+    padding: 20px 70px;
+    background-color: #cecece;
+    margin-bottom: 30px;
+  }
+
+  li {
+    display: inline-block;
+
+    div {
+      font-size: 24px;
+      padding-bottom: 4px;
+    }
+  }
+}
+
+.charts {
+  display: flex;
+  justify-content: space-between;
+  padding-bottom: 30px;
+}
+
+.chart {
+  height: 150px;
+  background-color: #ffffff;
+
+  -webkit-box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+  -moz-box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.5);
+}

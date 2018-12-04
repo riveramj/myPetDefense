@@ -290,4 +290,18 @@ object DataLoader extends Loggable {
       ParentService.updateNextShipDate(subscription, Full(user))
     }
   }
+
+  def createOneSizeCat = {
+    val oneSizeCat = Product.find(By(Product.size, AnimalSize.CatAllSize))
+    if (oneSizeCat.isEmpty) {
+      Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatAllSize,
+        sizeName = "All Sizes",
+        imageName = "zoguard/ZoGuard-Plus-cat-2.jpg",
+        sku = "100001"
+      )
+    }
+  }
 }
