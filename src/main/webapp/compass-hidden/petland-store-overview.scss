@@ -20,3 +20,21 @@
 .user {
   cursor: pointer;
 }
+
+.account-snapshot {
+  ul {
+    display: flex;
+    justify-content: space-between;
+    text-align: center;
+    padding: 20px 70px;
+  }
+
+  li {
+    display: inline-block;
+
+    div {
+      font-size: 24px;
+      padding-bottom: 4px;
+    }
+  }
+}

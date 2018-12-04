@@ -43,10 +43,8 @@ class PetlandOverview extends Loggable {
   def findStatus(status: Status.Value) = {
     if (status == Status.Active)
       "Active"
-    else if (status == Status.Cancelled)
-      "Cancelled"
     else 
-      "Suspended"
+      "Inactive"
   }
 
   def getName(parent: User) = {
