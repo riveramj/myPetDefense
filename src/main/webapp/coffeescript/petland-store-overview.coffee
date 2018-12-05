@@ -6,7 +6,7 @@ activeInactiveChart = new Chart(activeInactive, {
     labels: ["Active", "Inactive"],
     datasets: [{
       label: '# of Customers',
-      data: [100, 19],
+      data: [],
       backgroundColor: [
         'rgba(255, 99, 132, 0.2)',
         'rgba(54, 162, 235, 0.2)'
@@ -20,14 +20,16 @@ activeInactiveChart = new Chart(activeInactive, {
   }
 })
 
-mtdCommission = document.getElementById("total-active-chart").getContext('2d')
-mtdCommissionChart = new Chart(mtdCommission, {
-  type: 'bar',
+totalActive = document.getElementById("total-active-chart").getContext('2d')
+totalActiveChart = new Chart(totalActive, {
+  type: 'line',
   data: {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    labels: [],
     datasets: [{
+      fill: false,
+      lineTension: 0,
       label: '# of Customers',
-      data: [40, 29, 30, 50, 60, 50, 40, 41, 43, 49, 35, 42],
+      data: [0,0,0,0,0,0],
       backgroundColor: [
         'rgba(255, 99, 132, 0.2)',
         'rgba(54, 162, 235, 0.2)'
@@ -43,25 +45,33 @@ mtdCommissionChart = new Chart(mtdCommission, {
     title: {
       display: true,
       text: 'Total Active Users'
+    },
+    scales: {
+      yAxes: [{
+        ticks: {
+          beginAtZero: true
+        }
+      }]
     }
   }
 })
-ytdCommission = document.getElementById("signup-chart").getContext('2d')
-ytdCommissionChart = new Chart(ytdCommission, {
+
+signup = document.getElementById("signup-chart").getContext('2d')
+signupChart = new Chart(signup, {
   type: 'line',
   data: {
-    labels: ["Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"],
+    labels: [],
     datasets: [{
       fill: false,
       lineTension: 0,
       label: '# of Customers',
-      data: [40, 29, 30, 50, 60, 50, 40, 41, 43, 49, 35, 42],
+      data: [0,0,0,0,0,0],
       pointBackgroundColor: 'rgb(255,0,0)',
       borderColor: 'rgb(0,0,255)'
     }]
   },
   options: {
-    responsive:true,
+    responsive: true,
     maintainAspectRatio: false,
     legend: {
       display: false
@@ -69,6 +79,38 @@ ytdCommissionChart = new Chart(ytdCommission, {
     title: {
       display: true,
       text: 'New User Signups'
+    },
+    scales: {
+      yAxes: [{
+        ticks: {
+          beginAtZero: true
+        }
+      }]
     }
   }
 })
+
+$(document).on "update-chart-data", (event) ->
+  chartName = event.chartName
+  newData = event.newData
+  newLabels = event.newLabels
+  
+  updateData(chartName, newData, newLabels)
+  
+updateData = (chartName, newData, newLabels) ->
+  switch chartName
+    when "activeInactive"
+      activeInactiveChart.data.datasets[0].data = newData
+      activeInactiveChart.update()
+    
+    when "totalActive"
+      totalActiveChart.data.datasets[0].data = newData
+      totalActiveChart.data.labels = newLabels
+      totalActiveChart.update()
+
+    when "signup"
+      signupChart.data.datasets[0].data = newData
+      signupChart.data.labels = newLabels
+      signupChart.update()
+
+$('.update-data').click()

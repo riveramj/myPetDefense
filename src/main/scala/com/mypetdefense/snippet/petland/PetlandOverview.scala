@@ -17,6 +17,12 @@ import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 
 import java.text.SimpleDateFormat
 
+import java.util.{Date, Locale}
+import java.time.{LocalDate, ZoneId, LocalDateTime}
+import java.time.format.DateTimeFormatter
+
+case class UpdateChartData(chartName: String, newData: Array[Int], newLabels: Array[String] = Array()) extends MyPetDefenseEvent("update-chart-data")
+
 object PetlandOverview extends Loggable { 
   import net.liftweb.sitemap._
     import Loc._
@@ -33,12 +39,24 @@ class PetlandOverview extends Loggable {
   val agency = currentUser.flatMap(_.agency.obj)
   val agencyName = agency.map(_.name.get).openOr("")
   val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  
-  var currentParent: Box[User] = Empty
+  val chartDateFormat = new SimpleDateFormat("MMM")
 
   val users = User.findAll(
     By(User.userType, UserType.Parent)
   ).filter(_.referer.obj == agency)
+  
+  val allSubscriptions = users.map(_.getSubscription).flatten
+  val allShipments = allSubscriptions.map(_.shipments.toList).flatten
+
+  val usersByStatus = users.groupBy(_.status.get)
+  val activeUsers = usersByStatus(Status.Active)
+  val activeUserCount = activeUsers.size
+  val inactiveUserCount = users.size - activeUserCount
+
+  val activeUserSubscription = users.map(_.getSubscription).flatten
+  val activeShipments = activeUserSubscription.map(_.shipments.toList).flatten
+
+  var currentParent: Box[User] = Empty
 
   def findStatus(status: Status.Value) = {
     if (status == Status.Active)
@@ -58,6 +76,75 @@ class PetlandOverview extends Loggable {
     CancelledUser.find(By(CancelledUser.user, parent.userId.get)).map(_.name).openOr("")
   }
 
+  def currentDate = LocalDateTime.now()
+  
+  def getDateRange(month: String) = {
+    if (month == "") {
+      currentDate
+    } else {
+      convertMonthToDate(month)
+    }
+  }
+
+  def getProcessDateOfShipment(shipment: Shipment) = {
+    shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+  }
+
+  def findCurrentMonthShipment(shipment: Shipment, month: String = "") = {
+    val date = getDateRange(month)
+
+    val processedDate = getProcessDateOfShipment(shipment)
+
+    (
+      (processedDate.getYear == date.getYear) &&
+      (processedDate.getMonth == date.getMonth)
+    )
+  }
+
+  def convertMonthToDate(month: String) = {
+    val dateFormat = new SimpleDateFormat("MMMM yyyy")
+    val monthDate = dateFormat.parse(s"$month 2018") //TODO: dynanmic year
+
+    monthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+  }
+
+  def updateCharts = {
+    val activeUserSignupDates = activeUserSubscription.map(_.startDate.get)
+
+    val activeUsersSignupByMonth = activeUserSignupDates.map(chartDateFormat.format).groupBy(identity).mapValues(_.size)
+
+    val activeUsersSignupByMonthLabel = activeUsersSignupByMonth.keys.toArray
+    val activeUsersSignupByMonthValue = activeUsersSignupByMonth.values.toArray
+
+    val shipmentsByMonth = allShipments.map(_.dateProcessed.get).map(chartDateFormat.format).groupBy(identity).mapValues(_.size)
+
+    val allShipmentsByMonthLabel = shipmentsByMonth.keys.toArray
+    val allShipmentsByMonthValue = shipmentsByMonth.values.toArray
+
+    (
+      UpdateChartData("activeInactive", Array(activeUserCount, inactiveUserCount)) &
+      UpdateChartData("totalActive", allShipmentsByMonthValue, allShipmentsByMonthLabel) &
+      UpdateChartData("signup", activeUsersSignupByMonthValue, activeUsersSignupByMonthLabel)
+    )
+  }
+
+  def snapShotBindings = {
+    val currentMonthSubscriptionShipments = {
+      for {
+        subscription <- allSubscriptions
+        shipment <- subscription.shipments.toList
+          if (findCurrentMonthShipment(shipment)) 
+      } yield {
+        (subscription, shipment)
+      } 
+    }
+
+    ".mtd-shipments *" #> currentMonthSubscriptionShipments.size
+    //".mtd-commission-earned *" #>
+    //".ytd-commission-earned *" #>
+
+  }
+
   def petBindings = {
     val parent = currentParent
     val pets = parent.map(_.pets.toList).openOr(Nil)
@@ -70,8 +157,10 @@ class PetlandOverview extends Loggable {
   }
 
   def render = {
+    snapShotBindings &
     ".overview [class+]" #> "current" &
     ".store-name *" #> currentUser.map(_.name) &
+    ".update-data [onclick]" #> ajaxInvoke(() => updateCharts) &
     "tbody" #> users.sortWith(_.name < _.name).map { parent =>
       idMemoize { detailsRenderer =>
 
