@@ -241,7 +241,8 @@ nav .entry {
   padding: 0 15px;
 
   @media (min-width: $bp-large) {
-    margin: 0 0 55px;
+    margin: 30px auto 60px;
+    max-width: 884px;
   }
 
   h2 {
@@ -270,7 +271,7 @@ nav .entry {
   }
 
   @media (min-width: $bp-large) {
-    width: 884px;
+    width: 100%;
     margin: 0;
   }
 
@@ -401,7 +402,7 @@ nav .entry {
   width: 100%;
 
   @media (min-width: $bp-large) {
-    width: 422px;
+    width: 406px;
   }
 
   > h3 {
@@ -472,7 +473,7 @@ nav .entry {
 
   @media (min-width: $bp-large) {
     display: inline-block;
-    width: 422px;
+    width: 406px;
   }
 
   h3 {
