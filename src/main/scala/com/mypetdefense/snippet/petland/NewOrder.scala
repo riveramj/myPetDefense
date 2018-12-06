@@ -40,6 +40,8 @@ object petsOrdered extends SessionVar[List[Pet]](Nil)
 
 case class OrderSubmitted(email: String) extends MyPetDefenseEvent("order-submitted")
 
+case class PetAdded(petName: String) extends MyPetDefenseEvent("pet-added")
+
 object NewOrder extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
@@ -373,7 +375,8 @@ class NewOrder extends Loggable {
     (
       addPetRenderer.map(_.setHtml).openOr(Noop) &
       orderDetailsRenderer.map(_.setHtml).openOr(Noop) &
-      totalsRenderer.map(_.setHtml).openOr(Noop)
+      totalsRenderer.map(_.setHtml).openOr(Noop) &
+      PetAdded(newPet.map(_.name.get).headOption.getOrElse(""))
     )
   }
 
@@ -415,15 +418,10 @@ class NewOrder extends Loggable {
       }
     } &
     "#empty-cart [class+]" #> { 
-      if (pets.size > 0) {
-        println(pets.size)
-
+      if (pets.size > 0)
         "hidden"
-      } else {
-        println(pets.size)
-
-        "nope"
-      }
+      else
+        ""
     } &
     ".continue-shopping *" #> (if (pets.size > 0) "Continue Shopping" else "Add Another Pet")
   }

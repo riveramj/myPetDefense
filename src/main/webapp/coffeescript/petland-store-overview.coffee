@@ -8,9 +8,13 @@ activeInactiveChart = new Chart(activeInactive, {
       label: '# of Customers',
       data: [],
       backgroundColor: [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)'
-     ]
+        '#B3E7E6',
+        '#F7F7F7'
+      ],
+      borderColor: [
+        '#45ADA9',
+        '#CECECE'
+      ]
     }]
   },
   options: {
