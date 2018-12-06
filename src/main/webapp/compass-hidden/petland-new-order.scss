@@ -3,13 +3,11 @@
 @import "footer";
 
 #top-bar {
-  background-color: #259490;
-
   padding: 15px 0 15px;
   text-align: center;
 
   @media (min-width: $bp-medium) {
-    padding-left: 25px;
+    padding: 15px 125px;
     text-align: left;
   }
 }
@@ -44,14 +42,17 @@ nav .entry {
     margin-right: 25px;
   }
 
-
-  &.current {
-    border-bottom: 2px solid #ffffff;
+  a {
+    color: #919191;
+    letter-spacing: 0.4px;
   }
 
-  a {
-    color: #ffffff;
-    letter-spacing: 0.4px;
+  &.current {
+    padding-bottom: 10px;
+
+    a {
+      color: #605F5F;
+    }
   }
 }
 
@@ -134,7 +135,7 @@ nav .entry {
 .product-production {
   margin-top: 2px;
   font-size: 20px;
-  color: #454343;
+  color: #919191;
   line-height: 33px;
 }
 
@@ -184,7 +185,7 @@ nav .entry {
   label {
     div {
       margin-bottom: 5px;
-      color: #454343;
+      color: #5d5d5d;
       font-size: 18px;
       font-weight: $bold;
       line-height: 24px;
@@ -210,7 +211,7 @@ nav .entry {
   }
 }
 
-.size-container, .birthday-container {
+.size-container {
   display: flex;
   justify-content: space-between;
 }
@@ -241,7 +242,7 @@ nav .entry {
   padding: 0 15px;
 
   @media (min-width: $bp-large) {
-    margin: 30px auto 60px;
+    margin: 30px auto 94px;
     max-width: 884px;
   }
 
@@ -276,8 +277,8 @@ nav .entry {
   }
 
   thead td {
-    color: #1D8884;
-    background-color: #CDF5F4;
+    color: #454343;
+    background-color: #F8F8F8;
     padding: 20px 11px;
     line-height: 24px;
     font-size: 16px;
@@ -413,6 +414,7 @@ nav .entry {
     padding: 20px 0 20px 25px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
+    font-weight: $bold;
     border-bottom: 1px solid #57B8B4;
   }
 }
@@ -455,7 +457,7 @@ nav .entry {
   h2 {
     font-size: 24px;
     line-height: 24px;
-    color: #4C4C4C;
+    color: #454343;
     font-weight: $bold;
     margin: 55px 0 25px;
     text-align: center;
@@ -479,7 +481,11 @@ nav .entry {
   h3 {
     padding: 20px 25px;
     border-bottom: 1px solid #CECECE;
-    font-size: 18px;
+    font-size: 16px;
+    color: #454343;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: $bold;
   }
 
   .billing-container, .shipping-container {
@@ -520,8 +526,8 @@ nav .entry {
 }
 
 .field-label {
-  color: #7E7E7E;
-  font-weight: $semibold;
+  color: #5D5D5D;
+  font-weight: $bold;
   font-size: 16px;
   line-height: 24px;
   display: block;
@@ -670,5 +676,43 @@ input.checkout {
 
   @media (min-width: $bp-medium) {
     width: 418px;
+  }
+}
+
+#empty-cart {
+  margin: 0 auto;
+  text-align: center;
+  color: #454343;
+  line-height: 20px;
+  font-size: 18px;
+
+  &.hidden {
+    display: none;
+  }
+
+  @media (min-width: $bp-large) {
+    padding: 35px 0 0;
+  }
+}
+
+.continue-shopping {
+  color: #1D8884;
+  letter-spacing: 1.5px;
+  font-size: 20px;
+  line-height: 24px;
+  border-radius: 30px;
+  background-color: #ffffff;
+  margin: 0;
+  border: 1px solid #1D8884;
+  text-align: center;
+  padding: 18px 0;
+  margin: 32px auto 0;
+  text-transform: uppercase;
+  text-align: center;
+  display: block;
+  cursor: pointer;
+  
+  @media (min-width: $bp-large) {
+    width: 359px;
   }
 }
