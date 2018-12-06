@@ -515,6 +515,10 @@ nav .entry {
   @media (min-width: $bp-medium) {
     width: 177px;
   }
+
+  @media (min-width: $bp-large) {
+    width: 169px;
+  }
 }
 
 #first-name {
