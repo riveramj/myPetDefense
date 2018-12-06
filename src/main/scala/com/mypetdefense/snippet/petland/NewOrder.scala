@@ -182,17 +182,14 @@ class NewOrder extends Loggable {
 
             case TrySuccess(stripeFailure) =>
               logger.error(s"create subscription failed with stripe error: ${stripeFailure}")
-              stripeFailure
               Noop
 
             case TryFail(throwable: Throwable) =>
               logger.error(s"create subscription failed with other error: ${throwable}")
-              Empty
               Noop
           }
             case TrySuccess(stripeFailure) =>
               logger.error(s"create customer failed with stripe error: ${stripeFailure}")
-              stripeFailure
               Noop
 
             case TryFail(throwable: Throwable) =>
@@ -288,9 +285,14 @@ class NewOrder extends Loggable {
         dogZoguardProduct
     }.openOr(Nil)
 
+    val productChoices = products.map(product => (Full(product.size.get), product.getSizeAndSizeName))
+
+    newPetCurrentSize = productChoices.headOption.flatMap(_._1)
+    newPetAdultSize = productChoices.headOption.flatMap(_._1)
+
     SHtml.ajaxSelectObj(
-      (Empty, "Choose Size") +: products.map(product => (Full(product.size.get), product.getSizeAndSizeName)),
-      Empty,
+      productChoices,
+      Full(newPetCurrentSize),
       (possibleSize: Box[AnimalSize.Value]) => {
         if (petSize == "current") {
           newPetCurrentSize = possibleSize
@@ -311,7 +313,7 @@ class NewOrder extends Loggable {
   
   def birthdayYearDropdown = {
     SHtml.ajaxSelect(
-      List(("", "Year")) ++ ((1998 to 2019).toList.map(year => (year.toString, year.toString))),
+      List(("", "Year")) ++ ((2019 to 1998 by -1).toList.map(year => (year.toString, year.toString))),
       Full(birthdayYear),
       birthdayYear = _
     )
