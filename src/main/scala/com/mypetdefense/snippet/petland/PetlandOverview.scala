@@ -21,6 +21,8 @@ import java.util.{Date, Locale}
 import java.time.{LocalDate, ZoneId, LocalDateTime}
 import java.time.format.DateTimeFormatter
 
+import scala.collection.immutable.ListMap
+
 case class UpdateChartData(chartName: String, newData: Array[Int], newLabels: Array[String] = Array()) extends MyPetDefenseEvent("update-chart-data")
 
 object PetlandOverview extends Loggable { 
@@ -39,7 +41,8 @@ class PetlandOverview extends Loggable {
   val agency = currentUser.flatMap(_.agency.obj)
   val agencyName = agency.map(_.name.get).openOr("")
   val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  val chartDateFormat = new SimpleDateFormat("MMM")
+  val chartDateFormat = new SimpleDateFormat("MM")
+  val chartDateFormatName = new SimpleDateFormat("MMM")
 
   val users = User.findAll(
     By(User.userType, UserType.Parent)
@@ -117,15 +120,26 @@ class PetlandOverview extends Loggable {
   def updateCharts = {
     val activeUserSignupDates = activeUserSubscription.map(_.startDate.get)
 
-    val activeUsersSignupByMonth = activeUserSignupDates.map(chartDateFormat.format).groupBy(identity).mapValues(_.size)
+    val activeUsersSignupByMonth = activeUserSignupDates.map(chartDateFormat.format).map(toInt).groupBy(identity).mapValues(_.size)
 
-    val activeUsersSignupByMonthLabel = activeUsersSignupByMonth.keys.toArray
-    val activeUsersSignupByMonthValue = activeUsersSignupByMonth.values.toArray
+    val activeUsersSignupByMonthSorted = ListMap(activeUsersSignupByMonth.toSeq.sortBy(_._1):_*)
 
-    val shipmentsByMonth = allShipments.map(_.dateProcessed.get).map(chartDateFormat.format).groupBy(identity).mapValues(_.size)
+    val activeUsersSignupByMonthLabel = activeUsersSignupByMonthSorted.keys.toArray.map { month =>
+      chartDateFormatName.format(chartDateFormat.parse(month.toString))
+    }
+    val activeUsersSignupByMonthValue = activeUsersSignupByMonthSorted.values.toArray
 
-    val allShipmentsByMonthLabel = shipmentsByMonth.keys.toArray
-    val allShipmentsByMonthValue = shipmentsByMonth.values.toArray
+    val shipmentsByMonth = allShipments.map(_.dateProcessed.get).map(chartDateFormat.format).map(toInt).groupBy(identity).mapValues(_.size)
+
+    val adjustedShipmentsByMonth = shipmentsByMonth + (12 -> activeUserCount)
+
+    val shipmentsByMonthSorted = ListMap(adjustedShipmentsByMonth.toSeq.sortBy(_._1):_*)
+
+    val allShipmentsByMonthLabel = shipmentsByMonthSorted.keys.toArray.map { month =>
+      chartDateFormatName.format(chartDateFormat.parse(month.toString))
+    }
+
+    val allShipmentsByMonthValue = shipmentsByMonthSorted.values.toArray
 
     (
       UpdateChartData("activeInactive", Array(activeUserCount, inactiveUserCount)) &
