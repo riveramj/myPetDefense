@@ -185,6 +185,7 @@ h3 {
   font-size: 22px;
   line-height: 33px;
   margin-bottom: 11px;
+  margin-top: 35px;
 }
 
 .customer-list-container {
@@ -329,4 +330,8 @@ tbody tr {
   &.inactive {
     color: #818080;
   }
+}
+
+.update-data {
+  display: none;
 }

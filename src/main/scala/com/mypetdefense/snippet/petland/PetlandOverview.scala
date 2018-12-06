@@ -110,6 +110,18 @@ class PetlandOverview extends Loggable {
     )
   }
 
+  def findCurrentYearSubscriptionSignup(subscription: Subscription) = {
+    val signupDate = subscription.startDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+
+    signupDate.getYear == currentDate.getYear
+  }
+
+  def findCurrentMonthSubscriptionSignup(subscription: Subscription) = {
+    val signupDate = subscription.startDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+
+    signupDate.getMonth == currentDate.getMonth
+  }
+
   def convertMonthToDate(month: String) = {
     val dateFormat = new SimpleDateFormat("MMMM yyyy")
     val monthDate = dateFormat.parse(s"$month 2018") //TODO: dynanmic year
@@ -159,10 +171,30 @@ class PetlandOverview extends Loggable {
       } 
     }
 
-    ".mtd-shipments *" #> currentMonthSubscriptionShipments.size
-    //".mtd-commission-earned *" #>
-    //".ytd-commission-earned *" #>
+    val currentYearSignups = {
+      for {
+        subscription <- allSubscriptions
+          if (findCurrentYearSubscriptionSignup(subscription)) 
+      } yield {
+        subscription
+      }
+    }
 
+    val currentMonthSignups = {
+      for {
+        subscription <- currentYearSignups
+          if (findCurrentMonthSubscriptionSignup(subscription)) 
+      } yield {
+        subscription
+      }
+    }
+
+    val ytdCommission = currentYearSignups.size * 2
+    val mtdCommission = currentMonthSignups.size * 2
+
+    ".mtd-shipments *" #> currentMonthSubscriptionShipments.size
+    ".mtd-commission-earned *" #> s"$$$mtdCommission" &
+    ".ytd-commission-earned *" #> s"$$$ytdCommission"
   }
 
   def petBindings = {
@@ -182,6 +214,7 @@ class PetlandOverview extends Loggable {
     ".overview [class+]" #> "current" &
     ".store-name *" #> currentUser.map(_.name) &
     ".update-data [onclick]" #> ajaxInvoke(() => updateCharts) &
+    ".customer-count *" #> usersWithName.size &
     "tbody" #> usersWithName.sortWith(_.name < _.name).map { parent =>
       idMemoize { detailsRenderer =>
 

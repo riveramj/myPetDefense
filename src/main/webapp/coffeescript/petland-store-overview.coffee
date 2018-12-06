@@ -16,7 +16,14 @@ activeInactiveChart = new Chart(activeInactive, {
   options: {
     responsive:true,
     maintainAspectRatio: false,
-    aspectRatio: 1
+    aspectRatio: 1,
+    title: {
+      display: true,
+      text: 'Total Users'
+    },
+    legend: {
+      position: 'left'
+    }
   }
 })
 
