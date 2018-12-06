@@ -77,8 +77,26 @@ body {
   }
 }
 
-.user.expanded {
-  border-bottom: none;
+.user {
+  &:after {
+    @extend %icon;
+    font-size: 13px;
+    line-height: 13px;
+    color: #454343;
+    padding-top: 19px;
+    position: absolute;
+    margin-left: -11px;
+
+    content: fa-content($fa-var-chevron-right);
+  }
+
+  &.expanded {
+    border-bottom: none;
+
+    &:after {
+      content: fa-content($fa-var-chevron-down);
+    }
+  }
 }
 
 .pet:last-child {
