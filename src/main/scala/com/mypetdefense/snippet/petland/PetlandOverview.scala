@@ -56,6 +56,8 @@ class PetlandOverview extends Loggable {
   val activeUserSubscription = users.map(_.getSubscription).flatten
   val activeShipments = activeUserSubscription.map(_.shipments.toList).flatten
 
+  val usersWithName = users.map(updateUserName(_))
+
   var currentParent: Box[User] = Empty
 
   def findStatus(status: Status.Value) = {
@@ -65,15 +67,19 @@ class PetlandOverview extends Loggable {
       "Inactive"
   }
 
-  def getName(parent: User) = {
-    if (parent.status == Status.Cancelled)
-      findCancelledUserName(parent)
-    else
-      parent.name
+  def updateUserName(parent: User) = {
+    if (parent.status == Status.Cancelled) {
+      val cancelledUser = findCancelledUserName(parent)
+      parent
+        .firstName(cancelledUser.map(_.firstName.get).openOr(""))
+        .lastName(cancelledUser.map(_.lastName.get).openOr(""))
+    } else {
+      parent
+    }
   }
 
   def findCancelledUserName(parent: User) = {
-    CancelledUser.find(By(CancelledUser.user, parent.userId.get)).map(_.name).openOr("")
+    CancelledUser.find(By(CancelledUser.user, parent.userId.get))
   }
 
   def currentDate = LocalDateTime.now()
@@ -162,7 +168,7 @@ class PetlandOverview extends Loggable {
     ".overview [class+]" #> "current" &
     ".store-name *" #> currentUser.map(_.name) &
     ".update-data [onclick]" #> ajaxInvoke(() => updateCharts) &
-    "tbody" #> users.sortWith(_.name < _.name).map { parent =>
+    "tbody" #> usersWithName.sortWith(_.name < _.name).map { parent =>
       idMemoize { detailsRenderer =>
 
         ".user" #> {
@@ -185,7 +191,7 @@ class PetlandOverview extends Loggable {
           
           val shipmentCount = subscription.map(_.shipments.toList.size).getOrElse(0)
 
-          ".name *" #> getName(parent) &
+          ".name *" #> parent.name &
           ".status *" #> findStatus(parent.status.get) &
           ".status [class+]" #> findStatus(parent.status.get).toLowerCase &
           ".signup-date *" #> signupDate &
