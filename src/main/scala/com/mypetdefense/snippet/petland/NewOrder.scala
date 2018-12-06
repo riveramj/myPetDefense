@@ -432,7 +432,7 @@ class NewOrder extends Loggable {
     ".order-totals" #> idMemoize { renderer =>
       totalsRenderer = Full(renderer)
 
-      val subtotal = pets.size.toDouble * 89.94
+      val subtotal = pets.size.toDouble * 90.00
       val discount = {
         if (pets.size <= 1)
           0.00
