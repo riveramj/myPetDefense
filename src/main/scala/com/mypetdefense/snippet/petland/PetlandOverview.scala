@@ -152,6 +152,7 @@ class PetlandOverview extends Loggable {
     ".pet" #> pets.map { pet =>
       ".pet-name *" #> pet.name.get &
       ".pet-status *" #> findStatus(pet.status.get) &
+      ".pet-status [class+]" #> findStatus(pet.status.get).toLowerCase &
       ".current-product *" #> pet.product.map(_.getSizeAndSizeName)
     }
   }
@@ -186,6 +187,7 @@ class PetlandOverview extends Loggable {
 
           ".name *" #> getName(parent) &
           ".status *" #> findStatus(parent.status.get) &
+          ".status [class+]" #> findStatus(parent.status.get).toLowerCase &
           ".signup-date *" #> signupDate &
           ".cancel-date *" #> cancellationDate &
           ".shipment-count *" #> shipmentCount
