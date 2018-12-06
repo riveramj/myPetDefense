@@ -413,7 +413,19 @@ class NewOrder extends Loggable {
         ".pet-current-product *" #> pet.product.obj.map(_.getNameAndSize) &
         ".remove [onclick]" #> ajaxInvoke(() => removePet(pet))
       }
-    }
+    } &
+    "#empty-cart [class+]" #> { 
+      if (pets.size > 0) {
+        println(pets.size)
+
+        "hidden"
+      } else {
+        println(pets.size)
+
+        "nope"
+      }
+    } &
+    ".continue-shopping *" #> (if (pets.size > 0) "Continue Shopping" else "Add Another Pet")
   }
 
   def totalSummaryBindings = {
