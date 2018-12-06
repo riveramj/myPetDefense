@@ -9,11 +9,7 @@ activeInactiveChart = new Chart(activeInactive, {
       data: [],
       backgroundColor: [
         '#B3E7E6',
-        '#F7F7F7'
-      ],
-      borderColor: [
-        '#45ADA9',
-        '#CECECE'
+        '#E7E7E7'
       ]
     }]
   },
@@ -34,10 +30,8 @@ totalActiveChart = new Chart(totalActive, {
       lineTension: 0,
       label: '# of Customers',
       data: [0,0,0,0,0,0],
-      backgroundColor: [
-        'rgba(255, 99, 132, 0.2)',
-        'rgba(54, 162, 235, 0.2)'
-     ]
+      pointBackgroundColor: '#259490',
+      borderColor: '#B3E7E6'
     }]
   },
   options: {
@@ -70,8 +64,8 @@ signupChart = new Chart(signup, {
       lineTension: 0,
       label: '# of Customers',
       data: [0,0,0,0,0,0],
-      pointBackgroundColor: 'rgb(255,0,0)',
-      borderColor: 'rgb(0,0,255)'
+      pointBackgroundColor: '#259490',
+      borderColor: '#B3E7E6'
     }]
   },
   options: {
