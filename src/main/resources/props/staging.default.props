@@ -1,6 +1,6 @@
 [Database]
 db.driver=org.postgresql.Driver
-db.url=jdbc:postgresql://stg-mypetdefense.cega431oqn39.us-west-2.rds.amazonaws.com:5432/mypetdefense
+db.url=jdbc:postgresql://mypetdefense-stg.cega431oqn39.us-west-2.rds.amazonaws.com:5432/mypetdefense
 db.user=mypetdefense
 db.password=8VWr2OAn1j
 
