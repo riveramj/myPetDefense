@@ -189,8 +189,8 @@ class PetlandOverview extends Loggable {
       }
     }
 
-    val ytdCommission = currentYearSignups.size * 2
-    val mtdCommission = currentMonthSignups.size * 2
+    val ytdCommission = currentYearSignups.size * 12
+    val mtdCommission = currentMonthSignups.size * 12
 
     ".mtd-shipments *" #> currentMonthSubscriptionShipments.size &
     ".mtd-commission-earned *" #> s"$$$mtdCommission" &
