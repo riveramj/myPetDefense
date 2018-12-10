@@ -52,4 +52,6 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
 object Price extends Price with LongKeyedMetaMapper[Price] {
   final val defaultPriceCode = Props.get("default.price.code").openOr("default")
   final val currentTppPriceCode = Props.get("tpp.price.code").openOr(defaultPriceCode)
+  final val currentPetland6MonthPaymentCode = Props.get("petland.6month.payment").openOr(defaultPriceCode)
+  final val currentPetlandMonthlyCode = Props.get("petland.1month.payment").openOr(defaultPriceCode)
 }
