@@ -1,0 +1,97 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div data-lift="petland.PetlandOverview.render?eager_eval=true">
+    <div data-lift="embed?what=petland/petland-nav-bar"></div>
+    <div id="item-container">
+      <h2 class="store-name">Petland Atlanta</h2>
+
+      <section class="account-snapshot">
+        <ul>
+          <li>
+            <div class="mtd-shipments">1234</div>
+            MTD Shipments
+          </li>
+          <li>
+            <div class="mtd-commission-earned">$1.00</div>
+            MTD Commission Earned
+          </li>
+          <li>
+            <div class="ytd-commission-earned">$2.00</div>
+            YTD Commission Earned
+          </li>
+        </ul>
+      </section>
+
+      <button class="update-data">Update Data</button>
+
+      <h3>Customer Analysis</h3>
+      <div class="customer-analysis">
+        <section class="charts">
+          <div class="chart active-inactive">
+            <canvas id="active-inactive-chart"></canvas>
+          </div>
+
+          <div class="chart">
+            <canvas id="total-active-chart"></canvas>
+          </div>
+
+          <div class="chart">
+            <canvas id="signup-chart"></canvas>
+          </div>
+        </section>
+
+        <div class="customer-list-container">
+          <div class="export-bar">
+            Customers (<span class="customer-count">200</span>)
+          </div>
+          <table class="customer-list">
+            <thead>
+              <tr>
+                <td>Name</td>
+                <td>Status</td>
+                <td>Shipments</td>
+                <td>Signup Date</td>
+                <td>Cancellation Date</td>
+            </thead>
+            <tbody>
+              <tr class="user">
+                <td class="name">Mike Rivera</td>
+                <td><span class="status">Good to Go</span></td>
+                <td class="shipment-count">0</td>
+                <td class="signup-date">Feb 2019</td>
+                <td class="cancel-date">-</td>
+              </tr>
+              <tr class="pets info">
+                <td colspan=5 class="pet-info">
+                  <table>
+                    <thead>
+                      <tr>
+                        <td>Pet Name</td>
+                        <td>Status</td>
+                        <td>Current Product</td>
+                      </tr>
+                    </thead>
+                    <tr class="pet">
+                      <td class="pet-name">fido</td>
+                      <td><span class="pet-status">active</span></td>
+                      <td class="current-product">adventure plus 10 pounds</td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div>
+          </div>
+        </div>
+      </div>
+
+      <tail>
+        <script type="text/javascript" src="/static/js/chart.bundle.min.js"></script>
+
+        <script type="text/javascript" data-lift="script-bundle?name=petland-store-overview"></script>
+      </tail>
+
+      <head_merge>
+        <link rel="stylesheet" data-lift="style-bundle?name=petland-store-overview">
+      </head_merge>
+    </div>

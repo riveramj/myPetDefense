@@ -7,6 +7,7 @@ import net.liftweb.util.Helpers._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 import com.mypetdefense.snippet.admin._
+import com.mypetdefense.snippet.petland._
 import com.mypetdefense.snippet.agency._
 
 object SecurityContext extends Loggable {
@@ -49,6 +50,12 @@ object SecurityContext extends Loggable {
           S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
         }
 
+      case petland if petlandAgent_? =>
+        possibleRedirect.openOr {
+          logger.info("Redirecting user to petland overview.")
+          S.redirectTo(PetlandOverview.menu.loc.calcDefaultHref)
+        }
+
       case agent if agent == UserType.Agent =>
         possibleRedirect.openOr {
           logger.info("Redirecting user to Agency Overview.")
@@ -79,5 +86,16 @@ object SecurityContext extends Loggable {
 
   def admin_? : Boolean = {
     currentUser.map(_.userType == UserType.Admin) openOr false
+  }
+
+  def petlandAgent_? : Boolean = {
+    {
+      for {
+        user <- currentUser
+        agency <- user.agency.obj
+        } yield {
+          agency.name.get == "Petland"
+        }
+    }.openOr(false)
   }
 }
