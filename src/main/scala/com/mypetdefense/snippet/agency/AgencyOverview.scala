@@ -72,6 +72,7 @@ class AgencyOverview extends Loggable {
     ".september [href]" #> AgencyOverview.exportTPPMontSalesMenu.calcHref("September") &
     ".october [href]" #> AgencyOverview.exportTPPMontSalesMenu.calcHref("October") &
     ".november [href]" #> AgencyOverview.exportTPPMontSalesMenu.calcHref("November") &
+    ".december [href]" #> AgencyOverview.exportTPPMontSalesMenu.calcHref("December") &
     ".month-to-date-export [href]" #> AgencyOverview.agencyMtdYtdExportMenu.calcHref(agencyName)
   }
 }
