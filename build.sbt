@@ -16,12 +16,6 @@ seq(resourceManagementSettings :_*)
 
 scalacOptions += "-deprecation"
 
-initialize := {
-  val required = "1.8"
-  val current  = sys.props("java.specification.version")
-  assert(current == required, s"Unsupported JDK: java.specification.version $current != $required")
-}
-
 seq(
   targetJavaScriptDirectory in ResourceCompile <<= (PluginKeys.webappResources in Compile) apply { resources => (resources / "static" / "js").get(0) },
   scriptDirectories in ResourceCompile <<= (PluginKeys.webappResources in Compile) map { resources => (resources / "javascript").get },
@@ -49,7 +43,7 @@ libraryDependencies ++= {
   val liftVersion = "3.2.0"
   Seq(
     "org.apache.shiro"    %  "shiro-core"         % "1.2.4",
-    "ch.qos.logback"      %  "logback-classic"    % "1.1.3",
+    "ch.qos.logback"      %  "logback-classic"    % "1.2.3",
     "net.sf.opencsv"      %  "opencsv"            % "2.3",
     "org.postgresql"      %  "postgresql"         % "42.2.5",
     "org.quartz-scheduler" % "quartz"             % "2.3.0",
