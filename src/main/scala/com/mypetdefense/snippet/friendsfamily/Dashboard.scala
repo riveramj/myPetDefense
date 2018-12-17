@@ -30,11 +30,11 @@ object Dashboard extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Friends Family Dashboard") / "friendsfamily" / "dashboard" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 
   val friendsFamilyLabelsExportMenu = Menu.i("Export Labels") / "friendsfamily" / "dashboard" / "export_friendsfamily_labels.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportFriendsFamilyUspsLabels _)
 
