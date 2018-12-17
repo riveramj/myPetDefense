@@ -28,11 +28,11 @@ object Parents extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Parents") / "admin" / "parents" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 
   val activeParentsCsvMenu = Menu.i("Active Parents") / "admin" / "parents" / "export_active_parents.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportActiveParents _)
 
@@ -521,7 +521,7 @@ class Parents extends Loggable {
           ".email *" #> getParentInfo(parent, "email") &
           ".billing-status *" #> subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
           ".referer *" #> refererName &
-          ".ship-date *" #> displayNextShipDate(nextShipDate.map(dateFormat.format(_)), isCancelled_?(parent)) &
+          ".ship-date *" #> tryo(displayNextShipDate(nextShipDate.map(dateFormat.format(_)), isCancelled_?(parent))).openOr("-") &
           ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
           ".actions .delete" #> ClearNodesIf(isCancelled_?(parent)) &
           ".actions .cancel" #> ClearNodesIf(isCancelled_?(parent)) &

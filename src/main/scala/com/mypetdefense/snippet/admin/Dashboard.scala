@@ -31,21 +31,21 @@ object Dashboard extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Dashboard") / "admin" / "dashboard" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 
   val newLabelsExportMenu = Menu.i("Export New Labels") / "admin" / "dashboard" / "export_new_shipments.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportNewUspsLabels _)
 
   val existingLabelsExportMenu = Menu.i("Export Existing Labels") / "admin" / "dashboard" / "export_existing_shipments.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportExistingUspsLabels _)
 
   val mpdShipstationExportMenu = Menu.i("Export MPD Shipstation Labels") / "admin" / "dashboard" / "export_MPD_shipstation.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportMpdShipstationLabels _)
 

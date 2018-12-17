@@ -27,7 +27,7 @@ object Reconciliations extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Reconciliations") / "inventory" / "reconciliations" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 }
 

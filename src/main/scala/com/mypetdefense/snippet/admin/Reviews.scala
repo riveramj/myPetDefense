@@ -37,7 +37,7 @@ object Reviews extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Reviews") / "admin" / "reviews" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 }
 
