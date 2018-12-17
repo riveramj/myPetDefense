@@ -27,7 +27,7 @@ object GrowthRates extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Growth Rates") / "admin" / "growth-rates" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 }
 

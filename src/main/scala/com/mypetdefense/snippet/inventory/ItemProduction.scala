@@ -28,7 +28,7 @@ object ItemProduction extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Item Production") / "inventory" / "item-production" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 }
 

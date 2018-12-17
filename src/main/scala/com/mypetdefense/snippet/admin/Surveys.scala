@@ -26,7 +26,7 @@ object Surveys extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Surveys") / "admin" / "surveys" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 }
 
