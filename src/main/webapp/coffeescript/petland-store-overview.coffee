@@ -96,6 +96,8 @@ signupChart = new Chart(signup, {
 })
 
 $(document).on "update-chart-data", (event) ->
+  console.log "got it"
+
   chartName = event.chartName
   newData = event.newData
   newLabels = event.newLabels
@@ -114,6 +116,7 @@ updateData = (chartName, newData, newLabels) ->
       totalActiveChart.update()
 
     when "signup"
+      console.log "in signup"
       signupChart.data.datasets[0].data = newData
       signupChart.data.labels = newLabels
       signupChart.update()

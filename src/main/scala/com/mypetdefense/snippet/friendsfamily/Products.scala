@@ -30,7 +30,7 @@ object Products extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Friends Family Products") / "friendsfamily" / "products" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 }
 

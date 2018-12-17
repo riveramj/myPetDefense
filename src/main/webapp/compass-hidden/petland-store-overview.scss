@@ -68,6 +68,29 @@ body {
   margin: 0 auto;
 }
 
+.date-filter {
+  padding-bottom: 12px;
+  text-align: right;
+  
+  span {
+    color: #454343;
+    line-height: 19px;
+    font-size: 16px;
+    font-weight: $bold;
+    padding-right: 12px;
+  }
+}
+
+#month-filter, #year-filter {
+  border-radius: 3px;
+  border: 1px solid #CECECE;
+  padding: 6px 9px;
+  font-size: 16px;
+
+  height: 33px;
+  background-color: #ffffff;
+}
+
 .pets {
   display: none;
 
@@ -200,6 +223,18 @@ h3 {
   font-size: 20px;
   font-weight: $bold;
   line-height: 24px;
+
+  display: flex;
+  justify-content: space-between;
+}
+
+.export-customers {
+  color: #137876;
+  font-size: 15px;
+  letter-spacing: 1.07px;
+  line-height: 18px;
+  font-weight: $bold;
+  text-decoration: none;
 }
 
 .customer-list {
