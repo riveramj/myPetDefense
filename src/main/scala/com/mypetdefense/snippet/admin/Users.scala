@@ -27,7 +27,7 @@ object Users extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Users") / "admin" / "users" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 }
 
@@ -42,7 +42,6 @@ class Users extends Loggable {
   var email = ""
   var userType: Box[UserType.Value] = Full(UserType.Agent)
   var chosenAgency: Box[Agency] = Empty
-  var admin_? = false
   
   def agencyDropdown = {
     SHtml.selectObj(
@@ -92,12 +91,6 @@ class Users extends Loggable {
       userType, 
       (userSelected: UserType.Value) => {
         userType = Full(userSelected)
-        admin_? = {
-          if (userSelected == UserType.Admin)
-            true
-          else
-            false
-        }
         renderer.setHtml
       }
     ).toForm
@@ -123,7 +116,6 @@ class Users extends Loggable {
       "#last-name" #> ajaxText(lastName, lastName = _) &
       "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
       "#user-type-select" #> userTypeRadio(renderer) &
-      "#agency-container" #> ClearNodesIf(admin_?) &
       "#agency-container #agency-select" #> agencyDropdown &
       "#create-item" #> SHtml.ajaxSubmit("Create User", () => createUser)
     } &

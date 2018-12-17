@@ -62,7 +62,7 @@ object Agencies extends Loggable {
   }
 
   val menu = Menu.i("Agencies") / "admin" / "agencies" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 
     val totalSalesExportMenu = Menu.param[String](
@@ -71,7 +71,7 @@ object Agencies extends Loggable {
       Full(_),
       string => string
     ) / "admin" / "agencies" / "month-year-gross-sales.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportTotalSalesResponse _)
 
@@ -81,7 +81,7 @@ object Agencies extends Loggable {
       Full(_),
       string => string
     ) / "admin" / "agencies" / "raw-sales.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportRawSalesResponse _)
 
@@ -91,7 +91,7 @@ object Agencies extends Loggable {
       Full(_),
       string => string
     ) / "admin" / "agencies" / "same-day-cancel.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportSameDayCancelResponse _)
 
@@ -101,7 +101,7 @@ object Agencies extends Loggable {
       Full(_),
       string => string
     ) / "admin" / "agencies" / "mtd-sales-old.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportMonthToDateSalesResponse _)
 
@@ -111,7 +111,7 @@ object Agencies extends Loggable {
       Full(_),
       string => string
     ) / "admin" / "agencies" / "cancellation-data.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportCancellationDataResponse _)
 
@@ -121,13 +121,14 @@ object Agencies extends Loggable {
       Full(_),
       string => string
     ) / "admin" / "agencies" / "mtd-sales.csv" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn >>
     EarlyResponse(agencyMtdYtdExport _)
 }
 
 class Agencies extends Loggable {
   var name = ""
+  var parentAgency: Box[Agency] = Empty
 
   val agencies = Agency.findAll()
 
@@ -137,9 +138,18 @@ class Agencies extends Loggable {
     ).flatten
 
     if(validateFields.isEmpty) {
-      Agency.createNewAgency(
-        name.trim()
-      )
+      if (parentAgency.isEmpty) {
+        Agency.createNewAgency(
+          name.trim()
+        )
+      } else {
+        Agency.createNewAgency(
+          name.trim(),
+          AgencyType.Store,
+          parentAgency
+        )
+      }
+
       S.redirectTo(Agencies.menu.loc.calcDefaultHref)
     } else {
       validateFields.foldLeft(Noop)(_ & _)
@@ -166,15 +176,33 @@ class Agencies extends Loggable {
       Alert("An error has occured. Please try again.")
   }
 
+  def agencyDropdown = {
+    SHtml.selectObj(
+      List((Empty, "Headquarters")) ++ agencies.map(agency => (Full(agency), agency.name.get)),
+      Full(parentAgency),
+      (agency: Box[Agency]) => parentAgency = agency
+    )
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".agencies [class+]" #> "current" &
     "#name" #> text(name, name = _) &
+    "#parent" #> agencyDropdown &
     "#create-item" #> SHtml.ajaxSubmit("Create Agency", () => createAgency) &
     ".agency" #> agencies.map { agency =>
       val activeCustomers = agency.customers.flatMap(_.getSubscription).filter(_.status == Status.Active)
 
+      val parent = Agency.getHQFor(agency)
+      val parentName = {
+        if (parent == agency)
+          "-"
+        else
+          parent.name.get
+      }
+
       ".name *" #> agency.name &
+      ".parent-name *" #> parentName &
       ".customer-count *" #> activeCustomers.size &
       ".coupon-count *" #> agency.coupons.size &
       ".actions .delete" #> ClearNodesIf(agency.customers.size > 0) &
