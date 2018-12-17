@@ -51,7 +51,7 @@ libraryDependencies ++= {
     "org.apache.shiro"    %  "shiro-core"         % "1.2.4",
     "ch.qos.logback"      %  "logback-classic"    % "1.1.3",
     "net.sf.opencsv"      %  "opencsv"            % "2.3",
-    "org.postgresql"      %  "postgresql"         % "9.4-1201-jdbc41",
+    "org.postgresql"      %  "postgresql"         % "42.2.5",
     "org.quartz-scheduler" % "quartz"             % "2.3.0",
     "org.eclipse.jetty"   %  "jetty-webapp"       % "9.4.12.v20180830" % "container; compile->default",
     "net.liftweb"         %% "lift-common"        % liftVersion % "compile",
