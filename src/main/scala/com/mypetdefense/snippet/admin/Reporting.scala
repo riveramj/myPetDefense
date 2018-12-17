@@ -25,7 +25,7 @@ object Reporting extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Reporting") / "admin" / "reporting" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 }
 
