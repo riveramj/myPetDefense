@@ -171,6 +171,7 @@ object Paths {
     agency.LegacyAgencyOverview.exportTPPMontSalesMenu,
     agency.LegacyAgencyOverview.menu,
     agency.AgencyOverview.menu,
+    agency.AgencyOverview.exportAgencyCustomerMenu,
     Login.menu,
     ForgotPassword.menu,
     ResetPassword.menu,
