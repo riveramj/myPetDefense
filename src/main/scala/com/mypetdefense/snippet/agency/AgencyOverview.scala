@@ -30,9 +30,25 @@ object AgencyOverview extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
+  def agencyCusomterExport: Box[LiftResponse] = {
+    exportAgencyCustomerMenu.currentValue flatMap { agency =>
+      ReportingService.exportAgencyCustomers(agency)
+    } 
+  }
+  
   val menu = Menu.i("Agency Overview") / "agency" / "agency-overview" >>
     adminUser >>
     loggedIn
+
+  val exportAgencyCustomerMenu = Menu.param[String](
+    "Agency Customers Export",
+    "Agency Customers Export",
+    Full(_),
+    string => string
+  ) / "agency" / "agency-overview" / "customers.csv" >>
+  adminUser >>
+  loggedIn >>
+  EarlyResponse(agencyCusomterExport _)
 }
 
 class AgencyOverview extends Loggable {
@@ -292,52 +308,55 @@ class AgencyOverview extends Loggable {
     "#month-filter" #> dateFilterMonthDropdown &
     ".customer-list-container" #> SHtml.idMemoize { renderer =>
       dateFilterTransform = Full(renderer)
-      
-    ".customer-count *" #> usersWithName.size &
-    "tbody" #> usersWithName.sortWith(_.name < _.name).map { parent =>
-      idMemoize { detailsRenderer =>
 
-        ".user" #> {
-          val subscription = parent.getSubscription
+      ".customer-count *" #> usersWithName.size &
+      ".export-customers [href]" #> (agency.map { realAgency =>
+        AgencyOverview.exportAgencyCustomerMenu.calcHref(realAgency.agencyId.get.toString)
+      }).openOr("#") &
+      "tbody" #> usersWithName.sortWith(_.name < _.name).map { parent =>
+        idMemoize { detailsRenderer =>
 
-          val signupDate = subscription.map { sub =>
-            signupCancelDateFormat.format(sub.startDate.get)
-          }.getOrElse("")
+          ".user" #> {
+            val subscription = parent.getSubscription
 
-          val cancellationDate = {
-            if (parent.status.get == Status.Cancelled) {
-              val possibleCancelDate = subscription.map(_.cancellationDate.get)
-              possibleCancelDate.flatMap { date =>
-                tryo(signupCancelDateFormat.format(date))
-              }.getOrElse("")
-            } else {
-              "-"
+            val signupDate = subscription.map { sub =>
+              signupCancelDateFormat.format(sub.startDate.get)
+            }.getOrElse("")
+
+            val cancellationDate = {
+              if (parent.status.get == Status.Cancelled) {
+                val possibleCancelDate = subscription.map(_.cancellationDate.get)
+                possibleCancelDate.flatMap { date =>
+                  tryo(signupCancelDateFormat.format(date))
+                }.getOrElse("")
+              } else {
+                "-"
+              }
             }
-          }
-          
-          val shipmentCount = subscription.map(_.shipments.toList.size).getOrElse(0)
 
-          ".name *" #> parent.name &
-          ".status *" #> findStatus(parent.status.get) &
-          ".status [class+]" #> findStatus(parent.status.get).toLowerCase &
-          ".signup-date *" #> signupDate &
-          ".cancel-date *" #> cancellationDate &
-          ".shipment-count *" #> shipmentCount
-        } &
-        "^ [onclick]" #> ajaxInvoke(() => {
-          if (currentParent.isEmpty) {
-            currentParent = Full(parent)
-          } else {
-            currentParent = Empty
-          }
+            val shipmentCount = subscription.map(_.shipments.toList.size).getOrElse(0)
 
-          detailsRenderer.setHtml
-        }) &
-        ".info [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
-        "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
-        petBindings
+            ".name *" #> parent.name &
+            ".status *" #> findStatus(parent.status.get) &
+            ".status [class+]" #> findStatus(parent.status.get).toLowerCase &
+            ".signup-date *" #> signupDate &
+            ".cancel-date *" #> cancellationDate &
+            ".shipment-count *" #> shipmentCount
+          } &
+          "^ [onclick]" #> ajaxInvoke(() => {
+            if (currentParent.isEmpty) {
+              currentParent = Full(parent)
+            } else {
+              currentParent = Empty
+            }
+
+            detailsRenderer.setHtml
+          }) &
+          ".info [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
+          "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
+          petBindings
+        }
       }
     }
-  }
   }
 }
