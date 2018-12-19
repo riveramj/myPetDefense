@@ -63,6 +63,8 @@ object SecurityContext extends Loggable {
   }
 
   def adminRedirect(user: User) = {
+    println(user)
+
     val agencyName = (for {
       agency <- user.agency.obj
       } yield {
