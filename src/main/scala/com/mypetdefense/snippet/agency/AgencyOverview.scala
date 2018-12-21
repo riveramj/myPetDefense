@@ -280,8 +280,11 @@ class AgencyOverview extends Loggable {
       }
     }
 
+    val currentMonthPets = currentMonthSignups.map(_.getPets).flatten
+    val currentYearPets = currentYearSignups.map(_.getPets).flatten
+
     val ytdCommission = currentYearSignups.size * 12
-    val mtdCommission = currentMonthSignups.size * 12
+    val mtdCommission = currentMonthPets.size * 12
 
     ".mtd-shipments *" #> currentMonthSubscriptionShipments.size &
     ".mtd-commission-earned *" #> s"$$$mtdCommission" &
