@@ -1,6 +1,6 @@
 [Database]
 db.driver=org.postgresql.Driver
-db.url=jdbc:postgresql://stg-mypetdefense.cega431oqn39.us-west-2.rds.amazonaws.com:5432/mypetdefense
+db.url=jdbc:postgresql://mypetdefense-stg.cega431oqn39.us-west-2.rds.amazonaws.com:5432/mypetdefense
 db.user=mypetdefense
 db.password=8VWr2OAn1j
 
@@ -17,7 +17,7 @@ secret.key=sk_test_BC0GclTGecvZKl6kimEn1dAn
 public.key=pk_test_rgQ72pMGC8pVMFU1KS3XlwLa
 stripe.base.url=https://dashboard.stripe.com/test
 
-server.url=http://demo.mypetdefense.com/
+server.url=https://demo.mypetdefense.com/
 
 [TaxJar]
 taxjar.api.key=41169ab583e69469e0612dee1586ce79
@@ -25,3 +25,6 @@ taxjar.api.key=41169ab583e69469e0612dee1586ce79
 [Price]
 default.price.code=default-jan-29-2018
 tpp.price.code=tpp-apr-01-2018
+petland.6month.payment=petland-6month-prepay-12-01-2018
+petland.free.payment=petland-free-12-01-2018
+petland.1month.payment=petland-monthly-12-01-2018

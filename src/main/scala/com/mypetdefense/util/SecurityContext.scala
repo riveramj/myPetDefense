@@ -7,6 +7,7 @@ import net.liftweb.util.Helpers._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 import com.mypetdefense.snippet.admin._
+import com.mypetdefense.snippet.petland._
 import com.mypetdefense.snippet.agency._
 
 object SecurityContext extends Loggable {
@@ -17,7 +18,7 @@ object SecurityContext extends Loggable {
   def logIn(user: User) = {
     loggedInUserId(Full(user.userId.get))
     loggedInUserId.is
-    
+
     loggedInUser(Full(user))
     loggedInUser.is
 
@@ -36,24 +37,44 @@ object SecurityContext extends Loggable {
       S.redirectTo(redirectLocation)
     } 
 
-    user.userType match {
-      case admin if admin == UserType.Admin =>
+    user.userType.get match {
+      case UserType.Admin =>
         possibleRedirect.openOr {
-          logger.info("Redirecting user to dashboard.")
-          S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
+          logger.info("Redirecting user to admin redirect.")
+          S.redirectTo(adminRedirect(user))
         }
-      
-      case parent if parent == UserType.Parent =>
+
+      case UserType.Parent  =>
         possibleRedirect.openOr {
           logger.info("Redirecting user to AccountOverview.")
           S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
         }
 
-      case agent if agent == UserType.Agent =>
+      case UserType.Agent =>
         possibleRedirect.openOr {
-          logger.info("Redirecting user to Agency Overview.")
-          S.redirectTo(AgencyOverview.menu.loc.calcDefaultHref)
+          logger.info("Redirecting user to New Order Form.")
+          S.redirectTo(NewOrder.menu.loc.calcDefaultHref)
         }
+
+      case other =>
+        logger.info(s"Not valid user type: $other")
+        S.redirectTo(Login.menu.loc.calcDefaultHref)
+    }
+  }
+
+  def adminRedirect(user: User) = {
+    println(user)
+
+    val agencyName = (for {
+      agency <- user.agency.obj
+      } yield {
+        agency.name.get
+      })
+
+    if (agencyName == "My Pet Defense") {
+      Dashboard.menu.loc.calcDefaultHref
+    } else {
+      AgencyOverview.menu.loc.calcDefaultHref
     }
   }
 
@@ -68,7 +89,7 @@ object SecurityContext extends Loggable {
   def loggedIn_? : Boolean = {
     currentUser.isDefined
   }
-  
+
   def agent_? : Boolean = {
     currentUser.map(_.userType == UserType.Agent) openOr false
   }
@@ -79,5 +100,9 @@ object SecurityContext extends Loggable {
 
   def admin_? : Boolean = {
     currentUser.map(_.userType == UserType.Admin) openOr false
+  }
+
+  def mpdAdmin_? : Boolean = {
+    (admin_? && currentUser.map(_.agency.obj.map(_.name.get == "My Pet Defense")).flatten.openOr(false))
   }
 }

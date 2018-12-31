@@ -10,6 +10,13 @@
           <span class="field-label">Name</span>
           <input id="name" type="text">            
         </label>
+        <div class="short-field" id="agency-container">
+          <div class="field-label">Parent Agency</div>
+          <span id="parent">
+            <input type="radio" value="agency">agency1
+            <input type="radio" value="agency">agency2
+          </span>
+        </div>
         <div class="create-item tiny-field">
           <button type="submit" id="create-item">Create</button>
         </div>
@@ -19,6 +26,7 @@
       <thead>
         <tr>
           <td>Name
+          <td>Parent
           <td>Customers
           <td>Coupons
           <td>Actions
@@ -27,6 +35,7 @@
       <tbody>
         <tr class="agency">
           <td class="name">Mike Rivera
+          <td class="parent-name">-
           <td class="customer-count">10
           <td class="coupon-count">10
           <td class="actions">
