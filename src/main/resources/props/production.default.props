@@ -25,6 +25,9 @@ taxjar.api.key=a898d7a70fb3f3d948b7aac38779e42d
 [Price]
 default.price.code=default-jan-29-2018
 tpp.price.code=tpp-apr-01-2018
+petland.6month.payment=petland-6month-prepay-12-01-2018
+petland.free.payment=petland-free-12-01-2018
+petland.1month.payment=petland-monthly-12-01-2018
 
 [ShipStation]
 shipstation.url=http://ssapi.shipstation.com
