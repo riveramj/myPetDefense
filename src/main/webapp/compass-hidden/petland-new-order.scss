@@ -636,6 +636,10 @@ nav .entry {
 
   width: 100%;
   background-color: #ffffff;
+
+  iframe {
+    background-color: #ffffff !important;
+  }    
 }
 
 input.checkout {
