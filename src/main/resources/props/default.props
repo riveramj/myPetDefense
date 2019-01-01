@@ -18,7 +18,7 @@ server.url=http://localhost:8080/
 taxjar.api.key=41169ab583e69469e0612dee1586ce79
 
 [Price]
-default.price.code=default-jan-29-2018
+default.price.code=petland-jan-1-2019
 tpp.price.code=tpp-apr-01-2018
 petland.6month.payment=petland-6month-prepay-12-01-2018
 petland.free.payment=petland-free-12-01-2018
