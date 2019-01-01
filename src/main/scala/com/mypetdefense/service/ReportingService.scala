@@ -150,9 +150,22 @@ object ReportingService extends Loggable {
       val mailedDate = getMailedDateOfShipment(shipment)
       
       mailedDate map { mailDate =>
-        (mailDate.getYear == date.getYear) &&
+        (mailDate.getYear == 2018) &&
         (mailDate.getMonth == date.getMonth)
       } openOr(false)
+    }
+  }
+
+  def findCurrentMonthProcessedShipments(shipments: List[Shipment], month: String = "") = {
+    val date = getDateRange(month)
+
+    shipments.filter { shipment =>
+      val processDate = getProcessDateOfShipment(shipment)
+
+      (
+        (processDate.getYear == 2018) &&
+        (processDate.getMonth == date.getMonth)
+      )
     }
   }
 
@@ -206,7 +219,7 @@ object ReportingService extends Loggable {
       val cancelDate = getCancelledDateOfSubscription(subscription)
       
       (
-        cancelDate.map(_.getYear == date.getYear).openOr(false) &&
+        cancelDate.map(_.getYear == 2018).openOr(false) &&
         cancelDate.map(_.getMonth == date.getMonth).openOr(false)
       )
     }
@@ -219,7 +232,7 @@ object ReportingService extends Loggable {
       val userCreatedDate = getCreatedDateOfUser(user)
 
       (
-        (getCreatedDateOfUser(user).getYear == date.getYear) &&
+        (getCreatedDateOfUser(user).getYear == 2018) &&
         (getCreatedDateOfUser(user).getMonth == date.getMonth)
       )
     }
@@ -232,7 +245,7 @@ object ReportingService extends Loggable {
       val userCreatedDate = getCreatedDateOfUser(user)
 
       !(
-        (userCreatedDate.getYear == date.getYear) &&
+        (userCreatedDate.getYear == 2018) &&
         (userCreatedDate.getMonth == date.getMonth)
       )
     }
@@ -277,7 +290,7 @@ object ReportingService extends Loggable {
       val cancelDate = getCancelledDateOfSubscription(subscription)
 
       cancelDate.map { cancelDate => 
-        (cancelDate.getYear == date.getYear) &&
+        (cancelDate.getYear == 2018) &&
         (cancelDate.getMonth == date.getMonth)
       }.openOr(false)
     }
@@ -455,7 +468,7 @@ object ReportingService extends Loggable {
 
     val currentYearTotal = totalSalesForShipments(currentYearShipments)
 
-    val currentYearSalesRow = s"${year},$$${currentYearTotal}"
+    val currentYearSalesRow = s"${year},$$${currentYearTotal}"/findCurrentMonthProcessedShipments
 
     val shipmentsByMonth = allShipments.groupBy { shipment =>
       val processDate = getProcessDateOfShipment(shipment)
@@ -868,7 +881,7 @@ object ReportingService extends Loggable {
     val allPayingActiveSubscriptions = findActiveSubscriptions(allPayingSubscriptions)
 
     val allPaidShipments = findPaidShipments(allPayingSubscriptions)
-    val paidMonthShipments = findCurrentMonthShipments(allPaidShipments, month)
+    val paidMonthShipments = findCurrentMonthProcessedShipments(allPaidShipments, month)
     val paidMonthPetsShippedCount = getPetCount(paidMonthShipments)
     val paidMonthGrossSales = totalSalesForShipments(paidMonthShipments)
     val paidMonthCommission = totalCommissionForSales(paidMonthGrossSales)
