@@ -468,7 +468,7 @@ object ReportingService extends Loggable {
 
     val currentYearTotal = totalSalesForShipments(currentYearShipments)
 
-    val currentYearSalesRow = s"${year},$$${currentYearTotal}"/findCurrentMonthProcessedShipments
+    val currentYearSalesRow = s"${year},$$${currentYearTotal}"
 
     val shipmentsByMonth = allShipments.groupBy { shipment =>
       val processDate = getProcessDateOfShipment(shipment)
