@@ -81,7 +81,7 @@ body {
   }
 }
 
-#month-filter, #year-filter {
+#month-filter, #year-filter, #choose-store {
   border-radius: 3px;
   border: 1px solid #CECECE;
   padding: 6px 9px;
@@ -201,6 +201,12 @@ h2 {
   font-size: 27px;
   font-weight: $bold;
   padding: 42px 0 15px;
+  display: inline-block;
+}
+
+#choose-store {
+  margin-left: 15px;
+  vertical-align: text-bottom;
 }
 
 h3 {
