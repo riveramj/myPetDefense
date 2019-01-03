@@ -21,6 +21,9 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
   object customers extends MappedOneToMany(User, User.referer)
   object members extends MappedOneToMany(User, User.agency)
   object coupons extends MappedOneToMany(Coupon, Coupon.agency)
+  object petlandStore extends MappedBoolean(this) {
+    override def defaultValue = false
+  }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }

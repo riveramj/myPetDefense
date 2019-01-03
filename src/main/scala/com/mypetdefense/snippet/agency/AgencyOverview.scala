@@ -53,43 +53,109 @@ object AgencyOverview extends Loggable {
 
 class AgencyOverview extends Loggable {
   val currentUser = SecurityContext.currentUser
-  val agency = currentUser.flatMap(_.agency.obj)
-  val agencyName = agency.map(_.name.get)
   val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
   val chartDateFormat = new SimpleDateFormat("MM")
   val chartDateFormatName = new SimpleDateFormat("MMM")
 
-  val users = User.findAll(
+  val allUsers = User.findAll(
     By(User.userType, UserType.Parent)
-  ).filter(_.referer.obj == agency)
-  
-  val allSubscriptions = users.map(_.getSubscription).flatten
-  val allShipments = allSubscriptions.map(_.shipments.toList).flatten
+  )
 
-  val usersByStatus = users.groupBy(_.status.get)
-  val activeUsers = tryo(usersByStatus(Status.Active)).openOr(Nil)
-  val activeUserCount = activeUsers.size
-  val inactiveUserCount = users.size - activeUserCount
-
-  val activeUserSubscription = users.map(_.getSubscription).flatten
-  val activeShipments = activeUserSubscription.map(_.shipments.toList).flatten
-
-  val usersWithName = users.map(updateUserName(_))
-
-  val shipmentsByMonth = allShipments.map(_.dateProcessed.get).map(chartDateFormat.format).map(toInt).groupBy(identity).mapValues(_.size)
-
-  val adjustedShipmentsByMonth = shipmentsByMonth + (12 -> activeUserCount)
-
-  val shipmentsByMonthSorted = ListMap(adjustedShipmentsByMonth.toSeq.sortBy(_._1):_*)
-
-  val allShipmentsByMonthLabel = shipmentsByMonthSorted.keys.toArray.map { month =>
-    chartDateFormatName.format(chartDateFormat.parse(month.toString))
+  val agencies = {
+    if (currentUser.map(_.petlandData_?).openOr(false)) {
+      Agency.findAll(By(Agency.petlandStore, true))
+    } else {
+      currentUser.flatMap(_.agency.obj).toList
+    }
   }
 
   var currentParent: Box[User] = Empty
   var dateFilterTransform: Box[IdMemoizeTransform] = Empty
+  var agencyRenderer: Box[IdMemoizeTransform] = Empty
+
+  def updateAgencyName = {
+    chosenAgency.map(_.name.get).getOrElse("All Stores")
+  }
+
+  def updateAgencyUsers = {
+    if (chosenAgency.isEmpty) {
+      agencies.map { agency =>
+        allUsers.filter(_.referer.obj == Full(agency))
+      }.flatten
+    } else {
+      allUsers.filter(_.referer.obj == chosenAgency)
+    }
+  }
+
+  var chosenAgency: Box[Agency] = {
+    if (agencies.size > 1)
+      Empty
+    else
+      agencies.headOption
+  }
+
+  var agencyName = updateAgencyName
+  var users = updateAgencyUsers
+  
+  def allSubscriptions = users.map(_.getSubscription).flatten
+  def allShipments = allSubscriptions.map(_.shipments.toList).flatten
+
+  def usersByStatus = users.groupBy(_.status.get)
+  def activeUsers = tryo(usersByStatus(Status.Active)).openOr(Nil)
+  def activeUserCount = activeUsers.size
+  def inactiveUserCount = users.size - activeUserCount
+
+  def activeUserSubscription = users.map(_.getSubscription).flatten
+  def activeShipments = activeUserSubscription.map(_.shipments.toList).flatten
+
+  def usersWithName = users.map(updateUserName(_))
+
+  def shipmentsByMonth = allShipments.map(_.dateProcessed.get).map(chartDateFormat.format).map(toInt).groupBy(identity).mapValues(_.size)
+
+  def adjustedShipmentsByMonth = shipmentsByMonth + (12 -> activeUserCount)
+
+  def shipmentsByMonthSorted = ListMap(adjustedShipmentsByMonth.toSeq.sortBy(_._1):_*)
+
+  def allShipmentsByMonthLabel = shipmentsByMonthSorted.keys.toArray.map { month =>
+    chartDateFormatName.format(chartDateFormat.parse(month.toString))
+  }
 
   var monthDateFilter = "All Months"
+  var storeIdFilter = chosenAgency.map(_.agencyId.get).openOr(-1L).toString
+
+  def storeDropdown = {
+    val agencyList = {
+      if (agencies.size == 1) {
+        agencies.map(agency => (agency.agencyId.get.toString, agency.name.get))
+      } else {
+        List((-1L.toString, "All Stores")) ++ agencies.map(agency => (agency.agencyId.get.toString, agency.name.get))
+      }
+    }
+
+    SHtml.ajaxSelect(
+      agencyList,
+      Full(storeIdFilter),
+      (possibleAgencyId: String) => {
+        storeIdFilter = possibleAgencyId
+        chosenAgency = {
+          if (storeIdFilter == -1L.toString)
+            Empty
+          else {
+            val properAgencyId = tryo(storeIdFilter.toLong).openOr(-1L)
+            agencies.find(_.agencyId.get == properAgencyId)
+          }
+        }
+
+        agencyName = updateAgencyName
+        users = updateAgencyUsers
+
+        (
+          agencyRenderer.map(_.setHtml).openOr(Noop) &
+          updateCharts
+        )
+      }
+    )
+  }
 
   def dateFilterMonthDropdown = {
     SHtml.ajaxSelect(
@@ -304,60 +370,65 @@ class AgencyOverview extends Loggable {
   }
 
   def render = {
-    snapShotBindings &
     ".overview [class+]" #> "current" &
-    ".store-name *" #> agencyName &
-    ".update-data [onclick]" #> ajaxInvoke(() => updateCharts) &
-    "#month-filter" #> dateFilterMonthDropdown &
-    ".customer-list-container" #> SHtml.idMemoize { renderer =>
-      dateFilterTransform = Full(renderer)
+    "#item-container" #> SHtml.idMemoize { agencyRender =>
+      agencyRenderer = Full(agencyRender)
 
-      ".customer-count *" #> usersWithName.size &
-      ".export-customers [href]" #> (agency.map { realAgency =>
-        AgencyOverview.exportAgencyCustomerMenu.calcHref(realAgency.agencyId.get.toString)
-      }).openOr("#") &
-      "tbody" #> usersWithName.sortWith(_.name < _.name).map { parent =>
-        idMemoize { detailsRenderer =>
+      snapShotBindings &
+      ".store-name *" #> agencyName &
+      "#choose-store" #> storeDropdown &
+      ".update-data [onclick]" #> ajaxInvoke(() => updateCharts) &
+      "#month-filter" #> dateFilterMonthDropdown &
+      ".customer-list-container" #> SHtml.idMemoize { renderer =>
+        dateFilterTransform = Full(renderer)
 
-          ".user" #> {
-            val subscription = parent.getSubscription
+        ".customer-count *" #> usersWithName.size &
+        ".export-customers [href]" #> (chosenAgency.map { realAgency =>
+          AgencyOverview.exportAgencyCustomerMenu.calcHref(realAgency.agencyId.get.toString)
+        }).getOrElse("#") &
+        "tbody" #> usersWithName.sortWith(_.name < _.name).map { parent =>
+          idMemoize { detailsRenderer =>
 
-            val signupDate = subscription.map { sub =>
-              signupCancelDateFormat.format(sub.startDate.get)
-            }.getOrElse("")
+            ".user" #> {
+              val subscription = parent.getSubscription
 
-            val cancellationDate = {
-              if (parent.status.get == Status.Cancelled) {
-                val possibleCancelDate = subscription.map(_.cancellationDate.get)
-                possibleCancelDate.flatMap { date =>
-                  tryo(signupCancelDateFormat.format(date))
-                }.getOrElse("")
-              } else {
-                "-"
+              val signupDate = subscription.map { sub =>
+                signupCancelDateFormat.format(sub.startDate.get)
+              }.getOrElse("")
+
+              val cancellationDate = {
+                if (parent.status.get == Status.Cancelled) {
+                  val possibleCancelDate = subscription.map(_.cancellationDate.get)
+                  possibleCancelDate.flatMap { date =>
+                    tryo(signupCancelDateFormat.format(date))
+                  }.getOrElse("")
+                } else {
+                  "-"
+                }
               }
-            }
 
-            val shipmentCount = subscription.map(_.shipments.toList.size).getOrElse(0)
+              val shipmentCount = subscription.map(_.shipments.toList.size).getOrElse(0)
 
-            ".name *" #> parent.name &
-            ".status *" #> findStatus(parent.status.get) &
-            ".status [class+]" #> findStatus(parent.status.get).toLowerCase &
-            ".signup-date *" #> signupDate &
-            ".cancel-date *" #> cancellationDate &
-            ".shipment-count *" #> shipmentCount
-          } &
-          "^ [onclick]" #> ajaxInvoke(() => {
-            if (currentParent.isEmpty) {
-              currentParent = Full(parent)
-            } else {
-              currentParent = Empty
-            }
+              ".name *" #> parent.name &
+              ".status *" #> findStatus(parent.status.get) &
+              ".status [class+]" #> findStatus(parent.status.get).toLowerCase &
+              ".signup-date *" #> signupDate &
+              ".cancel-date *" #> cancellationDate &
+              ".shipment-count *" #> shipmentCount
+            } &
+            "^ [onclick]" #> ajaxInvoke(() => {
+              if (currentParent.isEmpty) {
+                currentParent = Full(parent)
+              } else {
+                currentParent = Empty
+              }
 
-            detailsRenderer.setHtml
-          }) &
-          ".info [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
-          "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
-          petBindings
+              detailsRenderer.setHtml
+            }) &
+            ".info [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
+            "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
+            petBindings
+          }
         }
       }
     }
