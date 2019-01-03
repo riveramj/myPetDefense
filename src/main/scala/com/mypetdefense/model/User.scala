@@ -4,6 +4,7 @@ import net.liftweb._
   import mapper._
   import common._
   import util._
+    import Helpers.tryo
 
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.service.AccessKeyService._
@@ -29,6 +30,9 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object salt extends MappedString(this, 100)
   object phone extends MappedString(this, 100)
   object accessKey extends MappedString(this, 100)
+  object canSeePetlandData extends MappedBoolean(this) {
+    override def defaultValue = false
+  }
   object resetPasswordKey extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
   object referer extends MappedLongForeignKey(this, Agency)
@@ -53,6 +57,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def activePets = pets.filter(_.status == Status.Active)
 
   def refresh = User.find(By(User.userId, userId.get))
+
+  def petlandData_? = tryo(canSeePetlandData.get).openOr(false)
 
   def shippingAddress = {
     Address.find(
