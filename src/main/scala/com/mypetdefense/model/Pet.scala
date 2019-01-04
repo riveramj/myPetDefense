@@ -88,7 +88,6 @@ object AnimalType extends Enumeration {
 }
 
 object AnimalSize extends Enumeration {
-  val CatAllSize = Value("1.5+")
   val CatSmall = Value("1.5-5")
   val CatMedium = Value("5-9")
   val CatLarge = Value("9+")
@@ -107,4 +106,6 @@ object AnimalSize extends Enumeration {
   val DogMediumShld = Value("16-33")
   val DogLargeShld = Value("34-66")
   val DogXLargeShld = Value("66+")
+  
+  val CatAllSize = Value("1.5+")
 }
