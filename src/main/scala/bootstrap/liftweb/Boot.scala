@@ -75,6 +75,7 @@ class Boot {
     //DataLoader.resetUpcomingBillingCylces
     //DataLoader.createOneSizeCat
     DataLoader.loadPetlandInsert
+    DataLoader.removeFrontlineProduct
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")

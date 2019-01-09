@@ -329,4 +329,32 @@ object DataLoader extends Loggable {
       )
     }
   }
+
+  def removeFrontlineProduct = {
+    def findProduct(name: String, size: AnimalSize.Value) = {
+      Product.find(By(Product.name, name), By(Product.size, size))
+    }
+
+    val smallProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogSmallZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogSmallZo))
+    val mediumProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogMediumZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogMediumZo))
+    val largeProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogLargeZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogLargeZo))
+    val xlargeproduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogXLargeZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogXLargeZo))
+
+    val productSizes = List(smallProduct, mediumProduct, largeProduct, xlargeproduct)
+
+    for {
+      productSize <- productSizes
+      frontline <- productSize._1
+    } yield {
+      val pets = Pet.findAll(By(Pet.product, frontline))
+      
+      println(pets.map(_.petId))
+
+      productSize._2.map { zoguard =>
+        pets.map(_.product(zoguard).saveMe)
+      }
+
+      frontline.delete_!
+    }
+  }
 }
