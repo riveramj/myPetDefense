@@ -31,6 +31,8 @@ class Insert extends LongKeyedMapper[Insert] with IdPK {
   def welcomeInsert = Insert.find(By(Insert.name,"Welcome Insert"))
 
   def tppWelcomeInsert = Insert.find(By(Insert.name, "TPP Registrations Welcome Insert"))
+
+  def petlandWelcomeInsert = Insert.find(By(Insert.name, "Petland Welcome Insert"))
 }
 
 object Insert extends Insert with LongKeyedMetaMapper[Insert]
