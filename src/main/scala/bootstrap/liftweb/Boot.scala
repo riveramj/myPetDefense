@@ -66,14 +66,16 @@ class Boot {
 
     //DataLoader.loadProducts
     //DataLoader.loadAdmin
-    DataLoader.updateParentNoPets
+    //DataLoader.updateParentNoPets
     //DataLoader.createFriendsFamilyProducts
     //DataLoader.updateShipmentShipStationId
     //DataLoader.updateGeorgiaTaxRates
     //DataLoader.updateProductSku
     //DataLoader.loadWelcomeInserts
     //DataLoader.resetUpcomingBillingCylces
-    DataLoader.createOneSizeCat
+    //DataLoader.createOneSizeCat
+    DataLoader.loadPetlandInsert
+    DataLoader.removeFrontlineProduct
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
