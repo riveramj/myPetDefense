@@ -83,7 +83,8 @@ class NewOrder extends Loggable {
   var zip = ""
   var taxRate = 0D
   var taxDue = 0D
-  var subtotalWithDiscount = 0
+  var subtotal = 0D
+  var total = 0D
   
   var newPetType: Box[AnimalType.Value] = Empty
   var newPetCurrentSize: Box[AnimalSize.Value] = Empty
@@ -112,7 +113,7 @@ class NewOrder extends Loggable {
       city,
       state,
       zip,
-      subtotalWithDiscount
+      subtotal
     )
 
     taxDue = taxInfo._1
@@ -139,64 +140,41 @@ class NewOrder extends Loggable {
       val stripeCustomer = {
         Customer.create(
           email = Some(email),
-          card = Some(stripeToken)
+          card = Some(stripeToken),
+          taxPercent = Some(taxRate),
+          plan = Some(petlandPlanId),
+          quantity = Some(pets.size)
         )
       }
 
       Try(Await.result(stripeCustomer, new DurationInt(7).seconds)) match {
         case TrySuccess(Full(customer)) =>
-          val trialEndDateRaw = LocalDate.now(ZoneId.of("America/New_York")).plusMonths(6).atStartOfDay(ZoneId.of("America/New_York")).toInstant()
+          val user = newUserSetup(customer)
 
-          val trialEndDate = Date.from(trialEndDateRaw)
+          EmailActor ! SendNewUserEmail(user)
+          EmailActor ! Send6MonthSaleReceipt(user, pets, subtotal, taxDue)
 
-          val stripeSubscription = {
-            StripeSubscription.create(
-              customerId = customer.id,
-              plan = petlandPlanId,
-              trialEnd = Some(trialEndDate.getTime/1000),
-              quantity = Some(pets.size)
-            )
-          }
+          pets = Nil
+          petsOrdered(Nil)
+          email = ""
+          phone = ""
+          firstName = ""
+          lastName = ""
+          street1 = ""
+          street2 = ""
+          city = ""
+          state = ""
+          zip = ""
 
-          Try(Await.result(stripeSubscription, new DurationInt(7).seconds)) match {
-            case TrySuccess(Full(stripeSubscription)) =>
-              Full(stripeSubscription)
+          OrderSubmitted(user.email.get)
 
-              val user = newUserSetup(customer)
+        case TrySuccess(stripeFailure) =>
+          logger.error(s"create customer failed with stripe error: ${stripeFailure}")
+          Noop
 
-              val total = subtotalWithDiscount + taxDue
-
-              pets = Nil
-              petsOrdered(Nil)
-              email = ""
-              phone = ""
-              firstName = ""
-              lastName = ""
-              street1 = ""
-              street2 = ""
-              city = ""
-              state = ""
-              zip = ""
-
-              EmailActor ! SendNewUserEmail(user)
-
-              OrderSubmitted(user.email.get)
-
-            case TrySuccess(stripeFailure) =>
-              logger.error(s"create subscription failed with stripe error: ${stripeFailure}")
-              Noop
-
-            case TryFail(throwable: Throwable) =>
-              logger.error(s"create subscription failed with other error: ${throwable}")
-              Noop
-          }
-            case TrySuccess(stripeFailure) =>
-              logger.error(s"create customer failed with stripe error: ${stripeFailure}")
-              Noop
-
-            case TryFail(throwable: Throwable) =>
-              logger.error(s"create customer failed with other error: ${throwable}")
-              Noop
+        case TryFail(throwable: Throwable) =>
+          logger.error(s"create customer failed with other error: ${throwable}")
+          Noop
       }
     } else {
       validateFields.foldLeft(Noop)(_ & _)
@@ -253,8 +231,6 @@ class NewOrder extends Loggable {
     }
     */
 
-   EmailActor ! SendWelcomeEmail(newParent)
-    
     newParent
   }
 
@@ -434,17 +410,14 @@ class NewOrder extends Loggable {
     ".order-totals" #> idMemoize { renderer =>
       totalsRenderer = Full(renderer)
 
-      val subtotal = pets.size.toDouble * 90.00
-      val discount = {
-        if (pets.size <= 1)
-          0.00
-        else
-          (pets.size - 1).toDouble * 6.00
-      }
-      val total = subtotal - discount
+      subtotal = pets.size.toDouble * 90.00
+
+      calculateTax(state, zip)
+      
+      total = subtotal + taxDue
 
       ".subtotal-amount *" #> f"$$$subtotal%2.2f" &
-      ".discount-amount *" #> f"$$$discount%2.2f" &
+      ".tax-amount *" #> f"$$$taxDue%2.2f" &
       ".total-price *" #> f"$$$total%2.2f"
     }
   }
