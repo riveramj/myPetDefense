@@ -15,6 +15,15 @@ object DataLoader extends Loggable {
   def loadProducts = {
     if (Product.findAll().isEmpty) {
       Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatAllSize,
+        sizeName = "All Sizes",
+        imageName = "zoguard/ZoGuard-Plus-cat-2.jpg",
+        sku = "100001"
+      )
+
+      Product.createProduct(
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatMedium,
@@ -204,17 +213,26 @@ object DataLoader extends Loggable {
   }
 
   def loadAdmin = {
+    val mpdAgency = {
+      val possibleMpd = Agency.find(By(Agency.name, "My Pet Defense"))
+
+      if (possibleMpd.isEmpty)
+        Full(Agency.createNewAgency("My Pet Defense"))
+      else
+        possibleMpd
+    }
+
     if (User.findAll(By(User.userType, UserType.Admin)).isEmpty) {
       User.createNewUser(
-        "John",
-        "smith",
+        "Mike",
+        "Rivera",
         "",
         "rivera.mj@gmail.com",
         "password",
         "(404) 409-0724",
         None,
         None,
-        None,
+        mpdAgency,
         UserType.Admin
       )
     }
