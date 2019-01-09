@@ -119,9 +119,7 @@ class NewOrder extends Loggable {
     taxDue = taxInfo._1
     taxRate = taxInfo._2
 
-    //priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
-    
-    Noop
+    totalsRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def signup() = {
@@ -170,11 +168,11 @@ class NewOrder extends Loggable {
 
         case TrySuccess(stripeFailure) =>
           logger.error(s"create customer failed with stripe error: ${stripeFailure}")
-          Noop
+          Alert("An error has occured. Please try again. If you continue to receive an error, please contact us at help@mypetdefense.com.")
 
         case TryFail(throwable: Throwable) =>
           logger.error(s"create customer failed with other error: ${throwable}")
-          Noop
+          Alert("An error has occured. Please try again. If you continue to receive an error, please contact us at help@mypetdefense.com.")
       }
     } else {
       validateFields.foldLeft(Noop)(_ & _)
@@ -412,8 +410,6 @@ class NewOrder extends Loggable {
 
       subtotal = pets.size.toDouble * 90.00
 
-      calculateTax(state, zip)
-      
       total = subtotal + taxDue
 
       ".subtotal-amount *" #> f"$$$subtotal%2.2f" &
