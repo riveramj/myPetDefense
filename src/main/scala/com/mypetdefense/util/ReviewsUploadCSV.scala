@@ -180,8 +180,6 @@ object ReviewsUploadCSV extends Loggable {
     val productName = Columns.cellValue(Columns.Product, headerIndex, fieldList).openOr("")
 
     val product = (productName match {
-      case "Frontline Plus for Dogs" => Product.findAll(By(Product.name, "Frontline Plus for Dogs"))
-      case "Frontline Plus for Cats" => Product.findAll(By(Product.name, "Frontline Plus for Cats"))
       case "ZoGuard Plus for Dogs" => Product.findAll(By(Product.name, "ZoGuard Plus for Dogs"))
       case "ZoGuard Plus for Cats" => Product.findAll(By(Product.name, "ZoGuard Plus for Cats"))
       case "Adventure Plus for Dogs" => Product.findAll(By(Product.name, "Adventure Plus for Dogs"))
@@ -220,8 +218,6 @@ object ReviewsUploadCSV extends Loggable {
   }
 
   def updateProductRatings = {
-      updateRating("Frontline Plus for Dogs")
-      updateRating("Frontline Plus for Cats")
       updateRating("ZoGuard Plus for Dogs")
       updateRating("ZoGuard Plus for Cats")
       updateRating("Adventure Plus for Dogs")

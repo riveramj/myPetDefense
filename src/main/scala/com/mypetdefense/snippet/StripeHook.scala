@@ -42,9 +42,6 @@ trait StripeHook extends RestHelper with Loggable {
       shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
-
-      subscription.status(Status.Active).saveMe
-
       val notTrial_? = ParentService.notTrialSubscription_?(stripeCustomerId, stripeSubscriptionId)
       val city = shippingAddress.city.get
       val state = shippingAddress.state.get
@@ -61,6 +58,8 @@ trait StripeHook extends RestHelper with Loggable {
       }
 
       if (notTrial_? && activePets_?) {
+        subscription.status(Status.Active).saveMe
+
         if (activePets_?) {
           TaxJarService.processTaxesCharged(
             invoicePaymentId,
@@ -79,14 +78,15 @@ trait StripeHook extends RestHelper with Loggable {
           } yield {
             val agency = user.referer.obj
             val agencyName = agency.map(_.name.get).openOr("")
+            val petlandStore_? = agency.map(_.petlandStore.get).openOr(false)
 
             val inserts = {
-              (shipmentCount, agencyName) match {
-                case (0, "TPP") =>
+              (shipmentCount, agencyName, petlandStore_?) match {
+                case (0, "TPP", _) =>
                   List(Insert.welcomeInsert.toList, Insert.tppWelcomeInsert.toList)
-                case (0, _) =>
-                  List(Insert.welcomeInsert.toList)
-                case (_, _) =>
+                case (0, _, true) =>
+                  List(Insert.welcomeInsert.toList, Insert.petlandWelcomeInsert.toList)
+                case (_, _, _) =>
                   Nil
               }
             }.flatten
