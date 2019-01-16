@@ -220,7 +220,8 @@ class NewOrder extends Loggable {
       subscriptionId,
       new Date(),
       new Date(),
-      Price.currentPetlandMonthlyCode
+      Price.currentPetlandMonthlyCode,
+      6
     )
 
     /*
