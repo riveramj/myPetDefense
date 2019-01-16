@@ -20,6 +20,9 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   object renewalDate extends MappedDateTime(this)
   object nextShipDate extends MappedDateTime(this)
   object priceCode extends MappedString(this, 100)
+  object contractLength extends MappedInt(this) {
+    override def defaultValue = 0
+  }
   object shipments extends MappedOneToMany(Shipment, Shipment.subscription)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
@@ -56,7 +59,8 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     stripeSubscriptionId: String,
     startDate: Date,
     nextShipDate: Date,
-    priceCode: String = Price.defaultPriceCode
+    priceCode: String = Price.defaultPriceCode,
+    contractLength: Int = 0
   ) = {
     Subscription.create
     .subscriptionId(generateLongId)
@@ -65,6 +69,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     .startDate(startDate)
     .nextShipDate(nextShipDate)
     .priceCode(priceCode)
+    .contractLength(contractLength)
     .saveMe
   }
 }

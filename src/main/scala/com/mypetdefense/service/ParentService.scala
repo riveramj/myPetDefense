@@ -30,6 +30,8 @@ object ParentService extends Loggable {
 
   val whelpDateFormat = new java.text.SimpleDateFormat("M/d/y")
   val currentPentlandPlan = Props.get("petland.6month.payment") openOr ""
+  val petlandMonthlyPlan = Props.get("petland.1month.payment")
+  val petland5MonthCoupon = Props.get("petland.5month.coupon")
 
   def updateStripeCustomerCard(customerId: String, stripeToken: String, user: User) = {
     if (customerId == "") {
@@ -587,5 +589,28 @@ object ParentService extends Loggable {
 
   def getCurrentPetlandProductPlan = {
     getStripeProductPlan(currentPentlandPlan)
+  }
+
+  def changeToPetlandMonthlyStripePlan(customerId: String, subscriptionId: String): Box[StripeSubscription] = {
+    val subscription = StripeSubscription.update(
+      customerId = customerId,
+      subscriptionId = subscriptionId,
+      prorate = Some(false),
+      plan = petlandMonthlyPlan,
+      coupon = petland5MonthCoupon
+    )
+
+    Try(Await.result(subscription, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(updatedSubscription)) =>
+        Full(updatedSubscription)
+      
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"update subscription failed with stipe error: ${stripeFailure}")
+        stripeFailure
+      
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"update subscription failed with other error: ${throwable}")
+        Failure(throwable.toString)
+    }
   }
 }
