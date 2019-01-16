@@ -28,7 +28,7 @@ object InventoryItems extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Inventory Items") / "inventory" / "items" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 }
 

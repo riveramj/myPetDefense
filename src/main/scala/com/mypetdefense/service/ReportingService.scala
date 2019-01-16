@@ -17,6 +17,8 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 object ReportingService extends Loggable {
+  val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
+
   def currentDate = LocalDateTime.now()
 
   def yesterdayStart = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant())
@@ -51,6 +53,14 @@ object ReportingService extends Loggable {
 
   def getMailedDateOfShipment(shipment: Shipment) = {
     tryo(shipment.dateShipped.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+  }
+
+  def getStartDateOfSubscription(subscription: Subscription) = {
+    tryo(signupCancelDateFormat.format(subscription.startDate.get)).openOr("")
+  }
+
+  def getCancelDateOfSubscription(subscription: Subscription) = {
+    tryo(signupCancelDateFormat.format(subscription.cancellationDate.get)).openOr("")
   }
 
   def getCreatedDateOfUser(user: User) = {
@@ -140,9 +150,22 @@ object ReportingService extends Loggable {
       val mailedDate = getMailedDateOfShipment(shipment)
       
       mailedDate map { mailDate =>
-        (mailDate.getYear == date.getYear) &&
+        (mailDate.getYear == 2018) &&
         (mailDate.getMonth == date.getMonth)
       } openOr(false)
+    }
+  }
+
+  def findCurrentMonthProcessedShipments(shipments: List[Shipment], month: String = "") = {
+    val date = getDateRange(month)
+
+    shipments.filter { shipment =>
+      val processDate = getProcessDateOfShipment(shipment)
+
+      (
+        (processDate.getYear == 2018) &&
+        (processDate.getMonth == date.getMonth)
+      )
     }
   }
 
@@ -196,7 +219,7 @@ object ReportingService extends Loggable {
       val cancelDate = getCancelledDateOfSubscription(subscription)
       
       (
-        cancelDate.map(_.getYear == date.getYear).openOr(false) &&
+        cancelDate.map(_.getYear == 2018).openOr(false) &&
         cancelDate.map(_.getMonth == date.getMonth).openOr(false)
       )
     }
@@ -209,7 +232,7 @@ object ReportingService extends Loggable {
       val userCreatedDate = getCreatedDateOfUser(user)
 
       (
-        (getCreatedDateOfUser(user).getYear == date.getYear) &&
+        (getCreatedDateOfUser(user).getYear == 2018) &&
         (getCreatedDateOfUser(user).getMonth == date.getMonth)
       )
     }
@@ -222,7 +245,7 @@ object ReportingService extends Loggable {
       val userCreatedDate = getCreatedDateOfUser(user)
 
       !(
-        (userCreatedDate.getYear == date.getYear) &&
+        (userCreatedDate.getYear == 2018) &&
         (userCreatedDate.getMonth == date.getMonth)
       )
     }
@@ -267,7 +290,7 @@ object ReportingService extends Loggable {
       val cancelDate = getCancelledDateOfSubscription(subscription)
 
       cancelDate.map { cancelDate => 
-        (cancelDate.getYear == date.getYear) &&
+        (cancelDate.getYear == 2018) &&
         (cancelDate.getMonth == date.getMonth)
       }.openOr(false)
     }
@@ -858,7 +881,7 @@ object ReportingService extends Loggable {
     val allPayingActiveSubscriptions = findActiveSubscriptions(allPayingSubscriptions)
 
     val allPaidShipments = findPaidShipments(allPayingSubscriptions)
-    val paidMonthShipments = findCurrentMonthShipments(allPaidShipments, month)
+    val paidMonthShipments = findCurrentMonthProcessedShipments(allPaidShipments, month)
     val paidMonthPetsShippedCount = getPetCount(paidMonthShipments)
     val paidMonthGrossSales = totalSalesForShipments(paidMonthShipments)
     val paidMonthCommission = totalCommissionForSales(paidMonthGrossSales)
@@ -956,5 +979,47 @@ object ReportingService extends Loggable {
     cancelsByMonth.map { case (month, subscriptions) =>
       (month, subscriptions.size)
     }
+  }
+
+  def exportAgencyCustomers(rawAgencyId: String): Box[LiftResponse] = {
+    val headers = "Name" :: "Status" :: "Shipment Count" :: "Signup Date" :: "Cancellation Date" :: Nil
+
+    var agencyName = ""
+
+    val csvRows: List[List[String]] = {
+      for {
+        agencyId <- tryo(rawAgencyId.toLong).toList
+        agency <- Agency.find(By(Agency.agencyId, agencyId)).toList
+        customer <- agency.customers.toList
+        subscription <- customer.subscription.toList
+      } yield {
+        agencyName = agency.name.get
+
+        val status = {
+          if (subscription.status.get == Status.Active)
+            "Active"
+          else 
+            "Inactive"
+        }
+
+        val startDate = getStartDateOfSubscription(subscription)
+        val cancelDate = getCancelDateOfSubscription(subscription)
+
+        customer.name ::
+        status ::
+        subscription.shipments.toList.size.toString ::
+        startDate ::
+        cancelDate ::
+        Nil
+      }
+    }
+
+    val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
+
+    val fileName = s"${agencyName}-customers-${fileNameMonthDayYear}.csv"
+
+    val file = "filename=\"" + fileName + "\""
+
+    generateCSV(csv, file)
   }
 }

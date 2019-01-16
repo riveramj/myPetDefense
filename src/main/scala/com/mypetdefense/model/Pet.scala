@@ -21,6 +21,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   object breed extends MappedString(this, 100)
   object animalType extends MappedEnum(this, AnimalType)
   object size extends MappedEnum(this, AnimalSize)
+  object adultSize extends MappedEnum(this, AnimalSize)
   object birthday extends MappedDateTime(this)
   object product extends MappedLongForeignKey(this, Product)
   object nextGrowthDelay extends MappedInt(this)
@@ -105,4 +106,6 @@ object AnimalSize extends Enumeration {
   val DogMediumShld = Value("16-33")
   val DogLargeShld = Value("34-66")
   val DogXLargeShld = Value("66+")
+  
+  val CatAllSize = Value("1.5+")
 }

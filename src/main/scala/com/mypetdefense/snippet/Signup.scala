@@ -45,18 +45,6 @@ class Signup extends Loggable {
   var firstName = newUser.map(_.firstName.get).openOr("")
   var lastName = newUser.map(_.lastName.get).openOr("")
 
-  def redirectUser(user: User) = {
-    SecurityContext.logIn(user)
-    user.userType match {
-      case admin if admin == UserType.Admin => 
-        S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
-      case agent if agent == UserType.Agent => 
-        S.redirectTo(AgencyOverview.menu.loc.calcDefaultHref)
-      case _ =>
-        S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
-    }
-  }
-
   def signup() = {
     val validateFields = List(
       checkEmpty(firstName, "#first-name"),
@@ -65,14 +53,10 @@ class Signup extends Loggable {
     ).flatten
 
     if (validateFields.isEmpty) {
-      if (SecurityContext.loggedIn_?) {
-        SecurityContext.logCurrentUserOut()
-      }
-      
       newUser.map { user =>
         KeyService.removeKey(user, "accessKey")
         User.updatePendingUser(user, firstName, lastName, password)
-        redirectUser(user)
+        SecurityContext.loginRedirectUser(user)
       }.openOr(Noop)
 
     } else {

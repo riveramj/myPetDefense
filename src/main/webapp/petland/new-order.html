@@ -1,0 +1,277 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div data-lift="petland.NewOrder.render">
+    <div class="success-popover">
+      <img class="success-check" src="/images/success-check@2x.png">
+      <h3>
+        Your order was placed!
+      </h3>
+      <div>
+        An email was sent to you with your order details.
+      </div>
+      <button type="button" class="new-order">New Order</button>
+    </div>
+    <div id="top-bar">
+      <div id="logo-name">
+        <a href="/">
+          <picture>
+            <source srcset="/images/logo/logo-name.png, /images/logo/logo-name-2x.png 2x" media="(min-width: 46.8em)">
+            <img srcset="/images/logo/logo-name-small.png, /images/logo/logo-name-small@2x.png 2x" src="/images/logo/logo-name-small.png">
+          </picture>
+        </a>
+      </div>
+      <nav>
+        <ul id="menu-entries">
+          <li class="overview entry"><a href="/agency/agency-overview">Store Overview</a></li>
+          <li class="current entry"><a href="/petland/new-order">New Order</a></li>
+          <li class="entry"><a href="/logout">Logout</a></li>
+        </ul>
+      </nav>
+    </div>
+    <section class="details">
+      <form id="new-pet">
+        <h2>
+          <img class="petland-logo" src="/images/logo/petland-logo-orange@2x.png">
+          <div class="order-header">Order Form</div>
+        </h2>
+        <div class="multiple-pet">
+          <span class="part-1">Do you have multiple pets?</span>
+          <span class="part-2">Rad! Complete the form below and select 'Add to Order' once for each pet!</span>
+        </div>
+
+        <div id="pricing">
+          <ul id="price-list">
+            <li class="product-family">Zoguard Plus</li>
+            <li class="product-production">Flea &amp; Tick Protection for Cats and Dogs</li>
+            <li>
+              <picture class="zoguard-product-family">
+                <source srcset="/images/products/ZoGuard-Plus-Group@1x.jpg, /images/products/ZoGuard-Plus-Group@2x.jpg 2x" media="(min-width: 46.8em)">
+                <img srcset="/images/products/ZoGuard-Plus-Group@1x.jpg, /images/products/ZoGuard-Plus-Group@2x.jpg 2x" src="/images/products/ZoGuard-Plus-Group@1x.jpg">
+              </picture>
+            </li>
+          </ul>
+        </div>
+        <div class="pet-info">
+          <ul>
+            <li class="add-product">
+              <ul class="name-cart">
+                <li>
+                  <label>
+                    <div>Choose Pet Type</div>
+                    <select id="pet-type" required>
+                      <option value="" disabled selected hidden></option>
+                      <option value="cat">Cat</option>
+                      <option value="dog">Dog</option>
+                    </select>
+                  </label>
+                </li>
+                <li class="size-container">
+                  <div class="current-size-container">
+                    <label>
+                      <div>Current Pet Size</div>
+                      <select id="current-size" required>
+                        <option value="" disabled selected hidden></option>
+                        <option value="small">Small, 4-22 lbs</option>
+                        <option value="medium">Medium, 23-44 lbs</option>
+                        <option value="large">Large, 45-88 lbs</option>
+                        <option value="xlarge">XLarge, 89-132 lbs</option>
+                      </select>
+                    </label>
+                  </div>
+                  <div class="adult-size-container">
+                    <label>
+                      <div>Adult Pet Size</div>
+                      <select id="adult-size" required>
+                        <option value="" disabled selected hidden></option>
+                        <option value="small">Small, 4-22 lbs</option>
+                        <option value="medium">Medium, 23-44 lbs</option>
+                        <option value="large">Large, 45-88 lbs</option>
+                        <option value="xlarge">XLarge, 89-132 lbs</option>
+                      </select>
+                    </label>
+                  </div>
+                </li>
+                <li>
+                  <label>
+                    <div>Pet Birthday</div>
+                    <div class="birthday-container">
+                      <select id="birthday-month">
+                        <option value="" disabled selected hidden>Month</option>
+                        <option value="january">January</option>
+                        <option value="february">February</option>
+                        <option value="march">March</option>
+                        <option value="april">April</option>
+                        <option value="may">May</option>
+                        <option value="june">June</option>
+                        <option value="july">July</option>
+                        <option value="august">August</option>
+                        <option value="september">September</option>
+                        <option value="october">October</option>
+                        <option value="november">November</option>
+                        <option value="December">December</option>
+                      </select>
+
+                      <select id="birthday-year">
+                        <option value="" disabled selected hidden>Year</option>
+                        <option value="1998">1998</option>
+                        <option value="1999">1999</option>
+                        <option value="2000">20001</option>
+                        <option value="2001">20002</option>
+                        <option value="2002">20003</option>
+                        <option value="2003">20003</option>
+                        <option value="2004">20004</option>
+                        <option value="2005">20005</option>
+                        <option value="2006">20006</option>
+                        <option value="2007">20007</option>
+                        <option value="2008">20008</option>
+                        <option value="2009">20009</option>
+                        <option value="2010">20010</option>
+                        <option value="2011">20011</option>
+                        <option value="2012">20012</option>
+                        <option value="2013">20013</option>
+                        <option value="2014">20014</option>
+                        <option value="2015">20015</option>
+                        <option value="2016">20016</option>
+                        <option value="2017">20017</option>
+                        <option value="2018">20018</option>
+                      </select>
+                    </label>
+                  </div>
+                </li>
+                <li>
+                  <label>
+                    <div>Pet Name <span class="optional"> (optional)</span></div>
+                    <input id="new-pet-name">
+                  </label>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <button id="add-to-order" type="submit">Add to Order</button>
+      </form>
+    </section>
+
+    <section class="order-details">
+      <h2>Order Details</h2>
+      <h3>6 month service agreement</h3>
+
+      <table class="subscription-details">
+        <thead>
+          <tr>
+            <td>Pet</td>
+            <td>Product</td>
+            <td>Price</td>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="pet-entry">
+            <td class="pet-details">
+              <div class="pet-name">Pet 1</div>
+              <div class="birthday-container">Birthday: <span class="pet-birthday">October 2018</span></div>
+            </td>
+            <td class="pet-current-product">ZoGuard Plus for Dogs, Small</td>
+            <td class="price-container">
+              <div class=term-price">$90.00</div>
+              <div class="remove-from-order">
+                <button class="remove">Remove</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="empty-cart">Your cart is empty.</div>
+      <button type="button" class="continue-shopping">Continue Shopping</button>
+    </section>
+
+    <section class="checkout-container">
+      <form>
+        <h2>Customer Information</h2>
+        <input type="hidden" id="stripe-token">
+        <fieldset class="shipping-info">
+          <h3>Shipping Information</h3>
+          <div class="shipping-container">
+            <label class="name-container">
+              <span class="field-label">First name</span>
+              <input id="first-name" type="text">            
+            </label>
+            <label class="name-container">
+              <span class="field-label">Last name</span>
+              <input id="last-name" type="text">
+            </label>
+            <label>
+              <span class="field-label">Street Address</span>
+              <input id="street-1" type="text">
+              <input id="street-2" type="text">
+            </label>
+            <div class="city-state-zip">
+              <label class="short-field city">
+                <span class="field-label">City</span>
+                <input id="city" type="text">
+              </label>
+              <label class="short-field state">
+                <span class="field-label">State</span>
+                <input id="state" type="text" maxlength="2">
+              </label>
+              <label class="short-field zip">
+                <span class="field-label">Zip</span>
+                <input id="zip" type="tel" maxlength="5">
+              </label>
+            </div>
+            <label>
+              <span class="field-label">Phone</span>
+              <input id="phone" type="text">
+            </label>
+          </div>
+        </fieldset>
+        <div class="billing-info">
+          <fieldset>
+            <h3>Payment Information</h3>
+            <div class="billing-container">
+              <label>
+                <span class="field-label">Card Info</span>
+                <div class="form-row">
+                  <div id="card-element">
+                    <!-- a Stripe Element will be inserted here. -->
+                  </div>
+
+                  <!-- Used to display form errors -->
+                  <div id="card-errors" role="alert"></div>
+                </div>
+              </label>
+              <label class="email">
+                <span class="field-label">Email</span>
+                <input id="email" type="text">
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+            <ul class="order-totals">
+              <li id="subtotal"><span>Subtotal</span><span class="subtotal-amount">$179.88</span></li>
+              <li id="tax"><span>Tax</span><span class="tax-amount">$0.00</span></li>
+              <li id="order"><span class="order-total">Total</span><span class="total-price">$174.89</span></li>
+            </ul>
+          </div>
+        </div>
+        <button type="submit" class="checkout submit">Submit</button>
+        <p class="legalese">
+          By clicking submit, the customer acknowledges My Pet Defense agrees to supply the selected Flea &amp; Tick preventative for a period of 6 months from the current date. Service may be canceled at any time upon request, however, this agreement is not eligible for refund. Upon the completion of the initial 6-month period, this agreement will convert to a monthly agreement and will be automatically renewed at the monthly rate of $14.99 per pet on an ongoing monthly basis.
+        </p>
+      </form>
+    </section>
+
+  </div>
+  <div id="need-help">Need help? Email us at <a href="mailto:help@mypetdefense.com?Subject=Help">help@mypetdefense.com</a></div>
+  <div class="legal">
+    &copy;2018 My Pet Defense. All rights reserved. <a class="terms" href="/terms-of-service">Terms of Service</a>
+  </div>
+
+  <tail>
+    <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
+    <script type="text/javascript" data-lift="script-bundle?name=petland-new-order"></script>
+  </tail>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=petland-new-order">
+  </head_merge>
+</div>
