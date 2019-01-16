@@ -26,5 +26,5 @@ taxjar.api.key=41169ab583e69469e0612dee1586ce79
 default.price.code=petland-jan-1-2019
 tpp.price.code=tpp-apr-01-2018
 petland.6month.payment=petland-6month-prepay-12-01-2018
-petland.free.payment=petland-free-12-01-2018
+petland.5month.coupon=petland-5month-prepaid
 petland.1month.payment=petland-monthly-12-01-2018
