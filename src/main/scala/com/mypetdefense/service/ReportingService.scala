@@ -143,6 +143,14 @@ object ReportingService extends Loggable {
     }
   }
 
+  def getYearOrCurrent(year: String) = {
+    if (year == "") {
+      currentDate.getYear
+    } else {
+      tryo(year.toInt).openOr(0)
+    }
+  }
+
   def findCurrentMonthShipments(shipments: List[Shipment], month: String = "") = {
     val date = getDateRange(month)
 
@@ -283,14 +291,15 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentMonthCancelledSubscriptions(subscriptions: List[Subscription], month: String = "") = {
+  def findCurrentMonthCancelledSubscriptions(subscriptions: List[Subscription], month: String = "", possibleYear: String = "") = {
     val date = getDateRange(month)
+    val year = getYearOrCurrent(possibleYear)
 
     subscriptions filter { subscription =>
       val cancelDate = getCancelledDateOfSubscription(subscription)
 
       cancelDate.map { cancelDate => 
-        (cancelDate.getYear == 2018) &&
+        (cancelDate.getYear == year) &&
         (cancelDate.getMonth == date.getMonth)
       }.openOr(false)
     }
@@ -867,11 +876,11 @@ object ReportingService extends Loggable {
     }.toList.sortBy(_._1)
   }
 
-  def exportAgencyMonthSales(name: String, month: String): Box[LiftResponse] = {
+  def exportAgencyMonthSales(name: String, month: String, year: String): Box[LiftResponse] = {
     val totalUsers = Agency.find(By(Agency.name, name)).map(_.customers.toList).getOrElse(Nil)
 
     val totalSubscriptions = getSubscriptions(totalUsers)
-    val totalCancelledSubscriptions = findCurrentMonthCancelledSubscriptions(totalSubscriptions, month)
+    val totalCancelledSubscriptions = findCurrentMonthCancelledSubscriptions(totalSubscriptions, month, year)
 
     val newUsersMonth = findNewCustomersMonth(totalUsers, month)
     val netNewUsersMonth = newUsersMonth.filter(_.status != Status.Cancelled)
