@@ -27,8 +27,10 @@ object LegacyAgencyOverview extends Loggable {
   }
 
   def agencyMonthExport: Box[LiftResponse] = {
-    exportTPPMontSalesMenu.currentValue flatMap { month =>
-      ReportingService.exportAgencyMonthSales("TPP", month)
+    exportTPPMontSalesMenu.currentValue flatMap { monthYear =>
+      val month = monthYear.split(" ").headOption.getOrElse("")
+      val year = monthYear.split(" ").lastOption.getOrElse("")
+      ReportingService.exportAgencyMonthSales("TPP", month, year)
     } 
   }
 
@@ -64,15 +66,16 @@ class LegacyAgencyOverview extends Loggable {
 
   def render = {
     ".overview [class+]" #> "current" &
-    ".april [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("April") &
-    ".may [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("May") &
-    ".june [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("June") &
-    ".july [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("July") &
-    ".august [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("August") &
-    ".september [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("September") &
-    ".october [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("October") &
-    ".november [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("November") &
-    ".december [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("December") &
+    ".april [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("April 2018") &
+    ".may [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("May 2018") &
+    ".june [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("June 2018") &
+    ".july [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("July 2018") &
+    ".august [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("August 2018") &
+    ".september [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("September 2018") &
+    ".october [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("October 2018") &
+    ".november [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("November 2018") &
+    ".december [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("December 2018") &
+    ".january [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("January 2019") &
     ".month-to-date-export [href]" #> LegacyAgencyOverview.agencyMtdYtdExportMenu.calcHref(agencyName)
   }
 }
