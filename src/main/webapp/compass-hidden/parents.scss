@@ -253,3 +253,35 @@ input[type="text"] {
 .agent {
   font-size: 20px;
 }
+
+.parents-nav {
+  li {
+    display: inline-block;
+    background-color: #2E9F9B;
+    color: #ffffff;
+  }
+
+  button {
+    padding: 10px 18px;
+    border: none;
+    color: inherit;
+    background-color: inherit;
+    font-size: 0.8125rem;
+    cursor: pointer;
+  }
+
+  .active {
+    background-color: #F1F1F1;
+    color: #454343;
+  }
+}
+
+.parents-container {
+  padding: 20px;
+  background-color: #F1F1F1;
+  margin-bottom: 40px;
+  
+  table {
+    margin-bottom: 0;
+  }
+}

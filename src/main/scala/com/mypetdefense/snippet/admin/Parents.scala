@@ -10,7 +10,7 @@ import net.liftweb.common._
 import net.liftweb.util._
 import net.liftweb.http._
   import js.JsCmds._
-import net.liftweb.mapper.By
+import net.liftweb.mapper.{By, NotBy}
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -75,7 +75,12 @@ object Parents extends Loggable {
 }
 
 class Parents extends Loggable {
-  val parents = User.findAll(By(User.userType, UserType.Parent))
+  var parents = User.findAll(
+    By(User.userType, UserType.Parent),
+    NotBy(User.status, Status.Cancelled)
+  )
+  var parentsRenderer: Box[IdMemoizeTransform] = Empty
+  var cancelled = false
   
   var petType: Box[AnimalType.Value] = Empty
   var chosenProduct: Box[Product] = Empty
@@ -238,6 +243,28 @@ class Parents extends Loggable {
       "-"
     else
       shipmentDate.getOrElse("")
+  }
+
+  def changeParentSet(parentStatus: String) = {
+    parentStatus match {
+      case "active" =>
+        cancelled = false
+        
+        parents = User.findAll(
+          By(User.userType, UserType.Parent),
+          NotBy(User.status, Status.Cancelled)
+        )
+
+      case "cancelled" =>
+        cancelled = true
+        parents = User.findAll(
+          By(User.userType, UserType.Parent),
+          By(User.status, Status.Cancelled)
+        )
+      case _ =>
+    }
+  
+    parentsRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def parentInformationBinding(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]) = {
@@ -510,49 +537,55 @@ class Parents extends Loggable {
     SHtml.makeFormsAjax andThen
     ".parents [class+]" #> "current" &
     "#active-parents-export [href]" #> Parents.activeParentsCsvMenu.loc.calcDefaultHref &
-    "tbody" #> parents.sortWith(_.name < _.name).map { parent =>
-      val refererName = parent.referer.obj.map(_.name.get)
-      idMemoize { detailsRenderer =>
-        val subscription = parent.getSubscription
-        val nextShipDate = subscription.map(_.nextShipDate.get)
+    "#parents-active [onclick]" #> SHtml.ajaxInvoke(() => changeParentSet("active")) &
+    "#parents-cancelled [onclick]" #> SHtml.ajaxInvoke(() => changeParentSet("cancelled")) &
+    ".parents-container" #> SHtml.idMemoize { renderer =>
+      parentsRenderer = Full(renderer)
 
-        ".parent" #> {
-          ".name *" #> getParentInfo(parent, "name") &
-          ".email *" #> getParentInfo(parent, "email") &
-          ".billing-status *" #> subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
-          ".referer *" #> refererName &
-          ".ship-date *" #> tryo(displayNextShipDate(nextShipDate.map(dateFormat.format(_)), isCancelled_?(parent))).openOr("-") &
-          ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
-          ".actions .delete" #> ClearNodesIf(isCancelled_?(parent)) &
-          ".actions .cancel" #> ClearNodesIf(isCancelled_?(parent)) &
-          ".actions .delete [onclick]" #> Confirm(
-            s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
-            ajaxInvoke(deleteParent(parent) _)
-          ) &
-          ".actions .cancel [onclick]" #> Confirm(
-            s"Cancel ${parent.name}? This will cancel the user's account.",
-            ajaxInvoke(cancelParent(parent) _)
-          ) &
-          "^ [onclick]" #> ajaxInvoke(() => {
-            if (currentParent.isEmpty) {
-              currentParent = Full(parent)
-            } else {
-              currentParent = Empty
+      "tbody" #> parents.sortWith(_.name < _.name).map { parent =>
+        val refererName = parent.referer.obj.map(_.name.get)
+        idMemoize { detailsRenderer =>
+          val subscription = parent.getSubscription
+          val nextShipDate = subscription.map(_.nextShipDate.get)
+
+          ".parent" #> {
+            ".name *" #> getParentInfo(parent, "name") &
+            ".email *" #> getParentInfo(parent, "email") &
+            ".billing-status *" #> subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
+            ".referer *" #> refererName &
+            ".ship-date *" #> tryo(displayNextShipDate(nextShipDate.map(dateFormat.format(_)), isCancelled_?(parent))).openOr("-") &
+            ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
+            ".actions .delete" #> ClearNodesIf(isCancelled_?(parent)) &
+            ".actions .cancel" #> ClearNodesIf(isCancelled_?(parent)) &
+            ".actions .delete [onclick]" #> Confirm(
+              s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
+              ajaxInvoke(deleteParent(parent) _)
+            ) &
+            ".actions .cancel [onclick]" #> Confirm(
+              s"Cancel ${parent.name}? This will cancel the user's account.",
+              ajaxInvoke(cancelParent(parent) _)
+            ) &
+            "^ [onclick]" #> ajaxInvoke(() => {
+              if (currentParent.isEmpty) {
+                currentParent = Full(parent)
+              } else {
+                currentParent = Empty
+              }
+
+              detailsRenderer.setHtml
+            })
+          } & 
+          ".info [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
+          "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
+          ".parent-info" #> {
+            if (!currentParent.isEmpty) {
+              petBindings andThen
+              shipmentBindings(detailsRenderer, subscription) andThen
+              parentInformationBinding(detailsRenderer, subscription)
             }
-
-            detailsRenderer.setHtml
-          })
-        } & 
-        ".info [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
-        "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
-        ".parent-info" #> {
-          if (!currentParent.isEmpty) {
-            petBindings andThen
-            shipmentBindings(detailsRenderer, subscription) andThen
-            parentInformationBinding(detailsRenderer, subscription)
-          }
-          else {
-            "^" #> ClearNodes
+            else {
+              "^" #> ClearNodes
+            }
           }
         }
       }
