@@ -47,6 +47,7 @@ trait StripeHook extends RestHelper with Loggable {
       val state = shippingAddress.state.get
       val zip = shippingAddress.zip.get
       val activePets_? = user.activePets.length > 0
+      val charge = tryo((objectJson \ "charge").extract[String])
       
       def formatAmount(possibleAmount: String) = {
         val formattedAmount = tryo(possibleAmount.toDouble/100.0).openOr(0D)
@@ -101,9 +102,11 @@ trait StripeHook extends RestHelper with Loggable {
               user,
               subscription,
               invoicePaymentId,
+              charge,
               formatAmount(amountPaid),
               formatAmount(tax),
-              inserts
+              inserts,
+              StripeStatus.Paid
             )
           }
         }

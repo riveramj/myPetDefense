@@ -91,7 +91,7 @@ class Parents extends Loggable {
   val coupons = Coupon.findAll()
 
   val stripeBaseUrl = Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
-  val stripePaymentsBaseURL = s"${stripeBaseUrl}/invoices"
+  val stripeInvoiceBaseURL = s"${stripeBaseUrl}/invoices"
   val stripeSubscriptionBaseURL = s"${stripeBaseUrl}/subscriptions"
 
 
@@ -236,6 +236,17 @@ class Parents extends Loggable {
     shipment.delete_!
 
     detailsRenderer.setHtml
+  }
+
+  def refundShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment)() = {
+    ParentService.refundShipment(shipment) match {
+      case Full(refund) => 
+        shipment.stripeStatus(StripeStatus.Refunded).dateRefunded(new Date()).saveMe
+
+        detailsRenderer.setHtml
+      case _ =>
+        Alert("Could not refund shipment. Please try again.")
+    }
   }
 
   def displayNextShipDate(shipmentDate: Option[String], cancelled: Boolean) = {
@@ -518,8 +529,8 @@ class Parents extends Loggable {
 
       ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
       ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
-      ".amount-paid .stripe-payment *" #> s"$$${shipment.amountPaid.get}" &
-      ".amount-paid .stripe-payment [href]" #> s"${stripePaymentsBaseURL}/${shipment.stripePaymentId.get}" &
+      ".amount-paid .stripe-invoice *" #> s"$$${shipment.amountPaid.get}" &
+      ".amount-paid .stripe-invoice [href]" #> s"${stripeInvoiceBaseURL}/${shipment.stripePaymentId.get}" &
       ".pets ul" #> { itemsShipped.sortWith(_ < _).map { itemShipped =>
         ".pet-product *" #> itemShipped
       }} &
@@ -529,6 +540,14 @@ class Parents extends Loggable {
       ".shipment-actions .delete [onclick]" #> Confirm(
         "Delete this shipment? This cannot be undone!",
         ajaxInvoke(deleteShipment(detailsRenderer, shipment) _)
+      ) &
+      ".shipment-actions .refund [onclick]" #> Confirm(
+        "Refund this shipment? This cannot be undone!",
+        ajaxInvoke(refundShipment(detailsRenderer, shipment) _)
+      ) &
+      ".shipment-actions .refund" #> ClearNodesIf(
+        (tryo(shipment.stripeStatus.get) == Full(StripeStatus.Refunded)) ||
+        (tryo(shipment.stripeChargeId.get).isEmpty)
       )
     }
   }
