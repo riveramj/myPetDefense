@@ -556,7 +556,7 @@ class Parents extends Loggable {
       ) &
       ".shipment-actions .refund" #> ClearNodesIf(
         (tryo(shipment.stripeStatus.get) == Full(StripeStatus.Refunded)) ||
-        (tryo(shipment.stripeChargeId.get) == Full(""))
+        (tryo(shipment.stripeChargeId.get) == Full(null))
       )
     }
   }
