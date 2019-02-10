@@ -238,10 +238,12 @@ class Parents extends Loggable {
     detailsRenderer.setHtml
   }
 
-  def refundShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment)() = {
+  def refundShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment, parent: Box[User])() = {
     ParentService.refundShipment(shipment) match {
       case Full(refund) => 
         shipment.stripeStatus(StripeStatus.Refunded).dateRefunded(new Date()).saveMe
+
+        EmailActor ! SendShipmentRefundedEmail(parent, shipment)
 
         detailsRenderer.setHtml
       case _ =>
@@ -525,6 +527,11 @@ class Parents extends Loggable {
     ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
     ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
     ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
+<<<<<<< HEAD
+=======
+      println(tryo(shipment.stripeChargeId.get) + " chargeId")
+      println(tryo(shipment.stripeChargeId.get).isEmpty + " empty Check")
+>>>>>>> 4138e0ae... refund email
       
       val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
 
@@ -545,11 +552,11 @@ class Parents extends Loggable {
       ) &
       ".shipment-actions .refund [onclick]" #> Confirm(
         "Refund this shipment? This cannot be undone!",
-        ajaxInvoke(refundShipment(detailsRenderer, shipment) _)
+        ajaxInvoke(refundShipment(detailsRenderer, shipment, parent) _)
       ) &
       ".shipment-actions .refund" #> ClearNodesIf(
         (tryo(shipment.stripeStatus.get) == Full(StripeStatus.Refunded)) ||
-        (tryo(shipment.stripeChargeId.get).isEmpty)
+        (tryo(shipment.stripeChargeId.get) == Full(""))
       )
     }
   }
