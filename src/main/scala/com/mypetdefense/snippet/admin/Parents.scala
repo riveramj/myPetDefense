@@ -527,11 +527,6 @@ class Parents extends Loggable {
     ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
     ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
     ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
-<<<<<<< HEAD
-=======
-      println(tryo(shipment.stripeChargeId.get) + " chargeId")
-      println(tryo(shipment.stripeChargeId.get).isEmpty + " empty Check")
->>>>>>> 4138e0ae... refund email
       
       val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
 

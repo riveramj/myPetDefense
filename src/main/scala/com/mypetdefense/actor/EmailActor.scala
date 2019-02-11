@@ -601,8 +601,8 @@ trait SendShipmentRefundedEmailHandling extends EmailHandlerChain {
       
       val transform = {
         ".first-name *" #> firstName &
-        ".shipment-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
-        ".shipment-amount *" #> s"$$${shipment.amountPaid.get}"
+        ".shipment-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("") &
+        ".shipment-amount *" #> shipment.amountPaid.get
       }
 
       sendEmail(subject, email, transform(template))
