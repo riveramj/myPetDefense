@@ -32,12 +32,13 @@ class CreateShipStationOrderJob extends ManagedJob {
 
     val newShipments = Shipment.findAll(
       By(Shipment.shipStationOrderId, 0),
-      By(Shipment.status, Status.Active)
+      By(Shipment.status, Status.Active),
+      NotBy(Shipment.stripeStatus, Status.Refunded)
     )
 
     for {
       shipment <- newShipments
-        if (newShipments.size < 300)
+        if (newShipments.size < 400)
       subscription <- shipment.subscription.obj
       user <- subscription.user.obj
     } yield { 
