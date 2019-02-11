@@ -613,4 +613,21 @@ object ParentService extends Loggable {
         Failure(throwable.toString)
     }
   }
+
+  def refundShipment(shipment: Shipment): Box[Refund] = {
+    val refund = Refund.create(chargeId = shipment.stripeChargeId.get)
+
+    Try(Await.result(refund, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(newRefund)) =>
+        Full(newRefund)
+      
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"create refund failed with stipe error: ${stripeFailure}")
+        stripeFailure
+      
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"create refund failed with other error: ${throwable}")
+        Failure(throwable.toString)
+    }
+  }
 }
