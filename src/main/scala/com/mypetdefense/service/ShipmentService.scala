@@ -17,7 +17,7 @@ object ShipmentService extends Loggable {
       ),
       NullRef(Shipment.dateShipped),
       NotBy(Shipment.status, Status.Cancelled),
-      NotBy(Shipment.stripeStatus, Status.Refunded)
+      NotBy(Shipment.stripeStatus, StripeStatus.Refunded)
     )
   }
 
