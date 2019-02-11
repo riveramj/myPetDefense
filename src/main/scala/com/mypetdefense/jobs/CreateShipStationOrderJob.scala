@@ -37,7 +37,7 @@ class CreateShipStationOrderJob extends ManagedJob {
 
     for {
       shipment <- newShipments
-        if (newShipments.size < 300)
+        if (newShipments.size < 400)
       subscription <- shipment.subscription.obj
       user <- subscription.user.obj
     } yield { 

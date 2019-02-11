@@ -48,6 +48,7 @@ case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMe
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
 case class NotifyParentGrowthRate(pet: Pet, newProduct: String, user: User) extends EmailActorMessage
+case class SendShipmentRefundedEmail(parent: Box[User], shipment: Shipment) extends EmailActorMessage
 case class DailySalesEmail(
   agentNameAndCount: List[(String, Int)],
   monthAgentNameAndCount: List[(String, Int)],
@@ -577,6 +578,37 @@ trait NotifyParentGrowthRateHandling extends EmailHandlerChain {
   }
 }
 
+trait SendShipmentRefundedEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case SendShipmentRefundedEmail(parent, shipment) =>
+      val template =
+        Templates("emails-hidden" :: "shipment-refunded-email" :: Nil) openOr NodeSeq.Empty
+
+      val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
+      
+      val subject = s"Your Account has been Credited"
+      val hostUrl = Paths.serverUrl
+      
+      val (email, firstName) = (parent.map { possibleParent =>
+        if (possibleParent.status.get == Status.Cancelled) {
+          val cancelledUser = CancelledUser.find(By(CancelledUser.user, possibleParent.userId.get))
+
+          (cancelledUser.map(_.email.get).openOr(""), cancelledUser.map(_.firstName.get).openOr(""))
+        } else {
+          (possibleParent.email.get, possibleParent.firstName.get)
+        }
+      }).openOr(("",""))
+      
+      val transform = {
+        ".first-name *" #> firstName &
+        ".shipment-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("") &
+        ".shipment-amount *" #> shipment.amountPaid.get
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
 trait DailySalesEmailHandling extends EmailHandlerChain {
   addHandler {
     case DailySalesEmail(
@@ -794,6 +826,7 @@ trait EmailActor extends EmailHandlerChain
                     with DailySalesEmailHandling
                     with InternalDailyEmailHandling
                     with SixMonthSaleReceiptEmailHandling
+                    with SendShipmentRefundedEmailHandling
                     with TestimonialEmailHandling {
 
   val baseEmailTemplate = 
