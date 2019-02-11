@@ -32,8 +32,7 @@ class CreateShipStationOrderJob extends ManagedJob {
 
     val newShipments = Shipment.findAll(
       By(Shipment.shipStationOrderId, 0),
-      By(Shipment.status, Status.Active),
-      NotBy(Shipment.stripeStatus, StripeStatus.Refunded)
+      By(Shipment.status, Status.Active)
     )
 
     for {

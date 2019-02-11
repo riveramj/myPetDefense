@@ -243,7 +243,7 @@ class Parents extends Loggable {
       case Full(refund) =>
         ShipStationService.cancelShipstationOrder(shipment)
 
-        shipment.stripeStatus(StripeStatus.Refunded).dateRefunded(new Date()).saveMe
+        shipment.dateRefunded(new Date()).saveMe
 
         EmailActor ! SendShipmentRefundedEmail(parent, shipment)
 
@@ -552,7 +552,7 @@ class Parents extends Loggable {
         ajaxInvoke(refundShipment(detailsRenderer, shipment, parent) _)
       ) &
       ".shipment-actions .refund" #> ClearNodesIf(
-        (tryo(shipment.stripeStatus.get) == Full(StripeStatus.Refunded)) ||
+        (tryo(shipment.dateRefunded.get) != Full(null)) ||
         (tryo(shipment.stripeChargeId.get) == Full(null))
       )
     }
