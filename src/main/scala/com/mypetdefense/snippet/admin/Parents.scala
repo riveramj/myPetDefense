@@ -240,7 +240,9 @@ class Parents extends Loggable {
 
   def refundShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment, parent: Box[User])() = {
     ParentService.refundShipment(shipment) match {
-      case Full(refund) => 
+      case Full(refund) =>
+        ShipStationService.cancelShipstationOrder(shipment)
+
         shipment.stripeStatus(StripeStatus.Refunded).dateRefunded(new Date()).saveMe
 
         EmailActor ! SendShipmentRefundedEmail(parent, shipment)
