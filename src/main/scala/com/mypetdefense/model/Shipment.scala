@@ -1,6 +1,8 @@
 package com.mypetdefense.model
 
-import net.liftweb.mapper._
+import net.liftweb._
+  import common._
+  import mapper._
 
 import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
@@ -13,9 +15,11 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object subscription extends MappedLongForeignKey(this, Subscription)
   object shipStationOrderId extends MappedInt(this)
   object stripePaymentId extends MappedString(this, 100)
+  object stripeChargeId extends MappedString(this, 100)
   object trackingNumber extends MappedString(this, 100)
   object address extends MappedString(this, 200)
   object dateProcessed extends MappedDateTime(this)
+  object dateRefunded extends MappedDateTime(this)
   object expectedShipDate extends MappedDateTime(this)
   object dateShipped extends MappedDateTime(this)
   object dateReceived extends MappedDateTime(this)
@@ -44,6 +48,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
     user: User,
     subscription: Subscription,
     stripePaymentId: String,
+    stripeChargeId: Box[String],
     amountPaid: String,
     taxPaid: String,
     inserts: List[Insert]
@@ -53,6 +58,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
     val shipment = Shipment.create
       .shipmentId(generateLongId)
       .stripePaymentId(stripePaymentId)
+      .stripeChargeId(stripeChargeId.openOr(""))
       .subscription(subscription)
       .expectedShipDate(subscription.nextShipDate.get)
       .dateProcessed(dateProcessed)

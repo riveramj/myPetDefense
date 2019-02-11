@@ -4,49 +4,59 @@
     <div id="item-container">
       <h2>Parents</h2>
       <a href="#" id="active-parents-export">Active Parents</a>
-      <table>
-        <thead>
-          <tr>
-            <td>Name</td>
-            <td>Email</td>
-            <td>Billing Status</td>
-            <td>Referer</td>
-            <td>Next Ship Date</td>
-            <td>Actions</td>
-          </tr>
-        </thead>
-        <tbody>
-          <tr class="parent">
-            <td class="name">Mike Rivera</td>
-            <td class="email">email@email.com</td>
-            <td class="billing-status">Good to Go</td>
-            <td class="referer">We have pets</td>
-            <td class="ship-date">123-123-1234</td>
-            <td class="actions">
-              <button class="delete">Delete</button>
-              <button class="cancel">Cancel</button>
-            </td>
-          </tr>
-          <tr class="pets info">
-            <td colspan=7 class="parent-info">
-              <ul class="parent-nav">
-                <li class="parent-information active">
-                  <button type="button" class="parent-tab">Information</button>
-                </li>
-                <li class="parent-pets">
-                  <button type="button" class="parent-tab">Pets</button>
-                </li>
-                <li class="parent-shipments">
-                  <button type="button" class="parent-tab">Shipments</button>
-                </li>
-              </ul>
-              <div data-lift="embed?what=admin/parents-information"></div>
-              <div data-lift="embed?what=admin/parents-pets"></div>
-              <div data-lift="embed?what=admin/parents-shipments"></div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <ul class="parents-nav">
+        <li class="active parents-active">
+          <button type="button" id="parents-active">Active Parents</button>
+        </li>
+        <li class="parents-cancelled">
+          <button type="button" id="parents-cancelled">Cancelled Parents</button>
+        </li>
+      </ul>
+      <div class="parents-container">
+        <table>
+          <thead>
+            <tr>
+              <td>Name</td>
+              <td>Email</td>
+              <td>Billing Status</td>
+              <td>Referer</td>
+              <td>Next Ship Date</td>
+              <td>Actions</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="parent">
+              <td class="name">Mike Rivera</td>
+              <td class="email">email@email.com</td>
+              <td class="billing-status">Good to Go</td>
+              <td class="referer">We have pets</td>
+              <td class="ship-date">123-123-1234</td>
+              <td class="actions">
+                <button class="delete">Delete</button>
+                <button class="cancel">Cancel</button>
+              </td>
+            </tr>
+            <tr class="pets info">
+              <td colspan=7 class="parent-info">
+                <ul class="parent-nav">
+                  <li class="parent-information active">
+                    <button type="button" class="parent-tab">Information</button>
+                  </li>
+                  <li class="parent-pets">
+                    <button type="button" class="parent-tab">Pets</button>
+                  </li>
+                  <li class="parent-shipments">
+                    <button type="button" class="parent-tab">Shipments</button>
+                  </li>
+                </ul>
+                <div data-lift="embed?what=admin/parents-information"></div>
+                <div data-lift="embed?what=admin/parents-pets"></div>
+                <div data-lift="embed?what=admin/parents-shipments"></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
   <head_merge>
