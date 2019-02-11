@@ -42,12 +42,13 @@ trait StripeHook extends RestHelper with Loggable {
       shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
+      val charge = tryo((objectJson \ "charge").extract[String])
+
       val notTrial_? = ParentService.notTrialSubscription_?(stripeCustomerId, stripeSubscriptionId)
       val city = shippingAddress.city.get
       val state = shippingAddress.state.get
       val zip = shippingAddress.zip.get
       val activePets_? = user.activePets.length > 0
-      val charge = tryo((objectJson \ "charge").extract[String])
       
       def formatAmount(possibleAmount: String) = {
         val formattedAmount = tryo(possibleAmount.toDouble/100.0).openOr(0D)

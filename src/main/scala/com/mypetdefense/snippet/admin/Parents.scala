@@ -525,10 +525,12 @@ class Parents extends Loggable {
     ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
     ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
     ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
+      
       val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
 
       ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
       ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
+      ".refund-date *" #> tryo(dateFormat.format(shipment.dateRefunded.get)).openOr("-") &
       ".amount-paid .stripe-invoice *" #> s"$$${shipment.amountPaid.get}" &
       ".amount-paid .stripe-invoice [href]" #> s"${stripeInvoiceBaseURL}/${shipment.stripePaymentId.get}" &
       ".pets ul" #> { itemsShipped.sortWith(_ < _).map { itemShipped =>
