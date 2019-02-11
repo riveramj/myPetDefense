@@ -16,7 +16,7 @@ object ShipmentService extends Loggable {
         IHaveValidatedThisSQL("mike","2018-04-24")
       ),
       NullRef(Shipment.dateShipped),
-      NotBy(Shipment.status, Status.Cancelled)
+      By(Shipment.shipmentStatus, ShipmentStatus.Paid)
     )
   }
 
