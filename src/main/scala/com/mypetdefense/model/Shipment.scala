@@ -1,6 +1,8 @@
 package com.mypetdefense.model
 
-import net.liftweb.mapper._
+import net.liftweb._
+  import common._
+  import mapper._
 
 import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
@@ -13,9 +15,11 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object subscription extends MappedLongForeignKey(this, Subscription)
   object shipStationOrderId extends MappedInt(this)
   object stripePaymentId extends MappedString(this, 100)
+  object stripeChargeId extends MappedString(this, 100)
   object trackingNumber extends MappedString(this, 100)
   object address extends MappedString(this, 200)
   object dateProcessed extends MappedDateTime(this)
+  object dateRefunded extends MappedDateTime(this)
   object expectedShipDate extends MappedDateTime(this)
   object dateShipped extends MappedDateTime(this)
   object dateReceived extends MappedDateTime(this)
@@ -23,6 +27,7 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object amountPaid extends MappedString(this, 100)
   object shipmentLineItems extends MappedOneToMany(ShipmentLineItem, ShipmentLineItem.shipment)
   object insert extends MappedString(this, 100)
+  object stripeStatus extends MappedEnum(this, StripeStatus)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
   }
@@ -44,20 +49,24 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
     user: User,
     subscription: Subscription,
     stripePaymentId: String,
+    stripeChargeId: Box[String],
     amountPaid: String,
     taxPaid: String,
-    inserts: List[Insert]
+    inserts: List[Insert],
+    stripeStatus: StripeStatus.Value
   ) = {
     val dateProcessed = new Date()
 
     val shipment = Shipment.create
       .shipmentId(generateLongId)
       .stripePaymentId(stripePaymentId)
+      .stripeChargeId(stripeChargeId.openOr(""))
       .subscription(subscription)
       .expectedShipDate(subscription.nextShipDate.get)
       .dateProcessed(dateProcessed)
       .amountPaid(amountPaid)
       .taxPaid(taxPaid)
+      .stripeStatus(stripeStatus)
       .saveMe
 
     ShipmentLineItem.createShipmentItems(shipment, user, inserts)
@@ -110,3 +119,7 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
 }
 
 object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem]
+
+object StripeStatus extends Enumeration {
+  val Paid, Refunded = Value
+}

@@ -10,7 +10,7 @@ import net.liftweb.common._
 import net.liftweb.util._
 import net.liftweb.http._
   import js.JsCmds._
-import net.liftweb.mapper.By
+import net.liftweb.mapper.{By, NotBy}
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -75,7 +75,12 @@ object Parents extends Loggable {
 }
 
 class Parents extends Loggable {
-  val parents = User.findAll(By(User.userType, UserType.Parent))
+  var parents = User.findAll(
+    By(User.userType, UserType.Parent),
+    NotBy(User.status, Status.Cancelled)
+  )
+  var parentsRenderer: Box[IdMemoizeTransform] = Empty
+  var cancelled = false
   
   var petType: Box[AnimalType.Value] = Empty
   var chosenProduct: Box[Product] = Empty
@@ -86,7 +91,7 @@ class Parents extends Loggable {
   val coupons = Coupon.findAll()
 
   val stripeBaseUrl = Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
-  val stripePaymentsBaseURL = s"${stripeBaseUrl}/invoices"
+  val stripeInvoiceBaseURL = s"${stripeBaseUrl}/invoices"
   val stripeSubscriptionBaseURL = s"${stripeBaseUrl}/subscriptions"
 
 
@@ -233,11 +238,46 @@ class Parents extends Loggable {
     detailsRenderer.setHtml
   }
 
+  def refundShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment, parent: Box[User])() = {
+    ParentService.refundShipment(shipment) match {
+      case Full(refund) => 
+        shipment.stripeStatus(StripeStatus.Refunded).dateRefunded(new Date()).saveMe
+
+        EmailActor ! SendShipmentRefundedEmail(parent, shipment)
+
+        detailsRenderer.setHtml
+      case _ =>
+        Alert("Could not refund shipment. Please try again.")
+    }
+  }
+
   def displayNextShipDate(shipmentDate: Option[String], cancelled: Boolean) = {
     if (cancelled)
       "-"
     else
       shipmentDate.getOrElse("")
+  }
+
+  def changeParentSet(parentStatus: String) = {
+    parentStatus match {
+      case "active" =>
+        cancelled = false
+        
+        parents = User.findAll(
+          By(User.userType, UserType.Parent),
+          NotBy(User.status, Status.Cancelled)
+        )
+
+      case "cancelled" =>
+        cancelled = true
+        parents = User.findAll(
+          By(User.userType, UserType.Parent),
+          By(User.status, Status.Cancelled)
+        )
+      case _ =>
+    }
+  
+    parentsRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def parentInformationBinding(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]) = {
@@ -487,12 +527,14 @@ class Parents extends Loggable {
     ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
     ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
     ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
+      
       val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
 
       ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
       ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
-      ".amount-paid .stripe-payment *" #> s"$$${shipment.amountPaid.get}" &
-      ".amount-paid .stripe-payment [href]" #> s"${stripePaymentsBaseURL}/${shipment.stripePaymentId.get}" &
+      ".refund-date *" #> tryo(dateFormat.format(shipment.dateRefunded.get)).openOr("-") &
+      ".amount-paid .stripe-invoice *" #> s"$$${shipment.amountPaid.get}" &
+      ".amount-paid .stripe-invoice [href]" #> s"${stripeInvoiceBaseURL}/${shipment.stripePaymentId.get}" &
       ".pets ul" #> { itemsShipped.sortWith(_ < _).map { itemShipped =>
         ".pet-product *" #> itemShipped
       }} &
@@ -502,6 +544,14 @@ class Parents extends Loggable {
       ".shipment-actions .delete [onclick]" #> Confirm(
         "Delete this shipment? This cannot be undone!",
         ajaxInvoke(deleteShipment(detailsRenderer, shipment) _)
+      ) &
+      ".shipment-actions .refund [onclick]" #> Confirm(
+        "Refund this shipment? This cannot be undone!",
+        ajaxInvoke(refundShipment(detailsRenderer, shipment, parent) _)
+      ) &
+      ".shipment-actions .refund" #> ClearNodesIf(
+        (tryo(shipment.stripeStatus.get) == Full(StripeStatus.Refunded)) ||
+        (tryo(shipment.stripeChargeId.get) == Full(null))
       )
     }
   }
@@ -510,49 +560,55 @@ class Parents extends Loggable {
     SHtml.makeFormsAjax andThen
     ".parents [class+]" #> "current" &
     "#active-parents-export [href]" #> Parents.activeParentsCsvMenu.loc.calcDefaultHref &
-    "tbody" #> parents.sortWith(_.name < _.name).map { parent =>
-      val refererName = parent.referer.obj.map(_.name.get)
-      idMemoize { detailsRenderer =>
-        val subscription = parent.getSubscription
-        val nextShipDate = subscription.map(_.nextShipDate.get)
+    "#parents-active [onclick]" #> SHtml.ajaxInvoke(() => changeParentSet("active")) &
+    "#parents-cancelled [onclick]" #> SHtml.ajaxInvoke(() => changeParentSet("cancelled")) &
+    ".parents-container" #> SHtml.idMemoize { renderer =>
+      parentsRenderer = Full(renderer)
 
-        ".parent" #> {
-          ".name *" #> getParentInfo(parent, "name") &
-          ".email *" #> getParentInfo(parent, "email") &
-          ".billing-status *" #> subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
-          ".referer *" #> refererName &
-          ".ship-date *" #> tryo(displayNextShipDate(nextShipDate.map(dateFormat.format(_)), isCancelled_?(parent))).openOr("-") &
-          ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
-          ".actions .delete" #> ClearNodesIf(isCancelled_?(parent)) &
-          ".actions .cancel" #> ClearNodesIf(isCancelled_?(parent)) &
-          ".actions .delete [onclick]" #> Confirm(
-            s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
-            ajaxInvoke(deleteParent(parent) _)
-          ) &
-          ".actions .cancel [onclick]" #> Confirm(
-            s"Cancel ${parent.name}? This will cancel the user's account.",
-            ajaxInvoke(cancelParent(parent) _)
-          ) &
-          "^ [onclick]" #> ajaxInvoke(() => {
-            if (currentParent.isEmpty) {
-              currentParent = Full(parent)
-            } else {
-              currentParent = Empty
+      "tbody" #> parents.sortWith(_.name < _.name).map { parent =>
+        val refererName = parent.referer.obj.map(_.name.get)
+        idMemoize { detailsRenderer =>
+          val subscription = parent.getSubscription
+          val nextShipDate = subscription.map(_.nextShipDate.get)
+
+          ".parent" #> {
+            ".name *" #> getParentInfo(parent, "name") &
+            ".email *" #> getParentInfo(parent, "email") &
+            ".billing-status *" #> subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
+            ".referer *" #> refererName &
+            ".ship-date *" #> tryo(displayNextShipDate(nextShipDate.map(dateFormat.format(_)), isCancelled_?(parent))).openOr("-") &
+            ".actions .delete" #> ClearNodesIf(parent.activePets.size > 0) &
+            ".actions .delete" #> ClearNodesIf(isCancelled_?(parent)) &
+            ".actions .cancel" #> ClearNodesIf(isCancelled_?(parent)) &
+            ".actions .delete [onclick]" #> Confirm(
+              s"Delete ${parent.name}? This will remove all billing info subscriptions. Cannot be undone!",
+              ajaxInvoke(deleteParent(parent) _)
+            ) &
+            ".actions .cancel [onclick]" #> Confirm(
+              s"Cancel ${parent.name}? This will cancel the user's account.",
+              ajaxInvoke(cancelParent(parent) _)
+            ) &
+            "^ [onclick]" #> ajaxInvoke(() => {
+              if (currentParent.isEmpty) {
+                currentParent = Full(parent)
+              } else {
+                currentParent = Empty
+              }
+
+              detailsRenderer.setHtml
+            })
+          } & 
+          ".info [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
+          "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
+          ".parent-info" #> {
+            if (!currentParent.isEmpty) {
+              petBindings andThen
+              shipmentBindings(detailsRenderer, subscription) andThen
+              parentInformationBinding(detailsRenderer, subscription)
             }
-
-            detailsRenderer.setHtml
-          })
-        } & 
-        ".info [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
-        "^ [class+]" #> {if (currentParent.isEmpty) "" else "expanded"} &
-        ".parent-info" #> {
-          if (!currentParent.isEmpty) {
-            petBindings andThen
-            shipmentBindings(detailsRenderer, subscription) andThen
-            parentInformationBinding(detailsRenderer, subscription)
-          }
-          else {
-            "^" #> ClearNodes
+            else {
+              "^" #> ClearNodes
+            }
           }
         }
       }

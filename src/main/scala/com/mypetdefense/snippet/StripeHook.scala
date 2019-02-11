@@ -42,6 +42,8 @@ trait StripeHook extends RestHelper with Loggable {
       shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
+      val charge = tryo((objectJson \ "charge").extract[String])
+
       val notTrial_? = ParentService.notTrialSubscription_?(stripeCustomerId, stripeSubscriptionId)
       val city = shippingAddress.city.get
       val state = shippingAddress.state.get
@@ -101,9 +103,11 @@ trait StripeHook extends RestHelper with Loggable {
               user,
               subscription,
               invoicePaymentId,
+              charge,
               formatAmount(amountPaid),
               formatAmount(tax),
-              inserts
+              inserts,
+              StripeStatus.Paid
             )
           }
         }
