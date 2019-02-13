@@ -628,7 +628,7 @@ object ParentService extends Loggable {
 
     Try(Await.result(refund, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(newRefund)) =>
-        shipment.shipmentStatus(ShipmentStatus.Refunded).dateRefunded(new Date()).saveMe
+        shipment.dateRefunded(new Date()).saveMe
 
         EmailActor ! SendShipmentRefundedEmail(parent, shipment)
 

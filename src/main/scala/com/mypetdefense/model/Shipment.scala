@@ -28,6 +28,7 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object shipmentLineItems extends MappedOneToMany(ShipmentLineItem, ShipmentLineItem.shipment)
   object insert extends MappedString(this, 100)
   object shipmentStatus extends MappedEnum(this, ShipmentStatus)
+  object deliveryNotes extends MappedString(this, 100)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
   }
@@ -115,5 +116,12 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
 object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem]
 
 object ShipmentStatus extends Enumeration {
-  val Paid, Shipped, Refunded, Disputed, FailedDelivery = Value
+  val Paid = Value
+  val LabelCreated = Value("Label Created")
+  val InTransit = Value("In Transit")
+  val Delivered = Value
+  val DelayedDelivery = Value("Delayed Delivery")
+  val Refused = Value
+  val FailedDelivery = Value("Failed Delivery")
+  val Other = Value
 }

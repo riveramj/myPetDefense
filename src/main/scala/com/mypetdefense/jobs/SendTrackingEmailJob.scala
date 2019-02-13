@@ -41,7 +41,7 @@ class SendTrackingEmailJob extends ManagedJob {
           |${address.city.get}, ${address.state.get} ${address.zip.get}""".stripMargin.replaceAll("\n\n", "\n")
         }
 
-        shipment.dateShipped(new Date()).address(nameAddress).trackingNumber(label.trackingNumber).shipmentStatus(ShipmentStatus.Shipped).saveMe
+        shipment.dateShipped(new Date()).address(nameAddress).trackingNumber(label.trackingNumber).shipmentStatus(ShipmentStatus.LabelCreated).saveMe
 
         ParentService.updateNextShipDate(subscription, Full(user))
         InventoryService.deductShipmentItems(shipment)
