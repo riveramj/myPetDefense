@@ -19,14 +19,29 @@ import scala.util.{Failure => TryFail, _}
 import org.quartz.{CronScheduleBuilder, TriggerBuilder, JobBuilder, JobExecutionContext}
 
 import com.mypetdefense.model._
+  import ShipmentStatus._
+
+import java.text.SimpleDateFormat
+import java.util.{Date, Locale}
+import java.time.{LocalDate, ZoneId}
+import java.time.format.DateTimeFormatter
 
 class TrackShipmentDeliveryJob extends ManagedJob {
   implicit val formats = DefaultFormats
 
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
+    val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+
+    val currentDate = LocalDate.now()
+    val alertDeliveryDate = currentDate.plusDays(7)
     val uspsApiUrl = url("https://secure.shippingapis.com/ShippingAPI.dll").secure
 
     val retryAttempts = 10
+
+    def convertDateFormat(date: Date) = {
+
+      date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+  }
     
     def generateTrackingXml(trackingNumber: String) = {
       s"<TrackFieldRequest USERID='840MYPET0182'><Revision>1</Revision><ClientIp>174.49.109.237</ClientIp><SourceId>My Pet Defense</SourceId><TrackID ID='${trackingNumber}'></TrackID></TrackFieldRequest>"
@@ -60,12 +75,32 @@ class TrackShipmentDeliveryJob extends ManagedJob {
       }
     }
 
+    def createShipmentEvent(
+      shipment: Shipment,
+      title: String,
+      description: String
+    ) = {
+      val subscription = shipment.subscription.obj
+      val user = subscription.flatMap(_.user.obj)
+
+      Event.createEvent(
+        user,
+        subscription,
+        Full(shipment),
+        Empty,
+        EventType.Shipping,
+        title,
+        description
+        )
+    }
+
     val recentShipments = Shipment.findAll(
       NotBy(Shipment.trackingNumber, ""),
-      NotBy(Shipment.shipmentStatus, ShipmentStatus.Delivered),
-      NotBy(Shipment.shipmentStatus, ShipmentStatus.Refused),
-      NotBy(Shipment.shipmentStatus, ShipmentStatus.FailedDelivery),
-      MaxRows(100)
+      NotBy(Shipment.shipmentStatus, Delivered),
+      NotBy(Shipment.shipmentStatus, Refused),
+      NotBy(Shipment.shipmentStatus, FailedDelivery),
+      NotBy(Shipment.shipmentStatus, Other),
+      MaxRows(300)
     )
 
     recentShipments.map { shipment =>
@@ -95,40 +130,82 @@ class TrackShipmentDeliveryJob extends ManagedJob {
 
       val (shipmentStatus, deliveryNotes) = statuses match {
         case refused if statuses.contains("21") =>
-          (ShipmentStatus.FailedDelivery, "No Such Number")
+          (FailedDelivery, "No Such Number")
 
         case refused if statuses.contains("22") =>
-          (ShipmentStatus.FailedDelivery, "Insufficient Address")
+          (FailedDelivery, "Insufficient Address")
 
         case refused if statuses.contains("23") =>
-          (ShipmentStatus.Refused, "Moved, Left No Address")
+          (Refused, "Moved, Left No Address")
 
         case refused if statuses.contains("04") =>
-          (ShipmentStatus.Refused, "")
+          (Refused, "")
 
         case undeliverable if statuses.contains("05") =>
-          (ShipmentStatus.FailedDelivery, "Undeliverable as Addressed")
+          (FailedDelivery, "Undeliverable as Addressed")
 
         case other if statuses.contains("29") =>
-          (ShipmentStatus.FailedDelivery, "Return to Sender")
+          (FailedDelivery, "Return to Sender")
 
         case delivered if statuses.contains("01") =>
-          (ShipmentStatus.Delivered, "")
+          (Delivered, "")
 
         case delivered if statuses.contains("DX") =>
-          (ShipmentStatus.DelayedDelivery, "")
+          (DelayedDelivery, "")
 
         case inTransit if statuses.intersect(List("L1", "03", "10", "OA", "SF")).nonEmpty =>
-          (ShipmentStatus.InTransit, "")
+          (InTransit, "")
 
         case labelCreated if statuses.intersect(List("GX", "MA", "GA")).nonEmpty =>
-          (ShipmentStatus.LabelCreated, "")
+          (LabelCreated, "")
 
         case _ =>
-          (ShipmentStatus.Other, "")
+          (Other, "")
       }
 
       shipment.shipmentStatus(shipmentStatus).deliveryNotes(deliveryNotes).saveMe
+
+      shipmentStatus match {
+        case InTransit => {
+          val dateShipped = convertDateFormat(shipment.dateShipped.get)
+            
+          if (dateShipped.isBefore(currentDate.minusDays(7))) {
+            createShipmentEvent(
+              shipment,
+              "Shipment not delivered yet",
+              s"Shipment status is '${shipmentStatus}'. Shipment was mailed on ${dateShipped} but still not delivered as of ${currentDate}."
+            )
+          }
+        }
+
+        case LabelCreated => {
+          val dateShipped = convertDateFormat(shipment.dateShipped.get)
+            
+          if (dateShipped.isBefore(currentDate.minusDays(3))) {
+            createShipmentEvent(
+              shipment,
+              "Shipment not in transit yet",
+              s"Label was created but still not in transit as of ${currentDate}."
+            )
+          }
+        }
+
+        case Refused | FailedDelivery =>
+          createShipmentEvent(
+            shipment,
+            "Shipment failed delivery.",
+            s"Shipment status is '${shipmentStatus}'. Delivery notes are '${deliveryNotes}'."
+          )
+
+        case Other =>
+          createShipmentEvent(
+            shipment,
+            "Shipment Status marked as 'Other'.",
+            s"Shipment status is 'Other'. Needs manual investigation."
+          )
+
+        case _ =>
+      }
     }
   }   
 }
