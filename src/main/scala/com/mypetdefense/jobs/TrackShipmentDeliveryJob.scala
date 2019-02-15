@@ -30,8 +30,6 @@ class TrackShipmentDeliveryJob extends ManagedJob {
   implicit val formats = DefaultFormats
 
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
-    println("in job")
-
     val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
     val currentDate = LocalDate.now()
@@ -115,18 +113,8 @@ class TrackShipmentDeliveryJob extends ManagedJob {
       MaxRows(400)
     )
 
-    println(recentShipments.map(_.trackingNumber.get) + " ===== take1")
-
-    val nullShipments = Shipment.findAll(
-      NotBy(Shipment.trackingNumber, ""),
-      NotNullRef(Shipment.trackingNumber),
-      NullRef(Shipment.shipmentStatus),
-      MaxRows(400)
-    )
-
-
     recentShipments.map { shipment =>
-      val trackingNumber = "9400111899560798193660"
+      val trackingNumber = shipment.trackingNumber.get
 
       val trackingResponse = rawTrackingNumberResponse(trackingNumber, retryAttempts)
 
@@ -150,8 +138,6 @@ class TrackShipmentDeliveryJob extends ManagedJob {
             if (statuses.isEmpty) {
               val fullDescription = tryo((tracking \ "TrackResponse" \ "TrackInfo" \  "Error" \ "Description").extract[String]).openOr("")
 
-              println(fullDescription.contains("not yet available"))
-              
               if (fullDescription.contains("not yet available"))
                 "GA"
               else
@@ -163,8 +149,6 @@ class TrackShipmentDeliveryJob extends ManagedJob {
           summary +: singleStatus +: notStatus +: statuses
         }
       }).flatten
-
-      println(statuses + " - " + trackingNumber)
 
       val (shipmentStatus, deliveryNotes) = statuses match {
         case refused if statuses.contains("21") =>
