@@ -15,10 +15,11 @@ class Event extends LongKeyedMapper[Event] with IdPK with OneToMany[Long, Event]
   }
   object title extends MappedString(this, 200)
   object details extends MappedString(this, 1000)
-  object ResolutionNotes extends MappedString(this, 1000)
-  object resolveDate extends MappedDateTime(this)
+  object resolutionNotes extends MappedString(this, 1000)
+  object resolutionDate extends MappedDateTime(this)
   object eventDate extends MappedDateTime(this)
   object eventType extends MappedEnum(this, EventType)
+  object eventStatus extends MappedEnum(this, EventStatus)
   object subscription extends MappedLongForeignKey(this, Subscription)
   object shipment extends MappedLongForeignKey(this, Shipment)
   object user extends MappedLongForeignKey(this, User)
@@ -39,9 +40,7 @@ object Event extends Event with LongKeyedMetaMapper[Event] {
     details: String,
     eventDate: Date = new Date()
   ) = {
-    val dateProcessed = new Date()
-
-    val event = Event.create
+    Event.create
       .eventId(generateLongId)
       .user(user)
       .subscription(subscription)
@@ -51,12 +50,17 @@ object Event extends Event with LongKeyedMetaMapper[Event] {
       .eventDate(eventDate)
       .title(title)
       .details(details)
+      .eventStatus(EventStatus.Open)
       .saveMe
-
-    event
   }
+
+  def unresolvedEvents = findAll(NotBy(Event.eventStatus, EventStatus.Resolved))
 }
 
 object EventType extends Enumeration {
   val Shipping, Billing, Signup = Value
+}
+
+object EventStatus extends Enumeration {
+  val Open, Pending, Resolved = Value
 }

@@ -167,6 +167,7 @@ object Paths {
     admin.Agencies.mtdYtdExportMenu,
     admin.PhonePortal.menu,
     admin.Surveys.menu,
+    admin.EventsDashboard.menu,
     agency.LegacyAgencyOverview.agencyMtdYtdExportMenu,
     agency.LegacyAgencyOverview.exportTPPMontSalesMenu,
     agency.LegacyAgencyOverview.menu,
