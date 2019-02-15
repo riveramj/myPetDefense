@@ -125,10 +125,8 @@ class TrackShipmentDeliveryJob extends ManagedJob {
     )
 
 
-    println(nullShipments.map(_.trackingNumber.get) + " ===== take2")
-
     recentShipments.map { shipment =>
-      val trackingNumber = shipment.trackingNumber.get
+      val trackingNumber = "9400111899560798193660"
 
       val trackingResponse = rawTrackingNumberResponse(trackingNumber, retryAttempts)
 
@@ -151,6 +149,8 @@ class TrackShipmentDeliveryJob extends ManagedJob {
           val notStatus = {
             if (statuses.isEmpty) {
               val fullDescription = tryo((tracking \ "TrackResponse" \ "TrackInfo" \  "Error" \ "Description").extract[String]).openOr("")
+
+              println(fullDescription.contains("not yet available"))
               
               if (fullDescription.contains("not yet available"))
                 "GA"
@@ -160,7 +160,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
               ""
           }
 
-          summary +: singleStatus +: statuses
+          summary +: singleStatus +: notStatus +: statuses
         }
       }).flatten
 
