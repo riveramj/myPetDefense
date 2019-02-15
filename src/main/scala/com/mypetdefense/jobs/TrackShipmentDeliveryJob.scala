@@ -152,7 +152,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
             if (statuses.isEmpty) {
               val fullDescription = tryo((tracking \ "TrackResponse" \ "TrackInfo" \  "Error" \ "Description").extract[String]).openOr("")
               
-              if (fullDescription.contains("not yet available")
+              if (fullDescription.contains("not yet available"))
                 "GA"
               else
                 ""
@@ -164,7 +164,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
         }
       }).flatten
 
-    println(shipmentStatus " - " + trackingNumber)
+      println(statuses + " - " + trackingNumber)
 
       val (shipmentStatus, deliveryNotes) = statuses match {
         case refused if statuses.contains("21") =>
