@@ -240,7 +240,7 @@ object DailyTrackShipmentDeliveryJob extends TriggeredJob {
     val trigger = TriggerBuilder.newTrigger()
     .withIdentity("DailyTrackShipmentDeliveryJobTrigger")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 5 0-8 ? * MON-SAT *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 0-8 ? * MON-SAT *"))
     .build()
 }
 
