@@ -106,6 +106,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
 
     val recentShipments = Shipment.findAll(
       NotBy(Shipment.trackingNumber, ""),
+      NotNullRef(Shipment.trackingNumber),
       NotBy(Shipment.shipmentStatus, Delivered),
       NotBy(Shipment.shipmentStatus, Refused),
       NotBy(Shipment.shipmentStatus, FailedDelivery),
@@ -117,6 +118,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
 
     val nullShipments = Shipment.findAll(
       NotBy(Shipment.trackingNumber, ""),
+      NotNullRef(Shipment.trackingNumber),
       NullRef(Shipment.shipmentStatus),
       MaxRows(400)
     )
