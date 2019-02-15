@@ -30,6 +30,8 @@ class TrackShipmentDeliveryJob extends ManagedJob {
   implicit val formats = DefaultFormats
 
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
+    println("in job")
+
     val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
     val currentDate = LocalDate.now()
@@ -110,6 +112,8 @@ class TrackShipmentDeliveryJob extends ManagedJob {
       NotBy(Shipment.shipmentStatus, Other),
       MaxRows(400)
     )
+
+    println(recentShipments.map(_.trackingNumber.get))
 
     recentShipments.map { shipment =>
       val trackingNumber = shipment.trackingNumber.get
