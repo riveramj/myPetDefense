@@ -104,10 +104,12 @@ class TrackShipmentDeliveryJob extends ManagedJob {
 
     val recentShipments = Shipment.findAll(
       NotBy(Shipment.trackingNumber, ""),
-      NotBy(Shipment.shipmentStatus, Delivered),
-      NotBy(Shipment.shipmentStatus, Refused),
-      NotBy(Shipment.shipmentStatus, FailedDelivery),
-      NotBy(Shipment.shipmentStatus, Other),
+      NotNullRef(Shipment.trackingNumber),
+      //NotBy(Shipment.shipmentStatus, Delivered),
+      //NotBy(Shipment.shipmentStatus, Refused),
+      //NotBy(Shipment.shipmentStatus, FailedDelivery),
+      //NotBy(Shipment.shipmentStatus, Other),
+      NullRef(Shipment.shipmentStatus),
       MaxRows(400)
     )
 
@@ -132,7 +134,19 @@ class TrackShipmentDeliveryJob extends ManagedJob {
               ""
           }
 
-          summary +: singleStatus +: statuses
+          val notStatus = {
+            if (statuses.isEmpty) {
+              val fullDescription = tryo((tracking \ "TrackResponse" \ "TrackInfo" \  "Error" \ "Description").extract[String]).openOr("")
+
+              if (fullDescription.contains("not yet available"))
+                "GA"
+              else
+                ""
+            } else
+              ""
+          }
+
+          summary +: singleStatus +: notStatus +: statuses
         }
       }).flatten
 
