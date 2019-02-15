@@ -83,15 +83,23 @@ class TrackShipmentDeliveryJob extends ManagedJob {
       val subscription = shipment.subscription.obj
       val user = subscription.flatMap(_.user.obj)
 
-      Event.createEvent(
-        user,
-        subscription,
-        Full(shipment),
-        Empty,
-        EventType.Shipping,
-        title,
-        description
+      val existingEvent = Event.find(
+        By(Event.shipment, shipment),
+        NotBy(Event.eventStatus, EventStatus.Resolved)
+      )
+      
+      if (existingEvent.isEmpty) {
+        Event.createEvent(
+          user,
+          subscription,
+          Full(shipment),
+          Empty,
+          EventType.Shipping,
+          title,
+          description,
+          shipment.dateShipped.get
         )
+      }
     }
 
     val recentShipments = Shipment.findAll(
@@ -100,7 +108,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
       NotBy(Shipment.shipmentStatus, Refused),
       NotBy(Shipment.shipmentStatus, FailedDelivery),
       NotBy(Shipment.shipmentStatus, Other),
-      MaxRows(300)
+      MaxRows(400)
     )
 
     recentShipments.map { shipment =>
@@ -218,7 +226,7 @@ object DailyTrackShipmentDeliveryJob extends TriggeredJob {
     val trigger = TriggerBuilder.newTrigger()
     .withIdentity("DailyTrackShipmentDeliveryJobTrigger")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 5 * ? * MON-SAT *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 5 0-8 ? * MON-SAT *"))
     .build()
 }
 
