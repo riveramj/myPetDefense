@@ -15,7 +15,7 @@ class Event extends LongKeyedMapper[Event] with IdPK with OneToMany[Long, Event]
   }
   object title extends MappedString(this, 200)
   object details extends MappedString(this, 1000)
-  object resolutionNotes extends MappedString(this, 1000)
+  object notes extends MappedString(this, 1000)
   object resolutionDate extends MappedDateTime(this)
   object eventDate extends MappedDateTime(this)
   object eventType extends MappedEnum(this, EventType)
