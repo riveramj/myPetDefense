@@ -111,6 +111,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
       NotBy(Shipment.shipmentStatus, Refused),
       NotBy(Shipment.shipmentStatus, FailedDelivery),
       NotBy(Shipment.shipmentStatus, Other),
+      NullRef(Shipment.shipmentStatus),
       MaxRows(400)
     )
 
@@ -147,9 +148,23 @@ class TrackShipmentDeliveryJob extends ManagedJob {
               ""
           }
 
+          val notStatus = {
+            if (statuses.isEmpty) {
+              val fullDescription = tryo((tracking \ "TrackResponse" \ "TrackInfo" \  "Error" \ "Description").extract[String]).openOr("")
+              
+              if (fullDescription.contains("not yet available")
+                "GA"
+              else
+                ""
+            } else
+              ""
+          }
+
           summary +: singleStatus +: statuses
         }
       }).flatten
+
+    println(shipmentStatus " - " + trackingNumber)
 
       val (shipmentStatus, deliveryNotes) = statuses match {
         case refused if statuses.contains("21") =>
