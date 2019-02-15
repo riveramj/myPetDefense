@@ -1,0 +1,63 @@
+<div id="main" data-lift="surround?with=default-template;at=content"> 
+<div data-lift="admin.EventsDashboard.render?eager_eval=true">
+  <div data-lift="embed?what=admin/admin-nav-bar"></div>
+  <div id="item-container">
+    <h2>Events Dashboard</h2>
+    <div class="events-container">
+      <!--
+      <ul class="dashboard-nav">
+        <li class="active events-open">
+          <button type="button" id="dashboard-current">Open Events</button>
+        </li>
+        <li class="events-closed">
+          <button type="button" id="dashboard-future">Resolved Events</button>
+        </li>
+      </ul>
+      -->
+      <div class="event-details">
+        <table>
+          <thead>
+            <tr>
+              <td>Event Date</td>
+              <td>Title</td>
+              <td>Details</td>
+              <td>Account Email</td>
+              <td>Tracking Number</td>
+              <td>Event Type</td>
+              <td>Resolution Notes</td>
+              <td>Actions</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="event">
+              <td class="event-date">01/01/2019</td>
+              <td class="title">failed delivery</td>
+              <td class="details">no one was home.</td>
+              <td class="account-email">foo@bar.com</td>
+              <td class="tracking-number">
+                <a href="https://tools.usps.com/go/TrackConfirmAction.action?tLabels=12345" target="_blank">
+                  12345
+                </a>
+              </td>
+              <td class="event-type">setup</td>
+              <td class="resolution-notes">
+                <textarea class="notes" rows="5" placeholder="Optional"></textarea></td>
+              <td class="actions">
+                <form>
+                  <button type="submit" class="resolve">Resolve</button>
+                  <button type="submit" class="set-pending">Pending</button>
+                </form>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=dashboard">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=dashboard"></script>
+  </tail>
+</div>

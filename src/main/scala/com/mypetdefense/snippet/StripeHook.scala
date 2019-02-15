@@ -106,7 +106,8 @@ trait StripeHook extends RestHelper with Loggable {
               charge,
               formatAmount(amountPaid),
               formatAmount(tax),
-              inserts
+              inserts,
+              ShipmentStatus.Paid
             )
           }
         }

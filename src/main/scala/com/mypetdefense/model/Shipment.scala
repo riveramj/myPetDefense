@@ -27,17 +27,13 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object amountPaid extends MappedString(this, 100)
   object shipmentLineItems extends MappedOneToMany(ShipmentLineItem, ShipmentLineItem.shipment)
   object insert extends MappedString(this, 100)
+  object shipmentStatus extends MappedEnum(this, ShipmentStatus)
+  object deliveryNotes extends MappedString(this, 100)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
   }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
-  }
-
-  def cancel = {
-    this
-      .status(Status.Cancelled)
-      .saveMe
   }
 
   def refresh = Shipment.find(By(Shipment.shipmentId, shipmentId.get))
@@ -51,7 +47,8 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
     stripeChargeId: Box[String],
     amountPaid: String,
     taxPaid: String,
-    inserts: List[Insert]
+    inserts: List[Insert],
+    shipmentStatus: ShipmentStatus.Value
   ) = {
     val dateProcessed = new Date()
 
@@ -64,6 +61,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
       .dateProcessed(dateProcessed)
       .amountPaid(amountPaid)
       .taxPaid(taxPaid)
+      .shipmentStatus(shipmentStatus)
       .saveMe
 
     ShipmentLineItem.createShipmentItems(shipment, user, inserts)
@@ -116,3 +114,14 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
 }
 
 object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem]
+
+object ShipmentStatus extends Enumeration {
+  val Paid = Value
+  val LabelCreated = Value("Label Created")
+  val InTransit = Value("In Transit")
+  val Delivered = Value
+  val DelayedDelivery = Value("Delayed Delivery")
+  val Refused = Value
+  val FailedDelivery = Value("Failed Delivery")
+  val Other = Value
+}
