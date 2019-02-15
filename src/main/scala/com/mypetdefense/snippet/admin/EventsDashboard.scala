@@ -42,11 +42,11 @@ class EventsDashboard extends Loggable {
 
   def actionOnEvent(
     event: Event,
-    resolutionNotes: String,
+    eventNotes: String,
     eventStatus: EventStatus.Value,
     renderer: IdMemoizeTransform
   )() = {
-    val updatedEvent = event.resolutionNotes(resolutionNotes).eventStatus(eventStatus)
+    val updatedEvent = event.notes(eventNotes).eventStatus(eventStatus)
 
     if (eventStatus == EventStatus.Resolved)
       updatedEvent.resolutionDate(new Date()).saveMe
@@ -63,7 +63,7 @@ class EventsDashboard extends Loggable {
     ".event-dashboard [class+]" #> "current" &
     ".event-details" #> SHtml.idMemoize { eventActionRenderer =>
       ".event" #> unresolvedEvents.sortBy(_.eventDate.get.getTime).map { event =>
-        var notes = event.resolutionNotes.get
+        var notes = event.notes.get
         val trackingNumber = event.shipment.obj.map(_.trackingNumber.get)
 
         ".event-date *" #> dateFormat.format(event.eventDate.get) &
