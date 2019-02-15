@@ -241,13 +241,8 @@ class Parents extends Loggable {
   def refundShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment, parent: Box[User])() = {
     ParentService.refundShipment(shipment) match {
       case Full(refund) =>
-        ShipStationService.cancelShipstationOrder(shipment)
-
-        shipment.dateRefunded(new Date()).saveMe
-
-        EmailActor ! SendShipmentRefundedEmail(parent, shipment)
-
         detailsRenderer.setHtml
+
       case _ =>
         Alert("Could not refund shipment. Please try again.")
     }
@@ -543,6 +538,7 @@ class Parents extends Loggable {
       ".address *" #> shipment.address.get &
       ".tracking-number-container .tracking-number [href]" #> s"https://tools.usps.com/go/TrackConfirmAction?tLabels=${shipment.trackingNumber.get}" &
       ".tracking-number-container .tracking-number *" #> shipment.trackingNumber.get &
+      ".shipment-status *" #> shipment.shipmentStatus.toString &
       ".shipment-actions .delete [onclick]" #> Confirm(
         "Delete this shipment? This cannot be undone!",
         ajaxInvoke(deleteShipment(detailsRenderer, shipment) _)
