@@ -230,7 +230,7 @@ object DailyTrackShipmentDeliveryJob extends TriggeredJob {
     .build()
 }
 
-object FrequentTrackShipmentDeliveryJobb extends TriggeredJob {
+object FrequentTrackShipmentDeliveryJob extends TriggeredJob {
   val detail = JobBuilder.newJob(classOf[TrackShipmentDeliveryJob])
     .withIdentity("FrequentTrackShipmentDeliveryJob")
     .build
