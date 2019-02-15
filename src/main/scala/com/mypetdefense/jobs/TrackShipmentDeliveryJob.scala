@@ -113,7 +113,16 @@ class TrackShipmentDeliveryJob extends ManagedJob {
       MaxRows(400)
     )
 
-    println(recentShipments.map(_.trackingNumber.get))
+    println(recentShipments.map(_.trackingNumber.get) + " ===== take1")
+
+    val nullShipments = Shipment.findAll(
+      NotBy(Shipment.trackingNumber, ""),
+      NullRef(Shipment.shipmentStatus),
+      MaxRows(400)
+    )
+
+
+    println(nullShipments.map(_.trackingNumber.get) + " ===== take2")
 
     recentShipments.map { shipment =>
       val trackingNumber = shipment.trackingNumber.get
