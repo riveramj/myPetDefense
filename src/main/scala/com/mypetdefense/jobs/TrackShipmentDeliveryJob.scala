@@ -109,6 +109,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
       NotBy(Shipment.shipmentStatus, Refused),
       NotBy(Shipment.shipmentStatus, FailedDelivery),
       NotBy(Shipment.shipmentStatus, Other),
+      OrderBy(Shipment.dateProcessed,Ascending),
       MaxRows(400)
     )
 
