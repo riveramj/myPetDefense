@@ -109,6 +109,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
       NotBy(Shipment.shipmentStatus, Refused),
       NotBy(Shipment.shipmentStatus, FailedDelivery),
       NotBy(Shipment.shipmentStatus, Other),
+      OrderBy(Shipment.dateProcessed,Ascending),
       MaxRows(400)
     )
 
@@ -184,7 +185,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
           (Other, "")
       }
 
-      shipment.shipmentStatus(shipmentStatus).deliveryNotes(deliveryNotes).saveMe
+      val updatedShipment = shipment.shipmentStatus(shipmentStatus).deliveryNotes(deliveryNotes).saveMe
 
       shipmentStatus match {
         case InTransit => {
@@ -192,7 +193,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
             
           if (dateShipped.isBefore(currentDate.minusDays(7))) {
             createShipmentEvent(
-              shipment,
+              updatedShipment,
               "Shipment not delivered yet",
               s"Shipment status is '${shipmentStatus}'. Shipment was mailed on ${dateShipped} but still not delivered as of ${currentDate}."
             )
@@ -202,9 +203,17 @@ class TrackShipmentDeliveryJob extends ManagedJob {
         case LabelCreated => {
           val dateShipped = convertDateFormat(shipment.dateShipped.get)
             
-          if (dateShipped.isBefore(currentDate.minusDays(3))) {
+          if (dateShipped.isBefore(currentDate.minusDays(20))) {
+            val oldShipment = shipment.shipmentStatus(Other).deliveryNotes("Old label.").saveMe
+
             createShipmentEvent(
-              shipment,
+              oldShipment,
+              "Old label in system",
+              s"Ship date of shipment is ${shipment.dateShipped}. Thats older than 20 days. Marked as 'Other'."
+            )
+          } else if (dateShipped.isBefore(currentDate.minusDays(3))) {
+            createShipmentEvent(
+              updatedShipment,
               "Shipment not in transit yet",
               s"Label was created but still not in transit as of ${currentDate}."
             )
@@ -213,14 +222,14 @@ class TrackShipmentDeliveryJob extends ManagedJob {
 
         case Refused | FailedDelivery =>
           createShipmentEvent(
-            shipment,
+            updatedShipment,
             "Shipment failed delivery.",
             s"Shipment status is '${shipmentStatus}'. Delivery notes are '${deliveryNotes}'."
           )
 
         case Other =>
           createShipmentEvent(
-            shipment,
+            updatedShipment,
             "Shipment Status marked as 'Other'.",
             s"Shipment status is 'Other'. Needs manual investigation."
           )
