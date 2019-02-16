@@ -203,7 +203,15 @@ class TrackShipmentDeliveryJob extends ManagedJob {
         case LabelCreated => {
           val dateShipped = convertDateFormat(shipment.dateShipped.get)
             
-          if (dateShipped.isBefore(currentDate.minusDays(3))) {
+          if (dateShipped.isBefore(currentDate.minusDays(20))) {
+            val oldShipment = shipment.shipmentStatus(Other).deliveryNotes("Old label.").saveMe
+
+            createShipmentEvent(
+              oldShipment,
+              "Old label in system",
+              s"Ship date of shipment is ${shipment.dateShipped}. Thats older than 20 days. Marked as 'Other'."
+            )
+          } else if (dateShipped.isBefore(currentDate.minusDays(3))) {
             createShipmentEvent(
               updatedShipment,
               "Shipment not in transit yet",
