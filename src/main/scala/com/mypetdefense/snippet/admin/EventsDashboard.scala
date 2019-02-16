@@ -35,7 +35,7 @@ object EventsDashboard extends Loggable {
 }
 
 class EventsDashboard extends Loggable {
-  val dateFormat = new SimpleDateFormat("MM/dd")
+  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
   
   var eventActionRenderer: Box[IdMemoizeTransform] = Empty
   var unresolvedEvents = Event.unresolvedEvents
