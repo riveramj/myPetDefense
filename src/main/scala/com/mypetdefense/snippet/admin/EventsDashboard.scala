@@ -71,7 +71,7 @@ class EventsDashboard extends Loggable {
         ".details *" #> event.details.get &
         ".account-email *" #> event.user.obj.map(_.email.get) &
         ".tracking-number a *" #> trackingNumber &
-        ".tracking-number a [href]" #> s"https://tools.usps.com/go/TrackConfirmAction.action?tLabels=${trackingNumber}" &
+        ".tracking-number a [href]" #> s"https://tools.usps.com/go/TrackConfirmAction.action?tLabels=${trackingNumber.openOr("")}" &
         ".event-type *" #> event.eventType.get.toString &
         ".notes" #> SHtml.ajaxTextarea(notes, notes = _) & 
         ".resolve" #> SHtml.ajaxSubmit("Resolved", () => actionOnEvent(event, notes, EventStatus.Resolved, eventActionRenderer)) &
