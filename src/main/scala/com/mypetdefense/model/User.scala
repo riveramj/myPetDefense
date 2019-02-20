@@ -34,7 +34,9 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     override def defaultValue = false
   }
   object resetPasswordKey extends MappedString(this, 100)
-  object userType extends MappedEnum(this, UserType)
+  object userType extends MappedEnum(this, UserType) {
+    override def dbIndexed_? = true
+  }
   object referer extends MappedLongForeignKey(this, Agency)
   object salesAgentId extends MappedString(this, 100)
   object coupon extends MappedLongForeignKey(this, Coupon)
@@ -45,6 +47,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object addresses extends MappedOneToMany(Address, Address.user)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
+    override def dbIndexed_? = true
   }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
