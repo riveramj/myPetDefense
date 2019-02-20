@@ -219,7 +219,12 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   }
 }
 
-object User extends User with LongKeyedMetaMapper[User]
+object User extends User with LongKeyedMetaMapper[User] {
+  override def dbIndexes = List(Index(
+    IndexField(userType),
+    IndexField(status)
+  ))
+}
 
 object UserType extends Enumeration {
   val Agent, Parent, Admin = Value
