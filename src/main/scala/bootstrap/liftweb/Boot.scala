@@ -45,6 +45,7 @@ class Boot {
       Pet,
       Product,
       Shipment,
+      Event,
       ShipmentLineItem,
       Subscription,
       Agency,
@@ -69,15 +70,18 @@ class Boot {
 
     //DataLoader.loadProducts
     //DataLoader.loadAdmin
-    DataLoader.updateParentNoPets
     DataLoader.createBoxAccessKey
+    DataLoader.createPetBoxes
+    //DataLoader.updateParentNoPets
     //DataLoader.createFriendsFamilyProducts
     //DataLoader.updateShipmentShipStationId
     //DataLoader.updateGeorgiaTaxRates
-    DataLoader.updateProductSku
-    DataLoader.loadWelcomeInserts
-    DataLoader.resetUpcomingBillingCylces
-    DataLoader.createPetBoxes
+    //DataLoader.updateProductSku
+    //DataLoader.loadWelcomeInserts
+    //DataLoader.resetUpcomingBillingCylces
+    //DataLoader.createOneSizeCat
+    //DataLoader.loadPetlandInsert
+    //DataLoader.removeFrontlineProduct
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")

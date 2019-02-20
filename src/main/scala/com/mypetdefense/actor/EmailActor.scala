@@ -50,6 +50,7 @@ case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
 case class NotifyParentGrowthRate(pet: Pet, newProduct: String, user: User) extends EmailActorMessage
 case class BoxReceiptEmail(order: BoxOrder) extends EmailActorMessage
 case class BoxShippedEmail(order: BoxOrder) extends EmailActorMessage
+case class SendShipmentRefundedEmail(parent: Box[User], shipment: Shipment) extends EmailActorMessage
 case class DailySalesEmail(
   agentNameAndCount: List[(String, Int)],
   monthAgentNameAndCount: List[(String, Int)],
@@ -102,6 +103,12 @@ case class Send5kEmail(
   email: String,
   dogName: String
 ) extends EmailActorMessage
+case class Send6MonthSaleReceipt(
+  user: User,
+  pets: List[Pet],
+  subtotal: Double,
+  tax: Double
+)
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Welcome to My Pet Defense!"
@@ -573,6 +580,37 @@ trait NotifyParentGrowthRateHandling extends EmailHandlerChain {
   }
 }
 
+trait SendShipmentRefundedEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case SendShipmentRefundedEmail(parent, shipment) =>
+      val template =
+        Templates("emails-hidden" :: "shipment-refunded-email" :: Nil) openOr NodeSeq.Empty
+
+      val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
+      
+      val subject = s"Your Account has been Credited"
+      val hostUrl = Paths.serverUrl
+      
+      val (email, firstName) = (parent.map { possibleParent =>
+        if (possibleParent.status.get == Status.Cancelled) {
+          val cancelledUser = CancelledUser.find(By(CancelledUser.user, possibleParent.userId.get))
+
+          (cancelledUser.map(_.email.get).openOr(""), cancelledUser.map(_.firstName.get).openOr(""))
+        } else {
+          (possibleParent.email.get, possibleParent.firstName.get)
+        }
+      }).openOr(("",""))
+      
+      val transform = {
+        ".first-name *" #> firstName &
+        ".shipment-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("") &
+        ".shipment-amount *" #> shipment.amountPaid.get
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
 trait DailySalesEmailHandling extends EmailHandlerChain {
   addHandler {
     case DailySalesEmail(
@@ -787,6 +825,47 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait SixMonthSaleReceiptEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case Send6MonthSaleReceipt(
+      user,
+      pets,
+      subtotal,
+      tax
+    ) =>
+      val template =
+    Templates("emails-hidden" :: "six-month-receipt-email" :: Nil) openOr NodeSeq.Empty
+
+      val subject = "My Pet Defense Receipt"
+      val shipAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
+
+      val dateFormatter = new SimpleDateFormat("MMM dd")
+
+      val products = pets.map(_.product.obj).flatten
+      val amountPaid = subtotal + tax
+
+      val transform = {
+        ".receipt-date" #> dateFormatter.format(new Date()) &
+        "#parent-name" #> user.firstName &
+        ".name" #> user.name &
+        "#ship-address-1" #> shipAddress.map(_.street1.get) &
+        "#ship-address-2" #> ClearNodesIf(shipAddress.map(_.street2.get).getOrElse("") == "") andThen
+        "#ship-address-2-content" #> shipAddress.map(_.street2.get) &
+        "#ship-city" #> shipAddress.map(_.city.get) &
+        "#ship-state" #> shipAddress.map(_.state.get) &
+        "#ship-zip" #> shipAddress.map(_.zip.get) &
+        "#tax" #> ClearNodesIf(tax == 0D) andThen
+        ".ordered-product" #> products.map { product =>
+          ".product *" #> product.name.get
+        } &
+        "#tax #tax-due *" #> f"$$$tax%2.2f" &
+        "#total *" #> f"$$$amountPaid%2.2f" 
+      }
+      
+      sendEmail(subject, user.email.get, transform(template))
+  }
+}
+
 object EmailActor extends EmailActor
 trait EmailActor extends EmailHandlerChain
                     with WelcomeEmailHandling
@@ -817,6 +896,8 @@ trait EmailActor extends EmailHandlerChain
                     with InternalDailyEmailHandling
                     with BoxReceiptEmailHandling
                     with BoxShippedEmailHandling
+                    with SixMonthSaleReceiptEmailHandling
+                    with SendShipmentRefundedEmailHandling
                     with TestimonialEmailHandling {
 
   val baseEmailTemplate = 

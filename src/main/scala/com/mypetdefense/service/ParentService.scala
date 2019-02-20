@@ -12,6 +12,7 @@ import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 import com.mypetdefense.snippet.TPPApi
 
 import com.mypetdefense.model._
+import com.mypetdefense.actor._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -29,6 +30,9 @@ object ParentService extends Loggable {
   implicit val e = new StripeExecutor(stripeSecretKey)
 
   val whelpDateFormat = new java.text.SimpleDateFormat("M/d/y")
+  val currentPentlandPlan = Props.get("petland.6month.payment") openOr ""
+  val petlandMonthlyPlan = Props.get("petland.1month.payment")
+  val petland5MonthCoupon = Props.get("petland.5month.coupon")
 
   def updateStripeCustomerCard(customerId: String, stripeToken: String, user: User) = {
     if (customerId == "") {
@@ -104,7 +108,7 @@ object ParentService extends Loggable {
     val stripeCustomerId = user.map(_.stripeId.get).openOr("")
     
     val subscription = user.flatMap(_.getSubscription)
-    val shipments = subscription.map(_.shipments.toList).openOr(Nil)
+    val paidOpenShipments = subscription.map(_.shipments.toList).openOr(Nil).filter(_.shipmentStatus.get == ShipmentStatus.Paid)
     val addresses = user.map(_.addresses.toList).openOr(Nil)
 
     cancelOpenOrders(oldUser)
@@ -113,7 +117,7 @@ object ParentService extends Loggable {
     Try(Await.result(removeCustomer, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(stripeSub)) =>
         if (fullDelete) {
-          shipments.map { shipment =>
+          subscription.map(_.shipments.toList).openOr(Nil).map { shipment =>
             shipment.shipmentLineItems.map(_.delete_!)
             shipment.delete_!
           }
@@ -125,7 +129,7 @@ object ParentService extends Loggable {
           }
         } else {
           user.map(_.cancel)
-          shipments.map(_.cancel)
+          paidOpenShipments.map(shipment => refundShipment(shipment, user))
           addresses.map(_.cancel)
           subscription.map(_.cancel)
         }
@@ -133,7 +137,7 @@ object ParentService extends Loggable {
         logger.error(s"remove customer failed with stipe error: ${stripeFailure}")
         
         user.map(_.cancel)
-        shipments.map(_.cancel)
+        paidOpenShipments.map(shipment => refundShipment(shipment, user))
         addresses.map(_.cancel)
         subscription.map(_.cancel)
 
@@ -143,7 +147,7 @@ object ParentService extends Loggable {
         logger.error(s"remove customer failed with other error: ${throwable}")
         
         user.map(_.cancel)
-        shipments.map(_.cancel)
+        paidOpenShipments.map(shipment => refundShipment(shipment, user))
         addresses.map(_.cancel)
         subscription.map(_.cancel)
 
@@ -650,6 +654,81 @@ object ParentService extends Loggable {
       case TryFail(throwable: Throwable) =>
         logger.error(s"update subscription tax rate failed with other error: ${throwable}")
         throwable
+    }
+  }
+
+  def getStripeProductPlan(planId: String) = {
+    Try(
+      Await.result(Plan.get(planId), new DurationInt(10).seconds)
+    ) match {
+      case TrySuccess(Full(stripePlan)) =>
+        Full(stripePlan)
+      
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"get plan failed with stripe error: ${stripeFailure}")
+        stripeFailure
+
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"get plan failed with other error: ${throwable}")
+        Empty
+    }
+  }
+
+  def getCurrentPetlandProductPlan = {
+    getStripeProductPlan(currentPentlandPlan)
+  }
+
+  def changeToPetlandMonthlyStripePlan(customerId: String, subscriptionId: String): Box[StripeSubscription] = {
+    val subscription = StripeSubscription.update(
+      customerId = customerId,
+      subscriptionId = subscriptionId,
+      prorate = Some(false),
+      plan = petlandMonthlyPlan,
+      coupon = petland5MonthCoupon
+    )
+
+    Try(Await.result(subscription, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(updatedSubscription)) =>
+        Full(updatedSubscription)
+      
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"update subscription failed with stipe error: ${stripeFailure}")
+        stripeFailure
+      
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"update subscription failed with other error: ${throwable}")
+        Failure(throwable.toString)
+    }
+  }
+
+  def refundShipment(shipment: Shipment, possibleParent: Box[User] = Empty): Box[Refund] = {
+    val parent = {
+      if (possibleParent.isEmpty) {
+        shipment.subscription.obj.flatMap(_.user.obj)
+      } else {
+        possibleParent
+      }
+    }
+
+    val refund = Refund.create(chargeId = shipment.stripeChargeId.get)
+
+    Try(Await.result(refund, new DurationInt(10).seconds)) match {
+      case TrySuccess(Full(newRefund)) =>
+        shipment.dateRefunded(new Date()).saveMe
+
+        EmailActor ! SendShipmentRefundedEmail(parent, shipment)
+
+        ShipStationService.cancelShipstationOrder(shipment)
+
+        Full(newRefund)
+      
+      case TrySuccess(stripeFailure) =>
+        logger.error(s"create refund failed with stipe error: ${stripeFailure}")
+        stripeFailure
+      
+      case TryFail(throwable: Throwable) =>
+        logger.error(s"create refund failed with other error: ${throwable}")
+        Failure(throwable.toString)
     }
   }
 }

@@ -71,7 +71,12 @@ object Paths {
     storeAndRedirect _
   )
 
-  val agencyUser = If(
+  val mpdAdmin = If(
+    () => SecurityContext.mpdAdmin_?,
+    storeAndRedirect _
+  )
+
+  val agentUser = If(
     () => SecurityContext.agent_?,
     storeAndRedirect _
   )
@@ -162,9 +167,12 @@ object Paths {
     admin.Agencies.mtdYtdExportMenu,
     admin.PhonePortal.menu,
     admin.Surveys.menu,
-    agency.AgencyOverview.agencyMtdYtdExportMenu,
-    agency.AgencyOverview.exportTPPMontSalesMenu,
+    admin.EventsDashboard.menu,
+    agency.LegacyAgencyOverview.agencyMtdYtdExportMenu,
+    agency.LegacyAgencyOverview.exportTPPMontSalesMenu,
+    agency.LegacyAgencyOverview.menu,
     agency.AgencyOverview.menu,
+    agency.AgencyOverview.exportAgencyCustomerMenu,
     Login.menu,
     ForgotPassword.menu,
     ResetPassword.menu,
@@ -186,6 +194,7 @@ object Paths {
     inventory.InventoryItems.menu,
     inventory.Reconciliations.menu,
     inventory.InventoryChangeAudits.menu,
-    inventory.ItemProduction.menu
+    inventory.ItemProduction.menu,
+    petland.NewOrder.menu
   )
 }

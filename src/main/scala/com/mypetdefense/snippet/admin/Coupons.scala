@@ -26,7 +26,7 @@ object Coupons extends Loggable {
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Coupons") / "admin" / "coupons" >>
-    adminUser >>
+    mpdAdmin >>
     loggedIn
 }
 

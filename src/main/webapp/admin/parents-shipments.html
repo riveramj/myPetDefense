@@ -16,17 +16,20 @@
           <tr>
             <td>Paid Date</td>
             <td>Shipped Date</td>
+            <td>Refund Date</td>
             <td>Amount Paid</td>
             <td>Pets - Products</td>
             <td>Address</td>
             <td>Tracking Number</td>
+            <td>Shipment Status</td>
             <td>Actions</td>
           </tr>
         </thead>
         <tr class="shipment">
           <td class="paid-date">10/18/2015</td>
           <td class="ship-date">10/19/2016</td>
-          <td class="amount-paid"><a class="stripe-payment" href="https://dashboard.stripe.com/test/payments/payment-id" target="_blank">$0.02</a></td>
+          <td class="refund-date">10/19/2017</td>
+          <td class="amount-paid"><a class="stripe-invoice" href="https://dashboard.stripe.com/test/payments/payment-id" target="_blank">$0.02</a></td>
           <td class="pets">
             <ul>
               <li class="pet-product">Fido - zoguard for dogs small</li>
@@ -38,8 +41,12 @@
           </td>
           <td class="tracking-number-container">
             <a class="tracking-number" href="https://tools.usps.com/go/TrackConfirmAction?tLabels=1234" target="_blank">1234</a>
-            </td>
-          <td class="shipment-actions"><button class="delete">Delete</button></td>
+          </td>
+          <td class="shipment-status">on the way</td>
+          <td class="shipment-actions">
+            <button class="delete">Delete</button>
+            <button class="refund">Refund</button>
+          </td>
         </tr>
       </table>
     </li>

@@ -15,6 +15,15 @@ object DataLoader extends Loggable {
   def loadProducts = {
     if (Product.findAll().isEmpty) {
       Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatAllSize,
+        sizeName = "All Sizes",
+        imageName = "zoguard/ZoGuard-Plus-cat-2.jpg",
+        sku = "100001"
+      )
+
+      Product.createProduct(
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatMedium,
@@ -198,23 +207,39 @@ object DataLoader extends Loggable {
 
   def loadWelcomeInserts = {
     if (Insert.findAll().isEmpty) {
-      Insert.createNewInsert("Welcome Insert", "450006")
+      Insert.createNewInsert("Welcome Brochure", "450006")
       Insert.createNewInsert("TPP Registrations Welcome Insert", "450027")
+      Insert.createNewInsert("Petland Welcome Insert", "450028")
+    }
+  }
+
+  def loadPetlandInsert = {
+    if (Insert.find(By(Insert.name, "Petland Welcome Insert")).isEmpty) {
+      Insert.createNewInsert("Petland Welcome Insert", "450028")
     }
   }
 
   def loadAdmin = {
+    val mpdAgency = {
+      val possibleMpd = Agency.find(By(Agency.name, "My Pet Defense"))
+
+      if (possibleMpd.isEmpty)
+        Full(Agency.createNewAgency("My Pet Defense"))
+      else
+        possibleMpd
+    }
+
     if (User.findAll(By(User.userType, UserType.Admin)).isEmpty) {
       User.createNewUser(
-        "John",
-        "smith",
+        "Mike",
+        "Rivera",
         "",
         "rivera.mj@gmail.com",
         "password",
         "(404) 409-0724",
         None,
         None,
-        None,
+        mpdAgency,
         UserType.Admin
       )
     }
@@ -299,7 +324,7 @@ object DataLoader extends Loggable {
   def resetUpcomingBillingCylces = {
     val upcomingSubscriptions = Subscription.findAll(
       BySql(
-        "nextShipDate > CURRENT_DATE and nextShipDate < CURRENT_DATE + interval '3 day'",
+        "nextShipDate > CURRENT_DATE + interval '1 day' and nextShipDate < CURRENT_DATE + interval '3 day'",
         IHaveValidatedThisSQL("mike","2018-04-24")
       ),
       By(Subscription.status, Status.Active)
@@ -318,6 +343,48 @@ object DataLoader extends Loggable {
       PetBox.createNewPetBox("Exotic Proteins Box", 19.99)
       PetBox.createNewPetBox("Wellness Box", 24.99)
       PetBox.createNewPetBox("Multivitamin Box", 24.99)
+    }
+  }
+
+  def createOneSizeCat = {
+    val oneSizeCat = Product.find(By(Product.size, AnimalSize.CatAllSize))
+    if (oneSizeCat.isEmpty) {
+      Product.createProduct(
+        name = "ZoGuard Plus for Cats",
+        animalType = AnimalType.Cat,
+        size = AnimalSize.CatAllSize,
+        sizeName = "All Sizes",
+        imageName = "zoguard/ZoGuard-Plus-cat-2.jpg",
+        sku = "100001"
+      )
+    }
+  }
+
+  def removeFrontlineProduct = {
+    def findProduct(name: String, size: AnimalSize.Value) = {
+      Product.find(By(Product.name, name), By(Product.size, size))
+    }
+
+    val smallProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogSmallZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogSmallZo))
+    val mediumProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogMediumZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogMediumZo))
+    val largeProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogLargeZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogLargeZo))
+    val xlargeproduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogXLargeZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogXLargeZo))
+
+    val productSizes = List(smallProduct, mediumProduct, largeProduct, xlargeproduct)
+
+    for {
+      productSize <- productSizes
+      frontline <- productSize._1
+    } yield {
+      val pets = Pet.findAll(By(Pet.product, frontline))
+      
+      println(pets.map(_.petId))
+
+      productSize._2.map { zoguard =>
+        pets.map(_.product(zoguard).saveMe)
+      }
+
+      frontline.delete_!
     }
   }
 }

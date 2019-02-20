@@ -4,6 +4,7 @@ import net.liftweb._
   import mapper._
   import common._
   import util._
+    import Helpers.tryo
 
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.service.KeyService._
@@ -29,6 +30,9 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object salt extends MappedString(this, 100)
   object phone extends MappedString(this, 100)
   object accessKey extends MappedString(this, 100)
+  object canSeePetlandData extends MappedBoolean(this) {
+    override def defaultValue = false
+  }
   object resetPasswordKey extends MappedString(this, 100)
   object boxSalesKey extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
@@ -42,6 +46,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object addresses extends MappedOneToMany(Address, Address.user)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
+    override def dbIndexed_? = true
   }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
@@ -54,6 +59,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def activePets = pets.filter(_.status == Status.Active)
 
   def refresh = User.find(By(User.userId, userId.get))
+
+  def petlandData_? = tryo(canSeePetlandData.get).openOr(false)
 
   def shippingAddress = {
     Address.find(
@@ -100,10 +107,14 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     val salt = getSalt
     val hashedPassword = hashPassword(password, salt)
 
-    user
-      .password(hashedPassword)
-      .salt(salt)
-      .saveMe
+    if (password != "") {
+      user
+        .password(hashedPassword)
+        .salt(salt)
+        .saveMe
+    } else {
+      user.accessKey(createAccessKey).saveMe
+    }
   }
 
   def createNewPendingUser(
