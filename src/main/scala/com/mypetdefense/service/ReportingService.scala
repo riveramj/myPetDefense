@@ -135,11 +135,19 @@ object ReportingService extends Loggable {
     }
   }
 
-  def getDateRange(month: String) = {
+  def getDateRange(month: String, year: Int = 2019) = {
     if (month == "") {
       currentDate
     } else {
-      convertMonthToDate(month)
+      convertMonthToDate(month, year)
+    }
+  }
+
+  def getYearOrCurrent(year: String) = {
+    if (year == "") {
+      currentDate.getYear
+    } else {
+      tryo(year.toInt).openOr(0)
     }
   }
 
@@ -150,20 +158,20 @@ object ReportingService extends Loggable {
       val mailedDate = getMailedDateOfShipment(shipment)
       
       mailedDate map { mailDate =>
-        (mailDate.getYear == 2018) &&
+        (mailDate.getYear == 2019) &&
         (mailDate.getMonth == date.getMonth)
       } openOr(false)
     }
   }
 
-  def findCurrentMonthProcessedShipments(shipments: List[Shipment], month: String = "") = {
+  def findCurrentMonthProcessedShipments(shipments: List[Shipment], month: String = "", year: Int = 2019) = {
     val date = getDateRange(month)
 
     shipments.filter { shipment =>
       val processDate = getProcessDateOfShipment(shipment)
 
       (
-        (processDate.getYear == 2018) &&
+        (processDate.getYear == year) &&
         (processDate.getMonth == date.getMonth)
       )
     }
@@ -205,9 +213,9 @@ object ReportingService extends Loggable {
     customers.filter(_.salesAgentId == agentId)
   }
 
-  def convertMonthToDate(month: String) = {
+  def convertMonthToDate(month: String, year: Int) = {
     val dateFormat = new SimpleDateFormat("MMMM yyyy")
-    val monthDate = dateFormat.parse(s"$month 2018") //TODO: dynanmic year
+    val monthDate = dateFormat.parse(s"$month $year")
 
     monthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
   }
@@ -219,33 +227,33 @@ object ReportingService extends Loggable {
       val cancelDate = getCancelledDateOfSubscription(subscription)
       
       (
-        cancelDate.map(_.getYear == 2018).openOr(false) &&
+        cancelDate.map(_.getYear == 2019).openOr(false) &&
         cancelDate.map(_.getMonth == date.getMonth).openOr(false)
       )
     }
   }
 
-  def findNewCustomersMonth(users: List[User], month: String = "") = {
+  def findNewCustomersMonth(users: List[User], month: String = "", year: Int = 2019) = {
     val date = getDateRange(month)
 
     users filter { user =>
       val userCreatedDate = getCreatedDateOfUser(user)
 
       (
-        (getCreatedDateOfUser(user).getYear == 2018) &&
+        (getCreatedDateOfUser(user).getYear == year) &&
         (getCreatedDateOfUser(user).getMonth == date.getMonth)
       )
     }
   }
 
-  def findPayingUsers(users: List[User], month: String = "") = {
+  def findPayingUsers(users: List[User], month: String = "", year: Int = 2019) = {
     val date = getDateRange(month)
 
     users filter { user =>
       val userCreatedDate = getCreatedDateOfUser(user)
 
       !(
-        (userCreatedDate.getYear == 2018) &&
+        (userCreatedDate.getYear == year) &&
         (userCreatedDate.getMonth == date.getMonth)
       )
     }
@@ -283,14 +291,14 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentMonthCancelledSubscriptions(subscriptions: List[Subscription], month: String = "") = {
-    val date = getDateRange(month)
+  def findCurrentMonthCancelledSubscriptions(subscriptions: List[Subscription], month: String = "", year: Int = 2019) = {
+    val date = getDateRange(month, year)
 
     subscriptions filter { subscription =>
       val cancelDate = getCancelledDateOfSubscription(subscription)
 
       cancelDate.map { cancelDate => 
-        (cancelDate.getYear == 2018) &&
+        (cancelDate.getYear == year) &&
         (cancelDate.getMonth == date.getMonth)
       }.openOr(false)
     }
@@ -867,28 +875,29 @@ object ReportingService extends Loggable {
     }.toList.sortBy(_._1)
   }
 
-  def exportAgencyMonthSales(name: String, month: String): Box[LiftResponse] = {
+  def exportAgencyMonthSales(name: String, month: String, possibleYear: String): Box[LiftResponse] = {
+    val year = getYearOrCurrent(possibleYear)
     val totalUsers = Agency.find(By(Agency.name, name)).map(_.customers.toList).getOrElse(Nil)
 
     val totalSubscriptions = getSubscriptions(totalUsers)
-    val totalCancelledSubscriptions = findCurrentMonthCancelledSubscriptions(totalSubscriptions, month)
+    val totalCancelledSubscriptions = findCurrentMonthCancelledSubscriptions(totalSubscriptions, month, year)
 
-    val newUsersMonth = findNewCustomersMonth(totalUsers, month)
+    val newUsersMonth = findNewCustomersMonth(totalUsers, month, year)
     val netNewUsersMonth = newUsersMonth.filter(_.status != Status.Cancelled)
-    val payingUsers = findPayingUsers(totalUsers, month)
+    val payingUsers = findPayingUsers(totalUsers, month, year)
 
     val allPayingSubscriptions = getSubscriptions(payingUsers)
     val allPayingActiveSubscriptions = findActiveSubscriptions(allPayingSubscriptions)
 
     val allPaidShipments = findPaidShipments(allPayingSubscriptions)
-    val paidMonthShipments = findCurrentMonthProcessedShipments(allPaidShipments, month)
+    val paidMonthShipments = findCurrentMonthProcessedShipments(allPaidShipments, month, year)
     val paidMonthPetsShippedCount = getPetCount(paidMonthShipments)
     val paidMonthGrossSales = totalSalesForShipments(paidMonthShipments)
     val paidMonthCommission = totalCommissionForSales(paidMonthGrossSales)
     val discountCount = (paidMonthPetsShippedCount * 12.99) - paidMonthGrossSales
 
     val csvRows = {
-      List(List("Time Period", month)) ++
+      List(List("Time Period", s"$month $year")) ++
       spacerRow ++
       List(List("Net New Users", netNewUsersMonth.size)) ++
       List(List("Total Cancellations", totalCancelledSubscriptions.size)) ++
@@ -899,7 +908,7 @@ object ReportingService extends Loggable {
       List(List("Estimated Commission", f"$$$paidMonthCommission%2.2f"))
     }.map(_.mkString(",")).mkString("\n")
 
-    val fileName = s"${name}-${month}-sales-summary.csv"
+    val fileName = s"${name}-${month}-${year}-sales-summary.csv"
 
     val file = "filename=\"" + fileName + "\""
 

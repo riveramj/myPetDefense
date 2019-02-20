@@ -45,6 +45,7 @@ class Boot {
       Pet,
       Product,
       Shipment,
+      Event,
       ShipmentLineItem,
       Subscription,
       Agency,
