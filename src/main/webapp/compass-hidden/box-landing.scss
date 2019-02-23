@@ -6,7 +6,6 @@
   background-color: #ffffff;
 
   nav {
-    display: inline-block;
     float: right;
     margin: 14px 19px 0 0;
   }
@@ -15,6 +14,55 @@
 #logo-name {
   padding: 14px 0 11px 15px;
   display: inline-block;
+}
+
+.page-header {
+  background-color: #ffffff;
+  color: #4E4E4E;
+
+  padding: 29px 23px;
+  text-align: center;
+  max-width: 744px;
+  margin: 0 auto;
+
+  @media (min-width: $bp-medium) {
+    text-align: left;
+  }
+
+  img {
+    @media (min-width: $bp-medium) {
+      float: right;
+    }
+  }
+
+  .headlines {
+    font-size: 18px;
+  }
+
+  h1 {
+    margin: 6px auto;
+    font-size: 40px;
+    font-weight: $bold;
+    line-height: 44px;
+    max-width: 372px;
+
+    @media (min-width: $bp-medium) {
+      margin: 6px 0;
+    }
+  }
+
+  .treat-dog {
+    padding-top: 20px;
+    line-height: 26px;
+    font-size: 19px;
+    margin: 0 auto;
+
+    max-width: 332px;
+
+    @media (min-width: $bp-medium) {
+      margin: 0;
+    }
+  }
 }
 
 .discount-bar {
@@ -42,6 +90,11 @@
 
   margin-top: 20px;
 
+  @media (min-width: $bp-medium) {
+    clear: both;
+    text-align: center;
+  }
+
   .box {
     text-align: center;
     width: 315px;
@@ -50,8 +103,18 @@
 }
 
 .treat {
-  margin-bottom: 40px;
+  padding-bottom: 40px;
   text-align: center;
+
+  @media (min-width: $bp-medium) {
+    display: inline-block;
+    margin: 35px 99px 0 0;
+    vertical-align: top;
+  }
+
+  &:nth-child(even) {
+    margin-right: 0;
+  }
 }
 
 .add-product {
@@ -150,8 +213,7 @@ li.treat-title {
   padding: 5px 10px;
 
   @media (min-width: $bp-medium) {
-    font-size: 16px;
-    padding: 13px 30px;
+    padding: 5px 15px;
   }
 
   &:before {
@@ -163,31 +225,6 @@ li.treat-title {
       font-size: 14px;
       margin-right: 8px;
     }
-  }
-}
-
-.page-header {
-  background-color: #ffffff;
-  color: #4E4E4E;
-
-  padding: 29px 23px;
-
-  ul {
-    text-align: center;
-    font-size: 18px;
-  }
-
-  h1 {
-    margin: 6px 0;
-    font-size: 40px;
-    font-weight: $bold;
-    line-height: 44px;
-  }
-
-  .treat-dog {
-    padding-top: 20px;
-    line-height: 26px;
-    font-size: 19px;
   }
 }
 
