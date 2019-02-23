@@ -95,10 +95,11 @@
     text-align: center;
   }
 
-  .box {
-    text-align: center;
-    width: 315px;
-    margin: 0 auto;
+  ul {
+    @media (min-width: $bp-medium) {
+      max-width: 625px;
+      margin: 0 auto 40px;
+    }
   }
 }
 
@@ -108,7 +109,7 @@
 
   @media (min-width: $bp-medium) {
     display: inline-block;
-    margin: 35px 99px 0 0;
+    margin: 35px 120px 0 0;
     vertical-align: top;
   }
 
@@ -123,11 +124,14 @@
   text-transform: uppercase;
   border-radius: 20px;
   border: none;
-  padding: 12px 65px;
+  padding: 12px 0;
   font-weight: $bold;
   font-size: 13px;
   letter-spacing: 1px;
   line-height: 16px;
+
+  width: 250px;
+
   box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.15);
 
   &:before {
