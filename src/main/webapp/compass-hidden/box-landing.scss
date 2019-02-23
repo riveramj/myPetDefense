@@ -6,7 +6,6 @@
   background-color: #ffffff;
 
   nav {
-    display: inline-block;
     float: right;
     margin: 14px 19px 0 0;
   }
@@ -17,19 +16,52 @@
   display: inline-block;
 }
 
-.treats {
-  padding: 0 10px 10px;
+.page-header {
+  background-color: #ffffff;
+  color: #4E4E4E;
 
-  margin-top: 20px;
+  padding: 29px 23px;
+  text-align: center;
+  max-width: 744px;
+  margin: 0 auto;
 
   @media (min-width: $bp-medium) {
-    padding-top: 60px;
+    text-align: left;
   }
 
-  .box {
-    text-align: center;
-    width: 315px;
+  img {
+    @media (min-width: $bp-medium) {
+      float: right;
+    }
+  }
+
+  .headlines {
+    font-size: 18px;
+  }
+
+  h1 {
+    margin: 6px auto;
+    font-size: 40px;
+    font-weight: $bold;
+    line-height: 44px;
+    max-width: 372px;
+
+    @media (min-width: $bp-medium) {
+      margin: 6px 0;
+    }
+  }
+
+  .treat-dog {
+    padding-top: 20px;
+    line-height: 26px;
+    font-size: 19px;
     margin: 0 auto;
+
+    max-width: 332px;
+
+    @media (min-width: $bp-medium) {
+      margin: 0;
+    }
   }
 }
 
@@ -49,37 +81,39 @@
   }
 }
 
-.treat-your-dog {
-  display: none;
-
-  @media (min-width: $bp-medium) {
-    display: block;
-    color: #ffffff;
-    line-height: 26px;
-    font-size: 28px;
-    font-weight: $bold;
-    text-align: center;
-    margin-bottom: 27px;
-  }
-}
-
 .promotion {
   font-weight: $bold;
 }
 
-.product-big-images {
-  img {
-    width: 100%;
+.treats {
+  padding: 0 10px 10px;
+
+  margin-top: 20px;
+
+  @media (min-width: $bp-medium) {
+    clear: both;
+    text-align: center;
   }
+
+  .box {
+    text-align: center;
+    width: 315px;
+    margin: 0 auto;
+  }
+}
+
+.treat {
+  padding-bottom: 40px;
+  text-align: center;
 
   @media (min-width: $bp-medium) {
     display: inline-block;
-    vertical-align: text-bottom;
+    margin: 35px 99px 0 0;
+    vertical-align: top;
+  }
 
-    img {
-      height: 300px;
-      width: 200px;
-    }
+  &:nth-child(even) {
+    margin-right: 0;
   }
 }
 
@@ -130,16 +164,6 @@ li.treat-title {
   margin-bottom: 10px;
 }
 
-li.box-price-highlights {
-  display: flex;
-  text-align: left;
-
-  @media (min-width: $bp-medium) {
-    justify-content: space-between;
-    margin-bottom: 21px;
-  }
-}
-
 .price {
   color: #128983;
   font-size: 25px;
@@ -149,7 +173,7 @@ li.box-price-highlights {
   margin-bottom: 15px;
 }
 
-.box-highlights {
+.treat-highlights {
   li {
     margin-bottom: 9px;
     color: #128983;
@@ -189,8 +213,7 @@ li.box-price-highlights {
   padding: 5px 10px;
 
   @media (min-width: $bp-medium) {
-    font-size: 16px;
-    padding: 13px 30px;
+    padding: 5px 15px;
   }
 
   &:before {
@@ -205,42 +228,6 @@ li.box-price-highlights {
   }
 }
 
-.page-header {
-  background-color: #ffffff;
-  color: #4E4E4E;
-
-  padding: 29px 23px;
-
-  @media (min-width: $bp-medium) {
-    width: 500px;
-    margin: -265px auto 65px;
-    padding: 40px 60px;
-  }
-
-  ul {
-    text-align: center;
-    font-size: 18px;
-  }
-
-  h1 {
-    margin: 6px 0;
-    font-size: 40px;
-    font-weight: $bold;
-    line-height: 44px;
-  }
-
-  .treat-dog {
-    padding-top: 20px;
-    line-height: 26px;
-    font-size: 19px;
-  }
-}
-
 #footer, .legal, #need-help {
   background-color: #5D5D5D;
-}
-
-.treat {
-  margin-bottom: 40px;
-  text-align: center;
 }
