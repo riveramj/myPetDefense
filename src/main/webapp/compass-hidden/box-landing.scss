@@ -17,22 +17,6 @@
   display: inline-block;
 }
 
-.treats {
-  padding: 0 10px 10px;
-
-  margin-top: 20px;
-
-  @media (min-width: $bp-medium) {
-    padding-top: 60px;
-  }
-
-  .box {
-    text-align: center;
-    width: 315px;
-    margin: 0 auto;
-  }
-}
-
 .discount-bar {
   background-color: #128983;
   padding: 12px 0;
@@ -49,38 +33,25 @@
   }
 }
 
-.treat-your-dog {
-  display: none;
-
-  @media (min-width: $bp-medium) {
-    display: block;
-    color: #ffffff;
-    line-height: 26px;
-    font-size: 28px;
-    font-weight: $bold;
-    text-align: center;
-    margin-bottom: 27px;
-  }
-}
-
 .promotion {
   font-weight: $bold;
 }
 
-.product-big-images {
-  img {
-    width: 100%;
-  }
+.treats {
+  padding: 0 10px 10px;
 
-  @media (min-width: $bp-medium) {
-    display: inline-block;
-    vertical-align: text-bottom;
+  margin-top: 20px;
 
-    img {
-      height: 300px;
-      width: 200px;
-    }
+  .box {
+    text-align: center;
+    width: 315px;
+    margin: 0 auto;
   }
+}
+
+.treat {
+  margin-bottom: 40px;
+  text-align: center;
 }
 
 .add-product {
@@ -130,16 +101,6 @@ li.treat-title {
   margin-bottom: 10px;
 }
 
-li.box-price-highlights {
-  display: flex;
-  text-align: left;
-
-  @media (min-width: $bp-medium) {
-    justify-content: space-between;
-    margin-bottom: 21px;
-  }
-}
-
 .price {
   color: #128983;
   font-size: 25px;
@@ -149,7 +110,7 @@ li.box-price-highlights {
   margin-bottom: 15px;
 }
 
-.box-highlights {
+.treat-highlights {
   li {
     margin-bottom: 9px;
     color: #128983;
@@ -211,12 +172,6 @@ li.box-price-highlights {
 
   padding: 29px 23px;
 
-  @media (min-width: $bp-medium) {
-    width: 500px;
-    margin: -265px auto 65px;
-    padding: 40px 60px;
-  }
-
   ul {
     text-align: center;
     font-size: 18px;
@@ -238,9 +193,4 @@ li.box-price-highlights {
 
 #footer, .legal, #need-help {
   background-color: #5D5D5D;
-}
-
-.treat {
-  margin-bottom: 40px;
-  text-align: center;
 }
