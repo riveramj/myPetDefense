@@ -1,15 +1,15 @@
 package com.mypetdefense.model
 
 import net.liftweb.mapper._
-import net.liftweb.common.Box
+import net.liftweb.common._
 
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
 import java.util.Date
 
-class BoxOrder extends LongKeyedMapper[BoxOrder] with IdPK with OneToMany[Long, BoxOrder] {
-  def getSingleton = BoxOrder
-  object boxOrderId extends MappedLong(this){
+class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Long, TreatOrder] {
+  def getSingleton = TreatOrder
+  object treatOrderId extends MappedLong(this){
     override def dbIndexed_? = true
     override def defaultValue = generateLongId
   }
@@ -30,16 +30,16 @@ class BoxOrder extends LongKeyedMapper[BoxOrder] with IdPK with OneToMany[Long, 
   object dateReceived extends MappedDateTime(this)
   object taxPaid extends MappedDouble(this)
   object amountPaid extends MappedDouble(this)
-  object boxesOrdered extends MappedOneToMany(BoxOrderLineItem, BoxOrderLineItem.order)
+  object treatsOrdered extends MappedOneToMany(TreatOrderLineItem, TreatOrderLineItem.order)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
-  def refresh = BoxOrder.find(By(BoxOrder.boxOrderId, boxOrderId.get))
+  def refresh = TreatOrder.find(By(TreatOrder.treatOrderId, treatOrderId.get))
 }
 
-object BoxOrder extends BoxOrder with LongKeyedMetaMapper[BoxOrder] {
-  def createBoxOrder(
+object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
+  def createTreatOrder(
     user: Box[User],
     firstName: String,
     lastName: String,
@@ -48,12 +48,12 @@ object BoxOrder extends BoxOrder with LongKeyedMetaMapper[BoxOrder] {
     stripeChargeId: String,
     amountPaid: Double,
     taxPaid: Double,
-    boxes: List[(PetBox, Int)]
+    treats: List[(Treat, Int)]
   ) = {
     val dateProcessed = new Date()
 
-    val newBoxOrder = BoxOrder.create
-      .boxOrderId(generateLongId)
+    val newTreatOrder = TreatOrder.create
+      .treatOrderId(generateLongId)
       .stripeChargeId(stripeChargeId)
       .user(user)
       .firstName(firstName)
@@ -69,40 +69,40 @@ object BoxOrder extends BoxOrder with LongKeyedMetaMapper[BoxOrder] {
       .taxPaid(taxPaid)
       .saveMe
 
-    boxes.map { box =>
-      BoxOrderLineItem.createBoxOrderLineItems(boxes, newBoxOrder)
+    treats.map { treat =>
+      TreatOrderLineItem.createTreatOrderLineItems(treats, newTreatOrder)
     }
 
-    newBoxOrder
+    newTreatOrder
   }
 }
 
-class BoxOrderLineItem extends LongKeyedMapper[BoxOrderLineItem] with IdPK {
-  def getSingleton = BoxOrderLineItem
+class TreatOrderLineItem extends LongKeyedMapper[TreatOrderLineItem] with IdPK {
+  def getSingleton = TreatOrderLineItem
   object orderLineItemId extends MappedLong(this){
     override def dbIndexed_? = true
     override def defaultValue = generateLongId
   }
 
-  object order extends MappedLongForeignKey(this, BoxOrder)
-  object box extends MappedLongForeignKey(this, PetBox)
+  object order extends MappedLongForeignKey(this, TreatOrder)
+  object treat extends MappedLongForeignKey(this, Treat)
   object quantity extends MappedInt(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
-  def createBoxOrderLineItems(
-    boxes: List[(PetBox, Int)],
-    order: BoxOrder
+  def createTreatOrderLineItems(
+    treats: List[(Treat, Int)],
+    order: TreatOrder
   ) = {
-    boxes.map { case (box, quantity) =>
-      BoxOrderLineItem.create
+    treats.map { case (treat, quantity) =>
+      TreatOrderLineItem.create
       .quantity(quantity)
-      .box(box)
+      .treat(treat)
       .order(order)
       .saveMe
     }
   }
 }
 
-object BoxOrderLineItem extends BoxOrderLineItem with LongKeyedMetaMapper[BoxOrderLineItem]
+object TreatOrderLineItem extends TreatOrderLineItem with LongKeyedMetaMapper[TreatOrderLineItem]

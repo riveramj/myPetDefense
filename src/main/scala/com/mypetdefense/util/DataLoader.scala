@@ -266,11 +266,11 @@ object DataLoader extends Loggable {
     }
   }
 
-  def createBoxAccessKey = {
+  def createProductAccessKey = {
     val possibleActiveParentsWithoutKey = User.findAll(
       By(User.userType, UserType.Parent),
       By(User.status, Status.Active),
-      NullRef(User.boxSalesKey)
+      NullRef(User.productSalesKey)
     )
 
     val activeParentsWithoutKey = possibleActiveParentsWithoutKey.filter { parent =>
@@ -282,9 +282,9 @@ object DataLoader extends Loggable {
     }
 
     activeParentsWithoutKey.map { parent =>
-      val boxKey = KeyService.createBoxSalesKey
+      val productKey = KeyService.createProductSalesKey
 
-      parent.boxSalesKey(boxKey).saveMe
+      parent.productSalesKey(productKey).saveMe
     }
   }
 
@@ -338,11 +338,12 @@ object DataLoader extends Loggable {
     }
   }
 
-  def createPetBoxes = {
-    if (PetBox.findAll().isEmpty) {
-      PetBox.createNewPetBox("Exotic Proteins Box", 19.99)
-      PetBox.createNewPetBox("Wellness Box", 24.99)
-      PetBox.createNewPetBox("Multivitamin Box", 24.99)
+  def createProducts = {
+    if (Treat.findAll().isEmpty) {
+      Treat.createNewTreat("Duck Jerky Multivitamin & Immune Maintenance", 14.99)
+      Treat.createNewTreat("Lamb Jerky Digestive Health & Probiotic", 14.99)
+      Treat.createNewTreat("Beef Jerky Hip & Joint Formula", 14.99)
+      Treat.createNewTreat("Chicken Jerky Skin & Coat Formula", 14.99)
     }
   }
 

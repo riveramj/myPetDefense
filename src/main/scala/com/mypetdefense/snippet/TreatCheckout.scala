@@ -23,18 +23,18 @@ import com.mypetdefense.actor._
 
 import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription}
 
-object BoxCheckout extends Loggable {
+object TreatCheckout extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Box Checkout") / "box-checkout"
+  val menu = Menu.i("Treat Checkout") / "treat-checkout"
 }
 
 case object UseNewCard extends MyPetDefenseEvent("use-new-card")
 
-class BoxCheckout extends Loggable {
-  import BoxCheckout._
+class TreatCheckout extends Loggable {
+  import TreatCheckout._
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
@@ -64,10 +64,10 @@ class BoxCheckout extends Loggable {
   var stripeToken = ""
 
   def findSubtotal = {
-    val cart = BoxDetailsFlow.shoppingCart.is
+    val cart = TreatsFlow.shoppingCart.is
     
-    cart.map { case (product, quantity) =>
-      product.price.get * quantity
+    cart.map { case (treat, quantity) =>
+      treat.price.get * quantity
     }.foldLeft(0D)(_+_)
   }
 
@@ -88,7 +88,7 @@ class BoxCheckout extends Loggable {
     priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
   }
 
-  def orderBox() = {
+  def orderTreat() = {
     val validateFields = List(
         validEmailFormat(email, "#email"),
         checkEmpty(firstName, "#first-name"),
@@ -105,7 +105,7 @@ class BoxCheckout extends Loggable {
       val stripeId = user.map(_.stripeId.get).openOr("")
       val amountPaid = findSubtotal + taxDue
 
-      val boxCharge = {
+      val treatCharge = {
         val stripeAmount = (amountPaid * 100).toLong
         val internalSaleDescription = "Thanksgiving Box"
 
@@ -136,7 +136,7 @@ class BoxCheckout extends Loggable {
       }
 
       (for {
-        charge <- boxCharge
+        charge <- treatCharge
       } yield {
         val address = Address.create
           .street1(street1)
@@ -152,9 +152,9 @@ class BoxCheckout extends Loggable {
             email
         }
 
-        val cart = BoxDetailsFlow.shoppingCart.is
+        val cart = TreatsFlow.shoppingCart.is
 
-        val newBoxOrder = BoxOrder.createBoxOrder(
+        val newTreatOrder = TreatOrder.createTreatOrder(
           user,
           firstName,
           lastName,
@@ -166,9 +166,9 @@ class BoxCheckout extends Loggable {
           cart.toList
         )
 
-        EmailActor ! BoxReceiptEmail(newBoxOrder)
+        EmailActor ! TreatReceiptEmail(newTreatOrder)
 
-        BoxDetailsFlow.boxSale(Full(amountPaid, cart))
+        TreatsFlow.treatSale(Full(amountPaid, cart))
 
         S.redirectTo(Success.menu.loc.calcDefaultHref)
       }).openOr(Noop)
@@ -181,10 +181,10 @@ class BoxCheckout extends Loggable {
     UseNewCard
   }
 
-  def removeBoxFromCart(box: PetBox) = {
-    val cart = BoxDetailsFlow.shoppingCart.is
+  def removeTreatFromCart(treat: Treat) = {
+    val cart = TreatsFlow.shoppingCart.is
 
-    BoxDetailsFlow.shoppingCart(cart - box)
+    TreatsFlow.shoppingCart(cart - treat)
 
     (
       cartRenderer.map(_.setHtml).openOr(Noop) &
@@ -192,17 +192,17 @@ class BoxCheckout extends Loggable {
     )
   }
 
-  def updateCartCount(box: PetBox, newQuantity: Int) = {
-    val cart = BoxDetailsFlow.shoppingCart.is
+  def updateCartCount(treat: Treat, newQuantity: Int) = {
+    val cart = TreatsFlow.shoppingCart.is
 
     val updatedCart = {
       if (newQuantity < 1)
-        cart - box
+        cart - treat
       else
-        cart + (box -> newQuantity)
+        cart + (treat -> newQuantity)
     }
 
-    BoxDetailsFlow.shoppingCart(updatedCart)
+    TreatsFlow.shoppingCart(updatedCart)
 
     (
       cartRenderer.map(_.setHtml).openOr(Noop) &
@@ -242,17 +242,17 @@ class BoxCheckout extends Loggable {
     val orderSummary = {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
-        val cart = BoxDetailsFlow.shoppingCart.is
+        val cart = TreatsFlow.shoppingCart.is
 
         val subtotal = findSubtotal
 
         val total = subtotal + taxDue
 
-        ".box-ordered" #> cart.map { case (box, quantity) =>
-          val boxTotal = quantity * box.price.get
+        ".treat-ordered" #> cart.map { case (treat, quantity) =>
+          val treatTotal = quantity * treat.price.get
           ".ordered-quantity *" #> quantity &
-          ".ordered-box-name *" #> box.name.get &
-          ".box-total *" #> f"$$$boxTotal%2.2f"
+          ".ordered-treat-name *" #> treat.name.get &
+          ".treat-total *" #> f"$$$treatTotal%2.2f"
         } &
         ".subtotal-amount *" #> f"$$$subtotal%2.2f" &
         "#tax" #> ClearNodesIf(taxDue == 0D) &
@@ -264,22 +264,22 @@ class BoxCheckout extends Loggable {
     SHtml.makeFormsAjax andThen
     loginBindings &
     "#shopping-cart" #> idMemoize { renderer =>
-      val cart = BoxDetailsFlow.shoppingCart.is
+      val cart = TreatsFlow.shoppingCart.is
 
       cartRenderer = Full(renderer)
       
-      val subtotal = cart.map { case (box, quantity) =>
-        quantity * box.price.get
+      val subtotal = cart.map { case (treat, quantity) =>
+        quantity * treat.price.get
       }.foldLeft(0D)(_ + _)
 
-      ".cart-item" #> cart.map { case (box, quantity) =>
-        val itemPrice = box.price.get * quantity
+      ".cart-item" #> cart.map { case (treat, quantity) =>
+        val itemPrice = treat.price.get * quantity
 
-        ".cart-box-name *" #> box.name.get &
+        ".cart-treat-name *" #> treat.name.get &
         ".selected-quantity *" #> quantity &
-        ".remove-box [onclick]" #> ajaxInvoke(() => removeBoxFromCart(box)) &
-        ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity - 1)) &
-        ".add [onclick]" #> ajaxInvoke(() => updateCartCount(box, quantity + 1)) &
+        ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
+        ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
+        ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
         ".item-price *" #> f"$$$itemPrice%2.2f"
       } &
       ".subtotal *" #> f"$$$subtotal%2.2f"
@@ -329,7 +329,7 @@ class BoxCheckout extends Loggable {
         ".existing-card .change-card [onclick]" #> ajaxInvoke(useNewCard _)
       } &
       "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-      ".buy-box" #> ajaxSubmit("Place Order", () => orderBox)
+      ".buy-treat" #> ajaxSubmit("Place Order", () => orderTreat)
     }
   }
 }

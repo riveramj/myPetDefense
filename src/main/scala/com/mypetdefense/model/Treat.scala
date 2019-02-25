@@ -9,9 +9,9 @@ import com.mypetdefense.util.RandomIdGenerator._
 
 import java.util.Date
 
-class PetBox extends LongKeyedMapper[PetBox] with IdPK with OneToMany[Long, PetBox] {
-  def getSingleton = PetBox
-  object petBoxId extends MappedLong(this) {
+class Treat extends LongKeyedMapper[Treat] with IdPK with OneToMany[Long, Treat] {
+  def getSingleton = Treat
+  object treatId extends MappedLong(this) {
     override def dbIndexed_? = true
     override def defaultValue = generateLongId
   }
@@ -21,12 +21,12 @@ class PetBox extends LongKeyedMapper[PetBox] with IdPK with OneToMany[Long, PetB
     override def defaultValue = new Date()
   }
 
-  def createNewPetBox(name: String, price: Double) = {
-    PetBox.create
+  def createNewTreat(name: String, price: Double) = {
+    Treat.create
     .name(name)
     .price(price)
     .saveMe
   }
 }
 
-object PetBox extends PetBox with LongKeyedMetaMapper[PetBox]
+object Treat extends Treat with LongKeyedMetaMapper[Treat]

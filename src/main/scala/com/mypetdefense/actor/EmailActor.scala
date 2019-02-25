@@ -48,8 +48,8 @@ case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMe
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
 case class NotifyParentGrowthRate(pet: Pet, newProduct: String, user: User) extends EmailActorMessage
-case class BoxReceiptEmail(order: BoxOrder) extends EmailActorMessage
-case class BoxShippedEmail(order: BoxOrder) extends EmailActorMessage
+case class TreatReceiptEmail(order: TreatOrder) extends EmailActorMessage
+case class TreatShippedEmail(order: TreatOrder) extends EmailActorMessage
 case class SendShipmentRefundedEmail(parent: Box[User], shipment: Shipment) extends EmailActorMessage
 case class DailySalesEmail(
   agentNameAndCount: List[(String, Int)],
@@ -688,13 +688,13 @@ trait InternalDailyEmailHandling extends EmailHandlerChain {
   }
 }
 
-trait BoxReceiptEmailHandling extends EmailHandlerChain {
+trait TreatReceiptEmailHandling extends EmailHandlerChain {
   addHandler {
-    case BoxReceiptEmail(
+    case TreatReceiptEmail(
       order
     ) =>
       val template =
-    Templates("emails-hidden" :: "box-receipt-email" :: Nil) openOr NodeSeq.Empty
+    Templates("emails-hidden" :: "treat-receipt-email" :: Nil) openOr NodeSeq.Empty
 
       val subject = "My Pet Defense Receipt"
       val email = order.email.get
@@ -719,15 +719,15 @@ trait BoxReceiptEmailHandling extends EmailHandlerChain {
   }
 }
 
-trait BoxShippedEmailHandling extends EmailHandlerChain {
+trait TreatShippedEmailHandling extends EmailHandlerChain {
   addHandler {
-    case BoxShippedEmail(
+    case TreatShippedEmail(
       order
     ) =>
       val template =
-    Templates("emails-hidden" :: "box-shipped-email" :: Nil) openOr NodeSeq.Empty
+    Templates("emails-hidden" :: "treat-shipped-email" :: Nil) openOr NodeSeq.Empty
 
-      val subject = "My Pet Defense Box Shipped!"
+      val subject = "My Pet Defense Treats Shipped!"
       val email = order.email.get
       val trackingNumber = order.trackingNumber.get
 
@@ -894,8 +894,8 @@ trait EmailActor extends EmailHandlerChain
                     with NotifyParentGrowthRateHandling
                     with DailySalesEmailHandling
                     with InternalDailyEmailHandling
-                    with BoxReceiptEmailHandling
-                    with BoxShippedEmailHandling
+                    with TreatReceiptEmailHandling
+                    with TreatShippedEmailHandling
                     with SixMonthSaleReceiptEmailHandling
                     with SendShipmentRefundedEmailHandling
                     with TestimonialEmailHandling {
