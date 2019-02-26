@@ -15,7 +15,7 @@ import com.mypetdefense.service._
 
 import com.mypetdefense._
   import model._
-import com.mypetdefense.util.SecurityContext
+import com.mypetdefense.util.{SecurityContext, ClearNodesIf}
 
 object TreatList extends Loggable {
   import net.liftweb.sitemap._
@@ -40,7 +40,7 @@ class TreatList extends Loggable {
   val lambTreats = Treat.find(By(Treat.name, "Lamb Jerky Digestive Health & Probiotic"))
   val beefTreats = Treat.find(By(Treat.name, "Beef Jerky Hip & Joint Formula"))
   val chickenTreats = Treat.find(By(Treat.name, "Chicken Jerky Skin & Coat Formula"))
-  
+
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
   user.map(SecurityContext.logIn(_))
@@ -104,10 +104,15 @@ class TreatList extends Loggable {
         ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
         ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
         ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
-        ".item-price *" #> f"$$$itemPrice%2.2f"
+        ".treat-price *" #> f"$$$itemPrice%2.2f"
       } &
-      ".subtotal *" #> f"$$$subtotal%2.2f" &
-      ".checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref
+      ".cart-footer" #> {
+        ".subtotal *" #> f"$$$subtotal%2.2f" &
+        ".checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref
+      } &
+      ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
+      ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
+      ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
     } andThen
     ".duck .add-treat [onclick]" #> ajaxInvoke(() => addToCart(duckTreats)) &
     ".lamb .add-treat [onclick]" #> ajaxInvoke(() => addToCart(lambTreats)) &
