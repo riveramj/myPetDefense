@@ -109,9 +109,9 @@ class TreatList extends Loggable {
       ".subtotal *" #> f"$$$subtotal%2.2f" &
       ".checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref
     } andThen
-    ".duck add-treat [onclick]" #> ajaxInvoke(() => addToCart(duckTreats)) &
-    ".lamb add-treat [onclick]" #> ajaxInvoke(() => addToCart(lambTreats)) &
-    ".beef add-treat [onclick]" #> ajaxInvoke(() => addToCart(beefTreats)) &
-    ".chicken add-treat [onclick]" #> ajaxInvoke(() => addToCart(chickenTreats))
+    ".duck .add-treat [onclick]" #> ajaxInvoke(() => addToCart(duckTreats)) &
+    ".lamb .add-treat [onclick]" #> ajaxInvoke(() => addToCart(lambTreats)) &
+    ".beef .add-treat [onclick]" #> ajaxInvoke(() => addToCart(beefTreats)) &
+    ".chicken .add-treat [onclick]" #> ajaxInvoke(() => addToCart(chickenTreats))
   }
 }
