@@ -57,21 +57,21 @@ class Boot {
       FriendsFamilyProduct,
       FriendsFamilyOrder,
       FriendsFamilyOrderLineItem,
-      BoxOrder,
+      TreatOrder,
       ItemReconciliation,
       ReconciliationEvent,
       InventoryItem,
       InventoryChangeAudit,
       Insert,
       InventoryItemPart,
-      PetBox,
-      BoxOrderLineItem
+      Treat,
+      TreatOrderLineItem
     )
 
     //DataLoader.loadProducts
     //DataLoader.loadAdmin
-    DataLoader.createBoxAccessKey
-    DataLoader.createPetBoxes
+    DataLoader.createProductAccessKey
+    DataLoader.createProducts
     //DataLoader.updateParentNoPets
     //DataLoader.createFriendsFamilyProducts
     //DataLoader.updateShipmentShipStationId

@@ -34,7 +34,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     override def defaultValue = false
   }
   object resetPasswordKey extends MappedString(this, 100)
-  object boxSalesKey extends MappedString(this, 100)
+  object productSalesKey extends MappedString(this, 100)
   object userType extends MappedEnum(this, UserType)
   object referer extends MappedLongForeignKey(this, Agency)
   object salesAgentId extends MappedString(this, 100)
@@ -87,7 +87,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .lastName(TitleCase(lastName))
       .stripeId(stripeId)
       .email(email)
-      .boxSalesKey(createAccessKey)
+      .productSalesKey(createAccessKey)
       .phone(phone)
       .coupon(coupon)
       .referer(referer)
@@ -132,7 +132,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .lastName(TitleCase(lastName))
       .email(email)
       .accessKey(createAccessKey)
-      .boxSalesKey(createAccessKey)
+      .productSalesKey(createAccessKey)
       .agency(agency)
       .userType(userType)
       .referer(referer)
@@ -162,7 +162,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .email(parentInfo.email)
       .phone(parentInfo.phone.getOrElse(""))
       .accessKey(createAccessKey)
-      .boxSalesKey(createAccessKey)
+      .productSalesKey(createAccessKey)
       .userType(UserType.Parent)
       .referer(referer)
       .salesAgentId(salesAgentId)
@@ -216,7 +216,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .phone("")
       .accessKey("")
       .resetPasswordKey("")
-      .boxSalesKey("")
+      .productSalesKey("")
       .status(Status.Cancelled)
       .saveMe
   }

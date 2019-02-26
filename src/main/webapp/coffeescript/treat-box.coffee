@@ -2,7 +2,7 @@ $(document).ready ->
   $('#main').on 'click', '.desktop-close, .continue-shopping, .continue-checkout', (event) ->
     $('#shopping-cart').removeClass('opened')
 
-  $('#main').on 'click', '.add-to-cart button, .open-cart', (event) ->
+  $('#main').on 'click', '.add-treat, .open-cart', (event) ->
     $('#shopping-cart').addClass('opened')
 
   $('#main').on 'click', '.desktop-close, .continue-shopping', (event) ->

@@ -22,7 +22,7 @@ object KeyService extends Loggable {
     StringHelpers.randomString(16)
   }
 
-  def createBoxSalesKey() = {
+  def createProductSalesKey() = {
     StringHelpers.randomString(16)
   }
   
@@ -44,8 +44,8 @@ object KeyService extends Loggable {
               case _ => false
             }
 
-          case "boxSalesKey" =>
-            user.boxSalesKey.get match {
+          case "productSalesKey" =>
+            user.productSalesKey.get match {
               case possibleKey if possibleKey == key => true
               case _ => false
             }
@@ -70,8 +70,8 @@ object KeyService extends Loggable {
       case "accessKey" =>
         user.accessKey("").saveMe
       
-      case "boxSalesKey" =>
-        user.boxSalesKey("").saveMe
+      case "productSalesKey" =>
+        user.productSalesKey("").saveMe
 
       case "resetPasswordKey" =>
         user.resetPasswordKey("").saveMe
@@ -85,8 +85,8 @@ object KeyService extends Loggable {
       case "accessKey" =>
         User.find(By(User.accessKey, key))
       
-      case "boxSalesKey" =>
-        User.find(By(User.boxSalesKey, key))
+      case "productSalesKey" =>
+        User.find(By(User.productSalesKey, key))
 
       case "resetPasswordKey" =>
         User.find(By(User.resetPasswordKey, key))
