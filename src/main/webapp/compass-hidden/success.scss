@@ -74,7 +74,7 @@
     margin-top: -296px;
     @include omega;
 
-    &.box-sale {
+    &.treat-sale {
       margin-top: -228px;
     }
   }
@@ -136,7 +136,7 @@
     letter-spacing: 0.4px;
     display: inline-block;
 
-    &.box-sale {
+    &.treat-sale {
       margin-left: 130px;
 
       @media (min-width: $bp-med) {
@@ -176,7 +176,6 @@
   padding-bottom: 8px;
 }
 
-
 li.complete:before {
   display: inline-block;
   position: initial;
@@ -184,4 +183,8 @@ li.complete:before {
 .flow-progress-bar  .step-container {
   float: none;
   display: inline-block;
+}
+
+.treat-count {
+  margin-left: 0;
 }

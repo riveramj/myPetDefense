@@ -132,6 +132,7 @@
   font-size: 13px;
   font-weight: $bold;
   background: #ffffff;
+  text-align: center;
 
   border-radius: 20px;
   color: #545151;
@@ -144,6 +145,8 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   line-height: 16px;
+
+  cursor: pointer;
 
   @media (min-width: $bp-medium) {
     padding: 12px 0;
@@ -177,6 +180,7 @@
     line-height: 16px;
     border-radius: 20px;
     font-size: 13px;
+    cursor: pointer;
 
     @media (min-width: $bp-medium) {
       padding: 12px 0;
@@ -192,14 +196,6 @@
       padding: 16px 14px;
     }
   }
-
-  .continue-checkout {
-    padding: 10px 9px 9px;
-
-    @media (min-width: $bp-medium) {
-      padding: 14px 15px;
-    }
-  }
 }
 
 .added-product-shot {
@@ -209,6 +205,10 @@
 
 .added-product-image {
   height: 100px;
+}
+
+.mobile .cart-product-shot {
+  display: inline-block;
 }
 
 .desktop .cart-product-shot {
@@ -223,7 +223,7 @@
 .cart-treat {
   display: inline-block;
   vertical-align: top;
-  margin: 10px 0 0 15px;
+  margin-top: 10px;
   width: calc(100% - 56px);
 
   ul:first-child {
@@ -247,6 +247,7 @@
   background-color: #ffffff;
   margin: 0;
   padding: 0;
+  cursor: pointer;
 
   color: #1D8884;
 
@@ -386,6 +387,7 @@ button.subtract, button.add, .selected-quantity {
 button.subtract, button.add {
   width: 40px;
   height: 45px;
+  cursor: pointer;
 }
 
 button.subtract {

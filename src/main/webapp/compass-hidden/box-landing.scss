@@ -129,6 +129,7 @@
   font-size: 13px;
   letter-spacing: 1px;
   line-height: 16px;
+  cursor: pointer;
 
   width: 250px;
 
@@ -215,6 +216,7 @@ li.treat-title {
   text-transform: uppercase;
   font-size: 14px;
   padding: 5px 10px;
+  cursor: pointer;
 
   @media (min-width: $bp-medium) {
     padding: 5px 15px;

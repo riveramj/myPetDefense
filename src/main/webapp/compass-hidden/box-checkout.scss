@@ -3,7 +3,7 @@
 @import "footer";
 
 #top-bar {
-  background-color: #404040;
+  background-color: #ffffff;
   display: flex;
   justify-content: space-between;
 
@@ -23,8 +23,8 @@
 }
 
 #menu-entries .open-cart {
-  background-color: #ffffff;
-  color: #1D8884;
+  background-color: #1D8884;
+  color: #ffffff;
   font-weight: $bold;
   border: none;
   text-transform: uppercase;
@@ -91,6 +91,10 @@
 .checkout-container {
   padding: 25px 17px;
 
+  form {
+    text-align: center;
+  }
+
   @media (min-width: $bp-medium) {
     padding: 40px 0 50px;
     margin: 0 auto;
@@ -122,7 +126,7 @@ section {
     margin: 0 auto 30px;
     padding: 15px;
   }
-  
+
   legend, h3 {
     color: #5D5D5D;
     font-size: 14px;
@@ -147,6 +151,22 @@ section {
   label {
     padding-bottom: 18px;
     display: block;
+  }
+}
+
+.checkout-container section {
+  text-align: left;
+
+  @media (min-width: $bp-large) {
+    display: inline-block;
+    vertical-align: top;
+  }
+}
+
+.billing-order-summary {
+  @media (min-width: $bp-large) {
+    display: inline-grid;
+    vertical-align: top;
   }
 }
 
@@ -210,20 +230,29 @@ section {
 }
 
 input.checkout {
-  background-color: #1D8884;
+  background: #FF8627;
+  border: none;
+  box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.35);
   color: #ffffff;
-  font-size: 16px;
   letter-spacing: 1px;
+  display: block;
+  padding: 15px 0;
+  text-decoration: none;
+  width: 170px;
+  text-align: center;
+  text-transform: uppercase;
   font-weight: $bold;
-  padding: 22px 0 20px;
+  line-height: 16px;
+  border-radius: 20px;
+  font-size: 20px;
+  cursor: pointer;
   width: 100%;
   max-width: 339px;
-  border: none;
-  text-transform: uppercase;
 
   @media (min-width: $bp-medium) {
-    max-width: unset;
+    max-width: none;
     width: 500px;
+    margin: 0 auto;
   }
 
   &.processing {
@@ -269,7 +298,12 @@ input.checkout {
   top: 0;
   background-color: rgba(0,0,0,.6);
   width: 100%;
-  padding-top: 15%;
+  padding-top: 10%;
+  z-index: 1;
+
+  @media (min-width: $bp-large) {
+    padding-top: 5%;
+  }
 
   &.logged-in {
     display: none;
@@ -357,7 +391,15 @@ input.checkout {
   }
 }
 
+.shipping-information {
+  @media (min-width: $bp-large) {
+    margin-right: 30px;
+  }
+}
+
 .signup-container {
+  margin-top: 15px;
+
   @media (min-width: $bp-medium) {
     text-align: center;
   }
