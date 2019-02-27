@@ -8,13 +8,10 @@
         <button type="button" class="continue-shopping">Continue Shopping</button>
       </div>
       
-      <ul id="items-in-cart">
+      <ul class="items-in-cart mobile">
         <li class="cart-item">
           <div class="cart-product-shot">
-            <picture>
-              <source srcset="../images/treat-boxes/activepetz-duck-small@1x.jpg, ../images/treat-boxes/activepetz-duck-small@2x.jpg 2x" media="(min-width: 46.8em)">
-              <img srcset="../images/treat-boxes/activepetz-duck-small@1x.jpg, ../images/treat-boxes/activepetz-duck-small@2x.jpg 2x" src="../images/treat-boxes/activepetz-duck-small@1x.jpg">
-            </picture>
+            <img class="treat-cart-thumbnail" src="../images/treat-boxes/activepetz-duck-small@2x.jpg">
           </div>
           <div class="cart-treat">
             <ul>
@@ -34,6 +31,46 @@
           </ul>
         </li>
       </ul>
+      <div class="items-in-cart desktop">
+        <table>
+          <thead>
+            <tr>
+              <td>Product</td>
+              <td>Price</td>
+              <td>Quantity</td>
+              <td>Remove</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="cart-item">
+              <td class="cart-product-shot">
+                <div>
+                  <img class="treat-cart-thumbnail" src="../images/treat-boxes/activepetz-duck-small@2x.jpg">
+                  <div class="cart-treat-name">Duck Treats</div>
+                </div>
+              </td>
+              <td class="treat-price">$19.99</td>
+              <td class="treat-quantity">
+                <button class="subtract"></button><div class="selected-quantity">1</div><button class="add"></button>
+              </td>
+              <td><button class="remove-treat"></button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="subtotal-container">
+          Subtotal: <span class="subtotal">$0.99</span> 
+        </div>
+      </div>
+
+      <ul class="cart-actions desktop">
+        <li>
+          <button type="button" class="continue-shopping">Continue Shopping</button>
+        </li>
+        <li>
+          <a href="/" class="checkout mobile">Go to Checkout</a>
+        </li>
+      </ul>
+
       <ul class="cart-footer">
         <ul class="cart-totals">
           <li>

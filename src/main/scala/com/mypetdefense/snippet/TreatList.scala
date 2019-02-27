@@ -96,7 +96,7 @@ class TreatList extends Loggable {
         quantity * treat.price.get
       }.foldLeft(0D)(_ + _)
 
-      ".cart-item" #> cart.map { case (treat, quantity) =>
+      ".items-in-cart .cart-item" #> cart.map { case (treat, quantity) =>
         val itemPrice = treat.price.get * quantity
 
         ".cart-treat-name *" #> treat.name.get &
@@ -110,8 +110,11 @@ class TreatList extends Loggable {
         ".subtotal *" #> f"$$$subtotal%2.2f" &
         ".checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref
       } &
+      ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
+      ".cart-actions .checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref &
       ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
       ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
+      ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
       ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
     } andThen
     ".duck .add-treat [onclick]" #> ajaxInvoke(() => addToCart(duckTreats)) &
