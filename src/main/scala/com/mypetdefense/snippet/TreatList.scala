@@ -22,12 +22,14 @@ object TreatList extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
+  val menu = Menu.i("Treats") / "treats"
+
   val treatListMenu = 
     Menu.param[User](
       "Our Treats", "Our Treats",
       productSalesKey => KeyService.findUserByKey(productSalesKey, "productSalesKey"),
       user => user.productSalesKey.get
-    ) / "treat-list" >>
+    ) / "treats" >>
     MatchWithoutCurrentValue
 }
 

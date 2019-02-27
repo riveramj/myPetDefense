@@ -46,18 +46,22 @@ class Success extends Loggable {
           "#checkout-total *" #> s"First ${freeMonthCount} months free"
         }
       } &
-      "#box-count" #> ClearNodes &
-      "#box-total" #> ClearNodes
+      "treat-sold" #> ClearNodes
     } else {
       val treatSalesTotal = TreatsFlow.treatSale.is.map(_._1).openOr(0D)
+      val treats = TreatsFlow.treatSale.is.map(_._2).openOr(Map())
 
-      "#order-summary [class+]" #> "box-sale" &
-      "#order-total h3 [class+]" #> "box-sale" andThen
-      //"#big-box-count span *" #> bigBoxQuantity &
-      //"#small-box-count span *" #> smallBoxQuantity &
+      "#order-summary [class+]" #> "treat-sale" &
+      "#order-total h3 [class+]" #> "treat-sale" andThen
+      "#order-details .treat-sold" #> treats.map { case (treat, count) =>
+        ".treat-name *" #> treat.name &
+        ".treat-count *" #> count
+      } &
       "#checkout-total #amount *" #> f"$$$treatSalesTotal%2.2f" &
-      "#pet-count" #> ClearNodes &
-      "#monthly-total" #> ClearNodes &
+      "#order-details" #> {
+        "#pet-count" #> ClearNodes &
+        "#monthly-total" #> ClearNodes
+      } &
       "#checkout-total .per-month" #> ClearNodes
     }
   }

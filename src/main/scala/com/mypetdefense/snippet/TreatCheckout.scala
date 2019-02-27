@@ -90,7 +90,7 @@ class TreatCheckout extends Loggable {
 
   def orderTreat() = {
     val validateFields = List(
-        validEmailFormat(email, "#email"),
+        validEmailFormat(email, "#checkout-email"),
         checkEmpty(firstName, "#first-name"),
         checkEmpty(lastName, "#last-name"),
         checkEmpty(street1, "#street-1"),
@@ -272,7 +272,7 @@ class TreatCheckout extends Loggable {
         quantity * treat.price.get
       }.foldLeft(0D)(_ + _)
 
-      ".cart-item" #> cart.map { case (treat, quantity) =>
+      ".items-in-cart .cart-item" #> cart.map { case (treat, quantity) =>
         val itemPrice = treat.price.get * quantity
 
         ".cart-treat-name *" #> treat.name.get &
@@ -280,9 +280,19 @@ class TreatCheckout extends Loggable {
         ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
         ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
         ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
-        ".item-price *" #> f"$$$itemPrice%2.2f"
+        ".treat-price *" #> f"$$$itemPrice%2.2f"
       } &
-      ".subtotal *" #> f"$$$subtotal%2.2f"
+      ".cart-footer" #> {
+        ".subtotal *" #> f"$$$subtotal%2.2f" &
+        ".cart-actions .continue-shopping [href]" #> "/treats"
+      } &
+      ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
+      ".cart-actions .continue-shopping [href]" #> "/treats" &
+      ".empty-cart .continue-shopping [href]" #> "/treats" &
+      ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
+      ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
+      ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
+      ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
     } &
     ".checkout-container" #> SHtml.idMemoize { renderer =>
       user = SecurityContext.currentUser

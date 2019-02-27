@@ -31,45 +31,86 @@
   <div id="shopping-cart">
     <div class="cart-contents">
       <h3>Shopping Cart</h3>
-
-      <h4>Current Products</h4>
-
-      <ul id="items-in-cart">
+      <div class="empty-cart">
+        <span>Your cart is empty</span>
+        <a href="/" class="continue-shopping">Continue Shopping</a>
+      </div>
+      
+      <ul class="items-in-cart mobile">
         <li class="cart-item">
           <div class="cart-product-shot">
-            <img class="cart-product-image" src="../images/treat-boxes/mosaic-product-group-small.jpg">
+            <img class="treat-cart-thumbnail" src="../images/treat-boxes/activepetz-duck-small@2x.jpg">
           </div>
-          <div class="cart-box">
+          <div class="cart-treat">
             <ul>
               <li>
-                <span class="cart-box-name">Good for you Box</span>
+                <span class="cart-treat-name">Duck Treats</span>
               </li>
-              <li><button class="remove-box"></button></li>
+              <li><button class="remove-treat"></button></li>
             </ul>
           </div>
           <ul class="quantity-price">
-            <li class="box-quantity">
+            <li class="treat-quantity">
               <button class="subtract"></button><div class="selected-quantity">1</div><button class="add"></button>
             </li>
-            <li class="item-price">
+            <li class="treat-price">
               $19.99
             </li>
           </ul>
         </li>
       </ul>
+      <div class="items-in-cart desktop">
+        <table>
+          <thead>
+            <tr>
+              <td>Product</td>
+              <td>Price</td>
+              <td>Quantity</td>
+              <td>Remove</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="cart-item">
+              <td class="cart-product-shot">
+                <div>
+                  <img class="treat-cart-thumbnail" src="../images/treat-boxes/activepetz-duck-small@2x.jpg">
+                  <div class="cart-treat-name">Duck Treats</div>
+                </div>
+              </td>
+              <td class="treat-price">$19.99</td>
+              <td class="treat-quantity">
+                <button class="subtract"></button><div class="selected-quantity">1</div><button class="add"></button>
+              </td>
+              <td><button class="remove-treat"></button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="subtotal-container">
+          Subtotal: <span class="subtotal">$0.99</span> 
+        </div>
+      </div>
+
+      <ul class="cart-actions desktop">
+        <li>
+          <a href="/" class="continue-shopping">Continue Shopping</a>
+        </li>
+        <li>
+          <button type="button" class="checkout continue-checkout mobile">Go to Checkout</button>
+        </li>
+      </ul>
+
       <ul class="cart-footer">
         <ul class="cart-totals">
           <li>
-            <div class="label">Subtotal:</div><div class="subtotal">$22.99</div>
+            <div class="label">Subtotal:</div><div class="subtotal">$0.99</div>
           </li>
         </ul>
         <ul class="cart-actions">
           <li>
-            <a href="/box-details" class="go-to-boxes">Continue Shopping</a>
+            <a href="/" class="continue-shopping">Continue Shopping</a>
           </li>
           <li>
-            <button class="checkout continue-checkout mobile">Checkout</button>
-            <button class="checkout continue-checkout desktop">Go to Checkout</button>
+            <button type="button" class="checkout mobile continue-checkout">Go to Checkout</button>
           </li>
         </ul>
       </ul>
@@ -79,10 +120,10 @@
 
   <div id="top-bar">
     <div id="logo-name">
-      <a href="/box-details">
+      <a href="/treats">
         <picture>
-          <source srcset="../images/logo/white-logo@1px.png, ../images/logo/white-logo@2x.png 2x" media="(min-width: 46.8em)">
-        <img srcset="../images/logo/logo-name-white-small.png, ../images/logo/logo-name-white-small@2x.png 2x" src="../images/logo/logo-name-white-small.png">
+          <source srcset="../images/logo/logo-name.png, ../images/logo/logo-name-2x.png 2x" media="(min-width: 46.8em)">
+        <img srcset="../images/logo/logo-name.png, ../images/logo/logo-name-2x.png 2x" src="../images/logo/logo-name.png">
         </picture>
       </a>
     </div>
@@ -130,6 +171,7 @@
           </div>
         </fieldset>
       </section>
+      <div class="billing-order-summary">
       <section class="billing-information">
         <fieldset>
           <legend>Billing Info</legend>
@@ -158,10 +200,10 @@
       <section id="order-summary">
         <h3>Order Summary</h3>
         <ul id="order-details">
-          <li>Boxes Ordered</li>
-          <li class="box-ordered">
-            <div class="ordered-box">
-              <span class="ordered-quantity">1</span> x <span class="ordered-box-name">goody box</span></div><div class="box-total">$11.99</div>
+          <li>Treats Ordered</li>
+          <li class="treat-ordered">
+            <div class="ordered-treat">
+              <span class="ordered-quantity">1</span> x <span class="ordered-treat-name">goody box</span></div><div class="treat-total">$11.99</div>
           </li>
           <li id="subtotal">
             <div>Subtotal</div><div class="subtotal-amount">$1.99</div>
@@ -174,9 +216,10 @@
           </li>
         </ul>
       </section>
+    </div>
 
       <div class="signup-container">
-        <button type="submit" class="buy-box checkout submit select-choice">Place Order</button>
+        <button type="submit" class="buy-treat checkout submit select-choice">Place Order</button>
       </div>
     </form>
   </div>
