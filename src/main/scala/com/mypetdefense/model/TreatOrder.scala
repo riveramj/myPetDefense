@@ -69,9 +69,7 @@ object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
       .taxPaid(taxPaid)
       .saveMe
 
-    treats.map { treat =>
-      TreatOrderLineItem.createTreatOrderLineItems(treats, newTreatOrder)
-    }
+    TreatOrderLineItem.createTreatOrderLineItems(treats, newTreatOrder)
 
     newTreatOrder
   }
