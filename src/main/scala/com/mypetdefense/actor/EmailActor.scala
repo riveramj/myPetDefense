@@ -699,6 +699,9 @@ trait TreatReceiptEmailHandling extends EmailHandlerChain {
       val subject = "My Pet Defense Receipt"
       val email = order.email.get
 
+      val treats = order.refresh.map(_.treatsOrdered.toList).openOr(Nil)
+      val subtotal = (order.amountPaid.get - order.taxPaid.get)
+
       val transform = {
         "#parent-name *" #> order.firstName &
         ".name *" #> (order.firstName + " " + order.lastName) &
@@ -708,11 +711,16 @@ trait TreatReceiptEmailHandling extends EmailHandlerChain {
         "#ship-city *" #> order.city.get &
         "#ship-state *" #> order.state.get &
         "#ship-zip *" #> order.zip.get &
-        //".big-quantity *" #> order.bigQuantity.get &
-        //".small-quantity *" #> order.smallQuantity.get &
-        ".amount-due *" #> (order.amountPaid.get - order.taxPaid.get) &
-        "#tax-due *" #> order.taxPaid.get &
-        "#total *" #> order.amountPaid.get 
+        ".ordered-product" #> treats.map { orderedTreat =>
+          val treat = orderedTreat.treat.obj
+          println(treat)
+
+          ".treat-quantity *" #> orderedTreat.quantity.get &
+          ".treat-name *" #> treat.map(_.name.get)
+        } &
+        ".amount-due *" #> f"$$$subtotal%2.2f" &
+        "#tax-due *" #> f"$$${order.taxPaid.get}%2.2f" &
+        "#total *" #> f"$$${order.amountPaid.get}%2.2f" 
       }
 
       sendEmail(subject, email, transform(template))
@@ -733,6 +741,9 @@ trait TreatShippedEmailHandling extends EmailHandlerChain {
 
       val trackingLink = s"https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}"
 
+      val treats = order.treatsOrdered.toList
+      val subtotal = (order.amountPaid.get - order.taxPaid.get)
+
       val transform = {
         "#ship-date" #> dateFormatter.format(new Date()) &
         ".tracking-link [href]" #> trackingLink &
@@ -745,10 +756,16 @@ trait TreatShippedEmailHandling extends EmailHandlerChain {
         "#ship-city" #> order.city.get &
         "#ship-state" #> order.state.get &
         "#ship-zip" #> order.zip.get &
-        //".big-quantity *" #> order.bigQuantity &
-        //".small-quantity *" #> order.smallQuantity &
-        ".tax *" #> order.taxPaid &
-        ".total *" #> order.amountPaid 
+        ".ordered-product" #> treats.map { orderedTreat =>
+          val treat = orderedTreat.treat.obj
+          println(treat)
+
+          ".treat-quantity *" #> orderedTreat.quantity.get &
+          ".treat-name *" #> treat.map(_.name.get)
+        } &
+        ".amount-due *" #> f"$$$subtotal%2.2f" &
+        "#tax-due *" #> f"$$${order.taxPaid.get}%2.2f" &
+        "#total *" #> f"$$${order.amountPaid.get}%2.2f" 
       }
 
       sendEmail(subject, email, transform(template))
