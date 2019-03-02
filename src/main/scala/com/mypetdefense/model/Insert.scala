@@ -17,14 +17,16 @@ class Insert extends LongKeyedMapper[Insert] with IdPK {
   }
   object name extends MappedString(this, 100)
   object itemNumber extends MappedString(this, 100)
+  object weight extends MappedDouble(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
-  def createNewInsert(name: String, itemNumber: String) = {
+  def createNewInsert(name: String, itemNumber: String, weight: Double) = {
     Insert.create
       .name(name)
       .itemNumber(itemNumber)
+      .weight(weight)
       .saveMe
   }
 

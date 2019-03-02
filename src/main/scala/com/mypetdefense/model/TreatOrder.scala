@@ -22,6 +22,7 @@ class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Lo
   object city extends MappedString(this, 100)
   object state extends MappedString(this, 100)
   object zip extends MappedString(this, 100)
+  object shipStationOrderId extends MappedInt(this)
   object stripeChargeId extends MappedString(this, 100)
   object trackingNumber extends MappedString(this, 100)
   object dateProcessed extends MappedDateTime(this)
@@ -34,6 +35,10 @@ class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Lo
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+  object shipmentStatus extends MappedEnum(this, ShipmentStatus)
+  object deliveryNotes extends MappedString(this, 100)
+
+  def name = this.firstName.get + " " + this.lastName.get
 
   def refresh = TreatOrder.find(By(TreatOrder.treatOrderId, treatOrderId.get))
 }
@@ -54,6 +59,7 @@ object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
 
     val newTreatOrder = TreatOrder.create
       .treatOrderId(generateLongId)
+      .shipStationOrderId(0)
       .stripeChargeId(stripeChargeId)
       .user(user)
       .firstName(firstName)
@@ -85,6 +91,7 @@ class TreatOrderLineItem extends LongKeyedMapper[TreatOrderLineItem] with IdPK {
   object order extends MappedLongForeignKey(this, TreatOrder)
   object treat extends MappedLongForeignKey(this, Treat)
   object quantity extends MappedInt(this)
+  object insert extends MappedLongForeignKey(this, Insert)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }

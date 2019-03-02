@@ -65,13 +65,17 @@ class Boot {
       Insert,
       InventoryItemPart,
       Treat,
-      TreatOrderLineItem
+      TreatOrderLineItem,
+      Packaging
     )
 
     //DataLoader.loadProducts
     //DataLoader.loadAdmin
     DataLoader.createProductAccessKey
     DataLoader.createProducts
+    DataLoader.createPackaging
+    DataLoader.addWeightToFleaTick
+    DataLoader.addWeightToInsert
     //DataLoader.updateParentNoPets
     //DataLoader.createFriendsFamilyProducts
     //DataLoader.updateShipmentShipStationId

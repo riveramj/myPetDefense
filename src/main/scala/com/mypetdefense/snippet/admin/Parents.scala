@@ -525,7 +525,7 @@ class Parents extends Loggable {
     ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
     ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
       
-      val itemsShipped = shipment.shipmentLineItems.toList.map(_.getShipmentItem)
+      val itemsShipped = shipment.shipmentLineItems.toList.map(_.getProductPetNameItemSize)
 
       ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
       ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
