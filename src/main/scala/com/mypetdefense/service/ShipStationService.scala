@@ -130,9 +130,10 @@ object ShipStationService extends Loggable {
     }
   }
 
-  def createShipStationOrder(shipment: Shipment, user: User): Future[Box[Order]] = {
+  def createBillShipToAddress(user: User) = {
     val userAddress = user.shippingAddress
-    val billShipTo = ShipStationAddress(
+
+    ShipStationAddress(
       name = Some(user.name),
       street1 = userAddress.map(_.street1.get).openOr(""),
       street2 = userAddress.map(_.street2.get),
@@ -140,6 +141,35 @@ object ShipStationService extends Loggable {
       state = userAddress.map(_.state.get).openOr("").toUpperCase,
       postalCode = userAddress.map(_.zip.get).openOr("")
     )
+  }
+
+  def createShipStationTreatOrder(order: TreatOrder, user: User): Future[Box[Order]] = {
+    val billShipTo = createBillShipToAddress(user)
+    
+    val treatOrderLineItems: List[TreatOrderLineItem] = order.treatsOrdered.toList
+    val treats = treatOrderLineItems.flatMap(_.treat.obj)
+    val shipStationProductIds = treats.map(_.sku.get)
+
+    val shipStationItems = shipStationProductIds.map { sku =>
+      OrderItem(
+        quantity = 1,
+        sku = sku
+      )
+    }
+
+    Order.create(
+      orderNumber = s"${order.treatOrderId.get}",
+      orderDate = dateFormat.format(new Date()),
+      orderStatus = "awaiting_shipment",
+      billTo = billShipTo,
+      shipTo = billShipTo,
+      items = Some(shipStationItems)
+    )
+
+  }
+
+  def createShipStationOrder(shipment: Shipment, user: User): Future[Box[Order]] = {
+    val billShipTo = createBillShipToAddress(user)
 
     val refreshedShipment = shipment.refresh
     val shipmentLineItems = refreshedShipment.toList.map(_.shipmentLineItems.toList).flatten

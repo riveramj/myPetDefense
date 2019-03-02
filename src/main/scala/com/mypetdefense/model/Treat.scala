@@ -17,14 +17,18 @@ class Treat extends LongKeyedMapper[Treat] with IdPK with OneToMany[Long, Treat]
   }
   object name extends MappedString(this, 100)
   object price extends MappedDouble(this)
+  object sku extends MappedString(this, 100)
+  object weight extends MappedDouble(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
-  def createNewTreat(name: String, price: Double) = {
+  def createNewTreat(name: String, price: Double, weight: Double, sku: String) = {
     Treat.create
     .name(name)
     .price(price)
+    .weight(weight)
+    .sku(sku)
     .saveMe
   }
 }

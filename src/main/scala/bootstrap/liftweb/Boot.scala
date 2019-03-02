@@ -65,7 +65,8 @@ class Boot {
       Insert,
       InventoryItemPart,
       Treat,
-      TreatOrderLineItem
+      TreatOrderLineItem,
+      Packaging
     )
 
     //DataLoader.loadProducts

@@ -1,4 +1,4 @@
-package com.mypetdefense.jobs
+package com.mypetdefense.jobs 
 
 import net.liftweb._
   import mapper.NullRef
