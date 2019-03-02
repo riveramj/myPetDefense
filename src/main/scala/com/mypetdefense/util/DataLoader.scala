@@ -231,6 +231,17 @@ object DataLoader extends Loggable {
     }
   }
 
+  def addWeightToInsert = {
+    val inserts = Insert.findAll()
+
+    inserts map { insert =>
+      if (insert.name.get.contains("Insert"))
+        insert.weight(.1).saveMe
+      else
+        insert.weight(.4).saveMe
+    }
+  }
+
   def loadPetlandInsert = {
     if (Insert.find(By(Insert.name, "Petland Welcome Insert")).isEmpty) {
       Insert.createNewInsert("Petland Welcome Insert", "450028", .1)
@@ -391,6 +402,10 @@ object DataLoader extends Loggable {
         8
       )
     }
+  }
+
+  def addWeightToFleaTick = {
+    Product.findAll().map(_.weight(1).saveMe)
   }
 
   def createOneSizeCat = {

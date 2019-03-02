@@ -40,6 +40,8 @@ class Packaging extends LongKeyedMapper[Packaging] with IdPK with OneToMany[Long
       .saveMe
   }
 
+  def getBubbleMailer = Packaging.find(By(Packaging.sku, "bubble1234"))
+  def getSmallBox = Packaging.find(By(Packaging.sku, "smallBox1234"))
   def getLargeBox = Packaging.find(By(Packaging.sku, "largeBox1234"))
 }
 

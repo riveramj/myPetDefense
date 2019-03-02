@@ -38,6 +38,8 @@ class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Lo
   object shipmentStatus extends MappedEnum(this, ShipmentStatus)
   object deliveryNotes extends MappedString(this, 100)
 
+  def name = this.firstName.get + " " + this.lastName.get
+
   def refresh = TreatOrder.find(By(TreatOrder.treatOrderId, treatOrderId.get))
 }
 

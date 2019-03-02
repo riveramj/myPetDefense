@@ -23,30 +23,26 @@ import dispatch.{Req => DispatchReq, _} , Defaults._
 
 class CreateTreatLabelJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
-    
     val treatOrders = TreatOrder.findAll(
       By(TreatOrder.shipStationOrderId, 0),
       By(TreatOrder.shipmentStatus, ShipmentStatus.Paid),
     )
 
-    for {
-      treatOrder <- treatOrders
-      user <- treatOrder.user.obj
-    } yield { 
-      val shipStationOrder = ShipStationService.createShipStationTreatOrder(treatOrder, user)
+    treatOrders map { treatOrder =>
+      val shipStationOrder = ShipStationService.createShipStationTreatOrder(treatOrder)
 
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>
-          treatOrder.shipStationOrderId(order.orderId).saveMe
+          treatOrder.shipStationOrderId(order.orderId).shipmentStatus(ShipmentStatus.LabelCreated).saveMe
 
         case TrySuccess(shipStationFailure) =>
           logger.error(s"create order failed with shipStation error:")
           logger.error(shipStationFailure)
-          logger.error(s"user email is ${user.email.get}")
+          logger.error(s"email is ${treatOrder.email.get}")
 
         case TryFail(throwable: Throwable) =>
           logger.error(s"create order failed with other error: ${throwable}")
-          logger.error(s"user email is ${user.email.get}")
+          logger.error(s"email is ${treatOrder.email.get}")
           throwable
       }
     }
@@ -76,4 +72,3 @@ object FrequentCreateTreatLabelJob extends TriggeredJob {
       .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 1 minutes
       .build
 }
-
