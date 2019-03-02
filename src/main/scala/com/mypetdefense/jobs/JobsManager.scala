@@ -54,7 +54,7 @@ object JobManager extends SimpleInjector with Loggable {
     //FrequentTrackingEmailJob ::
     //FrequentCreateOrderJob ::
     //FrequentTrackShipmentDeliveryJob ::
-    FrequentCreateTreatLabelJob ::
+    //FrequentCreateTreatLabelJob ::
     Nil
   }
 }
