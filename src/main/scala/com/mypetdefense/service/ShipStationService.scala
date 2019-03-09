@@ -144,7 +144,6 @@ object ShipStationService extends Loggable {
   }
 
   def createOrderBillShipToAddress(order: TreatOrder) = {
-
     ShipStationAddress(
       name = Some(order.name),
       street1 = order.street1.get,
