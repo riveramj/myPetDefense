@@ -73,6 +73,10 @@
     @include span-columns(6);
     margin-top: -296px;
     @include omega;
+
+    &.treat-sale {
+      margin-top: -228px;
+    }
   }
 
   h2 {
@@ -131,6 +135,14 @@
     text-transform: uppercase;
     letter-spacing: 0.4px;
     display: inline-block;
+
+    &.treat-sale {
+      margin-left: 130px;
+
+      @media (min-width: $bp-med) {
+        margin-left: 200px;
+      }
+    }
   }
 
   #checkout-total {
@@ -164,7 +176,6 @@
   padding-bottom: 8px;
 }
 
-
 li.complete:before {
   display: inline-block;
   position: initial;
@@ -172,4 +183,8 @@ li.complete:before {
 .flow-progress-bar  .step-container {
   float: none;
   display: inline-block;
+}
+
+.treat-count {
+  margin-left: 0;
 }

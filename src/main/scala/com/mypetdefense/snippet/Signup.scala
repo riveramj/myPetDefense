@@ -25,7 +25,7 @@ object Signup extends Loggable {
   val menu = 
     Menu.param[User](
       "Signup", "Signup",
-      accessKey => AccessKeyService.findUserByKey(accessKey),
+      accessKey => KeyService.findUserByKey(accessKey, "accessKey"),
       user => user.accessKey.get
     ) / "signup" >>
     MatchWithoutCurrentValue >>
@@ -54,7 +54,7 @@ class Signup extends Loggable {
 
     if (validateFields.isEmpty) {
       newUser.map { user =>
-        AccessKeyService.removeAccessKey(user)
+        KeyService.removeKey(user, "accessKey")
         User.updatePendingUser(user, firstName, lastName, password)
         SecurityContext.loginRedirectUser(user)
       }.openOr(Noop)
@@ -76,4 +76,3 @@ class Signup extends Loggable {
     }
   }
 }
-

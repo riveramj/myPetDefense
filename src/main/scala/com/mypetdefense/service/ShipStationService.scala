@@ -130,9 +130,10 @@ object ShipStationService extends Loggable {
     }
   }
 
-  def createShipStationOrder(shipment: Shipment, user: User): Future[Box[Order]] = {
+  def createUserBillShipToAddress(user: User) = {
     val userAddress = user.shippingAddress
-    val billShipTo = ShipStationAddress(
+
+    ShipStationAddress(
       name = Some(user.name),
       street1 = userAddress.map(_.street1.get).openOr(""),
       street2 = userAddress.map(_.street2.get),
@@ -140,22 +141,95 @@ object ShipStationService extends Loggable {
       state = userAddress.map(_.state.get).openOr("").toUpperCase,
       postalCode = userAddress.map(_.zip.get).openOr("")
     )
+  }
+
+  def createOrderBillShipToAddress(order: TreatOrder) = {
+    ShipStationAddress(
+      name = Some(order.name),
+      street1 = order.street1.get,
+      street2 = Some(order.street2.get),
+      city = order.city.get,
+      state = order.state.get.toUpperCase,
+      postalCode = order.zip.get
+    )
+  }
+
+  def createShipStationTreatOrder(order: TreatOrder): Future[Box[Order]] = {
+    val packaging = Packaging.getLargeBox
+
+    val billShipTo = createOrderBillShipToAddress(order)
+    
+    val treatOrderLineItems: List[TreatOrderLineItem] = order.treatsOrdered.toList
+    val treats = treatOrderLineItems.flatMap(_.treat.obj)
+    val shipStationProductIds = treats.map(_.sku.get) ++ packaging.map(_.sku.get).toList
+
+    val shipStationItems = shipStationProductIds.map { sku =>
+      OrderItem(
+        quantity = 1,
+        sku = sku
+      )
+    }
+
+    val totalWeight = treats.map(_.weight.get).sum + packaging.map(_.weight.get).openOr(0.0)
+    val carrierCode = "stamps_com"
+    val serviceCode = if (treats.size == 1) "usps_first_class_mail" else "usps_priority_mail"
+    val packageCode = "package"
+
+    Order.create(
+      orderNumber = s"${order.treatOrderId.get}",
+      orderDate = dateFormat.format(new Date()),
+      orderStatus = "awaiting_shipment",
+      billTo = billShipTo,
+      shipTo = billShipTo,
+      items = Some(shipStationItems),
+      weight = Some(Weight(totalWeight, "ounces")),
+      carrierCode = Some(carrierCode),
+      serviceCode = Some(serviceCode),
+      packageCode = Some(packageCode)
+    )
+
+  }
+
+  def createShipStationOrder(shipment: Shipment, user: User): Future[Box[Order]] = {
+    val billShipTo = createUserBillShipToAddress(user)
 
     val refreshedShipment = shipment.refresh
     val shipmentLineItems = refreshedShipment.toList.map(_.shipmentLineItems.toList).flatten
+    val shipmentProducts = shipmentLineItems.filter(!_.product.obj.isEmpty)
     
-    val petNamesProducts = shipmentLineItems.map(_.getShipmentItem).mkString(". ")
+    val petNamesProducts = shipmentProducts.map(_.getProductPetNameItemSize).mkString(". ")
 
     val products = shipmentLineItems.map(_.product.obj).flatten
     val inserts = shipmentLineItems.map(_.insert.obj).flatten
 
     val shipStationProductIds = products.map(_.sku.get)
-    val shipStationInsertsIds = inserts.map(_.itemNumber.get)
-
-    val allShipStationItems = shipStationProductIds ++ shipStationInsertsIds
 
     val paidShipment_? = tryo(shipment.amountPaid.get.toDouble).openOr(0.0) > 0.0
-    
+
+    val fleaTickCount = products.size
+
+    val (packaging, packagingId) = fleaTickCount match {
+      case 1 | 2 | 3 => 
+        (Packaging.getBubbleMailer, Nil)
+      
+      case 4 | 5 => 
+        val packaging = Packaging.getSmallBox
+        (packaging, packaging.map(_.sku.get).toList)
+  
+      case _ => Packaging.getLargeBox
+        val packaging = Packaging.getSmallBox
+        (packaging, packaging.map(_.sku.get).toList)
+    }
+
+    val productWeight = products.map(_.weight.get).sum
+    val insertWeight = inserts.map(_.weight.get).sum
+
+    val totalWeight = productWeight + insertWeight + packaging.map(_.weight.get).openOr(0.0)
+
+    val shipStationInsertsIds = inserts.map(_.itemNumber.get)
+
+    val allShipStationItems = shipStationProductIds ++ shipStationInsertsIds ++ packagingId
+
     val shipStationItems = allShipStationItems.map { sku =>
       OrderItem(
         quantity = 1,
@@ -170,7 +244,12 @@ object ShipStationService extends Loggable {
       billTo = billShipTo,
       shipTo = billShipTo,
       items = Some(shipStationItems),
-      giftMessage = Some(petNamesProducts)
+      giftMessage = Some(petNamesProducts),
+      weight = Some(Weight(totalWeight, "ounces")),
+      carrierCode = Some("stamps_com"),
+      serviceCode = Some("usps_first_class_mail"),
+      packageCode = Some("package"),
+      customerEmail = Some(user.email.get)
     )
   }
 
