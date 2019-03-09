@@ -82,7 +82,7 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
   object pet extends MappedLongForeignKey(this, Pet)
   object insert extends MappedLongForeignKey(this, Insert)
 
-  def getShipmentItem = {
+  def getProductPetNameItemSize = {
     val productNameSize = this.product.obj.map(_.getNameAndSize).openOr("")
     s"${this.petName.get} - ${productNameSize}".replace("null", "")
   }

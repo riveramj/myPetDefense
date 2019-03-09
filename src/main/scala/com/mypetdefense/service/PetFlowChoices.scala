@@ -20,3 +20,8 @@ object PetFlowChoices extends Loggable {
   object shoppingCart extends SessionVar[Map[Long, (String, Product, Double)]](Map())
   object purchased extends SessionVar[Box[Boolean]](Empty)
 }
+
+object TreatsFlow extends Loggable {
+  object shoppingCart extends SessionVar[Map[Treat, Int]](Map())
+  object treatSale extends SessionVar[Box[(Double, Map[Treat, Int])]](Empty)
+}
