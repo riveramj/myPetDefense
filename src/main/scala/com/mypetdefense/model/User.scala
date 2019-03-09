@@ -7,7 +7,7 @@ import net.liftweb._
     import Helpers.tryo
 
 import com.mypetdefense.util.RandomIdGenerator._
-import com.mypetdefense.service.AccessKeyService._
+import com.mypetdefense.service.KeyService._
 import com.mypetdefense.snippet.NewParent
 import com.mypetdefense.util.TitleCase
 
@@ -34,9 +34,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     override def defaultValue = false
   }
   object resetPasswordKey extends MappedString(this, 100)
-  object userType extends MappedEnum(this, UserType) {
-    override def dbIndexed_? = true
-  }
+  object productSalesKey extends MappedString(this, 100)
+  object userType extends MappedEnum(this, UserType)
   object referer extends MappedLongForeignKey(this, Agency)
   object salesAgentId extends MappedString(this, 100)
   object coupon extends MappedLongForeignKey(this, Coupon)
@@ -88,6 +87,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .lastName(TitleCase(lastName))
       .stripeId(stripeId)
       .email(email)
+      .productSalesKey(createAccessKey)
       .phone(phone)
       .coupon(coupon)
       .referer(referer)
@@ -132,6 +132,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .lastName(TitleCase(lastName))
       .email(email)
       .accessKey(createAccessKey)
+      .productSalesKey(createAccessKey)
       .agency(agency)
       .userType(userType)
       .referer(referer)
@@ -161,6 +162,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .email(parentInfo.email)
       .phone(parentInfo.phone.getOrElse(""))
       .accessKey(createAccessKey)
+      .productSalesKey(createAccessKey)
       .userType(UserType.Parent)
       .referer(referer)
       .salesAgentId(salesAgentId)
@@ -214,17 +216,13 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .phone("")
       .accessKey("")
       .resetPasswordKey("")
+      .productSalesKey("")
       .status(Status.Cancelled)
       .saveMe
   }
 }
 
-object User extends User with LongKeyedMetaMapper[User] {
-  override def dbIndexes = List(Index(
-    IndexField(userType),
-    IndexField(status)
-  ))
-}
+object User extends User with LongKeyedMetaMapper[User]
 
 object UserType extends Enumeration {
   val Agent, Parent, Admin = Value

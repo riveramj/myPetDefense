@@ -1,0 +1,239 @@
+@import "base";
+@import "shopping-cart";
+@import "footer";
+
+#top-bar {
+  background-color: #ffffff;
+
+  nav {
+    float: right;
+    margin: 14px 19px 0 0;
+  }
+}
+
+#logo-name {
+  padding: 14px 0 11px 15px;
+  display: inline-block;
+}
+
+.page-header {
+  background-color: #ffffff;
+  color: #4E4E4E;
+
+  padding: 29px 23px;
+  text-align: center;
+  max-width: 744px;
+  margin: 0 auto;
+
+  @media (min-width: $bp-medium) {
+    text-align: left;
+  }
+
+  img {
+    @media (min-width: $bp-medium) {
+      float: right;
+    }
+  }
+
+  .headlines {
+    font-size: 18px;
+  }
+
+  h1 {
+    margin: 6px auto;
+    font-size: 40px;
+    font-weight: $bold;
+    line-height: 44px;
+    max-width: 372px;
+
+    @media (min-width: $bp-medium) {
+      margin: 6px 0;
+    }
+  }
+
+  .treat-dog {
+    padding-top: 20px;
+    line-height: 26px;
+    font-size: 19px;
+    margin: 0 auto;
+
+    max-width: 332px;
+
+    @media (min-width: $bp-medium) {
+      margin: 0;
+    }
+  }
+}
+
+.discount-bar {
+  background-color: #128983;
+  padding: 12px 0;
+  text-align: center;
+  color: #ffffff;
+  font-size: 13px;
+  letter-spacing: 1px;
+  font-weight: $bold;
+  text-transform: uppercase;
+
+  &:before {
+    @extend .fas;
+    content: fa-content($fa-var-piggy-bank);
+  }
+}
+
+.promotion {
+  font-weight: $bold;
+}
+
+.treats {
+  padding: 0 10px 10px;
+
+  margin-top: 20px;
+
+  @media (min-width: $bp-medium) {
+    clear: both;
+    text-align: center;
+  }
+
+  ul {
+    @media (min-width: $bp-medium) {
+      max-width: 625px;
+      margin: 0 auto 40px;
+    }
+  }
+}
+
+.treat {
+  padding-bottom: 40px;
+  text-align: center;
+
+  @media (min-width: $bp-medium) {
+    display: inline-block;
+    margin: 35px 120px 0 0;
+    vertical-align: top;
+  }
+
+  &:nth-child(even) {
+    margin-right: 0;
+  }
+}
+
+.add-treat {
+  background-color: #FF8627;
+  color: #ffffff;
+  text-transform: uppercase;
+  border-radius: 20px;
+  border: none;
+  padding: 12px 0;
+  font-weight: $bold;
+  font-size: 13px;
+  letter-spacing: 1px;
+  line-height: 16px;
+  cursor: pointer;
+
+  width: 250px;
+
+  box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.15);
+
+  &:before {
+    @extend .fas;
+    content: fa-content($fa-var-shopping-cart);
+    margin-right: 6px;
+  
+    @media (min-width: $bp-medium) {
+      font-size: 14px;
+      margin-right: 8px;
+    }
+  }
+}
+
+.treat-details {
+  width: 250px;
+  margin: 20px auto 0;
+  text-align: left;
+}
+
+li.treat-title {
+  color: #4E4E4E;
+  font-weight: $bold;
+  font-size: 18px;
+  line-height: 22px;
+  padding-bottom: 2px;
+  margin-top: 20px;
+}
+
+.treat-description {
+  color: #828181;
+  font-size: 14px;
+  line-height: 19px;
+  margin-bottom: 10px;
+}
+
+.price {
+  color: #128983;
+  font-size: 25px;
+  line-height: 30px;
+  font-weight: $bold;
+  text-align: left;
+  margin-bottom: 15px;
+}
+
+.treat-highlights {
+  li {
+    margin-bottom: 9px;
+    color: #128983;
+    line-height: 15px;
+    font-size: 12px;
+    font-weight: $bold;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .grain:before {
+    @extend .fal;
+    content: fa-content($fa-var-wheat);
+    margin-right: 6px;
+  }
+
+  .usa:before {
+    @extend .fas;
+    content: fa-content($fa-var-flag-usa);
+    margin-right: 6px;
+  }
+
+  .dog:before {
+    @extend .fas;
+    content: fa-content($fa-var-dog);
+    margin-right: 6px;
+  }
+}
+
+.open-cart {
+  background-color: #1D8884;
+  color: #ffffff;
+  font-weight: $bold;
+  border: none;
+  text-transform: uppercase;
+  font-size: 14px;
+  padding: 5px 10px;
+  cursor: pointer;
+
+  @media (min-width: $bp-medium) {
+    padding: 5px 15px;
+  }
+
+  &:before {
+    @extend .fas;
+    content: fa-content($fa-var-shopping-cart);
+    margin-right: 6px;
+  
+    @media (min-width: $bp-medium) {
+      font-size: 14px;
+      margin-right: 8px;
+    }
+  }
+}
+
+#footer, .legal, #need-help {
+  background-color: #5D5D5D;
+}

@@ -45,7 +45,7 @@ class CreateShipStationOrderJob extends ManagedJob {
 
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>
-          shipment.shipStationOrderId(order.orderId).saveMe
+          shipment.shipStationOrderId(order.orderId).shipmentStatus(ShipmentStatus.LabelCreated).saveMe
 
           if (!sameDateComparison(
             new Date(),

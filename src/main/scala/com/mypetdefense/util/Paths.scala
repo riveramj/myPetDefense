@@ -189,6 +189,8 @@ object Paths {
     friendsfamily.Dashboard.friendsFamilyLabelsExportMenu,
     friendsfamily.Orders.menu,
     friendsfamily.Products.menu,
+    TreatList.treatListMenu,
+    TreatCheckout.menu,
     inventory.InventoryItems.menu,
     inventory.Reconciliations.menu,
     inventory.InventoryChangeAudits.menu,
