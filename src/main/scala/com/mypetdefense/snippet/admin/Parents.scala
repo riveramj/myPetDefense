@@ -10,7 +10,7 @@ import net.liftweb.common._
 import net.liftweb.util._
 import net.liftweb.http._
   import js.JsCmds._
-import net.liftweb.mapper.{By, NotBy}
+import net.liftweb.mapper._
 
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -30,65 +30,25 @@ object Parents extends Loggable {
   val menu = Menu.i("Parents") / "admin" / "parents" >>
     mpdAdmin >>
     loggedIn
-
-  val activeParentsCsvMenu = Menu.i("Active Parents") / "admin" / "parents" / "export_active_parents.csv" >>
-    mpdAdmin >>
-    loggedIn >>
-    EarlyResponse(exportActiveParents _)
-
-  def exportActiveParents: Box[LiftResponse] = {
-      val csvHeaders = "Name" :: "Email" :: "Address" :: "Pet Name" :: "Animal Type" :: "Pet Size" :: Nil
-
-      val csvRows: List[List[String]] = {
-        val pets = Pet.findAll(By(Pet.status, Status.Active))
-        
-        {
-          for {
-            pet <- pets
-            user <- pet.user.obj
-            address <- user.addresses.toList.headOption
-          } yield {
-
-            user.name ::
-            user.email.get ::
-            s"${address.street1.get} ${address.street2.get} ${address.city.get} ${address.state.get} ${address.zip.get}" ::
-            pet.name.get ::
-            pet.animalType.get.toString ::
-            pet.size.get.toString  ::
-            Nil
-          }
-        }
-      }
-
-      val resultingCsv = (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
-
-        Some(new InMemoryResponse(
-          resultingCsv.getBytes("UTF-8"),
-          List(
-            "Content-Type" -> "binary/octet-stream",
-            "Content-Disposition" -> "attachment; filename=\"data.csv\""
-            ),
-          Nil,
-          200
-        ))
-    }
 }
 
 class Parents extends Loggable {
-  var parents = User.findAll(
-    By(User.userType, UserType.Parent),
-    NotBy(User.status, Status.Cancelled)
-  )
+  var activeParents: List[User] = Nil
+  var cancelledParents: List[CancelledUser] = Nil
+  var parents: List[User] = Nil
+
   var parentsRenderer: Box[IdMemoizeTransform] = Empty
-  var cancelled = false
   
   var petType: Box[AnimalType.Value] = Empty
   var chosenProduct: Box[Product] = Empty
   var petName = ""
   var petBreed = ""
   var petBirthday = ""
+  var searchTerm = ""
 
   val coupons = Coupon.findAll()
+  val dogProducts = Product.findAll(By(Product.animalType, AnimalType.Dog))
+  val catProducts = Product.findAll(By(Product.animalType, AnimalType.Dog))
 
   val stripeBaseUrl = Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
   val stripeInvoiceBaseURL = s"${stripeBaseUrl}/invoices"
@@ -102,31 +62,53 @@ class Parents extends Loggable {
   var parentDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var currentParent: Box[User] = Empty
 
+  def searchParents = {
+    val formattedSearchTerm = searchTerm.split(" ").map(_ + ":*").mkString(" | ")
+
+    val searchQuery = s"to_tsvector('english', coalesce(firstname,'') || ' ' || coalesce(lastname,'') || ' ' || coalesce(email,'')) @@ to_tsquery('english', '${formattedSearchTerm}')"
+
+    val activeParentsSearch = User.findAll(
+      By(User.userType, UserType.Parent),
+      BySql(searchQuery,
+        IHaveValidatedThisSQL("mike","2019-03-09")
+      )
+    )
+
+    val cancelledParentsSearch = CancelledUser.findAll(
+      BySql(searchQuery,
+        IHaveValidatedThisSQL("mike","2019-03-09")
+      )
+    )
+
+    activeParents = activeParentsSearch
+    cancelledParents = cancelledParentsSearch
+
+    val cancelledUsers = cancelledParents.map(getOldUserWithInfo).flatten
+    parents = activeParents ++ cancelledUsers
+
+    parentsRenderer.map(_.setHtml).openOr(Noop)
+  }
+
+  def getCancelledUser(parent: User) = {
+    CancelledUser.find(By(CancelledUser.user, parent.userId.get))
+  }
+
+  def getOldUserWithInfo(cancelledParent: CancelledUser) = {
+    val cancelledUser = User.find(By(User.userId, cancelledParent.user.get))
+    cancelledUser.map { user =>
+      user
+        .firstName(cancelledParent.firstName.get)
+        .lastName(cancelledParent.firstName.get)
+        .email(cancelledParent.email.get)
+    }
+  }
+
   def isCancelled_?(parent: Box[User]): Boolean = {
     parent.map(isCancelled_?).openOr(false)
   }
 
   def isCancelled_?(parent: User): Boolean = {
     parent.status.get == Status.Cancelled
-  }
-
-  def findCancelledUser(parent: User) = {
-    CancelledUser.find(By(CancelledUser.user, parent.userId.get))
-  }
-
-  def getParentInfo(parent: User, info: String) = {
-    (isCancelled_?(parent), info) match {
-      case (true, "name") =>
-        findCancelledUser(parent).map(_.name).openOr("")
-      case (true, "email") =>
-        findCancelledUser(parent).map(_.email.get).openOr("")
-      case (false, "name") =>
-        parent.name
-      case (false, "email") =>
-        parent.email.get
-      case (_, _) =>
-        ""
-    }
   }
 
   def petTypeRadio(renderer: IdMemoizeTransform) = {
@@ -142,7 +124,10 @@ class Parents extends Loggable {
 
   def productDropdown = {
     val products = petType.map { animal =>
-      Product.findAll(By(Product.animalType, animal))
+      if (animal == AnimalType.Dog)
+        dogProducts
+      else
+        catProducts
     }.openOr(Nil)
 
     SHtml.ajaxSelectObj(
@@ -225,7 +210,7 @@ class Parents extends Loggable {
       case Full(_) =>
         EmailActor ! ParentCancelledAccountEmail(parent)
 
-        S.redirectTo(Parents.menu.loc.calcDefaultHref)
+        searchParents
       case _ =>
         Alert("An error has occured. Please try again.")
     }
@@ -255,28 +240,6 @@ class Parents extends Loggable {
       shipmentDate.getOrElse("")
   }
 
-  def changeParentSet(parentStatus: String) = {
-    parentStatus match {
-      case "active" =>
-        cancelled = false
-        
-        parents = User.findAll(
-          By(User.userType, UserType.Parent),
-          NotBy(User.status, Status.Cancelled)
-        )
-
-      case "cancelled" =>
-        cancelled = true
-        parents = User.findAll(
-          By(User.userType, UserType.Parent),
-          By(User.status, Status.Cancelled)
-        )
-      case _ =>
-    }
-  
-    parentsRenderer.map(_.setHtml).openOr(Noop)
-  }
-
   def parentInformationBinding(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]) = {
     val parent = currentParent
     val address = parent.flatMap(_.addresses.toList.headOption)
@@ -284,21 +247,10 @@ class Parents extends Loggable {
       tryo(user.salesAgentId.get).openOr("")
     }
 
-    var stripeSubscriptionId = subscription.map(_.stripeSubscriptionId.get).getOrElse("")
-
     def updateBillingStatus(status: Status.Value, oldSubscription: Subscription) = {
       oldSubscription.status(status).saveMe
 
       detailsRenderer.setHtml
-    }
-
-    def updateStripeSubscriptionId(oldSubscription: Option[Subscription]) = {
-      oldSubscription.map(_.stripeSubscriptionId(stripeSubscriptionId).saveMe)
-
-      {
-        Alert("Id has been updated") &
-        detailsRenderer.setHtml
-      }
     }
 
     val street1 = address.map(_.street1.get).openOr("")
@@ -391,12 +343,7 @@ class Parents extends Loggable {
           ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))
       }
     } &
-    ".parent-information .agent-name .agent *" #> agent &
-    ".parent-information .change-stripe-subscription .stripe-subscription-id" #> ajaxText(stripeSubscriptionId, stripeSubscriptionId = _) &
-    ".parent-information .change-stripe-subscription .change-id [onClick]" #> Confirm(
-      s"Update Stripe Subscription Id? This can really mess things up!",
-      ajaxInvoke(() => updateStripeSubscriptionId(subscription))
-    )
+    ".parent-information .agent-name .agent *" #> agent
   }
 
   def petBindings = {
@@ -557,21 +504,23 @@ class Parents extends Loggable {
   def render = {
     SHtml.makeFormsAjax andThen
     ".parents [class+]" #> "current" &
-    "#active-parents-export [href]" #> Parents.activeParentsCsvMenu.loc.calcDefaultHref &
-    "#parents-active [onclick]" #> SHtml.ajaxInvoke(() => changeParentSet("active")) &
-    "#parents-cancelled [onclick]" #> SHtml.ajaxInvoke(() => changeParentSet("cancelled")) &
+    ".search-container" #> {
+      ".search-term" #> ajaxText(searchTerm, searchTerm = _) &
+      ".search-parents [onclick]" #> ajaxInvoke(searchParents _)
+    } &
     ".parents-container" #> SHtml.idMemoize { renderer =>
       parentsRenderer = Full(renderer)
 
       "tbody" #> parents.sortWith(_.name < _.name).map { parent =>
         val refererName = parent.referer.obj.map(_.name.get)
+        
         idMemoize { detailsRenderer =>
           val subscription = parent.getSubscription
           val nextShipDate = subscription.map(_.nextShipDate.get)
 
           ".parent" #> {
-            ".name *" #> getParentInfo(parent, "name") &
-            ".email *" #> getParentInfo(parent, "email") &
+            ".name *" #> parent.name &
+            ".email *" #> parent.email.get &
             ".billing-status *" #> subscription.map(_.status.get.toString.split("(?=\\p{Upper})").mkString(" ")) &
             ".referer *" #> refererName &
             ".ship-date *" #> tryo(displayNextShipDate(nextShipDate.map(dateFormat.format(_)), isCancelled_?(parent))).openOr("-") &
