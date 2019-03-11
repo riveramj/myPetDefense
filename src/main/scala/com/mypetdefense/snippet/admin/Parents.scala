@@ -45,6 +45,7 @@ class Parents extends Loggable {
   var petBreed = ""
   var petBirthday = ""
   var searchTerm = ""
+  var email = ""
 
   val coupons = Coupon.findAll()
   val dogProducts = Product.findAll(By(Product.animalType, AnimalType.Dog))
@@ -63,30 +64,35 @@ class Parents extends Loggable {
   var currentParent: Box[User] = Empty
 
   def searchParents = {
-    val formattedSearchTerm = searchTerm.split(" ").map(_ + ":*").mkString(" | ")
+    if (searchTerm == "")
+      Alert("Search cannot be empty right now.")
+    else {
+      val formattedSearchTerm = searchTerm.split(" ").map(_ + ":*").mkString(" | ")
 
-    val searchQuery = s"to_tsvector('english', coalesce(firstname,'') || ' ' || coalesce(lastname,'') || ' ' || coalesce(email,'')) @@ to_tsquery('english', '${formattedSearchTerm}')"
+      val searchQuery = s"to_tsvector('english', coalesce(firstname,'') || ' ' || coalesce(lastname,'') || ' ' || coalesce(email,'')) @@ to_tsquery('english', '${formattedSearchTerm}')"
 
-    val activeParentsSearch = User.findAll(
-      By(User.userType, UserType.Parent),
-      BySql(searchQuery,
-        IHaveValidatedThisSQL("mike","2019-03-09")
+      val activeParentsSearch = User.findAll(
+        By(User.userType, UserType.Parent),
+        BySql(searchQuery,
+          IHaveValidatedThisSQL("mike","2019-03-09")
+        )
       )
-    )
 
-    val cancelledParentsSearch = CancelledUser.findAll(
-      BySql(searchQuery,
-        IHaveValidatedThisSQL("mike","2019-03-09")
+      val cancelledParentsSearch = CancelledUser.findAll(
+        BySql(searchQuery,
+          IHaveValidatedThisSQL("mike","2019-03-09")
+        )
       )
-    )
 
-    activeParents = activeParentsSearch
-    cancelledParents = cancelledParentsSearch
+      activeParents = activeParentsSearch
+      cancelledParents = cancelledParentsSearch
 
-    val cancelledUsers = cancelledParents.map(getOldUserWithInfo).flatten
-    parents = activeParents ++ cancelledUsers
+      val cancelledUsers = cancelledParents.map(getOldUserWithInfo).flatten
+      parents = activeParents ++ cancelledUsers
 
-    parentsRenderer.map(_.setHtml).openOr(Noop)
+      currentParent = Empty
+      parentsRenderer.map(_.setHtml).openOr(Noop)
+    }
   }
 
   def getCancelledUser(parent: User) = {
@@ -98,7 +104,7 @@ class Parents extends Loggable {
     cancelledUser.map { user =>
       user
         .firstName(cancelledParent.firstName.get)
-        .lastName(cancelledParent.firstName.get)
+        .lastName(cancelledParent.lastName.get)
         .email(cancelledParent.email.get)
     }
   }
@@ -279,6 +285,13 @@ class Parents extends Loggable {
       Noop
     }
 
+    def changeEmail(parent: Box[User], email: String) = {
+      val updatedParent = parent.map(_.refresh).flatten
+      updatedParent.map(_.email(email).saveMe)
+
+      Alert("Email Updated")
+    }
+
     def updateParentName(name: String, namePart: String, parent: Box[User]) = {
       namePart match {
         case "firstName" => parent.map(_.firstName(name).saveMe)
@@ -309,39 +322,11 @@ class Parents extends Loggable {
       ".state" #> SHtml.ajaxText(state, possibleAddress => updateAddress(possibleAddress, "state", address)) &
       ".zip" #> SHtml.ajaxText(zip, possibleAddress => updateAddress(possibleAddress, "zip", address))
     } &
-    ".parent-information .billing-status" #> subscription.map { oldSubscription =>
-      val oldStatus = oldSubscription.status.get
+    ".parent-information .change-email" #> {
+      val currentEmail = parent.map(_.email.get).openOr("")
 
-      oldStatus match {
-        case Status.BillingSuspended =>
-          "#parent-billing-status .stripe-subscription [class+]" #> "past-due" &
-          "#parent-billing-status .stripe-subscription [href]" #> s"${stripeSubscriptionBaseURL}/${oldSubscription.stripeSubscriptionId.get}" &
-          "#parent-billing-status .stripe-subscription *" #> "Suspended due to billing" &
-          ".change-to-active [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
-          ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
-          ".change-to-billing-suspended" #> ClearNodes
-
-        case Status.UserSuspended =>
-          "#parent-billing-status .stripe-subscription *" #> "User Suspended" &
-          "#parent-billing-status .stripe-subscription [href]" #> s"${stripeSubscriptionBaseURL}/${oldSubscription.stripeSubscriptionId.get}" &
-          ".change-to-active [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
-          ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))&
-          ".change-to-user-suspended" #> ClearNodes
-
-        case Status.Active =>
-          "#parent-billing-status .stripe-subscription *" #> "Active" &
-          "#parent-billing-status .stripe-subscription [href]" #> s"${stripeSubscriptionBaseURL}/${oldSubscription.stripeSubscriptionId.get}" &
-          ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription)) &
-          ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
-          ".change-to-active" #> ClearNodes
-
-        case _ =>
-          "#parent-billing-status .stripe-subscription *" #> oldStatus.toString &
-          "#parent-billing-status .stripe-subscription [href]" #> s"${stripeSubscriptionBaseURL}/${oldSubscription.stripeSubscriptionId.get}" &
-          ".change-billing-status [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.Active, oldSubscription)) &
-          ".change-to-user-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.UserSuspended, oldSubscription)) &
-          ".change-to-billing-suspended [onClick]" #> SHtml.ajaxInvoke(() => updateBillingStatus(Status.BillingSuspended, oldSubscription))
-      }
+      ".parent-email" #> SHtml.ajaxText(currentEmail, email = _) &
+      ".update-email [onclick]" #> SHtml.ajaxInvoke(() => changeEmail(parent, email))
     } &
     ".parent-information .agent-name .agent *" #> agent
   }
