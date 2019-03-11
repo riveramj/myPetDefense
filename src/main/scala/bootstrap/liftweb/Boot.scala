@@ -71,8 +71,8 @@ class Boot {
 
     //DataLoader.loadProducts
     //DataLoader.loadAdmin
-    DataLoader.createProductAccessKey
-    DataLoader.createProducts
+    //DataLoader.createProductAccessKey
+    //DataLoader.createProducts
     DataLoader.createPackaging
     DataLoader.addWeightToFleaTick
     DataLoader.addWeightToInsert
