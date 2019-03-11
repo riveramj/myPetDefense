@@ -329,6 +329,14 @@ input[type="text"] {
   }
 }
 
-.agent-name {
-  padding: 0 40px;
+.agent-info {
+  display: inline-block;
+
+  h3 {
+    display: inline-block;
+  }
+
+  .agent-name {
+    padding: 0 0 0 10px;
+  }
 }
