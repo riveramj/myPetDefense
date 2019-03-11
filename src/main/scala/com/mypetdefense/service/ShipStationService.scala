@@ -226,6 +226,8 @@ object ShipStationService extends Loggable {
 
     val totalWeight = productWeight + insertWeight + packaging.map(_.weight.get).openOr(0.0)
 
+    val normalizedWeight = if (totalWeight < 4.0) 4.0 else totalWeight
+
     val shipStationInsertsIds = inserts.map(_.itemNumber.get)
 
     val allShipStationItems = shipStationProductIds ++ shipStationInsertsIds ++ packagingId
@@ -245,7 +247,7 @@ object ShipStationService extends Loggable {
       shipTo = billShipTo,
       items = Some(shipStationItems),
       giftMessage = Some(petNamesProducts),
-      weight = Some(Weight(totalWeight, "ounces")),
+      weight = Some(Weight(normalizedWeight, "ounces")),
       carrierCode = Some("stamps_com"),
       serviceCode = Some("usps_first_class_mail"),
       packageCode = Some("package"),

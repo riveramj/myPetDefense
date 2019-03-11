@@ -151,7 +151,6 @@ object Paths {
     admin.Dashboard.existingLabelsExportMenu,
     admin.Dashboard.mpdShipstationExportMenu,
     admin.Parents.menu,
-    admin.Parents.activeParentsCsvMenu,
     admin.Users.menu,
     admin.GrowthRates.menu,
     admin.Prices.menu,
