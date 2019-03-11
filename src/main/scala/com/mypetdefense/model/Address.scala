@@ -48,7 +48,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     .street1(TitleCase(street1))
     .street2(TitleCase(street2))
     .city(TitleCase(city))
-    .state(TitleCase(state))
+    .state(state.toUpperCase)
     .zip(zip)
     .addressType(addressType)
     .saveMe
@@ -61,7 +61,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     .street1(TitleCase(newAddress.street1))
     .street2(TitleCase(newAddress.street2.getOrElse("")))
     .city(TitleCase(newAddress.city))
-    .state(TitleCase(newAddress.state))
+    .state(newAddress.state.toUpperCase)
     .zip(newAddress.zip)
     .addressType(AddressType.Shipping)
     .saveMe

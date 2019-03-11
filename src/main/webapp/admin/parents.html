@@ -3,15 +3,10 @@
     <div data-lift="embed?what=admin/admin-nav-bar"></div>
     <div id="item-container">
       <h2>Parents</h2>
-      <a href="#" id="active-parents-export">Active Parents</a>
-      <ul class="parents-nav">
-        <li class="active parents-active">
-          <button type="button" id="parents-active">Active Parents</button>
-        </li>
-        <li class="parents-cancelled">
-          <button type="button" id="parents-cancelled">Cancelled Parents</button>
-        </li>
-      </ul>
+      <form class="search-container">
+        <input type="text" class="search-term" placeholder="Name or email">
+        <button class="search-parents">Search</button>
+      </form>
       <div class="parents-container">
         <table>
           <thead>

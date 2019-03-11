@@ -57,16 +57,25 @@ class Boot {
       FriendsFamilyProduct,
       FriendsFamilyOrder,
       FriendsFamilyOrderLineItem,
+      TreatOrder,
       ItemReconciliation,
       ReconciliationEvent,
       InventoryItem,
       InventoryChangeAudit,
       Insert,
-      InventoryItemPart
+      InventoryItemPart,
+      Treat,
+      TreatOrderLineItem,
+      Packaging
     )
 
     //DataLoader.loadProducts
     //DataLoader.loadAdmin
+    //DataLoader.createProductAccessKey
+    //DataLoader.createProducts
+    DataLoader.createPackaging
+    DataLoader.addWeightToFleaTick
+    DataLoader.addWeightToInsert
     //DataLoader.updateParentNoPets
     //DataLoader.createFriendsFamilyProducts
     //DataLoader.updateShipmentShipStationId
@@ -75,8 +84,8 @@ class Boot {
     //DataLoader.loadWelcomeInserts
     //DataLoader.resetUpcomingBillingCylces
     //DataLoader.createOneSizeCat
-    DataLoader.loadPetlandInsert
-    DataLoader.removeFrontlineProduct
+    //DataLoader.loadPetlandInsert
+    //DataLoader.removeFrontlineProduct
     
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")

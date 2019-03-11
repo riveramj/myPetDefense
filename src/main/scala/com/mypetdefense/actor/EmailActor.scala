@@ -48,6 +48,8 @@ case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMe
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
 case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
 case class NotifyParentGrowthRate(pet: Pet, newProduct: String, user: User) extends EmailActorMessage
+case class TreatReceiptEmail(order: TreatOrder) extends EmailActorMessage
+case class TreatShippedEmail(order: TreatOrder) extends EmailActorMessage
 case class SendShipmentRefundedEmail(parent: Box[User], shipment: Shipment) extends EmailActorMessage
 case class DailySalesEmail(
   agentNameAndCount: List[(String, Int)],
@@ -686,6 +688,88 @@ trait InternalDailyEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait TreatReceiptEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case TreatReceiptEmail(
+      order
+    ) =>
+      val template =
+    Templates("emails-hidden" :: "treat-receipt-email" :: Nil) openOr NodeSeq.Empty
+
+      val subject = "My Pet Defense Receipt"
+      val email = order.email.get
+
+      val treats = order.refresh.map(_.treatsOrdered.toList).openOr(Nil)
+      val subtotal = (order.amountPaid.get - order.taxPaid.get)
+
+      val transform = {
+        "#parent-name *" #> order.firstName &
+        ".name *" #> (order.firstName + " " + order.lastName) &
+        "#ship-address-1 *" #> order.street1.get &
+        "#ship-address-2" #> ClearNodesIf(order.street2.get == "") andThen
+        "#ship-address-2-content *" #> order.street2.get &
+        "#ship-city *" #> order.city.get &
+        "#ship-state *" #> order.state.get &
+        "#ship-zip *" #> order.zip.get &
+        ".ordered-product" #> treats.map { orderedTreat =>
+          val treat = orderedTreat.treat.obj
+
+          ".treat-quantity *" #> orderedTreat.quantity.get &
+          ".treat-name *" #> treat.map(_.name.get)
+        } &
+        ".amount-due *" #> f"$$$subtotal%2.2f" &
+        "#tax-due *" #> f"$$${order.taxPaid.get}%2.2f" &
+        "#total *" #> f"$$${order.amountPaid.get}%2.2f" 
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
+trait TreatShippedEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case TreatShippedEmail(
+      order
+    ) =>
+      val template =
+    Templates("emails-hidden" :: "treat-shipped-email" :: Nil) openOr NodeSeq.Empty
+
+      val subject = "My Pet Defense Treats Shipped!"
+      val email = order.email.get
+      val trackingNumber = order.trackingNumber.get
+
+      val trackingLink = s"https://tools.usps.com/go/TrackConfirmAction?tLabels=${trackingNumber}"
+
+      val treats = order.treatsOrdered.toList
+      val subtotal = (order.amountPaid.get - order.taxPaid.get)
+
+      val transform = {
+        "#ship-date" #> dateFormatter.format(new Date()) &
+        ".tracking-link [href]" #> trackingLink &
+        ".tracking-number *" #> trackingNumber &
+        "#parent-name" #> order.firstName &
+        ".name" #> (order.firstName + " " + order.lastName) &
+        "#ship-address-1" #> order.street1.get &
+        "#ship-address-2" #> ClearNodesIf(order.street2.get == "") andThen
+        "#ship-address-2-content" #> order.street2.get &
+        "#ship-city" #> order.city.get &
+        "#ship-state" #> order.state.get &
+        "#ship-zip" #> order.zip.get &
+        ".ordered-product" #> treats.map { orderedTreat =>
+          val treat = orderedTreat.treat.obj
+
+          ".treat-quantity *" #> orderedTreat.quantity.get &
+          ".treat-name *" #> treat.map(_.name.get)
+        } &
+        ".amount-due *" #> f"$$$subtotal%2.2f" &
+        "#tax-due *" #> f"$$${order.taxPaid.get}%2.2f" &
+        "#total *" #> f"$$${order.amountPaid.get}%2.2f" 
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   val invoicePaymentSucceededEmailTemplate =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
@@ -825,6 +909,8 @@ trait EmailActor extends EmailHandlerChain
                     with NotifyParentGrowthRateHandling
                     with DailySalesEmailHandling
                     with InternalDailyEmailHandling
+                    with TreatReceiptEmailHandling
+                    with TreatShippedEmailHandling
                     with SixMonthSaleReceiptEmailHandling
                     with SendShipmentRefundedEmailHandling
                     with TestimonialEmailHandling {
