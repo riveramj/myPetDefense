@@ -405,7 +405,7 @@ object DataLoader extends Loggable {
   }
 
   def addWeightToFleaTick = {
-    Product.findAll().map(_.weight(1).saveMe)
+    Product.findAll().map(_.weight(0.5).saveMe)
   }
 
   def createOneSizeCat = {
