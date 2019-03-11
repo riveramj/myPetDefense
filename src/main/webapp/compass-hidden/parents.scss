@@ -14,6 +14,7 @@
   }
 
   .search-parents {
+    cursor: pointer;
     display: inline-block;
     margin: 0;
     padding: 0;
@@ -146,7 +147,6 @@ fieldset.add-pet, fieldset.add-coupon {
   > li {
     display: inline-block;
     vertical-align: top;
-    float: left
   }
 
   label {
@@ -267,7 +267,7 @@ input[type="text"] {
 
 .parent-name {
   input {
-    width: 48%;
+    width: fit-content;
     display: inline-block;
   }
 }
@@ -292,4 +292,43 @@ input[type="text"] {
   table {
     margin-bottom: 0;
   }
+}
+
+.change-email {
+  display: block;
+  padding-top: 20px;
+
+  .parent-email {
+    width: 339px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+    display: inline-block;
+
+  }
+
+  .update-email {
+    border: none;
+    background: none;
+    padding: 0 20px;
+    margin: 0;
+    height: 38px;
+
+    display: inline-block;
+
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border: 1px solid #CECECE;
+    border-left: none;
+
+    margin-left: -3px;
+    vertical-align: top;
+    background-color: #DCDBDB;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+}
+
+.agent-name {
+  padding: 0 40px;
 }
