@@ -328,7 +328,7 @@ class Parents extends Loggable {
       ".parent-email" #> SHtml.ajaxText(currentEmail, email = _) &
       ".update-email [onclick]" #> SHtml.ajaxInvoke(() => changeEmail(parent, email))
     } &
-    ".parent-information .agent-name .agent *" #> agent
+    ".parent-information .agent-name-container .agent *" #> agent
   }
 
   def petBindings = {
