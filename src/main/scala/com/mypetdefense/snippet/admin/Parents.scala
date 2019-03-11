@@ -448,12 +448,16 @@ class Parents extends Loggable {
     { 
       if (isCancelled_?(parent)) {
         ".parent-shipments [class+]" #> "active" &
-        ".change-ship-date-container" #> ClearNodes
+        ".change-ship-date-container" #> ClearNodes &
+        ".agent-info" #> PassThru
       } else {
-        ".parent-shipments" #> PassThru
+        ".agent-info" #> ClearNodes
       }
     } andThen
     ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
+    ".agent-name *" #> currentParent.map { user =>
+      tryo(user.salesAgentId.get).openOr("")
+    } &
     ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
     ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
       
