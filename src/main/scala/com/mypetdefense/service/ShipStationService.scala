@@ -191,7 +191,7 @@ object ShipStationService extends Loggable {
   }
 
   def createShipStationOrder(shipment: Shipment, user: User, subscription: Subscription): Future[Box[Order]] = {
-    val tags = subscription.tags.toList
+    val tags = subscription.tags.toList.map(_.tag.get)
 
     val useBox = Tag.useBoxTag.map(tags.contains(_)).openOr(false)
 
