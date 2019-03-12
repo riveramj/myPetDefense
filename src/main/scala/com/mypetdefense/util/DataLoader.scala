@@ -450,4 +450,10 @@ object DataLoader extends Loggable {
       frontline.delete_!
     }
   }
+
+  def createBoxedTag = {
+    if (Tag.findAll().isEmpty) {
+      Tag.createNewTag("Use Box")
+    }
+  }
 }
