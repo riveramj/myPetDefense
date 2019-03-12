@@ -20,7 +20,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.CatAllSize,
         sizeName = "All Sizes",
         imageName = "zoguard/ZoGuard-Plus-cat-2.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100001"
       )
 
@@ -30,7 +30,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.CatMedium,
         sizeName = "Medium",
         imageName = "adventure/Adventure-Plus-medium-cat.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100011"
       )
 
@@ -40,7 +40,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.CatLarge,
         sizeName = "Large",
         imageName = "adventure/Adventure-Plus-large-cat.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100012"
       )
 
@@ -50,7 +50,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.CatSmall,
         sizeName = "Small",
         imageName = "zoguard/ZoGuard-Plus-cat-2.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100001"
       )
 
@@ -60,7 +60,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.CatMedium,
         sizeName = "Medium",
         imageName = "zoguard/ZoGuard-Plus-cat-2.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100001"
       )
 
@@ -70,7 +70,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.CatLarge,
         sizeName = "Large",
         imageName = "zoguard/ZoGuard-Plus-cat-2.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100001"
       )
 
@@ -80,7 +80,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogSmallAdv,
         sizeName = "Small",
         imageName = "adventure/Adventure-Plus-small-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100013"
       )
       Product.createProduct(
@@ -89,7 +89,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogMediumAdv,
         sizeName = "Medium",
         imageName = "adventure/Adventure-Plus-medium-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100014"
       )
       Product.createProduct(
@@ -98,7 +98,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogLargeAdv,
         sizeName = "Large",
         imageName = "adventure/Adventure-Plus-large-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100015"
       )
       Product.createProduct(
@@ -107,7 +107,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogXLargeAdv,
         sizeName = "X-Large",
         imageName = "adventure/Adventure-Plus-xlarge-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100016"
       )
 
@@ -117,7 +117,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogSmallZo,
         sizeName = "Small",
         imageName = "zoguard/ZoGuard-Plus-small-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100002"
       )
       Product.createProduct(
@@ -126,7 +126,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogMediumZo,
         sizeName = "Medium",
         imageName = "zoguard/ZoGuard-Plus-medium-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100003"
       )
       Product.createProduct(
@@ -135,7 +135,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogLargeZo,
         sizeName = "Large",
         imageName = "zoguard/ZoGuard-Plus-large-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100004"
       )
       Product.createProduct(
@@ -144,7 +144,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogXLargeZo,
         sizeName = "X-Large",
         imageName = "zoguard/ZoGuard-Plus-xlarge-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100005"
       )
 
@@ -154,7 +154,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogSmallShld,
         sizeName = "Small",
         imageName = "shieldtec/ShieldTec-Plus-small-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100007"
       )
       Product.createProduct(
@@ -163,7 +163,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogMediumShld,
         sizeName = "Medium",
         imageName = "shieldtec/ShieldTec-Plus-medium-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100008"
       )
       Product.createProduct(
@@ -172,7 +172,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogLargeShld,
         sizeName = "Large",
         imageName = "shieldtec/ShieldTec-Plus-large-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100009"
       )
       Product.createProduct(
@@ -181,7 +181,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.DogXLargeShld,
         sizeName = "X-Large",
         imageName = "shieldtec/ShieldTec-Plus-xlarge-dog.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100010"
       )
     }
@@ -225,9 +225,9 @@ object DataLoader extends Loggable {
 
   def loadWelcomeInserts = {
     if (Insert.findAll().isEmpty) {
-      Insert.createNewInsert("Welcome Brochure", "450006", .4)
-      Insert.createNewInsert("TPP Registrations Welcome Insert", "450027", .1)
-      Insert.createNewInsert("Petland Welcome Insert", "450028", .1)
+      Insert.createNewInsert("Welcome Brochure", "450006", .5)
+      Insert.createNewInsert("TPP Registrations Welcome Insert", "450027", .0)
+      Insert.createNewInsert("Petland Welcome Insert", "450028", .0)
     }
   }
 
@@ -380,7 +380,7 @@ object DataLoader extends Loggable {
     if (Packaging.findAll().isEmpty) {
       Packaging.createNewPackaging(
         "Bubble Mailer",
-        1.5,
+        0.3,
         "bubble1234",
         0,
         3
@@ -405,7 +405,7 @@ object DataLoader extends Loggable {
   }
 
   def addWeightToFleaTick = {
-    Product.findAll().map(_.weight(0.5).saveMe)
+    Product.findAll().map(_.weight(0.8).saveMe)
   }
 
   def createOneSizeCat = {
@@ -417,7 +417,7 @@ object DataLoader extends Loggable {
         size = AnimalSize.CatAllSize,
         sizeName = "All Sizes",
         imageName = "zoguard/ZoGuard-Plus-cat-2.jpg",
-        weight = 1,
+        weight = 0.8,
         sku = "100001"
       )
     }
