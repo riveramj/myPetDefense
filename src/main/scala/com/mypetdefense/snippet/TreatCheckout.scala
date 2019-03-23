@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet 
+package com.mypetdefense.snippet
 
 import net.liftweb._
   import http.SHtml._
@@ -52,6 +52,8 @@ class TreatCheckout extends Loggable {
   var state = address.map(_.state.get).openOr("")
   var zip = address.map(_.zip.get).openOr("")
 
+  var discountCode = ""
+
   var password = ""
 
   var taxDue = 0D
@@ -65,7 +67,7 @@ class TreatCheckout extends Loggable {
 
   def findSubtotal = {
     val cart = TreatsFlow.shoppingCart.is
-    
+
     cart.map { case (treat, quantity) =>
       treat.price.get * quantity
     }.foldLeft(0D)(_+_)
@@ -99,15 +101,26 @@ class TreatCheckout extends Loggable {
         checkEmpty(zip, "#zip")
       ).flatten
 
+    val dollarOff = discountCode.toLowerCase match {
+      case "1fl" => 1
+      case "2fl" => 2
+      case "3fl" => 3
+      case "4fl" => 4
+      case "5fl" => 5
+      case "6fl" => 6
+      case "7fl" => 7
+      case "8fl" => 8
+    }
+
     if(!validateFields.isEmpty) {
       validateFields.foldLeft(Noop)(_ & _)
     } else {
       val stripeId = user.map(_.stripeId.get).openOr("")
-      val amountPaid = findSubtotal + taxDue
+      val amountPaid = findSubtotal + taxDue - dollarOff
 
       val treatCharge = {
         val stripeAmount = (amountPaid * 100).toLong
-        val internalSaleDescription = "Thanksgiving Box"
+        val internalSaleDescription = "Treat Purchase"
 
         if (existingUser_? && useExistingCard) {
           val stripeCustomer = ParentService.getStripeCustomer(stripeId)
@@ -267,7 +280,7 @@ class TreatCheckout extends Loggable {
       val cart = TreatsFlow.shoppingCart.is
 
       cartRenderer = Full(renderer)
-      
+
       val subtotal = cart.map { case (treat, quantity) =>
         quantity * treat.price.get
       }.foldLeft(0D)(_ + _)
@@ -319,6 +332,7 @@ class TreatCheckout extends Loggable {
       "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
       "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
       "#checkout-email" #> text(email, userEmail => email = userEmail.trim) &
+      "#checkout-discount" #> text(discountCode, discount => discountCode = discount.trim) &
       "#checkout-email" #> {
         if (existingUser_?) {
           "^ [class+]" #> "disabled" &
