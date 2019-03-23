@@ -196,13 +196,13 @@ li.treat-title {
   }
 
   .check:before {
-    @extend .fal;
+    @extend .fas;
     content: fa-content($fa-var-check);
     margin-right: 6px;
   }
 
   .animals:before {
-    @extend .fal;
+    @extend .fas;
     content: fa-content($fa-var-paw);
     margin-right: 6px;
   }
@@ -248,4 +248,8 @@ li.treat-title {
 
 #footer, .legal, #need-help {
   background-color: #5D5D5D;
+}
+
+.fruit-small img, .fruit-large, img {
+  height: 175px;
 }
