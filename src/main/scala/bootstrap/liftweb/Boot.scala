@@ -25,9 +25,9 @@ class Boot {
 
     if (!DB.jndiJdbcConnAvailable_?) {
 
-      val vendor = 
+      val vendor =
         new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",
-			     Props.get("db.url") openOr 
+			     Props.get("db.url") openOr
 			     "jdbc:h2:lift_proto.db;AUTO_SERVER=TRUE",
 			     Props.get("db.user"), Props.get("db.password"))
 
@@ -86,16 +86,18 @@ class Boot {
     //DataLoader.createOneSizeCat
     //DataLoader.loadPetlandInsert
     //DataLoader.removeFrontlineProduct
-    
+    DataLoader.createFruitVeg
+    DataLoader.replaceChickenTreat
+
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
-    
+
     LiftRules.setSiteMap(Paths.siteMap)
 
     //Show the spinny image when an Ajax call starts
     LiftRules.ajaxStart =
       Full(() => LiftRules.jsArtifacts.show("ajax-loader").cmd)
-    
+
     // Make the spinny image go away when it ends
     LiftRules.ajaxEnd =
       Full(() => LiftRules.jsArtifacts.hide("ajax-loader").cmd)
@@ -105,14 +107,14 @@ class Boot {
 
     // Use HTML5 for rendering
     LiftRules.htmlProperties.default.set((r: Req) =>
-      new Html5Properties(r.userAgent))    
+      new Html5Properties(r.userAgent))
 
     // Make a transaction span the whole HTTP request
     S.addAround(DB.buildLoanWrapper)
 
     // set DocType to HTML5
     LiftRules.htmlProperties.default.set((r: Req) =>new Html5Properties(r.userAgent))
-    
+
     LiftRules.statelessDispatch.append(StripeHook)
     LiftRules.statelessDispatch.append(TPPApi)
     LiftRules.statelessDispatch.append(FriendsFamilyAPI)
@@ -154,10 +156,10 @@ class Boot {
   // startup quartz scheduler
   JobManager.init()
 
-  //Lift CSP settings see http://content-security-policy.com/ and 
-  //Lift API for more information.  
+  //Lift CSP settings see http://content-security-policy.com/ and
+  //Lift API for more information.
   LiftRules.securityRules = () => {
-    SecurityRules(content = Some(ContentSecurityPolicy(           
+    SecurityRules(content = Some(ContentSecurityPolicy(
       scriptSources = List(
         ContentSourceRestriction.Self,
         ContentSourceRestriction.Host("https://ajax.googleapis.com")
@@ -176,5 +178,5 @@ class Boot {
         ContentSourceRestriction.Host("https://www.youtube.com"),
       )
     )))
-  }      
+  }
 }

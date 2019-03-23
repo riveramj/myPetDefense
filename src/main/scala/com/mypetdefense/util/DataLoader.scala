@@ -5,7 +5,7 @@ import com.mypetdefense.service._
 import net.liftweb._
   import common._
   import util._
-  
+
 import net.liftweb.util.Helpers._
 import net.liftweb.mapper._
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
@@ -209,7 +209,7 @@ object DataLoader extends Loggable {
     )
 
     val productSku = Product.find(By(Product.sku, "100011"))
-    
+
     if (productSku.isEmpty) {
       for {
         (productName, size, sku) <- productsToUpdate
@@ -218,7 +218,7 @@ object DataLoader extends Loggable {
           By(Product.size, size)
         )
       } yield {
-        product.sku(sku).saveMe 
+        product.sku(sku).saveMe
       }
     }
   }
@@ -376,6 +376,16 @@ object DataLoader extends Loggable {
     }
   }
 
+  def createFruitVeg = {
+    Treat.createNewTreat("Fruit and Vegetable Medley (Small)", 12.99, 3, "fruit-small12345")
+    Treat.createNewTreat("Fruit and Vegetable Medley (Large)", 19.99, 6, "fruit-large12345")
+  }
+
+  def replaceChickenTreat = {
+    Treat.find(By(Treat.name, "Chicken Jerky Skin & Coat Formula")).map(_.delete_!)
+    Treat.createNewTreat("Salmon Jerky Skin & Coat Formula", 14.99, 8, "salmon12345")
+  }
+
   def createPackaging = {
     if (Packaging.findAll().isEmpty) {
       Packaging.createNewPackaging(
@@ -440,7 +450,7 @@ object DataLoader extends Loggable {
       frontline <- productSize._1
     } yield {
       val pets = Pet.findAll(By(Pet.product, frontline))
-      
+
       println(pets.map(_.petId))
 
       productSize._2.map { zoguard =>
