@@ -24,7 +24,7 @@ object TreatList extends Loggable {
 
   val menu = Menu.i("Treats") / "treats"
 
-  val treatListMenu = 
+  val treatListMenu =
     Menu.param[User](
       "Our Treats", "Our Treats",
       productSalesKey => KeyService.findUserByKey(productSalesKey, "productSalesKey"),
@@ -37,11 +37,13 @@ class TreatList extends Loggable {
   import TreatList._
 
   var user = TreatList.treatListMenu.currentValue
-  
+
   val duckTreats = Treat.find(By(Treat.name, "Duck Jerky Multivitamin & Immune Maintenance"))
   val lambTreats = Treat.find(By(Treat.name, "Lamb Jerky Digestive Health & Probiotic"))
   val beefTreats = Treat.find(By(Treat.name, "Beef Jerky Hip & Joint Formula"))
-  val chickenTreats = Treat.find(By(Treat.name, "Chicken Jerky Skin & Coat Formula"))
+  val salmonTreats = Treat.find(By(Treat.name, "Salmon Jerky Skin & Coat Formula"))
+  val fruitSmallTreats = Treat.find(By(Treat.name, "Fruit and Vegetable Medley (Small)"))
+  val fruitLargeTreats = Treat.find(By(Treat.name, "Fruit and Vegetable Medley (Large)"))
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
@@ -75,7 +77,7 @@ class TreatList extends Loggable {
 
       TreatsFlow.shoppingCart(updatedCart)
     }
-    
+
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
@@ -93,7 +95,7 @@ class TreatList extends Loggable {
       val cart = TreatsFlow.shoppingCart.is
 
       cartRenderer = Full(renderer)
-      
+
       val subtotal = cart.map { case (treat, quantity) =>
         quantity * treat.price.get
       }.foldLeft(0D)(_ + _)
@@ -122,6 +124,8 @@ class TreatList extends Loggable {
     ".duck .add-treat [onclick]" #> ajaxInvoke(() => addToCart(duckTreats)) &
     ".lamb .add-treat [onclick]" #> ajaxInvoke(() => addToCart(lambTreats)) &
     ".beef .add-treat [onclick]" #> ajaxInvoke(() => addToCart(beefTreats)) &
-    ".chicken .add-treat [onclick]" #> ajaxInvoke(() => addToCart(chickenTreats))
+    ".salmon .add-treat [onclick]" #> ajaxInvoke(() => addToCart(salmonTreats)) &
+    ".fruit-small .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitSmallTreats)) &
+    ".fruit-large .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitLargeTreats))
   }
 }
