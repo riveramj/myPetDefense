@@ -50,7 +50,7 @@ class TreatList extends Loggable {
   user.map(SecurityContext.logIn(_))
 
   def updateCartCount(treat: Treat, newQuantity: Int) = {
-    val cart = TreatsFlow.shoppingCart.is
+    val cart = TreatsFlow.treatShoppingCart.is
 
     val updatedCart = {
       if (newQuantity < 1)
@@ -59,14 +59,14 @@ class TreatList extends Loggable {
         cart + (treat -> newQuantity)
     }
 
-    TreatsFlow.shoppingCart(updatedCart)
+    TreatsFlow.treatShoppingCart(updatedCart)
 
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def addToCart(possibleTreat: Box[Treat]) = {
     possibleTreat.map { treat =>
-      val cart = TreatsFlow.shoppingCart.is
+      val cart = TreatsFlow.treatShoppingCart.is
 
       val updatedCart = {
         if (cart.contains(treat))
@@ -75,16 +75,16 @@ class TreatList extends Loggable {
           cart + (treat -> 1)
       }
 
-      TreatsFlow.shoppingCart(updatedCart)
+      TreatsFlow.treatShoppingCart(updatedCart)
     }
 
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def removeTreatFromCart(treat: Treat) = {
-    val cart = TreatsFlow.shoppingCart.is
+    val cart = TreatsFlow.treatShoppingCart.is
 
-    TreatsFlow.shoppingCart(cart - treat)
+    TreatsFlow.treatShoppingCart(cart - treat)
 
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
@@ -92,7 +92,7 @@ class TreatList extends Loggable {
   def render = {
     "#logo-name a [href]" #> TreatList.treatListMenu.loc.calcDefaultHref &
     "#shopping-cart" #> idMemoize { renderer =>
-      val cart = TreatsFlow.shoppingCart.is
+      val cart = TreatsFlow.treatShoppingCart.is
 
       cartRenderer = Full(renderer)
 
