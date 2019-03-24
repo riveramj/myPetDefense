@@ -110,6 +110,7 @@ class TreatCheckout extends Loggable {
       case "6fl" => 6
       case "7fl" => 7
       case "8fl" => 8
+      case _ => 0
     }
 
     if(!validateFields.isEmpty) {
