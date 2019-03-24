@@ -88,6 +88,7 @@ class Boot {
     //DataLoader.removeFrontlineProduct
     //DataLoader.createFruitVeg
     //DataLoader.replaceChickenTreat
+    DataLoader.createProducts
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
