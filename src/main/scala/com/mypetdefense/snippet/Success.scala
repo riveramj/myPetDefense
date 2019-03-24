@@ -29,27 +29,34 @@ class Success extends Loggable {
   purchased.is
 
   def render() = {
-    if (TreatsFlow.treatSale.is == Empty) {
+    if (TreatsFlow.treatShoppingCart.is == Map()) {
+      println("in if")
+
       val petCount = shoppingCart.is.size
-      val monthylTotal = total.is
+      val monthlyTotal = total.is
       val freeMonthCount = freeMonths.is.openOr(0)
 
-      "#pet-count span *" #> petCount &
-      "#monthly-total" #> ClearNodesIf(freeMonthCount == 0) &
-      "#monthly-total span *" #> monthylTotal.map( paid => f"$$$paid%2.2f" ) &
+      "#order-details" #> {
+        "#pet-count span *" #> petCount &
+        "#monthly-total" #> ClearNodesIf(freeMonthCount == 0) &
+        ".treat-sold" #> ClearNodes &
+        "#monthly-total span *" #> monthlyTotal.map( paid => f"$$$paid%2.2f" )
+      } &
       {
         if (freeMonthCount == 0) {
-          "#checkout-total #amount *" #> monthylTotal.map( paid => f"$$$paid%2.2f" )
+          "#checkout-total #amount *" #> monthlyTotal.map( paid => f"$$$paid%2.2f" )
         } else if (freeMonthCount == 1) {
           "#checkout-total *" #> s"First Month Free"
         } else {
           "#checkout-total *" #> s"First ${freeMonthCount} months free"
         }
-      } &
-      "treat-sold" #> ClearNodes
+      }
     } else {
       val treatSalesTotal = TreatsFlow.treatSale.is.map(_._1).openOr(0D)
       val treats = TreatsFlow.treatSale.is.map(_._2).openOr(Map())
+
+      TreatsFlow.treatSale(Empty)
+      TreatsFlow.treatShoppingCart(Map())
 
       "#order-summary [class+]" #> "treat-sale" &
       "#order-total h3 [class+]" #> "treat-sale" andThen

@@ -66,7 +66,7 @@ class TreatCheckout extends Loggable {
   var stripeToken = ""
 
   def findSubtotal = {
-    val cart = TreatsFlow.shoppingCart.is
+    val cart = TreatsFlow.treatShoppingCart.is
 
     cart.map { case (treat, quantity) =>
       treat.price.get * quantity
@@ -110,6 +110,7 @@ class TreatCheckout extends Loggable {
       case "6fl" => 6
       case "7fl" => 7
       case "8fl" => 8
+      case _ => 0
     }
 
     if(!validateFields.isEmpty) {
@@ -165,7 +166,7 @@ class TreatCheckout extends Loggable {
             email
         }
 
-        val cart = TreatsFlow.shoppingCart.is
+        val cart = TreatsFlow.treatShoppingCart.is
 
         val newTreatOrder = TreatOrder.createTreatOrder(
           user,
@@ -195,9 +196,9 @@ class TreatCheckout extends Loggable {
   }
 
   def removeTreatFromCart(treat: Treat) = {
-    val cart = TreatsFlow.shoppingCart.is
+    val cart = TreatsFlow.treatShoppingCart.is
 
-    TreatsFlow.shoppingCart(cart - treat)
+    TreatsFlow.treatShoppingCart(cart - treat)
 
     (
       cartRenderer.map(_.setHtml).openOr(Noop) &
@@ -206,7 +207,7 @@ class TreatCheckout extends Loggable {
   }
 
   def updateCartCount(treat: Treat, newQuantity: Int) = {
-    val cart = TreatsFlow.shoppingCart.is
+    val cart = TreatsFlow.treatShoppingCart.is
 
     val updatedCart = {
       if (newQuantity < 1)
@@ -215,7 +216,7 @@ class TreatCheckout extends Loggable {
         cart + (treat -> newQuantity)
     }
 
-    TreatsFlow.shoppingCart(updatedCart)
+    TreatsFlow.treatShoppingCart(updatedCart)
 
     (
       cartRenderer.map(_.setHtml).openOr(Noop) &
@@ -255,7 +256,7 @@ class TreatCheckout extends Loggable {
     val orderSummary = {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
-        val cart = TreatsFlow.shoppingCart.is
+        val cart = TreatsFlow.treatShoppingCart.is
 
         val subtotal = findSubtotal
 
@@ -277,7 +278,7 @@ class TreatCheckout extends Loggable {
     SHtml.makeFormsAjax andThen
     loginBindings &
     "#shopping-cart" #> idMemoize { renderer =>
-      val cart = TreatsFlow.shoppingCart.is
+      val cart = TreatsFlow.treatShoppingCart.is
 
       cartRenderer = Full(renderer)
 
