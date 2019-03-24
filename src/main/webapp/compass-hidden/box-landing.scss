@@ -4,9 +4,11 @@
 
 #top-bar {
   background-color: #ffffff;
+  display: flex;
+  justify-content: space-between;
 
   nav {
-    float: right;
+    float: inline-block;
     margin: 14px 19px 0 0;
   }
 }
@@ -14,6 +16,14 @@
 #logo-name {
   padding: 14px 0 11px 15px;
   display: inline-block;
+
+  @media (min-width: $bp-medium) {
+    padding: 20px 40px 20px;
+  }
+
+  img {
+    height: 31px;
+  }
 }
 
 .page-header {
@@ -250,6 +260,6 @@ li.treat-title {
   background-color: #5D5D5D;
 }
 
-.fruit-small img, .fruit-large, img {
+.fruit-small img, .fruit-large img {
   height: 175px;
 }
