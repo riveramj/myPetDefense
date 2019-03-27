@@ -24,7 +24,7 @@ object ResetPassword extends Loggable {
 
   val menu = Menu.param[User](
     "Reset Password", "Reset Password",
-    accessKey => KeyService.findUserByKey(accessKey, "accessKey"),
+    accessKey => KeyService.findUserByKey(accessKey, "resetPasswordKey"),
     user => user.resetPasswordKey.get
   ) / "reset-password" >> 
     Hidden
