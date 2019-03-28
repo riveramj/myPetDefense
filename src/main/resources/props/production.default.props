@@ -23,7 +23,7 @@ server.url=http://mypetdefense.com/
 taxjar.api.key=a898d7a70fb3f3d948b7aac38779e42d
 
 [Price]
-default.price.code=fl-expo-mar-3-2019
+default.price.code=tpp-apr-01-2018
 tpp.price.code=tpp-apr-01-2018
 petland.6month.payment=petland-6month-prepay-12-01-2018
 petland.5month.coupon=petland-5month-prepaid
