@@ -459,7 +459,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def createNetPetlandStores = {
+  def createNewPetlandStores = {
     val petlandAgencies = Agency.findAll(By(Agency.petlandStore, true))
     
     val agents = petlandAgencies.map(_.members.toList).flatten
