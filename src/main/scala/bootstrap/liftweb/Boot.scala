@@ -73,9 +73,9 @@ class Boot {
     //DataLoader.loadAdmin
     //DataLoader.createProductAccessKey
     //DataLoader.createProducts
-    DataLoader.createPackaging
-    DataLoader.addWeightToFleaTick
-    DataLoader.addWeightToInsert
+    //DataLoader.createPackaging
+    //DataLoader.addWeightToFleaTick
+    //DataLoader.addWeightToInsert
     //DataLoader.updateParentNoPets
     //DataLoader.createFriendsFamilyProducts
     //DataLoader.updateShipmentShipStationId
@@ -88,7 +88,8 @@ class Boot {
     //DataLoader.removeFrontlineProduct
     //DataLoader.createFruitVeg
     //DataLoader.replaceChickenTreat
-    DataLoader.createProducts
+    //DataLoader.createProducts
+    DataLoader.createNetPetlandStores
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
