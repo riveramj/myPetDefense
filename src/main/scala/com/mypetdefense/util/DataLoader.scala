@@ -458,4 +458,70 @@ object DataLoader extends Loggable {
       frontline.delete_!
     }
   }
+
+  def createNewPetlandStores = {
+    val petlandAgencies = Agency.findAll(By(Agency.petlandStore, true))
+    
+    val agents = petlandAgencies.map(_.members.toList).flatten
+
+    agents.map(_.delete_!)
+    
+    petlandAgencies.map(_.delete_!)
+
+    val petlandHQ = Full(Agency.createNewAgency(
+      "Petland",
+      AgencyType.Headquarters,
+      Empty,
+      "petlandhq",
+      true
+    ))
+
+    Agency.createNewAgency(
+      "Petland Carriage Place",
+      AgencyType.Store,
+      petlandHQ,
+      "zplohcp",
+      true
+    )
+
+    Agency.createNewAgency(
+      "Petland Lewis Center",
+      AgencyType.Store,
+      petlandHQ,
+      "zplohlc",
+      true
+    )
+
+    Agency.createNewAgency(
+      "Petland Kennesaw",
+      AgencyType.Store,
+      petlandHQ,
+      "zplgak",
+      true
+    )
+
+    Agency.createNewAgency(
+      "Petland Mall of Georgia",
+      AgencyType.Store,
+      petlandHQ,
+      "pmog",
+      true
+    )
+
+    Agency.createNewAgency(
+      "Petland Sarasota",
+      AgencyType.Store,
+      petlandHQ,
+      "zplfls",
+      true
+    )
+
+    Agency.createNewAgency(
+      "Petland Summerville",
+      AgencyType.Store,
+      petlandHQ,
+      "ps68",
+      true
+    )
+  }
 }
