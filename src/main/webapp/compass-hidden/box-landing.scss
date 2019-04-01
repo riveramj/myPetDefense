@@ -4,9 +4,11 @@
 
 #top-bar {
   background-color: #ffffff;
+  display: flex;
+  justify-content: space-between;
 
   nav {
-    float: right;
+    float: inline-block;
     margin: 14px 19px 0 0;
   }
 }
@@ -14,6 +16,14 @@
 #logo-name {
   padding: 14px 0 11px 15px;
   display: inline-block;
+
+  @media (min-width: $bp-medium) {
+    padding: 20px 40px 20px;
+  }
+
+  img {
+    height: 31px;
+  }
 }
 
 .page-header {
@@ -139,7 +149,7 @@
     @extend .fas;
     content: fa-content($fa-var-shopping-cart);
     margin-right: 6px;
-  
+
     @media (min-width: $bp-medium) {
       font-size: 14px;
       margin-right: 8px;
@@ -195,6 +205,18 @@ li.treat-title {
     margin-right: 6px;
   }
 
+  .check:before {
+    @extend .fas;
+    content: fa-content($fa-var-check);
+    margin-right: 6px;
+  }
+
+  .animals:before {
+    @extend .fas;
+    content: fa-content($fa-var-paw);
+    margin-right: 6px;
+  }
+
   .usa:before {
     @extend .fas;
     content: fa-content($fa-var-flag-usa);
@@ -226,7 +248,7 @@ li.treat-title {
     @extend .fas;
     content: fa-content($fa-var-shopping-cart);
     margin-right: 6px;
-  
+
     @media (min-width: $bp-medium) {
       font-size: 14px;
       margin-right: 8px;
@@ -236,4 +258,8 @@ li.treat-title {
 
 #footer, .legal, #need-help {
   background-color: #5D5D5D;
+}
+
+.fruit-small img, .fruit-large img {
+  height: 175px;
 }

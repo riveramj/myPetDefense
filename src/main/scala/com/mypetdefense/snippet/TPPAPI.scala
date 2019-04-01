@@ -36,6 +36,7 @@ case class NewParent(firstName: String, lastName: String, email: String, address
 object TPPApi extends RestHelper with Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
+  val tppAgency = Agency.find(By(Agency.name, "TPP"))
 
   def sendStripeErrorEmail(
     failedStepMessage: String,
@@ -355,9 +356,18 @@ object TPPApi extends RestHelper with Loggable {
         pets <- tryo(petsJson.extract[List[NewPet]]) ?~ "Error in pets json." ~> 400
         agentId <- tryo(requestJson \ "agentId").map(_.extract[String]) ?~ "Phone agent is missing." ~> 400
         } yield {
+          val storeCodeRaw = tryo(requestJson \ "storeCode")
+          val storeCode = tryo(storeCodeRaw.map(_.extract[String])).flatten.openOr("")
+
+          val salesAgency = {
+            if (storeCode != "")
+              Agency.find(By(Agency.storeCode, storeCode))
+            else
+              tppAgency
+          }
+
           EmailActor ! SendTppApiJsonEmail(requestJson.toString)
 
-          val salesAgency = Agency.find(By(Agency.name, "TPP"))
           val existingUser = User.find(By(User.email, possibleParent.email), By(User.userType, UserType.Parent))
 
           existingUser match {

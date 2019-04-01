@@ -5,7 +5,7 @@ import com.mypetdefense.service._
 import net.liftweb._
   import common._
   import util._
-  
+
 import net.liftweb.util.Helpers._
 import net.liftweb.mapper._
 import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
@@ -209,7 +209,7 @@ object DataLoader extends Loggable {
     )
 
     val productSku = Product.find(By(Product.sku, "100011"))
-    
+
     if (productSku.isEmpty) {
       for {
         (productName, size, sku) <- productsToUpdate
@@ -218,7 +218,7 @@ object DataLoader extends Loggable {
           By(Product.size, size)
         )
       } yield {
-        product.sku(sku).saveMe 
+        product.sku(sku).saveMe
       }
     }
   }
@@ -368,12 +368,20 @@ object DataLoader extends Loggable {
   }
 
   def createProducts = {
-    if (Treat.findAll().isEmpty) {
       Treat.createNewTreat("Duck Jerky Multivitamin & Immune Maintenance", 14.99, 8, "duck12345")
       Treat.createNewTreat("Lamb Jerky Digestive Health & Probiotic", 14.99, 8, "lamb12345")
       Treat.createNewTreat("Beef Jerky Hip & Joint Formula", 14.99, 8, "beef12345")
-      Treat.createNewTreat("Chicken Jerky Skin & Coat Formula", 14.99, 8, "chicken12345")
-    }
+      //Treat.createNewTreat("Chicken Jerky Skin & Coat Formula", 14.99, 8, "chicken12345")
+  }
+
+  def createFruitVeg = {
+    Treat.createNewTreat("Fruit and Vegetable Medley (Small)", 12.99, 3, "fruit-small12345")
+    Treat.createNewTreat("Fruit and Vegetable Medley (Large)", 19.99, 6, "fruit-large12345")
+  }
+
+  def replaceChickenTreat = {
+    Treat.find(By(Treat.name, "Chicken Jerky Skin & Coat Formula")).map(_.delete_!)
+    Treat.createNewTreat("Salmon Jerky Skin & Coat Formula", 14.99, 8, "salmon12345")
   }
 
   def createPackaging = {
@@ -440,7 +448,7 @@ object DataLoader extends Loggable {
       frontline <- productSize._1
     } yield {
       val pets = Pet.findAll(By(Pet.product, frontline))
-      
+
       println(pets.map(_.petId))
 
       productSize._2.map { zoguard =>
@@ -455,5 +463,71 @@ object DataLoader extends Loggable {
     if (Tag.findAll().isEmpty) {
       Tag.createNewTag("Use Box")
     }
+  }
+
+  def createNewPetlandStores = {
+    val petlandAgencies = Agency.findAll(By(Agency.petlandStore, true))
+    
+    val agents = petlandAgencies.map(_.members.toList).flatten
+
+    agents.map(_.delete_!)
+    
+    petlandAgencies.map(_.delete_!)
+
+    val petlandHQ = Full(Agency.createNewAgency(
+      "Petland",
+      AgencyType.Headquarters,
+      Empty,
+      "petlandhq",
+      true
+    ))
+
+    Agency.createNewAgency(
+      "Petland Carriage Place",
+      AgencyType.Store,
+      petlandHQ,
+      "zplohcp",
+      true
+    )
+
+    Agency.createNewAgency(
+      "Petland Lewis Center",
+      AgencyType.Store,
+      petlandHQ,
+      "zplohlc",
+      true
+    )
+
+    Agency.createNewAgency(
+      "Petland Kennesaw",
+      AgencyType.Store,
+      petlandHQ,
+      "zplgak",
+      true
+    )
+
+    Agency.createNewAgency(
+      "Petland Mall of Georgia",
+      AgencyType.Store,
+      petlandHQ,
+      "pmog",
+      true
+    )
+
+    Agency.createNewAgency(
+      "Petland Sarasota",
+      AgencyType.Store,
+      petlandHQ,
+      "zplfls",
+      true
+    )
+
+    Agency.createNewAgency(
+      "Petland Summerville",
+      AgencyType.Store,
+      petlandHQ,
+      "ps68",
+      true
+    )
   }
 }

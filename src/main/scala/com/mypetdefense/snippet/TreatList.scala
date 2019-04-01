@@ -24,7 +24,7 @@ object TreatList extends Loggable {
 
   val menu = Menu.i("Treats") / "treats"
 
-  val treatListMenu = 
+  val treatListMenu =
     Menu.param[User](
       "Our Treats", "Our Treats",
       productSalesKey => KeyService.findUserByKey(productSalesKey, "productSalesKey"),
@@ -37,18 +37,20 @@ class TreatList extends Loggable {
   import TreatList._
 
   var user = TreatList.treatListMenu.currentValue
-  
+
   val duckTreats = Treat.find(By(Treat.name, "Duck Jerky Multivitamin & Immune Maintenance"))
   val lambTreats = Treat.find(By(Treat.name, "Lamb Jerky Digestive Health & Probiotic"))
   val beefTreats = Treat.find(By(Treat.name, "Beef Jerky Hip & Joint Formula"))
-  val chickenTreats = Treat.find(By(Treat.name, "Chicken Jerky Skin & Coat Formula"))
+  val salmonTreats = Treat.find(By(Treat.name, "Salmon Jerky Skin & Coat Formula"))
+  val fruitSmallTreats = Treat.find(By(Treat.name, "Fruit and Vegetable Medley (Small)"))
+  val fruitLargeTreats = Treat.find(By(Treat.name, "Fruit and Vegetable Medley (Large)"))
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
   user.map(SecurityContext.logIn(_))
 
   def updateCartCount(treat: Treat, newQuantity: Int) = {
-    val cart = TreatsFlow.shoppingCart.is
+    val cart = TreatsFlow.treatShoppingCart.is
 
     val updatedCart = {
       if (newQuantity < 1)
@@ -57,14 +59,14 @@ class TreatList extends Loggable {
         cart + (treat -> newQuantity)
     }
 
-    TreatsFlow.shoppingCart(updatedCart)
+    TreatsFlow.treatShoppingCart(updatedCart)
 
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def addToCart(possibleTreat: Box[Treat]) = {
     possibleTreat.map { treat =>
-      val cart = TreatsFlow.shoppingCart.is
+      val cart = TreatsFlow.treatShoppingCart.is
 
       val updatedCart = {
         if (cart.contains(treat))
@@ -73,16 +75,16 @@ class TreatList extends Loggable {
           cart + (treat -> 1)
       }
 
-      TreatsFlow.shoppingCart(updatedCart)
+      TreatsFlow.treatShoppingCart(updatedCart)
     }
-    
+
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def removeTreatFromCart(treat: Treat) = {
-    val cart = TreatsFlow.shoppingCart.is
+    val cart = TreatsFlow.treatShoppingCart.is
 
-    TreatsFlow.shoppingCart(cart - treat)
+    TreatsFlow.treatShoppingCart(cart - treat)
 
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
@@ -90,10 +92,10 @@ class TreatList extends Loggable {
   def render = {
     "#logo-name a [href]" #> TreatList.treatListMenu.loc.calcDefaultHref &
     "#shopping-cart" #> idMemoize { renderer =>
-      val cart = TreatsFlow.shoppingCart.is
+      val cart = TreatsFlow.treatShoppingCart.is
 
       cartRenderer = Full(renderer)
-      
+
       val subtotal = cart.map { case (treat, quantity) =>
         quantity * treat.price.get
       }.foldLeft(0D)(_ + _)
@@ -122,6 +124,8 @@ class TreatList extends Loggable {
     ".duck .add-treat [onclick]" #> ajaxInvoke(() => addToCart(duckTreats)) &
     ".lamb .add-treat [onclick]" #> ajaxInvoke(() => addToCart(lambTreats)) &
     ".beef .add-treat [onclick]" #> ajaxInvoke(() => addToCart(beefTreats)) &
-    ".chicken .add-treat [onclick]" #> ajaxInvoke(() => addToCart(chickenTreats))
+    ".salmon .add-treat [onclick]" #> ajaxInvoke(() => addToCart(salmonTreats)) &
+    ".fruit-small .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitSmallTreats)) &
+    ".fruit-large .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitLargeTreats))
   }
 }
