@@ -459,6 +459,12 @@ object DataLoader extends Loggable {
     }
   }
 
+  def createBoxedTag = {
+    if (Tag.findAll().isEmpty) {
+      Tag.createNewTag("Use Box")
+    }
+  }
+
   def createNewPetlandStores = {
     val petlandAgencies = Agency.findAll(By(Agency.petlandStore, true))
     

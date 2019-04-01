@@ -192,14 +192,20 @@ object TPPApi extends RestHelper with Loggable {
             val plusOneDayDate = Date.from(plusOneDayTime)
 
             updatedParent.map { user =>
-              Subscription.createNewSubscription(
+              val mpdSubscription = Subscription.createNewSubscription(
                 user,
                 subscriptionId,
                 new Date(),
                 plusOneDayDate,
                 Price.currentTppPriceCode
               )
+
+              TaggedItem.createNewTaggedItem(
+                subscription = Full(mpdSubscription),
+                tag = Tag.useBox
+              )
             }
+
             val coupon = Coupon.find(By(Coupon.couponCode, couponName.getOrElse("")))
             val updatedUser = updatedParent.map(_.coupon(coupon).saveMe)
 
