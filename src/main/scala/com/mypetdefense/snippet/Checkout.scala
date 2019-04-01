@@ -216,7 +216,7 @@ class Checkout extends Loggable {
 
     TaggedItem.createNewTaggedItem(
       subscription = Full(mpdSubscription),
-      tag = Tag.useBoxTag
+      tag = Tag.useBox
     )
 
     if (Props.mode == Props.RunModes.Production) {
