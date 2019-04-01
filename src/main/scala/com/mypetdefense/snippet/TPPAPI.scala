@@ -202,7 +202,7 @@ object TPPApi extends RestHelper with Loggable {
 
               TaggedItem.createNewTaggedItem(
                 subscription = Full(mpdSubscription),
-                tag = Tag.useBoxTag
+                tag = Tag.useBox
               )
             }
 

@@ -193,7 +193,7 @@ object ShipStationService extends Loggable {
   def createShipStationOrder(shipment: Shipment, user: User, subscription: Subscription): Future[Box[Order]] = {
     val tags = subscription.tags.toList.map(_.tag.get)
 
-    val useBox = Tag.useBoxTag.map(tags.contains(_)).openOr(false)
+    val useBox = Tag.useBox.map(tags.contains(_)).openOr(false)
 
     val billShipTo = createUserBillShipToAddress(user)
 
@@ -218,14 +218,13 @@ object ShipStationService extends Loggable {
         (packaging, packaging.map(_.sku.get).toList)
 
       case (true, _) =>
-        Packaging.getLargeBox
-        val packaging = Packaging.getSmallBox
+        val packaging = Packaging.getLargeBox
         (packaging, packaging.map(_.sku.get).toList)
 
-      case (_, 1 | 2 | 3) => 
+      case (false, 1 | 2 | 3) => 
         (Packaging.getBubbleMailer, Nil)
       
-      case (_, 4 | 5) => 
+      case (false, 4 | 5) => 
         val packaging = Packaging.getSmallBox
         (packaging, packaging.map(_.sku.get).toList)
   

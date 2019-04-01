@@ -29,6 +29,6 @@ object Tag extends Tag with LongKeyedMetaMapper[Tag] {
       .saveMe
   }
 
-  def useBoxTag = Tag.find(By(Tag.name, "Use Box"))
+  def useBox = Tag.find(By(Tag.name, "Use Box"))
 }
 
