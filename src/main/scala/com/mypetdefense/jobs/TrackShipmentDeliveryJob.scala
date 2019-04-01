@@ -175,7 +175,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
         case delivered if statuses.contains("DX") =>
           (DelayedDelivery, "")
 
-        case inTransit if statuses.intersect(List("L1", "03", "10", "OA", "SF")).nonEmpty =>
+        case inTransit if statuses.intersect(List("PC", "OF", "07", "NT", "U1", "T1", "A1", "L1", "03", "10", "OA", "SF")).nonEmpty =>
           (InTransit, "")
 
         case labelCreated if statuses.intersect(List("GX", "MA", "GA")).nonEmpty =>
