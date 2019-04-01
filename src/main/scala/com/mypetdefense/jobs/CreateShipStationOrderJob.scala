@@ -41,7 +41,7 @@ class CreateShipStationOrderJob extends ManagedJob {
       subscription <- shipment.subscription.obj
       user <- subscription.user.obj
     } yield { 
-      val shipStationOrder = ShipStationService.createShipStationOrder(shipment, user)
+      val shipStationOrder = ShipStationService.createShipStationOrder(shipment, user, subscription)
 
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>

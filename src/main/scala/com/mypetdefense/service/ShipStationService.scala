@@ -190,7 +190,11 @@ object ShipStationService extends Loggable {
 
   }
 
-  def createShipStationOrder(shipment: Shipment, user: User): Future[Box[Order]] = {
+  def createShipStationOrder(shipment: Shipment, user: User, subscription: Subscription): Future[Box[Order]] = {
+    val tags = subscription.tags.toList.map(_.tag.get)
+
+    val useBox = Tag.useBox.map(tags.contains(_)).openOr(false)
+
     val billShipTo = createUserBillShipToAddress(user)
 
     val refreshedShipment = shipment.refresh
@@ -208,15 +212,24 @@ object ShipStationService extends Loggable {
 
     val fleaTickCount = products.size
 
-    val (packaging, packagingId) = fleaTickCount match {
-      case 1 | 2 | 3 => 
+    val (packaging, packagingId) = (useBox, fleaTickCount) match {
+      case (true, count) if count < 6 =>
+        val packaging = Packaging.getSmallBox
+        (packaging, packaging.map(_.sku.get).toList)
+
+      case (true, _) =>
+        val packaging = Packaging.getLargeBox
+        (packaging, packaging.map(_.sku.get).toList)
+
+      case (false, 1 | 2 | 3) => 
         (Packaging.getBubbleMailer, Nil)
       
-      case 4 | 5 => 
+      case (false, 4 | 5) => 
         val packaging = Packaging.getSmallBox
         (packaging, packaging.map(_.sku.get).toList)
   
-      case _ => Packaging.getLargeBox
+      case (_, _) => 
+        Packaging.getLargeBox
         val packaging = Packaging.getSmallBox
         (packaging, packaging.map(_.sku.get).toList)
     }

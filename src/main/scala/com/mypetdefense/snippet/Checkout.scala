@@ -206,12 +206,17 @@ class Checkout extends Loggable {
         subscription.id
       }).flatMap(identity).getOrElse("")
 
-    Subscription.createNewSubscription(
+    val mpdSubscription = Subscription.createNewSubscription(
       user,
       subscriptionId,
       new Date(),
       new Date(),
       priceCode.is.openOr(Price.defaultPriceCode)
+    )
+
+    TaggedItem.createNewTaggedItem(
+      subscription = Full(mpdSubscription),
+      tag = Tag.useBox
     )
 
     if (Props.mode == Props.RunModes.Production) {
