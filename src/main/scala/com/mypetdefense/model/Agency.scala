@@ -20,6 +20,7 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
   object agencyType extends MappedEnum(this, AgencyType)
   object customers extends MappedOneToMany(User, User.referer)
   object members extends MappedOneToMany(User, User.agency)
+  object storeCode extends MappedString(this, 100)
   object coupons extends MappedOneToMany(Coupon, Coupon.agency)
   object petlandStore extends MappedBoolean(this) {
     override def defaultValue = false
@@ -31,13 +32,17 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
   def createNewAgency(
     name: String,
     agencyType: AgencyType.Value = AgencyType.Headquarters,
-    parent: Box[Agency] = Empty
+    parent: Box[Agency] = Empty,
+    storeCode: String = "",
+    petlandStore: Boolean = false
   ) = {
     Agency.create
     .agencyId(generateLongId)
     .name(name)
     .agencyType(agencyType)
     .parent(parent)
+    .storeCode(storeCode)
+    .petlandStore(petlandStore)
     .saveMe
   }
 

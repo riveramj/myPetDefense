@@ -66,16 +66,18 @@ class Boot {
       InventoryItemPart,
       Treat,
       TreatOrderLineItem,
-      Packaging
+      Packaging,
+      TaggedItem,
+      Tag
     )
 
     //DataLoader.loadProducts
     //DataLoader.loadAdmin
     //DataLoader.createProductAccessKey
     //DataLoader.createProducts
-    DataLoader.createPackaging
-    DataLoader.addWeightToFleaTick
-    DataLoader.addWeightToInsert
+    //DataLoader.createPackaging
+    //DataLoader.addWeightToFleaTick
+    //DataLoader.addWeightToInsert
     //DataLoader.updateParentNoPets
     //DataLoader.createFriendsFamilyProducts
     //DataLoader.updateShipmentShipStationId
@@ -88,7 +90,8 @@ class Boot {
     //DataLoader.removeFrontlineProduct
     //DataLoader.createFruitVeg
     //DataLoader.replaceChickenTreat
-    DataLoader.createProducts
+    //DataLoader.createProducts
+    DataLoader.createNewPetlandStores
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
