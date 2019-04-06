@@ -53,6 +53,7 @@ class TreatCheckout extends Loggable {
   var zip = address.map(_.zip.get).openOr("")
 
   var discountCode = ""
+  var discount_? = false
 
   var password = ""
 
@@ -90,6 +91,18 @@ class TreatCheckout extends Loggable {
     priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
   }
 
+  def validateCouponCode() = {
+    if (discountCode.toLowerCase == "mpd20") {
+      discount_? = true
+
+      (
+        Alert("Discount applied.") &
+        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+      )
+    } else
+      Alert("Invalid discount code.")
+  }
+
   def orderTreat() = {
     val validateFields = List(
         validEmailFormat(email, "#checkout-email"),
@@ -101,17 +114,13 @@ class TreatCheckout extends Loggable {
         checkEmpty(zip, "#zip")
       ).flatten
 
-    val dollarOff = discountCode.toLowerCase match {
-      case "1fl" => 1
-      case "2fl" => 2
-      case "3fl" => 3
-      case "4fl" => 4
-      case "5fl" => 5
-      case "6fl" => 6
-      case "7fl" => 7
-      case "8fl" => 8
+    val percentOff = discountCode.toLowerCase match {
+      case "mpd20" => .20
+      case "mpd 20" => .20
       case _ => 0
     }
+
+    val dollarOff = findSubtotal * percentOff
 
     if(!validateFields.isEmpty) {
       validateFields.foldLeft(Noop)(_ & _)
@@ -258,7 +267,16 @@ class TreatCheckout extends Loggable {
         priceAdditionsRenderer = Full(renderer)
         val cart = TreatsFlow.treatShoppingCart.is
 
-        val subtotal = findSubtotal
+        val beforeSubtotal = findSubtotal
+
+        val subtotal = {
+          if (discount_?) {
+            val coupon = beforeSubtotal * .20
+            beforeSubtotal - coupon
+          } else {
+            beforeSubtotal
+          }
+        }
 
         val total = subtotal + taxDue
 
@@ -333,7 +351,8 @@ class TreatCheckout extends Loggable {
       "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
       "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
       "#checkout-email" #> text(email, userEmail => email = userEmail.trim) &
-      "#checkout-discount" #> text(discountCode, discount => discountCode = discount.trim) &
+      "#checkout-discount" #> ajaxText(discountCode, discount => discountCode = discount.trim) &
+      ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
       "#checkout-email" #> {
         if (existingUser_?) {
           "^ [class+]" #> "disabled" &
