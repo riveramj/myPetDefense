@@ -530,4 +530,20 @@ object DataLoader extends Loggable {
       true
     )
   }
+
+  def createPuppySpot = {
+    val puppySpot = Agency.createNewAgency(
+      "PuppySpot",
+      AgencyType.Store,
+      Empty,
+      "pupspot",
+      false
+    )
+
+    val tppAgency = Agency.find(By(Agency.name, "TPP"))
+
+    val tppCustomers = tppAgency.map(_.customers.toList).openOr(Nil)
+
+    tppCustomers.map(_.referer(puppySpot).saveMe)
+  }
 }
