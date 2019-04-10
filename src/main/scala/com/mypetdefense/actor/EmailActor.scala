@@ -54,6 +54,8 @@ case class SendShipmentRefundedEmail(parent: Box[User], shipment: Shipment) exte
 case class DailySalesEmail(
   agentNameAndCount: List[(String, Int)],
   monthAgentNameAndCount: List[(String, Int)],
+  dailySalesByAgency: List[(String, Int)],
+  monthlySalesByAgency: List[(String, Int)],
   email: String
 ) extends EmailActorMessage
 case class InternalDailyEmail(
@@ -616,6 +618,8 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
     case DailySalesEmail(
       agentNameAndCount,
       monthAgentNameAndCount,
+      dailySalesByAgency,
+      monthlySalesByAgency,
       email
     ) =>
       val template =
@@ -645,6 +649,14 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
         } &
         ".monthly-agent" #> monthAgentNameAndCount.map { case (agent, count) =>
           ".agent-name *" #> agent &
+          ".sale-count *" #> count
+        } &
+        ".daily-agency" #> dailySalesByAgency.map { case (agencyName, count) =>
+          ".agency-name *" #> agencyName &
+          ".sale-count *" #> count
+        } &
+        ".monthly-agency-container .monthly-agency" #> monthlySalesByAgency.map { case (agencyName, count) =>
+          ".agency-name *" #> agencyName &
           ".sale-count *" #> count
         }
       }

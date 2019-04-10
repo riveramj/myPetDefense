@@ -842,8 +842,71 @@ object ReportingService extends Loggable {
     )
   }
 
+  def findYesterdaySalesByAgency: List[(String, Int)] = {
+    val agencies = Agency.findAll(NotBy(Agency.name, "My Pet Defense"))
+    val usersByAgencies = agencies.map { agency =>
+      (agency, agency.customers.toList)
+    }
+
+    val newUsersYesterdayByAgency = usersByAgencies.map { case (agency, users) =>
+      val yesterdayUsers = users.filter { user => 
+        val createdDate = getCreatedDateOfUser(user)
+
+        val createdDateDay = createdDate.getDayOfMonth
+        val createdDateMonth = createdDate.getMonth
+        val createdDateYear = createdDate.getYear
+
+        val yesterdayDay = yesterday.getDayOfMonth
+        val yesterdayMonth = yesterday.getMonth
+        val yesterdayYear = yesterday.getYear
+
+        (
+          (createdDateDay == yesterdayDay) &&
+          (createdDateMonth == yesterdayMonth) &&
+          (createdDateYear == yesterdayYear)
+        )
+      }
+
+      (agency, yesterdayUsers)
+    }
+
+
+    newUsersYesterdayByAgency.map { case (agency, users) =>
+      val pets = users.flatMap(_.pets.toList)
+      (agency.name.get -> pets.size)
+    }.toList.sortBy(_._1)
+  }
+
+  def findMTDSalesByAgency: List[(String, Int)] = {
+    val agencies = Agency.findAll(NotBy(Agency.name, "My Pet Defense"))
+    val usersByAgencies = agencies.map { agency =>
+      (agency, agency.customers.toList)
+    }
+
+    val newUsersThisMonthByAgency = usersByAgencies.map { case (agency, users) =>
+      val newUsersThisMonth = users.filter { user =>
+        val createdDayDate = getCreatedDateOfUser(user)
+        val yesterdayDayOfYear = currentDate.getDayOfYear - 1
+
+        (
+          createdDayDate.getYear == yesterday.getYear &&
+          createdDayDate.getMonth == yesterday.getMonth
+        )
+      }
+      (agency, newUsersThisMonth)
+    }
+
+    newUsersThisMonthByAgency.map { case (agency, users) =>
+      val pets = users.flatMap(_.pets)
+      (agency.name.get -> pets.size)
+    }.toList.sortBy(_._1)
+  }
+
   def findYesterdaySalesByAgent: List[(String, Int)] = {
-    val totalUsers = Agency.findAll(NotBy(Agency.name, "My Pet Defense")).flatMap(_.customers.toList)
+    val totalUsers = Agency.findAll(
+      NotBy(Agency.name, "My Pet Defense"),
+      NotBy(Agency.name, "Petland"),
+    ).flatMap(_.customers.toList)
 
     val newUsersYesterday = totalUsers.filter { user =>
       val createdDate = getCreatedDateOfUser(user)
@@ -870,8 +933,10 @@ object ReportingService extends Loggable {
   }
 
   def findMTDSalesByAgent: List[(String, Int)] = {
-    val yesterday = LocalDate.now(ZoneId.of("America/New_York")).minusDays(1)
-   val totalUsers = Agency.findAll(NotBy(Agency.name, "My Pet Defense")).flatMap(_.customers.toList)
+   val totalUsers = Agency.findAll(
+      NotBy(Agency.name, "My Pet Defense"),
+      NotBy(Agency.name, "Petland"),
+    ).flatMap(_.customers.toList)
 
     val newUsersThisMonth = totalUsers.filter { user =>
       val createdDayDate = getCreatedDateOfUser(user)

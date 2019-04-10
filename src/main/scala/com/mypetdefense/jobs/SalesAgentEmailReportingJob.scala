@@ -8,8 +8,12 @@ import com.mypetdefense.actor._
 class SalesAgentReportEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
 
-    val dailAgentData = ReportingService.findYesterdaySalesByAgent
+    val dailyAgentData = ReportingService.findYesterdaySalesByAgent
     val monthlyAgentData = ReportingService.findMTDSalesByAgent
+
+    val dailyAgencyData = ReportingService.findYesterdaySalesByAgency
+    val monthlyAgencyData = ReportingService.findYesterdaySalesByAgency
+
     
     EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "mike.rivera@mypetdefense.com")
     EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "silvia@thirdpartypet.com")
