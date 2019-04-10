@@ -21,7 +21,10 @@ object ReportingService extends Loggable {
 
   def currentDate = LocalDateTime.now()
 
+  def yesterday = LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).minusDays(1)
+
   def yesterdayStart = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant())
+
   def yesterdayEnd = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).toInstant())
   
   def yearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
@@ -843,10 +846,21 @@ object ReportingService extends Loggable {
     val totalUsers = Agency.find(By(Agency.name, agency)).map(_.customers.toList).getOrElse(Nil)
 
     val newUsersYesterday = totalUsers.filter { user =>
-      val createdDayOfYear = getCreatedDateOfUser(user).getDayOfYear
-      val yesterdayDayOfYear = currentDate.getDayOfYear - 1
+      val createdDate = getCreatedDateOfUser(user)
       
-      createdDayOfYear == yesterdayDayOfYear
+      val createdDateDay = createdDate.getDayOfMonth
+      val createdDateMonth = createdDate.getMonth
+      val createdDateYear = createdDate.getYear
+
+      val yesterdayDay = yesterday.getDayOfMonth
+      val yesterdayMonth = yesterday.getMonth
+      val yesterdayYear = yesterday.getYear
+
+      (
+        (createdDateDay == yesterdayDay) &&
+        (createdDateMonth == yesterdayMonth) &&
+        (createdDateYear == yesterdayYear)
+      )
     }
 
     newUsersYesterday.groupBy(_.salesAgentId.get).map { case (agentId, users) =>
