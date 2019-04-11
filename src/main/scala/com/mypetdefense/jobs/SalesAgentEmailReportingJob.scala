@@ -8,16 +8,76 @@ import com.mypetdefense.actor._
 class SalesAgentReportEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
 
-    val dailAgentData = ReportingService.findYesterdaySalesByAgent("TPP")
-    val monthlyAgentData = ReportingService.findMTDSalesByAgent("TPP")
+    val dailyAgentData = ReportingService.findYesterdaySalesByAgent
+    val monthlyAgentData = ReportingService.findMTDSalesByAgent
+
+    val dailyAgencyData = ReportingService.findYesterdaySalesByAgency
+    val monthlyAgencyData = ReportingService.findMTDSalesByAgency
+
     
-    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "mike.rivera@mypetdefense.com")
-    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "silvia@thirdpartypet.com")
-    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "mike@canineregistrations.com")
-    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "melissa@thirdpartypet.com")
-    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "toni@thirdpartypet.com")
-    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "katie@thirdpartypet.com")
-    EmailActor ! DailySalesEmail(dailAgentData, monthlyAgentData, "alicia@thirdpartypet.com")
+    EmailActor ! DailySalesEmail(
+      dailyAgentData,
+      monthlyAgentData,
+      dailyAgencyData,
+      monthlyAgencyData,
+      "mike.rivera@mypetdefense.com"
+    )
+
+    EmailActor ! DailySalesEmail(
+      dailyAgentData,
+      monthlyAgentData,
+      dailyAgencyData,
+      monthlyAgencyData,
+      "silvia@thirdpartypet.com"
+    )
+
+    EmailActor ! DailySalesEmail(
+      dailyAgentData,
+      monthlyAgentData,
+      dailyAgencyData,
+      monthlyAgencyData,
+      "mike@canineregistrations.com"
+    )
+
+    EmailActor ! DailySalesEmail(
+      dailyAgentData,
+      monthlyAgentData,
+      dailyAgencyData,
+      monthlyAgencyData,
+      "melissa@thirdpartypet.com"
+    )
+
+    EmailActor ! DailySalesEmail(
+      dailyAgentData,
+      monthlyAgentData,
+      dailyAgencyData,
+      monthlyAgencyData,
+      "toni@thirdpartypet.com"
+    )
+
+    EmailActor ! DailySalesEmail(
+      dailyAgentData,
+      monthlyAgentData,
+      dailyAgencyData,
+      monthlyAgencyData,
+      "skyler@thirdpartypet.com"
+    )
+
+    EmailActor ! DailySalesEmail(
+      dailyAgentData,
+      monthlyAgentData,
+      dailyAgencyData,
+      monthlyAgencyData,
+      "katie@thirdpartypet.com"
+    )
+
+    EmailActor ! DailySalesEmail(
+      dailyAgentData,
+      monthlyAgentData,
+      dailyAgencyData,
+      monthlyAgencyData,
+      "alicia@thirdpartypet.com"
+    )
   }
 }
 
