@@ -843,7 +843,11 @@ object ReportingService extends Loggable {
   }
 
   def findYesterdaySalesByAgency: List[(String, Int)] = {
-    val agencies = Agency.findAll(NotBy(Agency.name, "My Pet Defense"))
+    val agencies = Agency.findAll(
+      NotBy(Agency.name, "My Pet Defense"),
+      NotBy(Agency.name, "Petland")
+    )
+
     val usersByAgencies = agencies.map { agency =>
       (agency, agency.customers.toList)
     }
@@ -878,7 +882,10 @@ object ReportingService extends Loggable {
   }
 
   def findMTDSalesByAgency: List[(String, Int)] = {
-    val agencies = Agency.findAll(NotBy(Agency.name, "My Pet Defense"))
+    val agencies = Agency.findAll(
+      NotBy(Agency.name, "My Pet Defense"),
+      NotBy(Agency.name, "Petland")
+    )
     val usersByAgencies = agencies.map { agency =>
       (agency, agency.customers.toList)
     }

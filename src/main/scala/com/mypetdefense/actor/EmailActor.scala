@@ -643,7 +643,7 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
         ".month-sales *" #> monthlySales &
         ".date *" #> headerDate &
         ".month *" #> monthYear &
-        ".agent" #> agentNameAndCount.map { case (agent, count) =>
+        ".agent-container .agent" #> agentNameAndCount.map { case (agent, count) =>
           ".agent-name *" #> agent &
           ".sale-count *" #> count
         } &
