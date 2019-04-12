@@ -92,7 +92,7 @@ class Boot {
     //DataLoader.replaceChickenTreat
     //DataLoader.createProducts
     //DataLoader.createNewPetlandStores
-    DataLoader.createPuppySpot
+    //DataLoader.createPuppySpot
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
