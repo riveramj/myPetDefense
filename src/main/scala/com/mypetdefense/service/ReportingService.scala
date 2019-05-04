@@ -1117,4 +1117,26 @@ object ReportingService extends Loggable {
 
     generateCSV(csv, file)
   }
+
+  def getPetlandCustomersWithStats = {
+    val petlandStores = Agency.findAll(By(Agency.petlandStore, true))
+    
+    val customersByStoreWithInfo = petlandStores.map { store =>
+      val parents = store.customers.toList
+      
+      val parentsWithInfo = (for {
+        parent <- parents
+        subscription <- parent.subscription
+      } yield {
+        val shipmentCount = subscription.shipments.toList.size
+
+        List(store.name.get, parent.userId.get, parent.email.get, parent.name, subscription.startDate.get, subscription.status.get, shipmentCount).mkString(", ")
+      })
+
+      parentsWithInfo.mkString("\n")
+    }
+
+    customersByStoreWithInfo.map(println(_))
+  }
 }
+  
