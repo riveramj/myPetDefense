@@ -355,10 +355,8 @@ object TPPApi extends RestHelper with Loggable {
         petsJson <- Full(requestJson \ "pets")
         pets <- tryo(petsJson.extract[List[NewPet]]) ?~ "Error in pets json." ~> 400
         agentId <- tryo(requestJson \ "agentId").map(_.extract[String]) ?~ "Phone agent is missing." ~> 400
+        storeCode <- tryo(requestJson \ "storeCode") .map(_.extract[String]) ?~ "Store code is missing." ~> 400
         } yield {
-          val storeCodeRaw = tryo(requestJson \ "storeCode")
-          val storeCode = tryo(storeCodeRaw.map(_.extract[String])).flatten.openOr("")
-
           val salesAgency = {
             if (storeCode != "")
               Agency.find(By(Agency.storeCode, storeCode))
