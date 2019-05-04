@@ -358,10 +358,11 @@ object TPPApi extends RestHelper with Loggable {
         storeCode <- tryo(requestJson \ "storeCode") .map(_.extract[String]) ?~ "Store code is missing." ~> 400
         } yield {
           val salesAgency = {
-            if (storeCode != "")
-              Agency.find(By(Agency.storeCode, storeCode))
-            else
+            val possibleAgency = Agency.find(By(Agency.storeCode, storeCode))
+            if (possibleAgency.isEmpty)
               tppAgency
+            else
+              possibleAgency
           }
 
           EmailActor ! SendTppApiJsonEmail(requestJson.toString)
