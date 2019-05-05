@@ -5,8 +5,8 @@ import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
 
-class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Product] {
-  def getSingleton = Product
+class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, FleaTick] {
+  def getSingleton = FleaTick
   object productId extends MappedLong(this){
     override def dbIndexed_? = true
   }
@@ -26,7 +26,7 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   }
 
   def getNameAndSize = s"${this.name} ${this.size.toString()} lbs"
-  
+
   def getSizeAndSizeName = s"${this.sizeName}, ${this.size.toString()} lbs"
 
   def createProduct(
@@ -38,7 +38,7 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     weight: Double,
     sku: String
   ) = {
-    Product.create
+    FleaTick.create
     .productId(generateLongId)
     .name(name)
     .animalType(animalType)
@@ -52,4 +52,4 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   def isZoGuard_? = this.name.get.toLowerCase.contains("zoguard")
 }
 
-object Product extends Product with LongKeyedMetaMapper[Product]
+object FleaTick extends FleaTick with LongKeyedMetaMapper[FleaTick]

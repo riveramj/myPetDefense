@@ -63,12 +63,12 @@ class NewOrder extends Loggable {
     "July", "August", "September", "October", "November", "December"
   )
 
-  val dogZoguardProduct = Product.findAll(
-    By(Product.name, "ZoGuard Plus for Dogs")
+  val dogZoguardProduct = FleaTick.findAll(
+    By(FleaTick.name, "ZoGuard Plus for Dogs")
   )
 
-  val catZoguardProduct = Product.findAll(
-    By(Product.size, AnimalSize.CatAllSize)
+  val catZoguardProduct = FleaTick.findAll(
+    By(FleaTick.size, AnimalSize.CatAllSize)
   )
 
   var pets = petsOrdered.is

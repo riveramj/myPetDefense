@@ -37,7 +37,7 @@ object Prices extends Loggable {
 case class DisplayPrice(code: String, price: Double, productName: String)
 
 class Prices extends Loggable {
-  val productNames = Product.findAll().map(_.name.get).distinct
+  val productNames = FleaTick.findAll().map(_.name.get).distinct
   val allPrices = Price.findAll()
   val prices: List[DisplayPrice] = allPrices.map { price =>
     DisplayPrice(price.code.get, price.price.get, price.product.obj.map(_.name.get).openOr(""))
@@ -67,7 +67,7 @@ class Prices extends Loggable {
       val date = LocalDate.now
       val name = s"${chosenProduct} (${code} ${date})"
 
-      val selectedProducts = Product.findAll(By(Product.name, chosenProduct))
+      val selectedProducts = FleaTick.findAll(By(FleaTick.name, chosenProduct))
       for {
         product <- selectedProducts
       } yield {
@@ -81,7 +81,7 @@ class Prices extends Loggable {
   }
 
   def deletePrice(price: DisplayPrice)() = {
-    val products = Product.findAll(By(Product.name, price.productName))
+    val products = FleaTick.findAll(By(FleaTick.name, price.productName))
     products.map { product =>
       val prices = Price.findAll(By(Price.product, product), By(Price.code, price.code))
       prices.map(_.delete_!)

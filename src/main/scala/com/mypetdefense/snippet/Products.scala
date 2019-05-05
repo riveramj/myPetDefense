@@ -33,7 +33,7 @@ class Products extends Loggable {
   val currentCouponCode = currentCoupon.map(_.couponCode.get).openOr("")
   val priceCode = PetFlowChoices.priceCode.is.openOr(Price.defaultPriceCode)
 
-  val products = Product.findAll()
+  val products = FleaTick.findAll()
 
   val prices = Price.findAll(
     By(Price.code, priceCode),
@@ -45,13 +45,13 @@ class Products extends Loggable {
     By(Price.active, true)
   )
 
-  def getPriceForProduct(product: Product, priceList: List[Price]) = {
+  def getPriceForProduct(product: FleaTick, priceList: List[Price]) = {
     priceList.filter { price =>
       price.product.obj == product
     }.headOption.map(_.price.get).getOrElse(0D)
   }
 
-  def getImageUrl(product: Box[Product]) = {
+  def getImageUrl(product: Box[FleaTick]) = {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
   }
   

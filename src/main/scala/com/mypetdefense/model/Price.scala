@@ -14,14 +14,14 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
   }
   object price extends MappedDouble(this)
   object code extends MappedString(this, 100)
-  object product extends MappedLongForeignKey(this, Product)
+  object product extends MappedLongForeignKey(this, FleaTick)
   object active extends MappedBoolean(this)
   object stripeName extends MappedString(this, 200)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
-  def createPrice(priceId: Long, price: Double, code: String, product: Product, stripeName: String) = {
+  def createPrice(priceId: Long, price: Double, code: String, product: FleaTick, stripeName: String) = {
     Price.create
     .priceId(priceId)
     .price(price)
@@ -32,7 +32,7 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
     .saveMe
   }
 
-  def getPricesByCode(product: Product, code: String, active: Boolean = true) = {
+  def getPricesByCode(product: FleaTick, code: String, active: Boolean = true) = {
     Price.find(
       By(Price.product, product),
       By(Price.code, code),
@@ -40,7 +40,7 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
     )
   }
 
-  def getDefaultProductPrice(product: Product, active: Boolean = true) = {
+  def getDefaultProductPrice(product: FleaTick, active: Boolean = true) = {
     Price.find(
       By(Price.product, product),
       By(Price.code, Price.defaultPriceCode),

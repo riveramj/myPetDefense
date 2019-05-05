@@ -23,7 +23,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   object size extends MappedEnum(this, AnimalSize)
   object adultSize extends MappedEnum(this, AnimalSize)
   object birthday extends MappedDateTime(this)
-  object product extends MappedLongForeignKey(this, Product)
+  object product extends MappedLongForeignKey(this, FleaTick)
   object nextGrowthDelay extends MappedInt(this)
   object sentDogTag extends MappedBoolean(this) {
     override def defaultValue = false
@@ -38,13 +38,13 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   def refresh = Pet.find(By(Pet.petId, petId.get))
 
   def createNewPet(
-    user: User,
-    name: String,
-    animalType: AnimalType.Value,
-    size: AnimalSize.Value,
-    product: Product,
-    whelpDate: Box[Date] = Empty,
-    breed: String = ""
+                    user: User,
+                    name: String,
+                    animalType: AnimalType.Value,
+                    size: AnimalSize.Value,
+                    product: FleaTick,
+                    whelpDate: Box[Date] = Empty,
+                    breed: String = ""
   ) = {
     Pet.create
     .petId(generateLongId)
@@ -59,11 +59,11 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   }
 
   def createNewPet(
-    user: User,
-    name: String,
-    product: Product,
-    breed: String,
-    whelpDate: Box[Date]
+                    user: User,
+                    name: String,
+                    product: FleaTick,
+                    breed: String,
+                    whelpDate: Box[Date]
   ): Pet = {
     createNewPet(
       user,

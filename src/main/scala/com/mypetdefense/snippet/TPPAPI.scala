@@ -298,9 +298,9 @@ object TPPApi extends RestHelper with Loggable {
         case size => size
       }
 
-      val product = Product.find(
-        By(Product.name, sanitizedProductName),
-        By(Product.sizeName, sanitizedSize)
+      val product = FleaTick.find(
+        By(FleaTick.name, sanitizedProductName),
+        By(FleaTick.sizeName, sanitizedSize)
       )
 
     if (product == Empty) {

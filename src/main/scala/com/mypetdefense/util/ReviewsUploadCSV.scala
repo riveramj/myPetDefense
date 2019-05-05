@@ -180,11 +180,11 @@ object ReviewsUploadCSV extends Loggable {
     val productName = Columns.cellValue(Columns.Product, headerIndex, fieldList).openOr("")
 
     val product = (productName match {
-      case "ZoGuard Plus for Dogs" => Product.findAll(By(Product.name, "ZoGuard Plus for Dogs"))
-      case "ZoGuard Plus for Cats" => Product.findAll(By(Product.name, "ZoGuard Plus for Cats"))
-      case "Adventure Plus for Dogs" => Product.findAll(By(Product.name, "Adventure Plus for Dogs"))
-      case "Adventure Plus for Cats" => Product.findAll(By(Product.name, "Adventure Plus for Cats"))
-      case "ShieldTec Plus for Dogs" => Product.findAll(By(Product.name, "ShieldTec Plus for Dogs"))
+      case "ZoGuard Plus for Dogs" => FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Dogs"))
+      case "ZoGuard Plus for Cats" => FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Cats"))
+      case "Adventure Plus for Dogs" => FleaTick.findAll(By(FleaTick.name, "Adventure Plus for Dogs"))
+      case "Adventure Plus for Cats" => FleaTick.findAll(By(FleaTick.name, "Adventure Plus for Cats"))
+      case "ShieldTec Plus for Dogs" => FleaTick.findAll(By(FleaTick.name, "ShieldTec Plus for Dogs"))
     }).headOption
 
     val ratingRaw = Columns.cellValue(Columns.Rating, headerIndex, fieldList).openOr("")
@@ -207,7 +207,7 @@ object ReviewsUploadCSV extends Loggable {
   }
 
   def updateRating(productName: String) = {
-    val products = Product.findAll(By(Product.name, productName))
+    val products = FleaTick.findAll(By(FleaTick.name, productName))
     val reviews = products.map(_.reviews.toList).flatten
     val ratings = reviews.map(_.rating.get)
     val avgRating = ratings.sum/reviews.size

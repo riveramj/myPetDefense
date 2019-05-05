@@ -77,7 +77,7 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
     override def defaultValue = generateLongId
   }
   object shipment extends MappedLongForeignKey(this, Shipment)
-  object product extends MappedLongForeignKey(this, Product)
+  object product extends MappedLongForeignKey(this, FleaTick)
   object petName extends MappedString(this, 100)
   object pet extends MappedLongForeignKey(this, Pet)
   object insert extends MappedLongForeignKey(this, Insert)

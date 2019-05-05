@@ -16,7 +16,7 @@ class TaggedItem extends LongKeyedMapper[TaggedItem] with IdPK {
     override def defaultValue = generateLongId
   }
   object subscription extends MappedLongForeignKey(this, Subscription)
-  object product extends MappedLongForeignKey(this, Product)
+  object product extends MappedLongForeignKey(this, FleaTick)
   object pet extends MappedLongForeignKey(this, Pet)
   object shipment extends MappedLongForeignKey(this, Shipment)
   object treatOrder extends MappedLongForeignKey(this, TreatOrder)
@@ -32,14 +32,14 @@ class TaggedItem extends LongKeyedMapper[TaggedItem] with IdPK {
 
 object TaggedItem extends TaggedItem with LongKeyedMetaMapper[TaggedItem] {
   def createNewTaggedItem(
-    user: Box[User] = Empty,
-    subscription: Box[Subscription] = Empty,
-    shipment: Box[Shipment] = Empty,
-    pet: Box[Pet] = Empty,
-    product: Box[Product] = Empty,
-    treat: Box[Treat] = Empty,
-    treatOrder: Box[TreatOrder] = Empty,
-    tag: Box[Tag]
+                           user: Box[User] = Empty,
+                           subscription: Box[Subscription] = Empty,
+                           shipment: Box[Shipment] = Empty,
+                           pet: Box[Pet] = Empty,
+                           product: Box[FleaTick] = Empty,
+                           treat: Box[Treat] = Empty,
+                           treatOrder: Box[TreatOrder] = Empty,
+                           tag: Box[Tag]
   ) = {
     TaggedItem.create
       .taggedItemId(generateLongId)

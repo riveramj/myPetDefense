@@ -40,7 +40,7 @@ class Parents extends Loggable {
   var parentsRenderer: Box[IdMemoizeTransform] = Empty
   
   var petType: Box[AnimalType.Value] = Empty
-  var chosenProduct: Box[Product] = Empty
+  var chosenProduct: Box[FleaTick] = Empty
   var petName = ""
   var petBreed = ""
   var petBirthday = ""
@@ -48,8 +48,8 @@ class Parents extends Loggable {
   var email = ""
 
   val coupons = Coupon.findAll()
-  val dogProducts = Product.findAll(By(Product.animalType, AnimalType.Dog))
-  val catProducts = Product.findAll(By(Product.animalType, AnimalType.Dog))
+  val dogProducts = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
+  val catProducts = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
 
   val stripeBaseUrl = Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
   val stripeInvoiceBaseURL = s"${stripeBaseUrl}/invoices"
@@ -139,7 +139,7 @@ class Parents extends Loggable {
     SHtml.ajaxSelectObj(
       products.map(product => (product, product.getNameAndSize)),
       chosenProduct,
-      (possibleProduct: Product) => chosenProduct = Full(possibleProduct)
+      (possibleProduct: FleaTick) => chosenProduct = Full(possibleProduct)
     )
   }
 
@@ -354,7 +354,7 @@ class Parents extends Loggable {
       Noop
     }
 
-    def updatePetInfo(newInfo: String, infoType: String, pet: Pet, product: Box[Product] = Empty) = {
+    def updatePetInfo(newInfo: String, infoType: String, pet: Pet, product: Box[FleaTick] = Empty) = {
 
       infoType match {
         case "name" => pet.name(newInfo).saveMe
@@ -372,16 +372,16 @@ class Parents extends Loggable {
     }
 
     def changePetProduct(
-      petType: AnimalType.Value,
-      currentProduct: Box[Product],
-      pet: Pet
+                          petType: AnimalType.Value,
+                          currentProduct: Box[FleaTick],
+                          pet: Pet
     ) = {
-      val products = Product.findAll(By(Product.animalType, petType))
+      val products = FleaTick.findAll(By(FleaTick.animalType, petType))
 
       SHtml.ajaxSelectObj(
         products.map(product => (product, product.getNameAndSize)),
         currentProduct,
-        (possibleProduct: Product) => 
+        (possibleProduct: FleaTick) =>
           updatePetInfo("", "product", pet, Full(possibleProduct))
       )
     }

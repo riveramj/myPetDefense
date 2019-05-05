@@ -36,7 +36,7 @@ class CartReview extends Loggable {
   var coupon: Box[Coupon] = PetFlowChoices.coupon.is
   var couponCode = coupon.map(_.couponCode.get).openOr("")
 
-  def getImageUrl(product: Box[Product]) = {
+  def getImageUrl(product: Box[FleaTick]) = {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
   }
 

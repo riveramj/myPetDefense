@@ -39,7 +39,7 @@ class PetsAndProducts extends Loggable {
   val priceCode = subscription.map(_.priceCode.get).getOrElse("")
 
   var newPetType: Box[AnimalType.Value] = Empty
-  var newPetChosenProduct: Box[Product] = Empty
+  var newPetChosenProduct: Box[FleaTick] = Empty
   var newPetName = ""
 
   def petTypeDropdown(renderer: IdMemoizeTransform) = {
@@ -59,13 +59,13 @@ class PetsAndProducts extends Loggable {
 
   def productDropdown() = {
     val products = newPetType.map { animal =>
-      Product.findAll(By(Product.animalType, animal))
+      FleaTick.findAll(By(FleaTick.animalType, animal))
     }.openOr(Nil)
 
     SHtml.ajaxSelectObj(
       (Empty, "Choose Product") +: products.map(product => (Full(product), product.getNameAndSize)),
       Full(newPetChosenProduct),
-      (possibleProduct: Box[Product]) => newPetChosenProduct = possibleProduct
+      (possibleProduct: Box[FleaTick]) => newPetChosenProduct = possibleProduct
     )
   }
 
@@ -129,7 +129,7 @@ class PetsAndProducts extends Loggable {
     }
   }
 
-  def savePet(pet: Pet, name: String, updatedProduct: Box[Product]) = {
+  def savePet(pet: Pet, name: String, updatedProduct: Box[FleaTick]) = {
     val updatedPet = (
       for {
         product <- updatedProduct
@@ -170,12 +170,12 @@ class PetsAndProducts extends Loggable {
       val price = priceItem.map(_.price.get).getOrElse(0D)
 
       val currentProductDropdown = {
-        val products = Product.findAll(By(Product.animalType, pet.animalType.get))
+        val products = FleaTick.findAll(By(FleaTick.animalType, pet.animalType.get))
 
         SHtml.ajaxSelectObj(
           products.map(product => (product, product.getNameAndSize)),
           currentProduct,
-          (possibleProduct: Product) => currentProduct = {
+          (possibleProduct: FleaTick) => currentProduct = {
             Full(possibleProduct)
           }
         )
