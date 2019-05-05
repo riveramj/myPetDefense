@@ -423,13 +423,13 @@ object ParentService extends Loggable {
   }
 
   def addNewPet(
-                 oldUser: User,
-                 name: String,
-                 animalType: AnimalType.Value,
-                 size: AnimalSize.Value,
-                 product: FleaTick,
-                 breed: String = "",
-                 birthday: String = ""
+    oldUser: User,
+    name: String,
+    animalType: AnimalType.Value,
+    size: AnimalSize.Value,
+    product: FleaTick,
+    breed: String = "",
+    birthday: String = ""
   ): Box[Pet] = {
 
     val possibleBirthday = parseWhelpDate(birthday)

@@ -38,13 +38,13 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   def refresh = Pet.find(By(Pet.petId, petId.get))
 
   def createNewPet(
-                    user: User,
-                    name: String,
-                    animalType: AnimalType.Value,
-                    size: AnimalSize.Value,
-                    product: FleaTick,
-                    whelpDate: Box[Date] = Empty,
-                    breed: String = ""
+    user: User,
+    name: String,
+    animalType: AnimalType.Value,
+    size: AnimalSize.Value,
+    product: FleaTick,
+    whelpDate: Box[Date] = Empty,
+    breed: String = ""
   ) = {
     Pet.create
     .petId(generateLongId)
@@ -59,11 +59,11 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   }
 
   def createNewPet(
-                    user: User,
-                    name: String,
-                    product: FleaTick,
-                    breed: String,
-                    whelpDate: Box[Date]
+    user: User,
+    name: String,
+    product: FleaTick,
+    breed: String,
+    whelpDate: Box[Date]
   ): Pet = {
     createNewPet(
       user,

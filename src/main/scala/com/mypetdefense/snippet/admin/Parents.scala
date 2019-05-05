@@ -372,9 +372,9 @@ class Parents extends Loggable {
     }
 
     def changePetProduct(
-                          petType: AnimalType.Value,
-                          currentProduct: Box[FleaTick],
-                          pet: Pet
+      petType: AnimalType.Value,
+      currentProduct: Box[FleaTick],
+      pet: Pet
     ) = {
       val products = FleaTick.findAll(By(FleaTick.animalType, petType))
 
