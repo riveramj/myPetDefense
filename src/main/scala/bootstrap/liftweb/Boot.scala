@@ -65,7 +65,7 @@ class Boot {
       InventoryChangeAudit,
       Insert,
       InventoryItemPart,
-      Treat,
+      Product,
       TreatOrderLineItem,
       Packaging,
       TaggedItem,

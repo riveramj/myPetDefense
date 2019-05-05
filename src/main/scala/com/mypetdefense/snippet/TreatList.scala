@@ -38,17 +38,17 @@ class TreatList extends Loggable {
 
   var user = TreatList.treatListMenu.currentValue
 
-  val duckTreats = Treat.find(By(Treat.name, "Duck Jerky Multivitamin & Immune Maintenance"))
-  val lambTreats = Treat.find(By(Treat.name, "Lamb Jerky Digestive Health & Probiotic"))
-  val beefTreats = Treat.find(By(Treat.name, "Beef Jerky Hip & Joint Formula"))
-  val salmonTreats = Treat.find(By(Treat.name, "Salmon Jerky Skin & Coat Formula"))
-  val fruitTreats = Treat.find(By(Treat.name, "Healthy Harvest Fruit and Veggie Mix"))
+  val duckTreats = Product.find(By(Product.name, "Duck Jerky Multivitamin & Immune Maintenance"))
+  val lambTreats = Product.find(By(Product.name, "Lamb Jerky Digestive Health & Probiotic"))
+  val beefTreats = Product.find(By(Product.name, "Beef Jerky Hip & Joint Formula"))
+  val salmonTreats = Product.find(By(Product.name, "Salmon Jerky Skin & Coat Formula"))
+  val fruitTreats = Product.find(By(Product.name, "Healthy Harvest Fruit and Veggie Mix"))
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
   user.map(SecurityContext.logIn(_))
 
-  def updateCartCount(treat: Treat, newQuantity: Int) = {
+  def updateCartCount(treat: Product, newQuantity: Int) = {
     val cart = TreatsFlow.treatShoppingCart.is
 
     val updatedCart = {
@@ -63,7 +63,7 @@ class TreatList extends Loggable {
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
-  def addToCart(possibleTreat: Box[Treat]) = {
+  def addToCart(possibleTreat: Box[Product]) = {
     possibleTreat.map { treat =>
       val cart = TreatsFlow.treatShoppingCart.is
 
@@ -80,7 +80,7 @@ class TreatList extends Loggable {
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
-  def removeTreatFromCart(treat: Treat) = {
+  def removeTreatFromCart(treat: Product) = {
     val cart = TreatsFlow.treatShoppingCart.is
 
     TreatsFlow.treatShoppingCart(cart - treat)

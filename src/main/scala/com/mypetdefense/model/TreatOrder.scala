@@ -53,7 +53,7 @@ object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
     stripeChargeId: String,
     amountPaid: Double,
     taxPaid: Double,
-    treats: List[(Treat, Int)]
+    treats: List[(Product, Int)]
   ) = {
     val dateProcessed = new Date()
 
@@ -89,7 +89,7 @@ class TreatOrderLineItem extends LongKeyedMapper[TreatOrderLineItem] with IdPK {
   }
 
   object order extends MappedLongForeignKey(this, TreatOrder)
-  object treat extends MappedLongForeignKey(this, Treat)
+  object treat extends MappedLongForeignKey(this, Product)
   object quantity extends MappedInt(this)
   object insert extends MappedLongForeignKey(this, Insert)
   object createdAt extends MappedDateTime(this) {
@@ -97,8 +97,8 @@ class TreatOrderLineItem extends LongKeyedMapper[TreatOrderLineItem] with IdPK {
   }
 
   def createTreatOrderLineItems(
-    treats: List[(Treat, Int)],
-    order: TreatOrder
+                                 treats: List[(Product, Int)],
+                                 order: TreatOrder
   ) = {
     treats.map { case (treat, quantity) =>
       TreatOrderLineItem.create

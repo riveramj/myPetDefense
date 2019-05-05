@@ -204,7 +204,7 @@ class TreatCheckout extends Loggable {
     UseNewCard
   }
 
-  def removeTreatFromCart(treat: Treat) = {
+  def removeTreatFromCart(treat: Product) = {
     val cart = TreatsFlow.treatShoppingCart.is
 
     TreatsFlow.treatShoppingCart(cart - treat)
@@ -215,7 +215,7 @@ class TreatCheckout extends Loggable {
     )
   }
 
-  def updateCartCount(treat: Treat, newQuantity: Int) = {
+  def updateCartCount(treat: Product, newQuantity: Int) = {
     val cart = TreatsFlow.treatShoppingCart.is
 
     val updatedCart = {
