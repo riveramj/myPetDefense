@@ -207,13 +207,13 @@ object ReviewsUploadCSV extends Loggable {
   }
 
   def updateRating(productName: String) = {
-    val products = FleaTick.findAll(By(FleaTick.name, productName))
-    val reviews = products.map(_.reviews.toList).flatten
+    val fleaTicks = FleaTick.findAll(By(FleaTick.name, productName))
+    val reviews = fleaTicks.map(_.reviews.toList).flatten
     val ratings = reviews.map(_.rating.get)
     val avgRating = ratings.sum/reviews.size
 
-    products.map { product =>
-      product.rating(avgRating).reviewCount(reviews.size).saveMe
+    fleaTicks.map { fleaTick =>
+      fleaTick.rating(avgRating).reviewCount(reviews.size).saveMe
     }
   }
 
