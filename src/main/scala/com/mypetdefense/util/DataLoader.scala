@@ -447,12 +447,12 @@ object DataLoader extends Loggable {
       productSize <- productSizes
       frontline <- productSize._1
     } yield {
-      val pets = Pet.findAll(By(Pet.product, frontline))
+      val pets = Pet.findAll(By(Pet.fleaTick, frontline))
 
       println(pets.map(_.petId))
 
       productSize._2.map { zoguard =>
-        pets.map(_.product(zoguard).saveMe)
+        pets.map(_.fleaTick(zoguard).saveMe)
       }
 
       frontline.delete_!

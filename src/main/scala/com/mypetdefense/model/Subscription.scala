@@ -37,7 +37,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
 
   def refresh = Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
 
-  def getProducts = getPets.flatMap(_.product.obj)
+  def getProducts = getPets.flatMap(_.fleaTick.obj)
 
   def getPets = user.obj.map(_.activePets).openOr(Nil)
 
@@ -52,7 +52,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     By(Pet.user, user.get),
     By(Pet.status, Status.Active)
   ).map { pet =>
-    (pet, pet.product.obj)
+    (pet, pet.fleaTick.obj)
   }
 
   def createNewSubscription(

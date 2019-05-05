@@ -134,7 +134,7 @@ class PetsAndProducts extends Loggable {
       for {
         product <- updatedProduct
         size = product.size.get
-        updatedPet = pet.product(product).name(name).size(size).saveMe
+        updatedPet = pet.fleaTick(product).name(name).size(size).saveMe
       } yield {
         updatedPet 
       }
@@ -161,7 +161,7 @@ class PetsAndProducts extends Loggable {
       "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
     } &
     ".pet" #> pets.toSeq.sortWith(_.name.get < _.name.get).map { pet =>
-      var currentProduct = pet.product.obj
+      var currentProduct = pet.fleaTick.obj
       var currentPetName = pet.name.get
 
       val priceItem = currentProduct.flatMap { item =>

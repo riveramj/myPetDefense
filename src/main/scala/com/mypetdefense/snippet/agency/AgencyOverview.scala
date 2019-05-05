@@ -365,7 +365,7 @@ class AgencyOverview extends Loggable {
       ".pet-name *" #> pet.name.get &
       ".pet-status *" #> findStatus(pet.status.get) &
       ".pet-status [class+]" #> findStatus(pet.status.get).toLowerCase &
-      ".current-product *" #> pet.product.map(_.getSizeAndSizeName)
+      ".current-product *" #> pet.fleaTick.map(_.getSizeAndSizeName)
     }
   }
 
