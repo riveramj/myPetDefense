@@ -10,3 +10,4 @@ src/main/webapp/static/css/*
 src/main/webapp/static/stylesheets/*
 blog/
 .history
+.idea/
