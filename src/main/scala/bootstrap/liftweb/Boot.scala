@@ -10,6 +10,7 @@ import net.liftweb._
 import com.mypetdefense.util._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
+import com.mypetdefense.service.ReportingService
 import com.mypetdefense.jobs.JobManager
 
 import java.util.TimeZone
@@ -93,6 +94,8 @@ class Boot {
     //DataLoader.createProducts
     //DataLoader.createNewPetlandStores
     //DataLoader.createPuppySpot
+    
+    //ReportingService.getPetlandCustomersWithStats
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
