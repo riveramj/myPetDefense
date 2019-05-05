@@ -77,28 +77,28 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
     override def defaultValue = generateLongId
   }
   object shipment extends MappedLongForeignKey(this, Shipment)
-  object product extends MappedLongForeignKey(this, Product)
+  object fleaTick extends MappedLongForeignKey(this, FleaTick)
   object petName extends MappedString(this, 100)
   object pet extends MappedLongForeignKey(this, Pet)
   object insert extends MappedLongForeignKey(this, Insert)
 
-  def getProductPetNameItemSize = {
-    val productNameSize = this.product.obj.map(_.getNameAndSize).openOr("")
-    s"${this.petName.get} - ${productNameSize}".replace("null", "")
+  def getFleaTickPetNameItemSize = {
+    val fleaTickNameSize = this.fleaTick.obj.map(_.getNameAndSize).openOr("")
+    s"${this.petName.get} - ${fleaTickNameSize}".replace("null", "")
   }
 
   def createShipmentItems(shipment: Shipment, user: User, inserts: List[Insert]) = {
     val pets = Pet.findAll(By(Pet.user, user), By(Pet.status, Status.Active))
-    val products = pets.map(_.product.obj)
+    val products = pets.map(_.fleaTick.obj)
 
     for {
       pet <- pets
-      product <- pet.product.obj
+      product <- pet.fleaTick.obj
     } yield {
       ShipmentLineItem.create
         .shipmentLineItemId(generateLongId)
         .shipment(shipment)
-        .product(product)
+        .fleaTick(product)
         .pet(pet)
         .petName(pet.name.get)
         .saveMe

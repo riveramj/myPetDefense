@@ -44,7 +44,7 @@ class Boot {
       CancelledUser,
       Address,
       Pet,
-      Product,
+      FleaTick,
       Shipment,
       Event,
       ShipmentLineItem,

@@ -868,7 +868,7 @@ trait SixMonthSaleReceiptEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val products = pets.map(_.product.obj).flatten
+      val products = pets.map(_.fleaTick.obj).flatten
       val amountPaid = subtotal + tax
 
       val transform = {

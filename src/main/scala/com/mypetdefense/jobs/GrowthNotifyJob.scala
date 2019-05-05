@@ -39,8 +39,8 @@ class GrowthNotifyJob extends ManagedJob {
     }).flatten
 
 
-    readyToGrowPetsUsers.map { case (pet, newProduct, user) =>
-      EmailActor ! NotifyParentGrowthRate(pet, newProduct, user)
+    readyToGrowPetsUsers.map { case (pet, newFleaTick, user) =>
+      EmailActor ! NotifyParentGrowthRate(pet, newFleaTick, user)
     }
   }
 }

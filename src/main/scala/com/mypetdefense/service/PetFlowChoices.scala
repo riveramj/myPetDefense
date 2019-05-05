@@ -16,8 +16,8 @@ object PetFlowChoices extends Loggable {
   object priceCode extends SessionVar[Box[String]](Empty)
   object coupon extends SessionVar[Box[Coupon]](Empty)
   object total extends SessionVar[Box[Double]](Empty)
-  object recentProduct extends RequestVar[Box[Product]](Empty)
-  object shoppingCart extends SessionVar[Map[Long, (String, Product, Double)]](Map())
+  object recentProduct extends RequestVar[Box[FleaTick]](Empty)
+  object shoppingCart extends SessionVar[Map[Long, (String, FleaTick, Double)]](Map())
   object purchased extends SessionVar[Box[Boolean]](Empty)
 }
 

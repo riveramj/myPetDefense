@@ -427,7 +427,7 @@ object ParentService extends Loggable {
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value,
-    product: Product,
+    product: FleaTick,
     breed: String = "",
     birthday: String = ""
   ): Box[Pet] = {
@@ -455,11 +455,11 @@ object ParentService extends Loggable {
   def updateStripeSubscriptionTotal(oldUser: User): Box[StripeSubscription] = {
     val updatedUser = oldUser.refresh
     
-    val products: List[Product] = {
+    val products: List[FleaTick] = {
       for {
         user <- updatedUser.toList
         pet <- user.activePets
-        product <- pet.product.obj
+        product <- pet.fleaTick.obj
       } yield {
         product
       }
@@ -538,8 +538,8 @@ object ParentService extends Loggable {
     currentMonth - growthDelay
   }
 
-  def checkForNewProduct(pet: Pet, newProduct: Box[Product], user: User) = {
-    if (pet.product.obj != newProduct)
+  def checkForNewProduct(pet: Pet, newProduct: Box[FleaTick], user: User) = {
+    if (pet.fleaTick.obj != newProduct)
       Full((pet, newProduct.map(_.getNameAndSize).openOr(""), user))
     else
       Empty
@@ -551,7 +551,7 @@ object ParentService extends Loggable {
       pet <- user.pets.toList
         if (pet.breed.get != null) &&
              (pet.birthday.get != null) &&
-             (pet.product.obj.map(_.isZoGuard_?).openOr(false))
+             (pet.fleaTick.obj.map(_.isZoGuard_?).openOr(false))
     } yield {
       val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase))
 
@@ -560,19 +560,19 @@ object ParentService extends Loggable {
       growthMonth match {
         case medium 
             if medium == getGrowthMonthNumber(growthRate, "medium") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogMediumZo))
           checkForNewProduct(pet, newProduct, user)
         }
 
         case large 
             if large == getGrowthMonthNumber(growthRate, "large") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogLargeZo))
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeZo))
           checkForNewProduct(pet, newProduct, user)
         }
 
         case xlarge 
             if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogXLargeZo))
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogXLargeZo))
           checkForNewProduct(pet, newProduct, user)
         }
 
@@ -587,7 +587,7 @@ object ParentService extends Loggable {
       pet <- user.pets.toList
         if (pet.breed.get != null) &&
              (pet.birthday.get != null) &&
-             (pet.product.obj.map(_.isZoGuard_?).openOr(false))
+             (pet.fleaTick.obj.map(_.isZoGuard_?).openOr(false))
     } yield {      
       val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase))
 
@@ -596,10 +596,10 @@ object ParentService extends Loggable {
       growthMonth match {
         case medium 
             if medium == getGrowthMonthNumber(growthRate, "medium") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogMediumZo))
           newProduct.map { product => 
             pet
-              .product(product)
+              .fleaTick(product)
               .size(AnimalSize.DogMediumZo)
               .nextGrowthDelay(0)
               .saveMe
@@ -608,10 +608,10 @@ object ParentService extends Loggable {
 
         case large 
             if large == getGrowthMonthNumber(growthRate, "large") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogLargeZo))
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeZo))
           newProduct.map { product => 
             pet
-              .product(product)
+              .fleaTick(product)
               .size(AnimalSize.DogLargeZo)
               .nextGrowthDelay(0)
               .saveMe
@@ -620,10 +620,10 @@ object ParentService extends Loggable {
 
         case xlarge 
             if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogXLargeZo))
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogXLargeZo))
           newProduct.map { product => 
             pet
-              .product(product)
+              .fleaTick(product)
               .size(AnimalSize.DogXLargeZo)
               .nextGrowthDelay(0)
               .saveMe

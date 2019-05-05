@@ -89,7 +89,7 @@ class AccountOverview extends Loggable {
 
         val petBindings = {
           ".pet" #> pets.map { pet =>
-            val product = pet.product.obj
+            val product = pet.fleaTick.obj
             val priceItem = product.flatMap { item =>
               Price.getPricesByCode(item, priceCode)
             }

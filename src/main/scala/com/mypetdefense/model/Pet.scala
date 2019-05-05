@@ -23,7 +23,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   object size extends MappedEnum(this, AnimalSize)
   object adultSize extends MappedEnum(this, AnimalSize)
   object birthday extends MappedDateTime(this)
-  object product extends MappedLongForeignKey(this, Product)
+  object fleaTick extends MappedLongForeignKey(this, FleaTick)
   object nextGrowthDelay extends MappedInt(this)
   object sentDogTag extends MappedBoolean(this) {
     override def defaultValue = false
@@ -42,7 +42,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value,
-    product: Product,
+    product: FleaTick,
     whelpDate: Box[Date] = Empty,
     breed: String = ""
   ) = {
@@ -52,7 +52,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     .name(TitleCase(name))
     .animalType(animalType)
     .size(size)
-    .product(product)
+    .fleaTick(product)
     .breed(breed)
     .birthday(whelpDate.openOr(null))
     .saveMe
@@ -61,7 +61,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   def createNewPet(
     user: User,
     name: String,
-    product: Product,
+    product: FleaTick,
     breed: String,
     whelpDate: Box[Date]
   ): Pet = {

@@ -89,7 +89,7 @@ object TPPApi extends RestHelper with Loggable {
   ) = {
     val refreshedUser = oldParent.refresh
     val pets = refreshedUser.map(_.pets.toList).openOr(Nil)
-    val products = pets.flatMap(_.product.obj)
+    val products = pets.flatMap(_.fleaTick.obj)
     val rawPennyCount: Double = products.map { product => 
       Price.getPricesByCode(product, Price.currentTppPriceCode).map(_.price.get) 
     }.flatten.foldLeft(0D)(_+_)
@@ -298,9 +298,9 @@ object TPPApi extends RestHelper with Loggable {
         case size => size
       }
 
-      val product = Product.find(
-        By(Product.name, sanitizedProductName),
-        By(Product.sizeName, sanitizedSize)
+      val product = FleaTick.find(
+        By(FleaTick.name, sanitizedProductName),
+        By(FleaTick.sizeName, sanitizedSize)
       )
 
     if (product == Empty) {

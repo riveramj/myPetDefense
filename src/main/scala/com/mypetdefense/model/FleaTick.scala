@@ -5,17 +5,17 @@ import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
 
-class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Product] {
-  def getSingleton = Product
-  object productId extends MappedLong(this){
+class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, FleaTick] {
+  def getSingleton = FleaTick
+  object fleaTickId extends MappedLong(this){
     override def dbIndexed_? = true
   }
   object name extends MappedString(this, 100)
   object animalType extends MappedEnum(this, AnimalType)
   object size extends MappedEnum(this, AnimalSize)
   object sizeName extends MappedString(this, 100)
-  object prices extends MappedOneToMany(Price, Price.product)
-  object reviews extends MappedOneToMany(Review, Review.product)
+  object prices extends MappedOneToMany(Price, Price.fleaTick)
+  object reviews extends MappedOneToMany(Review, Review.fleaTick)
   object rating extends MappedDouble(this)
   object reviewCount extends MappedInt(this)
   object imageName extends MappedString(this, 100)
@@ -26,10 +26,10 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   }
 
   def getNameAndSize = s"${this.name} ${this.size.toString()} lbs"
-  
+
   def getSizeAndSizeName = s"${this.sizeName}, ${this.size.toString()} lbs"
 
-  def createProduct(
+  def createFleaTick(
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value,
@@ -38,8 +38,8 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     weight: Double,
     sku: String
   ) = {
-    Product.create
-    .productId(generateLongId)
+    FleaTick.create
+    .fleaTickId(generateLongId)
     .name(name)
     .animalType(animalType)
     .size(size)
@@ -52,4 +52,4 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   def isZoGuard_? = this.name.get.toLowerCase.contains("zoguard")
 }
 
-object Product extends Product with LongKeyedMetaMapper[Product]
+object FleaTick extends FleaTick with LongKeyedMetaMapper[FleaTick]
