@@ -7,7 +7,7 @@ import com.mypetdefense.util.RandomIdGenerator._
 
 class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, FleaTick] {
   def getSingleton = FleaTick
-  object productId extends MappedLong(this){
+  object fleaTickId extends MappedLong(this){
     override def dbIndexed_? = true
   }
   object name extends MappedString(this, 100)
@@ -39,7 +39,7 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
     sku: String
   ) = {
     FleaTick.create
-    .productId(generateLongId)
+    .fleaTickId(generateLongId)
     .name(name)
     .animalType(animalType)
     .size(size)
