@@ -47,7 +47,7 @@ class Products extends Loggable {
 
   def getPriceForProduct(product: FleaTick, priceList: List[Price]) = {
     priceList.filter { price =>
-      price.product.obj == product
+      price.fleaTick.obj == product
     }.headOption.map(_.price.get).getOrElse(0D)
   }
 
