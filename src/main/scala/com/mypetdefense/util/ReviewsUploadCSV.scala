@@ -202,7 +202,7 @@ object ReviewsUploadCSV extends Loggable {
         .rating(rating)
         .author(author)
         .date(date)
-        .product(prod)
+        .fleaTick(prod)
     }
   }
 

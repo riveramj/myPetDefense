@@ -18,7 +18,7 @@ class Review extends LongKeyedMapper[Review] with IdPK with OneToMany[Long, Revi
   object rating extends MappedDouble(this)
   object author extends MappedString(this, 100)
   object date extends MappedDateTime(this)
-  object product extends MappedLongForeignKey(this, FleaTick)
+  object fleaTick extends MappedLongForeignKey(this, FleaTick)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -28,7 +28,7 @@ class Review extends LongKeyedMapper[Review] with IdPK with OneToMany[Long, Revi
     body: String,
     rating: Double,
     author: String,
-    product: Box[FleaTick]
+    fleaTick: Box[FleaTick]
   ) = {
     Review.create
     .reviewId(generateLongId)
@@ -36,7 +36,7 @@ class Review extends LongKeyedMapper[Review] with IdPK with OneToMany[Long, Revi
     .body(body)
     .rating(rating)
     .author(author)
-    .product(product)
+    .fleaTick(fleaTick)
     .saveMe
   }
 }

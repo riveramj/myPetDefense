@@ -15,7 +15,7 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
   object size extends MappedEnum(this, AnimalSize)
   object sizeName extends MappedString(this, 100)
   object prices extends MappedOneToMany(Price, Price.fleaTick)
-  object reviews extends MappedOneToMany(Review, Review.product)
+  object reviews extends MappedOneToMany(Review, Review.fleaTick)
   object rating extends MappedDouble(this)
   object reviewCount extends MappedInt(this)
   object imageName extends MappedString(this, 100)
