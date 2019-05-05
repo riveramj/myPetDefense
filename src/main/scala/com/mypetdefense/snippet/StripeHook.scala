@@ -88,9 +88,11 @@ trait StripeHook extends RestHelper with Loggable {
             val agencyName = agency.map(_.name.get).openOr("")
             val petlandStore_? = agency.map(_.petlandStore.get).openOr(false)
 
-            val inserts = (shipmentCount match {
-              case 0 =>
-                List(Insert.welcomeInsert.toList, Insert.tppWelcomeInsert.toList)
+            val inserts = ((shipmentCount, agencyName) match {
+              case (0, "My Pet Defense") =>
+                List(Insert.welcomeInsert)
+              case (0, _) =>
+                List(Insert.welcomeInsert, Insert.tppWelcomeInsert)
               case _ =>
                 Nil
             }).flatten
