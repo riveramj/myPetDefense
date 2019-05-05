@@ -29,7 +29,7 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
 
   def getSizeAndSizeName = s"${this.sizeName}, ${this.size.toString()} lbs"
 
-  def createProduct(
+  def createFleaTick(
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value,

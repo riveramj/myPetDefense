@@ -14,7 +14,7 @@ import dispatch._, Defaults._
 object DataLoader extends Loggable {
   def loadProducts = {
     if (FleaTick.findAll().isEmpty) {
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatAllSize,
@@ -24,7 +24,7 @@ object DataLoader extends Loggable {
         sku = "100001"
       )
 
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatMedium,
@@ -34,7 +34,7 @@ object DataLoader extends Loggable {
         sku = "100011"
       )
 
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatLarge,
@@ -44,7 +44,7 @@ object DataLoader extends Loggable {
         sku = "100012"
       )
 
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatSmall,
@@ -54,7 +54,7 @@ object DataLoader extends Loggable {
         sku = "100001"
       )
 
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatMedium,
@@ -64,7 +64,7 @@ object DataLoader extends Loggable {
         sku = "100001"
       )
 
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatLarge,
@@ -74,7 +74,7 @@ object DataLoader extends Loggable {
         sku = "100001"
       )
 
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogSmallAdv,
@@ -83,7 +83,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100013"
       )
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogMediumAdv,
@@ -92,7 +92,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100014"
       )
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogLargeAdv,
@@ -101,7 +101,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100015"
       )
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogXLargeAdv,
@@ -111,7 +111,7 @@ object DataLoader extends Loggable {
         sku = "100016"
       )
 
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogSmallZo,
@@ -120,7 +120,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100002"
       )
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogMediumZo,
@@ -129,7 +129,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100003"
       )
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogLargeZo,
@@ -138,7 +138,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100004"
       )
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogXLargeZo,
@@ -148,7 +148,7 @@ object DataLoader extends Loggable {
         sku = "100005"
       )
 
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogSmallShld,
@@ -157,7 +157,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100007"
       )
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogMediumShld,
@@ -166,7 +166,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100008"
       )
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogLargeShld,
@@ -175,7 +175,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100009"
       )
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogXLargeShld,
@@ -419,7 +419,7 @@ object DataLoader extends Loggable {
   def createOneSizeCat = {
     val oneSizeCat = FleaTick.find(By(FleaTick.size, AnimalSize.CatAllSize))
     if (oneSizeCat.isEmpty) {
-      FleaTick.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatAllSize,
