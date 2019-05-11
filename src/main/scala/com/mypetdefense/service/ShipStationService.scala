@@ -160,7 +160,7 @@ object ShipStationService extends Loggable {
     val billShipTo = createOrderBillShipToAddress(order)
     
     val treatOrderLineItems: List[TreatOrderLineItem] = order.treatsOrdered.toList
-    val treats = treatOrderLineItems.flatMap(_.treat.obj)
+    val treats = treatOrderLineItems.flatMap(_.product.obj)
     val shipStationProductIds = treats.map(_.sku.get) ++ packaging.map(_.sku.get).toList
 
     val shipStationItems = shipStationProductIds.map { sku =>

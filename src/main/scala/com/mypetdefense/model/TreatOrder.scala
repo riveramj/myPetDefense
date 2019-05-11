@@ -89,7 +89,7 @@ class TreatOrderLineItem extends LongKeyedMapper[TreatOrderLineItem] with IdPK {
   }
 
   object order extends MappedLongForeignKey(this, TreatOrder)
-  object treat extends MappedLongForeignKey(this, Product)
+  object product extends MappedLongForeignKey(this, Product)
   object quantity extends MappedInt(this)
   object insert extends MappedLongForeignKey(this, Insert)
   object createdAt extends MappedDateTime(this) {
@@ -103,7 +103,7 @@ class TreatOrderLineItem extends LongKeyedMapper[TreatOrderLineItem] with IdPK {
     treats.map { case (treat, quantity) =>
       TreatOrderLineItem.create
       .quantity(quantity)
-      .treat(treat)
+      .product(treat)
       .order(order)
       .saveMe
     }

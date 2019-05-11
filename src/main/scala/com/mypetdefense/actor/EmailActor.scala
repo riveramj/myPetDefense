@@ -724,7 +724,7 @@ trait TreatReceiptEmailHandling extends EmailHandlerChain {
         "#ship-state *" #> order.state.get &
         "#ship-zip *" #> order.zip.get &
         ".ordered-product" #> treats.map { orderedTreat =>
-          val treat = orderedTreat.treat.obj
+          val treat = orderedTreat.product.obj
 
           ".treat-quantity *" #> orderedTreat.quantity.get &
           ".treat-name *" #> treat.map(_.name.get)
@@ -768,7 +768,7 @@ trait TreatShippedEmailHandling extends EmailHandlerChain {
         "#ship-state" #> order.state.get &
         "#ship-zip" #> order.zip.get &
         ".ordered-product" #> treats.map { orderedTreat =>
-          val treat = orderedTreat.treat.obj
+          val treat = orderedTreat.product.obj
 
           ".treat-quantity *" #> orderedTreat.quantity.get &
           ".treat-name *" #> treat.map(_.name.get)
