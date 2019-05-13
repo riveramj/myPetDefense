@@ -34,6 +34,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   object cancellationReason extends MappedString(this, 100)
   object cancellationComment extends MappedText(this)
   object tags extends MappedOneToMany(TaggedItem, TaggedItem.subscription)
+  object addOnProducts extends MappedOneToMany(AddOnProduct, AddOnProduct.subscription)
 
   def refresh = Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
 
