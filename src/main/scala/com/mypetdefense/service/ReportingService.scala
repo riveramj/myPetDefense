@@ -963,7 +963,16 @@ object ReportingService extends Loggable {
 
   def exportAgencyMonthSales(name: String, month: String, possibleYear: String): Box[LiftResponse] = {
     val year = getYearOrCurrent(possibleYear)
-    val totalUsers = Agency.find(By(Agency.name, name)).map(_.customers.toList).getOrElse(Nil)
+    val totalUsers = {
+      if (name != "TPP")
+        Agency.find(By(Agency.name, name)).map(_.customers.toList).getOrElse(Nil)
+      else {
+        val puppySpot = Agency.find(By(Agency.name, "PuppySpot")).map(_.customers.toList).getOrElse(Nil)
+        val petland = Agency.find(By(Agency.name, "Petland")).map(Agency.getAllChildrenCustomers(_)).getOrElse(Nil)
+
+        puppySpot ++ petland
+      }
+    }
 
     val totalSubscriptions = getSubscriptions(totalUsers)
     val totalCancelledSubscriptions = findCurrentMonthCancelledSubscriptions(totalSubscriptions, month, year)
