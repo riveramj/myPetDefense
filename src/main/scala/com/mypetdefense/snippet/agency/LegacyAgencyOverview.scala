@@ -79,6 +79,7 @@ class LegacyAgencyOverview extends Loggable {
     ".february [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("February 2019") &
     ".march [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("March 2019") &
     ".april [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("April 2019") &
+    ".may [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("May 2019") &
     ".month-to-date-export [href]" #> LegacyAgencyOverview.agencyMtdYtdExportMenu.calcHref(agencyName)
   }
 }
