@@ -52,6 +52,14 @@ class SalesAgentReportEmailJob extends ManagedJob {
       monthlyAgentData,
       dailyAgencyData,
       monthlyAgencyData,
+      "keith@thirdpartypet.com"
+    )
+    
+    EmailActor ! DailySalesEmail(
+      dailyAgentData,
+      monthlyAgentData,
+      dailyAgencyData,
+      monthlyAgencyData,
       "toni@thirdpartypet.com"
     )
 
@@ -89,7 +97,7 @@ object DailyAgentSalesReportEmailJob extends TriggeredJob {
   val trigger = TriggerBuilder.newTrigger()
     .withIdentity("DailyAgentSalesReportEmailJobTrigger")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 30 7 ? * * *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 20 8 ? * * *"))
     .build()
 }
 
