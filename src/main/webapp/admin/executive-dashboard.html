@@ -1,0 +1,34 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div data-lift="admin.ExecutiveDashboard.render?eager_eval=true">
+    <div data-lift="embed?what=admin/admin-nav-bar"></div>
+    <div id="item-container">
+      <h2>Executive Dashboard</h2>
+      <div>
+        <table>
+          <thead>
+            <tr>
+              <td>Name</td>
+              <td>Active Customers</td>
+              <td>Suspended Customers</td>
+              <td>Cancelled Customers</td>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="agency">
+              <td class="name">Agency 1</td>
+              <td class="active-count">10</td>
+              <td class="suspended-count">10</td>
+              <td class="cancelled-count">10</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=dashboard">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=dashboard"></script>
+  </tail>
+</div>
