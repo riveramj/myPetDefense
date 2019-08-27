@@ -417,7 +417,12 @@ object DataLoader extends Loggable {
   }
 
   def createOneSizeCat = {
+    println("in one size"
+
     val oneSizeCat = Product.find(By(Product.size, AnimalSize.CatAllSize))
+
+    println(oneSizeCat + " is the cat product")
+
     if (oneSizeCat.isEmpty) {
       Product.createProduct(
         name = "ZoGuard Plus for Cats",
