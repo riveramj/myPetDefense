@@ -1,6 +1,55 @@
 @import "base"; 
 @import "nav-bar";
 @import "shopping-bar";
+@import "flow";
+
+li.complete {
+  @media (min-width: $bp-medium) {
+    &:before {
+      content: '';
+      position: initial;
+    }
+  }
+}
+.complete .step-container:before {
+  @extend %icon;
+}
+
+.complete .step-container:before {
+  @media (min-width: $bp-medium) {
+    content: fa-content($fa-var-check);
+    display: inline-block;
+  }
+}
+
+.flow-step {
+  padding: 18px 0 0;
+  height: 57px;
+  
+  &.complete {
+    &:before {
+      padding-top: 0;
+    }
+
+    .step-container {
+      vertical-align: sub;
+    }
+
+  }
+}
+
+
+
+.flow-progress-bar .step-name {
+  display: inline-block;
+}
+
+.pet-count {
+  @media (min-width: $bp-medium) {
+    left: 66px;
+    padding: 4px 8px;
+  }
+}
 
 #shopping-cart {
   margin-bottom: 73px;
@@ -13,7 +62,7 @@
   margin: 0 auto;
 
   @media (min-width: $bp-medium) {
-    padding: 30px 40px;
+    padding: 50px 40px;
   }
 
   > h2 {
@@ -430,4 +479,70 @@
       margin-right: 5px;
     }
   }
+}
+
+#next-pet {
+  text-align: center;
+  
+  @media (min-width: $bp-medium) {
+    display: inline-block;
+    width: 100%;
+    margin: 25px 0 83px;
+  }
+}
+
+#add-pet {
+  cursor: pointer;
+  width: 260px;
+  padding: rem(14px) 0;
+  text-decoration: none;
+  border: 1px solid #57B8B4;
+  color: $green;
+
+  background-color: initial;
+
+  font-weight: $semibold;
+  font-size: em(17px);
+
+  margin: 25px 0 10px;
+
+  border-radius: 5px;
+  text-transform: uppercase;
+
+  @media (min-width: $bp-medium) {
+    width: 138px;
+    margin: 0 15px 0 0;
+  }
+}
+
+#pet-discount {
+  margin-top: 25px;
+
+  text-align: center;
+
+  color: #4F4E4E;
+  font-size: 18px;
+  line-height: 24px;
+
+  @media (min-width: $bp-medium) {
+    max-width: 360px;
+    margin: 25px auto 0;
+  }
+
+  h2 {
+    margin-bottom: 8px;
+    color: #259490;
+    font-size: rem(25px);
+    font-weight: $semibold;
+
+    @media (min-width: $bp-medium) {
+      font-size: rem(30px);
+      margin-bottom: 10px;
+    }
+  }
+}
+
+.add-more-pets {
+  max-width: 750px;
+  text-align: left;
 }
