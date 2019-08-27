@@ -86,7 +86,7 @@ class Boot {
     //DataLoader.updateProductSku
     //DataLoader.loadWelcomeInserts
     //DataLoader.resetUpcomingBillingCylces
-    DataLoader.createOneSizeCat
+    //DataLoader.createOneSizeCat
     //DataLoader.loadPetlandInsert
     //DataLoader.removeFrontlineProduct
     //DataLoader.createFruitVeg
@@ -95,6 +95,7 @@ class Boot {
     //DataLoader.createNewPetlandStores
     //DataLoader.createPuppySpot
     //DataLoader.createBoxedTag
+    DataLoader.reloadDevDb
     
     //ReportingService.getPetlandCustomersWithStats
 

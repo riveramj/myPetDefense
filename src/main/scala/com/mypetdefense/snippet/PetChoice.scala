@@ -41,8 +41,6 @@ class PetChoice extends Loggable {
         By(Product.size, AnimalSize.CatAllSize)
       )
 
-      println(catProduct + " is the cat product")
-      
       petChoice(Full(AnimalType.Cat))
       productChoice(catProduct)
       petSize(catProduct.map(_.size.get))

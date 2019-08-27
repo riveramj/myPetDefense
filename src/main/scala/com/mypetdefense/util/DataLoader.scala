@@ -12,6 +12,11 @@ import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
 import dispatch._, Defaults._
 
 object DataLoader extends Loggable {
+  def reloadDevDb = {
+    Product.findAll().map(_.delete_!)
+    loadProducts
+  }
+  
   def loadProducts = {
     if (Product.findAll().isEmpty) {
       Product.createProduct(
