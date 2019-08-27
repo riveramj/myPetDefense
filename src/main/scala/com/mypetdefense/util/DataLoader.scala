@@ -417,7 +417,7 @@ object DataLoader extends Loggable {
   }
 
   def createOneSizeCat = {
-    println("in one size"
+    println("in one size")
 
     val oneSizeCat = Product.find(By(Product.size, AnimalSize.CatAllSize))
 
