@@ -86,7 +86,7 @@ class Boot {
     //DataLoader.updateProductSku
     //DataLoader.loadWelcomeInserts
     //DataLoader.resetUpcomingBillingCylces
-    DataLoader.createOneSizeCat
+    //DataLoader.createOneSizeCat
     //DataLoader.loadPetlandInsert
     //DataLoader.removeFrontlineProduct
     //DataLoader.createFruitVeg
