@@ -97,7 +97,7 @@ object DailyAgentSalesReportEmailJob extends TriggeredJob {
   val trigger = TriggerBuilder.newTrigger()
     .withIdentity("DailyAgentSalesReportEmailJobTrigger")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * * *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 22 ? * * *"))
     .build()
 }
 
