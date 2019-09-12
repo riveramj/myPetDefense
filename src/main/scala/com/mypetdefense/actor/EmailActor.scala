@@ -625,7 +625,7 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
       val template =
         Templates("emails-hidden" :: "daily-agent-report-email" :: Nil) openOr NodeSeq.Empty
 
-      val yesterdayDate = LocalDateTime.now().minusDays(2)
+      val yesterdayDate = LocalDateTime.now().minusDays(1)
 
       val subjectDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH))
       val headerDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH))
