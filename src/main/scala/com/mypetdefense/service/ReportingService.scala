@@ -860,7 +860,7 @@ object ReportingService extends Loggable {
         val createdDateMonth = createdDate.getMonth
         val createdDateYear = createdDate.getYear
 
-        val yesterdayDay = yesterday.getDayOfMonth
+        val yesterdayDay = 10
         val yesterdayMonth = yesterday.getMonth
         val yesterdayYear = yesterday.getYear
 
@@ -893,7 +893,6 @@ object ReportingService extends Loggable {
     val newUsersThisMonthByAgency = usersByAgencies.map { case (agency, users) =>
       val newUsersThisMonth = users.filter { user =>
         val createdDayDate = getCreatedDateOfUser(user)
-        val yesterdayDayOfYear = currentDate.getDayOfYear - 1
 
         (
           createdDayDate.getYear == yesterday.getYear &&
@@ -922,7 +921,7 @@ object ReportingService extends Loggable {
       val createdDateMonth = createdDate.getMonth
       val createdDateYear = createdDate.getYear
 
-      val yesterdayDay = yesterday.getDayOfMonth
+      val yesterdayDay = 10
       val yesterdayMonth = yesterday.getMonth
       val yesterdayYear = yesterday.getYear
 
@@ -947,7 +946,6 @@ object ReportingService extends Loggable {
 
     val newUsersThisMonth = totalUsers.filter { user =>
       val createdDayDate = getCreatedDateOfUser(user)
-      val yesterdayDayOfYear = currentDate.getDayOfYear - 1
       
       (
         createdDayDate.getYear == yesterday.getYear &&

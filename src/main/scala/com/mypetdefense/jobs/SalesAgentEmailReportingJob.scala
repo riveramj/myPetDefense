@@ -23,70 +23,7 @@ class SalesAgentReportEmailJob extends ManagedJob {
       "mike.rivera@mypetdefense.com"
     )
 
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "silvia@thirdpartypet.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "mike@canineregistrations.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "melissa@thirdpartypet.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "keith@thirdpartypet.com"
-    )
-    
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "toni@thirdpartypet.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "skyler@thirdpartypet.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "katie@thirdpartypet.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "alicia@thirdpartypet.com"
-    )
-  }
+      }
 }
 
 object DailyAgentSalesReportEmailJob extends TriggeredJob {
@@ -97,7 +34,7 @@ object DailyAgentSalesReportEmailJob extends TriggeredJob {
   val trigger = TriggerBuilder.newTrigger()
     .withIdentity("DailyAgentSalesReportEmailJobTrigger")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * * *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 52 5 ? * * *"))
     .build()
 }
 
