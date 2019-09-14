@@ -30,14 +30,12 @@ class Success extends Loggable {
 
   def render() = {
     if (TreatsFlow.treatShoppingCart.is == Map()) {
-      println("in if")
-
-      val petCount = shoppingCart.is.size
+      val pets = petCount.is.openOr(0)
       val monthlyTotal = total.is
       val freeMonthCount = freeMonths.is.openOr(0)
 
       "#order-details" #> {
-        "#pet-count span *" #> petCount &
+        "#pet-count span *" #> pets &
         "#monthly-total" #> ClearNodesIf(freeMonthCount == 0) &
         ".treat-sold" #> ClearNodes &
         "#monthly-total span *" #> monthlyTotal.map( paid => f"$$$paid%2.2f" )
