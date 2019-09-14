@@ -36,6 +36,10 @@ class CartReview extends Loggable {
   var coupon: Box[Coupon] = PetFlowChoices.coupon.is
   var couponCode = coupon.map(_.couponCode.get).openOr("")
 
+  val priceCode = PetFlowChoices.priceCode.is.openOr(Price.defaultPriceCode)
+
+  var currentPets = completedPets.is
+
   def getImageUrl(product: Box[Product]) = {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
   }
@@ -57,17 +61,56 @@ class CartReview extends Loggable {
   }
 
   def removePet(petId: Long)() = {
-    shoppingCart(shoppingCart.is - petId)
+    currentPets.remove(petId)
+    completedPets(currentPets)
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
+  def addNewPet() = {
+    petChoice(Empty)
+    productChoice(Empty)
+    petSize(Empty)
+    petId(Empty)
+
+    completedPets(currentPets)
+
+    S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
+  }
+
   def render = {
+    val currentPetId = PetFlowChoices.petId.is.openOr(0L)
+    
+    {
+      for {
+        petType <- petChoice.is
+        size <- petSize.is
+        product <- productChoice.is
+      } yield {
+        val pet = Pet.create
+          .petId(currentPetId)
+          .animalType(petType)
+          .size(size)
+          .product(product)
+
+        currentPets(currentPetId) = pet
+      }
+    }
+
     SHtml.makeFormsAjax andThen
     "#shopping-cart" #> idMemoize { renderer =>
       cartRenderer = Full(renderer)
 
-      val cart = shoppingCart.is
-      val subtotal = cart.values.map(_._3).sum
+      val cart = completedPets.is
+      
+      val subtotal = {
+        for {
+          pet <- cart.values
+          product <- pet.product.obj
+          price <- Price.getPricesByCode(product, priceCode)
+        } yield {
+          price.price.get
+        }
+      }.sum
       
       val discount = cart.size match {
         case 0 | 1 => 0
@@ -97,19 +140,25 @@ class CartReview extends Loggable {
         }
       } &
       ".cart-item" #> cart.map { case (id, pet) =>
-        val petName = pet._1
-        val product = pet._2
-        val itemPrice = pet._3
+        val petName = pet.name.get
+        val product = pet.product.obj
+        val productName = product.map(_.name.get).openOr("")
+        val productSizeName = product.map(_.getSizeAndSizeName).openOr("")
 
-        ".cart-product-image [src]" #> getImageUrl(Full(product)) &
+        val itemPrice = product.flatMap { prod =>
+          Price.getPricesByCode(prod, priceCode)
+        }.map(_.price.get).openOr(0D)
+
+        ".cart-product-image [src]" #> getImageUrl(product) &
         ".cart-pet-remove [onclick]" #> Confirm(s"Remove ${petName}?", ajaxInvoke(removePet(id) _)) &
-        ".product-name-size *" #> s"${product.name.get} ${product.getSizeAndSizeName}" &
+        ".product-name-size *" #> s"${productName} ${productSizeName}" &
         ".pet-name" #> ajaxText(petName, possibleName => {
-          shoppingCart(shoppingCart.is + (id -> pet.copy(_1 = possibleName)))
+          completedPets(pet.petId.get) = pet.name(possibleName)
           Noop
         }) &
         ".cart-pet-price *" #> f"$$$itemPrice%2.2f"
       } &
+      "#add-pet [onClick]" #> ajaxInvoke(addNewPet _) &
       {
         val successCoupon = {
           if (!PetFlowChoices.coupon.isEmpty)
