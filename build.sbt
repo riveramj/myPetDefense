@@ -9,7 +9,7 @@ version := "1.0-RC1"
 
 organization := "com.mypetdefense"
 
-scalaVersion := "2.12.4"
+scalaVersion := "2.12.10"
 
 seq(webSettings :_*)
 seq(resourceManagementSettings :_*)
@@ -40,7 +40,7 @@ resolvers ++= Seq(
 )
 
 libraryDependencies ++= {
-  val liftVersion = "3.2.0"
+  val liftVersion = "3.3.0"
   Seq(
     "org.apache.shiro"    %  "shiro-core"         % "1.2.4",
     "ch.qos.logback"      %  "logback-classic"    % "1.2.3",

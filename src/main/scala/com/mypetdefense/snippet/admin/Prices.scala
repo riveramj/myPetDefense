@@ -46,7 +46,7 @@ class Prices extends Loggable {
   var code = ""
   var rawPrice = ""
   var chosenProduct = ""
-  
+
   def productDropdown = {
     SHtml.select(
       ("","") +: productNames.sortWith(_<_).map(name => (name,name)),
