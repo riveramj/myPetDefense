@@ -32,6 +32,8 @@ import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon}
 
 import dispatch._, Defaults._
 
+import scala.collection.mutable.LinkedHashMap
+
 object Checkout extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
@@ -142,6 +144,10 @@ class Checkout extends Loggable {
           val user = newUserSetup(
             customer
           )
+
+          PetFlowChoices.petCount(Full(petCount))
+
+          PetFlowChoices.completedPets(LinkedHashMap.empty)
 
           val total = subtotalWithDiscount + taxDue
           
