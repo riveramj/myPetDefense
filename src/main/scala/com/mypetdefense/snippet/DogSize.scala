@@ -26,10 +26,6 @@ class DogSize extends Loggable {
   }
 
   def render = {
-    def sortProductSize(size1: String, size2: String) = {
-      val size1Int = size1.replaceAll("[^\\d.]", "")
-    }
-
     val products = Product.findAll(By(Product.name, "ZoGuard Plus for Dogs"))
 
     val smallDog = products.filter(_.size == AnimalSize.DogSmallZo).headOption

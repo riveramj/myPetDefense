@@ -23,9 +23,6 @@ li.complete {
 }
 
 .flow-step {
-  padding: 18px 0 0;
-  height: 57px;
-  
   &.complete {
     &:before {
       padding-top: 0;
@@ -46,7 +43,7 @@ li.complete {
 
 .pet-count {
   @media (min-width: $bp-medium) {
-    left: 66px;
+    left: 53px;
     padding: 4px 8px;
   }
 }
@@ -545,4 +542,10 @@ li.complete {
 .add-more-pets {
   max-width: 750px;
   text-align: left;
+}
+
+.arrow-up {
+  @media (min-width: $bp-large) {
+    margin-left: 22px;
+  }
 }

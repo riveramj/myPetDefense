@@ -36,19 +36,13 @@ class PetChoice extends Loggable {
     }
 
     def catFlow = {
-      val catProduct = Product.find(
-        By(Product.name, "ZoGuard Plus for Cats"),
-        By(Product.size, AnimalSize.CatAllSize)
-      )
-      
       petChoice(Full(AnimalType.Cat))
-      productChoice(catProduct)
-      petSize(Full(AnimalSize.CatAllSize))
+      petSize(Empty)
 
       if (petId.is.isEmpty)
         petId(Full(generateLongId))
 
-      S.redirectTo(CartReview.menu.loc.calcDefaultHref)
+      S.redirectTo(CatSize.menu.loc.calcDefaultHref)
     }
 
     "#dog" #> SHtml.submit("Select", dogFlow _) &

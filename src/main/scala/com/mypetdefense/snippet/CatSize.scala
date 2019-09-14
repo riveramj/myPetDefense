@@ -4,6 +4,7 @@ import net.liftweb.sitemap.Menu
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.http.{S, SHtml}
+import net.liftweb.mapper.{By,NotBy}
 
 import com.mypetdefense.service.PetFlowChoices
 import com.mypetdefense.model._
@@ -25,14 +26,25 @@ class CatSize extends Loggable {
   }
 
   def render = {
-    def chooseSize(size: AnimalSize.Value) = {
-      petSize(Full(size))
+    def chooseSize(product: Box[Product]) = {
+      productChoice(product)
+      petSize(product.map(_.size.get))
 
-      S.redirectTo(CatSize.menu.loc.calcDefaultHref)
+      S.redirectTo(CartReview.menu.loc.calcDefaultHref)
     }
 
-    "#small-cat" #> SHtml.submit("Select", () => chooseSize(AnimalSize.CatSmall)) &
-    "#medium-cat" #> SHtml.submit("Select", () => chooseSize(AnimalSize.CatMedium)) &
-    "#large-cat" #> SHtml.submit("Select", () => chooseSize(AnimalSize.CatLarge))
+    val products = Product.findAll(
+      By(Product.name, "ZoGuard Plus for Cats"),
+      NotBy(Product.size, AnimalSize.CatAllSize)
+    )
+
+    val smallCat = products.filter(_.size == AnimalSize.CatSmall).headOption
+    val mediumCat = products.filter(_.size == AnimalSize.CatMedium).headOption
+    val largeCat = products.filter(_.size == AnimalSize.CatLarge).headOption
+
+
+    "#small-cat" #> SHtml.submit("Select", () => chooseSize(smallCat)) &
+    "#medium-cat" #> SHtml.submit("Select", () => chooseSize(mediumCat)) &
+    "#large-cat" #> SHtml.submit("Select", () => chooseSize(largeCat))
   }
 }

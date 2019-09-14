@@ -118,7 +118,7 @@ object Paths {
     if (petChoice.is == Full(AnimalType.Dog))
       RedirectResponse(DogSize.menu.loc.calcDefaultHref)
     else
-      RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
+      RedirectResponse(CatSize.menu.loc.calcDefaultHref)
   )
 
   val completedPetOrFlow = If(
