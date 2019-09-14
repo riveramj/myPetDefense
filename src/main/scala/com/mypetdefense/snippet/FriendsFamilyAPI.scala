@@ -30,6 +30,17 @@ case class FriendsFamilyItem(sku: String, quantity: Int)
 
 object FriendsFamilyAPI extends RestHelper with Loggable {
   serve {
+    case req @ Req("authy" :: Nil, _, PostRequest) => {
+      println("----1")
+      println(req.hostAndPath)
+      println(req.headers)
+      val body = req.body
+      println(body.map(reqBody => tryo(Serialization.read[JValue](new String(reqBody)))))
+      println("----5")
+
+      OkResponse()
+    }
+    
     case req @ Req("api" :: "v1" :: "orders" :: Nil, _, PostRequest) => {
       for {
         requestBody <- (req.body ?~ "No request body." ~> 400)

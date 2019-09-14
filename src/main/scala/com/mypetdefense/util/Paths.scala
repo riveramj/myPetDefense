@@ -49,6 +49,8 @@ object Paths {
     RedirectResponse(Login.menu.loc.calcDefaultHref)
   }
 
+  def flowComplete_? = (!petChoice.is.isEmpty && !petSize.is.isEmpty && !productChoice.is.isEmpty)  
+
   val homePage = Menu.i("Home") / "index"
   val termsOfService = Menu.i("Terms of Service") / "terms-of-service"
   
@@ -104,6 +106,24 @@ object Paths {
   val hasProductInCart = If(
     () => !shoppingCart.is.isEmpty,
     RedirectResponse(Products.menu.loc.calcDefaultHref)
+  )
+
+  val petChosen = If(
+    () => !petChoice.is.isEmpty,
+    RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
+  )
+
+  val sizeChosen = If(
+    () => !petSize.is.isEmpty,
+    if (petChoice.is == Full(AnimalType.Dog))
+      RedirectResponse(DogSize.menu.loc.calcDefaultHref)
+    else
+      RedirectResponse(CatSize.menu.loc.calcDefaultHref)
+  )
+
+  val completedPetOrFlow = If(
+    () => (!completedPets.isEmpty || flowComplete_?),
+    () => RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
   )
 
   def serverUrl = {
@@ -194,6 +214,10 @@ object Paths {
     inventory.Reconciliations.menu,
     inventory.InventoryChangeAudits.menu,
     inventory.ItemProduction.menu,
-    petland.NewOrder.menu
+    petland.NewOrder.menu,
+    PetChoice.menu,
+    DogSize.menu,
+    CatSize.menu,
+    PetDetails.menu,
   )
 }
