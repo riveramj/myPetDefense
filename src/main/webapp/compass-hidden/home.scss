@@ -174,7 +174,7 @@
   padding-top: 20px;
 
  @media (min-width: $bp-medium) { 
-    padding: 60px 25% 60px;
+    padding: 28px 25% 60px;
   }
 
   @media (min-width: $bp-large) {
@@ -457,4 +457,26 @@ iframe[google_conversion_frame] {
 
 .coupon-code {
   text-transform: uppercase;
+}
+
+.step.size-choice {
+  width: 290px;
+  @media (min-width: $bp-medium) {
+    margin-top: 42px;
+  }
+  
+  img {
+    width: 280px;
+    height: auto;
+  }
+}
+
+.step.get-protected {
+  @media (min-width: $bp-medium) {
+    margin-top: 52px;
+  }
+
+  img {
+    height: auto;
+  }
 }
