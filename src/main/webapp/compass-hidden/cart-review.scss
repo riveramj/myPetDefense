@@ -158,12 +158,12 @@ li.complete {
     padding: 5px 0;
   }
 
-  .subtotal, .discount, .starting-total, .free-months-count {
+  .subtotal, .discount, .starting-total, .free-months-count, .coupon-discount-amount {
     float: right;
   }
 }
 
-.free-months {
+.free-months, .coupon-discount {
   color: #259490;
 }
 

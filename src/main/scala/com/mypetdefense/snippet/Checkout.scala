@@ -72,7 +72,8 @@ class Checkout extends Loggable {
   
   val subtotal = PetFlowChoices.subtotal.is.openOr(0D)
   val discount = PetFlowChoices.discount.is.openOr(0D)
-  val subtotalWithDiscount = subtotal - discount
+  val promotionAmount = coupon.map(_.dollarOff.get).openOr(0)
+  val subtotalWithDiscount = subtotal - discount - promotionAmount
 
   val pennyCount = (subtotal * 100).toInt
 
@@ -243,17 +244,19 @@ class Checkout extends Loggable {
 
         "#subtotal span *" #> f"$$$subtotal%2.2f" &
         "#discount" #> ClearNodesIf(discount == 0) &
+        "#promotion" #> ClearNodesIf(promotionAmount == 0) &
+        "#promotion span *" #> f"$$$promotionAmount%2.2f" &
         "#discount span *" #> f"$$$discount%2.2f" &
         "#tax" #> ClearNodesIf(taxDue == 0D) &
         "#tax span *" #> f"$$$taxDue%2.2f" &
         "#monthly-total span *" #> f"$$$monthlyTotal%2.2f" &
         {
-          if(coupon.isEmpty) {
+          val freeMonths = coupon.map(_.freeMonths.get).openOr(0)
+
+          if(coupon.isEmpty || freeMonths == 0) {
             "#order span *" #> f"$$$monthlyTotal%2.2f"
           } else {
             "#order span *" #> {
-              val freeMonths = coupon.map(_.freeMonths.get).openOr(0)
-
               if (freeMonths == 1) {
                 s"First Month Free"
               } else {
