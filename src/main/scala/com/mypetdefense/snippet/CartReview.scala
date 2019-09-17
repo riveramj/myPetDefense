@@ -126,7 +126,7 @@ class CartReview extends Loggable {
         case count => s"${count} items"
       }
 
-      val subtotalWithDiscount = subtotal - discount
+      val subtotalWithDiscount = subtotal - discount - coupon.map(_.dollarOff.get).openOr(0)
 
       ".cart-count *" #> cartCount &
       ".starting-total *" #> f"$$$subtotal%2.2f" &
@@ -134,9 +134,16 @@ class CartReview extends Loggable {
       ".subtotal *" #> f"$$$subtotalWithDiscount%2.2f" &
       {
         if(coupon.isEmpty) {
-          ".free-months" #> ClearNodes
+          ".free-months" #> ClearNodes &
+          ".coupon-discount" #> ClearNodes
         } else {
-          ".free-months-count *" #> coupon.map(_.freeMonths.get).openOr(0)
+           if (coupon.map(_.freeMonths.get == 0).openOr(true)) {
+            ".free-months" #> ClearNodes &
+            ".coupon-discount-amount *" #> f"$$${coupon.map(_.dollarOff.get).openOr(0)}%2.2f"
+           } else {
+             ".free-months-count *" #> coupon.map(_.freeMonths.get).openOr(0) &
+             ".coupon-discount" #> ClearNodes
+           }
         }
       } &
       ".cart-item" #> cart.map { case (id, pet) =>
