@@ -32,13 +32,15 @@ import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon}
 
 import dispatch._, Defaults._
 
+import scala.collection.mutable.LinkedHashMap
+
 object Checkout extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Checkout") / "checkout" >>
-    hasProductInCart
+    completedPetOrFlow
 }
 
 case class PromoCodeMessage(status: String) extends MyPetDefenseEvent("promotion-code-message")
@@ -65,12 +67,13 @@ class Checkout extends Loggable {
   var coupon: Box[Coupon] = PetFlowChoices.coupon
   var couponCode = coupon.map(_.couponCode.get).openOr("")
 
-  val cart = shoppingCart.is
-  val petCount = cart.size
+  val pets = completedPets.is
+  val petCount = pets.size
   
   val subtotal = PetFlowChoices.subtotal.is.openOr(0D)
   val discount = PetFlowChoices.discount.is.openOr(0D)
-  val subtotalWithDiscount = subtotal - discount
+  val promotionAmount = coupon.map(_.dollarOff.get).openOr(0)
+  val subtotalWithDiscount = subtotal - discount - promotionAmount
 
   val pennyCount = (subtotal * 100).toInt
 
@@ -143,6 +146,10 @@ class Checkout extends Loggable {
             customer
           )
 
+          PetFlowChoices.petCount(Full(petCount))
+
+          PetFlowChoices.completedPets(LinkedHashMap.empty)
+
           val total = subtotalWithDiscount + taxDue
           
           PetFlowChoices.total(Full(total))
@@ -165,8 +172,8 @@ class Checkout extends Loggable {
   }
 
   def createNewPets(user: User) = {
-    cart.map { case (_, (name, product, _)) =>
-      Pet.createNewPet(user, name, product, "", Empty)
+    pets.map { case (petId, pet) =>
+      Pet.createNewPet(pet, user)
     }
   }
 
@@ -220,7 +227,7 @@ class Checkout extends Loggable {
     )
 
     if (Props.mode == Props.RunModes.Production) {
-      EmailActor ! NewSaleEmail(user, cart.size, coupon.map(_.couponCode.get).openOr(""))
+      EmailActor ! NewSaleEmail(user, petCount, coupon.map(_.couponCode.get).openOr(""))
     }
 
     EmailActor ! SendWelcomeEmail(user)
@@ -237,17 +244,19 @@ class Checkout extends Loggable {
 
         "#subtotal span *" #> f"$$$subtotal%2.2f" &
         "#discount" #> ClearNodesIf(discount == 0) &
+        "#promotion" #> ClearNodesIf(promotionAmount == 0) &
+        "#promotion span *" #> f"$$$promotionAmount%2.2f" &
         "#discount span *" #> f"$$$discount%2.2f" &
         "#tax" #> ClearNodesIf(taxDue == 0D) &
         "#tax span *" #> f"$$$taxDue%2.2f" &
         "#monthly-total span *" #> f"$$$monthlyTotal%2.2f" &
         {
-          if(coupon.isEmpty) {
+          val freeMonths = coupon.map(_.freeMonths.get).openOr(0)
+
+          if(coupon.isEmpty || freeMonths == 0) {
             "#order span *" #> f"$$$monthlyTotal%2.2f"
           } else {
             "#order span *" #> {
-              val freeMonths = coupon.map(_.freeMonths.get).openOr(0)
-
               if (freeMonths == 1) {
                 s"First Month Free"
               } else {
