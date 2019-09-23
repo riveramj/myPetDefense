@@ -30,7 +30,7 @@ nav {
   padding: 20px;
 
   @media (min-width: $bp-medium) {
-    padding: 40px;
+    padding: 60px 45px 45px;
     margin: 0 auto;
     text-align: center;
   }
@@ -43,7 +43,7 @@ nav {
     vertical-align: top;
 
     &:nth-child(odd) {
-      margin-right: 30px;
+      margin-right: 50px;
     }
   }
 
@@ -57,7 +57,11 @@ nav {
     text-align: center;
 
     @media (min-width: $bp-medium) {
-      margin-bottom: 35px;
+      margin-bottom: 50px;
+    }
+
+    @media (min-width: $bp-large) {
+      padding: 30px;
     }
   }
 
@@ -79,10 +83,6 @@ nav {
       margin-right: 0;
     }
 
-    @media (min-width: $bp-medium) {
-      width: 48%;
-    }
-
     &.header {
       background-color: initial;
       display: block;
@@ -99,13 +99,25 @@ nav {
         font-size: 20px;
         font-weight: $normal;
       }
+
+      @media (min-width: $bp-large) {
+        padding-bottom: 25px;
+      }
     }
 
     @media (min-width: $bp-medium) {
       margin-right: 8px;
+      width: 48%;
+
       &:last-child {
         margin-right: 0;
       }
+    }
+
+    @media (min-width: $bp-large) {
+      margin-right: 28px;
+      width: 47%;
+      padding: 15px 0;
     }
 
     div {
