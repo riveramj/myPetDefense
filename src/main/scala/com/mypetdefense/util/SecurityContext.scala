@@ -70,7 +70,7 @@ object SecurityContext extends Loggable {
       })
 
     if (agencyName == "My Pet Defense") {
-      Dashboard.menu.loc.calcDefaultHref
+      ShipmentDashboard.menu.loc.calcDefaultHref
     } else {
       AgencyOverview.menu.loc.calcDefaultHref
     }
