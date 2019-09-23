@@ -64,7 +64,7 @@ class ExecutiveDashboard extends Loggable {
       price <- Price.getPricesByCode(product, priceCode)
       _ = println(price)
     } yield {
-      _ = println(price.price.get)
+      println(price.price.get)
       price.price.get
     }
   }.sum
