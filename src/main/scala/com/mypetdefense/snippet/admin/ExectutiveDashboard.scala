@@ -54,12 +54,17 @@ class ExecutiveDashboard extends Loggable {
   val currentMonthUpcomingSubscriptions = ReportingService.findCurrentMonthUpcomingSubscriptions
 
   val currentMonthUpcomingValue = {
+    println("in for loop")
     for {
       subscription <- currentMonthUpcomingSubscriptions
       product <- subscription.getProducts
+      _ = println(product)
       priceCode = subscription.priceCode.get
+      _ = println(priceCode)
       price <- Price.getPricesByCode(product, priceCode)
+      _ = println(price)
     } yield {
+      _ = println(price.price.get)
       price.price.get
     }
   }.sum
