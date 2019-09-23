@@ -13,7 +13,7 @@ import com.mypetdefense.service._
 
 import com.mypetdefense._
   import model.{User, UserType, Status}
-  import snippet.admin.Dashboard
+  import snippet.admin.ShipmentDashboard
 import com.mypetdefense.util.SecurityContext
 
 object Login extends Loggable {
