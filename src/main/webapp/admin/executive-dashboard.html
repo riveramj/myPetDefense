@@ -2,31 +2,73 @@
   <div data-lift="admin.ExecutiveDashboard.render?eager_eval=true">
     <div data-lift="embed?what=admin/admin-nav-bar"></div>
     <div id="item-container">
-      <h2>Executive Dashboard</h2>
-      <div>
-        <table>
-          <thead>
-            <tr>
-              <td>Name</td>
-              <td>Active Customers</td>
-              <td>Suspended Customers</td>
-              <td>Cancelled Customers</td>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="agency">
-              <td class="name">Agency 1</td>
-              <td class="active-count">10</td>
-              <td class="suspended-count">10</td>
-              <td class="cancelled-count">10</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <section class="mtd-shipments snapshot">
+        <ul>
+          <li class="header">
+            <h3>Month-to-Date Shipments</h3>
+          </li>
+          <li>
+            <div class="count">1234</div>
+            Total Shipments
+          </li>
+          <li>
+            <div class="value">$1.00</div>
+            Shipment Value
+          </li>
+        </ul>
+      </section>
+
+      <section class="today-shipments snapshot">
+        <ul>
+          <li class="header">
+            <h3>Today's Shipments</h3>
+          </li>
+          <li>
+            <div class="count">1234</div>
+            Total Shipments
+          </li>
+          <li>
+            <div class="value">$1.00</div>
+            Shipment Value
+          </li>
+        </ul>
+      </section>
+
+      <section class="total-month-shipments snapshot">
+        <ul>
+          <li class="header">
+            <h3>Total Current Month Shipments</h3>
+          </li>
+          <li>
+            <div class="count">1234</div>
+            Total Shipments
+          </li>
+          <li>
+            <div class="value">$1.00</div>
+            Shipment Value
+          </li>
+        </ul>
+      </section>
+
+      <section class="mtd-users snapshot">
+        <ul>
+          <li class="header">
+            <h3>Month-to-Date Users</h3>
+          </li>
+          <li>
+            <div class="new-users-count">1234</div>
+            New Users
+          </li>
+          <li>
+            <div class="cancellations-count">1234</div>
+            Cancellations
+          </li>
+        </ul>
+      </section>
     </div>
   </div>
   <head_merge>
-    <link rel="stylesheet" data-lift="style-bundle?name=dashboard">
+    <link rel="stylesheet" data-lift="style-bundle?name=executive-dashboard">
   </head_merge>
   <tail>
     <script type="text/javascript" data-lift="script-bundle?name=dashboard"></script>

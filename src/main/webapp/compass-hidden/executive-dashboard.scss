@@ -1,0 +1,122 @@
+@import "base";
+@import "admin-nav-bar";
+
+body {
+  background-color: #DCDBDB;
+}
+
+nav {
+  float: none;
+}
+
+#top-bar {
+  padding: 15px 0 15px;
+  text-align: center;
+  #logo-name {
+    display: block;
+  }
+
+  @media (min-width: $bp-medium) {
+    padding: 15px;
+    text-align: left;
+  }
+
+  @media (min-width: $bp-large) {
+    padding: 15px 50px;
+  }
+}
+
+#item-container {
+  padding: 20px;
+
+  @media (min-width: $bp-medium) {
+    padding: 40px;
+    margin: 0 auto;
+    text-align: center;
+  }
+}
+
+.snapshot {
+  @media (min-width: $bp-medium) {
+    display: inline-block;
+    width: 45%;
+    vertical-align: top;
+
+    &:nth-child(odd) {
+      margin-right: 30px;
+    }
+  }
+
+  ul {
+    background-color: #F1F1F1;
+    margin-bottom: 20px;
+    -webkit-box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    -moz-box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px 0 rgba(0,0,0,0.2);
+    padding: 10px;
+    text-align: center;
+
+    @media (min-width: $bp-medium) {
+      margin-bottom: 35px;
+    }
+  }
+
+  li {
+    background-color: #FFFFFF;
+    color: #B2B0B0;
+    padding: 6px 0;
+    display: inline-block;
+    width: 47%;
+    vertical-align: top;
+    text-align: center;
+
+    font-size: 15px;
+    line-height: 18px;
+
+    margin-right: 15px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+
+    @media (min-width: $bp-medium) {
+      width: 48%;
+    }
+
+    &.header {
+      background-color: initial;
+      display: block;
+      margin: 0 auto;
+      color: #4F4E4E;
+      font-size: 16px;
+      font-weight: $bold;
+      padding: 0 0 10px;
+      width: 100%;
+
+      @media (min-width: $bp-medium) {
+        margin-top: 0;
+        padding-bottom: 13px;
+        font-size: 20px;
+        font-weight: $normal;
+      }
+    }
+
+    @media (min-width: $bp-medium) {
+      margin-right: 8px;
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+
+    div {
+      color: #4F4E4E;
+      
+      @media (min-width: $bp-medium) {
+        line-height: 24px;
+        font-weight: $bold;
+        font-size: 20px;
+        padding-bottom: 2px;
+      }
+    }
+  }
+}
