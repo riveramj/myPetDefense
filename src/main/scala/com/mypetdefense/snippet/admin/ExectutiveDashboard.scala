@@ -42,7 +42,8 @@ class ExecutiveDashboard extends Loggable {
 
   val topLevelAgencies = List(mpdAgency, tppAgency)
 
-  val dollarFormatter = java.text.NumberFormat.getCurrencyInstance
+  val dollarFormatter = NumberFormat.getCurrencyInstance
+  val numberFormatter = NumberFormat.getIntegerInstance
 
   val mtdShipments = ReportingService.findMtdShipments
   val mtdShipmentValue = mtdShipments.map { shipment =>
@@ -73,11 +74,11 @@ class ExecutiveDashboard extends Loggable {
 
   def render = {
     ".executive-dashboard [class+]" #> "current" &
-    ".mtd-shipments .count *"#> mtdShipments.size &
+    ".mtd-shipments .count *"#> numberFormatter.format(mtdShipments.size) &
     ".mtd-shipments .value *"#> dollarFormatter.format(mtdShipmentValue) &
-    ".today-shipments .count *"#> todayShipments.size &
+    ".today-shipments .count *"#> numberFormatter.format(todayShipments.size) &
     ".today-shipments .value *"#> dollarFormatter.format(todayShipmentsValue) &
-    ".total-month-shipments .count *"#> totalMonthShipments &
+    ".total-month-shipments .count *"#> numberFormatter.format(totalMonthShipments) &
     ".total-month-shipments .value *"#> dollarFormatter.format(totalMonthShipmentValue) &
     ".mtd-users .new-users-count *"#> ReportingService.findNewMtdSubscriptions.size &
     ".mtd-users .cancellations-count *"#> ReportingService.findCancelledMtdSubscriptions.size &
