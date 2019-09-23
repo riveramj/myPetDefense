@@ -34,7 +34,7 @@ object ShipmentDashboard extends Loggable {
     mpdAdmin >>
     loggedIn
 
-    val newLabelsExportMenu = Menu.i("Export New Labels") / "admin" / "shipment-dashboard" / "export_new_shipments.csv" >>
+  val newLabelsExportMenu = Menu.i("Export New Labels") / "admin" / "shipment-dashboard" / "export_new_shipments.csv" >>
     mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportNewUspsLabels _)
