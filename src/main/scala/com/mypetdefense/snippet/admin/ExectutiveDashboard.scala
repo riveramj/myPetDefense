@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 import java.time.{LocalDate, ZoneId}
 import java.time.format.DateTimeFormatter
+import java.text.NumberFormat
 
 import com.mypetdefense.model._
 import com.mypetdefense.util.Paths._
@@ -40,6 +41,8 @@ class ExecutiveDashboard extends Loggable {
   val tppAgency = Agency.find(By(Agency.name, "TPP"))
 
   val topLevelAgencies = List(mpdAgency, tppAgency)
+
+  val dollarFormatter = java.text.NumberFormat.getCurrencyInstance
 
   val mtdShipments = ReportingService.findMtdShipments
   val mtdShipmentValue = mtdShipments.map { shipment =>
@@ -71,11 +74,11 @@ class ExecutiveDashboard extends Loggable {
   def render = {
     ".executive-dashboard [class+]" #> "current" &
     ".mtd-shipments .count *"#> mtdShipments.size &
-    ".mtd-shipments .value *"#> f"$$$mtdShipmentValue%2.2f" &
+    ".mtd-shipments .value *"#> dollarFormatter.format(mtdShipmentValue) &
     ".today-shipments .count *"#> todayShipments.size &
-    ".today-shipments .value *"#> f"$$$todayShipmentsValue%2.2f" &
+    ".today-shipments .value *"#> dollarFormatter.format(todayShipmentsValue) &
     ".total-month-shipments .count *"#> totalMonthShipments &
-    ".total-month-shipments .value *"#> f"$$$totalMonthShipmentValue%2.2f" &
+    ".total-month-shipments .value *"#> dollarFormatter.format(totalMonthShipmentValue) &
     ".mtd-users .new-users-count *"#> ReportingService.findNewMtdSubscriptions.size &
     ".mtd-users .cancellations-count *"#> ReportingService.findCancelledMtdSubscriptions.size &
     ".agency" #> topLevelAgencies.map { agency =>
