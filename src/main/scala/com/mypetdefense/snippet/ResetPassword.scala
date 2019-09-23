@@ -13,7 +13,7 @@ import com.mypetdefense.service._
 
 import com.mypetdefense._
   import model.{User, UserType}
-  import snippet.admin.Dashboard
+  import snippet.admin.ShipmentDashboard
 import com.mypetdefense.util.SecurityContext
 import com.mypetdefense.actor._
 
