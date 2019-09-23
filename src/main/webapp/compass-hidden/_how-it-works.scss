@@ -16,10 +16,6 @@
   #steps {
     padding-top: rem(30px);
     
-    @media (min-width: $bp-large) {
-      padding-top: rem(45px);
-    }
-
     li {
       margin-top: 60px;
       

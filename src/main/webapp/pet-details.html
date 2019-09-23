@@ -1,0 +1,97 @@
+<div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div class="flow-progress-bar">
+    <ul>
+      <li class="complete">
+        <a href="#">
+          <dl class="step-container">
+            <dt class="step-name">1. Pet</dt>
+            <dd class="step-choice">
+              <span class="chosen-pet" data-lift="PetChoice.chosenPet">catdog</span>
+            </dd>
+          </dl>
+        </a>
+      </li>
+      <li class="complete" data-lift="NavBar.size">
+        <a href="#">
+          <dl class="step-container">
+            <dt class="step-name">2. Size</dt>
+            <dd class="step-choice">
+              <span class="chosen-size">5-9</span>
+            </dd>
+          </dl>
+        </a>
+      </li>
+      <li>
+        <span class="pet-count" data-lift="NavBar.petCount">0</span>
+        <div>3. Pet Details</div>
+        <div class="arrow-up"></div>
+      </li>
+      <li>
+        <div>4. Checkout</div>
+      </li>
+    </ul>
+  </div>
+  <div class="flow-step complete">
+      <dl class="step-container">
+        <dt class="step-name">1. Pet</dt>
+        <dd class="step-choice">
+          <span class="chosen-pet" data-lift="PetChoice.chosenPet">cat</span>
+        </dd>
+      </dl>
+  </div>
+  <div class="flow-step complete" data-lift="NavBar.size">
+      <dl class="step-container">
+        <dt class="step-name">2. Size</dt>
+        <dd class="step-choice">
+          <span class="chosen-size">5-9</span>
+        </dd>
+      </dl>
+  </div>
+  <div class="flow-step unanswered">
+    <div class="step-name">3. Pet Details<span class="pet-count" data-lift="NavBar.petCount">0</span></div>
+    <div class="arrow-up"></div>
+  </div>
+
+  <form class="current-step" data-lift="PetDetails.render">
+    <h1 class="step-header">Pet Details</h1>
+    <fieldset class="account-info pet">
+      <button class="remove-pet">Remove Pet</button>
+      <ul class="name-birth">
+        <li>
+          <label>
+            <div><span class="field-label">Pet Name</span></div>
+            <input class="pet-name" type="text">
+          </label>
+        </li>
+      </ul>
+
+      <ul class="purchase-details">
+        <li>Pet <span class="details-pet">dog</span></li>
+        <li>Product <span class="details-product">dog</span></li>
+        <li>Size <span class="details-size">dog</span> <span>pounds</span></li>
+      </ul>
+    </fieldset>
+    <div id="pet-discount">
+      <h2>Discount for multiple pets!</h2>
+      <div>
+        You’ll get 5% off of the total when you add a second pet. For three pets and up, you’ll get 10% off the total.
+      </div>
+    </div>
+    <div id="next-actions">
+      <button id="add-pet" class="submit">Add Pet</button>
+      <button id="checkout" class="select-choice submit">Checkout</button>
+    </div>
+  </form>
+
+  <div class="flow-step unanswered">
+    <div class="step-name">4. Checkout</div>
+  </div>
+
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=pet-details"></script>
+  </tail>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=pet-details">
+  </head_merge>
+</div>
+

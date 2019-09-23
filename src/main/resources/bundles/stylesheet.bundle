@@ -54,6 +54,9 @@ dashboard
 dashboard.css
 admin.css
 
+executive-dashboard
+executive-dashboard.css
+
 account-overview
 account-overview.css
 
@@ -99,3 +102,12 @@ petland-new-order.css
 
 petland-store-overview
 petland-store-overview.css
+
+choose-pet
+choose-pet.css
+
+pet-size
+pet-size.css
+
+pet-details
+pet-details.css
