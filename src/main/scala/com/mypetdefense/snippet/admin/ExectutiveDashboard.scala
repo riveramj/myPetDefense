@@ -69,7 +69,7 @@ class ExecutiveDashboard extends Loggable {
   val totalMonthShipmentValue = todayShipmentsValue + currentMonthUpcomingValue
 
   def render = {
-    ".executive-dashboard [class+]" #> "current"
+    ".executive-dashboard [class+]" #> "current" &
     ".mtd-shipments .count *"#> mtdShipments.size &
     ".mtd-shipments .value *"#> f"$$$mtdShipmentValue%2.2f" &
     ".today-shipments .count *"#> todayShipments.size &
