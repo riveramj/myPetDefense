@@ -25,26 +25,26 @@ import com.mypetdefense.util._
 import com.mypetdefense.actor._
 import com.mypetdefense.service._
 
-object Dashboard extends Loggable {
+object ShipmentDashboard extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Dashboard") / "admin" / "dashboard" >>
+  val menu = Menu.i("Shipment Dashboard") / "admin" / "shipment-dashboard" >>
     mpdAdmin >>
     loggedIn
 
-  val newLabelsExportMenu = Menu.i("Export New Labels") / "admin" / "dashboard" / "export_new_shipments.csv" >>
+  val newLabelsExportMenu = Menu.i("Export New Labels") / "admin" / "shipment-dashboard" / "export_new_shipments.csv" >>
     mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportNewUspsLabels _)
 
-  val existingLabelsExportMenu = Menu.i("Export Existing Labels") / "admin" / "dashboard" / "export_existing_shipments.csv" >>
+  val existingLabelsExportMenu = Menu.i("Export Existing Labels") / "admin" / "shipment-dashboard" / "export_existing_shipments.csv" >>
     mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportExistingUspsLabels _)
 
-  val mpdShipstationExportMenu = Menu.i("Export MPD Shipstation Labels") / "admin" / "dashboard" / "export_MPD_shipstation.csv" >>
+  val mpdShipstationExportMenu = Menu.i("Export MPD Shipstation Labels") / "admin" / "shipment-dashboard" / "export_MPD_shipstation.csv" >>
     mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportMpdShipstationLabels _)
@@ -62,7 +62,7 @@ object Dashboard extends Loggable {
   }
 }
 
-class Dashboard extends Loggable {
+class ShipmentDashboard extends Loggable {
   var shipmentRenderer: Box[IdMemoizeTransform] = Empty
   var future = false
 
@@ -134,7 +134,7 @@ class Dashboard extends Loggable {
 
       trackingInfos.map(updateShipment)
 
-      S.redirectTo(Dashboard.menu.loc.calcDefaultHref)
+      S.redirectTo(ShipmentDashboard.menu.loc.calcDefaultHref)
     }
 
     def updateShipment(trackingInfo: TrackingInfo) = {
@@ -192,10 +192,10 @@ class Dashboard extends Loggable {
 
   def render = {
     SHtml.makeFormsAjax andThen
-    ".dashboard [class+]" #> "current" &
-    ".new-export [href]" #> Dashboard.newLabelsExportMenu.loc.calcDefaultHref &
-    ".existing-export [href]" #> Dashboard.existingLabelsExportMenu.loc.calcDefaultHref &
-    ".shipstation-export [href]" #> Dashboard.mpdShipstationExportMenu.loc.calcDefaultHref &
+    ".shipment-dashboard [class+]" #> "current" &
+    ".new-export [href]" #> ShipmentDashboard.newLabelsExportMenu.loc.calcDefaultHref &
+    ".existing-export [href]" #> ShipmentDashboard.existingLabelsExportMenu.loc.calcDefaultHref &
+    ".shipstation-export [href]" #> ShipmentDashboard.mpdShipstationExportMenu.loc.calcDefaultHref &
     "#dashboard-current [onclick]" #> SHtml.ajaxInvoke(() => changeDataSet("current")) &
     "#dashboard-future [onclick]" #> SHtml.ajaxInvoke(() => changeDataSet("future")) &
     ".dashboard-details" #> SHtml.idMemoize { renderer =>
