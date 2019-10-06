@@ -83,6 +83,10 @@ class LegacyAgencyOverview extends Loggable {
     ".june-2019 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("June 2019") &
     ".july-2019 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("July 2019") &
     ".august-2019 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("August 2019") &
+    ".august-2019 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("September 2019") &
+    ".september-2019 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("October 2019") &
+    ".november-2019 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("November 2019") &
+    ".december-2019 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("December 2019") &
     ".month-to-date-export [href]" #> LegacyAgencyOverview.agencyMtdYtdExportMenu.calcHref(agencyName)
   }
 }
