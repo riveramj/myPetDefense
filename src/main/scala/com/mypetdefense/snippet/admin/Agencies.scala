@@ -185,15 +185,18 @@ class Agencies extends Loggable {
   }
 
   def generateAgencyData(agency: Agency, parentAgency: Box[Agency]) = {
-    val activeCustomers = agency.customers.flatMap(_.getSubscription).filter(_.status == Status.Active)
-
     val parentName = parentAgency.map(_.name.get).openOr("-")
-
+    val activeCustomers = {
+      if (parentAgency.isEmpty)
+        Agency.getAllChildrenCustomers(agency)
+      else
+        agency.customers
+    }
 
     {
       ".name *" #> agency.name &
       ".parent-name *" #> parentName &
-      ".customer-count *" #> activeCustomers.size &
+      ".customer-count *" #> activeCustomers.flatMap(_.getSubscription).filter(_.status == Status.Active).size &
       ".coupon-count *" #> agency.coupons.size &
       ".actions .delete" #> ClearNodesIf(agency.customers.size > 0) &
       ".actions .delete [onclick]" #> Confirm(s"Delete ${agency.name}? This will delete all members and coupons.",ajaxInvoke(deleteAgency(agency) _)) &
