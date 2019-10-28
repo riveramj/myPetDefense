@@ -893,7 +893,7 @@ object ReportingService extends Loggable {
 
   def findMtdShipments = {
     Shipment.findAll(
-      By_>(Shipment.dateShipped, monthDayOne)
+      By_>(Shipment.createdAt, monthDayOne)
     )
   }
 

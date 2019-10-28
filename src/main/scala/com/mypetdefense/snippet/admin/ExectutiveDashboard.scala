@@ -55,11 +55,11 @@ class ExecutiveDashboard extends Loggable {
     tryo(shipment.amountPaid.get.toDouble)
   }.flatten.foldLeft(0D)(_+_)
 
-  val currentMonthUpcomingSubscriptions = ReportingService.findCurrentMonthUpcomingSubscriptions
+  val remainingMonthSubscriptions = ReportingService.findCurrentMonthUpcomingSubscriptions
 
-  val currentMonthUpcomingValue = {
+  val remainingMonthValue = {
     for {
-      subscription <- currentMonthUpcomingSubscriptions
+      subscription <- remainingMonthSubscriptions
       product <- subscription.getProducts
       priceCode = subscription.priceCode.get
       price <- Price.getPricesByCode(product, priceCode)
@@ -68,18 +68,14 @@ class ExecutiveDashboard extends Loggable {
     }
   }.sum
 
-  val totalMonthShipments = mtdShipments.size + currentMonthUpcomingSubscriptions.size
-
-  val totalMonthShipmentValue = todayShipmentsValue + currentMonthUpcomingValue
-
   def render = {
     ".executive-dashboard [class+]" #> "current" &
     ".mtd-shipments .count *"#> numberFormatter.format(mtdShipments.size) &
     ".mtd-shipments .value *"#> dollarFormatter.format(mtdShipmentValue) &
     ".today-shipments .count *"#> numberFormatter.format(todayShipments.size) &
     ".today-shipments .value *"#> dollarFormatter.format(todayShipmentsValue) &
-    ".total-month-shipments .count *"#> numberFormatter.format(totalMonthShipments) &
-    ".total-month-shipments .value *"#> dollarFormatter.format(totalMonthShipmentValue) &
+    ".remaining-shipments-month .count *"#> numberFormatter.format(remainingMonthSubscriptions.size) &
+    ".remaining-shipments-month .value *"#> dollarFormatter.format(remainingMonthValue) &
     ".mtd-users .new-users-count *"#> ReportingService.findNewMtdSubscriptions.size &
     ".mtd-users .cancellations-count *"#> ReportingService.findCancelledMtdSubscriptions.size &
     ".agency" #> topLevelAgencies.map { agency =>
