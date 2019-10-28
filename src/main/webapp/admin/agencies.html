@@ -25,19 +25,17 @@
     <table>
       <thead>
         <tr>
-          <td>Name
-          <td>Parent
-          <td>Customers
-          <td>Coupons
-          <td>Actions
+          <td>Name</td>
+          <td>Customers</td>
+          <td>Coupons</td>
+          <td>Actions</td>
         </tr>
       </thead>
-      <tbody>
-        <tr class="agency">
-          <td class="name">Mike Rivera
-          <td class="parent-name">-
-          <td class="customer-count">10
-          <td class="coupon-count">10
+      <tbody class="agency">
+        <tr>
+          <td class="name">Mike Rivera</td>
+          <td class="customer-count">10</td>
+          <td class="coupon-count">10</td>
           <td class="actions">
             <button class="delete">Delete</button>
             <a href="/export-csv" class="sales-export">Export Raw Sales Data</a>
@@ -46,6 +44,58 @@
             <a href="/export-csv" class="total-sales-export">Export Total Sales Data</a>
             <a href="/export-csv" class="month-to-date-sales-export">Export Month to Date Sales Data</a>
             <a href="/export-csv" class="month-to-date-export">Export MTD YTD Data</a>
+          </td>
+        </tr>
+        <tr class="subagencies level-1">
+          <td colspan=4 class="agency-info">
+            <table>
+              <thead>
+                <tr>
+                  <td>Name</td>
+                  <td>Parent</td>
+                  <td>Customers</td>
+                  <td>Coupons</td>
+                  <td>Actions</td>
+                </tr>
+              </thead>
+              <tbody class="agency">
+                <tr>
+                  <td class="name">Mike Rivera</td>
+                  <td class="parent-name">-</td>
+                  <td class="customer-count">10</td>
+                  <td class="coupon-count">10</td>
+                  <td class="actions">
+                    <button class="delete">Delete</button>
+                  </td>
+                </tr>
+                <tr class="subagencies level-2">
+                  <td colspan=5 class="agency-info">
+                    <table>
+                      <thead>
+                        <tr>
+                          <td>Name</td>
+                          <td>Parent</td>
+                          <td>Customers</td>
+                          <td>Coupons</td>
+                          <td>Actions</td>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr class="agency">
+                          <td class="name">Mike Rivera</td>
+                          <td class="parent-name">-</td>
+                          <td class="customer-count">10</td>
+                          <td class="coupon-count">10</td>
+                          <td class="actions">
+                            <button class="delete">Delete</button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </td>
         </tr>
       </tbody>
