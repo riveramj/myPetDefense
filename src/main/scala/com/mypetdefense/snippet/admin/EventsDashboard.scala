@@ -58,6 +58,16 @@ class EventsDashboard extends Loggable {
     renderer.setHtml
   }
 
+  def getEmail(event: Event) = {
+    val parent = event.user.obj
+    
+    if (parent.map(_.status == Status.Cancelled).openOr(false)) {
+      event.user.obj.flatMap(user => CancelledUser.find(By(CancelledUser.user, user.userId.get)).map(_.email.get))
+    } else {
+      event.user.obj.map(_.email.get)
+    }
+  }
+
   def render = {
     SHtml.makeFormsAjax andThen
     ".event-dashboard [class+]" #> "current" &
@@ -69,7 +79,7 @@ class EventsDashboard extends Loggable {
         ".event-date *" #> dateFormat.format(event.eventDate.get) &
         ".title *" #> event.title.get &
         ".details *" #> event.details.get &
-        ".account-email *" #> event.user.obj.map(_.email.get) &
+        ".account-email *" #> getEmail(event) &
         ".tracking-number a *" #> trackingNumber &
         ".tracking-number a [href]" #> s"https://tools.usps.com/go/TrackConfirmAction.action?tLabels=${trackingNumber.openOr("")}" &
         ".event-type *" #> event.eventType.get.toString &
