@@ -148,7 +148,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
 
           summary +: singleStatus +: notStatus +: statuses
         }
-      }).flatten
+      }).flatten.filter(!_.isEmpty)
 
       val (shipmentStatus, deliveryNotes) = statuses match {
         case refused if statuses.contains("21") =>
@@ -231,7 +231,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
           createShipmentEvent(
             updatedShipment,
             "Shipment Status marked as 'Other'.",
-            s"Shipment status is 'Other'. Needs manual investigation."
+            s"Shipment status is 'Other'. Needs manual investigation. Statuses are: '${statuses}'"
           )
 
         case _ =>
