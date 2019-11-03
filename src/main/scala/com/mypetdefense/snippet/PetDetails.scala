@@ -120,7 +120,7 @@ class PetDetails extends Loggable {
           .petId(currentPetId)
           .animalType(petType)
           .size(size)
-          .product(product)
+          .fleaTick(product)
       }
     }
 
@@ -144,7 +144,7 @@ class PetDetails extends Loggable {
 
       ".remove-pet [onclick]" #> ajaxInvoke(removePet(pet) _) &
       ".details-pet *" #> pet.animalType.toString &
-      ".details-product *" #> pet.product.obj.map(_.name.get) &
+      ".details-product *" #> pet.fleaTick.obj.map(_.name.get) &
       ".details-size *" #> pet.size.toString &
       ".pet-name" #> ajaxText(
         name,

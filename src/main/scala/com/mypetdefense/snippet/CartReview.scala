@@ -90,7 +90,7 @@ class CartReview extends Loggable {
           .petId(currentPetId)
           .animalType(petType)
           .size(size)
-          .product(product)
+          .fleaTick(product)
 
         currentPets(currentPetId) = pet
       }
@@ -105,7 +105,7 @@ class CartReview extends Loggable {
       val subtotal = {
         for {
           pet <- cart.values
-          product <- pet.product.obj
+          product <- pet.fleaTick.obj
           price <- Price.getPricesByCode(product, priceCode)
         } yield {
           price.price.get
@@ -148,7 +148,7 @@ class CartReview extends Loggable {
       } &
       ".cart-item" #> cart.map { case (id, pet) =>
         val petName = pet.name.get
-        val product = pet.product.obj
+        val product = pet.fleaTick.obj
         val productName = product.map(_.name.get).openOr("")
         val productSizeName = product.map(_.getSizeAndSizeName).openOr("")
 

@@ -26,16 +26,16 @@ class CatSize extends Loggable {
   }
 
   def render = {
-    def chooseSize(product: Box[Product]) = {
+    def chooseSize(product: Box[FleaTick]) = {
       productChoice(product)
       petSize(product.map(_.size.get))
 
       S.redirectTo(CartReview.menu.loc.calcDefaultHref)
     }
 
-    val products = Product.findAll(
-      By(Product.name, "ZoGuard Plus for Cats"),
-      NotBy(Product.size, AnimalSize.CatAllSize)
+    val products = FleaTick.findAll(
+      By(FleaTick.name, "ZoGuard Plus for Cats"),
+      NotBy(FleaTick.size, AnimalSize.CatAllSize)
     )
 
     val smallCat = products.filter(_.size == AnimalSize.CatSmall).headOption
