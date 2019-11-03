@@ -16,7 +16,7 @@ import com.mypetdefense.service._
 
 import com.mypetdefense._
   import model._
-  import snippet.admin.Dashboard
+  import snippet.admin.ShipmentDashboard
   import snippet.agency.AgencyOverview
 import com.mypetdefense.util.{SecurityContext, ClearNodesIf}
 import com.mypetdefense.actor._

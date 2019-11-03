@@ -250,7 +250,10 @@ class Parents extends Loggable {
     val parent = currentParent
     val address = parent.flatMap(_.addresses.toList.headOption)
     val agent = currentParent.map { user =>
-      tryo(user.salesAgentId.get).openOr("")
+      if (user.salesAgentId.get == null || user.salesAgentId.get.isEmpty)
+        "-"
+      else 
+        user.salesAgentId.get
     }
 
     def updateBillingStatus(status: Status.Value, oldSubscription: Subscription) = {
@@ -455,9 +458,6 @@ class Parents extends Loggable {
       }
     } andThen
     ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
-    ".agent-name *" #> currentParent.map { user =>
-      tryo(user.salesAgentId.get).openOr("")
-    } &
     ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
     ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
       

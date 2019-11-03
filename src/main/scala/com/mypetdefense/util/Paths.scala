@@ -49,6 +49,8 @@ object Paths {
     RedirectResponse(Login.menu.loc.calcDefaultHref)
   }
 
+  def flowComplete_? = (!petChoice.is.isEmpty && !petSize.is.isEmpty && !productChoice.is.isEmpty)  
+
   val homePage = Menu.i("Home") / "index"
   val termsOfService = Menu.i("Terms of Service") / "terms-of-service"
   
@@ -106,6 +108,24 @@ object Paths {
     RedirectResponse(Products.menu.loc.calcDefaultHref)
   )
 
+  val petChosen = If(
+    () => !petChoice.is.isEmpty,
+    RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
+  )
+
+  val sizeChosen = If(
+    () => !petSize.is.isEmpty,
+    if (petChoice.is == Full(AnimalType.Dog))
+      RedirectResponse(DogSize.menu.loc.calcDefaultHref)
+    else
+      RedirectResponse(CatSize.menu.loc.calcDefaultHref)
+  )
+
+  val completedPetOrFlow = If(
+    () => (!completedPets.isEmpty || flowComplete_?),
+    () => RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
+  )
+
   def serverUrl = {
     val hostUrl = Props.get("server.url") openOr "http://localhost:8080/"
 
@@ -146,10 +166,11 @@ object Paths {
     ParentSubscription.successfulResumeMenu,
     ParentSubscription.cancelSurveySubscriptionMenu,
     ParentSubscription.surveyCompleteSubscriptionMenu,
-    admin.Dashboard.menu,
-    admin.Dashboard.newLabelsExportMenu,
-    admin.Dashboard.existingLabelsExportMenu,
-    admin.Dashboard.mpdShipstationExportMenu,
+    admin.ExecutiveDashboard.menu,
+    admin.ShipmentDashboard.menu,
+    admin.ShipmentDashboard.newLabelsExportMenu,
+    admin.ShipmentDashboard.existingLabelsExportMenu,
+    admin.ShipmentDashboard.mpdShipstationExportMenu,
     admin.Parents.menu,
     admin.Users.menu,
     admin.GrowthRates.menu,
@@ -194,6 +215,10 @@ object Paths {
     inventory.Reconciliations.menu,
     inventory.InventoryChangeAudits.menu,
     inventory.ItemProduction.menu,
-    petland.NewOrder.menu
+    petland.NewOrder.menu,
+    PetChoice.menu,
+    DogSize.menu,
+    CatSize.menu,
+    PetDetails.menu,
   )
 }

@@ -130,7 +130,7 @@ class Agencies extends Loggable {
   var name = ""
   var parentAgency: Box[Agency] = Empty
 
-  val agencies = Agency.findAll()
+  val agencies = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
 
   def createAgency = {
     val validateFields = List(
@@ -184,31 +184,17 @@ class Agencies extends Loggable {
     )
   }
 
-  def render = {
-    SHtml.makeFormsAjax andThen
-    ".agencies [class+]" #> "current" &
-    "#name" #> text(name, name = _) &
-    "#parent" #> agencyDropdown &
-    "#create-item" #> SHtml.ajaxSubmit("Create Agency", () => createAgency) &
-    ".agency" #> agencies.map { agency =>
-      val activeCustomers = agency.customers.flatMap(_.getSubscription).filter(_.status == Status.Active)
+  def generateAgencyData(agency: Agency, parentAgency: Box[Agency]) = {
+    val parentName = parentAgency.map(_.name.get).openOr("-")
+    val activeCustomers = Agency.getAllChildrenCustomers(agency).flatMap(_.getSubscription).filter(_.status == Status.Active)
 
-      val parent = Agency.getHQFor(agency)
-      val parentName = {
-        if (parent == agency)
-          "-"
-        else
-          parent.name.get
-      }
-
+    {
       ".name *" #> agency.name &
       ".parent-name *" #> parentName &
       ".customer-count *" #> activeCustomers.size &
       ".coupon-count *" #> agency.coupons.size &
       ".actions .delete" #> ClearNodesIf(agency.customers.size > 0) &
-      ".actions .delete [onclick]" #> Confirm(s"Delete ${agency.name}? This will delete all members and coupons.",
-        ajaxInvoke(deleteAgency(agency) _)
-      ) &
+      ".actions .delete [onclick]" #> Confirm(s"Delete ${agency.name}? This will delete all members and coupons.",ajaxInvoke(deleteAgency(agency) _)) &
       ".actions .sales-export [href]" #> Agencies.salesDataExportMenu.calcHref(agency.name.get) &
       ".actions .same-day-cancel [href]" #> Agencies.sameDayCancelExportMenu.calcHref(agency.name.get) &
       ".actions .cancellation-export [href]" #> Agencies.cancellationExportMenu.calcHref(agency.name.get) &
@@ -217,7 +203,31 @@ class Agencies extends Loggable {
       ".actions .month-to-date-export [href]" #> Agencies.mtdYtdExportMenu.calcHref(agency.name.get)
     }
   }
+
+  def render = {
+    SHtml.makeFormsAjax andThen
+    ".agencies [class+]" #> "current" &
+    "#name" #> text(name, name = _) &
+    "#parent" #> agencyDropdown &
+    "#create-item" #> SHtml.ajaxSubmit("Create Agency", () => createAgency) &
+    ".agency" #> agencies.map { agency =>
+      generateAgencyData(agency, Empty) andThen {
+        val subagencies = Agency.findAll(By(Agency.parent, agency))
+        ".subagencies" #> ClearNodesIf(subagencies.isEmpty) &
+        ".subagencies" #> {
+          ".agency" #> subagencies.map { childAgency =>
+            generateAgencyData(childAgency, Full(agency)) andThen {
+              val grandsubagencies = Agency.findAll(By(Agency.parent, childAgency))
+              ".subagencies" #> ClearNodesIf(grandsubagencies.isEmpty) &
+              ".subagencies" #> {
+                ".agency" #> grandsubagencies.map { grandchildAgency =>
+                  generateAgencyData(grandchildAgency, Full(childAgency))
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
-
-
-

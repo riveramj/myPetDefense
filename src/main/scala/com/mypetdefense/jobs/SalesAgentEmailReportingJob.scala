@@ -52,6 +52,14 @@ class SalesAgentReportEmailJob extends ManagedJob {
       monthlyAgentData,
       dailyAgencyData,
       monthlyAgencyData,
+      "keith@thirdpartypet.com"
+    )
+    
+    EmailActor ! DailySalesEmail(
+      dailyAgentData,
+      monthlyAgentData,
+      dailyAgencyData,
+      monthlyAgencyData,
       "toni@thirdpartypet.com"
     )
 

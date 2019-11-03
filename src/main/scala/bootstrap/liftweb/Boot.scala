@@ -95,7 +95,7 @@ class Boot {
     //DataLoader.createProducts
     //DataLoader.createNewPetlandStores
     //DataLoader.createPuppySpot
-    DataLoader.createBoxedTag
+    //DataLoader.createBoxedTag
     
     //ReportingService.getPetlandCustomersWithStats
 

@@ -12,7 +12,7 @@ import com.mypetdefense.model._
 
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime}
+import java.time.{LocalDate, ZoneId, LocalDateTime, YearMonth}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
@@ -20,12 +20,22 @@ object ReportingService extends Loggable {
   val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
   def currentDate = LocalDateTime.now()
+  def now = LocalDate.now(ZoneId.of("America/New_York"))
 
-  def yesterday = LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).minusDays(1)
+  def nowDate = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).toInstant)
 
-  def yesterdayStart = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant())
+  def yesterday = now.atStartOfDay(ZoneId.of("America/New_York")).minusDays(1)
 
-  def yesterdayEnd = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).toInstant())
+  def yesterdayStart = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant())
+
+  def yesterdayEnd = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).toInstant())
+
+  def monthDayOne = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant())
+
+  def tomorrowStart = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant())
+    
+  def beginngNextMonth = Date.from(YearMonth.now().atEndOfMonth().atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant())
+
   
   def yearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
   
@@ -881,6 +891,37 @@ object ReportingService extends Loggable {
     }.toList.sortBy(_._1)
   }
 
+  def findMtdShipments = {
+    Shipment.findAll(
+      By_>(Shipment.createdAt, monthDayOne)
+    )
+  }
+
+  def findTodayShipments = {
+    Shipment.findAll(
+      By_>(Shipment.dateProcessed, nowDate)
+    )
+  }
+
+  def findCurrentMonthUpcomingSubscriptions = {
+    Subscription.findAll(
+      By_>(Subscription.nextShipDate, tomorrowStart),
+      By_<(Subscription.nextShipDate, beginngNextMonth)
+    )
+  }
+
+  def findNewMtdSubscriptions = {
+    Subscription.findAll(
+      By_>(Subscription.createdAt, monthDayOne)
+    )
+  }
+
+  def findCancelledMtdSubscriptions = {
+    Subscription.findAll(
+      By_>(Subscription.cancellationDate, monthDayOne)
+    )
+  }
+
   def findMTDSalesByAgency: List[(String, Int)] = {
     val agencies = Agency.findAll(
       NotBy(Agency.name, "My Pet Defense"),
@@ -963,7 +1004,16 @@ object ReportingService extends Loggable {
 
   def exportAgencyMonthSales(name: String, month: String, possibleYear: String): Box[LiftResponse] = {
     val year = getYearOrCurrent(possibleYear)
-    val totalUsers = Agency.find(By(Agency.name, name)).map(_.customers.toList).getOrElse(Nil)
+    val totalUsers = {
+      if (name != "TPP")
+        Agency.find(By(Agency.name, name)).map(_.customers.toList).getOrElse(Nil)
+      else {
+        val puppySpot = Agency.find(By(Agency.name, "PuppySpot")).map(_.customers.toList).getOrElse(Nil)
+        val petland = Agency.find(By(Agency.name, "Petland")).map(Agency.getAllChildrenCustomers(_)).getOrElse(Nil)
+
+        puppySpot ++ petland
+      }
+    }
 
     val totalSubscriptions = getSubscriptions(totalUsers)
     val totalCancelledSubscriptions = findCurrentMonthCancelledSubscriptions(totalSubscriptions, month, year)

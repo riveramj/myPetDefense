@@ -208,12 +208,12 @@ fieldset label {
   color: #706E6E;
 
   overflow: hidden;
-  width: 21px;
-  height: 22px;
+  width: 24px;
+  height: 23px;
 
   &:before {
     @extend %icon;
-    content: fa-content($fa-var-trash);
+    content: fa-content($fa-var-trash-alt);
   }
 
   @media (min-width: $bp-medium) {

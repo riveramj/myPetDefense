@@ -113,7 +113,7 @@ case class Send6MonthSaleReceipt(
 )
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
-  val welcomeEmailSubject = "Welcome to My Pet Defense!"
+  val welcomeEmailSubject = "Thanks for Joining My Pet Defense!"
   val welcomeEmailTemplate = 
     Templates("emails-hidden" :: "welcome-email" :: Nil) openOr NodeSeq.Empty
   
