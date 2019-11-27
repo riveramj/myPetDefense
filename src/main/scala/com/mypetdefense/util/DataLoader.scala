@@ -546,4 +546,19 @@ object DataLoader extends Loggable {
 
     tppCustomers.map(_.referer(puppySpot).saveMe)
   }
+
+  def calculateTax = {
+    val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
+    
+    for {
+      parent <- parents
+      address <- parent.shippingAddress
+    } yield {
+      if (address.state.get.toLowerCase == "ga" && parent.taxRate.get == 0D) { 
+        parent.setTaxRate
+      } else if (address.state.get.toLowerCase != "ga") {
+        parent.taxRate(0D).saveMe
+      }
+    }
+  }
 }

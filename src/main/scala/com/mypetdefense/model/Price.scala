@@ -21,28 +21,28 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
     override def defaultValue = new Date()
   }
 
-  def createPrice(priceId: Long, price: Double, code: String, product: FleaTick, stripeName: String) = {
+  def createPrice(priceId: Long, price: Double, code: String, fleaTick: FleaTick, stripeName: String) = {
     Price.create
     .priceId(priceId)
     .price(price)
     .code(code)
-    .fleaTick(product)
+    .fleaTick(fleaTick)
     .active(true)
     .stripeName(stripeName)
     .saveMe
   }
 
-  def getPricesByCode(product: FleaTick, code: String, active: Boolean = true) = {
+  def getPricesByCode(fleaTick: FleaTick, code: String, active: Boolean = true) = {
     Price.find(
-      By(Price.fleaTick, product),
+      By(Price.fleaTick, fleaTick),
       By(Price.code, code),
       By(Price.active, active)
     )
   }
 
-  def getDefaultProductPrice(product: FleaTick, active: Boolean = true) = {
+  def getDefaultProductPrice(fleaTick: FleaTick, active: Boolean = true) = {
     Price.find(
-      By(Price.fleaTick, product),
+      By(Price.fleaTick, fleaTick),
       By(Price.code, Price.defaultPriceCode),
       By(Price.active, active)
     )

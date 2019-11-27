@@ -111,6 +111,11 @@ case class Send6MonthSaleReceipt(
   subtotal: Double,
   tax: Double
 )
+case class AddOnReceiptEmail(
+  newProducts: List[AddOnProduct],
+  subscription: Box[Subscription],
+  parent: Box[User]
+)
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Thanks for Joining My Pet Defense!"
@@ -738,6 +743,38 @@ trait TreatReceiptEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait AddOnReceiptEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case AddOnReceiptEmail(
+      newProducts,
+      subscription,
+      parent
+    ) =>
+
+      val template =
+    Templates("emails-hidden" :: "add-on-receipt-email" :: Nil) openOr NodeSeq.Empty
+
+      val subject = "My Pet Defense Items Added"
+      val email = parent.map(_.email.get).openOr("")
+      val nextShipDate = subscription.map { possibleSubscription =>
+        dateFormatter.format(possibleSubscription.nextShipDate.get)
+      }.openOr("")
+
+      val transform = {
+        "#parent-name *" #> parent.map(_.firstName.get) &
+        ".ordered-product" #> newProducts.map { addOnProduct =>
+          val product = addOnProduct.product.obj
+
+          ".treat-quantity *" #> addOnProduct.quantity.get &
+          ".treat-name *" #> product.map(_.name.get)
+        } &
+        ".next-ship-date *" #> nextShipDate
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
 trait TreatShippedEmailHandling extends EmailHandlerChain {
   addHandler {
     case TreatShippedEmail(
@@ -922,6 +959,7 @@ trait EmailActor extends EmailHandlerChain
                     with DailySalesEmailHandling
                     with InternalDailyEmailHandling
                     with TreatReceiptEmailHandling
+                    with AddOnReceiptEmailHandling
                     with TreatShippedEmailHandling
                     with SixMonthSaleReceiptEmailHandling
                     with SendShipmentRefundedEmailHandling

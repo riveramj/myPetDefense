@@ -19,6 +19,10 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
   object product extends MappedLongForeignKey(this, Product)
   object subscription extends MappedLongForeignKey(this, Subscription)
   object quantity extends MappedInt(this)
+  object price extends MappedDouble(this)
+  object frequency extends MappedEnum(this, AddOnFrequency) {
+    override def defaultValue = AddOnFrequency.Monthly
+  }
   object addDate extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -33,11 +37,13 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
   def createAddOnProduct(
     product: Product,
     subscription: Subscription,
-    quantity: Int
+    quantity: Int,
+    price: Double
   ) = {
     AddOnProduct.create
       .quantity(quantity)
       .product(product)
+      .price(price)
       .subscription(subscription)
       .saveMe
   }
@@ -47,4 +53,8 @@ object AddOnProduct extends AddOnProduct with LongKeyedMetaMapper[AddOnProduct]
 
 object AddOnStatus extends Enumeration {
   val Active, Removed = Value
+}
+
+object AddOnFrequency extends Enumeration {
+  val Monthly, SemiMonthly, Yearly = Value
 }

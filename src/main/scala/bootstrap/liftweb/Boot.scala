@@ -90,12 +90,12 @@ class Boot {
     //DataLoader.createOneSizeCat
     //DataLoader.loadPetlandInsert
     //DataLoader.removeFrontlineProduct
-    //DataLoader.createFruitVeg
+    DataLoader.createFruitVeg
     //DataLoader.replaceChickenTreat
-    //DataLoader.createProducts
     //DataLoader.createNewPetlandStores
     //DataLoader.createPuppySpot
-    //DataLoader.createBoxedTag
+    DataLoader.createBoxedTag
+    //DataLoader.calculateTax
     
     //ReportingService.getPetlandCustomersWithStats
 

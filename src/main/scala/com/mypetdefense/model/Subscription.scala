@@ -74,6 +74,16 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     .contractLength(contractLength)
     .saveMe
   }
+
+  def getMonthlyCost = {
+    val fleaTick = getProducts
+    val fleaTickCost = fleaTick.map { fleaTick =>
+      Price.getPricesByCode(fleaTick, priceCode.get).map(_.price.get)
+    }.flatten.sum
+    val addOnProductsCost = addOnProducts.map(_.price.get).sum
+
+    addOnProductsCost + fleaTickCost
+  }
 }
 
 object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]

@@ -7,6 +7,7 @@ import net.liftweb._
     import Helpers.tryo
 
 import com.mypetdefense.util.RandomIdGenerator._
+import com.mypetdefense.service.TaxJarService
 import com.mypetdefense.service.KeyService._
 import com.mypetdefense.snippet.NewParent
 import com.mypetdefense.util.TitleCase
@@ -44,6 +45,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object pets extends MappedOneToMany(Pet, Pet.user)
   object subscription extends MappedOneToMany(Subscription, Subscription.user)
   object addresses extends MappedOneToMany(Address, Address.user)
+  object taxRate extends MappedDouble(this)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
     override def dbIndexed_? = true
@@ -219,6 +221,22 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .productSalesKey("")
       .status(Status.Cancelled)
       .saveMe
+  }
+
+  def getTaxRate = {
+    val shippingAddress = this.shippingAddress
+    
+    tryo(TaxJarService.calculateTaxRate(
+      shippingAddress.map(_.city.get).openOr(""),
+      shippingAddress.map(_.state.get).openOr(""),
+      shippingAddress.map(_.zip.get).openOr("")
+    )).openOr(0D)
+  }
+
+  def setTaxRate = {
+    val rate = getTaxRate
+
+    this.taxRate(rate).saveMe
   }
 }
 
