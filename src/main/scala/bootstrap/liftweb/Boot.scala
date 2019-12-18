@@ -95,6 +95,7 @@ class Boot {
     //DataLoader.createNewPetlandStores
     //DataLoader.createPuppySpot
     //DataLoader.createBoxedTag
+    DataLoader.renameVegTreat
     
     //ReportingService.getPetlandCustomersWithStats
 
