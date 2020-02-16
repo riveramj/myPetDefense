@@ -94,8 +94,10 @@ class Boot {
     //DataLoader.replaceChickenTreat
     //DataLoader.createNewPetlandStores
     //DataLoader.createPuppySpot
-    DataLoader.createBoxedTag
+    //DataLoader.createBoxedTag
     //DataLoader.calculateTax
+    //DataLoader.createBoxedTag
+    //DataLoader.renameVegTreat
     
     //ReportingService.getPetlandCustomersWithStats
 

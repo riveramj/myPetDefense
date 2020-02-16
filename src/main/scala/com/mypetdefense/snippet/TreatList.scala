@@ -42,7 +42,7 @@ class TreatList extends Loggable {
   val lambTreats = Product.find(By(Product.name, "Lamb Jerky Digestive Health & Probiotic"))
   val beefTreats = Product.find(By(Product.name, "Beef Jerky Hip & Joint Formula"))
   val salmonTreats = Product.find(By(Product.name, "Salmon Jerky Skin & Coat Formula"))
-  val fruitTreats = Product.find(By(Product.name, "Healthy Harvest Fruit and Veggie Mix"))
+  val fruitTreats = Product.find(By(Product.name, "Mind Your Peas Natural Dog Treats"))
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
@@ -124,6 +124,6 @@ class TreatList extends Loggable {
     ".lamb .add-treat [onclick]" #> ajaxInvoke(() => addToCart(lambTreats)) &
     ".beef .add-treat [onclick]" #> ajaxInvoke(() => addToCart(beefTreats)) &
     ".salmon .add-treat [onclick]" #> ajaxInvoke(() => addToCart(salmonTreats)) &
-    ".fruit-small .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitTreats))
+    ".fruit .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitTreats))
   }
 }
