@@ -154,6 +154,19 @@ trait StripeHook extends RestHelper with Loggable {
     }
   }
 
+  def disputeCreated(objectJson: JValue) = {
+    for {
+      stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
+      user <- User.find(By(User.stripeId, stripeCustomerId))
+      accountStatus <- tryo((objectJson \ "status").extract[String]) ?~! "No status."
+    } yield {
+      if (accountStatus == "past_due")
+        user.subscription.map(_.status(Status.BillingSuspended).saveMe)
+
+      OkResponse()
+    }
+  }
+
   serve {
     case req @ Req("stripe-hook" :: Nil, _, PostRequest) =>
     {
@@ -169,6 +182,7 @@ trait StripeHook extends RestHelper with Loggable {
           case "invoice.payment_succeeded" => invoicePaymentSucceeded(objectJson)
           case "invoice.payment_failed" => invoicePaymentFailed(objectJson)
           case "customer.subscription.updated" => subscriptionPastDue(objectJson)
+          case "charge.dispute.created" => disputeCreated(objectJson)
           case _ => Full(OkResponse())
         }
 
