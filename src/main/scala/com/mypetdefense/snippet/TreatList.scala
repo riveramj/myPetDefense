@@ -120,10 +120,6 @@ class TreatList extends Loggable {
       ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
       ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
     } andThen
-    ".duck .add-treat [onclick]" #> ajaxInvoke(() => addToCart(duckTreats)) &
-    ".lamb .add-treat [onclick]" #> ajaxInvoke(() => addToCart(lambTreats)) &
-    ".beef .add-treat [onclick]" #> ajaxInvoke(() => addToCart(beefTreats)) &
-    ".salmon .add-treat [onclick]" #> ajaxInvoke(() => addToCart(salmonTreats)) &
     ".fruit .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitTreats))
   }
 }
