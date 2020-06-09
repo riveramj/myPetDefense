@@ -69,7 +69,8 @@ class Boot {
       TreatOrderLineItem,
       Packaging,
       TaggedItem,
-      Tag
+      Tag,
+      AmazonOrder
     )
 
     //DataLoader.loadProducts
@@ -95,6 +96,7 @@ class Boot {
     //DataLoader.createNewPetlandStores
     //DataLoader.createPuppySpot
     //DataLoader.createBoxedTag
+    DataLoader.renameVegTreat
     
     //ReportingService.getPetlandCustomersWithStats
 
