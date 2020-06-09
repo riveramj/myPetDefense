@@ -69,7 +69,8 @@ class Boot {
       TreatOrderLineItem,
       Packaging,
       TaggedItem,
-      Tag
+      Tag,
+      AmazonOrder
     )
 
     //DataLoader.loadProducts
