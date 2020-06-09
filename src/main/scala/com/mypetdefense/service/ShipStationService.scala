@@ -160,17 +160,29 @@ object ShipStationService extends Loggable {
     val billShipTo = createOrderBillShipToAddress(order)
     
     val treatOrderLineItems: List[TreatOrderLineItem] = order.treatsOrdered.toList
-    val treats = treatOrderLineItems.flatMap(_.treat.obj)
-    val shipStationProductIds = treats.map(_.sku.get) ++ packaging.map(_.sku.get).toList
+    
+    val treats = treatOrderLineItems.map { treat =>
+      (treat.treat.obj, treat.quantity.get)
+    }
 
-    val shipStationItems = shipStationProductIds.map { sku =>
+    val shipstationTreats = treats.map { case (treat, count) =>
+      (treat.map(_.sku.get).openOr(""), count)
+    }
+
+    val shipStationProductIds = shipstationTreats ++ packaging.map(pkg => (pkg.sku.get, 1)).toList
+
+    val shipStationItems = shipStationProductIds.map { case (sku, quantity) =>
       OrderItem(
-        quantity = 1,
+        quantity = quantity,
         sku = sku
       )
     }
 
-    val totalWeight = treats.map(_.weight.get).sum + packaging.map(_.weight.get).openOr(0.0)
+    val treatWeights = treats.map { case (treat, count) =>
+      treat.map(_.weight.get).openOr(0D) * count
+    }
+
+    val totalWeight = treatWeights.sum + packaging.map(_.weight.get).openOr(0.0)
     val carrierCode = "stamps_com"
     val serviceCode = if (treats.size == 1) "usps_first_class_mail" else "usps_priority_mail"
     val packageCode = "package"

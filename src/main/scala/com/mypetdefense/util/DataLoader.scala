@@ -368,15 +368,16 @@ object DataLoader extends Loggable {
   }
 
   def createProducts = {
+    if (Treat.findAll().isEmpty) {
       Treat.createNewTreat("Duck Jerky Multivitamin & Immune Maintenance", 14.99, 8, "duck12345")
       Treat.createNewTreat("Lamb Jerky Digestive Health & Probiotic", 14.99, 8, "lamb12345")
       Treat.createNewTreat("Beef Jerky Hip & Joint Formula", 14.99, 8, "beef12345")
       //Treat.createNewTreat("Chicken Jerky Skin & Coat Formula", 14.99, 8, "chicken12345")
+    }
   }
 
   def createFruitVeg = {
-    Treat.createNewTreat("Fruit and Vegetable Medley (Small)", 12.99, 3, "fruit-small12345")
-    Treat.createNewTreat("Fruit and Vegetable Medley (Large)", 19.99, 6, "fruit-large12345")
+    Treat.createNewTreat("Mind Your Peas Natural Dog Treats", 12.99, 3, "fruit-small12345")
   }
 
   def replaceChickenTreat = {
@@ -545,5 +546,11 @@ object DataLoader extends Loggable {
     val tppCustomers = tppAgency.map(_.customers.toList).openOr(Nil)
 
     tppCustomers.map(_.referer(puppySpot).saveMe)
+  }
+
+  def renameVegTreat = {
+    val fruitTreats = Treat.find(By(Treat.name, "Healthy Harvest Fruit and Veggie Mix"))
+
+    fruitTreats.map(_.name("Mind Your Peas Natural Dog Treats").saveMe)
   }
 }
