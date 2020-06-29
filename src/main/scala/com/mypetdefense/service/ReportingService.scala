@@ -1,20 +1,20 @@
 package com.mypetdefense.service
 
 import net.liftweb._
-  import common._
-  import mapper._
-  import util._
-  import util.Helpers._
-  import net.liftweb.http._
-    import js.JsCmds._
-
+import common._
+import mapper._
+import util._
+import util.Helpers._
+import net.liftweb.http._
+import js.JsCmds._
 import com.mypetdefense.model._
-
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime, YearMonth}
+import java.time.{LocalDate, LocalDateTime, YearMonth, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+
+import com.mypetdefense.snippet.admin.AmazonOrderExport
 
 object ReportingService extends Loggable {
   val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
@@ -633,6 +633,55 @@ object ReportingService extends Loggable {
     val file = "filename=\"" + fileName + "\""
 
     generateCSV(csvRows, file)
+  }
+
+  def exportAmazonOrders(amazonOrderExport: AmazonOrderExport): Box[LiftResponse] = {
+    println(amazonOrderExport + " 000000")
+
+    val headers = List(
+      "Name",
+      "Address",
+      "Animal Type",
+      "Purchase Date",
+      "Product"
+    )
+
+    val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+    val startDateExport = amazonOrderExport.startDate.map(dateFormat.parse)
+    val endDateExport = amazonOrderExport.endDate.map(dateFormat.parse)
+    val petExport = amazonOrderExport.animalType
+
+    println(petExport)
+
+    val csvRows: List[List[String]] = {
+      for {
+        startDate <- startDateExport.toList
+        endDate <- endDateExport.toList
+        pet <- petExport.toList
+        order <- AmazonOrder.findAll(
+          By_>(AmazonOrder.purchaseDate, startDate),
+          By_<(AmazonOrder.purchaseDate, endDate),
+          By(AmazonOrder.animalType, pet)
+        )
+      } yield {
+        val address = (s"${order.address1.get} ${order.address2.get} ${order.address3.get} ${order.city.get} ${order.state.get} ${order.zip.get}").replaceAll("  ", "").trim()
+
+        order.name.get ::
+          address ::
+          order.animalType.get.toString ::
+          dateFormat.format(order.purchaseDate.get) ::
+          order.productName.get.replace(",","") ::
+          Nil
+      }
+    }
+
+    val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
+
+    val fileName = s"amazon-orders-${startDateExport}-${endDateExport}.csv"
+
+    val file = "filename=\"" + fileName + "\""
+
+    generateCSV(csv, file)
   }
 
   def exportAgencyMtdYtdSales(name: String): Box[LiftResponse] = {
