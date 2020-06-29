@@ -217,6 +217,13 @@ object AmazonOrderUploadCsv extends Loggable {
     val offsetDate = OffsetDateTime.parse(rawPurchaseDate, timeFormatter)
     val purchaseDate = Date.from(Instant.from(offsetDate))
 
+    val animalType = {
+      if (productName.toLowerCase().contains("dogs"))
+        AnimalType.Dog
+      else
+        AnimalType.Cat
+    }
+
     Full( AmazonOrder.create
       .amazonOrderId(amazonOrderId)
       .email(buyerEmail)
@@ -234,6 +241,7 @@ object AmazonOrderUploadCsv extends Loggable {
       .city(city)
       .state(state)
       .zip(zip)
+      .animalType(animalType)
       .purchaseDate(purchaseDate)
     )
   }

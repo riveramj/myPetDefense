@@ -3,9 +3,26 @@
   <div data-lift="embed?what=admin/admin-nav-bar"></div>
   <div id="item-container">
     <h2>Amazon Orders</h2>
+
+    <form id="export-results" data-lift="admin.amazonOrders.fileUpload">
+      <label>
+        Start Date
+        <input id="start-date" placeholder="MM/DD/YYYY">
+      </label>
+      <label>
+        End Date
+        <input id="end-date" placeholder="MM/DD/YYYY">
+      </label>
+      <label>
+        Animal Type
+        <input id="pet-type" placeholder="dog or cat">
+      </label>
+      <button id="download">Download</button>
+    </form>
+    
     <form id="upload-reviews-form" data-lift="admin.amazonOrders.fileUpload">
       <fieldset class="create">
-        <legend>Create Amazon Orders</legend>
+        <legend>Upload Amazon Orders</legend>
 
         <div class="fileUploadForm">
           <p>Try uploading a file:</p>
@@ -57,7 +74,7 @@
             </tr>
           </tbody>
         </table>
-        <input type="submit" value="Create Orders" id="create-reviews" />
+        <input type="submit" value="Upload Orders" id="create-reviews" />
       </fieldset>
     </form>
     <table class="all-reviews">
@@ -73,12 +90,7 @@
           <td>Carrier</td>
           <td>Product Name</td>
           <td>Name</td>
-          <td>Address 1</td>
-          <td>Address 2</td>
-          <td>Address 3</td>
-          <td>City</td>
-          <td>State</td>
-          <td>Zip</td>
+          <td>Address</td>
           <td>Purchase Date</td>
         </tr>
       </thead>
@@ -94,12 +106,7 @@
           <td class="carrier">zgrd+</td>
           <td class="product-name">zgrd+</td>
           <td class="name">zgrd+</td>
-          <td class="address-1">zgrd+</td>
-          <td class="address-2">zgrd+</td>
-          <td class="address-3">zgrd+</td>
-          <td class="city">zgrd+</td>
-          <td class="state">zgrd+</td>
-          <td class="zip">zgrd+</td>
+          <td class="address">zgrd+</td>
           <td class="purchase-date">zgrd+</td>
         </tr>
       </tbody>

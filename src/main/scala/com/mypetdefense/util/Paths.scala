@@ -189,6 +189,7 @@ object Paths {
     admin.Surveys.menu,
     admin.EventsDashboard.menu,
     admin.AmazonOrders.menu,
+    admin.AmazonOrders.exportAmazonOrder,
     agency.LegacyAgencyOverview.agencyMtdYtdExportMenu,
     agency.LegacyAgencyOverview.exportTPPMontSalesMenu,
     agency.LegacyAgencyOverview.menu,
