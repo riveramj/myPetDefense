@@ -2,8 +2,6 @@ package com.mypetdefense.model
 
 import net.liftweb._
   import mapper._
-  import common._
-  import util._
 
 import java.util.Date
 
@@ -33,12 +31,10 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   object cancellationDate extends MappedDateTime(this)
   object cancellationReason extends MappedString(this, 100)
   object cancellationComment extends MappedText(this)
+  object subscriptionBoxes extends MappedOneToMany(SubscriptionBox, SubscriptionBox.subscription)
   object tags extends MappedOneToMany(TaggedItem, TaggedItem.subscription)
-  object addOnProducts extends MappedOneToMany(AddOnProduct, AddOnProduct.subscription)
 
   def refresh = Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
-
-  def getProducts = getPets.flatMap(_.fleaTick.obj)
 
   def getPets = user.obj.map(_.activePets).openOr(Nil)
 
@@ -49,11 +45,8 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
       .saveMe
   }
 
-  def getPetAndProducts = Pet.findAll(
-    By(Pet.user, user.get),
-    By(Pet.status, Status.Active)
-  ).map { pet =>
-    (pet, pet.fleaTick.obj)
+  def getPetAndProducts = this.subscriptionBoxes.map { box =>
+    (box.pet.obj, box.fleaTick.obj)
   }
 
   def createNewSubscription(
@@ -76,13 +69,9 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   }
 
   def getMonthlyCost = {
-    val fleaTick = getProducts
-    val fleaTickCost = fleaTick.map { fleaTick =>
-      Price.getPricesByCode(fleaTick, priceCode.get).map(_.price.get)
-    }.flatten.sum
-    val addOnProductsCost = addOnProducts.map(_.price.get).sum
-
-    addOnProductsCost + fleaTickCost
+    this.subscriptionBoxes.map { box =>
+      box.basePrice.get + box.addOnProducts.map(_.price.get).sum
+    }.sum
   }
 }
 

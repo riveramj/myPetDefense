@@ -329,7 +329,6 @@ class NewOrder extends Loggable {
             .animalType(animal)
             .size(currentSize)
             .adultSize(adultSize)
-            .fleaTick(neededProduct)
         }
 
         if (birthday.isEmpty)
@@ -392,7 +391,6 @@ class NewOrder extends Loggable {
 
         ".pet-name *" #> pet.name.get &
         ".pet-birthday *" #> birthday &
-        ".pet-current-product *" #> pet.fleaTick.obj.map(_.getNameAndSize) &
         ".remove [onclick]" #> ajaxInvoke(() => removePet(pet))
       }
     } &

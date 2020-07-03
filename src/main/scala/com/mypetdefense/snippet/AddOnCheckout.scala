@@ -38,7 +38,8 @@ class AddOnCheckout extends Loggable {
 
   val user = SecurityContext.currentUser
   val address = user.flatMap(_.shippingAddress)
-  val subscription = user.flatMap(_.getSubscription)
+  val subscription = user.flatMap(_.subscription)
+  val boxes = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
   
   var discountCode = ""
   var discount_? = false
@@ -93,16 +94,16 @@ class AddOnCheckout extends Loggable {
     val treatCharge = {
       val cart = AddOnFlow.addOnShoppingCart.is
 
-      val addOnItems = cart.map { case (product, quantity) =>
-        subscription.map { possibleSubscription =>
+      val addOnItems = cart.flatMap { case (product, quantity) =>
+        boxes.headOption.map { box =>
           AddOnProduct.createAddOnProduct(
             product,
-            possibleSubscription,
+            box,
             quantity,
             1D
           )
         }
-      }.flatten.toList
+      }.toList
       
       EmailActor ! AddOnReceiptEmail(addOnItems, subscription, user)
 

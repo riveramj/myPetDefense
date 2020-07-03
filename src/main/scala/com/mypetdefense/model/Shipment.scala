@@ -88,17 +88,16 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
   }
 
   def createShipmentItems(shipment: Shipment, user: User, inserts: List[Insert]) = {
-    val pets = Pet.findAll(By(Pet.user, user), By(Pet.status, Status.Active))
-    val products = pets.map(_.fleaTick.obj)
-
     for {
-      pet <- pets
-      product <- pet.fleaTick.obj
+      subscription <- user.subscription.toList
+      box <- subscription.subscriptionBoxes
+      pet <- box.pet
+      fleaTick <- box.fleaTick
     } yield {
       ShipmentLineItem.create
         .shipmentLineItemId(generateLongId)
         .shipment(shipment)
-        .fleaTick(product)
+        .fleaTick(fleaTick)
         .pet(pet)
         .petName(pet.name.get)
         .saveMe

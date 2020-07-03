@@ -365,9 +365,6 @@ class Parents extends Loggable {
         case "birthday" =>
           val possibleBirthday = ParentService.parseWhelpDate(newInfo)
           pet.birthday(possibleBirthday.openOr(null)).saveMe
-        case "product" => product.map { prod =>
-          pet.fleaTick(prod).size(prod.size.get).saveMe
-        }
         case _ => pet
       }
       
@@ -417,8 +414,7 @@ class Parents extends Loggable {
           ".pet-breed" #> SHtml.ajaxText(pet.breed.get, possibleBreed => updatePetInfo(possibleBreed, "breed", pet)) &
           ".pet-birthday *" #> SHtml.ajaxText(birthday, possibleBirthday => updatePetInfo(possibleBirthday, "birthday", pet)) &
           ".pet-type *" #> pet.animalType.toString &
-          ".pet-product *" #> changePetProduct(pet.animalType.get, pet.fleaTick.obj, pet) &
-          ".pet-delay-growth input" #> ajaxText(s"$nextGrowthDelay months", possibleDelay => updateGrowthDelay(possibleDelay, pet)) & 
+          ".pet-delay-growth input" #> ajaxText(s"$nextGrowthDelay months", possibleDelay => updateGrowthDelay(possibleDelay, pet)) &
           ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
             ajaxInvoke(deletePet(parent, pet, renderer) _)
           )
@@ -504,7 +500,7 @@ class Parents extends Loggable {
         val refererName = parent.referer.obj.map(_.name.get)
         
         idMemoize { detailsRenderer =>
-          val subscription = parent.getSubscription
+          val subscription = parent.subscription.obj
           val nextShipDate = subscription.map(_.nextShipDate.get)
 
           ".parent" #> {

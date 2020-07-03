@@ -281,7 +281,7 @@ object DataLoader extends Loggable {
       val pets = parent.activePets
 
       if (pets.size == 0)
-        parent.getSubscription.map(_.status(Status.UserSuspended).saveMe)
+        parent.subscription.obj.map(_.status(Status.UserSuspended).saveMe)
     }
   }
 
@@ -303,7 +303,7 @@ object DataLoader extends Loggable {
     )
 
     val activeParentsWithoutKey = possibleActiveParentsWithoutKey.filter { parent =>
-      val subscription = parent.getSubscription
+      val subscription = parent.subscription.obj
       val subscriptionIsActive_? = subscription.map(_.status.get == Status.Active).getOrElse(false)
       val userHasPets_? = parent.activePets.size > 0
 
@@ -333,7 +333,7 @@ object DataLoader extends Loggable {
       user <- activeUsers
       address <- user.shippingAddress
         if (address.state.get.toLowerCase == "ga")
-      subscription <- user.getSubscription
+      subscription <- user.subscription.obj
     } yield {
 
       val stripeId = user.stripeId.get
@@ -428,34 +428,6 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100001"
       )
-    }
-  }
-
-  def removeFrontlineProduct = {
-    def findProduct(name: String, size: AnimalSize.Value) = {
-      FleaTick.find(By(FleaTick.name, name), By(FleaTick.size, size))
-    }
-
-    val smallProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogSmallZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogSmallZo))
-    val mediumProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogMediumZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogMediumZo))
-    val largeProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogLargeZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogLargeZo))
-    val xlargeproduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogXLargeZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogXLargeZo))
-
-    val productSizes = List(smallProduct, mediumProduct, largeProduct, xlargeproduct)
-
-    for {
-      productSize <- productSizes
-      frontline <- productSize._1
-    } yield {
-      val pets = Pet.findAll(By(Pet.fleaTick, frontline))
-
-      println(pets.map(_.petId))
-
-      productSize._2.map { zoguard =>
-        pets.map(_.fleaTick(zoguard).saveMe)
-      }
-
-      frontline.delete_!
     }
   }
 

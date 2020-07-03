@@ -43,7 +43,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object agency extends MappedLongForeignKey(this, Agency)
   object survey extends MappedLongForeignKey(this, Survey)
   object pets extends MappedOneToMany(Pet, Pet.user)
-  object subscription extends MappedOneToMany(Subscription, Subscription.user)
+  object subscription extends MappedLongForeignKey(this, Subscription)
   object addresses extends MappedOneToMany(Address, Address.user)
   object taxRate extends MappedDouble(this)
   object status extends MappedEnum(this, Status) {
@@ -56,9 +56,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
 
   def name = s"${firstName} ${lastName}"
 
-  def getSubscription = subscription.headOption
-
-  def activePets = pets.filter(_.status == Status.Active)
+  def activePets = pets.filter(_.status.get == Status.Active)
 
   def refresh = User.find(By(User.userId, userId.get))
 
@@ -193,7 +191,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def nameAndEmail = s"${this.name} <${this.email}>"
 
   def cancel = {
-    val shipAddress = this.addresses.toList.filter(_.addressType == AddressType.Shipping).headOption
+    val shipAddress = this.addresses.toList.find(_.addressType.get == AddressType.Shipping)
 
     val address = shipAddress.map { ship =>
       s"""${ship.street1}

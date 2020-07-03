@@ -68,7 +68,6 @@ class CartReview extends Loggable {
 
   def addNewPet() = {
     petChoice(Empty)
-    productChoice(Empty)
     petSize(Empty)
     petId(Empty)
 
@@ -84,13 +83,11 @@ class CartReview extends Loggable {
       for {
         petType <- petChoice.is
         size <- petSize.is
-        product <- productChoice.is
       } yield {
         val pet = Pet.create
           .petId(currentPetId)
           .animalType(petType)
           .size(size)
-          .fleaTick(product)
 
         currentPets(currentPetId) = pet
       }
@@ -102,15 +99,7 @@ class CartReview extends Loggable {
 
       val cart = completedPets.is
       
-      val subtotal = {
-        for {
-          pet <- cart.values
-          product <- pet.fleaTick.obj
-          price <- Price.getPricesByCode(product, priceCode)
-        } yield {
-          price.price.get
-        }
-      }.sum
+      val subtotal = cart.values.size * 12.99
       
       val discount = cart.size match {
         case 0 | 1 => 0
@@ -148,22 +137,12 @@ class CartReview extends Loggable {
       } &
       ".cart-item" #> cart.map { case (id, pet) =>
         val petName = pet.name.get
-        val product = pet.fleaTick.obj
-        val productName = product.map(_.name.get).openOr("")
-        val productSizeName = product.map(_.getSizeAndSizeName).openOr("")
-
-        val itemPrice = product.flatMap { prod =>
-          Price.getPricesByCode(prod, priceCode)
-        }.map(_.price.get).openOr(0D)
-
-        ".cart-product-image [src]" #> getImageUrl(product) &
-        ".cart-pet-remove [onclick]" #> Confirm(s"Remove ${petName}?", ajaxInvoke(removePet(id) _)) &
-        ".product-name-size *" #> s"${productName} ${productSizeName}" &
+        ".cart-pet-remove [onclick]" #> Confirm(s"Remove ${petName}?", ajaxInvoke(removePet(id))) &
         ".pet-name" #> ajaxText(petName, possibleName => {
           completedPets(pet.petId.get) = pet.name(possibleName)
           Noop
         }) &
-        ".cart-pet-price *" #> f"$$$itemPrice%2.2f"
+        ".cart-pet-price *" #> "$12.99"
       } &
       "#add-pet [onClick]" #> ajaxInvoke(addNewPet _) &
       {

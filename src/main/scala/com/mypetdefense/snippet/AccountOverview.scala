@@ -35,7 +35,7 @@ class AccountOverview extends Loggable {
   val oldUser = currentUser
   val user = User.find(By(User.userId, oldUser.map(_.userId.get).openOr(0L)))
   val pets = user.map(_.activePets).openOr(Nil)
-  val subscription = user.flatMap(_.getSubscription).flatMap(_.refresh)
+  val subscription = user.flatMap(_.subscription).flatMap(_.refresh)
   val priceCode = subscription.map(_.priceCode.get).getOrElse("")
 
   val shippingAddress = Address.find(
@@ -86,16 +86,18 @@ class AccountOverview extends Loggable {
     "#page-body-container" #> {
       user.map { parent =>
         val nextShipDate = subscription.map(_.nextShipDate.get)
+        val boxes = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
 
         val petBindings = {
-          ".pet" #> pets.map { pet =>
-            val product = pet.fleaTick.obj
+          ".pet" #> boxes.map { box =>
+            val pet = box.pet.obj
+            val product = box.fleaTick.obj
             val priceItem = product.flatMap { item =>
               Price.getPricesByCode(item, priceCode)
             }
             val price = priceItem.map(_.price.get).getOrElse(0D)
 
-            ".pet-name *" #> pet.name &
+            ".pet-name *" #> pet.map(_.name.get) &
             ".pet-product *" #> product.map(_.name.get) & 
             ".pet-size *" #> product.map(_.getSizeAndSizeName) &
             ".price *" #> f"$$$price%2.2f"
@@ -104,9 +106,9 @@ class AccountOverview extends Loggable {
 
         "#upcoming-order a [class+]" #> "current" &
         "#user-email *" #> parent.email &
-        ".next-ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
+        ".next-ship-date *" #> nextShipDate.map(dateFormat.format) &
         ".status *" #> subscription.map(_.status.get.toString) &
-        ".next-bill-date *" #> nextBillDate.map(dateFormat.format(_)) &
+        ".next-bill-date *" #> nextBillDate.map(dateFormat.format) &
         "#user-address" #> shippingAddress.map { address =>
           "#name *" #> parent.name &
           "#address-one *" #> address.street1.get &

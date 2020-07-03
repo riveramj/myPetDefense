@@ -35,7 +35,7 @@ object PetsAndProducts extends Loggable {
 
 class PetsAndProducts extends Loggable {
   val user = currentUser
-  val subscription = user.flatMap(_.getSubscription)
+  val subscription = user.flatMap(_.subscription.obj)
   val priceCode = subscription.map(_.priceCode.get).getOrElse("")
 
   var newPetType: Box[AnimalType.Value] = Empty
@@ -129,18 +129,8 @@ class PetsAndProducts extends Loggable {
     }
   }
 
-  def savePet(pet: Pet, name: String, updatedProduct: Box[FleaTick]) = {
-    val updatedPet = (
-      for {
-        product <- updatedProduct
-        size = product.size.get
-        updatedPet = pet.fleaTick(product).name(name).size(size).saveMe
-      } yield {
-        updatedPet 
-      }
-    )
-
-    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal(_))
+  def savePet(pet: Pet, name: String) = {
+    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal)
 
     updatedSubscription match {
       case Full(stripeSub) =>
@@ -161,34 +151,15 @@ class PetsAndProducts extends Loggable {
       "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
     } &
     ".pet" #> pets.toSeq.sortWith(_.name.get < _.name.get).map { pet =>
-      var currentProduct = pet.fleaTick.obj
       var currentPetName = pet.name.get
 
-      val priceItem = currentProduct.flatMap { item =>
-        Price.getPricesByCode(item, priceCode)
-      }
-      val price = priceItem.map(_.price.get).getOrElse(0D)
-
-      val currentProductDropdown = {
-        val products = FleaTick.findAll(By(FleaTick.animalType, pet.animalType.get))
-
-        SHtml.ajaxSelectObj(
-          products.map(product => (product, product.getNameAndSize)),
-          currentProduct,
-          (possibleProduct: FleaTick) => currentProduct = {
-            Full(possibleProduct)
-          }
-        )
-      }
-
       ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
-      ".pet-product" #> currentProductDropdown &
-      ".price *" #> f"$$$price%2.2f" &
+      ".price *" #> "$0.9999999" &
       ".pet-status *" #> pet.status.get.toString &
       ".cancel [onclick]" #> Confirm(s"Remove ${pet.name} and cancel future shipments?",
         ajaxInvoke(deletePet(pet) _)
       ) &
-      ".save" #> ajaxSubmit("Save Changes", () => savePet(pet, currentPetName, currentProduct))
+      ".save" #> ajaxSubmit("Save Changes", () => savePet(pet, currentPetName))
     }
   }
 }

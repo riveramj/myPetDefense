@@ -2,8 +2,6 @@ package com.mypetdefense.model
 
 import net.liftweb._
   import mapper._
-  import common._
-  import util._
 
 import com.mypetdefense.util.RandomIdGenerator._
 
@@ -17,7 +15,7 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
   }
 
   object product extends MappedLongForeignKey(this, Product)
-  object subscription extends MappedLongForeignKey(this, Subscription)
+  object subscriptionBox extends MappedLongForeignKey(this, SubscriptionBox)
   object quantity extends MappedInt(this)
   object price extends MappedDouble(this)
   object frequency extends MappedEnum(this, AddOnFrequency) {
@@ -27,16 +25,13 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
     override def defaultValue = new Date()
   }
   object removedDate extends MappedDateTime(this)
-  object status extends MappedEnum(this, AddOnStatus) {
-    override def defaultValue = AddOnStatus.Active
-  }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
   def createAddOnProduct(
     product: Product,
-    subscription: Subscription,
+    subscriptionBox: SubscriptionBox,
     quantity: Int,
     price: Double
   ) = {
@@ -44,16 +39,12 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
       .quantity(quantity)
       .product(product)
       .price(price)
-      .subscription(subscription)
+      .subscriptionBox(subscriptionBox)
       .saveMe
   }
 }
 
 object AddOnProduct extends AddOnProduct with LongKeyedMetaMapper[AddOnProduct]
-
-object AddOnStatus extends Enumeration {
-  val Active, Removed = Value
-}
 
 object AddOnFrequency extends Enumeration {
   val Monthly, SemiMonthly, Yearly = Value

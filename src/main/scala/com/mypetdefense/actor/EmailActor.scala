@@ -846,7 +846,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val products = subscription.map(_.getProducts).openOr(Nil)
+      val boxes = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
+      val products = boxes.flatMap(_.fleaTick.obj)
       val priceCode = subscription.map(_.priceCode.get).openOr("")
 
       val transform = {
@@ -905,7 +906,7 @@ trait SixMonthSaleReceiptEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val products = pets.map(_.fleaTick.obj).flatten
+      val products = user.subscription.map(_.subscriptionBoxes.flatMap(_.fleaTick.obj)).openOr(Nil)
       val amountPaid = subtotal + tax
 
       val transform = {

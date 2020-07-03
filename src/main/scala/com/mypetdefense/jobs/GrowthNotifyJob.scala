@@ -27,16 +27,16 @@ class GrowthNotifyJob extends ManagedJob {
     )
 
     val upcomingSubscription = allActiveSubscriptions.filter { subscription =>
-      val nextShipDate = tryo(subscription.nextShipDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+      val nextShipDate = tryo(subscription.nextShipDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
 
       val nextShipDateDayOfYear = nextShipDate.map(_.getDayOfYear).openOr(0)
 
       (nextShipDateDayOfYear - currentDate.getDayOfYear == 7)
     }
 
-    val readyToGrowPetsUsers: List[(Pet, String, User)] = (upcomingSubscription.map { subscription =>
+    val readyToGrowPetsUsers: List[(Pet, String, User)] = upcomingSubscription.flatMap { subscription =>
       ParentService.findGrowingPets(subscription)
-    }).flatten
+    }
 
 
     readyToGrowPetsUsers.map { case (pet, newFleaTick, user) =>
