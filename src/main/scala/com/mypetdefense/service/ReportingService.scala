@@ -636,8 +636,6 @@ object ReportingService extends Loggable {
   }
 
   def exportAmazonOrders(amazonOrderExport: AmazonOrderExport): Box[LiftResponse] = {
-    println(amazonOrderExport + " 000000")
-
     val headers = List(
       "Name",
       "Address",
@@ -650,8 +648,6 @@ object ReportingService extends Loggable {
     val startDateExport = amazonOrderExport.startDate.map(dateFormat.parse)
     val endDateExport = amazonOrderExport.endDate.map(dateFormat.parse)
     val petExport = amazonOrderExport.animalType
-
-    println(petExport)
 
     val csvRows: List[List[String]] = {
       for {

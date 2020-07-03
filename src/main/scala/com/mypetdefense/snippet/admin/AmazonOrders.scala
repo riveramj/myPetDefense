@@ -2,14 +2,12 @@ package com.mypetdefense.snippet
 package admin
 
 import net.liftweb._
-import http._
 import net.liftweb.http._
 import net.liftweb.http.js.JsCmd._
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
-import net.liftweb.mapper.By
 import java.text.SimpleDateFormat
 
 import com.mypetdefense.model._
@@ -31,12 +29,10 @@ object AmazonOrders extends Loggable {
   }
 
   def getExportParameters(rawQuery: String) = {
-    println(rawQuery + " 1234")
     val query = rawQuery.split(",")
     val startDate = query.find(_.startsWith("startDate")).map(_.substring(10))
     val endDate = query.find(_.startsWith("endDate")).map(_.substring(8))
     val petType = query.find(_.startsWith("animalType")).map(_.substring(11))
-    println(petType + " 111111")
 
     val animalType = if (petType.exists(_.toLowerCase.trim == "dog"))
       Full(AnimalType.Dog)
@@ -44,10 +40,6 @@ object AmazonOrders extends Loggable {
       Full(AnimalType.Cat)
     else
       Empty
-
-    println(startDate)
-    println(endDate)
-    println(animalType)
 
     AmazonOrderExport(startDate, endDate, animalType)
   }

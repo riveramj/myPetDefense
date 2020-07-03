@@ -224,6 +224,19 @@ object AmazonOrderUploadCsv extends Loggable {
         AnimalType.Cat
     }
 
+    val product = {
+      if (productName.toLowerCase().contains("salvo"))
+        Full(AmazonProduct.Salvo)
+      else if (productName.toLowerCase().contains("zoguard"))
+        Full(AmazonProduct.ZoGuardPlus)
+      else if (productName.toLowerCase().contains("adventure"))
+        Full(AmazonProduct.AdventurePlus)
+      else if (productName.toLowerCase().contains("shieldtec"))
+        Full(AmazonProduct.ShieldTecPlus)
+      else
+        Empty
+    }
+
     Full( AmazonOrder.create
       .amazonOrderId(amazonOrderId)
       .email(buyerEmail)
@@ -243,6 +256,7 @@ object AmazonOrderUploadCsv extends Loggable {
       .zip(zip)
       .animalType(animalType)
       .purchaseDate(purchaseDate)
+      .product(product.openOr(null))
     )
   }
 }

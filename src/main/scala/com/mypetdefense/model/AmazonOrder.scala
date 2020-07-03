@@ -31,6 +31,7 @@ class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
   object zip extends MappedString(this, 100)
   object purchaseDate extends MappedDateTime(this)
   object animalType extends MappedEnum(this, AnimalType)
+  object product extends MappedEnum(this, AmazonProduct)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -77,7 +78,9 @@ class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
   }
 }
 
-object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder] {
+object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder]
 
+object AmazonProduct extends Enumeration {
+  val ZoGuardPlus, AdventurePlus, ShieldTecPlus, Salvo = Value
 }
 
