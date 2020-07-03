@@ -71,6 +71,7 @@ class Boot {
       TaggedItem,
       Tag,
       AddOnProduct
+      AmazonOrder
     )
 
     //DataLoader.loadProducts

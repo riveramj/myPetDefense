@@ -12,6 +12,11 @@ object MailConfig extends Loggable {
     if (Props.mode == Props.RunModes.Development) {
       Mailer.devModeSend.default.set((m: MimeMessage) => logger.info("Dev mode message:\n" + prettyPrintMime(m)))
     } else {
+      Mailer.customProperties = Map(
+        "mail.smtp.starttls.enable" -> "true",
+        "mail.smtp.ssl.protocols" -> "TLSv1.2"
+        )
+
       (Props.get("mail.user"), Props.get("mail.password")) match {
         case (Full(username), Full(password)) =>
         Mailer.authenticator = Full(new Authenticator() {
