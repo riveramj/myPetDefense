@@ -70,7 +70,7 @@ class Boot {
       Packaging,
       TaggedItem,
       Tag,
-      AddOnProduct
+      AddOnProduct,
       AmazonOrder
     )
 
