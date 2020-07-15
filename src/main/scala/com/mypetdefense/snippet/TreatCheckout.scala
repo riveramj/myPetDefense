@@ -234,10 +234,9 @@ class TreatCheckout extends Loggable {
   }
 
   def login = {
-    val loginResult = LoginService.login(email, password, true)
+    val loginResult = LoginService.login(email, password, "", true)
 
     if (loginResult == Noop) {
-
       (
         checkoutRenderer.map(_.setHtml).openOr(Noop) &
         loginRenderer.map(_.setHtml).openOr(Noop)

@@ -26,6 +26,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object firstName extends MappedString(this, 100)
   object lastName extends MappedString(this, 100)
   object stripeId extends MappedString(this, 100)
+  object facebookId extends MappedString(this, 300)
+  object googleId extends MappedString(this, 300)
   object email extends MappedEmail(this, 50)
   object password extends MappedString(this, 100)
   object salt extends MappedString(this, 100)
@@ -182,6 +184,13 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   
   def findByEmail(email: String): Box[User] = {
     User.find(By(User.email, email))
+  }
+
+  def findByEmailOrId(email: String, facebookId: String): Box[User] = {
+    if (facebookId.isEmpty)
+      User.find(By(User.email, email))
+    else
+      User.find(By(User.facebookId, facebookId))
   }
 
   def isCorrectPassword_?(password: String, user: User) = {

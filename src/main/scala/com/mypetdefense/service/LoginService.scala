@@ -17,26 +17,31 @@ import com.mypetdefense._
 import com.mypetdefense.util.SecurityContext
 
 object LoginService extends Loggable {
-  def userCanLogIn_?(user: User, password: String): Box[Boolean] = {
-      if (!User.isCorrectPassword_?(password, user)) {
+  def userCanLogIn_?(user: User, password: String, facebookId: String): Box[Boolean] = {
+      if (!facebookId.isEmpty)
+        Full(true)
+      else if (!User.isCorrectPassword_?(password, user)) {
         Failure(S.?("login-invalidEmailOrPassword"))
-      } else if (user.status == Status.Inactive) {
+      } else if (user.status.get == Status.Inactive) {
         Failure("Inactive user")
       } else {
         Full(true)
       }
     }
 
-  def login(email: String, password: String, boxLogin: Boolean = false) = {
-    val validateFields = List(
-      checkEmpty(email, "#email"),
-      checkEmpty(email, "#password")
-    ).flatten
+  def login(email: String, password: String, facebookId: String, boxLogin: Boolean = false) = {
+    val validateFields = if (facebookId.isEmpty)
+      List(
+        checkEmpty(email, "#email"),
+        checkEmpty(email, "#password")
+      ).flatten
+    else
+      Nil
 
     if(validateFields.isEmpty) {
-      User.findByEmail(email) match {
+      User.findByEmailOrId(email, facebookId) match {
         case Full(user) =>
-          userCanLogIn_?(user, password) match {
+          userCanLogIn_?(user, password, facebookId) match {
             case Failure(msg, _, _) =>
               logger.info("\nOn login, we got %s" format msg)
 
