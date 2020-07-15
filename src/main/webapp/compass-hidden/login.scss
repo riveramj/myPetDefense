@@ -29,3 +29,16 @@ input#login {
     padding-bottom: 0;
   }
 }
+
+.facebook-container {
+  display: block;
+  clear: both;
+  text-align: center;
+  margin-top: 70px;
+  border-top: 1px solid #999999;
+  padding-top: 20px;
+
+  #fb-id {
+    display: none;
+  }
+}

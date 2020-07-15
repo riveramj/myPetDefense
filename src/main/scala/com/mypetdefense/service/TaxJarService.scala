@@ -25,6 +25,10 @@ object TaxJarService extends Loggable {
 
   val retryAttempts = 10
   
+
+  def calculateTaxRate(city: String, state: String, zip: String) = {
+    findTaxAmoutAndRate(city, state, zip, 0D)._2
+  }
   def findTaxAmoutAndRate(city: String, state: String, zip: String, amount: Double): (Double, Double) = {
     def taxResponse = {
       Http.default(calculateTaxUrl << Map(

@@ -162,7 +162,7 @@ object ShipStationService extends Loggable {
     val treatOrderLineItems: List[TreatOrderLineItem] = order.treatsOrdered.toList
     
     val treats = treatOrderLineItems.map { treat =>
-      (treat.treat.obj, treat.quantity.get)
+      (treat.product.obj, treat.quantity.get)
     }
 
     val shipstationTreats = treats.map { case (treat, count) =>
@@ -211,11 +211,11 @@ object ShipStationService extends Loggable {
 
     val refreshedShipment = shipment.refresh
     val shipmentLineItems = refreshedShipment.toList.map(_.shipmentLineItems.toList).flatten
-    val shipmentProducts = shipmentLineItems.filter(!_.product.obj.isEmpty)
+    val shipmentProducts = shipmentLineItems.filter(!_.fleaTick.obj.isEmpty)
     
-    val petNamesProducts = shipmentProducts.map(_.getProductPetNameItemSize).mkString(". ")
+    val petNamesProducts = shipmentProducts.map(_.getFleaTickPetNameItemSize).mkString(". ")
 
-    val products = shipmentLineItems.map(_.product.obj).flatten
+    val products = shipmentLineItems.map(_.fleaTick.obj).flatten
     val inserts = shipmentLineItems.map(_.insert.obj).flatten
 
     val shipStationProductIds = products.map(_.sku.get)

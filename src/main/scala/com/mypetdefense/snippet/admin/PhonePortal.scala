@@ -32,7 +32,7 @@ object PhonePortal extends Loggable {
 class PhonePortal extends Loggable {
 
   var petType: Box[AnimalType.Value] = Empty
-  var chosenProduct: Box[Product] = Empty
+  var chosenProduct: Box[FleaTick] = Empty
 
   var email = ""
   var petName = ""
@@ -71,13 +71,13 @@ class PhonePortal extends Loggable {
 
   def productDropdown = {
     val products = petType.map { animal =>
-      Product.findAll(By(Product.animalType, animal))
+      FleaTick.findAll(By(FleaTick.animalType, animal))
     }.openOr(Nil)
 
     SHtml.ajaxSelectObj(
       products.map(product => (product, product.getNameAndSize)),
       chosenProduct,
-      (possibleProduct: Product) => {
+      (possibleProduct: FleaTick) => {
         chosenProduct = Full(possibleProduct)
         orderSummaryRenderer.map(_.setHtml).openOr(Noop)
       }

@@ -63,12 +63,12 @@ class NewOrder extends Loggable {
     "July", "August", "September", "October", "November", "December"
   )
 
-  val dogZoguardProduct = Product.findAll(
-    By(Product.name, "ZoGuard Plus for Dogs")
+  val dogZoguardProduct = FleaTick.findAll(
+    By(FleaTick.name, "ZoGuard Plus for Dogs")
   )
 
-  val catZoguardProduct = Product.findAll(
-    By(Product.size, AnimalSize.CatAllSize)
+  val catZoguardProduct = FleaTick.findAll(
+    By(FleaTick.size, AnimalSize.CatAllSize)
   )
 
   var pets = petsOrdered.is
@@ -329,7 +329,6 @@ class NewOrder extends Loggable {
             .animalType(animal)
             .size(currentSize)
             .adultSize(adultSize)
-            .product(neededProduct)
         }
 
         if (birthday.isEmpty)
@@ -392,7 +391,6 @@ class NewOrder extends Loggable {
 
         ".pet-name *" #> pet.name.get &
         ".pet-birthday *" #> birthday &
-        ".pet-current-product *" #> pet.product.obj.map(_.getNameAndSize) &
         ".remove [onclick]" #> ajaxInvoke(() => removePet(pet))
       }
     } &

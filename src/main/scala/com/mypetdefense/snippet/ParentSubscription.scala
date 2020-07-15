@@ -149,7 +149,7 @@ class ParentSubscription extends Loggable {
   }
 
   def render = {
-    val userSubscription = SecurityContext.currentUser.flatMap(_.getSubscription).flatMap(_.refresh)
+    val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
 
     SHtml.makeFormsAjax andThen
     ".subscription a [class+]" #> "current" &
@@ -163,7 +163,7 @@ class ParentSubscription extends Loggable {
   }
 
   def manage = {
-    val userSubscription = SecurityContext.currentUser.flatMap(_.getSubscription).flatMap(_.refresh)
+    val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
 
     var cancelAccount = false
     var pauseAccount = false

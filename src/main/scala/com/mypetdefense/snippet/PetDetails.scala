@@ -37,9 +37,9 @@ class PetDetails extends Loggable {
 
   def validateNameBirthday = {
     (
-      currentPets.values.map { pet =>
-      checkEmpty(pet.name.get, s"#${pet.petId.get}-name")
-      }.flatten ++
+      currentPets.values.flatMap { pet =>
+        checkEmpty(pet.name.get, s"#${pet.petId.get}-name")
+      } ++
       nameErrors.map( nameId => ValidationError(nameId, "Required."))
     ).toList.distinct
   }
@@ -61,7 +61,6 @@ class PetDetails extends Loggable {
 
     if(validateFields.isEmpty) {
       petChoice(Empty)
-      productChoice(Empty)
       petSize(Empty)
       petId(Empty)
 
@@ -97,7 +96,6 @@ class PetDetails extends Loggable {
 
     if (petId.is == Full(pet.petId.get)) {
       petChoice(Empty)
-      productChoice(Empty)
       petSize(Empty)
       petId(Empty)
     }
@@ -114,13 +112,11 @@ class PetDetails extends Loggable {
       for {
         petType <- petChoice.is
         size <- petSize.is
-        product <- productChoice.is
       } yield {
         Pet.create
           .petId(currentPetId)
           .animalType(petType)
           .size(size)
-          .product(product)
       }
     }
 
@@ -144,7 +140,6 @@ class PetDetails extends Loggable {
 
       ".remove-pet [onclick]" #> ajaxInvoke(removePet(pet) _) &
       ".details-pet *" #> pet.animalType.toString &
-      ".details-product *" #> pet.product.obj.map(_.name.get) &
       ".details-size *" #> pet.size.toString &
       ".pet-name" #> ajaxText(
         name,

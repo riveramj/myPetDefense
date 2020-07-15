@@ -92,22 +92,22 @@ object ParentService extends Loggable {
   def cancelOpenOrders(oldUser: User) = {
     val openShipments = {
       for {
-        subscription <- oldUser.getSubscription.toList
+        subscription <- oldUser.subscription.toList
         shipment <- subscription.shipments
-        if (shipment.dateShipped.get == null && shipment.shipStationOrderId.get > 0)
+          if (shipment.dateShipped.get == null && shipment.shipStationOrderId.get > 0)
       } yield {
         shipment
       }
     }
 
-    openShipments.map(ShipStationService.cancelShipstationOrder(_))
+    openShipments.map(ShipStationService.cancelShipstationOrder)
   }
 
   def removeParent(oldUser: User, fullDelete: Boolean = false) = {
     val user = oldUser.refresh
     val stripeCustomerId = user.map(_.stripeId.get).openOr("")
     
-    val subscription = user.flatMap(_.getSubscription)
+    val subscription = user.flatMap(_.subscription.obj)
     val paidOpenShipments = subscription.map(_.shipments.toList).openOr(Nil).filter(_.shipmentStatus.get == ShipmentStatus.Paid)
     val addresses = user.map(_.addresses.toList).openOr(Nil)
 
@@ -419,7 +419,7 @@ object ParentService extends Loggable {
 
     whelpDateFormats.map { dateFormat =>
       tryo(dateFormat.parse(whelpDate))
-    }.filter(_.isDefined).headOption.getOrElse(Empty)
+    }.find(_.isDefined).getOrElse(Empty)
   }
 
   def addNewPet(
@@ -427,7 +427,7 @@ object ParentService extends Loggable {
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value,
-    product: Product,
+    product: FleaTick,
     breed: String = "",
     birthday: String = ""
   ): Box[Pet] = {
@@ -455,20 +455,21 @@ object ParentService extends Loggable {
   def updateStripeSubscriptionTotal(oldUser: User): Box[StripeSubscription] = {
     val updatedUser = oldUser.refresh
     
-    val products: List[Product] = {
+    val products: List[FleaTick] = {
       for {
         user <- updatedUser.toList
-        pet <- user.activePets
-        product <- pet.product.obj
+        subscription <- user.subscription.toList
+        boxes <- subscription.subscriptionBoxes
+        fleaTick <- boxes.fleaTick
       } yield {
-        product
+        fleaTick
       }
     }
 
     val (subscriptionId, priceCode) = (
       for {
         user <- updatedUser
-        subscription <- user.getSubscription
+        subscription <- user.subscription.obj
       } yield {
         (subscription.stripeSubscriptionId.get, subscription.priceCode.get)
       }
@@ -501,8 +502,8 @@ object ParentService extends Loggable {
     
     updatedSubscription match {
       case Full(stripeSub) =>
-        if (updatedUser.map(_.activePets.size == 0).openOr(false)) {
-          val subscription = updatedUser.flatMap(_.getSubscription)
+        if (updatedUser.map(_.activePets.isEmpty).openOr(false)) {
+          val subscription = updatedUser.flatMap(_.subscription.obj)
           subscription.map(_.status(Status.UserSuspended).saveMe)
         }
 
@@ -529,7 +530,7 @@ object ParentService extends Loggable {
   def findGrowthMonth(pet: Pet) = {
     val currentDate = LocalDate.now()
 
-    val birthday = tryo(pet.birthday.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
+    val birthday = tryo(pet.birthday.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
 
     val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
 
@@ -538,20 +539,21 @@ object ParentService extends Loggable {
     currentMonth - growthDelay
   }
 
-  def checkForNewProduct(pet: Pet, newProduct: Box[Product], user: User) = {
-    if (pet.product.obj != newProduct)
+  def checkForNewProduct(pet: Pet, box: SubscriptionBox, newProduct: Box[FleaTick], user: User): Box[(Pet, String, User)] = {
+    if (box.fleaTick.obj != newProduct)
       Full((pet, newProduct.map(_.getNameAndSize).openOr(""), user))
     else
       Empty
   }
 
-  def findGrowingPets(subscription: Subscription) = {
+  def findGrowingPets(subscription: Subscription): Seq[(Pet, String, User)] = {
     (for {
       user <- subscription.user.obj.toList
-      pet <- user.pets.toList
-        if (pet.breed.get != null) &&
-             (pet.birthday.get != null) &&
-             (pet.product.obj.map(_.isZoGuard_?).openOr(false))
+      box <- subscription.subscriptionBoxes
+      fleaTick <- box.fleaTick.obj
+        if fleaTick.isZoGuard_?
+      pet <- box.pet.obj
+        if (pet.breed.get != null) && (pet.birthday.get != null)
     } yield {
       val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase))
 
@@ -560,20 +562,20 @@ object ParentService extends Loggable {
       growthMonth match {
         case medium 
             if medium == getGrowthMonthNumber(growthRate, "medium") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
-          checkForNewProduct(pet, newProduct, user)
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogMediumZo))
+          checkForNewProduct(pet, box, newProduct, user)
         }
 
         case large 
             if large == getGrowthMonthNumber(growthRate, "large") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogLargeZo))
-          checkForNewProduct(pet, newProduct, user)
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeZo))
+          checkForNewProduct(pet, box, newProduct, user)
         }
 
         case xlarge 
             if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogXLargeZo))
-          checkForNewProduct(pet, newProduct, user)
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogXLargeZo))
+          checkForNewProduct(pet, box, newProduct, user)
         }
 
         case _ =>
@@ -584,10 +586,13 @@ object ParentService extends Loggable {
 
   def updatePuppyProducts(user: User) = {
     for {
-      pet <- user.pets.toList
+      subscription <- user.subscription.toList
+      box <- subscription.subscriptionBoxes
+      fleaTick <- box.fleaTick
+        if fleaTick.isZoGuard_?
+      pet <- box.pet
         if (pet.breed.get != null) &&
-             (pet.birthday.get != null) &&
-             (pet.product.obj.map(_.isZoGuard_?).openOr(false))
+             (pet.birthday.get != null)
     } yield {      
       val growthRate = GrowthRate.find(By(GrowthRate.breed, pet.breed.get.toLowerCase))
 
@@ -595,23 +600,28 @@ object ParentService extends Loggable {
 
       growthMonth match {
         case medium 
-            if medium == getGrowthMonthNumber(growthRate, "medium") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogMediumZo))
-          newProduct.map { product => 
+            if medium == getGrowthMonthNumber(growthRate, "medium") =>
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogMediumZo))
+          newProduct.map { product =>
+            box
+              .fleaTick(product)
+              .saveMe
+
             pet
-              .product(product)
               .size(AnimalSize.DogMediumZo)
               .nextGrowthDelay(0)
               .saveMe
           }
-        }
 
         case large 
             if large == getGrowthMonthNumber(growthRate, "large") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogLargeZo))
-          newProduct.map { product => 
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeZo))
+          newProduct.map { product =>
+            box
+              .fleaTick(product)
+              .saveMe
+
             pet
-              .product(product)
               .size(AnimalSize.DogLargeZo)
               .nextGrowthDelay(0)
               .saveMe
@@ -620,10 +630,13 @@ object ParentService extends Loggable {
 
         case xlarge 
             if xlarge == getGrowthMonthNumber(growthRate, "xlarge") => {
-          val newProduct = Product.find(By(Product.size, AnimalSize.DogXLargeZo))
-          newProduct.map { product => 
+          val newProduct = FleaTick.find(By(FleaTick.size, AnimalSize.DogXLargeZo))
+          newProduct.map { product =>
+            box
+              .fleaTick(product)
+              .saveMe
+
             pet
-              .product(product)
               .size(AnimalSize.DogXLargeZo)
               .nextGrowthDelay(0)
               .saveMe

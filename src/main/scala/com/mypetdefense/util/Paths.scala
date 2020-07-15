@@ -49,7 +49,7 @@ object Paths {
     RedirectResponse(Login.menu.loc.calcDefaultHref)
   }
 
-  def flowComplete_? = (!petChoice.is.isEmpty && !petSize.is.isEmpty && !productChoice.is.isEmpty)  
+  def flowComplete_? = (!petChoice.is.isEmpty && !petSize.is.isEmpty)
 
   val homePage = Menu.i("Home") / "index"
   val termsOfService = Menu.i("Terms of Service") / "terms-of-service"
@@ -211,7 +211,9 @@ object Paths {
     friendsfamily.Orders.menu,
     friendsfamily.Products.menu,
     TreatList.treatListMenu,
+    AddOnSale.addOnSaleMenu,
     TreatCheckout.menu,
+    AddOnCheckout.menu,
     inventory.InventoryItems.menu,
     inventory.Reconciliations.menu,
     inventory.InventoryChangeAudits.menu,

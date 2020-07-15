@@ -18,8 +18,59 @@
         <button id="login">log in</button>
       </div>
     </div>
+    <div class="facebook-container">
+      <div><input id="fb-id" type="password"></div>
+      <div class="fb-login-button" data-size="large" data-button-type="login_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false" data-width="" onlogin="checkLoginState();" data-scope="public_profile,email"></div>
+    </div>
   </form>
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=login">
   </head_merge>
+  <tail>
+
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v7.0&appId=329863464676769&autoLogAppEvents=1" nonce="1SNh4aGH"></script>
+
+    <script>
+      function statusChangeCallback(response) {  
+        console.log('statusChangeCallback');
+        console.log(response);
+        if (response.status === 'connected') {
+          $("#fb-id").val(response.authResponse.userID)
+          $("#login").click()
+        } else {                                 
+          document.getElementById('status').innerHTML = 'Please log ' +
+            'into this webpage.';
+        }
+      }
+
+        function checkLoginState() {
+        FB.getLoginStatus(function(response) {
+          statusChangeCallback(response);
+        });
+      }
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '329863464676769',
+          cookie     : true,
+          xfbml      : true,
+          version    : 'v7.0'
+        });
+
+        FB.AppEvents.logPageView();
+    
+        FB.getLoginStatus(function(response) {
+          console.log(response);
+        });
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "https://connect.facebook.net/en_US/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+    </script>
+  </tail>
 </div>

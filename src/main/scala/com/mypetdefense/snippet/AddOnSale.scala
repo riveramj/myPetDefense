@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet
+package com.mypetdefense.snippet 
 
 import net.liftweb._
   import http.SHtml._
@@ -17,39 +17,39 @@ import com.mypetdefense._
   import model._
 import com.mypetdefense.util.{SecurityContext, ClearNodesIf}
 
-object TreatList extends Loggable {
+object AddOnSale extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Treats") / "treats"
+  val menu = Menu.i("Add-on Sale") / "add-on"
 
-  val treatListMenu =
+  val addOnSaleMenu =
     Menu.param[User](
-      "Our Treats", "Our Treats",
+      "Additional Products", "Additional Products",
       productSalesKey => KeyService.findUserByKey(productSalesKey, "productSalesKey"),
       user => user.productSalesKey.get
-    ) / "treats" >>
+    ) / "add-on" >>
     MatchWithoutCurrentValue
 }
 
-class TreatList extends Loggable {
-  import TreatList._
+class AddOnSale extends Loggable {
+  import AddOnSale._
 
-  var user = TreatList.treatListMenu.currentValue
+  var user = AddOnSale.addOnSaleMenu.currentValue
 
   val duckTreats = Product.find(By(Product.name, "Duck Jerky Multivitamin & Immune Maintenance"))
   val lambTreats = Product.find(By(Product.name, "Lamb Jerky Digestive Health & Probiotic"))
   val beefTreats = Product.find(By(Product.name, "Beef Jerky Hip & Joint Formula"))
   val salmonTreats = Product.find(By(Product.name, "Salmon Jerky Skin & Coat Formula"))
-  val fruitTreats = Product.find(By(Product.name, "Mind Your Peas Natural Dog Treats"))
+  val fruitTreats = Product.find(By(Product.name, "Healthy Harvest Fruit and Veggie Mix"))
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
   user.map(SecurityContext.logIn(_))
 
   def updateCartCount(treat: Product, newQuantity: Int) = {
-    val cart = TreatsFlow.treatShoppingCart.is
+    val cart = AddOnFlow.addOnShoppingCart.is
 
     val updatedCart = {
       if (newQuantity < 1)
@@ -58,14 +58,14 @@ class TreatList extends Loggable {
         cart + (treat -> newQuantity)
     }
 
-    TreatsFlow.treatShoppingCart(updatedCart)
+    AddOnFlow.addOnShoppingCart(updatedCart)
 
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def addToCart(possibleTreat: Box[Product]) = {
     possibleTreat.map { treat =>
-      val cart = TreatsFlow.treatShoppingCart.is
+      val cart = AddOnFlow.addOnShoppingCart.is
 
       val updatedCart = {
         if (cart.contains(treat))
@@ -74,24 +74,24 @@ class TreatList extends Loggable {
           cart + (treat -> 1)
       }
 
-      TreatsFlow.treatShoppingCart(updatedCart)
+      AddOnFlow.addOnShoppingCart(updatedCart)
     }
 
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def removeTreatFromCart(treat: Product) = {
-    val cart = TreatsFlow.treatShoppingCart.is
+    val cart = AddOnFlow.addOnShoppingCart.is
 
-    TreatsFlow.treatShoppingCart(cart - treat)
+    AddOnFlow.addOnShoppingCart(cart - treat)
 
     cartRenderer.map(_.setHtml).openOr(Noop)
   }
 
   def render = {
-    "#logo-name a [href]" #> TreatList.treatListMenu.loc.calcDefaultHref &
+    "#logo-name a [href]" #> AddOnSale.addOnSaleMenu.loc.calcDefaultHref &
     "#shopping-cart" #> idMemoize { renderer =>
-      val cart = TreatsFlow.treatShoppingCart.is
+      val cart = AddOnFlow.addOnShoppingCart.is
 
       cartRenderer = Full(renderer)
 
@@ -111,15 +111,20 @@ class TreatList extends Loggable {
       } &
       ".cart-footer" #> {
         ".subtotal *" #> f"$$$subtotal%2.2f" &
-        ".checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref
+        ".checkout [href]" #> AddOnCheckout.menu.loc.calcDefaultHref
       } &
       ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
-      ".cart-actions .checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref &
+      ".cart-actions .checkout [href]" #> AddOnCheckout.menu.loc.calcDefaultHref &
       ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
       ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
       ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
       ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
     } andThen
-    ".fruit .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitTreats))
+    ".duck .add-treat [onclick]" #> ajaxInvoke(() => addToCart(duckTreats)) &
+    ".lamb .add-treat [onclick]" #> ajaxInvoke(() => addToCart(lambTreats)) &
+    ".beef .add-treat [onclick]" #> ajaxInvoke(() => addToCart(beefTreats)) &
+    ".salmon .add-treat [onclick]" #> ajaxInvoke(() => addToCart(salmonTreats)) &
+    ".fruit-small .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitTreats))
   }
 }
+

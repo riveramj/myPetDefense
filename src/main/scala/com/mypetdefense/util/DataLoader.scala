@@ -13,8 +13,8 @@ import dispatch._, Defaults._
 
 object DataLoader extends Loggable {
   def loadProducts = {
-    if (Product.findAll().isEmpty) {
-      Product.createProduct(
+    if (FleaTick.findAll().isEmpty) {
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatAllSize,
@@ -24,7 +24,7 @@ object DataLoader extends Loggable {
         sku = "100001"
       )
 
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatMedium,
@@ -34,7 +34,7 @@ object DataLoader extends Loggable {
         sku = "100011"
       )
 
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatLarge,
@@ -44,7 +44,7 @@ object DataLoader extends Loggable {
         sku = "100012"
       )
 
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatSmall,
@@ -54,7 +54,7 @@ object DataLoader extends Loggable {
         sku = "100001"
       )
 
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatMedium,
@@ -64,7 +64,7 @@ object DataLoader extends Loggable {
         sku = "100001"
       )
 
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatLarge,
@@ -74,7 +74,7 @@ object DataLoader extends Loggable {
         sku = "100001"
       )
 
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogSmallAdv,
@@ -83,7 +83,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100013"
       )
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogMediumAdv,
@@ -92,7 +92,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100014"
       )
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogLargeAdv,
@@ -101,7 +101,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100015"
       )
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "Adventure Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogXLargeAdv,
@@ -111,7 +111,7 @@ object DataLoader extends Loggable {
         sku = "100016"
       )
 
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogSmallZo,
@@ -120,7 +120,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100002"
       )
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogMediumZo,
@@ -129,7 +129,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100003"
       )
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogLargeZo,
@@ -138,7 +138,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100004"
       )
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogXLargeZo,
@@ -148,7 +148,7 @@ object DataLoader extends Loggable {
         sku = "100005"
       )
 
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogSmallShld,
@@ -157,7 +157,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100007"
       )
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogMediumShld,
@@ -166,7 +166,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100008"
       )
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogLargeShld,
@@ -175,7 +175,7 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100009"
       )
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ShieldTec Plus for Dogs",
         animalType = AnimalType.Dog,
         size = AnimalSize.DogXLargeShld,
@@ -208,14 +208,14 @@ object DataLoader extends Loggable {
       ("ShieldTec Plus for Dogs", AnimalSize.DogXLargeShld, "100010"),
     )
 
-    val productSku = Product.find(By(Product.sku, "100011"))
+    val productSku = FleaTick.find(By(FleaTick.sku, "100011"))
 
     if (productSku.isEmpty) {
       for {
         (productName, size, sku) <- productsToUpdate
-        product <- Product.find(
-          By(Product.name, productName),
-          By(Product.size, size)
+        product <- FleaTick.find(
+          By(FleaTick.name, productName),
+          By(FleaTick.size, size)
         )
       } yield {
         product.sku(sku).saveMe
@@ -281,7 +281,7 @@ object DataLoader extends Loggable {
       val pets = parent.activePets
 
       if (pets.size == 0)
-        parent.getSubscription.map(_.status(Status.UserSuspended).saveMe)
+        parent.subscription.obj.map(_.status(Status.UserSuspended).saveMe)
     }
   }
 
@@ -303,7 +303,7 @@ object DataLoader extends Loggable {
     )
 
     val activeParentsWithoutKey = possibleActiveParentsWithoutKey.filter { parent =>
-      val subscription = parent.getSubscription
+      val subscription = parent.subscription.obj
       val subscriptionIsActive_? = subscription.map(_.status.get == Status.Active).getOrElse(false)
       val userHasPets_? = parent.activePets.size > 0
 
@@ -333,7 +333,7 @@ object DataLoader extends Loggable {
       user <- activeUsers
       address <- user.shippingAddress
         if (address.state.get.toLowerCase == "ga")
-      subscription <- user.getSubscription
+      subscription <- user.subscription.obj
     } yield {
 
       val stripeId = user.stripeId.get
@@ -368,21 +368,20 @@ object DataLoader extends Loggable {
   }
 
   def createProducts = {
-    if (Treat.findAll().isEmpty) {
-      Treat.createNewTreat("Duck Jerky Multivitamin & Immune Maintenance", 14.99, 8, "duck12345")
-      Treat.createNewTreat("Lamb Jerky Digestive Health & Probiotic", 14.99, 8, "lamb12345")
-      Treat.createNewTreat("Beef Jerky Hip & Joint Formula", 14.99, 8, "beef12345")
-      //Treat.createNewTreat("Chicken Jerky Skin & Coat Formula", 14.99, 8, "chicken12345")
+    if (Product.findAll().isEmpty) {
+      Product.createNewProduct("Duck Jerky Multivitamin & Immune Maintenance", 14.99, 8, "duck12345")
+      Product.createNewProduct("Lamb Jerky Digestive Health & Probiotic", 14.99, 8, "lamb12345")
+      Product.createNewProduct("Beef Jerky Hip & Joint Formula", 14.99, 8, "beef12345")
     }
   }
 
   def createFruitVeg = {
-    Treat.createNewTreat("Mind Your Peas Natural Dog Treats", 12.99, 3, "fruit-small12345")
+    Product.createNewProduct("Mind Your Peas Natural Dog Treats", 12.99, 3, "fruit-small12345")
   }
 
   def replaceChickenTreat = {
-    Treat.find(By(Treat.name, "Chicken Jerky Skin & Coat Formula")).map(_.delete_!)
-    Treat.createNewTreat("Salmon Jerky Skin & Coat Formula", 14.99, 8, "salmon12345")
+    Product.find(By(Product.name, "Chicken Jerky Skin & Coat Formula")).map(_.delete_!)
+    Product.createNewProduct("Salmon Jerky Skin & Coat Formula", 14.99, 8, "salmon12345")
   }
 
   def createPackaging = {
@@ -414,13 +413,13 @@ object DataLoader extends Loggable {
   }
 
   def addWeightToFleaTick = {
-    Product.findAll().map(_.weight(0.8).saveMe)
+    FleaTick.findAll().map(_.weight(0.8).saveMe)
   }
 
   def createOneSizeCat = {
-    val oneSizeCat = Product.find(By(Product.size, AnimalSize.CatAllSize))
+    val oneSizeCat = FleaTick.find(By(FleaTick.size, AnimalSize.CatAllSize))
     if (oneSizeCat.isEmpty) {
-      Product.createProduct(
+      FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
         size = AnimalSize.CatAllSize,
@@ -429,34 +428,6 @@ object DataLoader extends Loggable {
         weight = 0.8,
         sku = "100001"
       )
-    }
-  }
-
-  def removeFrontlineProduct = {
-    def findProduct(name: String, size: AnimalSize.Value) = {
-      Product.find(By(Product.name, name), By(Product.size, size))
-    }
-
-    val smallProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogSmallZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogSmallZo))
-    val mediumProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogMediumZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogMediumZo))
-    val largeProduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogLargeZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogLargeZo))
-    val xlargeproduct = (findProduct("Frontline Plus for Dogs", AnimalSize.DogXLargeZo), findProduct("ZoGuard Plus for Dogs", AnimalSize.DogXLargeZo))
-
-    val productSizes = List(smallProduct, mediumProduct, largeProduct, xlargeproduct)
-
-    for {
-      productSize <- productSizes
-      frontline <- productSize._1
-    } yield {
-      val pets = Pet.findAll(By(Pet.product, frontline))
-
-      println(pets.map(_.petId))
-
-      productSize._2.map { zoguard =>
-        pets.map(_.product(zoguard).saveMe)
-      }
-
-      frontline.delete_!
     }
   }
 
@@ -548,8 +519,23 @@ object DataLoader extends Loggable {
     tppCustomers.map(_.referer(puppySpot).saveMe)
   }
 
+  def calculateTax = {
+    val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
+    
+    for {
+      parent <- parents
+      address <- parent.shippingAddress
+    } yield {
+      if (address.state.get.toLowerCase == "ga" && parent.taxRate.get == 0D) { 
+        parent.setTaxRate
+      } else if (address.state.get.toLowerCase != "ga") {
+        parent.taxRate(0D).saveMe
+      }
+    }
+  }
+
   def renameVegTreat = {
-    val fruitTreats = Treat.find(By(Treat.name, "Healthy Harvest Fruit and Veggie Mix"))
+    val fruitTreats = Product.find(By(Product.name, "Healthy Harvest Fruit and Veggie Mix"))
 
     fruitTreats.map(_.name("Mind Your Peas Natural Dog Treats").saveMe)
   }

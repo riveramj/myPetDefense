@@ -44,15 +44,15 @@ class ProductDetail extends Loggable {
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
   var name = ""
-  var chosenProduct: Box[Product] = Empty
+  var chosenProduct: Box[FleaTick] = Empty
   var chosenPrice = 0D
 
   val products = path match {
-    case "adventure-dog-detail" => Product.findAll(By(Product.name, "Adventure Plus for Dogs"))
-    case "shieldtec-dog-detail" => Product.findAll(By(Product.name, "ShieldTec Plus for Dogs"))
-    case "zoguard-dog-detail" => Product.findAll(By(Product.name, "ZoGuard Plus for Dogs"))
-    case "adventure-cat-detail" => Product.findAll(By(Product.name, "Adventure Plus for Cats"))
-    case "zoguard-cat-detail" => Product.findAll(By(Product.name, "ZoGuard Plus for Cats"))
+    case "adventure-dog-detail" => FleaTick.findAll(By(FleaTick.name, "Adventure Plus for Dogs"))
+    case "shieldtec-dog-detail" => FleaTick.findAll(By(FleaTick.name, "ShieldTec Plus for Dogs"))
+    case "zoguard-dog-detail" => FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Dogs"))
+    case "adventure-cat-detail" => FleaTick.findAll(By(FleaTick.name, "Adventure Plus for Cats"))
+    case "zoguard-cat-detail" => FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Cats"))
   }
 
   def addToCart() = {
@@ -77,13 +77,13 @@ class ProductDetail extends Loggable {
     }
   }
 
-  def getImageUrl(product: Box[Product]) = {
+  def getImageUrl(product: Box[FleaTick]) = {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
   }
 
   val productImages = products.map(product => getImageUrl(Full(product)))
 
-  def updateProductChoice(product: Product, price: Double) = {
+  def updateProductChoice(product: FleaTick, price: Double) = {
     chosenProduct = Full(product)
     chosenPrice = price
 
@@ -145,7 +145,7 @@ class ProductDetail extends Loggable {
     }
   }
 
-  def ratingBinding(products: List[Product]) = {
+  def ratingBinding(products: List[FleaTick]) = {
     val product = products.headOption
     val rating = product.map(_.rating.get).getOrElse(0D)
     val reviewCount = product.map(_.reviewCount.get).getOrElse(0)

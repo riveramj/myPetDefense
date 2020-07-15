@@ -111,6 +111,11 @@ case class Send6MonthSaleReceipt(
   subtotal: Double,
   tax: Double
 )
+case class AddOnReceiptEmail(
+  newProducts: List[AddOnProduct],
+  subscription: Box[Subscription],
+  parent: Box[User]
+)
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Thanks for Joining My Pet Defense!"
@@ -724,7 +729,7 @@ trait TreatReceiptEmailHandling extends EmailHandlerChain {
         "#ship-state *" #> order.state.get &
         "#ship-zip *" #> order.zip.get &
         ".ordered-product" #> treats.map { orderedTreat =>
-          val treat = orderedTreat.treat.obj
+          val treat = orderedTreat.product.obj
 
           ".treat-quantity *" #> orderedTreat.quantity.get &
           ".treat-name *" #> treat.map(_.name.get)
@@ -732,6 +737,38 @@ trait TreatReceiptEmailHandling extends EmailHandlerChain {
         ".amount-due *" #> f"$$$subtotal%2.2f" &
         "#tax-due *" #> f"$$${order.taxPaid.get}%2.2f" &
         "#total *" #> f"$$${order.amountPaid.get}%2.2f" 
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
+trait AddOnReceiptEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case AddOnReceiptEmail(
+      newProducts,
+      subscription,
+      parent
+    ) =>
+
+      val template =
+    Templates("emails-hidden" :: "add-on-receipt-email" :: Nil) openOr NodeSeq.Empty
+
+      val subject = "My Pet Defense Items Added"
+      val email = parent.map(_.email.get).openOr("")
+      val nextShipDate = subscription.map { possibleSubscription =>
+        dateFormatter.format(possibleSubscription.nextShipDate.get)
+      }.openOr("")
+
+      val transform = {
+        "#parent-name *" #> parent.map(_.firstName.get) &
+        ".ordered-product" #> newProducts.map { addOnProduct =>
+          val product = addOnProduct.product.obj
+
+          ".treat-quantity *" #> addOnProduct.quantity.get &
+          ".treat-name *" #> product.map(_.name.get)
+        } &
+        ".next-ship-date *" #> nextShipDate
       }
 
       sendEmail(subject, email, transform(template))
@@ -768,7 +805,7 @@ trait TreatShippedEmailHandling extends EmailHandlerChain {
         "#ship-state" #> order.state.get &
         "#ship-zip" #> order.zip.get &
         ".ordered-product" #> treats.map { orderedTreat =>
-          val treat = orderedTreat.treat.obj
+          val treat = orderedTreat.product.obj
 
           ".treat-quantity *" #> orderedTreat.quantity.get &
           ".treat-name *" #> treat.map(_.name.get)
@@ -809,7 +846,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val products = subscription.map(_.getProducts).openOr(Nil)
+      val boxes = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
+      val products = boxes.flatMap(_.fleaTick.obj)
       val priceCode = subscription.map(_.priceCode.get).openOr("")
 
       val transform = {
@@ -868,7 +906,7 @@ trait SixMonthSaleReceiptEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val products = pets.map(_.product.obj).flatten
+      val products = user.subscription.map(_.subscriptionBoxes.flatMap(_.fleaTick.obj)).openOr(Nil)
       val amountPaid = subtotal + tax
 
       val transform = {
@@ -922,6 +960,7 @@ trait EmailActor extends EmailHandlerChain
                     with DailySalesEmailHandling
                     with InternalDailyEmailHandling
                     with TreatReceiptEmailHandling
+                    with AddOnReceiptEmailHandling
                     with TreatShippedEmailHandling
                     with SixMonthSaleReceiptEmailHandling
                     with SendShipmentRefundedEmailHandling

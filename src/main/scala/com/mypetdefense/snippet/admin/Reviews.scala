@@ -84,7 +84,7 @@ class Reviews extends Loggable {
         ".rating *" #> review.rating.get &
         ".author *" #> review.author.get &
         ".date *" #> dateFormat.format(review.date.get) &
-        ".product *" #> review.product.map(_.name.get)
+        ".product *" #> review.fleaTick.map(_.name.get)
       }
     }
   }
@@ -100,7 +100,7 @@ class Reviews extends Loggable {
       ".rating *" #> review.rating.get &
       ".author *" #> review.author.get &
       ".date *" #> dateFormat.format(review.date.get) &
-      ".product *" #> review.product.map(_.name.get)
+      ".product *" #> review.fleaTick.map(_.name.get)
     }
   }
 }

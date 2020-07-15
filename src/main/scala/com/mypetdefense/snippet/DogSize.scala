@@ -26,21 +26,20 @@ class DogSize extends Loggable {
   }
 
   def render = {
-    val products = Product.findAll(By(Product.name, "ZoGuard Plus for Dogs"))
+    val products = FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Dogs"))
 
-    val smallDog = products.filter(_.size == AnimalSize.DogSmallZo).headOption
-    val mediumDog = products.filter(_.size == AnimalSize.DogMediumZo).headOption
-    val largeDog = products.filter(_.size == AnimalSize.DogLargeZo).headOption
-    val xlargeDog = products.filter(_.size == AnimalSize.DogXLargeZo).headOption
+    val smallDog = products.find(_.size.get == AnimalSize.DogSmallZo)
+    val mediumDog = products.find(_.size.get == AnimalSize.DogMediumZo)
+    val largeDog = products.find(_.size.get == AnimalSize.DogLargeZo)
+    val xlargeDog = products.find(_.size.get == AnimalSize.DogXLargeZo)
      
-    def chooseSize(product: Box[Product]) = {
-      productChoice(product)
+    def chooseSize(product: Box[FleaTick]) = {
       petSize(product.map(_.size.get))
 
       S.redirectTo(CartReview.menu.loc.calcDefaultHref)
     }
 
-    def getSizeNumber(product: Option[Product]) = product.map(_.size.toString)
+    def getSizeNumber(product: Option[FleaTick]) = product.map(_.size.toString)
 
     ".small .weight-number *" #> getSizeNumber(smallDog) &
     ".small #small-dog" #> SHtml.submit("Select", () => chooseSize(smallDog)) &

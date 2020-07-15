@@ -40,7 +40,7 @@ class Parents extends Loggable {
   var parentsRenderer: Box[IdMemoizeTransform] = Empty
   
   var petType: Box[AnimalType.Value] = Empty
-  var chosenProduct: Box[Product] = Empty
+  var chosenProduct: Box[FleaTick] = Empty
   var petName = ""
   var petBreed = ""
   var petBirthday = ""
@@ -48,8 +48,8 @@ class Parents extends Loggable {
   var email = ""
 
   val coupons = Coupon.findAll()
-  val dogProducts = Product.findAll(By(Product.animalType, AnimalType.Dog))
-  val catProducts = Product.findAll(By(Product.animalType, AnimalType.Dog))
+  val dogProducts = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
+  val catProducts = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
 
   val stripeBaseUrl = Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
   val stripeInvoiceBaseURL = s"${stripeBaseUrl}/invoices"
@@ -139,7 +139,7 @@ class Parents extends Loggable {
     SHtml.ajaxSelectObj(
       products.map(product => (product, product.getNameAndSize)),
       chosenProduct,
-      (possibleProduct: Product) => chosenProduct = Full(possibleProduct)
+      (possibleProduct: FleaTick) => chosenProduct = Full(possibleProduct)
     )
   }
 
@@ -357,7 +357,7 @@ class Parents extends Loggable {
       Noop
     }
 
-    def updatePetInfo(newInfo: String, infoType: String, pet: Pet, product: Box[Product] = Empty) = {
+    def updatePetInfo(newInfo: String, infoType: String, pet: Pet, product: Box[FleaTick] = Empty) = {
 
       infoType match {
         case "name" => pet.name(newInfo).saveMe
@@ -365,9 +365,6 @@ class Parents extends Loggable {
         case "birthday" =>
           val possibleBirthday = ParentService.parseWhelpDate(newInfo)
           pet.birthday(possibleBirthday.openOr(null)).saveMe
-        case "product" => product.map { prod =>
-          pet.product(prod).size(prod.size.get).saveMe
-        }
         case _ => pet
       }
       
@@ -376,15 +373,15 @@ class Parents extends Loggable {
 
     def changePetProduct(
       petType: AnimalType.Value,
-      currentProduct: Box[Product],
+      currentProduct: Box[FleaTick],
       pet: Pet
     ) = {
-      val products = Product.findAll(By(Product.animalType, petType))
+      val products = FleaTick.findAll(By(FleaTick.animalType, petType))
 
       SHtml.ajaxSelectObj(
         products.map(product => (product, product.getNameAndSize)),
         currentProduct,
-        (possibleProduct: Product) => 
+        (possibleProduct: FleaTick) =>
           updatePetInfo("", "product", pet, Full(possibleProduct))
       )
     }
@@ -417,8 +414,7 @@ class Parents extends Loggable {
           ".pet-breed" #> SHtml.ajaxText(pet.breed.get, possibleBreed => updatePetInfo(possibleBreed, "breed", pet)) &
           ".pet-birthday *" #> SHtml.ajaxText(birthday, possibleBirthday => updatePetInfo(possibleBirthday, "birthday", pet)) &
           ".pet-type *" #> pet.animalType.toString &
-          ".pet-product *" #> changePetProduct(pet.animalType.get, pet.product.obj, pet) &
-          ".pet-delay-growth input" #> ajaxText(s"$nextGrowthDelay months", possibleDelay => updateGrowthDelay(possibleDelay, pet)) & 
+          ".pet-delay-growth input" #> ajaxText(s"$nextGrowthDelay months", possibleDelay => updateGrowthDelay(possibleDelay, pet)) &
           ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
             ajaxInvoke(deletePet(parent, pet, renderer) _)
           )
@@ -461,7 +457,7 @@ class Parents extends Loggable {
     ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
     ".shipment" #> shipments.sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime).map { shipment =>
       
-      val itemsShipped = shipment.shipmentLineItems.toList.map(_.getProductPetNameItemSize)
+      val itemsShipped = shipment.shipmentLineItems.toList.map(_.getFleaTickPetNameItemSize)
 
       ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
       ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
@@ -504,7 +500,7 @@ class Parents extends Loggable {
         val refererName = parent.referer.obj.map(_.name.get)
         
         idMemoize { detailsRenderer =>
-          val subscription = parent.getSubscription
+          val subscription = parent.subscription.obj
           val nextShipDate = subscription.map(_.nextShipDate.get)
 
           ".parent" #> {

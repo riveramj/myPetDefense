@@ -234,7 +234,7 @@ class ShipmentDashboard extends Loggable {
 
           ".name-address *" #> nameAddress &
           ".product" #> petsAndProducts.map { case (pet, product) =>
-            ".pet-name *" #> pet.name.get &
+            ".pet-name *" #> pet.map(_.name.get) &
             ".product-name *" #> product.map(_.name.get) &
             ".product-size *" #> product.map(_.size.get.toString)
           } &
@@ -298,7 +298,7 @@ class ShipmentDashboard extends Loggable {
 
           ".name-address *" #> nameAddress &
           ".product" #> petsAndProducts.map { case (pet, product) =>
-            ".pet-name *" #> pet.name.get &
+            ".pet-name *" #> pet.map(_.name.get) &
             ".product-name *" #> product.map(_.name.get) &
             ".product-size *" #> product.map(_.size.get.toString)
           } &

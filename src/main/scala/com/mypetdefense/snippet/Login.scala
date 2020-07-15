@@ -39,6 +39,7 @@ class Login extends Loggable {
   def render = {
     var email = ""
     var password = ""
+    var fbId = ""
 
     S.request match {
       case Full(request) =>
@@ -52,7 +53,8 @@ class Login extends Loggable {
     "#login-container" #> {
       "#email" #> SHtml.text(email, email = _) &
       "#password" #> SHtml.password(password, password = _) &
-      "#login" #> SHtml.ajaxSubmit("Log In", () => LoginService.login(email, password))
+      "#fb-id" #> SHtml.password(fbId, fbId = _) &
+      "#login" #> SHtml.ajaxSubmit("Log In", () => LoginService.login(email, password, fbId))
     }
   }
 }
