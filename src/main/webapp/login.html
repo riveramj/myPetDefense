@@ -36,8 +36,11 @@
         console.log('statusChangeCallback');
         console.log(response);
         if (response.status === 'connected') {
-          $("#fb-id").val(response.authResponse.userID)
-          $("#login").click()
+          $("#fb-id").val(response.authResponse.userID);
+          $("#login").click();
+          
+          //FB.api('/me', {fields:"first_name, last_name, email"}, function(response) {
+          //});
         } else {                                 
           document.getElementById('status').innerHTML = 'Please log ' +
             'into this webpage.';
