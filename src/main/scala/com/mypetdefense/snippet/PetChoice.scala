@@ -27,17 +27,15 @@ class PetChoice extends Loggable {
   def render = {
     def dogFlow = {
       petChoice(Full(AnimalType.Dog))
-      petSize(Empty)
 
       if (petId.is.isEmpty)
         petId(Full(generateLongId))
 
-      S.redirectTo(DogSize.menu.loc.calcDefaultHref)
+      S.redirectTo(PetDetails.menu.loc.calcDefaultHref)
     }
 
     def catFlow = {
       petChoice(Full(AnimalType.Cat))
-      petSize(Empty)
 
       if (petId.is.isEmpty)
         petId(Full(generateLongId))

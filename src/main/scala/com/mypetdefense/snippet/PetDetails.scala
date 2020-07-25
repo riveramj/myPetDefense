@@ -33,6 +33,9 @@ class PetDetails extends Loggable {
   val formatter = new SimpleDateFormat("MM/yy")
 
   var currentPets = completedPets.is
+  var petName = ""
+  var petMonth = ""
+  var petYear = ""
   var nameErrors: List[String] = Nil
 
   val products = FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Dogs"))
@@ -45,124 +48,61 @@ class PetDetails extends Loggable {
 
   def validateNameBirthday = {
     (
-      currentPets.values.flatMap { pet =>
-        checkEmpty(pet.name.get, s"#${pet.petId.get}-name")
-      } ++
-      nameErrors.map( nameId => ValidationError(nameId, "Required."))
-    ).toList.distinct
+      checkEmpty(petName, "#pet-name") ::
+      checkEmpty(petMonth, "#pet-month") ::
+      checkEmpty(petYear, "#pet-year") ::
+      Nil
+    ).flatten.distinct
   }
 
-  def goToCheckout() = {
+  def validateAndNavigate(url: String) = {
     val validateFields = validateNameBirthday
 
     if(validateFields.isEmpty) {
-      completedPets(currentPets)
+      for {
+        newPetId <- PetFlowChoices.petId.is
+        animalType <- PetFlowChoices.petChoice.is
+      } yield {
+        val newPet = Pet.create
+          .petId(newPetId)
+          .animalType(animalType)
 
-      S.redirectTo(Checkout.menu.loc.calcDefaultHref)
+        currentPets(newPetId) = newPet
+        completedPets(currentPets)
+      }
+
+      petChoice(Empty)
+      petId(Empty)
+
+      S.redirectTo(url)
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
   }
 
-  def addNewPet() = {
-    val validateFields = validateNameBirthday
+  def goToCheckout() =
+    validateAndNavigate(Checkout.menu.loc.calcDefaultHref)
 
-    if(validateFields.isEmpty) {
-      petChoice(Empty)
-      petSize(Empty)
-      petId(Empty)
-
-      completedPets(currentPets)
-
-      S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
-    } else {
-      validateFields.foldLeft(Noop)(_ & _)
-    }
-  }
-
-  def updatePetName(name: String, pet: Pet) = {
-    val nameId = s"#${pet.petId.get}-name"
-    val nameError = checkEmpty(name, nameId)
-
-    if (nameError.isEmpty) {
-      val updatedPet = pet.name(name)
-      currentPets(pet.petId.get) = updatedPet
-      completedPets(currentPets)
-
-      nameErrors = nameErrors.filter(_ != nameId)
-
-      Noop
-    } else {
-      nameErrors = (nameErrors :+ nameId).distinct
-      nameError.foldLeft(Noop)(_ & _)
-    }
-  }
-
-  def removePet(pet: Pet)() = {
-    currentPets.remove(pet.petId.get)
-    completedPets(currentPets)
-
-    if (petId.is == Full(pet.petId.get)) {
-      petChoice(Empty)
-      petSize(Empty)
-      petId(Empty)
-    }
-
-    if (completedPets.size == 0 && petId.isEmpty)
-      S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
-    else
-      S.redirectTo(PetDetails.menu.loc.calcDefaultHref)
-  }
+  def addNewPet() =
+    validateAndNavigate(PetChoice.menu.loc.calcDefaultHref)
 
   def render = {
-    val currentPetId = PetFlowChoices.petId.is.openOr(0L)
-    val currentPet = {
-      for {
-        petType <- petChoice.is
-        size <- petSize.is
-      } yield {
-        Pet.create
-          .petId(currentPetId)
-          .animalType(petType)
-          .size(size)
-      }
-    }
-
-    currentPet.map { pet => 
-      val updatedPet = {
-        if (currentPets.contains(currentPetId)) 
-          pet
-            .name(currentPets(currentPetId).name.get)
-        else
-          pet
-      }
-
-      currentPets(currentPetId) = updatedPet
-    }
-
-    completedPets(currentPets)
-
     SHtml.makeFormsAjax andThen
     ".pet" #> currentPets.values.map { pet =>
       var name = pet.name.get
 
-      ".remove-pet [onclick]" #> ajaxInvoke(removePet(pet) _) &
       ".details-pet *" #> pet.animalType.toString &
       ".details-size *" #> pet.size.toString &
-      ".pet-name" #> ajaxText(
-        name,
-        possibleName => updatePetName(possibleName, pet),
-        "id" -> s"${pet.petId.get}-name"
-      )
+      ".pet-name" #> ajaxText(name, name = _)
     } &
       ".small .weight-number *" #> getSizeNumber(smallDog) &
-      ".small #small-dog" #> SHtml.submit("Select", () => chooseSize(smallDog)) &
+      //".small #small-dog" #> SHtml.submit("Select", () => chooseSize(smallDog)) &
       ".medium .weight-number *" #> getSizeNumber(mediumDog) &
-      ".medium #medium-dog" #> SHtml.submit("Select", () => chooseSize(mediumDog)) &
+      //".medium #medium-dog" #> SHtml.submit("Select", () => chooseSize(mediumDog)) &
       ".large .weight-number *" #> getSizeNumber(largeDog) &
-      ".large #large-dog" #> SHtml.submit("Select", () => chooseSize(largeDog)) &
+      //".large #large-dog" #> SHtml.submit("Select", () => chooseSize(largeDog)) &
       ".xlarge .weight-number *" #> getSizeNumber(xlargeDog) &
-      ".xlarge #xlarge-dog" #> SHtml.submit("Select", () => chooseSize(xlargeDog)) &
+      //".xlarge #xlarge-dog" #> SHtml.submit("Select", () => chooseSize(xlargeDog)) &
     "#add-pet" #> ajaxSubmit("Add Pet", addNewPet _) &
     "#checkout" #> ajaxSubmit("Checkout", goToCheckout _)
   }

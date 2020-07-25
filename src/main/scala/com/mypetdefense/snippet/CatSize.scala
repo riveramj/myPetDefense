@@ -20,14 +20,9 @@ object CatSize extends Loggable {
 
 class CatSize extends Loggable {
   import PetFlowChoices._
-
-  def chosenSize = ".chosen-size *" #> {
-    petSize.is.map(_.toString)
-  }
-
+  
   def render = {
     def chooseSize(product: Box[FleaTick]) = {
-      petSize(product.map(_.size.get))
 
       S.redirectTo(CartReview.menu.loc.calcDefaultHref)
     }

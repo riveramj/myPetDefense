@@ -68,7 +68,6 @@ class CartReview extends Loggable {
 
   def addNewPet() = {
     petChoice(Empty)
-    petSize(Empty)
     petId(Empty)
 
     completedPets(currentPets)
@@ -82,12 +81,10 @@ class CartReview extends Loggable {
     {
       for {
         petType <- petChoice.is
-        size <- petSize.is
       } yield {
         val pet = Pet.create
           .petId(currentPetId)
           .animalType(petType)
-          .size(size)
 
         currentPets(currentPetId) = pet
       }
@@ -139,7 +136,6 @@ class CartReview extends Loggable {
         val petName = pet.name.get
         ".cart-pet-remove [onclick]" #> Confirm(s"Remove ${petName}?", ajaxInvoke(removePet(id))) &
         ".pet-name" #> ajaxText(petName, possibleName => {
-          completedPets(pet.petId.get) = pet.name(possibleName)
           Noop
         }) &
         ".cart-pet-price *" #> "$12.99"
