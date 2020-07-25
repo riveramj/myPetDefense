@@ -35,6 +35,14 @@ class PetDetails extends Loggable {
   var currentPets = completedPets.is
   var nameErrors: List[String] = Nil
 
+  val products = FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Dogs"))
+  val smallDog = products.find(_.size.get == AnimalSize.DogSmallZo)
+  val mediumDog = products.find(_.size.get == AnimalSize.DogMediumZo)
+  val largeDog = products.find(_.size.get == AnimalSize.DogLargeZo)
+  val xlargeDog = products.find(_.size.get == AnimalSize.DogXLargeZo)
+
+  def getSizeNumber(product: Option[FleaTick]) = product.map(_.size.toString)
+
   def validateNameBirthday = {
     (
       currentPets.values.flatMap { pet =>
@@ -147,6 +155,14 @@ class PetDetails extends Loggable {
         "id" -> s"${pet.petId.get}-name"
       )
     } &
+      ".small .weight-number *" #> getSizeNumber(smallDog) &
+      ".small #small-dog" #> SHtml.submit("Select", () => chooseSize(smallDog)) &
+      ".medium .weight-number *" #> getSizeNumber(mediumDog) &
+      ".medium #medium-dog" #> SHtml.submit("Select", () => chooseSize(mediumDog)) &
+      ".large .weight-number *" #> getSizeNumber(largeDog) &
+      ".large #large-dog" #> SHtml.submit("Select", () => chooseSize(largeDog)) &
+      ".xlarge .weight-number *" #> getSizeNumber(xlargeDog) &
+      ".xlarge #xlarge-dog" #> SHtml.submit("Select", () => chooseSize(xlargeDog)) &
     "#add-pet" #> ajaxSubmit("Add Pet", addNewPet _) &
     "#checkout" #> ajaxSubmit("Checkout", goToCheckout _)
   }
