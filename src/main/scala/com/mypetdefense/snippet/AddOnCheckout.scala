@@ -1,27 +1,25 @@
 package com.mypetdefense.snippet 
 
 import net.liftweb._
-  import http.SHtml._
-  import util._
-    import Helpers._
-  import http._
-  import common._
-  import sitemap.Menu
-  import js._
-      import JsCmds._
-
+import http.SHtml._
+import util._
+import Helpers._
+import http._
+import common._
+import sitemap.Menu
+import js._
+import JsCmds._
 import com.mypetdefense.service._
-    import ValidationService._
-    import PetFlowChoices._
-
+import ValidationService._
+import PetFlowChoices._
 import com.mypetdefense._
-  import model._
-  import snippet.admin.ShipmentDashboard
-  import snippet.agency.AgencyOverview
-import com.mypetdefense.util.{SecurityContext, ClearNodesIf}
+import model._
+import snippet.admin.ShipmentDashboard
+import snippet.agency.AgencyOverview
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import com.mypetdefense.actor._
-
-import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription}
+import com.mypetdefense.snippet.signup.Success
+import me.frmr.stripe.{Customer, StripeExecutor, Coupon => StripeCoupon, Subscription => StripeSubscription}
 
 object AddOnCheckout extends Loggable {
   import net.liftweb.sitemap._
@@ -32,7 +30,7 @@ object AddOnCheckout extends Loggable {
 }
 
 class AddOnCheckout extends Loggable {
-  import TreatCheckout._
+  import com.mypetdefense.snippet.shop.TreatCheckout._
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 

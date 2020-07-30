@@ -1,29 +1,19 @@
- package com.mypetdefense.snippet
-
-import net.liftweb._
-  import http.SHtml._
-  import util._
-  import util.Helpers._
-  import common._
-  import util.ClearClearable
-  import http._
-  import mapper.{By, NullRef}
-  import js._
-  import JsCmds._
-
-import com.mypetdefense.service._
-  import ValidationService._
-  import PetFlowChoices._
+ package com.mypetdefense.snippet.signup
 
 import com.mypetdefense.model._
-
-import java.util.Date
-import java.text.SimpleDateFormat
+import com.mypetdefense.service._
+import net.liftweb._
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
 
 object CartReview extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
-  import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Review Cart") / "cart-review"
 }
@@ -151,7 +141,8 @@ class CartReview extends Loggable {
 
         ".promotion-info [class+]" #> successCoupon &
         "#promo-code" #> ajaxText(couponCode, couponCode = _) &
-        ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
+        ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() =>
+          validateCouponCode())
       }
     }
   }

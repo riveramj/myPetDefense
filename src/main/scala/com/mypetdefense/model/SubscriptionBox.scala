@@ -22,6 +22,28 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+
+  def createNewBox(subscription: Subscription, pet: Pet) = {
+    val fleaTick = pet.size.get match {
+      case AnimalSize.DogSmallZo => FleaTick.zoGuardSmallDog
+      case AnimalSize.DogMediumZo => FleaTick.zoGuardMediumDog
+      case AnimalSize.DogLargeZo => FleaTick.zoGuardLargeDog
+      case AnimalSize.DogXLargeZo => FleaTick.zoGuardXLargeDog
+    }
+
+    val basePrice = pet.size.get match {
+      case AnimalSize.DogSmallZo | AnimalSize.DogMediumZo => 24.99
+      case AnimalSize.DogLargeZo | AnimalSize.DogXLargeZo => 27.99
+    }
+
+    SubscriptionBox.create
+      .boxId(generateLongId)
+      .subscription(subscription)
+      .pet(pet)
+      .fleaTick(fleaTick)
+      .basePrice(basePrice)
+      .saveMe()
+  }
 }
 
 object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[SubscriptionBox]

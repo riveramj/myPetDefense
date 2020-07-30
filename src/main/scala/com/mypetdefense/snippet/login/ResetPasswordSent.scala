@@ -1,26 +1,15 @@
-package com.mypetdefense.snippet
-
-import net.liftweb._
-  import mapper.By
-  import util.Helpers._
-  import http._
-  import common._
-  import sitemap.Menu
-  import js._
-      import JsCmds._
-
-import com.mypetdefense.service._
-    import ValidationService._
+package com.mypetdefense.snippet.login
 
 import com.mypetdefense._
-  import model.{User, UserType}
-  import snippet.admin.ShipmentDashboard
-import com.mypetdefense.util.SecurityContext
+import com.mypetdefense.model.User
+import net.liftweb._
+import net.liftweb.common._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
 
 object ResetPasswordSent extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
-  import com.mypetdefense.util.Paths._
+  import Loc._
 
   val menu = Menu.param[User](
     "Reset Password Sent", "Reset Password Sent",

@@ -1,26 +1,22 @@
-package com.mypetdefense.snippet
-
-import net.liftweb._
-  import http.SHtml._
-  import util._
-    import Helpers._
-  import http._
-  import mapper.By
-  import common._
-  import sitemap.Menu
-  import js._
-      import JsCmds._
-
-import com.mypetdefense.service._
+package com.mypetdefense.snippet.shop
 
 import com.mypetdefense._
-  import model._
-import com.mypetdefense.util.{SecurityContext, ClearNodesIf}
+import com.mypetdefense.model._
+import com.mypetdefense.service._
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import net.liftweb._
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
 
 object TreatList extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
-  import com.mypetdefense.util.Paths._
+  import Loc._
 
   val menu = Menu.i("Treats") / "treats"
 
@@ -34,7 +30,6 @@ object TreatList extends Loggable {
 }
 
 class TreatList extends Loggable {
-  import TreatList._
 
   var user = TreatList.treatListMenu.currentValue
 

@@ -1,7 +1,14 @@
 <div id="page-container" data-lift="surround?with=login-template;at=content">
-  <form id="login-container" data-lift="login.Login.render">
-    <h2>Hey there!</h2>
-    <h3>Sign in to view your account.</h3>
+ <form id="login-container" data-lift="signup.CreateAccount.render">
+    <h2>Create your account</h2>
+    <label>
+      <div><span class="field-label">First</span></div>
+      <input id="first-name" type="text">
+    </label>
+    <label>
+      <div><span class="field-label">Rivera</span></div>
+      <input id="last-name" type="text">
+    </label>
     <label>
       <div><span class="field-label">Email</span></div>
       <input id="email" type="text">
@@ -11,36 +18,37 @@
       <input id="password" type="password">
     </label>
     <div>
-      <div id="forgot-password-container">
-        <a href="/forgot-password">Forgot Password?</a>
-      </div>
-      <div id="login-button-container">
-        <button id="login">log in</button>
+      <div id="create-account-container">
+        <button class="create-account">Continue</button>
       </div>
     </div>
-    <div class="facebook-container">
-      <div><input id="fb-id" type="password"></div>
+    <div class="facebook-container facebook-create">
+      <div><input id="facebook-id" type="password"></div>
       <div class="fb-login-button" data-size="large" data-button-type="login_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false" data-width="" onlogin="checkLoginState();" data-scope="public_profile,email"></div>
     </div>
   </form>
+
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=login">
   </head_merge>
-  <tail>
 
-    <div id="fb-root"></div>
+  <tail>
+   <script type="text/javascript" data-lift="script-bundle?name=create-account"></script>
+   <div id="fb-root"></div>
     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v7.0&appId=329863464676769&autoLogAppEvents=1" nonce="1SNh4aGH"></script>
 
-    <script>
+   <script>
       function statusChangeCallback(response) {  
         console.log('statusChangeCallback');
         console.log(response);
         if (response.status === 'connected') {
-          $("#fb-id").val(response.authResponse.userID);
-          $("#login").click();
-          
-          //FB.api('/me', {fields:"first_name, last_name, email"}, function(response) {
-          //});
+          FB.api('/me', {fields:"first_name, last_name, email"}, function(response) {
+            $("#facebook-id").val(response.id);
+            $("#first-name").val(response.first_name);
+            $("#last-name").val(response.last_name);
+            $("#email").val(response.email);
+            $(".create-account").click();
+          });
         } else {                                 
           document.getElementById('status').innerHTML = 'Please log ' +
             'into this webpage.';
@@ -77,3 +85,4 @@
     </script>
   </tail>
 </div>
+

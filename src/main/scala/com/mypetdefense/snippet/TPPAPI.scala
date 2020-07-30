@@ -194,7 +194,7 @@ object TPPApi extends RestHelper with Loggable {
 
             updatedParent.map { user =>
               val mpdSubscription = Subscription.createNewSubscription(
-                user,
+                Full(user),
                 subscriptionId,
                 new Date(),
                 plusOneDayDate,

@@ -45,3 +45,11 @@ $(document).ready ->
   $("input, textarea").on "focus", (event) ->
     $target = $(event.target)
     $target.removeClass("error").parent().find(".validation-error").remove()
+
+  $("body").on "click", '.dog-sizes li', (event) ->
+    dogSize = $(event.target).closest('li')
+    
+    if !dogSize.hasClass('selected')
+      $('.dog-sizes li').removeClass('selected')
+      dogSize.addClass('selected')
+      dogSize.find('input').click()

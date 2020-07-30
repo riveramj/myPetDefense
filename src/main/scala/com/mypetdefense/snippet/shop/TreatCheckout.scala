@@ -1,32 +1,20 @@
-package com.mypetdefense.snippet
+package com.mypetdefense.snippet.shop
 
-import net.liftweb._
-  import http.SHtml._
-  import util._
-    import Helpers._
-  import http._
-  import common._
-  import sitemap.Menu
-  import js._
-      import JsCmds._
-
-import com.mypetdefense.service._
-    import ValidationService._
-    import PetFlowChoices._
-
-import com.mypetdefense._
-  import model._
-  import snippet.admin.ShipmentDashboard
-  import snippet.agency.AgencyOverview
-import com.mypetdefense.util.{SecurityContext, ClearNodesIf}
 import com.mypetdefense.actor._
-
-import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription}
+import com.mypetdefense.model._
+import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.service._
+import com.mypetdefense.snippet.MyPetDefenseEvent
+import com.mypetdefense.snippet.signup.Success
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.util.Helpers._
 
 object TreatCheckout extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
-  import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Treat Checkout") / "treat-checkout"
 }
@@ -34,7 +22,6 @@ object TreatCheckout extends Loggable {
 case object UseNewCard extends MyPetDefenseEvent("use-new-card")
 
 class TreatCheckout extends Loggable {
-  import TreatCheckout._
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 

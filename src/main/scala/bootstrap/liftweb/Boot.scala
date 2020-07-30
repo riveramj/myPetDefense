@@ -49,6 +49,8 @@ class Boot {
       Event,
       ShipmentLineItem,
       Subscription,
+      SubscriptionBox,
+      SubscriptionItem,
       Agency,
       Coupon,
       Price,
@@ -75,7 +77,7 @@ class Boot {
     )
 
     //DataLoader.loadProducts
-    //DataLoader.loadAdmin
+    DataLoader.loadAdmin
     //DataLoader.createProductAccessKey
     //DataLoader.createProducts
     //DataLoader.createPackaging

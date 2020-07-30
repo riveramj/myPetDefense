@@ -1,18 +1,14 @@
-package com.mypetdefense.snippet
+package com.mypetdefense.snippet.signup
 
-import net.liftweb.sitemap.Menu
-import net.liftweb.util.Helpers._
+import com.mypetdefense.model.AnimalType
+import com.mypetdefense.service._
+import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.http._
-import net.liftweb.mapper.By
-
-import com.mypetdefense.service._
-import com.mypetdefense.model.{AnimalType, AnimalSize, Product}
-import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.util.Helpers._
 
 object PetChoice extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
 
   val menu = Menu.i("Pet Choice") / "pet-choice"
 }
@@ -31,7 +27,7 @@ class PetChoice extends Loggable {
       if (petId.is.isEmpty)
         petId(Full(generateLongId))
 
-      S.redirectTo(PetDetails.menu.loc.calcDefaultHref)
+      S.redirectTo(DogDetails.menu.loc.calcDefaultHref)
     }
 
     def catFlow = {
@@ -40,7 +36,7 @@ class PetChoice extends Loggable {
       if (petId.is.isEmpty)
         petId(Full(generateLongId))
 
-      S.redirectTo(CatSize.menu.loc.calcDefaultHref)
+      S.redirectTo(CatSignup.menu.loc.calcDefaultHref)
     }
 
     "#dog" #> SHtml.submit("Select", dogFlow _) &
