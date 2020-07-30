@@ -1,11 +1,11 @@
 package com.mypetdefense.model
 
 import net.liftweb._
-  import mapper._
-
+import mapper._
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.common.Box
 
 class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMany[Long, Subscription] {
   def getSingleton = Subscription
@@ -50,7 +50,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   }
 
   def createNewSubscription(
-    user: User,
+    user: Box[User],
     stripeSubscriptionId: String,
     startDate: Date,
     nextShipDate: Date,

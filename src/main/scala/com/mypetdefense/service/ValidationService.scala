@@ -30,7 +30,40 @@ object ValidationService extends Loggable {
   def checkDuplicateEmail(email: String, errorId: String): Box[ValidationError] = {
     if (email.nonEmpty) {
       User.find(By(User.email, email)) match {
-        case Full(user)  => Full(ValidationError(errorId, S ? "Email already exists."))
+        case Full(_)  => Full(ValidationError(errorId, S ? "Email already exists."))
+        case _ => Empty
+      }
+    } else {
+      Empty
+    }
+  }
+
+  def checkDuplicateEmailWithSubscription(email: String, errorId: String): Box[ValidationError] = {
+    if (email.nonEmpty) {
+      User.find(By(User.email, email)).flatMap(_.subscription.obj) match {
+        case Full(_) => Full(ValidationError(errorId, S ? "Email already exists."))
+        case _ => Empty
+      }
+    } else {
+      Empty
+    }
+  }
+
+  def checkDuplicateFacebookId(facebookId: String, errorId: String): Box[ValidationError] = {
+    if (facebookId.nonEmpty) {
+      User.find(By(User.facebookId, facebookId)) match {
+        case Full(_)  => Full(ValidationError(errorId, S ? "Facebook account already exists."))
+        case _ => Empty
+      }
+    } else {
+      Empty
+    }
+  }
+
+  def checkDuplicateFacebookIdWithSubscription(facebookId: String, errorId: String): Box[ValidationError] = {
+    if (facebookId.nonEmpty) {
+      User.find(By(User.facebookId, facebookId)).flatMap(_.subscription.obj) match {
+        case Full(_)  => Full(ValidationError(errorId, S ? "Facebook account already exists."))
         case _ => Empty
       }
     } else {
@@ -81,10 +114,25 @@ object ValidationService extends Loggable {
     validNumber(number, errorId)
   }
 
-  def checkEmail(email: String, errorId: String): Box[ValidationError] = {
-    checkDuplicateEmail(email, errorId) or
+  def checkEmail(email: String, errorId: String, signup: Boolean = false): Box[ValidationError] = {
+    {
+      if (signup)
+        checkDuplicateEmailWithSubscription(email, errorId)
+      else
+        checkDuplicateEmail(email, errorId)
+    } or
     checkEmpty(email, errorId) or
     validEmailFormat(email, errorId)
+  }
+
+  def checkFacebookId(facebookId: String, errorId: String, signup: Boolean = false): Box[ValidationError] = {
+    {
+      if (signup)
+        checkDuplicateFacebookIdWithSubscription(facebookId, errorId)
+      else
+        checkDuplicateFacebookId(facebookId, errorId)
+    } or
+      checkEmpty(facebookId, errorId)
   }
 
   def checkCouponValue(value: String, errorId: String) = {

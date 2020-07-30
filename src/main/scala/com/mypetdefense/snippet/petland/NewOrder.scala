@@ -216,7 +216,7 @@ class NewOrder extends Loggable {
       }).flatMap(identity).getOrElse("")
 
     Subscription.createNewSubscription(
-      newParent,
+      Full(newParent),
       subscriptionId,
       new Date(),
       new Date(),

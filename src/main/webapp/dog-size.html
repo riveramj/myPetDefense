@@ -1,42 +1,28 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
-  <div class="flow-progress-bar">
-    <ul>
-      <li class="complete">
-        <a href="/pet-choice">
-          <dl class="step-container">
-            <dt class="step-name">1. Pet</dt>
-            <dd class="step-choice">Dog</dd>
-          </dl>
-        </a>
-      </li>
-      <li>
-        2. Size
-        <div class="arrow-up"></div>
-      </li>
-      <li>
-        <a href="/pet-details">
-          <div class="pet-count" data-lift="NavBar.petCount">0</div>
-          <div>3. Review</div>
-        </a>
-      </li>
-      <li>
-        <div>4. Checkout</div>
-      </li>
-    </ul>
-  </div>
-  <div class="flow-step complete">
-    <a href="/pet-choice">
-      <div class="step-container">
-        <div class="step-name">1. Pet</div>
-        <div class="step-choice">Dog</div>
-      </div>
-    </a>
-  </div>
-  <div class="flow-step unanswered">
-    <div class="step-name">2. Size</div>
-    <div class="arrow-up"></div>
-  </div>
   <form class="current-step" data-lift="DogSize">
+    <div>
+      <label>
+        Name
+        <input type="text" id="pet-name">
+      </label>
+    </div>
+    <div>
+      Birthday
+      <label>
+        Month
+        <select id='pet-month'>
+          <option selected value=''>Select Month</option>
+          <option value='1'>Janaury</option>
+        </select> 
+      </label>
+      <label>
+        Year
+        <select id='pet-year'>
+          <option selected value=''>Select Month</option>
+          <option value='2020'>2020</option>
+        </select>
+      </label>
+    </div>
     <div class="header-container">
       <h1 class="step-header">Choose A Size Range</h1>
       <h2 class="step-question">
@@ -98,15 +84,6 @@
       <button class="select-choice" id="xlarge-dog">Select</button>
     </div>
   </form>
-  <div class="flow-step unanswered">
-    <a href="/cart-details">
-      <div class="step-name">3. Review<span class="pet-count" data-lift="NavBar.petCount">0</span></div>
-    </a>
-  </div>
-  <div class="flow-step unanswered">
-    <div class="step-name">4. Checkout</div>
-  </div>
-
   <head_merge>
    <link rel="stylesheet" data-lift="style-bundle?name=pet-size">
   </head_merge>

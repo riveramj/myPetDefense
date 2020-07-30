@@ -1,32 +1,22 @@
-package com.mypetdefense.snippet
+package com.mypetdefense.snippet.customer
 
-import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml._
-import net.liftweb.util._
-  import Helpers._
-import net.liftweb.common._
-import net.liftweb.util.ClearClearable
-import net.liftweb.http._
-  import js.JsCmds._
-import net.liftweb.mapper.By
-
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.time.{LocalDate, ZoneId}
-
-import com.mypetdefense.model._
-import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
-import com.mypetdefense.util.ClearNodesIf
-import com.mypetdefense.util.SecurityContext._
+import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
+import com.mypetdefense.util.SecurityContext._
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
 
 
 object PetsAndProducts extends Loggable {
-  import net.liftweb.sitemap._
-    import Loc._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu = Menu.i("Pets and Products") / "pets-products" >>
     loggedIn >>

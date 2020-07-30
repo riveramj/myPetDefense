@@ -1,26 +1,20 @@
-package com.mypetdefense.snippet
-
-import net.liftweb._
-  import util.Helpers._
-  import http._
-  import common._
-  import sitemap.Menu
-  import js._
-      import JsCmds._
-
-import com.mypetdefense.service._
-    import ValidationService._
+package com.mypetdefense.snippet.login
 
 import com.mypetdefense._
-  import model.{User, UserType}
-  import snippet.admin.ShipmentDashboard
-  import snippet.agency.AgencyOverview
+import com.mypetdefense.model.User
+import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.service._
 import com.mypetdefense.util.SecurityContext
+import net.liftweb._
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js._
+import net.liftweb.util.Helpers._
 
 object Signup extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
-  import com.mypetdefense.util.Paths._
+  import Loc._
 
   val menu = 
     Menu.param[User](
@@ -36,7 +30,6 @@ object Signup extends Loggable {
 }
 
 class Signup extends Loggable {
-  import Signup._
 
   val newUser = Signup.menu.currentValue
   val email = newUser.map(_.email.get).openOr("")

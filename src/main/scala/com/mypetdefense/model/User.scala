@@ -71,6 +71,27 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     )
   }
 
+  def upsertUser(
+                     firstName: String,
+                     lastName: String,
+                     email: String,
+                     password: String,
+                     facebookId: String,
+                     userType: UserType.Value
+                   ) = {
+    val user = (User.find(By(User.email, email)) match {
+      case Full(user) => user
+      case _ => User.create.userId(generateLongId).productSalesKey(createAccessKey)
+    })
+      .firstName(TitleCase(firstName))
+      .lastName(TitleCase(lastName))
+      .email(email)
+      .facebookId(facebookId)
+      .userType(userType)
+
+    setUserPassword(user, password)
+  }
+
   def createNewUser(
     firstName: String,
     lastName: String,
@@ -109,14 +130,13 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     val salt = getSalt
     val hashedPassword = hashPassword(password, salt)
 
-    if (password != "") {
+    (if (password != "") {
       user
         .password(hashedPassword)
         .salt(salt)
-        .saveMe
     } else {
-      user.accessKey(createAccessKey).saveMe
-    }
+      user.accessKey(createAccessKey)
+    }).saveMe
   }
 
   def createNewPendingUser(

@@ -263,7 +263,7 @@ object DataLoader extends Loggable {
         "Mike",
         "Rivera",
         "",
-        "rivera.mj@gmail.com",
+        "riveramj@gmail.com",
         "password",
         "(404) 409-0724",
         None,
