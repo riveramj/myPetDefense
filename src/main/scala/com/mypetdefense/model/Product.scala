@@ -33,6 +33,7 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   def hipAndJoint = Product.find(By(Product.name, "Hip & Joint Chews"))
   def calming = Product.find(By(Product.name, "Calming Chews"))
   def multiVitamin = Product.find(By(Product.name, "Multi-Vitamin Chews"))
+  def dentalPowder = Product.find(By(Product.name, "Dental Powder"))
 }
 
 object Product extends Product with LongKeyedMetaMapper[Product]

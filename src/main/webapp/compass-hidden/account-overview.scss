@@ -122,3 +122,28 @@ li.order-total {
   font-weight: $semibold;
   line-height: 31px;
 }
+
+.upgrade {
+  line-height: 21px;
+}
+
+.yes-upgrade, .no-upgrade {
+  border: solid 1px #cecece;
+  border-radius: 5px;
+  padding: 10px 15px;
+  background-color: white;
+  font-size: 17px
+}
+
+.no-upgrade {
+  margin-right: 10px;
+}
+
+.yes-upgrade {
+  background-color: #45ADA9;
+  color: white;
+}
+
+.upgrade-actions {
+  text-align: center;
+}

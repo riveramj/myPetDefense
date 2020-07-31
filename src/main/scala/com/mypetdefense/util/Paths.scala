@@ -149,6 +149,7 @@ object Paths {
     Checkout.menu,
     Success.menu,
     AccountOverview.menu,
+    UpgradeAccount.menu,
     ShippingBilling.menu,
     ShippingBilling.menuBilling,
     PetsAndProducts.menu,

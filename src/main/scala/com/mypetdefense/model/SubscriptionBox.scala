@@ -23,6 +23,9 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
     override def defaultValue = new Date()
   }
 
+  def refresh = SubscriptionBox.find(By(SubscriptionBox.boxId, boxId.get))
+
+
   def possiblePrice(subscriptionBox: SubscriptionBox) =
     if(subscriptionBox.subscriptionItems.toList.nonEmpty)
       subscriptionBox.pet.obj.map(basePrice).openOr(0D)
