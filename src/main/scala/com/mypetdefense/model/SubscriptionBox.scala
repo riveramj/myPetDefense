@@ -23,6 +23,17 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
     override def defaultValue = new Date()
   }
 
+  def possiblePrice(subscriptionBox: SubscriptionBox) =
+    if(subscriptionBox.subscriptionItems.toList.nonEmpty)
+      subscriptionBox.pet.obj.map(basePrice).openOr(0D)
+    else
+      0D
+
+  def basePrice(pet: Pet) = pet.size.get match {
+    case AnimalSize.DogSmallZo | AnimalSize.DogMediumZo => 24.99
+    case AnimalSize.DogLargeZo | AnimalSize.DogXLargeZo => 27.99
+  }
+
   def createNewBox(subscription: Subscription, pet: Pet) = {
     val fleaTick = pet.size.get match {
       case AnimalSize.DogSmallZo => FleaTick.zoGuardSmallDog
@@ -31,17 +42,12 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
       case AnimalSize.DogXLargeZo => FleaTick.zoGuardXLargeDog
     }
 
-    val basePrice = pet.size.get match {
-      case AnimalSize.DogSmallZo | AnimalSize.DogMediumZo => 24.99
-      case AnimalSize.DogLargeZo | AnimalSize.DogXLargeZo => 27.99
-    }
-
     SubscriptionBox.create
       .boxId(generateLongId)
       .subscription(subscription)
       .pet(pet)
       .fleaTick(fleaTick)
-      .basePrice(basePrice)
+      .basePrice(basePrice(pet))
       .saveMe()
   }
 }

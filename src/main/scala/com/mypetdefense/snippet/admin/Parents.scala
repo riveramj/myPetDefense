@@ -357,32 +357,35 @@ class Parents extends Loggable {
       Noop
     }
 
-    def updatePetInfo(newInfo: String, infoType: String, pet: Pet, product: Box[FleaTick] = Empty) = {
+    def updatePetInfo(newInfo: String, infoType: String, pet: Box[Pet], subscriptionBox: Box[SubscriptionBox] = Empty,  product: Box[FleaTick] = Empty) = {
 
       infoType match {
-        case "name" => pet.name(newInfo).saveMe
-        case "breed" => pet.breed(newInfo).saveMe
+        case "name" => pet.map(_.name(newInfo).saveMe)
+        case "breed" => pet.map(_.breed(newInfo).saveMe)
         case "birthday" =>
           val possibleBirthday = ParentService.parseWhelpDate(newInfo)
-          pet.birthday(possibleBirthday.openOr(null)).saveMe
+          pet.map(_.birthday(possibleBirthday.openOr(null)).saveMe)
+        case "product" => product.map { prod =>
+          subscriptionBox.map(_.fleaTick(prod).saveMe())
+        }
         case _ => pet
       }
       
       Noop
     }
 
-    def changePetProduct(
-      petType: AnimalType.Value,
-      currentProduct: Box[FleaTick],
-      pet: Pet
-    ) = {
-      val products = FleaTick.findAll(By(FleaTick.animalType, petType))
+    def changePetProduct(subscriptionBox: Box[SubscriptionBox]) = {
+      val pet = subscriptionBox.flatMap(_.pet.obj)
+      val petType = pet.map(_.animalType.get)
+      val currentProduct = subscriptionBox.flatMap(_.fleaTick.obj)
+
+      val products = petType.map(at =>FleaTick.findAll(By(FleaTick.animalType, at))).openOr(Nil)
 
       SHtml.ajaxSelectObj(
         products.map(product => (product, product.getNameAndSize)),
         currentProduct,
         (possibleProduct: FleaTick) =>
-          updatePetInfo("", "product", pet, Full(possibleProduct))
+          updatePetInfo("", "product", pet, subscriptionBox, Full(possibleProduct))
       )
     }
 
@@ -406,14 +409,18 @@ class Parents extends Loggable {
           By(Pet.status, Status.Active)
         )
 
+
+
         ".pet" #> pets.map { pet =>
           val birthday = tryo(birthdayFormat.format(pet.birthday.get)).map(_.toString).openOr("")
           var nextGrowthDelay = tryo(pet.nextGrowthDelay.get.toString).openOr("")
+          val subscriptionBox = SubscriptionBox.find(By(SubscriptionBox.pet, pet))
 
-          ".pet-name" #> SHtml.ajaxText(pet.name.get, possiblePetName => updatePetInfo(possiblePetName, "name", pet)) &
-          ".pet-breed" #> SHtml.ajaxText(pet.breed.get, possibleBreed => updatePetInfo(possibleBreed, "breed", pet)) &
-          ".pet-birthday *" #> SHtml.ajaxText(birthday, possibleBirthday => updatePetInfo(possibleBirthday, "birthday", pet)) &
+          ".pet-name" #> SHtml.ajaxText(pet.name.get, possiblePetName => updatePetInfo(possiblePetName, "name", Full(pet))) &
+          ".pet-breed" #> SHtml.ajaxText(pet.breed.get, possibleBreed => updatePetInfo(possibleBreed, "breed", Full(pet))) &
+          ".pet-birthday *" #> SHtml.ajaxText(birthday, possibleBirthday => updatePetInfo(possibleBirthday, "birthday", Full(pet))) &
           ".pet-type *" #> pet.animalType.toString &
+          ".pet-product *" #> changePetProduct(subscriptionBox) &
           ".pet-delay-growth input" #> ajaxText(s"$nextGrowthDelay months", possibleDelay => updateGrowthDelay(possibleDelay, pet)) &
           ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
             ajaxInvoke(deletePet(parent, pet, renderer) _)

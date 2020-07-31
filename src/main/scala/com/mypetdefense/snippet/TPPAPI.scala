@@ -88,12 +88,8 @@ object TPPApi extends RestHelper with Loggable {
     newUser: Boolean = true
   ) = {
     val parent = oldParent.refresh
-    val boxes = parent.flatMap(_.subscription.map(_.subscriptionBoxes.toList)).openOr(Nil)
     val pets = parent.map(_.pets.toList).openOr(Nil)
-    val products = boxes.flatMap(_.fleaTick.obj)
-    val rawPennyCount: Double = products.flatMap { product =>
-      Price.getPricesByCode(product, Price.currentTppPriceCode).map(_.price.get)
-    }.foldLeft(0D)(_+_)
+    val rawPennyCount: Double = pets.size * 12.99
 
     val pennyCount = tryo((rawPennyCount * 100).toInt).openOr(0)
 
@@ -112,10 +108,6 @@ object TPPApi extends RestHelper with Loggable {
 
     if (pennyCount == 0) {
       logger.error("Penny count is 0. This seems wrong.")
-
-      val prices = products.map { product => 
-        Price.getPricesByCode(product, Price.currentTppPriceCode).map(_.price.get) 
-      }
       
       val errorMsg = s"""
         Something went wrong with price association.
@@ -140,14 +132,14 @@ object TPPApi extends RestHelper with Loggable {
         ${rawPennyCount}
         ===============
 
-        Products:
+        Pets:
         ==============
-        ${products}
+        ${pets}
         ==============
 
         Prices
         ==============
-        ${prices}
+        ${12.99}
         ==============
       """
 
@@ -200,6 +192,14 @@ object TPPApi extends RestHelper with Loggable {
                 plusOneDayDate,
                 Price.currentTppPriceCode
               )
+
+              val refreshUser = user.subscription(mpdSubscription).saveMe()
+
+              refreshUser.pets.toList.map { pet =>
+                val box = SubscriptionBox.createNewBox(mpdSubscription, pet)
+
+                pet.box(box).saveMe()
+              }
 
               TaggedItem.createNewTaggedItem(
                 subscription = Full(mpdSubscription),

@@ -489,7 +489,16 @@ object ParentService extends Loggable {
   }
 
   def removePet(oldUser: Box[User], pet: Pet): Box[Pet] = {
-    oldUser.map(user => removePet(user, pet)).openOr(Empty)
+    oldUser.flatMap(user => removePet(user, pet))
+  }
+
+  def removePet(oldUser: Box[User], oldPet: Box[Pet]): Box[Pet] = {
+    {
+      for {
+        user <- oldUser
+        pet <- oldPet
+      } yield removePet(user, pet)
+    }.flatten
   }
 
   def removePet(oldUser: User, oldPet: Pet): Box[Pet] = {

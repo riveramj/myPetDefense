@@ -57,19 +57,11 @@ class Checkout extends Loggable {
   var couponCode = coupon.map(_.couponCode.get).openOr("")
 
   val pets = completedPets.is
-  println(pets.values.map(_.size))
-  println(AnimalSize.DogSmallZo)
-  println(AnimalSize.DogXLargeZo)
-  println("AnimalSize.DogXLargeZo")
   val petCount = pets.size
 
   val smMedPets = pets.values.count { pet =>
     pet.size.get != AnimalSize.DogLargeZo && pet.size.get != AnimalSize.DogXLargeZo
   }
-
-  println("smMedPets")
-  println(smMedPets)
-  println("smMedPets")
 
   val lgXlPets = petCount - smMedPets
   
@@ -238,7 +230,10 @@ class Checkout extends Loggable {
       priceCode.is.openOr(Price.defaultPriceCode)
     )
 
-    pets.map(SubscriptionBox.createNewBox(mpdSubscription, _))
+    val userWithSubscription = user.map(_.subscription(mpdSubscription).saveMe())
+
+    val boxes = pets.map(SubscriptionBox.createNewBox(mpdSubscription, _))
+    boxes.map(SubscriptionItem.createFirstBox)
 
     TaggedItem.createNewTaggedItem(
       subscription = Full(mpdSubscription),
@@ -246,12 +241,12 @@ class Checkout extends Loggable {
     )
 
     if (Props.mode == Props.RunModes.Production) {
-      EmailActor ! NewSaleEmail(user, petCount, coupon.map(_.couponCode.get).openOr(""))
+      EmailActor ! NewSaleEmail(userWithSubscription, petCount, coupon.map(_.couponCode.get).openOr(""))
     }
 
-    EmailActor ! SendWelcomeEmail(user)
-    
-    user
+    EmailActor ! SendWelcomeEmail(userWithSubscription)
+
+    userWithSubscription
   }
 
   def render = {

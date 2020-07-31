@@ -368,22 +368,13 @@ object DataLoader extends Loggable {
   }
 
   def createProducts = {
-    if (Product.findAll().isEmpty) {
-      Product.createNewProduct("Duck Jerky Multivitamin & Immune Maintenance", 14.99, 8, "duck12345")
-      Product.createNewProduct("Lamb Jerky Digestive Health & Probiotic", 14.99, 8, "lamb12345")
-      Product.createNewProduct("Beef Jerky Hip & Joint Formula", 14.99, 8, "beef12345")
+    if (Product.hipAndJoint.isEmpty) {
+      Product.createNewProduct("Hip & Joint Chews",  "hipJointChews")
+      Product.createNewProduct("Calming Chews", "calmingChews")
+      Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews")
     }
   }
-
-  def createFruitVeg = {
-    Product.createNewProduct("Mind Your Peas Natural Dog Treats", 12.99, 3, "fruit-small12345")
-  }
-
-  def replaceChickenTreat = {
-    Product.find(By(Product.name, "Chicken Jerky Skin & Coat Formula")).map(_.delete_!)
-    Product.createNewProduct("Salmon Jerky Skin & Coat Formula", 14.99, 8, "salmon12345")
-  }
-
+  
   def createPackaging = {
     if (Packaging.findAll().isEmpty) {
       Packaging.createNewPackaging(
