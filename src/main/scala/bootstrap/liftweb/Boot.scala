@@ -93,8 +93,8 @@ class Boot {
     //DataLoader.createOneSizeCat
     //DataLoader.loadPetlandInsert
     //DataLoader.removeFrontlineProduct
-    DataLoader.createProducts
-    DataLoader.createBasicExistingBoxes
+    //DataLoader.createProducts
+    //DataLoader.createBasicExistingBoxes
     //DataLoader.replaceChickenTreat
     //DataLoader.createNewPetlandStores
     //DataLoader.createPuppySpot
