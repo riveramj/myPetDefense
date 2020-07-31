@@ -17,13 +17,13 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     override def dbIndexed_? = true
   }
   object user extends MappedLongForeignKey(this, User)
+  object box extends MappedLongForeignKey(this, SubscriptionBox)
   object name extends MappedString(this, 100)
   object breed extends MappedString(this, 100)
   object animalType extends MappedEnum(this, AnimalType)
   object size extends MappedEnum(this, AnimalSize)
   object adultSize extends MappedEnum(this, AnimalSize)
   object birthday extends MappedDateTime(this)
-  object product extends MappedLongForeignKey(this, Product)
   object nextGrowthDelay extends MappedInt(this)
   object sentDogTag extends MappedBoolean(this) {
     override def defaultValue = false
@@ -42,7 +42,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value,
-    product: Product,
+    product: FleaTick,
     whelpDate: Box[Date] = Empty,
     breed: String = ""
   ) = {
@@ -52,7 +52,6 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     .name(TitleCase(name))
     .animalType(animalType)
     .size(size)
-    .product(product)
     .breed(breed)
     .birthday(whelpDate.openOr(null))
     .saveMe
@@ -61,7 +60,7 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   def createNewPet(
     user: User,
     name: String,
-    product: Product,
+    product: FleaTick,
     breed: String,
     whelpDate: Box[Date]
   ): Pet = {

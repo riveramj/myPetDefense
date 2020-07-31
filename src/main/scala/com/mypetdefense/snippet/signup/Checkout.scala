@@ -1,46 +1,35 @@
-package com.mypetdefense.snippet
-
-import net.liftweb.sitemap.Menu
-import net.liftweb._
-  import http.SHtml._
-  import util._
-  import util.Helpers._
-  import common._
-  import util.ClearClearable
-  import http._
-  import mapper.{By, NullRef}
-  import js._
-      import JsCmds._
-
-import com.mypetdefense.service._
-  import ValidationService._
-  import PetFlowChoices._
-
-import com.mypetdefense.util.ClearNodesIf
-import com.mypetdefense.model._
-import com.mypetdefense.actor._
+package com.mypetdefense.snippet.signup
 
 import java.util.Date
-import java.time.MonthDay
 
-import scala.util.{Failure => TryFail, Success => TrySuccess, _}
-
-import scala.concurrent.Await
-import scala.concurrent.duration._
-
-import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon}
-
-import dispatch._, Defaults._
+import com.mypetdefense.actor._
+import com.mypetdefense.model._
+import com.mypetdefense.service.PetFlowChoices._
+import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.service._
+import com.mypetdefense.snippet.MyPetDefenseEvent
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import me.frmr.stripe.{Customer, StripeExecutor}
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
 
 import scala.collection.mutable.LinkedHashMap
+import scala.concurrent.Await
+import scala.concurrent.duration._
+import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
 object Checkout extends Loggable {
-  import net.liftweb.sitemap._
-    import Loc._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu = Menu.i("Checkout") / "checkout" >>
-    completedPetOrFlow
+    completedPet >>
+    createdAccount
 }
 
 case class PromoCodeMessage(status: String) extends MyPetDefenseEvent("promotion-code-message")
@@ -49,11 +38,11 @@ class Checkout extends Loggable {
   val stripeSecretKey = Props.get("secret.key") openOr ""
   implicit val e = new StripeExecutor(stripeSecretKey)
 
-  var email = ""
-  var password = ""
-  
-  var firstName = ""
-  var lastName = ""
+  val currentUser = SecurityContext.currentUser
+  val email = currentUser.map(_.email.get).openOr("")
+
+  var firstName = currentUser.map(_.firstName.get).getOrElse("")
+  var lastName = currentUser.map(_.lastName.get).getOrElse("")
   var street1 = ""
   var street2 = ""
   var city = ""
@@ -64,18 +53,43 @@ class Checkout extends Loggable {
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
 
   var stripeToken = ""
-  var coupon: Box[Coupon] = PetFlowChoices.coupon
+  var coupon: Box[Coupon] = Empty
   var couponCode = coupon.map(_.couponCode.get).openOr("")
 
   val pets = completedPets.is
   val petCount = pets.size
+
+  val smMedPets = pets.values.count { pet =>
+    pet.size.get != AnimalSize.DogLargeZo && pet.size.get != AnimalSize.DogXLargeZo
+  }
+
+  val lgXlPets = petCount - smMedPets
   
-  val subtotal = PetFlowChoices.subtotal.is.openOr(0D)
-  val discount = PetFlowChoices.discount.is.openOr(0D)
-  val promotionAmount = coupon.map(_.dollarOff.get).openOr(0)
-  val subtotalWithDiscount = subtotal - discount - promotionAmount
+  val subtotal = (smMedPets * 24.99) + (lgXlPets * 27.99)
+  val discount = petCount match {
+    case 0 | 1 => 0
+    case _ => subtotal * 0.1
+  }
+  val promotionAmount = coupon.map(_.percentOff.get).openOr(0).toDouble
+  val subtotalWithDiscount = subtotal - discount - (subtotal * (promotionAmount/100))
 
   val pennyCount = (subtotal * 100).toInt
+
+  def validateCouponCode() = {
+    val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
+
+    if (possibleCoupon.isEmpty) {
+      PromoCodeMessage("error")
+    } else {
+      coupon = possibleCoupon
+      PetFlowChoices.coupon(coupon)
+
+      (
+        PromoCodeMessage("success") &
+        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+      )
+    }
+  }
 
   def calculateTax(possibleState: String, possibleZip: String) = {
     state = possibleState
@@ -96,10 +110,8 @@ class Checkout extends Loggable {
 
   def signup() = {
     val validateFields = List(
-        checkEmail(email, "#email"),
         checkEmpty(firstName, "#first-name"),
         checkEmpty(lastName, "#last-name"),
-        checkEmpty(password, "#password"),
         checkEmpty(street1, "#street-1"),
         checkEmpty(city, "#city"),
         checkEmpty(state, "#state"),
@@ -109,11 +121,8 @@ class Checkout extends Loggable {
     if(validateFields.isEmpty) {
       (coupon, petCount) match {
         case (Full(_), _) =>
-        case (Empty, 1) => 
         case (Empty, 2) => 
-          coupon = Coupon.find(By(Coupon.couponCode, "twopets"))
-        case (Empty, manyPets) if manyPets > 2 => 
-          coupon = Coupon.find(By(Coupon.couponCode, "threepets"))
+          coupon = Coupon.find(By(Coupon.couponCode, "multiPet"))
         case (_, _) => 
       }
 
@@ -171,30 +180,30 @@ class Checkout extends Loggable {
     }
   }
 
-  def createNewPets(user: User) = {
-    pets.map { case (petId, pet) =>
-      Pet.createNewPet(pet, user)
+  def createNewPets(user: Box[User]) = {
+    for {
+      usr <- user.toList
+      pet <- pets.values
+    } yield {
+      Pet.createNewPet(pet, usr)
     }
   }
 
   def newUserSetup(customer: Customer) = {
     val stripeId = customer.id
 
-    val user = User.createNewUser(
-      firstName,
-      lastName,
-      stripeId,
-      email,
-      password,
-      "",
-      coupon,
-      coupon.flatMap(_.agency.obj),
-      None,
-      UserType.Parent
-    )
+    val user = currentUser.map { oldUser =>
+      oldUser
+        .firstName(firstName)
+        .lastName(lastName)
+        .stripeId(stripeId)
+        .coupon(coupon)
+        .referer(coupon.flatMap(_.agency.obj))
+        .saveMe
+    }
 
     Address.createNewAddress(
-      Full(user),
+      user,
       street1,
       street2,
       city,
@@ -203,7 +212,7 @@ class Checkout extends Loggable {
       AddressType.Shipping
     )
     
-    createNewPets(user)
+    val pets = createNewPets(user)
 
     val subscriptionId = (
       for {
@@ -211,7 +220,7 @@ class Checkout extends Loggable {
         subscription <- rawSubscriptions.data.headOption
       } yield {
         subscription.id
-      }).flatMap(identity).getOrElse("")
+      }).flatten.getOrElse("")
 
     val mpdSubscription = Subscription.createNewSubscription(
       user,
@@ -221,18 +230,23 @@ class Checkout extends Loggable {
       priceCode.is.openOr(Price.defaultPriceCode)
     )
 
+    val userWithSubscription = user.map(_.subscription(mpdSubscription).saveMe())
+
+    val boxes = pets.map(SubscriptionBox.createNewBox(mpdSubscription, _))
+    boxes.map(SubscriptionItem.createFirstBox)
+
     TaggedItem.createNewTaggedItem(
       subscription = Full(mpdSubscription),
       tag = Tag.useBox
     )
 
     if (Props.mode == Props.RunModes.Production) {
-      EmailActor ! NewSaleEmail(user, petCount, coupon.map(_.couponCode.get).openOr(""))
+      EmailActor ! NewSaleEmail(userWithSubscription, petCount, coupon.map(_.couponCode.get).openOr(""))
     }
 
-    EmailActor ! SendWelcomeEmail(user)
-    
-    user
+    EmailActor ! SendWelcomeEmail(userWithSubscription)
+
+    userWithSubscription
   }
 
   def render = {
@@ -268,6 +282,13 @@ class Checkout extends Loggable {
       }
     }
 
+    val successCoupon = {
+      if (!coupon.isEmpty)
+        "promo-success"
+      else
+        ""
+    }
+
     SHtml.makeFormsAjax andThen
     orderSummary &
     "#first-name" #> text(firstName, firstName = _) &
@@ -277,10 +298,12 @@ class Checkout extends Loggable {
     "#city" #> ajaxText(city, city = _) &
     "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
     "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
-    "#email" #> text(email, userEmail => email = userEmail.trim) &
-    "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup) &
-    ".agreement" #> ClearNodesIf(subtotalWithDiscount == 0)
+    ".agreement" #> ClearNodesIf(subtotalWithDiscount == 0) &
+    ".promotion-info [class+]" #> successCoupon &
+    "#promo-code" #> ajaxText(couponCode, couponCode = _) &
+    ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() =>
+      validateCouponCode())
   }
 }

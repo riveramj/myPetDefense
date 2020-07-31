@@ -1,25 +1,14 @@
-package com.mypetdefense.snippet
-
-import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml._
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.util.ClearNodes
-import net.liftweb.http._
-import net.liftweb.mapper.{By, NullRef}
+package com.mypetdefense.snippet.signup
 
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.TreatsFlow
-
 import com.mypetdefense.util.ClearNodesIf
-import com.mypetdefense.model._
-
-import scala.collection.mutable.LinkedHashMap
+import net.liftweb.common._
+import net.liftweb.util.ClearNodes
+import net.liftweb.util.Helpers._
 
 object Success extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
-  import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Success") / "success"
 }

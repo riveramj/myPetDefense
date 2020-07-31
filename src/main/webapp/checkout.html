@@ -17,26 +17,13 @@
       </ul>
     </nav>
   </div>
-  <form class="current-step" data-lift="Checkout.render">
+  <form class="current-step" data-lift="signup.Checkout.render">
     <h1 class="step-header">Checkout</h1>
     <h2 class="step-question">
       Please take a moment to fill out the following information.
     </h2>
     <input type="hidden" id="stripe-token">
     <div id="left-column">
-     <fieldset class="account-info">
-        <legend>Account Info</legend>
-        <div>
-          <label>
-            <div><span class="field-label">Email</span></div>
-            <input id="email" type="text">
-          </label>
-          <label>
-            <div><span class="field-label">Password</span></div>
-            <input id="password" class="inspectletIgnore" type="password">
-          </label>
-        </div>
-     </fieldset>
      <fieldset class="shipping-info">
        <legend>Shipping Info</legend>
        <div>
@@ -68,7 +55,25 @@
        </div>
       </fieldset>
     </div>
+
     <div id="right-column">
+      <fieldset class="promo-container promotion-info">
+        <legend>Promotion Code</legend>
+        <div>
+        <label>
+          <div>
+            <span class="field-label">Enter Code</span>
+            <span id="promo-error" class="hidden">Invalid. Please try another code.</span>
+            <span id="promo-success" class="hidden">Promotion applied.</span>
+          </div>
+          <div class="apply-promo-container">
+            <input size="20" id="promo-code" type="text">
+            <button class="apply-promo mobile" type="button">Apply</button>
+            <button class="apply-promo desktop" type="button">Apply Code</button>
+          </div>
+        </label>
+        </div>
+      </fieldset>
       <fieldset class="billing-info">
         <legend>Billing Info</legend>
         <div class="billing-container">
@@ -108,7 +113,7 @@
 
   <div id="need-help">Need help? Email us at <a href="mailto:help@mypetdefense.com?Subject=Help">help@mypetdefense.com</a></div>
   <div class="legal">
-    &copy;2018 My Pet Defense. All rights reserved. <a class="terms" href="/terms-of-service">Terms of Service</a>
+    &copy;2020 My Pet Defense. All rights reserved. <a class="terms" href="/terms-of-service">Terms of Service</a>
   </div>
 
   <tail>

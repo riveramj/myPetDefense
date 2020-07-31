@@ -44,11 +44,13 @@ class Boot {
       CancelledUser,
       Address,
       Pet,
-      Product,
+      FleaTick,
       Shipment,
       Event,
       ShipmentLineItem,
       Subscription,
+      SubscriptionBox,
+      SubscriptionItem,
       Agency,
       Coupon,
       Price,
@@ -65,11 +67,12 @@ class Boot {
       InventoryChangeAudit,
       Insert,
       InventoryItemPart,
-      Treat,
+      Product,
       TreatOrderLineItem,
       Packaging,
       TaggedItem,
       Tag,
+      AddOnProduct,
       AmazonOrder
     )
 
@@ -90,13 +93,15 @@ class Boot {
     //DataLoader.createOneSizeCat
     //DataLoader.loadPetlandInsert
     //DataLoader.removeFrontlineProduct
-    //DataLoader.createFruitVeg
+    DataLoader.createProducts
+    DataLoader.createBasicExistingBoxes
     //DataLoader.replaceChickenTreat
-    //DataLoader.createProducts
     //DataLoader.createNewPetlandStores
     //DataLoader.createPuppySpot
     //DataLoader.createBoxedTag
-    DataLoader.renameVegTreat
+    //DataLoader.calculateTax
+    //DataLoader.createBoxedTag
+    //DataLoader.renameVegTreat
     
     //ReportingService.getPetlandCustomersWithStats
 
