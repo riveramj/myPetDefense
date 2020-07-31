@@ -77,7 +77,7 @@ class Boot {
     )
 
     //DataLoader.loadProducts
-    DataLoader.loadAdmin
+    //DataLoader.loadAdmin
     //DataLoader.createProductAccessKey
     //DataLoader.createProducts
     //DataLoader.createPackaging
@@ -94,6 +94,7 @@ class Boot {
     //DataLoader.loadPetlandInsert
     //DataLoader.removeFrontlineProduct
     DataLoader.createProducts
+    DataLoader.createBasicExistingBoxes
     //DataLoader.replaceChickenTreat
     //DataLoader.createNewPetlandStores
     //DataLoader.createPuppySpot

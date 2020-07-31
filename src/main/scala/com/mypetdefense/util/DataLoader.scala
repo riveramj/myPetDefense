@@ -531,4 +531,18 @@ object DataLoader extends Loggable {
 
     fruitTreats.map(_.name("Mind Your Peas Natural Dog Treats").saveMe)
   }
+
+  def createBasicExistingBoxes = {
+    if (SubscriptionBox.findAll().isEmpty) {
+      for {
+        user <- User.findAll(By(User.userType, UserType.Parent), By(User.status,Status.Active))
+        subscription <- user.subscription.obj.toList if subscription.status.get == Status.Active
+        pet <- subscription.getPets
+        fleaTick <- FleaTick.find(By(FleaTick.size, pet.size.get), By(FleaTick.animalType, pet.animalType.get))
+      } yield {
+        val box = SubscriptionBox.createBasicBox(subscription, fleaTick, pet)
+        pet.box(box).saveMe()
+      }
+    }
+  }
 }

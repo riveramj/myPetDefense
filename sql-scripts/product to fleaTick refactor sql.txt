@@ -4,10 +4,14 @@ ALTER TABLE fleatick RENAME COLUMN productId TO fleaTickId;
 
 ALTER TABLE pet RENAME COLUMN product TO fleaTick;
 
+Alter Table pet drop column product;
+
 ALTER TABLE price RENAME COLUMN product TO fleaTick;
 
 ALTER TABLE review RENAME COLUMN product TO fleaTick;
 
 ALTER TABLE shipmentlineitem RENAME COLUMN product TO fleaTick;
+
+ALTER TABLE taggedItem RENAME COLUMN product TO fleaTick;
 
 ALTER TABLE taggedItem RENAME COLUMN product TO fleaTick;

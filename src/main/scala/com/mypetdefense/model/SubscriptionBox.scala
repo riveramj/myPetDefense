@@ -25,7 +25,6 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
 
   def refresh = SubscriptionBox.find(By(SubscriptionBox.boxId, boxId.get))
 
-
   def possiblePrice(subscriptionBox: SubscriptionBox) =
     if(subscriptionBox.subscriptionItems.toList.nonEmpty)
       subscriptionBox.pet.obj.map(basePrice).openOr(0D)
@@ -51,6 +50,15 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
       .pet(pet)
       .fleaTick(fleaTick)
       .basePrice(basePrice(pet))
+      .saveMe()
+  }
+
+  def createBasicBox(subscription: Subscription, fleaTick: FleaTick, pet: Pet) = {
+    SubscriptionBox.create
+      .boxId(generateLongId)
+      .subscription(subscription)
+      .pet(pet)
+      .fleaTick(fleaTick)
       .saveMe()
   }
 }
