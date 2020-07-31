@@ -372,6 +372,7 @@ object DataLoader extends Loggable {
       Product.createNewProduct("Hip & Joint Chews",  "hipJointChews")
       Product.createNewProduct("Calming Chews", "calmingChews")
       Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews")
+      Product.createNewProduct("Dental Powder", "dentalPowder")
     }
   }
   

@@ -1,0 +1,56 @@
+<div id="main" data-lift="surround?with=default-template;at=content"> 
+<div data-lift="customer.UpgradeAccount.render?eager_eval=true">
+  <div data-lift="embed?what=parent-logo-bar"></div>
+  <div id="page-body-container">
+    <div data-lift="embed?what=parent-nav-bar"></div>
+    <div class="account-section">
+      <h2>Upgrade Account</h2>
+
+      <dl class="account-block arrival-date">
+        <div class="already-upgraded">
+          Woa there! You've already upgraded. You're all set here.
+        </div>
+
+        <div class="upgrade">
+          <div>It's here! And we're giving you the first month free!</div>
+          <br>
+
+
+          <div>Your new box will include:</div>
+          <br>
+
+          <ul>
+            <li>The same great flea &amp; tick dose</li>
+            <li>Dental Powder for fresh breath</li>
+            <li>3 supplement packs to help your best friend live their best life</li>
+          </ul>
+          <br>
+          <br>
+          <div>Your first box will ship free for all pets!</div>
+          <br>
+
+          <div>Your subscription will continue at<br><br>
+            $24.99 for each small &amp; medium dog 
+            <br>
+            $27.99 for each large &amp; xlarge dog</div>
+          <br>
+
+          <form class="upgrade-actions">
+            <button class="no-upgrade upgrade">No thanks..</button>
+            <button class="yes-upgrade upgrade">Upgrade Me!</button>
+          </form>
+        </div>
+      </dl>
+    </div>
+  </div>
+
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=account-overview">
+  </head_merge>
+
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=profile"></script>
+  </tail>
+</div>
+
+

@@ -31,7 +31,7 @@ class SubscriptionItem extends LongKeyedMapper[SubscriptionItem] with IdPK {
   }
 
   def createFirstBox(subscriptionBox: SubscriptionBox) = {
-    val products = List(Product.hipAndJoint, Product.calming, Product.multiVitamin).flatten
+    val products = List(Product.hipAndJoint, Product.calming, Product.multiVitamin, Product.dentalPowder).flatten
     products.map { product =>
       SubscriptionItem.create
         .product(product)

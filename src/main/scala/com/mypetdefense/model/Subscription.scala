@@ -13,6 +13,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     override def dbIndexed_? = true
   }
   object user extends MappedLongForeignKey(this, User)
+  object promptedUpgrade extends MappedBoolean(this)
   object stripeSubscriptionId extends MappedString(this, 100)
   object startDate extends MappedDateTime(this)
   object renewalDate extends MappedDateTime(this)
