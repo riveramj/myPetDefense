@@ -3,15 +3,18 @@ package com.mypetdefense.util
 import net.liftweb.common._
 import net.liftweb.http.RedirectResponse
 import net.liftweb.sitemap._
-  import Loc._
+import Loc._
 import net.liftweb.util._
-  import Helpers._
+import Helpers._
 import net.liftweb.util.Props
 import net.liftweb.http._
-
 import com.mypetdefense.snippet._
 import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
+import com.mypetdefense.snippet.customer._
+import com.mypetdefense.snippet.login._
+import com.mypetdefense.snippet.shop.{TreatCheckout, TreatList}
+import com.mypetdefense.snippet.signup._
 
 object Paths {
 
@@ -48,8 +51,6 @@ object Paths {
     })
     RedirectResponse(Login.menu.loc.calcDefaultHref)
   }
-
-  def flowComplete_? = (!petChoice.is.isEmpty && !petSize.is.isEmpty && !productChoice.is.isEmpty)  
 
   val homePage = Menu.i("Home") / "index"
   val termsOfService = Menu.i("Terms of Service") / "terms-of-service"
@@ -103,27 +104,20 @@ object Paths {
     RedirectResponse(Checkout.menu.loc.calcDefaultHref)
   )
 
-  val hasProductInCart = If(
-    () => !shoppingCart.is.isEmpty,
-    RedirectResponse(Products.menu.loc.calcDefaultHref)
-  )
-
   val petChosen = If(
     () => !petChoice.is.isEmpty,
     RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
   )
 
-  val sizeChosen = If(
-    () => !petSize.is.isEmpty,
-    if (petChoice.is == Full(AnimalType.Dog))
-      RedirectResponse(DogSize.menu.loc.calcDefaultHref)
-    else
-      RedirectResponse(CatSize.menu.loc.calcDefaultHref)
+  val completedPet = If(
+    () => completedPets.nonEmpty,
+    () => RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
   )
 
-  val completedPetOrFlow = If(
-    () => (!completedPets.isEmpty || flowComplete_?),
-    () => RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
+
+  val createdAccount = If(
+    () => SecurityContext.loggedIn_?,
+    () => RedirectResponse(CreateAccount.menu.loc.calcDefaultHref)
   )
 
   def serverUrl = {
@@ -151,9 +145,11 @@ object Paths {
     LandingPage.atlantaExpo,
     LandingPage.firstMonthFree,
     CartReview.menu,
+    CreateAccount.menu,
     Checkout.menu,
     Success.menu,
     AccountOverview.menu,
+    UpgradeAccount.menu,
     ShippingBilling.menu,
     ShippingBilling.menuBilling,
     PetsAndProducts.menu,
@@ -199,27 +195,22 @@ object Paths {
     ResetPassword.menu,
     ResetPasswordSent.menu,
     Signup.menu,
-    Products.menu,
-    ProductDetail.zoguardDogsMenu,
-    ProductDetail.adventureDogsMenu,
-    ProductDetail.sheieldtecDogsMenu,
-    ProductDetail.zoguardCatsMenu,
-    ProductDetail.adventureCatsMenu,
     Login.logoutMenu,
     friendsfamily.Dashboard.menu,
     friendsfamily.Dashboard.friendsFamilyLabelsExportMenu,
     friendsfamily.Orders.menu,
     friendsfamily.Products.menu,
     TreatList.treatListMenu,
+    AddOnSale.addOnSaleMenu,
     TreatCheckout.menu,
+    AddOnCheckout.menu,
     inventory.InventoryItems.menu,
     inventory.Reconciliations.menu,
     inventory.InventoryChangeAudits.menu,
     inventory.ItemProduction.menu,
     petland.NewOrder.menu,
+    CatSignup.menu,
     PetChoice.menu,
-    DogSize.menu,
-    CatSize.menu,
-    PetDetails.menu,
+    DogDetails.menu,
   )
 }

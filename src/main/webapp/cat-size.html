@@ -1,98 +1,33 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
-  <div class="flow-progress-bar">
+  <form class="current-step" data-lift="signup.CatSignup.render">
+    <div>Cat is coming soon! Give us your email to know when we launch it!</div>
+
     <ul>
-      <li class="complete">
-        <a href="/pet-choice">
-          <dl class="step-container">
-            <dt class="step-name">1. Pet</dt>
-            <dd class="step-choice">Cat</dd>
-          </dl>
-        </a>
+      <li>
+        <label>
+          First Name
+          <input type="text">
+        </label>
       </li>
       <li>
-        2. Size
-        <div class="arrow-up"></div>
+        <label>
+          Last Name
+          <input type="text">
+        </label>
       </li>
       <li>
-        <a href="/cart-review">
-          <div class="pet-count" data-lift="NavBar.petCount">0</div>
-          <div>3. Review</div>
-        </a>
+        <label>
+          email
+          <input type="text">
+        </label>
       </li>
       <li>
-        <div>4. Checkout</div>
+        <button>Notify Me!</button>
       </li>
     </ul>
-  </div>
-  <div class="flow-step complete">
-    <a href="/pet-choice">
-      <dl class="step-container">
-        <dt class="step-name">1. Pet</dt>
-        <dd class="step-choice">Cat</dd>
-      </dl>
-    </a>
-  </div>
-  <div class="flow-step unanswered">
-    <div class="step-name">2. Size</div>
-    <div class="arrow-up"></div>
-  </div>
-  <form class="current-step" data-lift="CatSize">
-    <h1 class="step-header">Choose A Size Range</h1>
-    <h2 class="step-question">
-      Flea and tick products have different dosage amounts based on pet size ranges.
-      <br/>
-      Choose the size range that best matches your cat.
-    </h2>
-    <div class="choice-container cat small">
-      <picture>
-        <source 
-          media="(min-width: 46.8em)" 
-          srcset="images/pet-sizes/small-yarn.png, images/pet-sizes/small-yarn@2x.png 2x">
-        <img class="size-choice cat small" src="images/pet-sizes/small-yarn-small.png" srcset="images/pet-sizes/small-yarn-small.png, images/pet-sizes/small-yarn-small@2x.png 2x">
-      </picture>
-      <ul class="weight cat small">
-        <li class="weight-number">1.5-5</li>
-        <li class="weight-unit">pounds</li>
-      </ul>
-      <button class="select-choice" id="small-cat">Select</button>
-    </div>
-    <div class="choice-container cat medium">
-      <picture>
-        <source 
-          media="(min-width: 46.8em)" 
-          srcset="images/pet-sizes/medium-yarn.png, images/pet-sizes/medium-yarn@2x.png 2x">
-        <img class="size-choice cat medium" src="images/pet-sizes/medium-yarn-small.png" srcset="images/pet-sizes/medium-yarn-small.png, images/pet-sizes/medium-yarn-small@2x.png 2x">
-      </picture>
-      <ul class="weight cat medium">
-        <li class="weight-number">5-9</li>
-        <li class="weight-unit">pounds</li>
-      </ul>
-      <button class="select-choice" id="medium-cat">Select</button>
-    </div>
-    <div class="choice-container cat large">
-      <picture>
-        <source 
-          media="(min-width: 46.8em)" 
-          srcset="images/pet-sizes/large-yarn.png, images/pet-sizes/large-yarn@2x.png 2x">
-        <img class="size-choice cat large" src="images/pet-sizes/large-yarn-small.png" srcset="images/pet-sizes/large-yarn-small.png, images/pet-sizes/large-yarn-small@2x.png 2x">
-      </picture>
-      <ul class="weight cat large">
-        <li class="weight-number">9+</li>
-        <li class="weight-unit">pounds</li>
-      </ul>
-      <button class="select-choice" id="large-cat">Select</button>
-    </div>
   </form>
-  <div class="flow-step unanswered">
-    <a href="/cart-review">
-      <div class="step-name">3. Review<span class="pet-count" data-lift="NavBar.petCount">0</span></div>
-    </a>
-  </div>
-  <div class="flow-step unanswered">
-    <div class="step-name">4. Checkout</div>
-  </div>
 
   <head_merge>
-   <link rel="stylesheet" data-lift="style-bundle?name=pet-size">
+  <link rel="stylesheet" data-lift="style-bundle?name=choose-pet">
   </head_merge>
 </div>

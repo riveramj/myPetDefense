@@ -2,41 +2,39 @@ package com.mypetdefense.actor
 
 import scala.xml.NodeSeq
 import scala.util._
-
 import java.text.SimpleDateFormat
 
 import net.liftweb._
-  import common._
-  import actor._
-  import util.Helpers._
-  import util._
-  import http._
-  import mapper.{By}
-
+import common._
+import actor._
+import util.Helpers._
+import util._
+import http._
+import mapper.By
 import dispatch._
 import org.joda.time._
-
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
-
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
-import java.time.{ZoneId, LocalDateTime}
+import java.time.{LocalDateTime, ZoneId}
 import java.time.format.DateTimeFormatter
 
 import net.liftweb.util.Mailer
 import Mailer._
+import com.mypetdefense.snippet.customer.ShippingBilling
+import com.mypetdefense.snippet.login.{ResetPassword, Signup}
 
 sealed trait EmailActorMessage
-case class SendWelcomeEmail(user: User) extends EmailActorMessage
+case class SendWelcomeEmail(user: Box[User]) extends EmailActorMessage
 case class SendFeedbackEmail(user: User) extends EmailActorMessage
 case class SendNewAdminEmail(user: User) extends EmailActorMessage
 case class SendNewAgentEmail(user: User) extends EmailActorMessage
 case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class SendPasswordResetEmail(user: User) extends EmailActorMessage
 case class SendPasswordUpdatedEmail(user: User) extends EmailActorMessage
-case class NewSaleEmail(user: User, petCount: Int, couponCode: String) extends EmailActorMessage
+case class NewSaleEmail(user: Box[User], petCount: Int, couponCode: String) extends EmailActorMessage
 case class NewPetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class PetRemovedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class BillingUpdatedEmail(user: User) extends EmailActorMessage
@@ -111,6 +109,11 @@ case class Send6MonthSaleReceipt(
   subtotal: Double,
   tax: Double
 )
+case class AddOnReceiptEmail(
+  newProducts: List[AddOnProduct],
+  subscription: Box[Subscription],
+  parent: Box[User]
+)
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Thanks for Joining My Pet Defense!"
@@ -122,10 +125,10 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
   addHandler {
     case SendWelcomeEmail(user) => 
       val transform = {
-        "#first-name" #> user.firstName.get 
+        "#first-name" #> user.map(_.firstName.get)
       }
 
-      sendEmail(welcomeEmailSubject, user.email.get, transform(welcomeEmailTemplate))
+      sendEmail(welcomeEmailSubject, user.map(_.email.get).openOr(""), transform(welcomeEmailTemplate))
   }
 }
 
@@ -414,8 +417,8 @@ trait NewSaleEmailHandling extends EmailHandlerChain {
       val subject = "New Sale! Check dashboard!!"
 
       val transform = {
-        "#name *" #> user.name &
-        "#email *" #> user.email &
+        "#name *" #> user.map(_.name).openOr("") &
+        "#email *" #> user.map(_.email.get).openOr("") &
         "#pet-count *" #> petCount &
         "#coupon *" #> couponCode &
         ".amount" #> ClearNodes
@@ -724,7 +727,7 @@ trait TreatReceiptEmailHandling extends EmailHandlerChain {
         "#ship-state *" #> order.state.get &
         "#ship-zip *" #> order.zip.get &
         ".ordered-product" #> treats.map { orderedTreat =>
-          val treat = orderedTreat.treat.obj
+          val treat = orderedTreat.product.obj
 
           ".treat-quantity *" #> orderedTreat.quantity.get &
           ".treat-name *" #> treat.map(_.name.get)
@@ -732,6 +735,38 @@ trait TreatReceiptEmailHandling extends EmailHandlerChain {
         ".amount-due *" #> f"$$$subtotal%2.2f" &
         "#tax-due *" #> f"$$${order.taxPaid.get}%2.2f" &
         "#total *" #> f"$$${order.amountPaid.get}%2.2f" 
+      }
+
+      sendEmail(subject, email, transform(template))
+  }
+}
+
+trait AddOnReceiptEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case AddOnReceiptEmail(
+      newProducts,
+      subscription,
+      parent
+    ) =>
+
+      val template =
+    Templates("emails-hidden" :: "add-on-receipt-email" :: Nil) openOr NodeSeq.Empty
+
+      val subject = "My Pet Defense Items Added"
+      val email = parent.map(_.email.get).openOr("")
+      val nextShipDate = subscription.map { possibleSubscription =>
+        dateFormatter.format(possibleSubscription.nextShipDate.get)
+      }.openOr("")
+
+      val transform = {
+        "#parent-name *" #> parent.map(_.firstName.get) &
+        ".ordered-product" #> newProducts.map { addOnProduct =>
+          val product = addOnProduct.product.obj
+
+          ".treat-quantity *" #> addOnProduct.quantity.get &
+          ".treat-name *" #> product.map(_.name.get)
+        } &
+        ".next-ship-date *" #> nextShipDate
       }
 
       sendEmail(subject, email, transform(template))
@@ -768,7 +803,7 @@ trait TreatShippedEmailHandling extends EmailHandlerChain {
         "#ship-state" #> order.state.get &
         "#ship-zip" #> order.zip.get &
         ".ordered-product" #> treats.map { orderedTreat =>
-          val treat = orderedTreat.treat.obj
+          val treat = orderedTreat.product.obj
 
           ".treat-quantity *" #> orderedTreat.quantity.get &
           ".treat-name *" #> treat.map(_.name.get)
@@ -809,7 +844,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val products = subscription.map(_.getProducts).openOr(Nil)
+      val boxes = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
+      val products = boxes.flatMap(_.fleaTick.obj)
       val priceCode = subscription.map(_.priceCode.get).openOr("")
 
       val transform = {
@@ -830,15 +866,7 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
         "#bill-zip" #> billAddress.map(_.zip.get) &
         "#tax" #> ClearNodesIf(taxPaid == "0") andThen
         ".ordered-product" #> products.map { product =>
-          val price = {
-            if (priceCode == null) {
-              9.99D
-            } else {
-              Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0D)
-            }
-          }
-          ".product *" #> s"${product.name.get}, ${product.size.get.toString} pounds" &
-          ".amount-due *" #> s"$$${price}"
+          ".product *" #> s"${product.name.get}, ${product.size.get.toString} pounds"
         } &
         "#tax #tax-due *" #> s"$$${taxPaid}" &
         "#total *" #> s"$$${amountPaid}" &
@@ -868,7 +896,7 @@ trait SixMonthSaleReceiptEmailHandling extends EmailHandlerChain {
 
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
-      val products = pets.map(_.product.obj).flatten
+      val products = user.subscription.map(_.subscriptionBoxes.flatMap(_.fleaTick.obj)).openOr(Nil)
       val amountPaid = subtotal + tax
 
       val transform = {
@@ -922,6 +950,7 @@ trait EmailActor extends EmailHandlerChain
                     with DailySalesEmailHandling
                     with InternalDailyEmailHandling
                     with TreatReceiptEmailHandling
+                    with AddOnReceiptEmailHandling
                     with TreatShippedEmailHandling
                     with SixMonthSaleReceiptEmailHandling
                     with SendShipmentRefundedEmailHandling

@@ -1,32 +1,22 @@
-package com.mypetdefense.snippet
+package com.mypetdefense.snippet.customer
 
-import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml._
-import net.liftweb.util._
-  import Helpers._
-import net.liftweb.common._
-import net.liftweb.util.ClearClearable
-import net.liftweb.http._
-  import js.JsCmds._
-import net.liftweb.mapper.By
-
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.time.{LocalDate, ZoneId}
-
-import com.mypetdefense.model._
-import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
-import com.mypetdefense.util.ClearNodesIf
-import com.mypetdefense.util.SecurityContext._
+import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
+import com.mypetdefense.util.SecurityContext._
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
 
 
 object PetsAndProducts extends Loggable {
-  import net.liftweb.sitemap._
-    import Loc._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu = Menu.i("Pets and Products") / "pets-products" >>
     loggedIn >>
@@ -35,11 +25,11 @@ object PetsAndProducts extends Loggable {
 
 class PetsAndProducts extends Loggable {
   val user = currentUser
-  val subscription = user.flatMap(_.getSubscription)
+  val subscription = user.flatMap(_.subscription.obj)
   val priceCode = subscription.map(_.priceCode.get).getOrElse("")
 
   var newPetType: Box[AnimalType.Value] = Empty
-  var newPetChosenProduct: Box[Product] = Empty
+  var newPetChosenProduct: Box[FleaTick] = Empty
   var newPetName = ""
 
   def petTypeDropdown(renderer: IdMemoizeTransform) = {
@@ -59,21 +49,18 @@ class PetsAndProducts extends Loggable {
 
   def productDropdown() = {
     val products = newPetType.map { animal =>
-      Product.findAll(By(Product.animalType, animal))
+      FleaTick.findAll(By(FleaTick.animalType, animal))
     }.openOr(Nil)
 
     SHtml.ajaxSelectObj(
       (Empty, "Choose Product") +: products.map(product => (Full(product), product.getNameAndSize)),
       Full(newPetChosenProduct),
-      (possibleProduct: Box[Product]) => newPetChosenProduct = possibleProduct
+      (possibleProduct: Box[FleaTick]) => newPetChosenProduct = possibleProduct
     )
   }
 
-  val pets = user.map { parent => 
-    Pet.findAll(
-      By(Pet.user, parent),
-      By(Pet.status, Status.Active)
-    )
+  val boxes = user.flatMap { parent =>
+    parent.subscription.obj.map(_.subscriptionBoxes.toList)
   }.openOr(Nil)
 
 
@@ -114,12 +101,12 @@ class PetsAndProducts extends Loggable {
     }
   }
 
-  def deletePet(pet: Pet)() = {
+  def deletePet(pet: Box[Pet])() = {
     ParentService.removePet(user, pet) match {
       case Full(_) =>
         if (Props.mode != Props.RunModes.Pilot) {
             user.map { parent =>
-              EmailActor ! PetRemovedEmail(parent, pet)
+              pet.map(p => EmailActor ! PetRemovedEmail(parent, p))
           }
         }
 
@@ -129,24 +116,25 @@ class PetsAndProducts extends Loggable {
     }
   }
 
-  def savePet(pet: Pet, name: String, updatedProduct: Box[Product]) = {
+  def savePet(pet: Box[Pet], subscriptionBox: SubscriptionBox, name: String, updatedProduct: Box[FleaTick]) = {
     val updatedPet = (
       for {
         product <- updatedProduct
+        pt <- pet
         size = product.size.get
-        updatedPet = pet.product(product).name(name).size(size).saveMe
+        updatedPet = pt.name(name).size(size).saveMe
       } yield {
-        updatedPet 
+        subscriptionBox.fleaTick(product).saveMe
+        updatedPet
       }
-    )
-
-    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal(_))
+      )
+    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal)
 
     updatedSubscription match {
       case Full(stripeSub) =>
         S.redirectTo(PetsAndProducts.menu.loc.calcDefaultHref)
       case _ =>
-        Alert("An error has occured. Please try again.")
+        Alert("An error has occurred. Please try again.")
     }
   }
 
@@ -160,35 +148,41 @@ class PetsAndProducts extends Loggable {
       "#new-pet-product-select" #> productDropdown() &
       "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
     } &
-    ".pet" #> pets.toSeq.sortWith(_.name.get < _.name.get).map { pet =>
-      var currentProduct = pet.product.obj
-      var currentPetName = pet.name.get
+    ".pet" #>  boxes.map { box =>
+      val pet = box.pet.obj
+      var currentProduct = box.fleaTick.obj
+      var currentPetName = pet.map(_.name.get).openOr("")
+      val product = box.fleaTick.obj
 
-      val priceItem = currentProduct.flatMap { item =>
-        Price.getPricesByCode(item, priceCode)
+      val price = if (SubscriptionBox.possiblePrice(box) == 0D) {
+        product.flatMap { item =>
+          Price.getPricesByCode(item, priceCode).map(_.price.get)
+        }.openOr(0D)
+      } else {
+        SubscriptionBox.possiblePrice(box)
       }
-      val price = priceItem.map(_.price.get).getOrElse(0D)
 
       val currentProductDropdown = {
-        val products = Product.findAll(By(Product.animalType, pet.animalType.get))
+        val products = pet.map(pt => FleaTick.findAll(By(FleaTick.animalType, pt.animalType.get))).openOr(Nil)
 
         SHtml.ajaxSelectObj(
           products.map(product => (product, product.getNameAndSize)),
           currentProduct,
-          (possibleProduct: Product) => currentProduct = {
+          (possibleProduct: FleaTick) => currentProduct = {
             Full(possibleProduct)
           }
         )
       }
 
       ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
-      ".pet-product" #> currentProductDropdown &
-      ".price *" #> f"$$$price%2.2f" &
-      ".pet-status *" #> pet.status.get.toString &
-      ".cancel [onclick]" #> Confirm(s"Remove ${pet.name} and cancel future shipments?",
-        ajaxInvoke(deletePet(pet) _)
-      ) &
-      ".save" #> ajaxSubmit("Save Changes", () => savePet(pet, currentPetName, currentProduct))
+        ".price *" #> f"$$$price%2.2f" &
+        ".pet-status *" #> pet.map(_.status.get.toString) &
+        ".pet-product" #> currentProductDropdown &
+        ".cancel [onclick]" #> Confirm(s"Remove ${currentPetName} and cancel future shipments?",
+          ajaxInvoke(deletePet(pet) _)
+        ) &
+        ".save" #> ajaxSubmit("Save Changes", () => savePet(pet, box, currentPetName, currentProduct))
     }
+
   }
 }

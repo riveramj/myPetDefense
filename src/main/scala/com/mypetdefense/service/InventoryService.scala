@@ -28,7 +28,7 @@ object InventoryService extends Loggable {
   def deductShipmentItems(shipment: Shipment) = {
     val shipmentLineItems = shipment.shipmentLineItems.toList
     
-    val products = shipmentLineItems.flatMap(_.product.obj)
+    val products = shipmentLineItems.flatMap(_.fleaTick.obj)
     val inserts = shipmentLineItems.map(_.insert.toList).flatten
 
     for {

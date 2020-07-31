@@ -1,4 +1,7 @@
 $(document).ready ->
+  $(".upgrade").on "click", (event) ->
+    window.location.href = "/account-overview"
+
   $(".go-back").on "click", (event) ->
     window.history.back()
 

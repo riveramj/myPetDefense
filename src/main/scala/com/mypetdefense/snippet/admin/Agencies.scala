@@ -186,7 +186,7 @@ class Agencies extends Loggable {
 
   def generateAgencyData(agency: Agency, parentAgency: Box[Agency]) = {
     val parentName = parentAgency.map(_.name.get).openOr("-")
-    val activeCustomers = Agency.getAllChildrenCustomers(agency).flatMap(_.getSubscription).filter(_.status == Status.Active)
+    val activeCustomers = Agency.getAllChildrenCustomers(agency).flatMap(_.subscription.obj).filter(_.status == Status.Active)
 
     {
       ".name *" #> agency.name &
