@@ -52,7 +52,7 @@ object Paths {
     RedirectResponse(Login.menu.loc.calcDefaultHref)
   }
 
-  val homePage = Menu.i("Home") / "index" >> RedirectResponse("mypetdefense.com")
+  val homePage = Menu.i("Home") / "index"
   val termsOfService = Menu.i("Terms of Service") / "terms-of-service"
   
   val thanksPage = Menu.i("Thanks") / "thanks"
