@@ -97,18 +97,18 @@ class AgencyOverview extends Loggable {
   var agencyName = updateAgencyName
   var users = updateAgencyUsers
   
-  def allSubscriptions = users.map(_.getSubscription).flatten
-  def allShipments = allSubscriptions.map(_.shipments.toList).flatten
+  def allSubscriptions = users.flatMap(_.subscription.obj)
+  def allShipments = allSubscriptions.flatMap(_.shipments.toList)
 
   def usersByStatus = users.groupBy(_.status.get)
   def activeUsers = tryo(usersByStatus(Status.Active)).openOr(Nil)
   def activeUserCount = activeUsers.size
   def inactiveUserCount = users.size - activeUserCount
 
-  def activeUserSubscription = users.map(_.getSubscription).flatten
-  def activeShipments = activeUserSubscription.map(_.shipments.toList).flatten
+  def activeUserSubscription = users.flatMap(_.subscription.obj)
+  def activeShipments = activeUserSubscription.flatMap(_.shipments.toList)
 
-  def usersWithName = users.map(updateUserName(_))
+  def usersWithName = users.map(updateUserName)
 
   def shipmentsByMonth = allShipments.map(_.dateProcessed.get).map(chartDateFormat.format).map(toInt).groupBy(identity).mapValues(_.size)
 
@@ -364,8 +364,7 @@ class AgencyOverview extends Loggable {
     ".pet" #> pets.map { pet =>
       ".pet-name *" #> pet.name.get &
       ".pet-status *" #> findStatus(pet.status.get) &
-      ".pet-status [class+]" #> findStatus(pet.status.get).toLowerCase &
-      ".current-product *" #> pet.product.map(_.getSizeAndSizeName)
+      ".pet-status [class+]" #> findStatus(pet.status.get).toLowerCase
     }
   }
 
@@ -390,7 +389,7 @@ class AgencyOverview extends Loggable {
           idMemoize { detailsRenderer =>
 
             ".user" #> {
-              val subscription = parent.getSubscription
+              val subscription = parent.subscription.obj
 
               val signupDate = subscription.map { sub =>
                 signupCancelDateFormat.format(sub.startDate.get)

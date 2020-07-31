@@ -336,7 +336,7 @@ object ReportingService extends Loggable {
       for {
         agency <- Agency.find(By(Agency.name, name)).toList
         customer <- agency.customers.toList
-        subscription <- customer.subscription
+        subscription <- customer.subscription.toList
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
         mailedDate <- getMailedDateOfShipment(shipment)
       } yield {
@@ -396,7 +396,7 @@ object ReportingService extends Loggable {
       }
     }
 
-    val currentYearCancelShipments = currentYearSubscriptionCancels.map(_.shipments.toList).flatten.filter { shipment => 
+    val currentYearCancelShipments = currentYearSubscriptionCancels.flatMap(_.shipments.toList).filter { shipment =>
       !getMailedDateOfShipment(shipment).isEmpty
     }
 
@@ -474,7 +474,7 @@ object ReportingService extends Loggable {
       for {
         agency <- Agency.find(By(Agency.name, name)).toList
         customer <- agency.customers.toList
-        subscription <- customer.subscription
+        subscription <- customer.subscription.toList
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
       } yield {
         shipment
@@ -521,7 +521,7 @@ object ReportingService extends Loggable {
       for {
         agency <- Agency.find(By(Agency.name, name)).toList
         customer <- agency.customers.toList
-        subscription <- customer.subscription
+        subscription <- customer.subscription.toList
         shipment <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
       } yield {
         shipment
@@ -817,7 +817,7 @@ object ReportingService extends Loggable {
       (currentDayOfYear - createdDayOfYear) < 8
     }
 
-    val lastWeekNewSubscriptions = lastWeekNewUsers.map(_.getSubscription).flatten
+    val lastWeekNewSubscriptions = lastWeekNewUsers.flatMap(_.subscription.obj)
 
     val lastWeekNewSubscriptionCancels = lastWeekNewSubscriptions filter { subscription =>
       val cancellationDate = getCancelledDateOfSubscription(subscription)
@@ -1058,7 +1058,7 @@ object ReportingService extends Loggable {
       for {
         agency <- Agency.find(By(Agency.name, name)).toList
         customers = agency.customers.toList
-        subscriptions = customers.map(_.getSubscription.toList).flatten
+        subscriptions = customers.flatMap(_.subscription.obj)
         cancelsByMonth <- sameDayCancelsByMonth(subscriptions)
       } yield {
         cancelsByMonth._1.toString ::

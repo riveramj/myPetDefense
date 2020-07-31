@@ -1,29 +1,19 @@
- package com.mypetdefense.snippet
-
-import net.liftweb._
-  import http.SHtml._
-  import util._
-  import util.Helpers._
-  import common._
-  import util.ClearClearable
-  import http._
-  import mapper.{By, NullRef}
-  import js._
-  import JsCmds._
-
-import com.mypetdefense.service._
-  import ValidationService._
-  import PetFlowChoices._
+ package com.mypetdefense.snippet.signup
 
 import com.mypetdefense.model._
-
-import java.util.Date
-import java.text.SimpleDateFormat
+import com.mypetdefense.service._
+import net.liftweb._
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
 
 object CartReview extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
-  import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Review Cart") / "cart-review"
 }
@@ -40,7 +30,7 @@ class CartReview extends Loggable {
 
   var currentPets = completedPets.is
 
-  def getImageUrl(product: Box[Product]) = {
+  def getImageUrl(product: Box[FleaTick]) = {
     s"images/product-shots/${product.map(_.imageName).openOr("")}"
   }
 
@@ -68,8 +58,6 @@ class CartReview extends Loggable {
 
   def addNewPet() = {
     petChoice(Empty)
-    productChoice(Empty)
-    petSize(Empty)
     petId(Empty)
 
     completedPets(currentPets)
@@ -83,14 +71,10 @@ class CartReview extends Loggable {
     {
       for {
         petType <- petChoice.is
-        size <- petSize.is
-        product <- productChoice.is
       } yield {
         val pet = Pet.create
           .petId(currentPetId)
           .animalType(petType)
-          .size(size)
-          .product(product)
 
         currentPets(currentPetId) = pet
       }
@@ -102,15 +86,7 @@ class CartReview extends Loggable {
 
       val cart = completedPets.is
       
-      val subtotal = {
-        for {
-          pet <- cart.values
-          product <- pet.product.obj
-          price <- Price.getPricesByCode(product, priceCode)
-        } yield {
-          price.price.get
-        }
-      }.sum
+      val subtotal = cart.values.size * 12.99
       
       val discount = cart.size match {
         case 0 | 1 => 0
@@ -148,22 +124,11 @@ class CartReview extends Loggable {
       } &
       ".cart-item" #> cart.map { case (id, pet) =>
         val petName = pet.name.get
-        val product = pet.product.obj
-        val productName = product.map(_.name.get).openOr("")
-        val productSizeName = product.map(_.getSizeAndSizeName).openOr("")
-
-        val itemPrice = product.flatMap { prod =>
-          Price.getPricesByCode(prod, priceCode)
-        }.map(_.price.get).openOr(0D)
-
-        ".cart-product-image [src]" #> getImageUrl(product) &
-        ".cart-pet-remove [onclick]" #> Confirm(s"Remove ${petName}?", ajaxInvoke(removePet(id) _)) &
-        ".product-name-size *" #> s"${productName} ${productSizeName}" &
+        ".cart-pet-remove [onclick]" #> Confirm(s"Remove ${petName}?", ajaxInvoke(removePet(id))) &
         ".pet-name" #> ajaxText(petName, possibleName => {
-          completedPets(pet.petId.get) = pet.name(possibleName)
           Noop
         }) &
-        ".cart-pet-price *" #> f"$$$itemPrice%2.2f"
+        ".cart-pet-price *" #> "$12.99"
       } &
       "#add-pet [onClick]" #> ajaxInvoke(addNewPet _) &
       {
@@ -176,7 +141,8 @@ class CartReview extends Loggable {
 
         ".promotion-info [class+]" #> successCoupon &
         "#promo-code" #> ajaxText(couponCode, couponCode = _) &
-        ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
+        ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() =>
+          validateCouponCode())
       }
     }
   }

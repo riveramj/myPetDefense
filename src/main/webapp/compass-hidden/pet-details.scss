@@ -68,11 +68,12 @@ fieldset > div {
 
 fieldset label {
   display: inline-block;
-  padding-bottom: rem(14px);
+  padding-bottom: 18px;
   width: 100%;
 
-  input {
+  input, select {
     width: 100%;
+    background-color: #ffffff;
     color: #4F4E4E;
     font-size: em(22px);
     border: 1px solid #CECECE;
@@ -82,6 +83,10 @@ fieldset label {
     @include placeholder {
       color: #949494;
     }
+  }
+
+  input[type="radio"] {
+    display: none;
   }
 }
 
@@ -219,4 +224,95 @@ fieldset label {
   @media (min-width: $bp-medium) {
     margin: 1px 1px -6px 0;
   }
+}
+
+.step-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.account-info {
+  padding-top: 30px;
+  padding-bottom: 30px;
+
+  @media (min-width: $bp-medium) {
+    padding: 50px 0;
+  }
+}
+
+.pet {
+  @media (min-width: $bp-medium) {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+}
+
+ul.pet {
+  @media (min-width: $bp-medium) {
+    max-width: 500px;
+  }
+}
+
+.dog-sizes {
+  @media (min-width: $bp-medium) {
+    text-align: center;
+
+    .dg-small {
+      padding-top: 45px;
+      margin-right: 20px;
+    }
+
+    .dg-medium {
+      padding-top: 30px;
+    }
+
+    .dg-large {
+      padding-top: 41px;
+      margin-right: 20px;
+    }
+  }
+
+  li {
+    margin: 0 auto 30px;
+    text-align: center;
+    width: 200px;
+    border-radius: 5px;
+    display: block;
+    border: 2px solid #CECECE;
+    padding: 20px 0;
+    background-color: #ffffff;
+
+    &.selected {
+      border-color: #259490;
+    }
+
+    @media (min-width: $bp-medium) {
+      vertical-align: middle;
+      height: 157px;
+      display: inline-block;
+    }
+
+    label {
+      padding-bottom: 0;
+    }
+  }
+}
+
+.dog-sizes-container {
+  h3 {
+    text-align: center;
+    padding: 25px 0 20px;
+    font-weight: 700;
+    font-size: 17px;
+  }
+}
+
+.weight-number {
+  margin-right: 20px;
+  padding-top: 14px;
+  display: inline-block;
+}
+
+.field-label {
+  font-size: 17px;
 }

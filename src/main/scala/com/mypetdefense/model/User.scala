@@ -7,6 +7,7 @@ import net.liftweb._
     import Helpers.tryo
 
 import com.mypetdefense.util.RandomIdGenerator._
+import com.mypetdefense.service.TaxJarService
 import com.mypetdefense.service.KeyService._
 import com.mypetdefense.snippet.NewParent
 import com.mypetdefense.util.TitleCase
@@ -25,6 +26,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object firstName extends MappedString(this, 100)
   object lastName extends MappedString(this, 100)
   object stripeId extends MappedString(this, 100)
+  object facebookId extends MappedString(this, 300)
+  object googleId extends MappedString(this, 300)
   object email extends MappedEmail(this, 50)
   object password extends MappedString(this, 100)
   object salt extends MappedString(this, 100)
@@ -42,8 +45,9 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object agency extends MappedLongForeignKey(this, Agency)
   object survey extends MappedLongForeignKey(this, Survey)
   object pets extends MappedOneToMany(Pet, Pet.user)
-  object subscription extends MappedOneToMany(Subscription, Subscription.user)
+  object subscription extends MappedLongForeignKey(this, Subscription)
   object addresses extends MappedOneToMany(Address, Address.user)
+  object taxRate extends MappedDouble(this)
   object status extends MappedEnum(this, Status) {
     override def defaultValue = Status.Active
     override def dbIndexed_? = true
@@ -54,9 +58,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
 
   def name = s"${firstName} ${lastName}"
 
-  def getSubscription = subscription.headOption
-
-  def activePets = pets.filter(_.status == Status.Active)
+  def activePets = pets.filter(_.status.get == Status.Active)
 
   def refresh = User.find(By(User.userId, userId.get))
 
@@ -67,6 +69,27 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       By(Address.user, this),
       By(Address.addressType, AddressType.Shipping)
     )
+  }
+
+  def upsertUser(
+                     firstName: String,
+                     lastName: String,
+                     email: String,
+                     password: String,
+                     facebookId: String,
+                     userType: UserType.Value
+                   ) = {
+    val user = (User.find(By(User.email, email)) match {
+      case Full(user) => user
+      case _ => User.create.userId(generateLongId).productSalesKey(createAccessKey)
+    })
+      .firstName(TitleCase(firstName))
+      .lastName(TitleCase(lastName))
+      .email(email)
+      .facebookId(facebookId)
+      .userType(userType)
+
+    setUserPassword(user, password)
   }
 
   def createNewUser(
@@ -107,14 +130,13 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     val salt = getSalt
     val hashedPassword = hashPassword(password, salt)
 
-    if (password != "") {
+    (if (password != "") {
       user
         .password(hashedPassword)
         .salt(salt)
-        .saveMe
     } else {
-      user.accessKey(createAccessKey).saveMe
-    }
+      user.accessKey(createAccessKey)
+    }).saveMe
   }
 
   def createNewPendingUser(
@@ -184,6 +206,13 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     User.find(By(User.email, email))
   }
 
+  def findByEmailOrId(email: String, facebookId: String): Box[User] = {
+    if (facebookId.isEmpty)
+      User.find(By(User.email, email))
+    else
+      User.find(By(User.facebookId, facebookId))
+  }
+
   def isCorrectPassword_?(password: String, user: User) = {
     user.password.get == hashPassword(password, user.salt.get)
   }
@@ -191,7 +220,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def nameAndEmail = s"${this.name} <${this.email}>"
 
   def cancel = {
-    val shipAddress = this.addresses.toList.filter(_.addressType == AddressType.Shipping).headOption
+    val shipAddress = this.addresses.toList.find(_.addressType.get == AddressType.Shipping)
 
     val address = shipAddress.map { ship =>
       s"""${ship.street1}
@@ -217,8 +246,25 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .accessKey("")
       .resetPasswordKey("")
       .productSalesKey("")
+      .facebookId("")
       .status(Status.Cancelled)
       .saveMe
+  }
+
+  def getTaxRate = {
+    val shippingAddress = this.shippingAddress
+    
+    tryo(TaxJarService.calculateTaxRate(
+      shippingAddress.map(_.city.get).openOr(""),
+      shippingAddress.map(_.state.get).openOr(""),
+      shippingAddress.map(_.zip.get).openOr("")
+    )).openOr(0D)
+  }
+
+  def setTaxRate = {
+    val rate = getTaxRate
+
+    this.taxRate(rate).saveMe
   }
 }
 

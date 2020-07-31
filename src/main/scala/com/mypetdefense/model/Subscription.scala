@@ -1,13 +1,11 @@
 package com.mypetdefense.model
 
 import net.liftweb._
-  import mapper._
-  import common._
-  import util._
-
+import mapper._
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.common.Box
 
 class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMany[Long, Subscription] {
   def getSingleton = Subscription
@@ -15,6 +13,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     override def dbIndexed_? = true
   }
   object user extends MappedLongForeignKey(this, User)
+  object promptedUpgrade extends MappedBoolean(this)
   object stripeSubscriptionId extends MappedString(this, 100)
   object startDate extends MappedDateTime(this)
   object renewalDate extends MappedDateTime(this)
@@ -33,11 +32,10 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   object cancellationDate extends MappedDateTime(this)
   object cancellationReason extends MappedString(this, 100)
   object cancellationComment extends MappedText(this)
+  object subscriptionBoxes extends MappedOneToMany(SubscriptionBox, SubscriptionBox.subscription)
   object tags extends MappedOneToMany(TaggedItem, TaggedItem.subscription)
 
   def refresh = Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
-
-  def getProducts = getPets.flatMap(_.product.obj)
 
   def getPets = user.obj.map(_.activePets).openOr(Nil)
 
@@ -48,15 +46,12 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
       .saveMe
   }
 
-  def getPetAndProducts = Pet.findAll(
-    By(Pet.user, user.get),
-    By(Pet.status, Status.Active)
-  ).map { pet =>
-    (pet, pet.product.obj)
+  def getPetAndProducts = this.subscriptionBoxes.map { box =>
+    (box.pet.obj, box.fleaTick.obj)
   }
 
   def createNewSubscription(
-    user: User,
+    user: Box[User],
     stripeSubscriptionId: String,
     startDate: Date,
     nextShipDate: Date,
@@ -72,6 +67,12 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     .priceCode(priceCode)
     .contractLength(contractLength)
     .saveMe
+  }
+
+  def getMonthlyCost = {
+    this.subscriptionBoxes.map { box =>
+      box.basePrice.get + box.addOnProducts.map(_.price.get).sum
+    }.sum
   }
 }
 

@@ -1,24 +1,14 @@
-package com.mypetdefense.snippet
-
-import net.liftweb._
-  import util.Helpers._
-  import http._
-  import common._
-  import sitemap.Menu
-  import js._
-      import JsCmds._
+package com.mypetdefense.snippet.login
 
 import com.mypetdefense.service._
-    import ValidationService._
-
-import com.mypetdefense._
-  import model.{User, UserType, Status}
-  import snippet.admin.ShipmentDashboard
-import com.mypetdefense.util.SecurityContext
+import net.liftweb._
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.util.Helpers._
 
 object Login extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu = Menu.i("Login") / "login" >>
@@ -39,6 +29,7 @@ class Login extends Loggable {
   def render = {
     var email = ""
     var password = ""
+    var fbId = ""
 
     S.request match {
       case Full(request) =>
@@ -52,7 +43,8 @@ class Login extends Loggable {
     "#login-container" #> {
       "#email" #> SHtml.text(email, email = _) &
       "#password" #> SHtml.password(password, password = _) &
-      "#login" #> SHtml.ajaxSubmit("Log In", () => LoginService.login(email, password))
+      "#fb-id" #> SHtml.password(fbId, fbId = _) &
+      "#login" #> SHtml.ajaxSubmit("Log In", () => LoginService.login(email, password, fbId))
     }
   }
 }

@@ -57,6 +57,7 @@ class ExecutiveDashboard extends Loggable {
 
   val remainingMonthSubscriptions = ReportingService.findCurrentMonthUpcomingSubscriptions
 
+  /*
   val remainingMonthValue = {
     for {
       subscription <- remainingMonthSubscriptions
@@ -67,6 +68,7 @@ class ExecutiveDashboard extends Loggable {
       price.price.get
     }
   }.sum
+   */
 
   def render = {
     ".executive-dashboard [class+]" #> "current" &
@@ -75,7 +77,7 @@ class ExecutiveDashboard extends Loggable {
     ".today-shipments .count *"#> numberFormatter.format(todayShipments.size) &
     ".today-shipments .value *"#> dollarFormatter.format(todayShipmentsValue) &
     ".remaining-shipments-month .count *"#> numberFormatter.format(remainingMonthSubscriptions.size) &
-    ".remaining-shipments-month .value *"#> dollarFormatter.format(remainingMonthValue) &
+    ".remaining-shipments-month .value *"#> dollarFormatter.format(0.99) &
     ".mtd-users .new-users-count *"#> ReportingService.findNewMtdSubscriptions.size &
     ".mtd-users .cancellations-count *"#> ReportingService.findCancelledMtdSubscriptions.size &
     ".agency" #> topLevelAgencies.map { agency =>
@@ -87,7 +89,7 @@ class ExecutiveDashboard extends Loggable {
         }
       }
 
-      val subscriptions = customers.flatMap(_.getSubscription)
+      val subscriptions = customers.flatMap(_.subscription.obj)
       val subscriptionsByStatus = subscriptions.groupBy(_.status.get)
       val activeSubscriptions = tryo(subscriptionsByStatus(Status.Active)).openOr(Nil)
       val cancelledSubscriptions = tryo(subscriptionsByStatus(Status.Cancelled)).openOr(Nil)
