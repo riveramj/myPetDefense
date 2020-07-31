@@ -533,16 +533,20 @@ object DataLoader extends Loggable {
   }
 
   def createBasicExistingBoxes = {
-    if (SubscriptionBox.findAll().isEmpty) {
-      for {
-        user <- User.findAll(By(User.userType, UserType.Parent), By(User.status,Status.Active))
-        subscription <- user.subscription.obj.toList if subscription.status.get == Status.Active
-        pet <- subscription.getPets
-        fleaTick <- FleaTick.find(By(FleaTick.size, pet.size.get), By(FleaTick.animalType, pet.animalType.get))
-      } yield {
-        val box = SubscriptionBox.createBasicBox(subscription, fleaTick, pet)
-        pet.box(box).saveMe()
-      }
+    println("in method =========")
+
+    for {
+      user <- User.findAll(By(User.userType, UserType.Parent), By(User.status,Status.Active))
+      _ = println("users")
+      subscription <- user.subscription.obj.toList if subscription.status.get == Status.Active
+      _ = println("subs")
+      pet <- subscription.getPets
+      _ = println("pets")
+      fleaTick <- FleaTick.find(By(FleaTick.size, pet.size.get), By(FleaTick.animalType, pet.animalType.get))
+      _ = println("flea")
+    } yield {
+      val box = SubscriptionBox.createBasicBox(subscription, fleaTick, pet)
+      pet.box(box).saveMe()
     }
   }
 }
