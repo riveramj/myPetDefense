@@ -22,7 +22,7 @@ object AccountOverview extends Loggable {
 
 class AccountOverview extends Loggable {
   val oldUser = currentUser
-  val user = User.find(By(User.userId, oldUser.map(_.userId.get).openOr(0L)))
+  val user = currentUser.flatMap(_.refresh)
   val pets = user.map(_.activePets).openOr(Nil)
   val subscription = user.flatMap(_.subscription).flatMap(_.refresh)
   val priceCode = subscription.map(_.priceCode.get).getOrElse("")
@@ -81,10 +81,13 @@ class AccountOverview extends Loggable {
           ".pet" #> boxes.map { box =>
             val pet = box.pet.obj
             val product = box.fleaTick.obj
-            val priceItem = product.flatMap { item =>
-              Price.getPricesByCode(item, priceCode)
+            val price = if (SubscriptionBox.possiblePrice(box) == 0D) {
+              product.flatMap { item =>
+                Price.getPricesByCode(item, priceCode).map(_.price.get)
+              }.openOr(0D)
+            } else {
+              SubscriptionBox.possiblePrice(box)
             }
-            val price = priceItem.map(_.price.get).getOrElse(0D)
 
             ".pet-name *" #> pet.map(_.name.get) &
             ".pet-product *" #> product.map(_.name.get) & 

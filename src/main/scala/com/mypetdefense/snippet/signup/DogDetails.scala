@@ -1,6 +1,7 @@
 package com.mypetdefense.snippet.signup
 
 import java.text.SimpleDateFormat
+import java.time.YearMonth
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
@@ -25,6 +26,7 @@ object DogDetails extends Loggable {
 
 class DogDetails extends Loggable {
   val formatter = new SimpleDateFormat("MM/yy")
+  val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 
   var currentPets = completedPets.is
   var petName = ""
@@ -62,9 +64,13 @@ class DogDetails extends Loggable {
         newPetId <- PetFlowChoices.petId.is
         animalType <- PetFlowChoices.petChoice.is
       } yield {
+        val birthday = yearMonthFormatter.parse(s"$petMonth-$petYear")
+
         val newPet = Pet.create
           .petId(newPetId)
+          .name(petName)
           .animalType(animalType)
+          .birthday(birthday)
           .size(petSize.openOr(null))
 
         currentPets(newPetId) = newPet

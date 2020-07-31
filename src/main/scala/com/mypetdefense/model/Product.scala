@@ -23,14 +23,16 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     override def defaultValue = new Date()
   }
 
-  def createNewProduct(name: String, price: Double, weight: Double, sku: String) = {
+  def createNewProduct(name: String, sku: String) = {
     Product.create
     .name(name)
-    .price(price)
-    .weight(weight)
     .sku(sku)
     .saveMe
   }
+
+  def hipAndJoint = Product.find(By(Product.name, "Hip & Joint Chews"))
+  def calming = Product.find(By(Product.name, "Calming Chews"))
+  def multiVitamin = Product.find(By(Product.name, "Multi-Vitamin Chews"))
 }
 
 object Product extends Product with LongKeyedMetaMapper[Product]

@@ -246,6 +246,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .accessKey("")
       .resetPasswordKey("")
       .productSalesKey("")
+      .facebookId("")
       .status(Status.Cancelled)
       .saveMe
   }
