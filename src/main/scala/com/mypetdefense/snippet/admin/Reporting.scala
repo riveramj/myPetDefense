@@ -61,7 +61,7 @@ class Reporting extends Loggable {
         (nextShipDate.isAfter(startDate.minusDays(1)) && nextShipDate.isBefore(endDate.plusDays(1)))
       }
 
-      upcomingSubscriptions.flatMap(_.getProducts).map(_.getNameAndSize)
+      upcomingSubscriptions.flatMap(_.subscriptionBoxes.toList.flatMap(_.fleaTick.obj)).map(_.getNameAndSize)
     }
 
     ".forecasting" #> idMemoize { renderer =>

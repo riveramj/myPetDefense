@@ -254,12 +254,12 @@ object LabelExportService extends Loggable {
           user <- subscription.user.obj.toList
           address <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping)).toList
           lineItem <- shipment.shipmentLineItems.toList
-          product <- lineItem.product.obj.toList
+          product <- lineItem.fleaTick.obj.toList
           pet <- lineItem.pet.obj.toList
         } yield {
           val petNamesProducts = shipment.shipmentLineItems.map { lineItem =>
             val lineItemPetName = lineItem.pet.obj.map(_.name.get).openOr("")
-            val lineItemProductName = lineItem.product.obj.map(_.getNameAndSize).openOr("")
+            val lineItemProductName = lineItem.fleaTick.obj.map(_.getNameAndSize).openOr("")
 
             s"${lineItemPetName} - ${lineItemProductName}"
           }.mkString(". ")

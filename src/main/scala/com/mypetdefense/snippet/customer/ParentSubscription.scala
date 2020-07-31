@@ -1,34 +1,27 @@
-package com.mypetdefense.snippet
-
-import net.liftweb.sitemap.Menu
-import net.liftweb._
-  import http.SHtml._
-  import util._
-  import util.Helpers._
-  import common._
-  import util.ClearClearable
-  import http._
-  import mapper.{By, NullRef}
-  import js._
-  import JsCmds._
+package com.mypetdefense.snippet.customer
 
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.time.{LocalDate, ZoneId}
+import java.util.Date
 
-import com.mypetdefense.model._
-import com.mypetdefense.util.SecurityContext
-import com.mypetdefense.util.Paths._
 import com.mypetdefense.actor._
-import com.mypetdefense.util.ClearNodesIf
-import com.mypetdefense.util.SecurityContext._
+import com.mypetdefense.model._
+import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-  import ValidationService._
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import com.mypetdefense.util.SecurityContext._
+import net.liftweb._
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js._
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
 
 object ParentSubscription extends Loggable {
-  import net.liftweb.sitemap._
-    import Loc._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu = Menu.i("Subscription") / "subscription" >>
     loggedIn >>
@@ -149,7 +142,7 @@ class ParentSubscription extends Loggable {
   }
 
   def render = {
-    val userSubscription = SecurityContext.currentUser.flatMap(_.getSubscription).flatMap(_.refresh)
+    val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
 
     SHtml.makeFormsAjax andThen
     ".subscription a [class+]" #> "current" &
@@ -163,7 +156,7 @@ class ParentSubscription extends Loggable {
   }
 
   def manage = {
-    val userSubscription = SecurityContext.currentUser.flatMap(_.getSubscription).flatMap(_.refresh)
+    val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
 
     var cancelAccount = false
     var pauseAccount = false

@@ -87,12 +87,9 @@ object TPPApi extends RestHelper with Loggable {
     stripeToken: String,
     newUser: Boolean = true
   ) = {
-    val refreshedUser = oldParent.refresh
-    val pets = refreshedUser.map(_.pets.toList).openOr(Nil)
-    val products = pets.flatMap(_.product.obj)
-    val rawPennyCount: Double = products.map { product => 
-      Price.getPricesByCode(product, Price.currentTppPriceCode).map(_.price.get) 
-    }.flatten.foldLeft(0D)(_+_)
+    val parent = oldParent.refresh
+    val pets = parent.map(_.pets.toList).openOr(Nil)
+    val rawPennyCount: Double = pets.size * 12.99
 
     val pennyCount = tryo((rawPennyCount * 100).toInt).openOr(0)
 
@@ -103,7 +100,7 @@ object TPPApi extends RestHelper with Loggable {
         None
     }
 
-    val address = refreshedUser.flatMap(_.addresses.toList.headOption)
+    val address = parent.flatMap(_.addresses.toList.headOption)
 
     val discountAmount = (pets.size - 1) * 100
 
@@ -111,10 +108,6 @@ object TPPApi extends RestHelper with Loggable {
 
     if (pennyCount == 0) {
       logger.error("Penny count is 0. This seems wrong.")
-
-      val prices = products.map { product => 
-        Price.getPricesByCode(product, Price.currentTppPriceCode).map(_.price.get) 
-      }
       
       val errorMsg = s"""
         Something went wrong with price association.
@@ -127,7 +120,7 @@ object TPPApi extends RestHelper with Loggable {
         Price Info:
         ===============
         parent:
-        ${refreshedUser}
+        ${parent}
 
         plan:
         tpp-pennyPlan
@@ -139,14 +132,14 @@ object TPPApi extends RestHelper with Loggable {
         ${rawPennyCount}
         ===============
 
-        Products:
+        Pets:
         ==============
-        ${products}
+        ${pets}
         ==============
 
         Prices
         ==============
-        ${prices}
+        ${12.99}
         ==============
       """
 
@@ -163,7 +156,7 @@ object TPPApi extends RestHelper with Loggable {
     }.getOrElse((0D, 0D))
 
     val stripeCustomer: Future[Box[Customer]] = Customer.create(
-      email = refreshedUser.map(_.email.get),
+      email = parent.map(_.email.get),
       card = Some(stripeToken),
       coupon = couponName
     )
@@ -182,7 +175,7 @@ object TPPApi extends RestHelper with Loggable {
         stripeSubscription onComplete {
           case TrySuccess(Full(subscription)) =>
 
-            val refreshedParent = refreshedUser.flatMap(_.refresh)
+            val refreshedParent = parent.flatMap(_.refresh)
             val updatedParent = refreshedParent.map(_.stripeId(customer.id).saveMe)
 
             val subscriptionId = subscription.id.getOrElse("")
@@ -193,12 +186,20 @@ object TPPApi extends RestHelper with Loggable {
 
             updatedParent.map { user =>
               val mpdSubscription = Subscription.createNewSubscription(
-                user,
+                Full(user),
                 subscriptionId,
                 new Date(),
                 plusOneDayDate,
                 Price.currentTppPriceCode
               )
+
+              val refreshUser = user.subscription(mpdSubscription).saveMe()
+
+              refreshUser.pets.toList.map { pet =>
+                val box = SubscriptionBox.createNewBox(mpdSubscription, pet)
+
+                pet.box(box).saveMe()
+              }
 
               TaggedItem.createNewTaggedItem(
                 subscription = Full(mpdSubscription),
@@ -220,7 +221,7 @@ object TPPApi extends RestHelper with Loggable {
             sendStripeErrorEmail(
               "We did not create a Stripe subscription or an internal subscription.",
               stripeFailure,
-              refreshedUser,
+              parent,
               stripeToken,
               pennyCount,
               couponName,
@@ -234,7 +235,7 @@ object TPPApi extends RestHelper with Loggable {
             sendStripeErrorEmail(
               "We did not create a Stripe subscription or an internal subscription.",
               throwable,
-              refreshedUser,
+              parent,
               stripeToken,
               pennyCount,
               couponName,
@@ -250,7 +251,7 @@ object TPPApi extends RestHelper with Loggable {
         sendStripeErrorEmail(
           "We did not create a Stripe subscription or an internal subscription.",
           Left(stripeFailure),
-          refreshedUser,
+          parent,
           stripeToken,
           pennyCount,
           couponName,
@@ -264,7 +265,7 @@ object TPPApi extends RestHelper with Loggable {
         sendStripeErrorEmail(
           "We did not create a Stripe subscription or an internal subscription.",
           Right(throwable),
-          refreshedUser,
+          parent,
           stripeToken,
           pennyCount,
           couponName,
@@ -298,9 +299,9 @@ object TPPApi extends RestHelper with Loggable {
         case size => size
       }
 
-      val product = Product.find(
-        By(Product.name, sanitizedProductName),
-        By(Product.sizeName, sanitizedSize)
+      val product = FleaTick.find(
+        By(FleaTick.name, sanitizedProductName),
+        By(FleaTick.sizeName, sanitizedSize)
       )
 
     if (product == Empty) {

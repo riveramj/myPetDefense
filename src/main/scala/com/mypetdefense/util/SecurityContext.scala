@@ -3,12 +3,13 @@ package com.mypetdefense.util
 import net.liftweb.http._
 import net.liftweb.common._
 import net.liftweb.util.Helpers._
-
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 import com.mypetdefense.snippet.admin._
 import com.mypetdefense.snippet.petland._
 import com.mypetdefense.snippet.agency._
+import com.mypetdefense.snippet.customer.{AccountOverview, UpgradeAccount}
+import com.mypetdefense.snippet.login.Login
 
 object SecurityContext extends Loggable {
 
@@ -35,7 +36,10 @@ object SecurityContext extends Loggable {
     val possibleRedirect = Paths.intendedPath.is map { redirectLocation =>
       logger.info(s"Redirecting user to ${redirectLocation}.")
       S.redirectTo(redirectLocation)
-    } 
+    }
+
+    val seenPrompt = user.subscription.obj.map(_.promptedUpgrade.get).openOr(false)
+    val upgraded = user.subscription.obj.map(_.subscriptionBoxes.toList.map(_.subscriptionItems.toList.nonEmpty)).openOr(Nil).foldLeft(true)(_ && _)
 
     user.userType.get match {
       case UserType.Admin =>
@@ -44,10 +48,16 @@ object SecurityContext extends Loggable {
           S.redirectTo(adminRedirect(user))
         }
 
-      case UserType.Parent  =>
+      case UserType.Parent if seenPrompt || upgraded =>
         possibleRedirect.openOr {
           logger.info("Redirecting user to AccountOverview.")
           S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
+        }
+
+      case UserType.Parent =>
+        possibleRedirect.openOr {
+          logger.info("Redirecting user to UpgradeAccount.")
+          S.redirectTo(UpgradeAccount.menu.loc.calcDefaultHref)
         }
 
       case UserType.Agent =>

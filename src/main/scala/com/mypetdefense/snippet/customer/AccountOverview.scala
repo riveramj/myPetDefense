@@ -1,30 +1,19 @@
-package com.mypetdefense.snippet
-
-import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.util.ClearClearable
-import net.liftweb.http._
-import net.liftweb.mapper.By
+package com.mypetdefense.snippet.customer
 
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
-import com.mypetdefense.util.Paths._
-import com.mypetdefense.actor._
+import com.mypetdefense.service.ParentService
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.SecurityContext._
-import com.mypetdefense.service.{ParentService, TaxJarService}
-
-import me.frmr.stripe.Discount
+import net.liftweb.common._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
 
 object AccountOverview extends Loggable {
-  import net.liftweb.sitemap._
-    import Loc._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu = Menu.i("Account Overview") / "account-overview" >>
     loggedIn >>
@@ -33,9 +22,9 @@ object AccountOverview extends Loggable {
 
 class AccountOverview extends Loggable {
   val oldUser = currentUser
-  val user = User.find(By(User.userId, oldUser.map(_.userId.get).openOr(0L)))
+  val user = currentUser.flatMap(_.refresh)
   val pets = user.map(_.activePets).openOr(Nil)
-  val subscription = user.flatMap(_.getSubscription).flatMap(_.refresh)
+  val subscription = user.flatMap(_.subscription).flatMap(_.refresh)
   val priceCode = subscription.map(_.priceCode.get).getOrElse("")
 
   val shippingAddress = Address.find(
@@ -86,16 +75,21 @@ class AccountOverview extends Loggable {
     "#page-body-container" #> {
       user.map { parent =>
         val nextShipDate = subscription.map(_.nextShipDate.get)
+        val boxes = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
 
         val petBindings = {
-          ".pet" #> pets.map { pet =>
-            val product = pet.product.obj
-            val priceItem = product.flatMap { item =>
-              Price.getPricesByCode(item, priceCode)
+          ".pet" #> boxes.map { box =>
+            val pet = box.pet.obj
+            val product = box.fleaTick.obj
+            val price = if (SubscriptionBox.possiblePrice(box) == 0D) {
+              product.flatMap { item =>
+                Price.getPricesByCode(item, priceCode).map(_.price.get)
+              }.openOr(0D)
+            } else {
+              SubscriptionBox.possiblePrice(box)
             }
-            val price = priceItem.map(_.price.get).getOrElse(0D)
 
-            ".pet-name *" #> pet.name &
+            ".pet-name *" #> pet.map(_.name.get) &
             ".pet-product *" #> product.map(_.name.get) & 
             ".pet-size *" #> product.map(_.getSizeAndSizeName) &
             ".price *" #> f"$$$price%2.2f"
@@ -104,9 +98,9 @@ class AccountOverview extends Loggable {
 
         "#upcoming-order a [class+]" #> "current" &
         "#user-email *" #> parent.email &
-        ".next-ship-date *" #> nextShipDate.map(dateFormat.format(_)) &
+        ".next-ship-date *" #> nextShipDate.map(dateFormat.format) &
         ".status *" #> subscription.map(_.status.get.toString) &
-        ".next-bill-date *" #> nextBillDate.map(dateFormat.format(_)) &
+        ".next-bill-date *" #> nextBillDate.map(dateFormat.format) &
         "#user-address" #> shippingAddress.map { address =>
           "#name *" #> parent.name &
           "#address-one *" #> address.street1.get &
