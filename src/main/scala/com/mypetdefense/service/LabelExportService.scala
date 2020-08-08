@@ -177,45 +177,6 @@ object LabelExportService extends Loggable {
     createCsvForLabels(csvRows)
   }
 
-  def exportFFLabelSet(orders: List[FriendsFamilyOrder]): Box[LiftResponse] = {
-    val csvRows: List[List[String]] = {
-      val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-
-      {
-        for {
-          order <- orders
-        } yield {
-          order.orderId.get.toString ::
-          dateFormat.format(new Date()) ::
-          "" ::
-          "standard shipping" ::
-          order.name.get ::
-          "" ::
-          order.street1.get ::
-          order.street2.get ::
-          "" ::
-          order.city.get ::
-          order.state.get ::
-          order.zip.get ::
-          "US" ::
-          "" ::
-          "" ::
-          "4" ::
-          "" ::
-          "" ::
-          "" ::
-          "" ::
-          "" ::
-          "" ::
-          "" ::
-          Nil
-        }
-      }
-    }
-
-    createCsvForLabels(csvRows)
-  }
-
   def createCsvForLabels(csvRows: List[List[String]], shipStation: Boolean = false) = {
     val resultingCsv = {
       if (shipStation)
@@ -233,12 +194,6 @@ object LabelExportService extends Loggable {
       Nil,
       200
     ))
-  }
-
-  def exportFriendsFamilyUspsLabels() = {
-    val newOrders = FriendsFamilyOrder.newOrders
-
-    exportFFLabelSet(newOrders)
   }
 
   def exportMpdShipStationLabels(): Box[LiftResponse] = {

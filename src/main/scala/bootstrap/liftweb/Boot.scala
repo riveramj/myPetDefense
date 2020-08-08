@@ -57,9 +57,6 @@ class Boot {
       GrowthRate,
       Review,
       Survey,
-      FriendsFamilyProduct,
-      FriendsFamilyOrder,
-      FriendsFamilyOrderLineItem,
       TreatOrder,
       ItemReconciliation,
       ReconciliationEvent,
@@ -113,8 +110,6 @@ class Boot {
 
     LiftRules.statelessDispatch.append(StripeHook)
     LiftRules.statelessDispatch.append(TPPApi)
-    LiftRules.statelessDispatch.append(FriendsFamilyAPI)
-    LiftRules.statelessDispatch.append(PromikaAPI)
   }
 
   //Bundles
