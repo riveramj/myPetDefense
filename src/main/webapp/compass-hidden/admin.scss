@@ -268,3 +268,10 @@ section.agency {
 .name-address {
   white-space: pre;
 }
+
+
+td.email {
+  overflow: hidden;
+  max-width: 155px;
+  text-overflow: ellipsis;
+}

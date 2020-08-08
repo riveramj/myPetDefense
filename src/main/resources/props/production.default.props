@@ -1,6 +1,6 @@
 [Database]
 db.driver=org.postgresql.Driver
-db.url=jdbc:postgresql://prd-mypetdefense.cega431oqn39.us-west-2.rds.amazonaws.com:5432/mypetdefense
+db.url=jdbc:postgresql://restore-db-mpd.cega431oqn39.us-west-2.rds.amazonaws.com:5432/mypetdefense
 db.user=mypetdefense
 db.password=sVO8&rZakm
 
@@ -17,7 +17,7 @@ secret.key=sk_live_vQ8HuvXBo7v4r1aBFbPGQqsD
 public.key=pk_live_hR6ryn2PwyeLHsRVTPX5EEol
 stripe.base.url=https://dashboard.stripe.com
 
-server.url=http://mypetdefense.com/
+server.url=https://app.mypetdefense.com/
 
 [TaxJar]
 taxjar.api.key=a898d7a70fb3f3d948b7aac38779e42d

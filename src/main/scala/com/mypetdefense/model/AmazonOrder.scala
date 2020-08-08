@@ -30,6 +30,7 @@ class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
   object state extends MappedString(this, 100)
   object zip extends MappedString(this, 100)
   object purchaseDate extends MappedDateTime(this)
+  object animalType extends MappedEnum(this, AnimalType)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }

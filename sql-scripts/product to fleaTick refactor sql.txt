@@ -10,8 +10,6 @@ ALTER TABLE price RENAME COLUMN product TO fleaTick;
 
 ALTER TABLE review RENAME COLUMN product TO fleaTick;
 
-ALTER TABLE shipmentlineitem RENAME COLUMN product TO fleaTick;
 
 ALTER TABLE taggedItem RENAME COLUMN product TO fleaTick;
 
-ALTER TABLE taggedItem RENAME COLUMN product TO fleaTick;
