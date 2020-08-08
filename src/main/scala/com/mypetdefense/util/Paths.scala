@@ -10,11 +10,13 @@ import net.liftweb.util.Props
 import net.liftweb.http._
 import com.mypetdefense.snippet._
 import com.mypetdefense.model._
+import com.mypetdefense.service.{CouponService, PetFlowChoices}
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.snippet.customer._
 import com.mypetdefense.snippet.login._
 import com.mypetdefense.snippet.shop.{TreatCheckout, TreatList}
 import com.mypetdefense.snippet.signup._
+import net.liftweb.mapper.By
 
 object Paths {
 
@@ -52,7 +54,19 @@ object Paths {
     RedirectResponse(Login.menu.loc.calcDefaultHref)
   }
 
+  def applyCouponRedirect(couponCode: String) = {
+    val coupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
+    println(coupon)
+    PetFlowChoices.coupon(coupon)
+    PetFlowChoices.coupon.is
+
+    S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
+  }
+
   val homePage = Menu.i("Home") / "index"
+  val halfOff = Menu.i("50% Off") / "50off" >> EarlyResponse(() => applyCouponRedirect("50off"))
+  val freeMonth = Menu.i("100% Off") / "100off" >> EarlyResponse(() => applyCouponRedirect("100off"))
+
   val termsOfService = Menu.i("Terms of Service") / "terms-of-service"
   
   val thanksPage = Menu.i("Thanks") / "thanks"
@@ -131,6 +145,8 @@ object Paths {
 
   def siteMap = SiteMap(
     homePage,
+    halfOff,
+    freeMonth,
     termsOfService,
     thanksPage,
     billingThanksPage,

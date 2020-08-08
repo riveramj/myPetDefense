@@ -76,33 +76,13 @@ class Boot {
       AmazonOrder
     )
 
-    //DataLoader.loadProducts
-    //DataLoader.loadAdmin
-    //DataLoader.createProductAccessKey
-    //DataLoader.createProducts
-    //DataLoader.createPackaging
-    //DataLoader.addWeightToFleaTick
-    //DataLoader.addWeightToInsert
-    //DataLoader.updateParentNoPets
-    //DataLoader.createFriendsFamilyProducts
-    //DataLoader.updateShipmentShipStationId
-    //DataLoader.updateGeorgiaTaxRates
-    //DataLoader.updateProductSku
-    //DataLoader.loadWelcomeInserts
-    //DataLoader.resetUpcomingBillingCylces
-    //DataLoader.createOneSizeCat
+    DataLoader.loadProducts
+    DataLoader.loadAdmin
+    DataLoader.createProducts
+    DataLoader.defaultSaleCoupons
+
     //DataLoader.loadPetlandInsert
-    //DataLoader.removeFrontlineProduct
-    //DataLoader.createProducts
     //DataLoader.createBasicExistingBoxes
-    //DataLoader.replaceChickenTreat
-    //DataLoader.createNewPetlandStores
-    //DataLoader.createPuppySpot
-    //DataLoader.createBoxedTag
-    //DataLoader.calculateTax
-    //DataLoader.createBoxedTag
-    //DataLoader.renameVegTreat
-    
     //ReportingService.getPetlandCustomersWithStats
 
     // where to search snippet

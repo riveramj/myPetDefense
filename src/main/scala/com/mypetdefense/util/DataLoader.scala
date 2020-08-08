@@ -187,67 +187,6 @@ object DataLoader extends Loggable {
     }
   }
 
-  def updateProductSku = {
-    val productsToUpdate = List(
-      ("Adventure Plus for Cats", AnimalSize.CatMedium, "100011"),
-      ("Adventure Plus for Cats", AnimalSize.CatLarge, "100012"),
-      ("ZoGuard Plus for Cats", AnimalSize.CatSmall, "100011"),
-      ("ZoGuard Plus for Cats", AnimalSize.CatMedium, "100011"),
-      ("ZoGuard Plus for Cats", AnimalSize.CatLarge, "100011"),
-      ("Adventure Plus for Dogs", AnimalSize.DogSmallAdv, "100013"),
-      ("Adventure Plus for Dogs", AnimalSize.DogMediumAdv, "100014"),
-      ("Adventure Plus for Dogs", AnimalSize.DogLargeAdv, "100015"),
-      ("Adventure Plus for Dogs", AnimalSize.DogXLargeAdv, "100016"),
-      ("ZoGuard Plus for Dogs", AnimalSize.DogSmallZo, "100002"),
-      ("ZoGuard Plus for Dogs", AnimalSize.DogMediumZo, "100003"),
-      ("ZoGuard Plus for Dogs", AnimalSize.DogLargeZo, "100004"),
-      ("ZoGuard Plus for Dogs", AnimalSize.DogXLargeZo, "100005"),
-      ("ShieldTec Plus for Dogs", AnimalSize.DogSmallShld, "100007"),
-      ("ShieldTec Plus for Dogs", AnimalSize.DogMediumShld, "100008"),
-      ("ShieldTec Plus for Dogs", AnimalSize.DogLargeShld, "100009"),
-      ("ShieldTec Plus for Dogs", AnimalSize.DogXLargeShld, "100010"),
-    )
-
-    val productSku = FleaTick.find(By(FleaTick.sku, "100011"))
-
-    if (productSku.isEmpty) {
-      for {
-        (productName, size, sku) <- productsToUpdate
-        product <- FleaTick.find(
-          By(FleaTick.name, productName),
-          By(FleaTick.size, size)
-        )
-      } yield {
-        product.sku(sku).saveMe
-      }
-    }
-  }
-
-  def loadWelcomeInserts = {
-    if (Insert.findAll().isEmpty) {
-      Insert.createNewInsert("Welcome Brochure", "450006", .5)
-      Insert.createNewInsert("TPP Registrations Welcome Insert", "450027", .0)
-      Insert.createNewInsert("Petland Welcome Insert", "450028", .0)
-    }
-  }
-
-  def addWeightToInsert = {
-    val inserts = Insert.findAll()
-
-    inserts map { insert =>
-      if (insert.name.get.contains("Insert"))
-        insert.weight(.1).saveMe
-      else
-        insert.weight(.4).saveMe
-    }
-  }
-
-  def loadPetlandInsert = {
-    if (Insert.find(By(Insert.name, "Petland Welcome Insert")).isEmpty) {
-      Insert.createNewInsert("Petland Welcome Insert", "450028", .1)
-    }
-  }
-
   def loadAdmin = {
     val mpdAgency = {
       val possibleMpd = Agency.find(By(Agency.name, "My Pet Defense"))
@@ -274,82 +213,6 @@ object DataLoader extends Loggable {
     }
   }
 
-  def updateParentNoPets = {
-    val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
-
-    parents.map { parent =>
-      val pets = parent.activePets
-
-      if (pets.size == 0)
-        parent.subscription.obj.map(_.status(Status.UserSuspended).saveMe)
-    }
-  }
-
-  def createFriendsFamilyProducts = {
-    val products = List(("511101","ZoGuard Plus for Cats (1.5 lbs and up) 3pk"),("511102","ZoGuard Plus for Dogs (5-22 lbs) 3pk"),("511103","ZoGuard Plus for Dogs (23-44 lbs) 3pk"),("511104","ZoGuard Plus for Dogs (45-88 lbs) 3pk"),("511105","ZoGuard Plus for Dogs (89-132 lbs) 3pk"),("511107","ShieldTec for Cats (1.5 lbs and up) 3pk"),("511112","ShieldTec Plus for Dogs (5-15 lbs) 4pk"),("511113","ShieldTec Plus for Dogs (16-33 lbs) 4pk"),("511114","ShieldTec Plus for Dogs (34-65 lbs) 4pk"),("511115","ShieldTec Plus for Dogs (66+ lbs and up) 4pk"),("511125","Adventure Plus for Cats (5-9 lbs) 4pk"),("511126","Adventure Plus for Cats (9 lbs and up) 4pk"),("511127","Adventure Plus for Dogs (3-10 lbs) 4pk"),("511128","Adventure Plus for Dogs (11-20 lbs) 4pk"),("511129","Adventure Plus for Dogs (21-55 lbs) 4pk"),("511130","Adventure Plus for Dogs (55 lbs and up) 4pk"),("512001","Salvo Flea & Tick Collar for Dogs (Small) 2pk"),("512002","Salvo Flea & Tick Collar for Dogs (Large) 2pk"),("514002","ShieldTec Flea & Tick Pet Spray (16 fl. Oz.)"))
-
-    if (FriendsFamilyProduct.findAll().isEmpty) {
-      products.map { case (sku, description) =>
-        FriendsFamilyProduct.createProduct(sku, description)
-      }
-    }
-  }
-
-  def createProductAccessKey = {
-    val possibleActiveParentsWithoutKey = User.findAll(
-      By(User.userType, UserType.Parent),
-      By(User.status, Status.Active),
-      NullRef(User.productSalesKey)
-    )
-
-    val activeParentsWithoutKey = possibleActiveParentsWithoutKey.filter { parent =>
-      val subscription = parent.subscription.obj
-      val subscriptionIsActive_? = subscription.map(_.status.get == Status.Active).getOrElse(false)
-      val userHasPets_? = parent.activePets.size > 0
-
-      (subscriptionIsActive_? && userHasPets_?)
-    }
-
-    activeParentsWithoutKey.map { parent =>
-      val productKey = KeyService.createProductSalesKey
-
-      parent.productSalesKey(productKey).saveMe
-    }
-  }
-
-  def updateShipmentShipStationId = {
-    val allShipments = Shipment.findAll()
-
-    allShipments.map(_.shipStationOrderId(-1).saveMe)
-  }
-
-  def updateGeorgiaTaxRates = {
-    val activeUsers = User.findAll(
-      By(User.userType, UserType.Parent),
-      NotBy(User.status, Status.Cancelled)
-    )
-
-    for {
-      user <- activeUsers
-      address <- user.shippingAddress
-        if (address.state.get.toLowerCase == "ga")
-      subscription <- user.subscription.obj
-    } yield {
-
-      val stripeId = user.stripeId.get
-      val subscriptionId = subscription.stripeSubscriptionId.get
-
-      val (amount, rate) = TaxJarService.findTaxAmoutAndRate(
-        address.city.get,
-        address.state.get,
-        address.zip.get,
-        12.99
-      )
-
-      ParentService.updateTaxRate(stripeId, subscriptionId, rate, user.email.get)
-    }
-  }
-
   def resetUpcomingBillingCylces = {
     val upcomingSubscriptions = Subscription.findAll(
       BySql(
@@ -373,53 +236,6 @@ object DataLoader extends Loggable {
       Product.createNewProduct("Calming Chews", "calmingChews")
       Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews")
       Product.createNewProduct("Dental Powder", "dentalPowder")
-    }
-  }
-  
-  def createPackaging = {
-    if (Packaging.findAll().isEmpty) {
-      Packaging.createNewPackaging(
-        "Bubble Mailer",
-        0.3,
-        "bubble1234",
-        0,
-        3
-      )
-
-      Packaging.createNewPackaging(
-        "Small Box",
-        2.5,
-        "smallBox1234",
-        0,
-        5
-      )
-
-      Packaging.createNewPackaging(
-        "Large Box",
-        4.5,
-        "largeBox1234",
-        4,
-        8
-      )
-    }
-  }
-
-  def addWeightToFleaTick = {
-    FleaTick.findAll().map(_.weight(0.8).saveMe)
-  }
-
-  def createOneSizeCat = {
-    val oneSizeCat = FleaTick.find(By(FleaTick.size, AnimalSize.CatAllSize))
-    if (oneSizeCat.isEmpty) {
-      FleaTick.createFleaTick(
-        name = "ZoGuard Plus for Cats",
-        animalType = AnimalType.Cat,
-        size = AnimalSize.CatAllSize,
-        sizeName = "All Sizes",
-        imageName = "zoguard/ZoGuard-Plus-cat-2.jpg",
-        weight = 0.8,
-        sku = "100001"
-      )
     }
   }
 
@@ -526,29 +342,26 @@ object DataLoader extends Loggable {
     }
   }
 
-  def renameVegTreat = {
-    val fruitTreats = Product.find(By(Product.name, "Healthy Harvest Fruit and Veggie Mix"))
-
-    fruitTreats.map(_.name("Mind Your Peas Natural Dog Treats").saveMe)
-  }
-
   def createBasicExistingBoxes = {
-    println("in method =========")
     if (SubscriptionBox.findAll().isEmpty) {
       for {
         user <- User.findAll(By(User.userType, UserType.Parent), By(User.status,Status.Active))
-        _ = println("users")
         subscription <- Subscription.find(By(Subscription.user, user)).toList
-        _ = println("subs")
         pet <- subscription.getPets
-        _ = println("pets")
         fleaTick <- FleaTick.find(By(FleaTick.size, pet.size.get), By(FleaTick.animalType, pet.animalType.get))
-        _ = println("flea")
       } yield {
         val box = SubscriptionBox.createBasicBox(subscription, fleaTick, pet)
         pet.box(box).saveMe()
         user.subscription(subscription).saveMe()
       }
+    }
+  }
+
+  def defaultSaleCoupons = {
+    if(Coupon.find(By(Coupon.couponCode, "50off")).isEmpty) {
+      val mpdAgency = Agency.find(By(Agency.name, "My Pet Defense"))
+      CouponService.createCoupon("50off", mpdAgency, "1", "50", "0")
+      CouponService.createCoupon("100off", mpdAgency, "1", "100", "0")
     }
   }
 }

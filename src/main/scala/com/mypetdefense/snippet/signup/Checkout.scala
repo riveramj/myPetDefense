@@ -53,8 +53,14 @@ class Checkout extends Loggable {
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
 
   var stripeToken = ""
-  var coupon: Box[Coupon] = Empty
-  var couponCode = coupon.map(_.couponCode.get).openOr("")
+  var coupon: Box[Coupon] = PetFlowChoices.coupon.is
+  var couponCode = {
+    val possibleCode = coupon.map(_.couponCode.get).openOr("")
+    if(possibleCode == "50off" || possibleCode == "100off")
+      ""
+    else
+      possibleCode
+  }
 
   val pets = completedPets.is
   val petCount = pets.size
