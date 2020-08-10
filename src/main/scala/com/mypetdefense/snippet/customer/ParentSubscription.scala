@@ -19,23 +19,25 @@ import net.liftweb.http.js._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
+import scala.xml.NodeSeq
+
 object ParentSubscription extends Loggable {
   import com.mypetdefense.util.Paths._
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Subscription") / "subscription" >>
+  val menu: Menu.Menuable = Menu.i("Subscription") / "subscription" >>
     loggedIn >>
     parent
 
-  val manageSubscriptionMenu = Menu.i("Manage Subscription") / "manage-subscription" >>
+  val manageSubscriptionMenu: Menu.Menuable = Menu.i("Manage Subscription") / "manage-subscription" >>
     loggedIn >>
     parent
 
-  val confirmCancelMenu = Menu.i("Confirm Cancel") / "confirm-cancel" >>
+  val confirmCancelMenu: Menu.Menuable = Menu.i("Confirm Cancel") / "confirm-cancel" >>
     loggedIn >>
     parent
 
-  val confirmResumeMenu = Menu.param[String](
+  val confirmResumeMenu: Menu.ParamMenuable[String] = Menu.param[String](
       "Confirm Resume",
       "Confirm Resume",
       Full(_),
@@ -44,11 +46,11 @@ object ParentSubscription extends Loggable {
     loggedIn >>
     parent
 
-    val successfulResumeMenu = Menu.i("Subscription Resumed") / "subscription-resumed" >>
+    val successfulResumeMenu: Menu.Menuable = Menu.i("Subscription Resumed") / "subscription-resumed" >>
     loggedIn >>
     parent
 
-  val confirmPauseMenu = Menu.param[String](
+  val confirmPauseMenu: Menu.ParamMenuable[String] = Menu.param[String](
       "Confirm Pause",
       "Confirm Pause",
       Full(_),
@@ -57,13 +59,13 @@ object ParentSubscription extends Loggable {
     loggedIn >>
     parent
 
-    val successfulPauseMenu = Menu.i("Subscription Paused") / "subscription-paused" >>
+    val successfulPauseMenu: Menu.Menuable = Menu.i("Subscription Paused") / "subscription-paused" >>
     loggedIn >>
     parent
   
-    val cancelSurveySubscriptionMenu = Menu.i("Cancellation Survey") / "cancel-survey"
+    val cancelSurveySubscriptionMenu: Menu.Menuable with Menu.WithSlash = Menu.i("Cancellation Survey") / "cancel-survey"
 
-  val surveyCompleteSubscriptionMenu = Menu.i("Survey Complete") / "survey-complete"
+  val surveyCompleteSubscriptionMenu: Menu.Menuable with Menu.WithSlash = Menu.i("Survey Complete") / "survey-complete"
 
   object currentUserSubscription extends SessionVar[Box[Subscription]](Empty)
 }
@@ -71,14 +73,14 @@ object ParentSubscription extends Loggable {
 class ParentSubscription extends Loggable {
   val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-  val user = currentUser
-  val stripeCustomerId = user.map(_.stripeId.get).openOr("")
+  val user: Box[User] = currentUser
+  val stripeCustomerId: String = user.map(_.stripeId.get).openOr("")
 
-  var email = user.map(_.email.get).openOr("")
+  var email: String = user.map(_.email.get).openOr("")
   var oldPassword = ""
   var newPassword = ""
   
-  def updateEmail() = {
+  def updateEmail(): JsCmd = {
     val validateFields = List(
         checkEmail(email, "#email")
       ).flatten
@@ -97,7 +99,7 @@ class ParentSubscription extends Loggable {
     }
   }
 
-  def updatePassword() = {
+  def updatePassword(): JsCmd = {
     val validateFields = List(
         checkEmpty(oldPassword, "#old-password"),
         checkEmpty(newPassword, "#new-password")
@@ -125,7 +127,7 @@ class ParentSubscription extends Loggable {
     }
   }
 
-  def cancelUserAccount() = {
+  def cancelUserAccount(): Nothing = {
     val pets: List[Pet] = user.map(_.pets.toList).openOr(Nil)
 
     pets.map(ParentService.removePet(user, _))
@@ -141,7 +143,7 @@ class ParentSubscription extends Loggable {
     S.redirectTo(ParentSubscription.cancelSurveySubscriptionMenu.loc.calcDefaultHref)
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
 
     SHtml.makeFormsAjax andThen
@@ -155,7 +157,7 @@ class ParentSubscription extends Loggable {
     ".status *" #> userSubscription.map(_.status.get.toString)
   }
 
-  def manage = {
+  def manage: NodeSeq => NodeSeq = {
     val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
 
     var cancelAccount = false
@@ -219,7 +221,7 @@ class ParentSubscription extends Loggable {
     ".continue-account-changes" #> SHtml.ajaxSubmit("Continue", confirmAction _)
   }
 
-  def resumeSubscription = {
+  def resumeSubscription: NodeSeq => NodeSeq = {
     val nextShipDate = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant())
 
     def confirmResume() = {
@@ -246,7 +248,7 @@ class ParentSubscription extends Loggable {
     ".confirm-resume" #> SHtml.ajaxSubmit("Resume Subscription", confirmResume _)
   }
 
-  def successfulResume = {
+  def successfulResume: CssBindFunc = {
     val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
@@ -258,7 +260,7 @@ class ParentSubscription extends Loggable {
     ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
   }
 
-  def pauseSubscription = {
+  def pauseSubscription: NodeSeq => NodeSeq = {
     val nextShipDate = ParentSubscription.confirmPauseMenu.currentValue.openOr("")
 
     def confirmPause() = {
@@ -290,7 +292,7 @@ class ParentSubscription extends Loggable {
     ".confirm-pause" #> SHtml.ajaxSubmit("Pause Subscription", confirmPause _)
   }
 
-  def successfulPause = {
+  def successfulPause: CssBindFunc = {
     val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
@@ -302,7 +304,7 @@ class ParentSubscription extends Loggable {
     ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
   }
 
-  def confirmCancelSubscription = {
+  def confirmCancelSubscription: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     "#user-email *" #> email &
     ".subscription a [class+]" #> "current" &
@@ -310,7 +312,7 @@ class ParentSubscription extends Loggable {
     
   }
 
-  def survey = {
+  def survey: NodeSeq => NodeSeq = {
     val updatedSubscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
 
     var selectedReason = ""

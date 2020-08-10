@@ -8,10 +8,10 @@ import com.mypetdefense.util.TitleCase
 import java.util.Date
 
 class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Long, TreatOrder] {
-  def getSingleton = TreatOrder
+  def getSingleton: KeyedMetaMapper[Long, TreatOrder] = TreatOrder
   object treatOrderId extends MappedLong(this){
     override def dbIndexed_? = true
-    override def defaultValue = generateLongId
+    override def defaultValue: Long = generateLongId
   }
   object user extends MappedLongForeignKey(this, User)
   object firstName extends MappedString(this, 100)
@@ -38,9 +38,9 @@ class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Lo
   object shipmentStatus extends MappedEnum(this, ShipmentStatus)
   object deliveryNotes extends MappedString(this, 100)
 
-  def name = this.firstName.get + " " + this.lastName.get
+  def name: String = this.firstName.get + " " + this.lastName.get
 
-  def refresh = TreatOrder.find(By(TreatOrder.treatOrderId, treatOrderId.get))
+  def refresh: Box[TreatOrder] = TreatOrder.find(By(TreatOrder.treatOrderId, treatOrderId.get))
 }
 
 object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
@@ -54,7 +54,7 @@ object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
     amountPaid: Double,
     taxPaid: Double,
     treats: List[(Product, Int)]
-  ) = {
+  ): TreatOrder = {
     val dateProcessed = new Date()
 
     val newTreatOrder = TreatOrder.create
@@ -82,10 +82,10 @@ object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
 }
 
 class TreatOrderLineItem extends LongKeyedMapper[TreatOrderLineItem] with IdPK {
-  def getSingleton = TreatOrderLineItem
+  def getSingleton: KeyedMetaMapper[Long, TreatOrderLineItem] = TreatOrderLineItem
   object orderLineItemId extends MappedLong(this){
     override def dbIndexed_? = true
-    override def defaultValue = generateLongId
+    override def defaultValue: Long = generateLongId
   }
 
   object order extends MappedLongForeignKey(this, TreatOrder)
@@ -99,7 +99,7 @@ class TreatOrderLineItem extends LongKeyedMapper[TreatOrderLineItem] with IdPK {
   def createTreatOrderLineItems(
                                  treats: List[(Product, Int)],
                                  order: TreatOrder
-  ) = {
+  ): List[TreatOrderLineItem] = {
     treats.map { case (treat, quantity) =>
       TreatOrderLineItem.create
       .quantity(quantity)

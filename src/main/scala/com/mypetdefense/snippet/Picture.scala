@@ -1,16 +1,17 @@
 package com.mypetdefense.snippet
 
 import net.liftweb._
-  import http.SHtml._
-  import util._
-  import util.Helpers._
-  import common._
-  import http._
-  import js._
-  import JsCmds._
-
+import http.SHtml._
+import util._
+import util.Helpers._
+import common._
+import http._
+import js._
+import JsCmds._
 import com.mypetdefense.actor._
 import com.mypetdefense.util.Paths
+
+import scala.xml.NodeSeq
 
 class Picture extends Loggable {
   var name = ""
@@ -19,7 +20,7 @@ class Picture extends Loggable {
   var dogLove = ""
   var instagram = ""
   
-  def sendMessage() = {
+  def sendMessage(): Nothing = {
     EmailActor ! PictureEmail(
       name,
       email,
@@ -31,7 +32,7 @@ class Picture extends Loggable {
     S.redirectTo(Paths.thanksPage.loc.calcDefaultHref)
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".name" #> text(name, name = _) &
     ".dog-name" #> text(dogName, dogName = _) &

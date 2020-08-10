@@ -8,7 +8,7 @@ import net.liftweb.util.Props
 import com.mypetdefense.util.RandomIdGenerator._
 
 class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price] {
-  def getSingleton = Price
+  def getSingleton: KeyedMetaMapper[Long, Price] = Price
   object priceId extends MappedLong(this){
     override def dbIndexed_? = true
   }
@@ -21,7 +21,7 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
     override def defaultValue = new Date()
   }
 
-  def createPrice(priceId: Long, price: Double, code: String, fleaTick: FleaTick, stripeName: String) = {
+  def createPrice(priceId: Long, price: Double, code: String, fleaTick: FleaTick, stripeName: String): Price = {
     Price.create
     .priceId(priceId)
     .price(price)
@@ -32,7 +32,7 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
     .saveMe
   }
 
-  def getPricesByCode(fleaTick: FleaTick, code: String, active: Boolean = true) = {
+  def getPricesByCode(fleaTick: FleaTick, code: String, active: Boolean = true): Box[Price] = {
     Price.find(
       By(Price.fleaTick, fleaTick),
       By(Price.code, code),
@@ -40,7 +40,7 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
     )
   }
 
-  def getDefaultProductPrice(fleaTick: FleaTick, active: Boolean = true) = {
+  def getDefaultProductPrice(fleaTick: FleaTick, active: Boolean = true): Box[Price] = {
     Price.find(
       By(Price.fleaTick, fleaTick),
       By(Price.code, Price.defaultPriceCode),

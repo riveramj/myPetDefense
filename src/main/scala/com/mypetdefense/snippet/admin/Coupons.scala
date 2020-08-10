@@ -1,38 +1,33 @@
 package com.mypetdefense.snippet
 package admin
 
-import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml._
 import net.liftweb.util._
-  import Helpers._
+import Helpers._
 import net.liftweb.common._
-import net.liftweb.util.ClearClearable
 import net.liftweb.http._
-  import js.JsCmds._
-import net.liftweb.mapper.By
-
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.time.{LocalDate, ZoneId}
+import js.JsCmds._
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service.CouponService
 import com.mypetdefense.util.ClearNodesIf
+import net.liftweb.http.js.JsCmd
+
+import scala.xml.{Elem, NodeSeq}
 
 object Coupons extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Coupons") / "admin" / "coupons" >>
+  val menu: Menu.Menuable = Menu.i("Coupons") / "admin" / "coupons" >>
     mpdAdmin >>
     loggedIn
 }
 
 class Coupons extends Loggable {
-  val coupons = Coupon.findAll()
-  val allAgencies = Agency.findAll()
+  val coupons: List[Coupon] = Coupon.findAll()
+  val allAgencies: List[Agency] = Agency.findAll()
 
   var codeName = ""
   var monthCount = "0"
@@ -40,7 +35,7 @@ class Coupons extends Loggable {
   var dollarOff = "0"
   var chosenAgency: Box[Agency] = Empty
 
-  def agencyDropdown = {
+  def agencyDropdown: Elem = {
     SHtml.selectObj(
       allAgencies.map(agency => (agency, agency.name.get)),
       chosenAgency,
@@ -48,7 +43,7 @@ class Coupons extends Loggable {
     )
   }
 
-  def createCoupon = {
+  def createCoupon: JsCmd = {
     val validateFields = (
       List(
         checkEmpty(codeName, "#code-name"),
@@ -69,27 +64,27 @@ class Coupons extends Loggable {
         percentOff,
         dollarOff
       ) match { 
-        case Full(coupon) =>
+        case Full(_) =>
           S.redirectTo(Coupons.menu.loc.calcDefaultHref)
 
         case Empty | Failure(_,_,_) =>
-          Alert("An error has occured. Please try again.")
+          Alert("An error has occurred. Please try again.")
       }
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
   }
 
-  def deleteCoupon(coupon: Coupon)() = {
+  def deleteCoupon(coupon: Coupon)(): Alert = {
     CouponService.deleteCoupon(coupon) match {
       case Full(_) =>
         S.redirectTo(Coupons.menu.loc.calcDefaultHref)
       case _ =>
-        Alert("An error has occured. Please try again.")
+        Alert("An error has occurred. Please try again.")
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".coupons [class+]" #> "current" &
     "#code-name" #> text(codeName, codeName = _) &
@@ -116,10 +111,10 @@ class Coupons extends Loggable {
       }
 
       val monthCount = {
-        if (coupon.freeMonths.get == 0)
+        if (coupon.numberOfMonths.get == 0)
           "-"
         else
-          coupon.freeMonths.get.toString
+          coupon.numberOfMonths.get.toString
       }
 
       ".code *" #> coupon.couponCode &
@@ -128,9 +123,9 @@ class Coupons extends Loggable {
       ".dollar-off *" #> couponDollar &
       ".usage-count *" #> coupon.users.size &
       ".agency *" #> coupon.agency.obj.map(_.name.get) &
-      ".actions .delete" #> ClearNodesIf(coupon.users.size > 0) &
+      ".actions .delete" #> ClearNodesIf(coupon.users.nonEmpty) &
       ".actions .delete [onclick]" #> Confirm(s"Delete ${coupon.couponCode}?",
-        ajaxInvoke(deleteCoupon(coupon) _)
+        ajaxInvoke(deleteCoupon(coupon))
       )
     }
   }

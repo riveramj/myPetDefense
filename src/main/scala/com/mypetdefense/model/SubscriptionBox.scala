@@ -2,15 +2,16 @@ package com.mypetdefense.model
 
 import net.liftweb._
 import mapper._
-
 import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
 
+import net.liftweb.common.Box
+
 class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with OneToMany[Long, SubscriptionBox] {
-  def getSingleton = SubscriptionBox
+  def getSingleton: KeyedMetaMapper[Long, SubscriptionBox] = SubscriptionBox
   object boxId extends MappedLong(this){
     override def dbIndexed_? = true
-    override def defaultValue = generateLongId
+    override def defaultValue: Long = generateLongId
   }
 
   object subscription extends MappedLongForeignKey(this, Subscription)
@@ -23,20 +24,20 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
     override def defaultValue = new Date()
   }
 
-  def refresh = SubscriptionBox.find(By(SubscriptionBox.boxId, boxId.get))
+  def refresh: Box[SubscriptionBox] = SubscriptionBox.find(By(SubscriptionBox.boxId, boxId.get))
 
-  def possiblePrice(subscriptionBox: SubscriptionBox) =
+  def possiblePrice(subscriptionBox: SubscriptionBox): Double =
     if(subscriptionBox.subscriptionItems.toList.nonEmpty)
       subscriptionBox.pet.obj.map(basePrice).openOr(0D)
     else
       0D
 
-  def basePrice(pet: Pet) = pet.size.get match {
+  def basePrice(pet: Pet): Double = pet.size.get match {
     case AnimalSize.DogSmallZo | AnimalSize.DogMediumZo => 24.99
     case AnimalSize.DogLargeZo | AnimalSize.DogXLargeZo => 27.99
   }
 
-  def createNewBox(subscription: Subscription, pet: Pet) = {
+  def createNewBox(subscription: Subscription, pet: Pet): SubscriptionBox = {
     val fleaTick = pet.size.get match {
       case AnimalSize.DogSmallZo => FleaTick.zoGuardSmallDog
       case AnimalSize.DogMediumZo => FleaTick.zoGuardMediumDog
@@ -53,7 +54,7 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
       .saveMe()
   }
 
-  def createBasicBox(subscription: Subscription, fleaTick: FleaTick, pet: Pet) = {
+  def createBasicBox(subscription: Subscription, fleaTick: FleaTick, pet: Pet): SubscriptionBox = {
     SubscriptionBox.create
       .boxId(generateLongId)
       .subscription(subscription)

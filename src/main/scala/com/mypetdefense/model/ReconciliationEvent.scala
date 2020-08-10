@@ -1,18 +1,13 @@
 package com.mypetdefense.model 
 
-import net.liftweb._
-  import mapper._
-  import common._
-  import util._
-
-import com.mypetdefense.util.RandomIdGenerator._
-
-import com.mypetdefense.util.TitleCase
-
 import java.util.Date
 
+import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb._
+import net.liftweb.mapper._
+
 class ReconciliationEvent extends LongKeyedMapper[ReconciliationEvent] with IdPK with OneToMany[Long, ReconciliationEvent] {
-  def getSingleton = ReconciliationEvent
+  def getSingleton: KeyedMetaMapper[Long, ReconciliationEvent] = ReconciliationEvent
   object reconciliationEventId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -22,7 +17,7 @@ class ReconciliationEvent extends LongKeyedMapper[ReconciliationEvent] with IdPK
     override def defaultValue = new Date()
   }
 
-  def createNewReconciliationEvent(eventDate: Date) = {
+  def createNewReconciliationEvent(eventDate: Date): ReconciliationEvent = {
     ReconciliationEvent.create
     .reconciliationEventId(generateLongId)
     .eventDate(eventDate)

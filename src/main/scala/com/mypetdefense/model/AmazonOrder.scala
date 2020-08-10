@@ -9,7 +9,7 @@ import java.util.Date
 import com.mypetdefense.util.RandomIdGenerator._
 
 class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
-  def getSingleton = AmazonOrder
+  def getSingleton: KeyedMetaMapper[Long, AmazonOrder] = AmazonOrder
   object orderId extends MappedLong(this){
     override def dbIndexed_? = true
   }
@@ -53,7 +53,7 @@ class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
     state: String,
     zip: String,
     purchaseDate: Date
-  ) = {
+  ): AmazonOrder = {
     AmazonOrder.create
     .amazonOrderId(amazonOrderId)
     .email(email)

@@ -2,16 +2,14 @@ package com.mypetdefense.snippet
 package inventory
 
 import net.liftweb._
-  import sitemap.Menu
-  import http.SHtml._
-  import http._
-  import js.JsCmds._
-
+import sitemap.Menu
+import http.SHtml._
+import http._
+import js.JsCmds._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
-import net.liftweb.util.ClearNodes
+import net.liftweb.util.{ClearNodes, CssSel}
 import net.liftweb.mapper.By
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -20,13 +18,16 @@ import com.mypetdefense.model._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.actor._
+import net.liftweb.http.js.JsCmd
+
+import scala.xml.NodeSeq
 
 object Reconciliations extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Reconciliations") / "inventory" / "reconciliations" >>
+  val menu: Menu.Menuable = Menu.i("Reconciliations") / "inventory" / "reconciliations" >>
     mpdAdmin >>
     loggedIn
 }
@@ -34,7 +35,7 @@ object Reconciliations extends Loggable {
 class Reconciliations extends Loggable {
   val reconciliationDateFormat = new java.text.SimpleDateFormat("M/d/y")
 
-  val reconciliations = ReconciliationEvent.findAll()
+  val reconciliations: List[ReconciliationEvent] = ReconciliationEvent.findAll()
   
   var newDate = ""
   var chosenItem: Box[InventoryItem] = Empty
@@ -44,7 +45,7 @@ class Reconciliations extends Loggable {
 
   var actualItemCount = ""
   
-  def createReconciliationEvent = {
+  def createReconciliationEvent: JsCmd = {
     val validateFields = List(
       validDate(newDate, reconciliationDateFormat, "#new-date")
     ).flatten
@@ -60,14 +61,14 @@ class Reconciliations extends Loggable {
     }
   }
 
-  def deleteReconciliation(reconciliation: ReconciliationEvent)() = {
+  def deleteReconciliation(reconciliation: ReconciliationEvent)(): Alert = {
     if (reconciliation.delete_!)
       S.redirectTo(Reconciliations.menu.loc.calcDefaultHref)
     else
       Alert("An error has occured. Please try again.")
   }
 
-  def inventoryItemDropdown = {
+  def inventoryItemDropdown: xml.Elem = {
     val inventoryItems = InventoryItem.findAll()
 
     SHtml.ajaxSelectObj(
@@ -80,7 +81,7 @@ class Reconciliations extends Loggable {
   def addItemToReconciliation(
     reconciliationEvent: ReconciliationEvent,
     renderer: IdMemoizeTransform
-  )() = {
+  )(): JsCmd = {
     chosenItem.map { item =>
 
       val expectedCount = item.total.get
@@ -98,7 +99,7 @@ class Reconciliations extends Loggable {
   def reconciliationDetailBindings(
     detailsRenderer: IdMemoizeTransform,
     reconciliation: ReconciliationEvent
-  ) = {
+  ): CssSel = {
     val itemReconciliations = ItemReconciliation.findAll(By(ItemReconciliation.reconciliationEvent, reconciliation))
     
 
@@ -117,7 +118,7 @@ class Reconciliations extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".reconciliation [class+]" #> "current" &
     ".create" #> idMemoize { renderer =>

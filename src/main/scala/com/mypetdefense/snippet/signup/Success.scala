@@ -7,17 +7,19 @@ import net.liftweb.common._
 import net.liftweb.util.ClearNodes
 import net.liftweb.util.Helpers._
 
+import scala.xml.NodeSeq
+
 object Success extends Loggable {
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Success") / "success"
+  val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Success") / "success"
 }
 
 class Success extends Loggable {
   purchased(Full(true))
   purchased.is
 
-  def render() = {
+  def render(): NodeSeq => NodeSeq = {
     if (TreatsFlow.treatShoppingCart.is == Map()) {
       val pets = petCount.is.openOr(0)
       val monthlyTotal = total.is

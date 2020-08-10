@@ -1,22 +1,17 @@
 package com.mypetdefense.service
 
-import net.liftweb._
-  import common._
-  import mapper._
-  import util._
-  import util.Helpers._
-  import net.liftweb.http._
-    import js.JsCmds._
+import java.text.SimpleDateFormat
+import java.util.Date
 
 import com.mypetdefense.model._
-
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime}
-import java.time.format.DateTimeFormatter
+import net.liftweb._
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.mapper._
+import net.liftweb.util.Helpers._
 
 object LabelExportService extends Loggable {
-  val csvHeaders = "Order ID (required)" ::
+  val csvHeaders: List[String] = "Order ID (required)" ::
                      "Order Date" ::
                      "Order Value" ::
                      "Requested Service" ::
@@ -41,7 +36,7 @@ object LabelExportService extends Loggable {
                      "Gift Message" ::
                      Nil
 
-  val shipStationHeaders = "Order #" ::
+  val shipStationHeaders: List[String] = "Order #" ::
                            "Order Created Date" ::
                            "Order Date Paid" ::
                            "Order Total" ::
@@ -87,7 +82,7 @@ object LabelExportService extends Loggable {
                            "Item Marketplace ID" ::
                            Nil
 
-  def legacyInsertCheck(shipment: Shipment) = {
+  def legacyInsertCheck(shipment: Shipment): Boolean = {
     val subscription = shipment.subscription.obj
     val allShipments = subscription.map(_.shipments.toList).openOr(Nil)
 
@@ -97,7 +92,7 @@ object LabelExportService extends Loggable {
     }
   }
 
-  def exportNewUspsLabels() = {
+  def exportNewUspsLabels(): Box[LiftResponse] = {
     val allShipments = ShipmentService.getCurrentPastDueShipments
 
     val newLabels = allShipments.filter { shipment =>
@@ -116,7 +111,7 @@ object LabelExportService extends Loggable {
     exportMPDLabelSet(newLabels)
   }
 
-  def exportExistingUspsLabels() = {
+  def exportExistingUspsLabels(): Box[LiftResponse] = {
     val allShipments = ShipmentService.getCurrentPastDueShipments
 
     val existingLabels = allShipments.filter { shipment =>
@@ -177,46 +172,7 @@ object LabelExportService extends Loggable {
     createCsvForLabels(csvRows)
   }
 
-  def exportFFLabelSet(orders: List[FriendsFamilyOrder]): Box[LiftResponse] = {
-    val csvRows: List[List[String]] = {
-      val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-
-      {
-        for {
-          order <- orders
-        } yield {
-          order.orderId.get.toString ::
-          dateFormat.format(new Date()) ::
-          "" ::
-          "standard shipping" ::
-          order.name.get ::
-          "" ::
-          order.street1.get ::
-          order.street2.get ::
-          "" ::
-          order.city.get ::
-          order.state.get ::
-          order.zip.get ::
-          "US" ::
-          "" ::
-          "" ::
-          "4" ::
-          "" ::
-          "" ::
-          "" ::
-          "" ::
-          "" ::
-          "" ::
-          "" ::
-          Nil
-        }
-      }
-    }
-
-    createCsvForLabels(csvRows)
-  }
-
-  def createCsvForLabels(csvRows: List[List[String]], shipStation: Boolean = false) = {
+  def createCsvForLabels(csvRows: List[List[String]], shipStation: Boolean = false): Some[InMemoryResponse] = {
     val resultingCsv = {
       if (shipStation)
         (List(csvHeaders) ++ csvRows).map(_.mkString(",")).mkString("\n")
@@ -233,12 +189,6 @@ object LabelExportService extends Loggable {
       Nil,
       200
     ))
-  }
-
-  def exportFriendsFamilyUspsLabels() = {
-    val newOrders = FriendsFamilyOrder.newOrders
-
-    exportFFLabelSet(newOrders)
   }
 
   def exportMpdShipStationLabels(): Box[LiftResponse] = {

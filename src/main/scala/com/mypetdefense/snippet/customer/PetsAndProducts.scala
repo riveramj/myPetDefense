@@ -8,31 +8,34 @@ import com.mypetdefense.util.SecurityContext._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
+import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
+
+import scala.xml.{Elem, NodeSeq}
 
 
 object PetsAndProducts extends Loggable {
   import com.mypetdefense.util.Paths._
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Pets and Products") / "pets-products" >>
+  val menu: Menu.Menuable = Menu.i("Pets and Products") / "pets-products" >>
     loggedIn >>
     parent
 }
 
 class PetsAndProducts extends Loggable {
-  val user = currentUser
-  val subscription = user.flatMap(_.subscription.obj)
-  val priceCode = subscription.map(_.priceCode.get).getOrElse("")
+  val user: Box[User] = currentUser
+  val subscription: Box[Subscription] = user.flatMap(_.subscription.obj)
+  val priceCode: String = subscription.map(_.priceCode.get).getOrElse("")
 
   var newPetType: Box[AnimalType.Value] = Empty
   var newPetChosenProduct: Box[FleaTick] = Empty
   var newPetName = ""
 
-  def petTypeDropdown(renderer: IdMemoizeTransform) = {
+  def petTypeDropdown(renderer: IdMemoizeTransform): Elem = {
     SHtml.ajaxSelectObj(
       List(
         (Empty, "Choose Pet"),
@@ -47,7 +50,7 @@ class PetsAndProducts extends Loggable {
     )
   }
 
-  def productDropdown() = {
+  def productDropdown(): Elem = {
     val products = newPetType.map { animal =>
       FleaTick.findAll(By(FleaTick.animalType, animal))
     }.openOr(Nil)
@@ -59,12 +62,12 @@ class PetsAndProducts extends Loggable {
     )
   }
 
-  val boxes = user.flatMap { parent =>
+  val boxes: List[SubscriptionBox] = user.flatMap { parent =>
     parent.subscription.obj.map(_.subscriptionBoxes.toList)
   }.openOr(Nil)
 
 
-  def addPet = {
+  def addPet: JsCmd = {
     val validateFields = List(
       checkEmpty(newPetName, "#new-pet-name")
     ).flatten
@@ -101,7 +104,7 @@ class PetsAndProducts extends Loggable {
     }
   }
 
-  def deletePet(pet: Box[Pet])() = {
+  def deletePet(pet: Box[Pet])(): Alert = {
     ParentService.removePet(user, pet) match {
       case Full(_) =>
         if (Props.mode != Props.RunModes.Pilot) {
@@ -116,7 +119,7 @@ class PetsAndProducts extends Loggable {
     }
   }
 
-  def savePet(pet: Box[Pet], subscriptionBox: SubscriptionBox, name: String, updatedProduct: Box[FleaTick]) = {
+  def savePet(pet: Box[Pet], subscriptionBox: SubscriptionBox, name: String, updatedProduct: Box[FleaTick]): Alert = {
     val updatedPet = (
       for {
         product <- updatedProduct
@@ -138,7 +141,7 @@ class PetsAndProducts extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".pets-products a [class+]" #> "current" &
     "#user-email *" #> user.map(_.email.get) &

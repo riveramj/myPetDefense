@@ -2,16 +2,14 @@ package com.mypetdefense.snippet
 package admin
 
 import net.liftweb._
-  import sitemap.Menu
-  import http.SHtml._
-  import http._
-  import js.JsCmds._
-
+import sitemap.Menu
+import http.SHtml._
+import http._
+import js.JsCmds._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.mapper.By
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -20,22 +18,25 @@ import com.mypetdefense.model._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.actor._
+import net.liftweb.http.js.JsCmd
+
+import scala.xml.{Elem, NodeSeq}
 
 object Users extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Users") / "admin" / "users" >>
+  val menu: Menu.Menuable = Menu.i("Users") / "admin" / "users" >>
     mpdAdmin >>
     loggedIn
 }
 
 class Users extends Loggable {
-  val users = User.findAll(
+  val users: List[User] = User.findAll(
     By(User.status, Status.Active)
   ).filter(_.userType != UserType.Parent)
-  val allAgencies = Agency.findAll()
+  val allAgencies: List[Agency] = Agency.findAll()
 
   var firstName = ""
   var lastName = ""
@@ -43,7 +44,7 @@ class Users extends Loggable {
   var userType: Box[UserType.Value] = Full(UserType.Agent)
   var chosenAgency: Box[Agency] = Empty
   
-  def agencyDropdown = {
+  def agencyDropdown: Elem = {
     SHtml.selectObj(
         allAgencies.map(agency => (agency, agency.name.get)),
         chosenAgency,
@@ -51,7 +52,7 @@ class Users extends Loggable {
       )
   }
 
-  def createUser = {
+  def createUser: JsCmd = {
     val validateFields = List(
       checkEmail(email, "#email"),
       checkEmpty(firstName, "#first-name"),
@@ -85,7 +86,7 @@ class Users extends Loggable {
     }
   }
 
-  def userTypeRadio(renderer: IdMemoizeTransform) = {
+  def userTypeRadio(renderer: IdMemoizeTransform): NodeSeq = {
     ajaxRadio(
       List(UserType.Agent, UserType.Admin), 
       userType, 
@@ -96,7 +97,7 @@ class Users extends Loggable {
     ).toForm
   }
 
-  def deleteUser(user: User)() = {
+  def deleteUser(user: User)(): JsCmd = {
     user.userType match {
       case parent if (parent == UserType.Parent) =>
         Noop
@@ -108,7 +109,7 @@ class Users extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".users [class+]" #> "current" &
     ".create" #> idMemoize { renderer =>

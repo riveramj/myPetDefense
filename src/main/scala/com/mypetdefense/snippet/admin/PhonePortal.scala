@@ -2,16 +2,14 @@ package com.mypetdefense.snippet
 package admin
 
 import net.liftweb._
-  import sitemap.Menu
-  import http.SHtml._
-  import http._
-  import js.JsCmds._
-
+import sitemap.Menu
+import http.SHtml._
+import http._
+import js.JsCmds._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.mapper.By
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -19,14 +17,17 @@ import java.time.{LocalDate, ZoneId}
 import com.mypetdefense.model._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.service._
-  import ValidationService._
+import ValidationService._
+import net.liftweb.http.js.JsCmd
+
+import scala.xml.{Elem, NodeSeq}
 
 object PhonePortal extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Phone Portal") / "admin" / "phone-portal"
+  val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Phone Portal") / "admin" / "phone-portal"
 }
 
 class PhonePortal extends Loggable {
@@ -54,7 +55,7 @@ class PhonePortal extends Loggable {
   var couponCode = ""
   var coupon: Box[Coupon] = None
 
-  def petTypeRadio(renderer: IdMemoizeTransform) = {
+  def petTypeRadio(renderer: IdMemoizeTransform): NodeSeq = {
     ajaxRadio(
       List(AnimalType.Dog, AnimalType.Cat),
       petType,
@@ -69,7 +70,7 @@ class PhonePortal extends Loggable {
     ).toForm
   }
 
-  def productDropdown = {
+  def productDropdown: Elem = {
     val products = petType.map { animal =>
       FleaTick.findAll(By(FleaTick.animalType, animal))
     }.openOr(Nil)
@@ -84,7 +85,7 @@ class PhonePortal extends Loggable {
     )
   }
 
-  def calculateTax(possibleState: String, possibleZip: String) = {
+  def calculateTax(possibleState: String, possibleZip: String): JsCmd = {
     state = possibleState
     zip = possibleZip
 
@@ -102,7 +103,7 @@ class PhonePortal extends Loggable {
     priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     val orderSummary = "#order-details" #> SHtml.idMemoize { renderer =>
       orderSummaryRenderer = Full(renderer)
 
@@ -133,7 +134,7 @@ class PhonePortal extends Loggable {
             "#order-total h3 [class+]" #> "promo" &
             "#order-total .monthly-charge [class+]" #> "promo" &
             "#order-total .monthly-charge *" #> {
-              val freeMonths = coupon.map(_.freeMonths).openOr(0)
+              val freeMonths = coupon.map(_.numberOfMonths).openOr(0)
               if (freeMonths == 1) {
                 s"FREE for first ${freeMonths} month"
               } else {

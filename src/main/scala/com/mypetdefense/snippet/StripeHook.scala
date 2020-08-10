@@ -24,13 +24,13 @@ import dispatch.{Req => DispatchReq, _} , Defaults._
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
 object StripeHook extends StripeHook {
-  override val emailActor = EmailActor
+  override val emailActor: EmailActor = EmailActor
 }
 
 trait StripeHook extends RestHelper with Loggable {
   def emailActor: EmailActor
 
-  def invoicePaymentSucceeded(objectJson: JValue) = {
+  def invoicePaymentSucceeded(objectJson: JValue): Box[OkResponse] = {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
       stripeSubscriptionId <- tryo((objectJson \ "subscription").extract[String]) ?~! "No subscription id."
@@ -115,7 +115,7 @@ trait StripeHook extends RestHelper with Loggable {
     }
   }
 
-  def invoicePaymentFailed(objectJson: JValue) = {
+  def invoicePaymentFailed(objectJson: JValue): Box[OkResponse] = {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
       user <- User.find(By(User.stripeId, stripeCustomerId))
@@ -141,7 +141,7 @@ trait StripeHook extends RestHelper with Loggable {
     }
   }
 
-  def subscriptionPastDue(objectJson: JValue) = {
+  def subscriptionPastDue(objectJson: JValue): Box[OkResponse] = {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
       user <- User.find(By(User.stripeId, stripeCustomerId))

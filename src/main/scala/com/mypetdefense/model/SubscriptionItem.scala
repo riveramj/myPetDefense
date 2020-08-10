@@ -8,10 +8,10 @@ import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
 
 class SubscriptionItem extends LongKeyedMapper[SubscriptionItem] with IdPK {
-  def getSingleton = SubscriptionItem
+  def getSingleton: KeyedMetaMapper[Long, SubscriptionItem] = SubscriptionItem
   object subscriptionItemId extends MappedLong(this){
     override def dbIndexed_? = true
-    override def defaultValue = generateLongId
+    override def defaultValue: Long = generateLongId
   }
 
   object product extends MappedLongForeignKey(this, Product)
@@ -23,14 +23,14 @@ class SubscriptionItem extends LongKeyedMapper[SubscriptionItem] with IdPK {
   def createSubscriptionItem(
                               product: Product,
                               subscriptionBox: SubscriptionBox
-                            ) = {
+                            ): SubscriptionItem = {
     SubscriptionItem.create
       .product(product)
       .subscriptionBox(subscriptionBox)
       .saveMe
   }
 
-  def createFirstBox(subscriptionBox: SubscriptionBox) = {
+  def createFirstBox(subscriptionBox: SubscriptionBox): List[SubscriptionItem] = {
     val products = List(Product.hipAndJoint, Product.calming, Product.multiVitamin, Product.dentalPowder).flatten
     products.map { product =>
       SubscriptionItem.create

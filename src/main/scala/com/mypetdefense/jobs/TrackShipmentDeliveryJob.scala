@@ -1,33 +1,30 @@
 package com.mypetdefense.jobs
 
-import net.liftweb._ 
-  import common._
-  import json._
-    import Extraction._
-  import Xml.{toJson, toXml}
-  import mapper._
-  import util.Helpers.tryo
+import net.liftweb._
+import common._
+import json._
+import Extraction._
+import Xml.{toJson, toXml}
+import mapper._
+import util.Helpers.tryo
+import dispatch._
+import Defaults._
 
-import dispatch._, Defaults._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-
 import scala.collection.concurrent.TrieMap
 import scala.util.{Failure => TryFail, _}
-
-import org.quartz.{CronScheduleBuilder, TriggerBuilder, JobBuilder, JobExecutionContext}
-
+import org.quartz.{CronScheduleBuilder, JobBuilder, JobDetail, JobExecutionContext, Trigger, TriggerBuilder}
 import com.mypetdefense.model._
-  import ShipmentStatus._
-
+import ShipmentStatus._
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 import java.time.{LocalDate, ZoneId}
 import java.time.format.DateTimeFormatter
 
 class TrackShipmentDeliveryJob extends ManagedJob {
-  implicit val formats = DefaultFormats
+  implicit val formats: DefaultFormats.type = DefaultFormats
 
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
     val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
@@ -241,11 +238,11 @@ class TrackShipmentDeliveryJob extends ManagedJob {
 }
 
 object DailyTrackShipmentDeliveryJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[TrackShipmentDeliveryJob])
+  val detail: JobDetail = JobBuilder.newJob(classOf[TrackShipmentDeliveryJob])
     .withIdentity("DailyTrackShipmentDeliveryJob")
     .build()
 
-    val trigger = TriggerBuilder.newTrigger()
+    val trigger: Trigger = TriggerBuilder.newTrigger()
     .withIdentity("DailyTrackShipmentDeliveryJobTrigger")
     .startNow()
     .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 0-8 ? * MON-SAT *"))
@@ -253,11 +250,11 @@ object DailyTrackShipmentDeliveryJob extends TriggeredJob {
 }
 
 object FrequentTrackShipmentDeliveryJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[TrackShipmentDeliveryJob])
+  val detail: JobDetail = JobBuilder.newJob(classOf[TrackShipmentDeliveryJob])
     .withIdentity("FrequentTrackShipmentDeliveryJob")
     .build
 
-  val trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder.newTrigger()
     .withIdentity("FrequentTrackShipmentDeliveryJobTrigger")
     .startNow
     .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 5 minutes

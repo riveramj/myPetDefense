@@ -1,24 +1,23 @@
 package com.mypetdefense.model
 
 import net.liftweb._
-  import mapper._
-  import common._
-  import util._
-    import Helpers.tryo
-
+import mapper._
+import common._
+import util._
+import Helpers.tryo
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.service.TaxJarService
 import com.mypetdefense.service.KeyService._
 import com.mypetdefense.snippet.NewParent
 import com.mypetdefense.util.TitleCase
-
 import org.apache.shiro.crypto.hash.Sha256Hash
 import org.apache.shiro.crypto.SecureRandomNumberGenerator
-
 import java.util.Date
 
+import scala.collection.mutable
+
 class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
-  def getSingleton = User
+  def getSingleton: KeyedMetaMapper[Long, User] = User
   object userId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -49,7 +48,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object addresses extends MappedOneToMany(Address, Address.user)
   object taxRate extends MappedDouble(this)
   object status extends MappedEnum(this, Status) {
-    override def defaultValue = Status.Active
+    override def defaultValue: Status.Value = Status.Active
     override def dbIndexed_? = true
   }
   object createdAt extends MappedDateTime(this) {
@@ -58,13 +57,13 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
 
   def name = s"${firstName} ${lastName}"
 
-  def activePets = pets.filter(_.status.get == Status.Active)
+  def activePets: mutable.Buffer[Pet] = pets.filter(_.status.get == Status.Active)
 
-  def refresh = User.find(By(User.userId, userId.get))
+  def refresh: Box[User] = User.find(By(User.userId, userId.get))
 
-  def petlandData_? = tryo(canSeePetlandData.get).openOr(false)
+  def petlandData_? : Boolean = tryo(canSeePetlandData.get).openOr(false)
 
-  def shippingAddress = {
+  def shippingAddress: Box[Address] = {
     Address.find(
       By(Address.user, this),
       By(Address.addressType, AddressType.Shipping)
@@ -78,7 +77,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
                      password: String,
                      facebookId: String,
                      userType: UserType.Value
-                   ) = {
+                   ): User = {
     val user = (User.find(By(User.email, email)) match {
       case Full(user) => user
       case _ => User.create.userId(generateLongId).productSalesKey(createAccessKey)
@@ -103,7 +102,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     referer: Box[Agency],
     agency: Box[Agency],
     userType: UserType.Value
-  ) = {
+  ): User = {
     val user = User.create
       .userId(generateLongId)
       .firstName(TitleCase(firstName))
@@ -147,7 +146,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     agency: Box[Agency],
     referer: Box[Agency],
     salesAgentId: String
-  ) = {
+  ): User = {
     User.create
       .userId(generateLongId)
       .firstName(TitleCase(firstName))
@@ -166,7 +165,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     parentInfo: NewParent,
     referer: Box[Agency],
     salesAgentId: String = ""
-  ) = {
+  ): User = {
     val possibleLastName = TitleCase(parentInfo.lastName)
     val andLocation = possibleLastName.indexOf(" And ")
 
@@ -196,7 +195,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     firstName: String,
     lastName: String,
     password: String
-  ) = {
+  ): User = {
     val updateduser = user.firstName(TitleCase(firstName)).lastName(TitleCase(lastName))
 
     setUserPassword(updateduser, password)
@@ -213,13 +212,13 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       User.find(By(User.facebookId, facebookId))
   }
 
-  def isCorrectPassword_?(password: String, user: User) = {
+  def isCorrectPassword_?(password: String, user: User): Boolean = {
     user.password.get == hashPassword(password, user.salt.get)
   }
 
   def nameAndEmail = s"${this.name} <${this.email}>"
 
-  def cancel = {
+  def cancel: User = {
     val shipAddress = this.addresses.toList.find(_.addressType.get == AddressType.Shipping)
 
     val address = shipAddress.map { ship =>
@@ -251,7 +250,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       .saveMe
   }
 
-  def getTaxRate = {
+  def getTaxRate: Double = {
     val shippingAddress = this.shippingAddress
     
     tryo(TaxJarService.calculateTaxRate(
@@ -261,7 +260,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     )).openOr(0D)
   }
 
-  def setTaxRate = {
+  def setTaxRate: User = {
     val rate = getTaxRate
 
     this.taxRate(rate).saveMe

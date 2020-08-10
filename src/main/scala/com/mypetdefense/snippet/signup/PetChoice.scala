@@ -5,22 +5,23 @@ import com.mypetdefense.service._
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.http._
+import net.liftweb.util.CssSel
 import net.liftweb.util.Helpers._
 
 object PetChoice extends Loggable {
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Pet Choice") / "pet-choice"
+  val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Pet Choice") / "pet-choice"
 }
 
 class PetChoice extends Loggable {
   import PetFlowChoices._
 
-  def chosenPet = "*" #> {
+  def chosenPet: CssSel = "*" #> {
     petChoice.is.map(_.toString)
   }
 
-  def render = {
+  def render: CssSel = {
     def dogFlow = {
       petChoice(Full(AnimalType.Dog))
 
@@ -36,7 +37,7 @@ class PetChoice extends Loggable {
       if (petId.is.isEmpty)
         petId(Full(generateLongId))
 
-      S.redirectTo(CatSignup.menu.loc.calcDefaultHref)
+      S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
     }
 
     "#dog" #> SHtml.submit("Select", dogFlow _) &

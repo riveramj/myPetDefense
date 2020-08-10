@@ -1,20 +1,17 @@
 package com.mypetdefense.jobs
 
 import net.liftweb._
-  import common._
-  import mapper._
-  import util.Helpers._ 
-
+import common._
+import mapper._
+import util.Helpers._
 import com.mypetdefense.service.ParentService
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-
-import org.quartz.{CronScheduleBuilder, TriggerBuilder, JobBuilder, JobExecutionContext}
-
+import org.quartz.{CronScheduleBuilder, JobBuilder, JobDetail, JobExecutionContext, Trigger, TriggerBuilder}
 import java.util.Date
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime, Period}
+import java.time.{LocalDate, LocalDateTime, Period, ZoneId}
 import java.time.format.DateTimeFormatter
 
 class GrowthNotifyJob extends ManagedJob {
@@ -46,11 +43,11 @@ class GrowthNotifyJob extends ManagedJob {
 }
 
 object OneWeekNotifyGrowthJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[GrowthNotifyJob])
+  val detail: JobDetail = JobBuilder.newJob(classOf[GrowthNotifyJob])
     .withIdentity("OneWeeksNotifyGrowthJob")
     .build()
 
-  val trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder.newTrigger()
     .withIdentity("OneWeeksNotifyGrowthJobTrigger")
     .startNow()
     .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * * *"))
@@ -58,11 +55,11 @@ object OneWeekNotifyGrowthJob extends TriggeredJob {
 }
 
 object FrequentNotifyGrowthJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[GrowthNotifyJob])
+  val detail: JobDetail = JobBuilder.newJob(classOf[GrowthNotifyJob])
     .withIdentity("FrequentNotifyGrowthJob")
     .build
 
-  val trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder.newTrigger()
     .withIdentity("FrequentNotifyGrowthJobTrigger")
     .startNow
     .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 5 minutes

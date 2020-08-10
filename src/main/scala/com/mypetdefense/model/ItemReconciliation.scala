@@ -10,7 +10,7 @@ import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
 
 class ItemReconciliation extends LongKeyedMapper[ItemReconciliation] with IdPK with OneToMany[Long, ItemReconciliation] {
-  def getSingleton = ItemReconciliation
+  def getSingleton: KeyedMetaMapper[Long, ItemReconciliation] = ItemReconciliation
   object itemReconciliationId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -27,7 +27,7 @@ class ItemReconciliation extends LongKeyedMapper[ItemReconciliation] with IdPK w
     event: ReconciliationEvent,
     actualCount: Int,
     expectedCount: Int
-  ) = {
+  ): ItemReconciliation = {
     ItemReconciliation.create
     .itemReconciliationId(generateLongId)
     .reconciliationEvent(event)

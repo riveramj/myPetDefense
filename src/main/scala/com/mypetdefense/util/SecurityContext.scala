@@ -16,7 +16,7 @@ object SecurityContext extends Loggable {
   private object loggedInUserId extends SessionVar[Box[Long]](Empty)
   private object loggedInUser extends SessionVar[Box[User]](Empty)
 
-  def logIn(user: User) = {
+  def logIn(user: User): Unit = {
     loggedInUserId(Full(user.userId.get))
     loggedInUserId.is
 
@@ -26,7 +26,7 @@ object SecurityContext extends Loggable {
     logger.info(s"Logged user in [ ${loggedInUser.is.map(_.email.get).openOr("")} ]")
   }
 
-  def loginRedirectUser(user: User) = {
+  def loginRedirectUser(user: User): Nothing = {
     if (loggedIn_?) {
       logCurrentUserOut()
     }
@@ -72,7 +72,7 @@ object SecurityContext extends Loggable {
     }
   }
 
-  def adminRedirect(user: User) = {
+  def adminRedirect(user: User): String = {
     val agencyName = (for {
       agency <- user.agency.obj
       } yield {
@@ -86,13 +86,13 @@ object SecurityContext extends Loggable {
     }
   }
 
-  def logCurrentUserOut() = {
+  def logCurrentUserOut(): Box[User] = {
     loggedInUserId(Empty)
     loggedInUser(Empty)
   }
 
   def currentUser: Box[User] = loggedInUser.is
-  def currentUserId = loggedInUserId.is.openOr(0)
+  def currentUserId: Long = loggedInUserId.is.openOr(0)
 
   def loggedIn_? : Boolean = {
     currentUser.isDefined

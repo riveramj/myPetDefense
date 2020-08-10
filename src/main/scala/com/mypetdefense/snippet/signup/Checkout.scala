@@ -13,21 +13,23 @@ import me.frmr.stripe.{Customer, StripeExecutor}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
+import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
-import scala.collection.mutable.LinkedHashMap
+import scala.collection.mutable
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
+import scala.xml.NodeSeq
 
 object Checkout extends Loggable {
   import com.mypetdefense.util.Paths._
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Checkout") / "checkout" >>
+  val menu: Menu.Menuable = Menu.i("Checkout") / "checkout" >>
     completedPet >>
     createdAccount
 }
@@ -35,14 +37,14 @@ object Checkout extends Loggable {
 case class PromoCodeMessage(status: String) extends MyPetDefenseEvent("promotion-code-message")
 
 class Checkout extends Loggable {
-  val stripeSecretKey = Props.get("secret.key") openOr ""
-  implicit val e = new StripeExecutor(stripeSecretKey)
+  val stripeSecretKey: String = Props.get("secret.key") openOr ""
+  implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
 
-  val currentUser = SecurityContext.currentUser
-  val email = currentUser.map(_.email.get).openOr("")
+  val currentUser: Box[User] = SecurityContext.currentUser
+  val email: String = currentUser.map(_.email.get).openOr("")
 
-  var firstName = currentUser.map(_.firstName.get).getOrElse("")
-  var lastName = currentUser.map(_.lastName.get).getOrElse("")
+  var firstName: String = currentUser.map(_.firstName.get).getOrElse("")
+  var lastName: String = currentUser.map(_.lastName.get).getOrElse("")
   var street1 = ""
   var street2 = ""
   var city = ""
@@ -53,29 +55,40 @@ class Checkout extends Loggable {
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
 
   var stripeToken = ""
-  var coupon: Box[Coupon] = Empty
-  var couponCode = coupon.map(_.couponCode.get).openOr("")
+  var coupon: Box[Coupon] = PetFlowChoices.coupon.is
+  var couponCode: String = {
+    if(is50Off(coupon))
+      ""
+    else
+      coupon.map(_.couponCode.get.toLowerCase()).openOr("")
+  }
 
-  val pets = completedPets.is
-  val petCount = pets.size
+  val pets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
+  val petCount: Int = pets.size
 
-  val smMedPets = pets.values.count { pet =>
+  val smMedPets: Int = pets.values.count { pet =>
     pet.size.get != AnimalSize.DogLargeZo && pet.size.get != AnimalSize.DogXLargeZo
   }
 
-  val lgXlPets = petCount - smMedPets
+  val lgXlPets: Int = petCount - smMedPets
   
-  val subtotal = (smMedPets * 24.99) + (lgXlPets * 27.99)
-  val discount = petCount match {
+  val subtotal: Double = (smMedPets * 24.99) + (lgXlPets * 27.99)
+  val discount: Double = petCount match {
     case 0 | 1 => 0
     case _ => subtotal * 0.1
   }
-  val promotionAmount = coupon.map(_.percentOff.get).openOr(0).toDouble
-  val subtotalWithDiscount = subtotal - discount - (subtotal * (promotionAmount/100))
+  val promotionAmount: Double = coupon.map(_.percentOff.get).openOr(0).toDouble/100 * subtotal
+  val subtotalWithDiscount: Double = subtotal - discount
 
-  val pennyCount = (subtotal * 100).toInt
+  val pennyCount: Int = (subtotal * 100).toInt
 
-  def validateCouponCode() = {
+  def codeMatchesCoupon(code: String, coupon: Box[Coupon]): Boolean =
+    coupon.map(_.couponCode.get).contains(code)
+
+  def is50Off(coupon:Box[Coupon]): Boolean =
+    codeMatchesCoupon(Coupon.halfOffCouponCode, coupon)
+
+  def validateCouponCode(): JsCmd = {
     val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
 
     if (possibleCoupon.isEmpty) {
@@ -84,14 +97,12 @@ class Checkout extends Loggable {
       coupon = possibleCoupon
       PetFlowChoices.coupon(coupon)
 
-      (
-        PromoCodeMessage("success") &
-        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
-      )
+      PromoCodeMessage("success") &
+      priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
     }
   }
 
-  def calculateTax(possibleState: String, possibleZip: String) = {
+  def calculateTax(possibleState: String, possibleZip: String): JsCmd = {
     state = possibleState
     zip = possibleZip
 
@@ -108,7 +119,7 @@ class Checkout extends Loggable {
     priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
   }
 
-  def signup() = {
+  def signup(): JsCmd = {
     val validateFields = List(
         checkEmpty(firstName, "#first-name"),
         checkEmpty(lastName, "#last-name"),
@@ -151,25 +162,23 @@ class Checkout extends Loggable {
 
       Try(Await.result(stripeCustomer, new DurationInt(7).seconds)) match {
         case TrySuccess(Full(customer)) =>
-          val user = newUserSetup(
-            customer
-          )
+          newUserSetup(customer)
 
           PetFlowChoices.petCount(Full(petCount))
 
-          PetFlowChoices.completedPets(LinkedHashMap.empty)
+          PetFlowChoices.completedPets(mutable.LinkedHashMap.empty)
 
           val total = subtotalWithDiscount + taxDue
           
           PetFlowChoices.total(Full(total))
           
-          PetFlowChoices.freeMonths(coupon.map(_.freeMonths.get))
+          PetFlowChoices.freeMonths(coupon.map(_.numberOfMonths.get))
 
           S.redirectTo(Success.menu.loc.calcDefaultHref)
 
         case TrySuccess(stripeFailure) =>
           logger.error("create customer failed with: " + stripeFailure)
-          Alert(s"An error has occurred ${stripeFailure}. Please Try again.")
+          Alert(s"""An error has occurred $stripeFailure. Please Try again.""")
 
         case TryFail(throwable: Throwable) =>
           logger.error("create customer failed with: " + throwable)
@@ -180,7 +189,7 @@ class Checkout extends Loggable {
     }
   }
 
-  def createNewPets(user: Box[User]) = {
+  def createNewPets(user: Box[User]): List[Pet] = {
     for {
       usr <- user.toList
       pet <- pets.values
@@ -189,7 +198,7 @@ class Checkout extends Loggable {
     }
   }
 
-  def newUserSetup(customer: Customer) = {
+  def newUserSetup(customer: Customer): Box[User] = {
     val stripeId = customer.id
 
     val user = currentUser.map { oldUser =>
@@ -249,32 +258,34 @@ class Checkout extends Loggable {
     userWithSubscription
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     val orderSummary = {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
 
         val monthlyTotal = subtotalWithDiscount + taxDue
+        val todayTotal = subtotalWithDiscount + taxDue - promotionAmount
 
         "#subtotal span *" #> f"$$$subtotal%2.2f" &
         "#discount" #> ClearNodesIf(discount == 0) &
         "#promotion" #> ClearNodesIf(promotionAmount == 0) &
-        "#promotion span *" #> f"$$$promotionAmount%2.2f" &
+        "#promotion span *" #> f"-$$$promotionAmount%2.2f" &
         "#discount span *" #> f"$$$discount%2.2f" &
         "#tax" #> ClearNodesIf(taxDue == 0D) &
         "#tax span *" #> f"$$$taxDue%2.2f" &
         "#monthly-total span *" #> f"$$$monthlyTotal%2.2f" &
         {
-          val freeMonths = coupon.map(_.freeMonths.get).openOr(0)
+          val couponDiscountPercent = coupon.map(_.percentOff.get).openOr(0)
+          val couponMonthCount = coupon.map(_.numberOfMonths.get).openOr(0)
 
-          if(coupon.isEmpty || freeMonths == 0) {
-            "#order span *" #> f"$$$monthlyTotal%2.2f"
+          if(coupon.isEmpty || couponDiscountPercent != 100) {
+            "#order span *" #> f"$$$todayTotal%2.2f"
           } else {
             "#order span *" #> {
-              if (freeMonths == 1) {
+              if (couponMonthCount == 1) {
                 s"First Month Free"
               } else {
-                s"First ${freeMonths} months free"
+                s"""First $couponMonthCount months free"""
               }
             }
           }
@@ -283,7 +294,7 @@ class Checkout extends Loggable {
     }
 
     val successCoupon = {
-      if (!coupon.isEmpty)
+      if (!coupon.isEmpty && !coupon.equals(Coupon.halfOffCoupon))
         "promo-success"
       else
         ""
@@ -299,8 +310,7 @@ class Checkout extends Loggable {
     "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
     "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup) &
-    ".agreement" #> ClearNodesIf(subtotalWithDiscount == 0) &
+    ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup()) &
     ".promotion-info [class+]" #> successCoupon &
     "#promo-code" #> ajaxText(couponCode, couponCode = _) &
     ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() =>

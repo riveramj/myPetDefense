@@ -21,30 +21,32 @@ import scala.language.implicitConversions
 import scala.language.postfixOps
 import java.util.Date
 
+import com.mypetdefense.util.AmazonOrderUploadCsv.Columns
+
 case class AmazonOrders(list: List[AmazonOrder])
 
 object AmazonOrderUploadCsv extends Loggable {
     def parse(source: Array[Byte]): Box[AmazonOrders] = parse(new String(source, StandardCharsets.UTF_8))
 
     object Columns extends Enumeration {
-      val AmazonOrderId = HeaderValue(name="amazon-order-id", default=Failure("missing required amazon-order-id"))
-      val BuyerEmail = HeaderValue(name="buyer-email", default=Failure("missing required buyer-email"))
-      val BuyerPhone = HeaderValue(name="buyer-phone-number", default=Failure("missing required buyer-phone-number"))
-      val ProductName = HeaderValue(name="product-name", default=Failure("missing required product-name"))
-      val QuantityPurchased = HeaderValue(name="quantity-shipped", default=Failure("missing required quantity-shipped"))
-      val ProductPrice = HeaderValue(name="item-price", default=Failure("missing required item-price"))
-      val ProductDiscount = HeaderValue(name="item-promotion-discount", default=Failure("missing required item-promotion-discount"))
-      val Carrier = HeaderValue(name="carrier", default=Failure("missing required carrier"))
+      val AmazonOrderId: HeaderValue = HeaderValue(name="amazon-order-id", default=Failure("missing required amazon-order-id"))
+      val BuyerEmail: HeaderValue = HeaderValue(name="buyer-email", default=Failure("missing required buyer-email"))
+      val BuyerPhone: HeaderValue = HeaderValue(name="buyer-phone-number", default=Failure("missing required buyer-phone-number"))
+      val ProductName: HeaderValue = HeaderValue(name="product-name", default=Failure("missing required product-name"))
+      val QuantityPurchased: HeaderValue = HeaderValue(name="quantity-shipped", default=Failure("missing required quantity-shipped"))
+      val ProductPrice: HeaderValue = HeaderValue(name="item-price", default=Failure("missing required item-price"))
+      val ProductDiscount: HeaderValue = HeaderValue(name="item-promotion-discount", default=Failure("missing required item-promotion-discount"))
+      val Carrier: HeaderValue = HeaderValue(name="carrier", default=Failure("missing required carrier"))
 
-      val Sku = HeaderValue(name="sku", default=Failure("missing required sku"))
-      val PurchaseDate = HeaderValue(name="purchase-date", default=Failure("missing required purchase-date"))
-      val RecipientName = HeaderValue(name="recipient-name", default=Failure("missing required recipient-name"))
-      val ShipAddress1 = HeaderValue(name="ship-address-1", default=Failure("missing required ship-address-1"))
-      val ShipAddress2 = HeaderValue(name="ship-address-2", default=Failure("missing required ship-address-2"))
-      val ShipAddress3 = HeaderValue(name="ship-address-3", default=Failure("missing required ship-address-3"))
-      val ShipCity = HeaderValue(name="ship-city", default=Failure("missing required ship-city"))
-      val ShipState= HeaderValue(name="ship-state", default=Failure("missing required ship-state"))
-      val ShipZip= HeaderValue(name="ship-postal-code", default=Failure("missing required ship-postal-code"))
+      val Sku: HeaderValue = HeaderValue(name="sku", default=Failure("missing required sku"))
+      val PurchaseDate: HeaderValue = HeaderValue(name="purchase-date", default=Failure("missing required purchase-date"))
+      val RecipientName: HeaderValue = HeaderValue(name="recipient-name", default=Failure("missing required recipient-name"))
+      val ShipAddress1: HeaderValue = HeaderValue(name="ship-address-1", default=Failure("missing required ship-address-1"))
+      val ShipAddress2: HeaderValue = HeaderValue(name="ship-address-2", default=Failure("missing required ship-address-2"))
+      val ShipAddress3: HeaderValue = HeaderValue(name="ship-address-3", default=Failure("missing required ship-address-3"))
+      val ShipCity: HeaderValue = HeaderValue(name="ship-city", default=Failure("missing required ship-city"))
+      val ShipState: HeaderValue = HeaderValue(name="ship-state", default=Failure("missing required ship-state"))
+      val ShipZip: HeaderValue = HeaderValue(name="ship-postal-code", default=Failure("missing required ship-postal-code"))
     
 
     case class HeaderValue(
@@ -53,11 +55,11 @@ object AmazonOrderUploadCsv extends Loggable {
         parser: String=>Box[String] = (rawCell: String) => Full(rawCell.trim).filter(_.nonEmpty),
         default: Box[String] = Empty
       ) extends Val(name) {
-      val nameMatcher = matcher openOr ("""(?i)^\s*"""+Pattern.quote(name)+"""\s*$""").r
-      def matches(candidate: String) = {
+      val nameMatcher: Regex = matcher openOr ("""(?i)^\s*"""+Pattern.quote(name)+"""\s*$""").r
+      def matches(candidate: String): Boolean = {
         nameMatcher.unapplySeq(candidate).isDefined
       }
-      def required = {
+      def required: Boolean = {
         default match {
           case Failure(_, _, _) => true
           case _ => false
@@ -65,15 +67,15 @@ object AmazonOrderUploadCsv extends Loggable {
       }
     }
 
-    def requiredColumns = {
+    def requiredColumns: Columns.ValueSet = {
       values.filter(_.required)
     }
 
-    def requiredColumnsCount = {
+    def requiredColumnsCount: Int = {
       requiredColumns.size
     }
 
-    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]) = {
+    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
       requiredColumns.filter(headerIndex.get(_).isEmpty)
     }
 
