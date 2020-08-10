@@ -10,13 +10,17 @@ import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
+import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
+import net.liftweb.util.CssSel
 import net.liftweb.util.Helpers._
+
+import scala.xml.NodeSeq
 
 object TreatCheckout extends Loggable {
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Treat Checkout") / "treat-checkout"
+  val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Treat Checkout") / "treat-checkout"
 }
 
 case object UseNewCard extends MyPetDefenseEvent("use-new-card")
@@ -25,19 +29,19 @@ class TreatCheckout extends Loggable {
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
-  var user = SecurityContext.currentUser
-  var existingUser_? =  if (user.isDefined) true else false
+  var user: Box[User] = SecurityContext.currentUser
+  var existingUser_? : Boolean =  if (user.isDefined) true else false
   var useExistingCard = true
 
-  var email = user.map(_.email.get).openOr("")
-  var firstName = user.map(_.firstName.get).openOr("")
-  var lastName = user.map(_.lastName.get).openOr("")
-  var address = user.flatMap(_.shippingAddress)
-  var street1 = address.map(_.street1.get).openOr("")
-  var street2 = address.map(_.street2.get).openOr("")
-  var city = address.map(_.city.get).openOr("")
-  var state = address.map(_.state.get).openOr("")
-  var zip = address.map(_.zip.get).openOr("")
+  var email: String = user.map(_.email.get).openOr("")
+  var firstName: String = user.map(_.firstName.get).openOr("")
+  var lastName: String = user.map(_.lastName.get).openOr("")
+  var address: Box[Address] = user.flatMap(_.shippingAddress)
+  var street1: String = address.map(_.street1.get).openOr("")
+  var street2: String = address.map(_.street2.get).openOr("")
+  var city: String = address.map(_.city.get).openOr("")
+  var state: String = address.map(_.state.get).openOr("")
+  var zip: String = address.map(_.zip.get).openOr("")
 
   var discountCode = ""
   var discount_? = false
@@ -53,7 +57,7 @@ class TreatCheckout extends Loggable {
 
   var stripeToken = ""
 
-  def findSubtotal = {
+  def findSubtotal: Double = {
     val cart = TreatsFlow.treatShoppingCart.is
 
     cart.map { case (treat, quantity) =>
@@ -61,7 +65,7 @@ class TreatCheckout extends Loggable {
     }.foldLeft(0D)(_+_)
   }
 
-  def calculateTax(possibleState: String, possibleZip: String) = {
+  def calculateTax(possibleState: String, possibleZip: String): JsCmd = {
     state = possibleState
     zip = possibleZip
 
@@ -78,7 +82,7 @@ class TreatCheckout extends Loggable {
     priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
   }
 
-  def validateCouponCode() = {
+  def validateCouponCode(): JsCmd = {
     if (discountCode.toLowerCase == "mpd20") {
       discount_? = true
 
@@ -90,7 +94,7 @@ class TreatCheckout extends Loggable {
       Alert("Invalid discount code.")
   }
 
-  def orderTreat() = {
+  def orderTreat(): JsCmd = {
     val validateFields = List(
         validEmailFormat(email, "#checkout-email"),
         checkEmpty(firstName, "#first-name"),
@@ -185,13 +189,13 @@ class TreatCheckout extends Loggable {
     }
   }
 
-  def useNewCard() = {
+  def useNewCard(): UseNewCard.type = {
     useExistingCard = false
 
     UseNewCard
   }
 
-  def removeTreatFromCart(treat: Product) = {
+  def removeTreatFromCart(treat: Product): JsCmd = {
     val cart = TreatsFlow.treatShoppingCart.is
 
     TreatsFlow.treatShoppingCart(cart - treat)
@@ -202,7 +206,7 @@ class TreatCheckout extends Loggable {
     )
   }
 
-  def updateCartCount(treat: Product, newQuantity: Int) = {
+  def updateCartCount(treat: Product, newQuantity: Int): JsCmd = {
     val cart = TreatsFlow.treatShoppingCart.is
 
     val updatedCart = {
@@ -220,7 +224,7 @@ class TreatCheckout extends Loggable {
     )
   }
 
-  def login = {
+  def login: JsCmd = {
     val loginResult = LoginService.login(email, password, "", true)
 
     if (loginResult == Noop) {
@@ -233,7 +237,7 @@ class TreatCheckout extends Loggable {
     }
   }
 
-  val loginBindings = {
+  val loginBindings: CssSel = {
     ".login-popover-container" #> SHtml.idMemoize { renderer =>
       loginRenderer = Full(renderer)
       val user = SecurityContext.currentUser
@@ -247,7 +251,7 @@ class TreatCheckout extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     val orderSummary = {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)

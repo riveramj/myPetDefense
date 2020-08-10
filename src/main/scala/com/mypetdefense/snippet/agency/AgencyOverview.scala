@@ -5,23 +5,23 @@ import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
-import net.liftweb.util.ClearClearable
+import net.liftweb.util.{ClearClearable, CssSel}
 import net.liftweb.http._
-  import js.JsCmds._
+import js.JsCmds._
 import net.liftweb.mapper.By
-
-import com.mypetdefense.model._
+import com.mypetdefense.model.{Status, _}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service.{CouponService, ReportingService}
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
-
 import java.text.SimpleDateFormat
-
 import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime}
+import java.time.{LocalDate, LocalDateTime, ZoneId}
 import java.time.format.DateTimeFormatter
 
+import net.liftweb.http.js.JsCmd
+
 import scala.collection.immutable.ListMap
+import scala.xml.Elem
 
 case class UpdateChartData(chartName: String, newData: Array[Int], newLabels: Array[String] = Array()) extends MyPetDefenseEvent("update-chart-data")
 
@@ -36,11 +36,11 @@ object AgencyOverview extends Loggable {
     } 
   }
   
-  val menu = Menu.i("Agency Overview") / "agency" / "agency-overview" >>
+  val menu: Menu.Menuable = Menu.i("Agency Overview") / "agency" / "agency-overview" >>
     adminUser >>
     loggedIn
 
-  val exportAgencyCustomerMenu = Menu.param[String](
+  val exportAgencyCustomerMenu: Menu.ParamMenuable[String] = Menu.param[String](
     "Agency Customers Export",
     "Agency Customers Export",
     Full(_),
@@ -52,16 +52,16 @@ object AgencyOverview extends Loggable {
 }
 
 class AgencyOverview extends Loggable {
-  val currentUser = SecurityContext.currentUser
+  val currentUser: Box[User] = SecurityContext.currentUser
   val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
   val chartDateFormat = new SimpleDateFormat("MM")
   val chartDateFormatName = new SimpleDateFormat("MMM")
 
-  val allUsers = User.findAll(
+  val allUsers: List[User] = User.findAll(
     By(User.userType, UserType.Parent)
   )
 
-  val agencies = {
+  val agencies: List[Agency] = {
     if (currentUser.map(_.petlandData_?).openOr(false)) {
       Agency.findAll(By(Agency.petlandStore, true))
     } else {
@@ -73,11 +73,11 @@ class AgencyOverview extends Loggable {
   var dateFilterTransform: Box[IdMemoizeTransform] = Empty
   var agencyRenderer: Box[IdMemoizeTransform] = Empty
 
-  def updateAgencyName = {
+  def updateAgencyName: String = {
     chosenAgency.map(_.name.get).getOrElse("All Stores")
   }
 
-  def updateAgencyUsers = {
+  def updateAgencyUsers: List[User] = {
     if (chosenAgency.isEmpty) {
       agencies.map { agency =>
         allUsers.filter(_.referer.obj == Full(agency))
@@ -94,36 +94,36 @@ class AgencyOverview extends Loggable {
       agencies.headOption
   }
 
-  var agencyName = updateAgencyName
-  var users = updateAgencyUsers
+  var agencyName: String = updateAgencyName
+  var users: List[User] = updateAgencyUsers
   
-  def allSubscriptions = users.flatMap(_.subscription.obj)
-  def allShipments = allSubscriptions.flatMap(_.shipments.toList)
+  def allSubscriptions: List[Subscription] = users.flatMap(_.subscription.obj)
+  def allShipments: List[Shipment] = allSubscriptions.flatMap(_.shipments.toList)
 
-  def usersByStatus = users.groupBy(_.status.get)
-  def activeUsers = tryo(usersByStatus(Status.Active)).openOr(Nil)
-  def activeUserCount = activeUsers.size
-  def inactiveUserCount = users.size - activeUserCount
+  def usersByStatus: Map[Status.Value, List[User]] = users.groupBy(_.status.get)
+  def activeUsers: List[User] = tryo(usersByStatus(Status.Active)).openOr(Nil)
+  def activeUserCount: Int = activeUsers.size
+  def inactiveUserCount: Int = users.size - activeUserCount
 
-  def activeUserSubscription = users.flatMap(_.subscription.obj)
-  def activeShipments = activeUserSubscription.flatMap(_.shipments.toList)
+  def activeUserSubscription: List[Subscription] = users.flatMap(_.subscription.obj)
+  def activeShipments: List[Shipment] = activeUserSubscription.flatMap(_.shipments.toList)
 
-  def usersWithName = users.map(updateUserName)
+  def usersWithName: List[User] = users.map(updateUserName)
 
-  def shipmentsByMonth = allShipments.map(_.dateProcessed.get).map(chartDateFormat.format).map(toInt).groupBy(identity).mapValues(_.size)
+  def shipmentsByMonth: Map[Int, Int] = allShipments.map(_.dateProcessed.get).map(chartDateFormat.format).map(toInt).groupBy(identity).mapValues(_.size)
 
-  def adjustedShipmentsByMonth = shipmentsByMonth + (12 -> activeUserCount)
+  def adjustedShipmentsByMonth: Map[Int, Int] = shipmentsByMonth + (12 -> activeUserCount)
 
-  def shipmentsByMonthSorted = ListMap(adjustedShipmentsByMonth.toSeq.sortBy(_._1):_*)
+  def shipmentsByMonthSorted: ListMap[Int, Int] = ListMap(adjustedShipmentsByMonth.toSeq.sortBy(_._1):_*)
 
-  def allShipmentsByMonthLabel = shipmentsByMonthSorted.keys.toArray.map { month =>
+  def allShipmentsByMonthLabel: Array[String] = shipmentsByMonthSorted.keys.toArray.map { month =>
     chartDateFormatName.format(chartDateFormat.parse(month.toString))
   }
 
   var monthDateFilter = "All Months"
-  var storeIdFilter = chosenAgency.map(_.agencyId.get).openOr(-1L).toString
+  var storeIdFilter: String = chosenAgency.map(_.agencyId.get).openOr(-1L).toString
 
-  def storeDropdown = {
+  def storeDropdown: xml.Elem = {
     val agencyList = {
       if (agencies.size == 1) {
         agencies.map(agency => (agency.agencyId.get.toString, agency.name.get))
@@ -157,7 +157,7 @@ class AgencyOverview extends Loggable {
     )
   }
 
-  def dateFilterMonthDropdown = {
+  def dateFilterMonthDropdown: Elem = {
     SHtml.ajaxSelect(
       List(("All Months", "All Months")) ++ allShipmentsByMonthLabel.map(month => (month, month)),
       Full(monthDateFilter),
@@ -171,14 +171,14 @@ class AgencyOverview extends Loggable {
     )
   }
 
-  def findStatus(status: Status.Value) = {
+  def findStatus(status: Status.Value): String = {
     if (status == Status.Active)
       "Active"
     else 
       "Inactive"
   }
 
-  def updateUserName(parent: User) = {
+  def updateUserName(parent: User): User = {
     if (parent.status == Status.Cancelled) {
       val cancelledUser = findCancelledUserName(parent)
       parent
@@ -189,13 +189,13 @@ class AgencyOverview extends Loggable {
     }
   }
 
-  def findCancelledUserName(parent: User) = {
+  def findCancelledUserName(parent: User): Box[CancelledUser] = {
     CancelledUser.find(By(CancelledUser.user, parent.userId.get))
   }
 
-  def currentDate = LocalDateTime.now()
+  def currentDate: LocalDateTime = LocalDateTime.now()
   
-  def getDateRange(month: String) = {
+  def getDateRange(month: String): LocalDateTime = {
     if (month == "") {
       currentDate
     } else {
@@ -203,11 +203,11 @@ class AgencyOverview extends Loggable {
     }
   }
 
-  def getProcessDateOfShipment(shipment: Shipment) = {
+  def getProcessDateOfShipment(shipment: Shipment): LocalDate = {
     shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
-  def findCurrentMonthShipment(shipment: Shipment, month: String = "") = {
+  def findCurrentMonthShipment(shipment: Shipment, month: String = ""): Boolean = {
     val date = getDateRange(month)
 
     val processedDate = getProcessDateOfShipment(shipment)
@@ -218,26 +218,26 @@ class AgencyOverview extends Loggable {
     )
   }
 
-  def findCurrentYearSubscriptionSignup(subscription: Subscription) = {
+  def findCurrentYearSubscriptionSignup(subscription: Subscription): Boolean = {
     val signupDate = subscription.startDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
 
     signupDate.getYear == currentDate.getYear
   }
 
-  def findCurrentMonthSubscriptionSignup(subscription: Subscription) = {
+  def findCurrentMonthSubscriptionSignup(subscription: Subscription): Boolean = {
     val signupDate = subscription.startDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
 
     signupDate.getMonth == currentDate.getMonth
   }
 
-  def convertMonthToDate(month: String) = {
+  def convertMonthToDate(month: String): LocalDateTime = {
     val dateFormat = new SimpleDateFormat("MMMM yyyy")
     val monthDate = dateFormat.parse(s"$month 2018") //TODO: dynanmic year
 
     monthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
   }
 
-  def updateCharts = {
+  def updateCharts: JsCmd = {
     val activeUserSignupDates = activeUserSubscription.map(_.startDate.get)
 
     val activeUsersSignupByMonth = activeUserSignupDates.map(chartDateFormat.format).map(toInt).groupBy(identity).mapValues(_.size)
@@ -317,7 +317,7 @@ class AgencyOverview extends Loggable {
     )
   }
 
-  def snapShotBindings = {
+  def snapShotBindings: CssSel = {
     val currentMonthSubscriptionShipments = {
       for {
         subscription <- allSubscriptions
@@ -357,7 +357,7 @@ class AgencyOverview extends Loggable {
     ".ytd-commission-earned *" #> s"$$$ytdCommission"
   }
 
-  def petBindings = {
+  def petBindings: CssSel = {
     val parent = currentParent
     val pets = parent.map(_.pets.toList).openOr(Nil)
 
@@ -368,7 +368,7 @@ class AgencyOverview extends Loggable {
     }
   }
 
-  def render = {
+  def render: CssSel = {
     ".overview [class+]" #> "current" &
     "#item-container" #> SHtml.idMemoize { agencyRender =>
       agencyRenderer = Full(agencyRender)

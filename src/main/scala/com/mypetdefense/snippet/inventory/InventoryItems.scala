@@ -2,16 +2,14 @@ package com.mypetdefense.snippet
 package inventory
 
 import net.liftweb._
-  import sitemap.Menu
-  import http.SHtml._
-  import http._
-  import js.JsCmds._
-
+import sitemap.Menu
+import http.SHtml._
+import http._
+import js.JsCmds._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
-import net.liftweb.util.ClearNodes
+import net.liftweb.util.{ClearNodes, CssSel}
 import net.liftweb.mapper.By
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -21,19 +19,22 @@ import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.service.InventoryService
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.actor._
+import net.liftweb.http.js.JsCmd
+
+import scala.xml.{Elem, NodeSeq}
 
 object InventoryItems extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Inventory Items") / "inventory" / "items" >>
+  val menu: Menu.Menuable = Menu.i("Inventory Items") / "inventory" / "items" >>
     mpdAdmin >>
     loggedIn
 }
 
 class InventoryItems extends Loggable {
-  val inventoryItems = InventoryItem.findAll()
+  val inventoryItems: List[InventoryItem] = InventoryItem.findAll()
   
   var newItemNumber = ""
   var newDescription = ""
@@ -43,7 +44,7 @@ class InventoryItems extends Loggable {
   var itemRenderer: Box[IdMemoizeTransform] = Empty
   var currentItem: Box[InventoryItem] = Empty
   
-  def createItem = {
+  def createItem: JsCmd = {
     val validateFields = List(
       checkEmpty(newItemNumber, "#new-item-number"),
       checkEmpty(newDescription, "#new-description"),
@@ -71,14 +72,14 @@ class InventoryItems extends Loggable {
     }
   }
 
-  def deleteItem(item: InventoryItem)() = {
+  def deleteItem(item: InventoryItem)(): Alert = {
     if (item.delete_!)
       S.redirectTo(InventoryItems.menu.loc.calcDefaultHref)
     else
       Alert("An error has occured. Please try again.")
   }
 
-  def updateItem(partValue: String, partName: String, item: InventoryItem) = {
+  def updateItem(partValue: String, partName: String, item: InventoryItem): JsCmd = {
     var badCount = false
 
     partName match {
@@ -120,7 +121,7 @@ class InventoryItems extends Loggable {
     adjustmentType: String,
     item: InventoryItem,
     detailsRenderer: IdMemoizeTransform
-  )() = {
+  )(): JsCmd = {
     val count = item.total.get
 
     adjustmentType match {
@@ -134,7 +135,7 @@ class InventoryItems extends Loggable {
     detailsRenderer.setHtml
   }
 
-  def unitOfMeasureDropdown = {
+  def unitOfMeasureDropdown: Elem = {
     val possibleUnits = List(UnitOfMeasure.Each, UnitOfMeasure.Carton)
 
     SHtml.selectObj(
@@ -144,7 +145,7 @@ class InventoryItems extends Loggable {
     )
   }
 
-  def inventoryItemDetailBindings(detailsRenderer: IdMemoizeTransform, item: InventoryItem) = {
+  def inventoryItemDetailBindings(detailsRenderer: IdMemoizeTransform, item: InventoryItem): CssSel = {
     val itemNumber = item.itemNumber.get
     val description = item.description.get
     val count = item.total.toString
@@ -154,7 +155,7 @@ class InventoryItems extends Loggable {
       ".change-count" #> ajaxText(count, possibleCount => updateItem(possibleCount, "count", item))
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".inventory-items [class+]" #> "current" &
     ".create" #> idMemoize { renderer =>

@@ -22,7 +22,7 @@ object Paths {
 
   object intendedPath extends SessionVar[Box[String]](Empty)
 
-  def storeAndRedirect = {
+  def storeAndRedirect: RedirectResponse = {
     intendedPath(S.request.map { req =>
       val path = req.path
       val pathString =
@@ -54,7 +54,7 @@ object Paths {
     RedirectResponse(Login.menu.loc.calcDefaultHref)
   }
 
-  def applyCouponRedirect(couponCode: String) = {
+  def applyCouponRedirect(couponCode: String): Nothing = {
     val coupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
     println(coupon)
     PetFlowChoices.coupon(coupon)
@@ -63,78 +63,78 @@ object Paths {
     S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
   }
 
-  val homePage = Menu.i("Home") / "index"
-  val halfOff = Menu.i("50% Off") / "50off" >> EarlyResponse(() => applyCouponRedirect("50off"))
-  val freeMonth = Menu.i("100% Off") / "100off" >> EarlyResponse(() => applyCouponRedirect("100off"))
+  val homePage: Menu.Menuable with Menu.WithSlash = Menu.i("Home") / "index"
+  val halfOff: Menu.Menuable = Menu.i("50% Off") / "50off" >> EarlyResponse(() => applyCouponRedirect("50off"))
+  val freeMonth: Menu.Menuable = Menu.i("100% Off") / "100off" >> EarlyResponse(() => applyCouponRedirect("100off"))
 
-  val termsOfService = Menu.i("Terms of Service") / "terms-of-service"
+  val termsOfService: Menu.Menuable with Menu.WithSlash = Menu.i("Terms of Service") / "terms-of-service"
   
-  val thanksPage = Menu.i("Thanks") / "thanks"
-  val billingThanksPage = Menu.i("Success!") / "update-success"
+  val thanksPage: Menu.Menuable with Menu.WithSlash = Menu.i("Thanks") / "thanks"
+  val billingThanksPage: Menu.Menuable with Menu.WithSlash = Menu.i("Success!") / "update-success"
 
-  val testimonial = Menu.i("Review") / "testimonial" >>
+  val testimonial: Menu.Menuable = Menu.i("Review") / "testimonial" >>
     TemplateBox(() => Templates("testimonial" :: Nil))
 
-  val pictureRelease = Menu.i("Picture Release") / "picture" >>
+  val pictureRelease: Menu.Menuable = Menu.i("Picture Release") / "picture" >>
     TemplateBox(() => Templates("picture" :: Nil))
 
-  val loggedIn = If(
+  val loggedIn: If = If(
     () => SecurityContext.loggedIn_?,
     storeAndRedirect _
   )
 
-  val adminUser = If(
+  val adminUser: If = If(
     () => SecurityContext.admin_?,
     storeAndRedirect _
   )
 
-  val mpdAdmin = If(
+  val mpdAdmin: If = If(
     () => SecurityContext.mpdAdmin_?,
     storeAndRedirect _
   )
 
-  val agentUser = If(
+  val agentUser: If = If(
     () => SecurityContext.agent_?,
     storeAndRedirect _
   )
 
-  val parent = If(
+  val parent: If = If(
     () => SecurityContext.parent_?,
     storeAndRedirect _
   )
 
-  val agentOrAdmin = If(
+  val agentOrAdmin: If = If(
     () => (SecurityContext.admin_? || SecurityContext.agent_?),
     storeAndRedirect _
   )
 
-  val notLoggedIn = If(
+  val notLoggedIn: If = If(
     () => ! SecurityContext.loggedIn_?,
     RedirectResponse("/logout")
   )
 
-  val finishedCheckout = If(
+  val finishedCheckout: If = If(
     () => !total.is.isEmpty,
     RedirectResponse(Checkout.menu.loc.calcDefaultHref)
   )
 
-  val petChosen = If(
+  val petChosen: If = If(
     () => !petChoice.is.isEmpty,
     RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
   )
 
-  val completedPet = If(
+  val completedPet: If = If(
     () => completedPets.nonEmpty,
     () => RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
   )
 
 
-  val createdAccount = If(
+  val createdAccount: If = If(
     () => SecurityContext.loggedIn_?,
     () => RedirectResponse(CreateAccount.menu.loc.calcDefaultHref)
   )
 
-  def serverUrl = {
+  def serverUrl: String = {
     val hostUrl = Props.get("server.url") openOr "http://localhost:8080/"
 
     if (hostUrl.endsWith("/"))
@@ -143,7 +143,7 @@ object Paths {
       hostUrl
   }
 
-  def siteMap = SiteMap(
+  def siteMap: SiteMap = SiteMap(
     homePage,
     halfOff,
     freeMonth,
@@ -160,7 +160,6 @@ object Paths {
     LandingPage.olympics,
     LandingPage.atlantaExpo,
     LandingPage.firstMonthFree,
-    CartReview.menu,
     CreateAccount.menu,
     Checkout.menu,
     Success.menu,
@@ -222,7 +221,6 @@ object Paths {
     inventory.InventoryChangeAudits.menu,
     inventory.ItemProduction.menu,
     petland.NewOrder.menu,
-    CatSignup.menu,
     PetChoice.menu,
     DogDetails.menu,
   )

@@ -7,38 +7,40 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.ParentService
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.SecurityContext._
+import me.frmr.stripe.UpcomingInvoice
 import net.liftweb.common._
 import net.liftweb.mapper.By
+import net.liftweb.util.CssSel
 import net.liftweb.util.Helpers._
 
 object AccountOverview extends Loggable {
   import com.mypetdefense.util.Paths._
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Account Overview") / "account-overview" >>
+  val menu: Menu.Menuable = Menu.i("Account Overview") / "account-overview" >>
     loggedIn >>
     parent
 }
 
 class AccountOverview extends Loggable {
-  val oldUser = currentUser
-  val user = currentUser.flatMap(_.refresh)
-  val pets = user.map(_.activePets).openOr(Nil)
-  val subscription = user.flatMap(_.subscription).flatMap(_.refresh)
-  val priceCode = subscription.map(_.priceCode.get).getOrElse("")
+  val oldUser: Box[User] = currentUser
+  val user: Box[User] = currentUser.flatMap(_.refresh)
+  val pets: Seq[Pet] = user.map(_.activePets).openOr(Nil)
+  val subscription: Box[Subscription] = user.flatMap(_.subscription).flatMap(_.refresh)
+  val priceCode: String = subscription.map(_.priceCode.get).getOrElse("")
 
-  val shippingAddress = Address.find(
+  val shippingAddress: Box[Address] = Address.find(
     By(Address.user, user),
     By(Address.addressType, AddressType.Shipping)
   )
 
   val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
 
-  val stripeCustomerId = user.map(_.stripeId.get).openOr("")
+  val stripeCustomerId: String = user.map(_.stripeId.get).openOr("")
 
-  val upcomingInvoice = ParentService.getUpcomingInvoice(stripeCustomerId)
+  val upcomingInvoice: Box[UpcomingInvoice] = ParentService.getUpcomingInvoice(stripeCustomerId)
 
-  val productSubtotal = upcomingInvoice.map(_.subtotal/100D).openOr(0D)
+  val productSubtotal: Double = upcomingInvoice.map(_.subtotal/100D).openOr(0D)
 
   val discount: Box[Double] = {
     for {
@@ -58,20 +60,20 @@ class AccountOverview extends Loggable {
     }
   }
 
-  val discountAmount = discount match {
+  val discountAmount: String = discount match {
     case Full(discount) if discount > 0 => f"-$$$discount%2.2f"
     case _ => "-$0.00"
   }
 
-  val taxDue = upcomingInvoice.flatMap(_.tax.map(_.toDouble/100D)).openOr(0D)
-  val totalDue = upcomingInvoice.map(_.amountDue.toDouble/100D).openOr(0D)
-  val nextBillDateRaw = upcomingInvoice.map(_.date)
+  val taxDue: Double = upcomingInvoice.flatMap(_.tax.map(_.toDouble/100D)).openOr(0D)
+  val totalDue: Double = upcomingInvoice.map(_.amountDue.toDouble/100D).openOr(0D)
+  val nextBillDateRaw: Box[Long] = upcomingInvoice.map(_.date)
 
-  val nextBillDate = nextBillDateRaw.map { date =>
+  val nextBillDate: Box[Date] = nextBillDateRaw.map { date =>
     new Date(date * 1000)
   }
 
-  def render = {
+  def render: CssSel = {
     "#page-body-container" #> {
       user.map { parent =>
         val nextShipDate = subscription.map(_.nextShipDate.get)

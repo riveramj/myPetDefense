@@ -1,19 +1,19 @@
 package com.mypetdefense.service
 
-import net.liftweb._ 
-  import common._
-  import http.S
-  import util.Helpers._
-  import mapper.By
-
+import net.liftweb._
+import common._
+import http.S
+import util.Helpers._
+import mapper.By
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
-
 import java.util.Date
 import java.text.SimpleDateFormat
 
+import scala.util.matching.Regex
+
 object ValidationService extends Loggable {
- val emailRegex = """^([^@]+)@([^@]+\.([^@].?)+)$""".r
+ val emailRegex: Regex = """^([^@]+)@([^@]+\.([^@].?)+)$""".r
 
   def checkEmpty(fieldValue: Option[String], fieldId: String): Box[ValidationError] = {
     checkEmpty(fieldValue getOrElse "", fieldId)
@@ -135,7 +135,7 @@ object ValidationService extends Loggable {
       checkEmpty(facebookId, errorId)
   }
 
-  def checkCouponValue(value: String, errorId: String) = {
+  def checkCouponValue(value: String, errorId: String): Box[ValidationError] = {
     if (value.trim() == "0") {
       Full(ValidationError(errorId, "Cannot be 0."))
     } else {
@@ -143,7 +143,7 @@ object ValidationService extends Loggable {
     }
   }
 
-  def checkMonthPercentDollar(months: (String, String), percent: (String, String), dollar: (String, String)) = {
+  def checkMonthPercentDollar(months: (String, String), percent: (String, String), dollar: (String, String)): List[Box[ValidationError]] = {
     val hasMonths_? = months._1.nonEmpty
     val hasPercent_? = percent._1.nonEmpty
     val hasDollar_? = dollar._1.nonEmpty
@@ -187,7 +187,7 @@ object ValidationService extends Loggable {
     quantity2: Int,
     field1: String,
     field2: String
-  ) = {
+  ): List[Box[ValidationError]] = {
     val number1 = tryo(quantity1.toInt).openOr(0)
     val number2 = tryo(quantity1.toInt).openOr(0)
 

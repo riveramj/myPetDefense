@@ -2,7 +2,6 @@ package com.mypetdefense.util
 
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
-
 import java.io.StringReader
 import java.util.regex.Pattern
 
@@ -10,31 +9,31 @@ import net.liftweb.http.S
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.mapper.By
-
 import au.com.bytecode.opencsv.{CSVParser, CSVReader}
+
 import xml.Text
-
 import com.mypetdefense.model._
-
 import java.nio.charset.StandardCharsets
+
 import scala.language.implicitConversions
 import scala.language.postfixOps
-
 import java.text.SimpleDateFormat
 import java.util.Date
+
+import com.mypetdefense.util.TrackingUploadCSV.Columns
 
 case class TrackingInfo(recipient: String, trackingNumber: String)
 
 case class TrackingInfoList(list: List[TrackingInfo])
 
 object TrackingUploadCSV extends Loggable {
-  val badChar = "=\"".toSet
+  val badChar: Set[Char] = "=\"".toSet
 
   def parse(source: Array[Byte]): Box[TrackingInfoList] = parse(new String(source, StandardCharsets.UTF_8))
 
   object Columns extends Enumeration {
-    val Recipient = HeaderValue(name="Recipient", default=Failure("missing required Recipient"))
-    val TrackingNumber = HeaderValue(name="Tracking #", default=Failure("missing required Tracking #"))
+    val Recipient: HeaderValue = HeaderValue(name="Recipient", default=Failure("missing required Recipient"))
+    val TrackingNumber: HeaderValue = HeaderValue(name="Tracking #", default=Failure("missing required Tracking #"))
 
     case class HeaderValue(
       name: String,
@@ -42,11 +41,11 @@ object TrackingUploadCSV extends Loggable {
       parser: String=>Box[String] = (rawCell: String) => Full(rawCell.trim).filter(_.nonEmpty),
       default: Box[String] = Empty
     ) extends Val(name) {
-      val nameMatcher = matcher openOr ("""(?i)^\s*"""+Pattern.quote(name)+"""\s*$""").r
-      def matches(candidate: String) = {
+      val nameMatcher: Regex = matcher openOr ("""(?i)^\s*"""+Pattern.quote(name)+"""\s*$""").r
+      def matches(candidate: String): Boolean = {
         nameMatcher.unapplySeq(candidate).isDefined
       }
-      def required = {
+      def required: Boolean = {
         default match {
           case Failure(_, _, _) => true
           case _ => false
@@ -54,15 +53,15 @@ object TrackingUploadCSV extends Loggable {
       }
     }
 
-    def requiredColumns = {
+    def requiredColumns: Columns.ValueSet = {
       values.filter(_.required)
     }
 
-    def requiredColumnsCount = {
+    def requiredColumnsCount: Int = {
       requiredColumns.size
     }
 
-    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]) = {
+    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
       requiredColumns.filter(headerIndex.get(_).isEmpty)
     }
 

@@ -8,7 +8,7 @@ import net.liftweb.util.Props
 import com.mypetdefense.util.RandomIdGenerator._
 
 class GrowthRate extends LongKeyedMapper[GrowthRate] with IdPK with OneToMany[Long, GrowthRate] {
-  def getSingleton = GrowthRate
+  def getSingleton: KeyedMetaMapper[Long, GrowthRate] = GrowthRate
   object growthRateId extends MappedLong(this){
     override def dbIndexed_? = true
   }
@@ -25,7 +25,7 @@ class GrowthRate extends LongKeyedMapper[GrowthRate] with IdPK with OneToMany[Lo
     medium: Option[Int] = None,
     large: Option[Int] = None,
     xLarge: Option[Int] = None
-  ) = {
+  ): GrowthRate = {
     GrowthRate.create
     .growthRateId(generateLongId)
     .breed(breed)

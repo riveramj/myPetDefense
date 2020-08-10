@@ -21,12 +21,14 @@ import com.mypetdefense.actor._
 import com.mypetdefense.snippet.signup.Success
 import me.frmr.stripe.{Customer, StripeExecutor, Coupon => StripeCoupon, Subscription => StripeSubscription}
 
+import scala.xml.NodeSeq
+
 object AddOnCheckout extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Add-on Checkout") / "add-on-checkout"
+  val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Add-on Checkout") / "add-on-checkout"
 }
 
 class AddOnCheckout extends Loggable {
@@ -34,10 +36,10 @@ class AddOnCheckout extends Loggable {
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
-  val user = SecurityContext.currentUser
-  val address = user.flatMap(_.shippingAddress)
-  val subscription = user.flatMap(_.subscription)
-  val boxes = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
+  val user: Box[User] = SecurityContext.currentUser
+  val address: Box[Address] = user.flatMap(_.shippingAddress)
+  val subscription: Box[Subscription] = user.flatMap(_.subscription)
+  val boxes: List[SubscriptionBox] = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
   
   var discountCode = ""
   var discount_? = false
@@ -47,7 +49,7 @@ class AddOnCheckout extends Loggable {
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
   var checkoutRenderer: Box[IdMemoizeTransform] = None
 
-  def findNewMonthlySubtotal = {
+  def findNewMonthlySubtotal: Double = {
     val cart = AddOnFlow.addOnShoppingCart.is
 
     (cart.map { case (product, quantity) =>
@@ -55,7 +57,7 @@ class AddOnCheckout extends Loggable {
     }.foldLeft(0D)(_+_)) + subscription.map(_.getMonthlyCost).openOr(0D)
   }
 
-  def calculateTax() = {
+  def calculateTax(): JsCmd = {
     val possibleTaxRate = user.map(_.taxRate.get)
 
     val taxInfo = if (possibleTaxRate.isDefined) {
@@ -76,7 +78,7 @@ class AddOnCheckout extends Loggable {
     priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
   }
 
-  def validateCouponCode() = {
+  def validateCouponCode(): JsCmd = {
     if (discountCode.toLowerCase == "mpd20") {
       discount_? = true
 
@@ -88,7 +90,7 @@ class AddOnCheckout extends Loggable {
       Alert("Invalid discount code.")
   }
 
-  def orderTreat() = {
+  def orderTreat(): Unit = {
     val treatCharge = {
       val cart = AddOnFlow.addOnShoppingCart.is
 
@@ -111,7 +113,7 @@ class AddOnCheckout extends Loggable {
     }
   }
 
-  def removeTreatFromCart(treat: Product) = {
+  def removeTreatFromCart(treat: Product): JsCmd = {
     val cart = AddOnFlow.addOnShoppingCart.is
 
     AddOnFlow.addOnShoppingCart(cart - treat)
@@ -122,7 +124,7 @@ class AddOnCheckout extends Loggable {
     )
   }
 
-  def updateCartCount(treat: Product, newQuantity: Int) = {
+  def updateCartCount(treat: Product, newQuantity: Int): JsCmd = {
     val cart = AddOnFlow.addOnShoppingCart.is
 
     val updatedCart = {
@@ -140,7 +142,7 @@ class AddOnCheckout extends Loggable {
     )
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     val orderSummary = {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)

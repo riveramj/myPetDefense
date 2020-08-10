@@ -9,47 +9,47 @@ import net.liftweb.http._
 import net.liftweb.mapper._
 
 import scala.collection.immutable.ListMap
-
 import com.mypetdefense.model._
 import com.mypetdefense.service.ReportingService
-
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 import java.time.{LocalDate, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
+import net.liftweb.util.CssSel
+
 object Reporting extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Reporting") / "admin" / "reporting" >>
+  val menu: Menu.Menuable = Menu.i("Reporting") / "admin" / "reporting" >>
     mpdAdmin >>
     loggedIn
 }
 
 class Reporting extends Loggable {
-  val agencies = Agency.findAll().map(_.name.get)
-  val allSubscriptions = Subscription.findAll(By(Subscription.status, Status.Active)) //TODO: make this use the dynamic dates
+  val agencies: List[String] = Agency.findAll().map(_.name.get)
+  val allSubscriptions: List[Subscription] = Subscription.findAll(By(Subscription.status, Status.Active)) //TODO: make this use the dynamic dates
 
   val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  val localDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
-  val currentDate = LocalDate.now()
+  val localDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
+  val currentDate: LocalDate = LocalDate.now()
 
-  var fromDate = currentDate.plusDays(14).format(localDateFormat)
-  var toDate = currentDate.plusDays(14).format(localDateFormat)
+  var fromDate: String = currentDate.plusDays(14).format(localDateFormat)
+  var toDate: String = currentDate.plusDays(14).format(localDateFormat)
 
   def convertToPercentage(percent: Double) = f"${percent*100}%.1f%%"
 
-  def convertForecastingDates(date: String) = {
+  def convertForecastingDates(date: String): LocalDate = {
     
     val parsedDate = dateFormat.parse(date)
 
     parsedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
-  val forecastingCounts = {
+  val forecastingCounts: CssSel = {
     def upcomingSubscriptionProducts = {
       val startDate = convertForecastingDates(fromDate)
       val endDate = convertForecastingDates(toDate)
@@ -97,7 +97,7 @@ class Reporting extends Loggable {
     }
   }
 
-  def render = {
+  def render: CssSel = {
     ".reporting [class+]" #> "current" &
     ".agency" #> agencies.map { agencyName =>
 

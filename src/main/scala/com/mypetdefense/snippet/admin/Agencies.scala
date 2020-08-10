@@ -5,20 +5,22 @@ import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
-import net.liftweb.util.ClearClearable
+import net.liftweb.util.{ClearClearable, CssSel}
 import net.liftweb.http._
-  import js.JsCmds._
+import js.JsCmds._
 import net.liftweb.mapper.By
-
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service.{CouponService, ReportingService}
 import com.mypetdefense.util.ClearNodesIf
-
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime}
+import java.time.{LocalDate, LocalDateTime, ZoneId}
 import java.time.format.DateTimeFormatter
+
+import net.liftweb.http.js.JsCmd
+
+import scala.xml.{Elem, NodeSeq}
 
 object Agencies extends Loggable {
   import net.liftweb.sitemap._
@@ -61,11 +63,11 @@ object Agencies extends Loggable {
     } 
   }
 
-  val menu = Menu.i("Agencies") / "admin" / "agencies" >>
+  val menu: Menu.Menuable = Menu.i("Agencies") / "admin" / "agencies" >>
     mpdAdmin >>
     loggedIn
 
-    val totalSalesExportMenu = Menu.param[String](
+    val totalSalesExportMenu: Menu.ParamMenuable[String] = Menu.param[String](
       "Export Total Sales",
       "Export Total Sales",
       Full(_),
@@ -75,7 +77,7 @@ object Agencies extends Loggable {
     loggedIn >>
     EarlyResponse(exportTotalSalesResponse _)
 
-  val salesDataExportMenu = Menu.param[String](
+  val salesDataExportMenu: Menu.ParamMenuable[String] = Menu.param[String](
       "Export Gross Sales",
       "Export Gross Sales",
       Full(_),
@@ -85,7 +87,7 @@ object Agencies extends Loggable {
     loggedIn >>
     EarlyResponse(exportRawSalesResponse _)
 
-    val sameDayCancelExportMenu = Menu.param[String](
+    val sameDayCancelExportMenu: Menu.ParamMenuable[String] = Menu.param[String](
       "Export Same Day Cancellations",
       "Export Same Day Cancellations",
       Full(_),
@@ -95,7 +97,7 @@ object Agencies extends Loggable {
     loggedIn >>
     EarlyResponse(exportSameDayCancelResponse _)
 
-  val monthToDateExportMenu = Menu.param[String](
+  val monthToDateExportMenu: Menu.ParamMenuable[String] = Menu.param[String](
       "Export Month to Date Sales",
       "Export Month to Date Sales",
       Full(_),
@@ -105,7 +107,7 @@ object Agencies extends Loggable {
     loggedIn >>
     EarlyResponse(exportMonthToDateSalesResponse _)
 
-  val cancellationExportMenu = Menu.param[String](
+  val cancellationExportMenu: Menu.ParamMenuable[String] = Menu.param[String](
       "Export Cancellation Data",
       "Export Cancellation Data",
       Full(_),
@@ -115,7 +117,7 @@ object Agencies extends Loggable {
     loggedIn >>
     EarlyResponse(exportCancellationDataResponse _)
 
-    val mtdYtdExportMenu = Menu.param[String](
+    val mtdYtdExportMenu: Menu.ParamMenuable[String] = Menu.param[String](
       "Export Month to Date Sales New",
       "Export Month to Date Sales New",
       Full(_),
@@ -130,9 +132,9 @@ class Agencies extends Loggable {
   var name = ""
   var parentAgency: Box[Agency] = Empty
 
-  val agencies = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
+  val agencies: List[Agency] = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
 
-  def createAgency = {
+  def createAgency: JsCmd = {
     val validateFields = List(
       checkEmpty(name, "#name")
     ).flatten
@@ -156,7 +158,7 @@ class Agencies extends Loggable {
     }
   }
 
-  def deleteAgency(agency: Agency)() = {
+  def deleteAgency(agency: Agency)(): Alert = {
 
     val possibleAgency = Agency.find(By(Agency.agencyId, agency.agencyId.get))
 
@@ -176,7 +178,7 @@ class Agencies extends Loggable {
       Alert("An error has occured. Please try again.")
   }
 
-  def agencyDropdown = {
+  def agencyDropdown: Elem = {
     SHtml.selectObj(
       List((Empty, "Headquarters")) ++ agencies.map(agency => (Full(agency), agency.name.get)),
       Full(parentAgency),
@@ -184,7 +186,7 @@ class Agencies extends Loggable {
     )
   }
 
-  def generateAgencyData(agency: Agency, parentAgency: Box[Agency]) = {
+  def generateAgencyData(agency: Agency, parentAgency: Box[Agency]): CssSel = {
     val parentName = parentAgency.map(_.name.get).openOr("-")
     val activeCustomers = Agency.getAllChildrenCustomers(agency).flatMap(_.subscription.obj).filter(_.status == Status.Active)
 
@@ -204,7 +206,7 @@ class Agencies extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".agencies [class+]" #> "current" &
     "#name" #> text(name, name = _) &

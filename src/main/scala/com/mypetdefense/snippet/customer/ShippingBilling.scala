@@ -8,6 +8,7 @@ import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.Paths._
 import com.mypetdefense.util.SecurityContext._
+import me.frmr.stripe.Card
 import net.liftweb._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -22,18 +23,18 @@ object ShippingBilling extends Loggable {
   import com.mypetdefense.util.Paths._
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Shipping and Billing") / "shipping-billing" >>
+  val menu: Menu.Menuable = Menu.i("Shipping and Billing") / "shipping-billing" >>
     loggedIn >>
     parent
 
-  val menuBilling = Menu.i("Billing Renew") / "billing" >>
+  val menuBilling: Menu.Menuable = Menu.i("Billing Renew") / "billing" >>
     loggedIn >>
     parent
 }
 
 class ShippingBilling extends Loggable {
-  val user = currentUser.flatMap(_.refresh)
-  val stripeCustomerId = user.map(_.stripeId.get).openOr("")
+  val user: Box[User] = currentUser.flatMap(_.refresh)
+  val stripeCustomerId: String = user.map(_.stripeId.get).openOr("")
 
   var firstName = ""
   var lastName = ""
@@ -47,11 +48,11 @@ class ShippingBilling extends Loggable {
   var stripeToken = ""
   var promoCode = ""
 
-  val customerCard = ParentService.getCustomerCard(stripeCustomerId)
+  val customerCard: Option[Card] = ParentService.getCustomerCard(stripeCustomerId)
 
   cardNumberLastFour = customerCard.map(card => card.last4.toString).getOrElse("Not Found")
 
-  def updateCard(parent: User) = {
+  def updateCard(parent: User): Unit = {
     ParentService.updateStripeCustomerCard(
       stripeCustomerId,
       stripeToken,
@@ -59,7 +60,7 @@ class ShippingBilling extends Loggable {
     )
   }
 
-  def updateBilling(parent: User)() = {
+  def updateBilling(parent: User)(): Nothing = {
     updateCard(parent)
 
     if (Props.mode != Props.RunModes.Pilot) {
@@ -70,7 +71,7 @@ class ShippingBilling extends Loggable {
     S.redirectTo(ShippingBilling.menu.loc.calcDefaultHref)
   }
 
-  def updateBillingAddWinterCoupon(parent: User)() = {
+  def updateBillingAddWinterCoupon(parent: User)(): Nothing = {
     updateCard(parent)
 
     val coupon = Coupon.find(By(Coupon.couponCode,"winter17"))
@@ -85,7 +86,7 @@ class ShippingBilling extends Loggable {
     S.redirectTo(billingThanksPage.loc.calcDefaultHref)
   }
 
-  def updateAddress() = {
+  def updateAddress(): JsCmd = {
     val validateFields = List(
         checkEmpty(firstName, "#first-name"),
         checkEmpty(lastName, "#last-name"),
@@ -119,7 +120,7 @@ class ShippingBilling extends Loggable {
     }
   }
 
-  def render = {
+  def render: CssBindFunc = {
     val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
     "#page-body-container" #> {
       for {
@@ -152,7 +153,7 @@ class ShippingBilling extends Loggable {
     }
   }
 
-  def billingRenew = {
+  def billingRenew: CssBindFunc = {
     val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
     "#page-body-container" #> {
       for {

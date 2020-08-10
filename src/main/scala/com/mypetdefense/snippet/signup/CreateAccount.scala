@@ -6,14 +6,17 @@ import com.mypetdefense.util.SecurityContext
 import net.liftweb.common._
 import net.liftweb.http.SHtml.text
 import net.liftweb.http._
+import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds.Noop
 import net.liftweb.util.Helpers._
+
+import scala.xml.NodeSeq
 
 object CreateAccount extends Loggable {
   import com.mypetdefense.util.Paths._
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Create Account") / "create-account" >> completedPet
+  val menu: Menu.Menuable = Menu.i("Create Account") / "create-account" >> completedPet
 }
 
 class CreateAccount extends Loggable {
@@ -23,7 +26,7 @@ class CreateAccount extends Loggable {
   var password = ""
   var facebookId = ""
 
-  def createAccount() = {
+  def createAccount(): JsCmd = {
     val baseFields = List(
       checkEmail(email, "#email", true),
       checkEmpty(firstName, "#first-name"),
@@ -57,7 +60,7 @@ class CreateAccount extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     "#first-name" #> text(firstName, userFirstName => firstName = userFirstName.trim) &
     "#last-name" #> text(lastName, userLastName => lastName = userLastName.trim) &

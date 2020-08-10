@@ -9,9 +9,8 @@ import net.liftweb.util.ClearNodes
 import net.liftweb.common._
 import net.liftweb.util._
 import net.liftweb.http._
-  import js.JsCmds._
+import js.JsCmds._
 import net.liftweb.mapper._
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -21,13 +20,16 @@ import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.actor._
+import net.liftweb.http.js.JsCmd
+
+import scala.xml.{Elem, NodeSeq}
 
 object Parents extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Parents") / "admin" / "parents" >>
+  val menu: Menu.Menuable = Menu.i("Parents") / "admin" / "parents" >>
     mpdAdmin >>
     loggedIn
 }
@@ -47,11 +49,11 @@ class Parents extends Loggable {
   var searchTerm = ""
   var email = ""
 
-  val coupons = Coupon.findAll()
-  val dogProducts = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
-  val catProducts = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
+  val coupons: List[Coupon] = Coupon.findAll()
+  val dogProducts: List[FleaTick] = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
+  val catProducts: List[FleaTick] = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
 
-  val stripeBaseUrl = Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
+  val stripeBaseUrl: String = Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
   val stripeInvoiceBaseURL = s"${stripeBaseUrl}/invoices"
   val stripeSubscriptionBaseURL = s"${stripeBaseUrl}/subscriptions"
 
@@ -63,7 +65,7 @@ class Parents extends Loggable {
   var parentDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var currentParent: Box[User] = Empty
 
-  def searchParents = {
+  def searchParents: JsCmd = {
     if (searchTerm == "")
       Alert("Search cannot be empty right now.")
     else {
@@ -95,11 +97,11 @@ class Parents extends Loggable {
     }
   }
 
-  def getCancelledUser(parent: User) = {
+  def getCancelledUser(parent: User): Box[CancelledUser] = {
     CancelledUser.find(By(CancelledUser.user, parent.userId.get))
   }
 
-  def getOldUserWithInfo(cancelledParent: CancelledUser) = {
+  def getOldUserWithInfo(cancelledParent: CancelledUser): Box[User] = {
     val cancelledUser = User.find(By(User.userId, cancelledParent.user.get))
     cancelledUser.map { user =>
       user
@@ -117,7 +119,7 @@ class Parents extends Loggable {
     parent.status.get == Status.Cancelled
   }
 
-  def petTypeRadio(renderer: IdMemoizeTransform) = {
+  def petTypeRadio(renderer: IdMemoizeTransform): NodeSeq = {
     ajaxRadio(
       List(AnimalType.Dog, AnimalType.Cat),
       petType,
@@ -128,7 +130,7 @@ class Parents extends Loggable {
     ).toForm
   }
 
-  def productDropdown = {
+  def productDropdown: Elem = {
     val products = petType.map { animal =>
       if (animal == AnimalType.Dog)
         dogProducts
@@ -143,7 +145,7 @@ class Parents extends Loggable {
     )
   }
 
-  def addCoupon(parent: Box[User], updatedCoupon: Box[Coupon]) = {
+  def addCoupon(parent: Box[User], updatedCoupon: Box[Coupon]): Nothing = {
     parent.map(_.coupon(updatedCoupon).saveMe)
 
     ParentService.updateCoupon(parent.map(_.stripeId.get).openOr(""), updatedCoupon.map(_.couponCode.get))
@@ -151,7 +153,7 @@ class Parents extends Loggable {
     S.redirectTo(Parents.menu.loc.calcDefaultHref)
   }
 
-  def addPet(possibleParent: Box[User], renderer: IdMemoizeTransform) = {
+  def addPet(possibleParent: Box[User], renderer: IdMemoizeTransform): JsCmd = {
     val validateFields = List(
       checkEmpty(petName, ".new-pet-name")
     ).flatten
@@ -189,7 +191,7 @@ class Parents extends Loggable {
     }
   }
 
-  def deletePet(parent: Box[User], pet: Pet, renderer: IdMemoizeTransform)() = {
+  def deletePet(parent: Box[User], pet: Pet, renderer: IdMemoizeTransform)(): JsCmd = {
     ParentService.removePet(parent, pet) match {
       case Full(_) =>
         renderer.setHtml
@@ -198,7 +200,7 @@ class Parents extends Loggable {
     }
   }
 
-  def deleteParent(parent: User)() = {
+  def deleteParent(parent: User)(): Alert = {
     ParentService.removeParent(parent, true) match {
       case Full(_) =>
         S.redirectTo(Parents.menu.loc.calcDefaultHref)
@@ -207,7 +209,7 @@ class Parents extends Loggable {
     }
   }
 
-  def cancelParent(parent: User)() = {
+  def cancelParent(parent: User)(): JsCmd = {
     val pets: List[Pet] = parent.pets.toList
 
     pets.map(ParentService.removePet(parent, _))
@@ -222,14 +224,14 @@ class Parents extends Loggable {
     }
   }
 
-  def deleteShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment)() = {
+  def deleteShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment)(): JsCmd = {
     shipment.shipmentLineItems.map(_.delete_!)
     shipment.delete_!
 
     detailsRenderer.setHtml
   }
 
-  def refundShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment, parent: Box[User])() = {
+  def refundShipment(detailsRenderer: IdMemoizeTransform, shipment: Shipment, parent: Box[User])(): JsCmd = {
     ParentService.refundShipment(shipment) match {
       case Full(refund) =>
         detailsRenderer.setHtml
@@ -239,14 +241,14 @@ class Parents extends Loggable {
     }
   }
 
-  def displayNextShipDate(shipmentDate: Option[String], cancelled: Boolean) = {
+  def displayNextShipDate(shipmentDate: Option[String], cancelled: Boolean): String = {
     if (cancelled)
       "-"
     else
       shipmentDate.getOrElse("")
   }
 
-  def parentInformationBinding(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]) = {
+  def parentInformationBinding(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]): CssBindFunc = {
     val parent = currentParent
     val address = parent.flatMap(_.addresses.toList.headOption)
     val agent = currentParent.map { user =>
@@ -334,7 +336,7 @@ class Parents extends Loggable {
     ".parent-information .agent-name-container .agent *" #> agent
   }
 
-  def petBindings = {
+  def petBindings: CssBindFunc = {
     val parent = currentParent
     var chosenCoupon = parent.flatMap(_.coupon.obj)
 
@@ -430,7 +432,7 @@ class Parents extends Loggable {
     }
   }
 
-  def shipmentBindings(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]) = {
+  def shipmentBindings(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]): NodeSeq => NodeSeq = {
     val parent = currentParent
     val nextShipDate = subscription.map(_.nextShipDate.get)
 
@@ -493,7 +495,7 @@ class Parents extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".parents [class+]" #> "current" &
     ".search-container" #> {

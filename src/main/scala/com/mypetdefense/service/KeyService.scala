@@ -18,15 +18,15 @@ import net.liftweb.util.StringHelpers
 object KeyService extends Loggable {
   private val rng = new Random(new SecureRandom)
 
-  def createAccessKey() = {
+  def createAccessKey(): String = {
     StringHelpers.randomString(16)
   }
 
-  def createProductSalesKey() = {
+  def createProductSalesKey(): String = {
     StringHelpers.randomString(16)
   }
   
-  def createResetKey(user: User) = {
+  def createResetKey(user: User): User = {
     val key = StringHelpers.randomString(16)
     val curTime = new DateTime()
     user.resetPasswordKey(key).saveMe
@@ -65,7 +65,7 @@ object KeyService extends Loggable {
     }
   }
 
-  def removeKey(user: User, keyType: String) = {
+  def removeKey(user: User, keyType: String): Serializable = {
     keyType match {
       case "accessKey" =>
         user.accessKey("").saveMe

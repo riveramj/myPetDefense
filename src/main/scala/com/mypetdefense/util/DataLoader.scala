@@ -12,7 +12,7 @@ import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
 import dispatch._, Defaults._
 
 object DataLoader extends Loggable {
-  def loadProducts = {
+  def loadProducts: Any = {
     if (FleaTick.findAll().isEmpty) {
       FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
@@ -187,7 +187,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def loadAdmin = {
+  def loadAdmin: Any = {
     val mpdAgency = {
       val possibleMpd = Agency.find(By(Agency.name, "My Pet Defense"))
 
@@ -213,7 +213,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def resetUpcomingBillingCylces = {
+  def resetUpcomingBillingCylces: List[Serializable] = {
     val upcomingSubscriptions = Subscription.findAll(
       BySql(
         "nextShipDate > CURRENT_DATE + interval '1 day' and nextShipDate < CURRENT_DATE + interval '3 day'",
@@ -230,7 +230,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def createProducts = {
+  def createProducts: Any = {
     if (Product.hipAndJoint.isEmpty) {
       Product.createNewProduct("Hip & Joint Chews",  "hipJointChews")
       Product.createNewProduct("Calming Chews", "calmingChews")
@@ -239,13 +239,13 @@ object DataLoader extends Loggable {
     }
   }
 
-  def createBoxedTag = {
+  def createBoxedTag: Any = {
     if (Tag.findAll().isEmpty) {
       Tag.createNewTag("Use Box")
     }
   }
 
-  def createNewPetlandStores = {
+  def createNewPetlandStores: Agency = {
     val petlandAgencies = Agency.findAll(By(Agency.petlandStore, true))
     
     val agents = petlandAgencies.map(_.members.toList).flatten
@@ -311,7 +311,7 @@ object DataLoader extends Loggable {
     )
   }
 
-  def createPuppySpot = {
+  def createPuppySpot: List[User] = {
     val puppySpot = Agency.createNewAgency(
       "PuppySpot",
       AgencyType.Store,
@@ -327,7 +327,7 @@ object DataLoader extends Loggable {
     tppCustomers.map(_.referer(puppySpot).saveMe)
   }
 
-  def calculateTax = {
+  def calculateTax: List[Any] = {
     val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
     
     for {
@@ -342,7 +342,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def createBasicExistingBoxes = {
+  def createBasicExistingBoxes: Any = {
     if (SubscriptionBox.findAll().isEmpty) {
       for {
         user <- User.findAll(By(User.userType, UserType.Parent), By(User.status,Status.Active))
@@ -357,7 +357,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def defaultSaleCoupons = {
+  def defaultSaleCoupons: Any = {
     if(Coupon.find(By(Coupon.couponCode, "50off")).isEmpty) {
       val mpdAgency = Agency.find(By(Agency.name, "My Pet Defense"))
       CouponService.createCoupon("50off", mpdAgency, "1", "50", "0")

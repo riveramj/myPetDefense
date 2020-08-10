@@ -1,17 +1,15 @@
 package com.mypetdefense.model
 
 import net.liftweb._
-  import mapper._
-
+import mapper._
 import com.mypetdefense.util.RandomIdGenerator._
-
 import java.util.Date
 
 class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
-  def getSingleton = AddOnProduct
+  def getSingleton: KeyedMetaMapper[Long, AddOnProduct] = AddOnProduct
   object addOnProductId extends MappedLong(this){
     override def dbIndexed_? = true
-    override def defaultValue = generateLongId
+    override def defaultValue: Long = generateLongId
   }
 
   object product extends MappedLongForeignKey(this, Product)
@@ -19,7 +17,7 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
   object quantity extends MappedInt(this)
   object price extends MappedDouble(this)
   object frequency extends MappedEnum(this, AddOnFrequency) {
-    override def defaultValue = AddOnFrequency.Monthly
+    override def defaultValue: AddOnFrequency.Value = AddOnFrequency.Monthly
   }
   object addDate extends MappedDateTime(this) {
     override def defaultValue = new Date()
@@ -34,7 +32,7 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
     subscriptionBox: SubscriptionBox,
     quantity: Int,
     price: Double
-  ) = {
+  ): AddOnProduct = {
     AddOnProduct.create
       .quantity(quantity)
       .product(product)

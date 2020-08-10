@@ -34,9 +34,9 @@ case class NewPet(name: String, whelpDate: Option[String], product: String, curr
 case class NewParent(firstName: String, lastName: String, email: String, address: NewAddress, phone: Option[String], stripeToken: String)
 
 object TPPApi extends RestHelper with Loggable {
-  val stripeSecretKey = Props.get("secret.key") openOr ""
-  implicit val e = new StripeExecutor(stripeSecretKey)
-  val tppAgency = Agency.find(By(Agency.name, "TPP"))
+  val stripeSecretKey: String = Props.get("secret.key") openOr ""
+  implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
+  val tppAgency: Box[Agency] = Agency.find(By(Agency.name, "TPP"))
 
   def sendStripeErrorEmail(
     failedStepMessage: String,
@@ -46,7 +46,7 @@ object TPPApi extends RestHelper with Loggable {
     pennyCount: Int,
     couponName: Option[String],
     taxRate: Double
-  ) = {
+  ): Unit = {
     val errorMsg = s"""
       Something went wrong with stripe creation.
 
@@ -86,7 +86,7 @@ object TPPApi extends RestHelper with Loggable {
     oldParent: User,
     stripeToken: String,
     newUser: Boolean = true
-  ) = {
+  ): Unit = {
     val parent = oldParent.refresh
     val pets = parent.map(_.pets.toList).openOr(Nil)
     val rawPennyCount: Double = pets.size * 12.99
@@ -276,7 +276,7 @@ object TPPApi extends RestHelper with Loggable {
     }
   }
 
-  def createPets(pets: List[NewPet], parent: User) = {
+  def createPets(pets: List[NewPet], parent: User): List[Box[Pet]] = {
     (pets.map { pet =>
       val sanitizedProductName = pet.product.toLowerCase match {
         case possibleProduct 

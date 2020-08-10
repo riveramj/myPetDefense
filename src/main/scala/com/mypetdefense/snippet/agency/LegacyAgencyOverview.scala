@@ -5,11 +5,10 @@ import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
-import net.liftweb.util.ClearClearable
+import net.liftweb.util.{ClearClearable, CssSel}
 import net.liftweb.http._
-  import js.JsCmds._
+import js.JsCmds._
 import net.liftweb.mapper.By
-
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service.{CouponService, ReportingService}
@@ -34,11 +33,11 @@ object LegacyAgencyOverview extends Loggable {
     } 
   }
 
-  val menu = Menu.i("Legacy Agency Overview") / "agency" / "legacy-agency-overview" >>
+  val menu: Menu.Menuable = Menu.i("Legacy Agency Overview") / "agency" / "legacy-agency-overview" >>
     adminUser >>
     loggedIn
 
-  val agencyMtdYtdExportMenu = Menu.param[String](
+  val agencyMtdYtdExportMenu: Menu.ParamMenuable[String] = Menu.param[String](
       "Agency Export Month to Date Sales",
       "Agency Export Month to Date Sales",
       Full(_),
@@ -48,7 +47,7 @@ object LegacyAgencyOverview extends Loggable {
     loggedIn >>
     EarlyResponse(agencyMtdYtdExport _)
 
-  val exportTPPMontSalesMenu = Menu.param[String](
+  val exportTPPMontSalesMenu: Menu.ParamMenuable[String] = Menu.param[String](
       "Agency Export Month Sales",
       "Agency Export Month  Sales",
       Full(_),
@@ -60,11 +59,11 @@ object LegacyAgencyOverview extends Loggable {
 }
 
 class LegacyAgencyOverview extends Loggable {
-  val currentUser = SecurityContext.currentUser
-  val agency = currentUser.flatMap(_.agency.obj)
-  val agencyName = agency.map(_.name.get).openOr("")
+  val currentUser: Box[User] = SecurityContext.currentUser
+  val agency: Box[Agency] = currentUser.flatMap(_.agency.obj)
+  val agencyName: String = agency.map(_.name.get).openOr("")
 
-  def render = {
+  def render: CssSel = {
     ".overview [class+]" #> "current" &
     ".april [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("April 2018") &
     ".may [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("May 2018") &

@@ -15,7 +15,7 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator
 import java.util.Date
 
 class CancelledUser extends LongKeyedMapper[CancelledUser] with IdPK with OneToMany[Long, CancelledUser] {
-  def getSingleton = CancelledUser
+  def getSingleton: KeyedMetaMapper[Long, CancelledUser] = CancelledUser
   object cancelledUserId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -37,7 +37,7 @@ class CancelledUser extends LongKeyedMapper[CancelledUser] with IdPK with OneToM
     email: String,
     address: String,
     userId: Long
-  ) = {
+  ): CancelledUser = {
     CancelledUser.create
       .cancelledUserId(generateLongId)
       .firstName(firstName)

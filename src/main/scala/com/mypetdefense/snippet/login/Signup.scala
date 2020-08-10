@@ -12,11 +12,13 @@ import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js._
 import net.liftweb.util.Helpers._
 
+import scala.xml.NodeSeq
+
 object Signup extends Loggable {
   import net.liftweb.sitemap._
   import Loc._
 
-  val menu = 
+  val menu: Menu.ParamMenuable[User] =
     Menu.param[User](
       "Signup", "Signup",
       accessKey => KeyService.findUserByKey(accessKey, "accessKey"),
@@ -31,14 +33,14 @@ object Signup extends Loggable {
 
 class Signup extends Loggable {
 
-  val newUser = Signup.menu.currentValue
-  val email = newUser.map(_.email.get).openOr("")
+  val newUser: Box[User] = Signup.menu.currentValue
+  val email: String = newUser.map(_.email.get).openOr("")
   
   var password = ""
-  var firstName = newUser.map(_.firstName.get).openOr("")
-  var lastName = newUser.map(_.lastName.get).openOr("")
+  var firstName: String = newUser.map(_.firstName.get).openOr("")
+  var lastName: String = newUser.map(_.lastName.get).openOr("")
 
-  def signup() = {
+  def signup(): JsCmd = {
     val validateFields = List(
       checkEmpty(firstName, "#first-name"),
       checkEmpty(lastName, "#last-name"),
@@ -58,7 +60,7 @@ class Signup extends Loggable {
   }
 
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     "#signup-container" #> {
       "#first-name" #> SHtml.text(firstName, firstName = _) &

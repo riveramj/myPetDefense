@@ -1,25 +1,24 @@
 package com.mypetdefense.jobs
 
 import net.liftweb._
-  import mapper.NullRef
-  import common._
-  import mapper._
-  import util.Helpers._ 
-
-import com.mypetdefense.service.{ShipStationService, ParentService}
+import mapper.NullRef
+import common._
+import mapper._
+import util.Helpers._
+import com.mypetdefense.service.{ParentService, ShipStationService}
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-
-import org.quartz.{CronScheduleBuilder, TriggerBuilder, JobBuilder, JobExecutionContext}
-
+import org.quartz.{CronScheduleBuilder, JobBuilder, JobDetail, JobExecutionContext, Trigger, TriggerBuilder}
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime, Period}
+import java.time.{LocalDate, LocalDateTime, Period, ZoneId}
 import java.time.format.DateTimeFormatter
-import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => ShipStationShipment, _}
-import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
-import dispatch.{Req => DispatchReq, _} , Defaults._
+import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => ShipStationShipment, _}
+
+import scala.util.{Failure => TryFail, Success => TrySuccess, _}
+import dispatch.{Req => DispatchReq, _}
+import Defaults._
 
 class CreateShipStationOrderJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
@@ -81,11 +80,11 @@ class CreateShipStationOrderJob extends ManagedJob {
 }
 
 object HalfHourCreateOrderJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[CreateShipStationOrderJob])
+  val detail: JobDetail = JobBuilder.newJob(classOf[CreateShipStationOrderJob])
     .withIdentity("HalfHourCreateOrderJob")
     .build()
 
-    val trigger = TriggerBuilder.newTrigger()
+    val trigger: Trigger = TriggerBuilder.newTrigger()
       .withIdentity("HalfHourCreateOrderJobTrigger")
       .startNow()
       .withSchedule(CronScheduleBuilder.cronSchedule("0 30 * ? * * *"))
@@ -93,11 +92,11 @@ object HalfHourCreateOrderJob extends TriggeredJob {
 }
 
 object FrequentCreateOrderJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[CreateShipStationOrderJob])
+  val detail: JobDetail = JobBuilder.newJob(classOf[CreateShipStationOrderJob])
     .withIdentity("FrequentCreateOrderJob")
     .build
 
-    val trigger = TriggerBuilder.newTrigger()
+    val trigger: Trigger = TriggerBuilder.newTrigger()
       .withIdentity("FrequentCreateOrderJobTrigger")
       .startNow
       .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 1 minutes

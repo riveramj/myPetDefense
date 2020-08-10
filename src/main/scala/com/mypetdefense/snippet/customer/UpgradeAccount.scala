@@ -19,17 +19,19 @@ import net.liftweb.http.js.JsCmds._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
+import scala.xml.NodeSeq
+
 object UpgradeAccount extends Loggable {
   import com.mypetdefense.util.Paths._
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Upgrade Account") / "upgrade-account" >>
+  val menu: Menu.Menuable = Menu.i("Upgrade Account") / "upgrade-account" >>
     loggedIn >>
     parent
 }
 
 class UpgradeAccount extends Loggable {
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
 
     val updatedSubscription = userSubscription.map(_.promptedUpgrade(true).saveMe())

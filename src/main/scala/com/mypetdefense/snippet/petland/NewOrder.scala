@@ -3,37 +3,34 @@ package petland
 
 import net.liftweb.sitemap.Menu
 import net.liftweb._
-  import http.SHtml._
-  import util._
-  import util.Helpers._
-  import common._
-  import util.ClearClearable
-  import http._
-  import mapper.{By, NullRef}
-  import js._
-      import JsCmds._
-
+import http.SHtml._
+import util._
+import util.Helpers._
+import common._
+import util.ClearClearable
+import http._
+import mapper.{By, NullRef}
+import js._
+import JsCmds._
 import com.mypetdefense.service._
-  import ValidationService._
-  import PetFlowChoices._
-
+import ValidationService._
+import PetFlowChoices._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import com.mypetdefense.model._
 import com.mypetdefense.actor._
-
 import java.util.Date
 import java.time.MonthDay
 import java.time.{LocalDate, ZoneId}
 import java.text.SimpleDateFormat
 
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
-
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import me.frmr.stripe.{Customer, StripeExecutor, Coupon => StripeCoupon, Subscription => StripeSubscription, Product => _, _}
+import dispatch._
+import Defaults._
 
-import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon, Subscription => StripeSubscription, Product => _, _}
-
-import dispatch._, Defaults._
+import scala.xml.{Elem, NodeSeq}
 
 
 object petsOrdered extends SessionVar[List[Pet]](Nil)
@@ -47,31 +44,31 @@ object NewOrder extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Petland New Order") / "petland" / "new-order" >>
+  val menu: Menu.Menuable = Menu.i("Petland New Order") / "petland" / "new-order" >>
     agentOrAdmin >>
     loggedIn
 }
 
 class NewOrder extends Loggable {
-  val stripeSecretKey = Props.get("secret.key") openOr ""
-  implicit val e = new StripeExecutor(stripeSecretKey)
+  val stripeSecretKey: String = Props.get("secret.key") openOr ""
+  implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
 
-  val currentUser = SecurityContext.currentUser
+  val currentUser: Box[User] = SecurityContext.currentUser
   
   val monthsOfyear = List(
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   )
 
-  val dogZoguardProduct = FleaTick.findAll(
+  val dogZoguardProduct: List[FleaTick] = FleaTick.findAll(
     By(FleaTick.name, "ZoGuard Plus for Dogs")
   )
 
-  val catZoguardProduct = FleaTick.findAll(
+  val catZoguardProduct: List[FleaTick] = FleaTick.findAll(
     By(FleaTick.size, AnimalSize.CatAllSize)
   )
 
-  var pets = petsOrdered.is
+  var pets: List[Pet] = petsOrdered.is
   var email = ""
   var phone = ""
   var firstName = ""
@@ -102,10 +99,10 @@ class NewOrder extends Loggable {
 
   val birthdayDateFormat = new SimpleDateFormat("MMM yyyy")
 
-  val petlandPlan = ParentService.getCurrentPetlandProductPlan
-  val petlandPlanId = petlandPlan.map(_.id).openOr("")
+  val petlandPlan: Box[Plan] = ParentService.getCurrentPetlandProductPlan
+  val petlandPlanId: String = petlandPlan.map(_.id).openOr("")
 
-  def calculateTax(possibleState: String, possibleZip: String) = {
+  def calculateTax(possibleState: String, possibleZip: String): JsCmd = {
     state = possibleState
     zip = possibleZip
 
@@ -122,7 +119,7 @@ class NewOrder extends Loggable {
     totalsRenderer.map(_.setHtml).openOr(Noop)
   }
 
-  def signup() = {
+  def signup(): JsCmd = {
     val validateFields = List(
         checkEmail(email, "#email"),
         checkEmpty(phone, "#phone"),
@@ -179,7 +176,7 @@ class NewOrder extends Loggable {
     }
   }
 
-  def newUserSetup(customer: Customer) = {
+  def newUserSetup(customer: Customer): User = {
     val stripeId = customer.id
 
     val newParent = User.createNewUser(
@@ -233,13 +230,13 @@ class NewOrder extends Loggable {
     newParent
   }
 
-  def createNewPets(parent: User) = {
+  def createNewPets(parent: User): List[Pet] = {
     pets.map { pet =>
       Pet.createNewPet(pet, parent)
     }
   }
 
-  def petTypeDropdown(renderer: IdMemoizeTransform) = {
+  def petTypeDropdown(renderer: IdMemoizeTransform): Elem = {
     SHtml.ajaxSelectObj(
       List(
         (Empty, "Choose Pet"),
@@ -254,7 +251,7 @@ class NewOrder extends Loggable {
     )
   }
 
-  def petSizeDropdown(petSize: String) = {
+  def petSizeDropdown(petSize: String): Elem = {
     val products = newPetType.map { animal =>
       if (animal == AnimalType.Cat)
         catZoguardProduct
@@ -280,7 +277,7 @@ class NewOrder extends Loggable {
     )
   }
 
-  def birthdayMonthDropdown = {
+  def birthdayMonthDropdown: Elem = {
     SHtml.ajaxSelect(
       List(("", "Month")) ++ monthsOfyear.map(month => (month, month)),
       Full(birthdayMonth),
@@ -288,7 +285,7 @@ class NewOrder extends Loggable {
     )
   }
   
-  def birthdayYearDropdown = {
+  def birthdayYearDropdown: Elem = {
     SHtml.ajaxSelect(
       List(("", "Year")) ++ ((2019 to 1998 by -1).toList.map(year => (year.toString, year.toString))),
       Full(birthdayYear),
@@ -296,7 +293,7 @@ class NewOrder extends Loggable {
     )
   }
 
-  def addPet() = {
+  def addPet(): JsCmd = {
     val product = {
       if (newPetType == Full(AnimalType.Cat)) {
         catZoguardProduct
@@ -358,7 +355,7 @@ class NewOrder extends Loggable {
     )
   }
 
-  def removePet(pet: Pet) = {
+  def removePet(pet: Pet): JsCmd = {
     pets = pets.filter(_ != pet)
 
     petsOrdered(pets)
@@ -369,7 +366,7 @@ class NewOrder extends Loggable {
     )
   }
 
-  def addPetBindings = {
+  def addPetBindings: CssBindFunc = {
     "#new-pet" #> SHtml.idMemoize { renderer =>
       addPetRenderer = Full(renderer)
 
@@ -383,7 +380,7 @@ class NewOrder extends Loggable {
     }
   }
 
-  def orderBindings = {
+  def orderBindings: CssBindFunc = {
     ".subscription-details" #> idMemoize { renderer =>
       orderDetailsRenderer = Full(renderer)
       ".pet-entry" #> pets.map { pet =>
@@ -403,7 +400,7 @@ class NewOrder extends Loggable {
     ".continue-shopping *" #> (if (pets.size > 0) "Continue Shopping" else "Add Another Pet")
   }
 
-  def totalSummaryBindings = {
+  def totalSummaryBindings: CssBindFunc = {
     ".order-totals" #> idMemoize { renderer =>
       totalsRenderer = Full(renderer)
 
@@ -417,7 +414,7 @@ class NewOrder extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".new-order [class+]" #> "current" &
     ".overview" #> ClearNodesIf(!SecurityContext.admin_?) &

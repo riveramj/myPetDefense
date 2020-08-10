@@ -19,9 +19,9 @@ import net.liftweb._
 class MyPetDefenseEvent(eventName:String) extends JsCmd {
   import Serialization._
 
-  implicit def typeHints = Serialization.formats(NoTypeHints)
+  implicit def typeHints: AnyRef with Formats = Serialization.formats(NoTypeHints)
 
-  def toJsCmd = {
+  def toJsCmd: String = {
     Call("myPetDefenseSite.event", eventName, decompose(this)).cmd.toJsCmd
   }
 }

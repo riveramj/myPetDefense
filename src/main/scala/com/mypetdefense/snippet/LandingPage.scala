@@ -24,35 +24,35 @@ object LandingPage extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val landing2Free = Menu.i("2 Months Free!") / "2free" >>
+  val landing2Free: Menu.Menuable = Menu.i("2 Months Free!") / "2free" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
   
-  val landing3Free = Menu.i("3 Months Free!") / "3free" >>
+  val landing3Free: Menu.Menuable = Menu.i("3 Months Free!") / "3free" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
 
-  val cold5k = Menu.i("Dog Gone 5k") / "cold5k" >>
+  val cold5k: Menu.Menuable = Menu.i("Dog Gone 5k") / "cold5k" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
   
-  val doggiePalooza = Menu.i("Doggie-Palooza") / "palooza" >>
+  val doggiePalooza: Menu.Menuable = Menu.i("Doggie-Palooza") / "palooza" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
 
-  val woofstock = Menu.i("Woofstock 2018") / "woofstock" >>
+  val woofstock: Menu.Menuable = Menu.i("Woofstock 2018") / "woofstock" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
 
-  val olympics = Menu.i("Rescue Dog Olympics") / "olympics" >>
+  val olympics: Menu.Menuable = Menu.i("Rescue Dog Olympics") / "olympics" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
 
-  val atlantaExpo = Menu.i("Atlanta Expo") / "atlanta" >>
+  val atlantaExpo: Menu.Menuable = Menu.i("Atlanta Expo") / "atlanta" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
   
-  val firstMonthFree = Menu.i("First Month Free") / "firstmonthfree" >>
+  val firstMonthFree: Menu.Menuable = Menu.i("First Month Free") / "firstmonthfree" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
 }
 
 class LandingPage extends Loggable {
   import PetFlowChoices._
 
-  val path = S.request.map(_.uri).openOr("").drop(1)
+  val path: String = S.request.map(_.uri).openOr("").drop(1)
 
   val (modalTitle, modalOffer) = path match {
     case "2free" =>
@@ -104,10 +104,10 @@ class LandingPage extends Loggable {
       ("It was nice to see you!","Thank you for stopping by to talk with us! Your first free month has been added to your cart.")
   }
 
-  val monthCount = PetFlowChoices.coupon.is.map(_.freeMonths.get).openOr(0)
-  val couponCode = PetFlowChoices.coupon.is.map(_.couponCode.get).openOr("")
+  val monthCount: Int = PetFlowChoices.coupon.is.map(_.numberOfMonths.get).openOr(0)
+  val couponCode: String = PetFlowChoices.coupon.is.map(_.couponCode.get).openOr("")
 
-  def render = {
+  def render: CssBindFunc = {
     ".coupon-code *" #> couponCode &
     ".applied-months *" #> s" ${monthCount} months free!" &
     ".low-price *" #> { if (couponCode == "cold5k") "$10" else "$13" } &

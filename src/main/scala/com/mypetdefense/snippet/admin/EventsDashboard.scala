@@ -11,9 +11,8 @@ import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js._
 import net.liftweb.common._
 import net.liftweb.http._
-  import js.JsCmds._
+import js.JsCmds._
 import net.liftweb.mapper.{By, NullRef}
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -24,12 +23,14 @@ import com.mypetdefense.util._
 import com.mypetdefense.actor._
 import com.mypetdefense.service._
 
+import scala.xml.NodeSeq
+
 object EventsDashboard extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Events Dashboard") / "admin" / "events-dashboard" >>
+  val menu: Menu.Menuable = Menu.i("Events Dashboard") / "admin" / "events-dashboard" >>
     mpdAdmin >>
     loggedIn
 }
@@ -38,14 +39,14 @@ class EventsDashboard extends Loggable {
   val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
   
   var eventActionRenderer: Box[IdMemoizeTransform] = Empty
-  var unresolvedEvents = Event.unresolvedEvents
+  var unresolvedEvents: List[Event] = Event.unresolvedEvents
 
   def actionOnEvent(
     event: Event,
     eventNotes: String,
     eventStatus: EventStatus.Value,
     renderer: IdMemoizeTransform
-  )() = {
+  )(): JsCmd = {
     val updatedEvent = event.notes(eventNotes).eventStatus(eventStatus)
 
     if (eventStatus == EventStatus.Resolved)
@@ -58,7 +59,7 @@ class EventsDashboard extends Loggable {
     renderer.setHtml
   }
 
-  def getEmail(event: Event) = {
+  def getEmail(event: Event): Box[String] = {
     val parent = event.user.obj
     
     if (parent.map(_.status == Status.Cancelled).openOr(false)) {
@@ -68,7 +69,7 @@ class EventsDashboard extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".event-dashboard [class+]" #> "current" &
     ".event-details" #> SHtml.idMemoize { eventActionRenderer =>
