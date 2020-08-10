@@ -1,30 +1,25 @@
 package com.mypetdefense.service
 
-import net.liftweb._ 
-  import common._
-  import util.Helpers.tryo
-  import json._
-  import util.Props
-
-import me.frmr.stripe.{StripeExecutor, Customer, Coupon => StripeCoupon}
-import scala.util.{Failure => TryFail, Success => TrySuccess, _}
-
 import com.mypetdefense.model._
+import dispatch._
+import me.frmr.stripe.{StripeExecutor, Coupon => StripeCoupon}
+import net.liftweb.common._
+import net.liftweb.util.Helpers.tryo
+import net.liftweb.util.Props
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-
-import dispatch._, Defaults._
+import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
 object CouponService extends Loggable {
-  val stripeSecretKey = Props.get("secret.key") openOr ""
-  implicit val e = new StripeExecutor(stripeSecretKey)
+  val stripeSecretKey: String = Props.get("secret.key") openOr ""
+  implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
 
-  def convertedString(possibleNumber: String) = {
+  def convertedString(possibleNumber: String): Int = {
     tryo(possibleNumber.trim().toInt).openOr(0)
   }
 
-  def createStripeCoupon(couponCode: String, agency: Box[Agency], freeMonths: Int, percentOff: Int, dollarOff: Int) = {
+  def createStripeCoupon(couponCode: String, freeMonths: Int, percentOff: Int, dollarOff: Int): Future[Box[StripeCoupon]] = {
 
     val (durationType, durationMonths) = {
       if (freeMonths == 0)
@@ -51,26 +46,25 @@ object CouponService extends Loggable {
     }
   }
 
-  def createCoupon(couponCode: String, agency: Box[Agency], rawFreeMonths: String, rawPercentOff: String, rawDollarOff: String): Box[Coupon] = {
+  def createCoupon(couponCode: String, agency: Box[Agency], rawMonthCount: String, rawPercentOff: String, rawDollarOff: String): Box[Coupon] = {
 
-    val freeMonths = convertedString(rawFreeMonths)
+    val monthCount = convertedString(rawMonthCount)
     val percentOff = convertedString(rawPercentOff)
     val dollarOff = convertedString(rawDollarOff)
 
     val newStripeCoupon = createStripeCoupon(
       couponCode,
-      agency,
-      freeMonths,
+      monthCount,
       percentOff,
       dollarOff
     )
 
     Try(Await.result(newStripeCoupon, new DurationInt(3).seconds)) match {
-      case TrySuccess(Full(newCoupon)) =>
+      case TrySuccess(Full(_)) =>
         Full(Coupon.createNewCoupon(
           couponCode,
           agency,
-          freeMonths,
+          monthCount,
           percentOff,
           dollarOff
         ))
@@ -85,7 +79,7 @@ object CouponService extends Loggable {
     }
   }
 
-  def deleteCoupon(coupon: Coupon) = {
+  def deleteCoupon(coupon: Coupon): Box[Coupon] = {
     val tryDelete = StripeCoupon.delete(coupon.couponCode.get)
 
     Try(Await.result(tryDelete, new DurationInt(3).seconds)) match {
@@ -95,7 +89,7 @@ object CouponService extends Loggable {
 
       case TrySuccess(stripeFailure) =>
         logger.error("create customer failed with: " + stripeFailure)
-        logger.error(s"attempting to delete ${coupon} locally")
+        logger.error(s"attempting to delete $coupon locally")
       
         if (coupon.delete_!)
           Full(coupon)

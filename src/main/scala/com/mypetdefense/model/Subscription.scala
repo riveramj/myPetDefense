@@ -7,8 +7,10 @@ import java.util.Date
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Box
 
+import scala.collection.mutable
+
 class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMany[Long, Subscription] {
-  def getSingleton = Subscription
+  def getSingleton: KeyedMetaMapper[Long, Subscription] = Subscription
   object subscriptionId extends MappedLong(this){
     override def dbIndexed_? = true
   }
@@ -24,7 +26,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   }
   object shipments extends MappedOneToMany(Shipment, Shipment.subscription)
   object status extends MappedEnum(this, Status) {
-    override def defaultValue = Status.Active
+    override def defaultValue: Status.Value = Status.Active
   }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
@@ -35,18 +37,18 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   object subscriptionBoxes extends MappedOneToMany(SubscriptionBox, SubscriptionBox.subscription)
   object tags extends MappedOneToMany(TaggedItem, TaggedItem.subscription)
 
-  def refresh = Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
+  def refresh: Box[Subscription] = Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
 
-  def getPets = user.obj.map(_.activePets).openOr(Nil)
+  def getPets: Seq[Pet] = user.obj.map(_.activePets).openOr(Nil)
 
-  def cancel = {
+  def cancel: Subscription = {
     this
       .status(Status.Cancelled)
       .cancellationDate(new Date())
       .saveMe
   }
 
-  def getPetAndProducts = this.subscriptionBoxes.map { box =>
+  def getPetAndProducts: mutable.Buffer[(Box[Pet], Box[FleaTick])] = this.subscriptionBoxes.map { box =>
     (box.pet.obj, box.fleaTick.obj)
   }
 
@@ -57,7 +59,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     nextShipDate: Date,
     priceCode: String = Price.defaultPriceCode,
     contractLength: Int = 0
-  ) = {
+  ): Subscription = {
     Subscription.create
     .subscriptionId(generateLongId)
     .user(user)
@@ -69,7 +71,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     .saveMe
   }
 
-  def getMonthlyCost = {
+  def getMonthlyCost: Double = {
     this.subscriptionBoxes.map { box =>
       box.basePrice.get + box.addOnProducts.map(_.price.get).sum
     }.sum

@@ -2,23 +2,20 @@ package com.mypetdefense.snippet
 package admin
 
 import net.liftweb._
-  import sitemap.Menu
-  import http.SHtml._
-  import http._
-  import js.JsCmds._
-
+import sitemap.Menu
+import http.SHtml._
+import http._
+import js.JsCmds._
 import net.liftweb.http._
 import net.liftweb.util._
 import net.liftweb.http.js.JE._
 import net.liftweb.http.js.JsCmd._
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js._
-
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util._
 import net.liftweb.mapper.By
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -26,17 +23,18 @@ import java.time.{LocalDate, ZoneId}
 import com.mypetdefense.model._
 import com.mypetdefense.util._
 import com.mypetdefense.service._
-  import ValidationService._
+import ValidationService._
 import com.mypetdefense.actor._
-
 import com.mypetdefense.util.RandomIdGenerator._
+
+import scala.xml.NodeSeq
 
 object Reviews extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Reviews") / "admin" / "reviews" >>
+  val menu: Menu.Menuable = Menu.i("Reviews") / "admin" / "reviews" >>
     mpdAdmin >>
     loggedIn
 }
@@ -47,7 +45,7 @@ class Reviews extends Loggable {
   
   val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
   
-  def fileUpload = {
+  def fileUpload: NodeSeq => NodeSeq = {
     var fileHolder: Box[FileParamHolder] = Empty
     
     def uploadFile(file: FileParamHolder): JsCmd = {
@@ -89,7 +87,7 @@ class Reviews extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     val allReviews = Review.findAll()
 
     SHtml.makeFormsAjax andThen

@@ -1,17 +1,17 @@
 package com.mypetdefense.jobs
 
 import org.quartz.impl.StdSchedulerFactory
-
 import net.liftweb._
 import common._
+import org.quartz.Scheduler
 import util._
 
 object JobManager extends SimpleInjector with Loggable {
 
-  val jobs = new Inject(() => calcJobs) {}
+  val jobs: JobManager.Inject[List[TriggeredJob]] = new Inject(() => calcJobs) {}
 
   // Quartz Scheduler
-  lazy val scheduler = StdSchedulerFactory.getDefaultScheduler()
+  lazy val scheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
 
   // calculate the jobs to run
   private def calcJobs: List[TriggeredJob] = {

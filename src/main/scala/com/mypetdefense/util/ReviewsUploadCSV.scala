@@ -2,7 +2,6 @@ package com.mypetdefense.util
 
 import scala.collection.JavaConverters._
 import scala.util.matching.Regex
-
 import java.io.StringReader
 import java.util.regex.Pattern
 
@@ -10,17 +9,17 @@ import net.liftweb.http.S
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.mapper.By
-
 import au.com.bytecode.opencsv.{CSVParser, CSVReader}
+
 import xml.Text
-
 import com.mypetdefense.model._
-
 import java.nio.charset.StandardCharsets
+
 import scala.language.implicitConversions
 import scala.language.postfixOps
-
 import java.text.SimpleDateFormat
+
+import com.mypetdefense.util.ReviewsUploadCSV.Columns
 
 case class ReviewsList(list: List[Review])
 
@@ -28,12 +27,12 @@ object ReviewsUploadCSV extends Loggable {
     def parse(source: Array[Byte]): Box[ReviewsList] = parse(new String(source, StandardCharsets.UTF_8))
 
     object Columns extends Enumeration {
-    val Title = HeaderValue(name="Title", default=Failure("missing required Title"))
-    val Body = HeaderValue(name="Body", default=Failure("missing required Email"))
-    val Rating = HeaderValue(name="Rating", default=Failure("missing required Rating"))
-    val Author = HeaderValue(name="Author", default=Failure("missing required Author"))
-    val Date = HeaderValue(name="Date", default=Failure("missing required Date"))
-    val Product = HeaderValue(name="Product", default=Failure("missing required Product"))
+    val Title: HeaderValue = HeaderValue(name="Title", default=Failure("missing required Title"))
+    val Body: HeaderValue = HeaderValue(name="Body", default=Failure("missing required Email"))
+    val Rating: HeaderValue = HeaderValue(name="Rating", default=Failure("missing required Rating"))
+    val Author: HeaderValue = HeaderValue(name="Author", default=Failure("missing required Author"))
+    val Date: HeaderValue = HeaderValue(name="Date", default=Failure("missing required Date"))
+    val Product: HeaderValue = HeaderValue(name="Product", default=Failure("missing required Product"))
 
     case class HeaderValue(
         name: String,
@@ -41,11 +40,11 @@ object ReviewsUploadCSV extends Loggable {
         parser: String=>Box[String] = (rawCell: String) => Full(rawCell.trim).filter(_.nonEmpty),
         default: Box[String] = Empty
       ) extends Val(name) {
-      val nameMatcher = matcher openOr ("""(?i)^\s*"""+Pattern.quote(name)+"""\s*$""").r
-      def matches(candidate: String) = {
+      val nameMatcher: Regex = matcher openOr ("""(?i)^\s*"""+Pattern.quote(name)+"""\s*$""").r
+      def matches(candidate: String): Boolean = {
         nameMatcher.unapplySeq(candidate).isDefined
       }
-      def required = {
+      def required: Boolean = {
         default match {
           case Failure(_, _, _) => true
           case _ => false
@@ -53,15 +52,15 @@ object ReviewsUploadCSV extends Loggable {
       }
     }
 
-    def requiredColumns = {
+    def requiredColumns: Columns.ValueSet = {
       values.filter(_.required)
     }
 
-    def requiredColumnsCount = {
+    def requiredColumnsCount: Int = {
       requiredColumns.size
     }
 
-    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]) = {
+    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
       requiredColumns.filter(headerIndex.get(_).isEmpty)
     }
 
@@ -206,7 +205,7 @@ object ReviewsUploadCSV extends Loggable {
     }
   }
 
-  def updateRating(productName: String) = {
+  def updateRating(productName: String): List[FleaTick] = {
     val fleaTicks = FleaTick.findAll(By(FleaTick.name, productName))
     val reviews = fleaTicks.map(_.reviews.toList).flatten
     val ratings = reviews.map(_.rating.get)
@@ -217,7 +216,7 @@ object ReviewsUploadCSV extends Loggable {
     }
   }
 
-  def updateProductRatings = {
+  def updateProductRatings: List[FleaTick] = {
       updateRating("ZoGuard Plus for Dogs")
       updateRating("ZoGuard Plus for Cats")
       updateRating("Adventure Plus for Dogs")

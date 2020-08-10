@@ -11,9 +11,8 @@ import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js._
 import net.liftweb.common._
 import net.liftweb.http._
-  import js.JsCmds._
-import net.liftweb.mapper.{BySql, IHaveValidatedThisSQL, By}
-
+import js.JsCmds._
+import net.liftweb.mapper.{By, BySql, IHaveValidatedThisSQL}
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 import java.time.{LocalDate, ZoneId}
@@ -25,26 +24,28 @@ import com.mypetdefense.util._
 import com.mypetdefense.actor._
 import com.mypetdefense.service._
 
+import scala.xml.NodeSeq
+
 object ShipmentDashboard extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Shipment Dashboard") / "admin" / "shipment-dashboard" >>
+  val menu: Menu.Menuable = Menu.i("Shipment Dashboard") / "admin" / "shipment-dashboard" >>
     mpdAdmin >>
     loggedIn
 
-  val newLabelsExportMenu = Menu.i("Export New Labels") / "admin" / "shipment-dashboard" / "export_new_shipments.csv" >>
+  val newLabelsExportMenu: Menu.Menuable = Menu.i("Export New Labels") / "admin" / "shipment-dashboard" / "export_new_shipments.csv" >>
     mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportNewUspsLabels _)
 
-  val existingLabelsExportMenu = Menu.i("Export Existing Labels") / "admin" / "shipment-dashboard" / "export_existing_shipments.csv" >>
+  val existingLabelsExportMenu: Menu.Menuable = Menu.i("Export Existing Labels") / "admin" / "shipment-dashboard" / "export_existing_shipments.csv" >>
     mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportExistingUspsLabels _)
 
-  val mpdShipstationExportMenu = Menu.i("Export MPD Shipstation Labels") / "admin" / "shipment-dashboard" / "export_MPD_shipstation.csv" >>
+  val mpdShipstationExportMenu: Menu.Menuable = Menu.i("Export MPD Shipstation Labels") / "admin" / "shipment-dashboard" / "export_MPD_shipstation.csv" >>
     mpdAdmin >>
     loggedIn >>
     EarlyResponse(exportMpdShipstationLabels _)
@@ -67,17 +68,17 @@ class ShipmentDashboard extends Loggable {
   var future = false
 
   val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  val localDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
+  val localDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
   
-  val currentDate = LocalDate.now()
+  val currentDate: LocalDate = LocalDate.now()
 
-  var fromDate = currentDate.format(localDateFormat)
-  var toDate = currentDate.plusDays(3).format(localDateFormat)
+  var fromDate: String = currentDate.format(localDateFormat)
+  var toDate: String = currentDate.plusDays(3).format(localDateFormat)
 
-  def paidShipments = ShipmentService.getCurrentPastDueShipments
-  def futureSubscriptions = ShipmentService.getUpcomingSubscriptions
+  def paidShipments: List[Shipment] = ShipmentService.getCurrentPastDueShipments
+  def futureSubscriptions: List[Subscription] = ShipmentService.getUpcomingSubscriptions
 
-  def changeDataSet(dataSet: String) = {
+  def changeDataSet(dataSet: String): JsCmd = {
     dataSet match {
       case "current" =>
         future = false
@@ -89,7 +90,7 @@ class ShipmentDashboard extends Loggable {
     shipmentRenderer.map(_.setHtml).openOr(Noop)
   }
 
-  def paymentProcessed_?(shipment: Shipment) = {
+  def paymentProcessed_?(shipment: Shipment): Boolean = {
     val paymentId = shipment.stripePaymentId.get
     !paymentId.isEmpty
   }
@@ -100,7 +101,7 @@ class ShipmentDashboard extends Loggable {
     shipment: Shipment,
     address: String,
     renderer: IdMemoizeTransform
-  )() = {
+  )(): JsCmd = {
     subscription.map { subscription =>
       ParentService.updateNextShipDate(subscription, user)
     }
@@ -120,11 +121,11 @@ class ShipmentDashboard extends Loggable {
     renderer.setHtml
   }
 
-  def shipmentHasShipped_?(shipment: Shipment) = {
+  def shipmentHasShipped_?(shipment: Shipment): Boolean = {
     !tryo(shipment.dateShipped.get.toString).isEmpty
   }
 
-  def fileUpload = {
+  def fileUpload: NodeSeq => NodeSeq = {
     var fileHolder: Box[FileParamHolder] = Empty
     
     def uploadFile(file: FileParamHolder): JsCmd = {
@@ -173,7 +174,7 @@ class ShipmentDashboard extends Loggable {
     })  
   }
 
-  def updateTrackingNumber(trackingNumber: String, shipment: Shipment) = {
+  def updateTrackingNumber(trackingNumber: String, shipment: Shipment): JsCmd = {
     if (!trackingNumber.trim.isEmpty) {
       val refreshedShipment = shipment.refresh
     
@@ -183,14 +184,14 @@ class ShipmentDashboard extends Loggable {
     Noop
   }
 
-  def convertForecastingDates(date: String) = {
+  def convertForecastingDates(date: String): LocalDate = {
     
     val parsedDate = dateFormat.parse(date)
 
     parsedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".shipment-dashboard [class+]" #> "current" &
     ".new-export [href]" #> ShipmentDashboard.newLabelsExportMenu.loc.calcDefaultHref &

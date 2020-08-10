@@ -26,14 +26,14 @@ import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => 
 import com.mypetdefense.model._
 
 object ShipStationService extends Loggable {
-  val key = Props.get("shipstation.key") openOr ""
-  val secret = Props.get("shipstation.secret") openOr ""
-  val url = Props.get("shipstation.url") openOr ""
+  val key: String = Props.get("shipstation.key") openOr ""
+  val secret: String = Props.get("shipstation.secret") openOr ""
+  val url: String = Props.get("shipstation.url") openOr ""
   val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-  implicit val shipStationExecutor = new ShipStationExecutor(key, secret, url)
+  implicit val shipStationExecutor: ShipStationExecutor = new ShipStationExecutor(key, secret, url)
 
-  def getOrder(orderId: Int) = {
+  def getOrder(orderId: Int): Box[Order] = {
     Try(
       Await.result(Order.get(orderId.toString), new DurationInt(10).seconds)
     ) match {
@@ -75,7 +75,7 @@ object ShipStationService extends Loggable {
     shipDate: String,
     weight: Weight,
     testLabel: Boolean = false
-  ) = {
+  ): Box[Label] = {
     val createLabel = Order.createLabelForOrder(
       orderId = orderId,
       carrierCode = carrierCode,
@@ -102,7 +102,7 @@ object ShipStationService extends Loggable {
     }
   }
 
-  def cancelShipstationOrder(shipment: Shipment) = {
+  def cancelShipstationOrder(shipment: Shipment): Box[Order] = {
     val possibleOrder = getOrder(shipment.shipStationOrderId.get)
 
     val cancelOrder = possibleOrder.map { order =>
@@ -130,7 +130,7 @@ object ShipStationService extends Loggable {
     }
   }
 
-  def createUserBillShipToAddress(user: User) = {
+  def createUserBillShipToAddress(user: User): ShipStationAddress = {
     val userAddress = user.shippingAddress
 
     ShipStationAddress(
@@ -143,7 +143,7 @@ object ShipStationService extends Loggable {
     )
   }
 
-  def createOrderBillShipToAddress(order: TreatOrder) = {
+  def createOrderBillShipToAddress(order: TreatOrder): ShipStationAddress = {
     ShipStationAddress(
       name = Some(order.name),
       street1 = order.street1.get,
@@ -286,7 +286,7 @@ object ShipStationService extends Loggable {
     Order.holdUntil(orderId, holdDate)
   }
 
-  def getYesterdayShipments() = {
+  def getYesterdayShipments(): Box[ShipmentList] = {
     val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
     val yesterdayDate = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant())
     val shipDate = dateFormat.format(yesterdayDate)

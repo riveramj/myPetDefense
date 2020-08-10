@@ -3,7 +3,7 @@ package com.mypetdefense.snippet.signup
 import java.text.SimpleDateFormat
 import java.time.YearMonth
 
-import com.mypetdefense.model._
+import com.mypetdefense.model.{AnimalSize, _}
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
@@ -16,11 +16,14 @@ import net.liftweb.http.js._
 import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 
+import scala.collection.mutable
+import scala.xml.{Elem, NodeSeq}
+
 object DogDetails extends Loggable {
   import com.mypetdefense.util.Paths._
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Dog Details") / "dog-details" >>
+  val menu: Menu.Menuable = Menu.i("Dog Details") / "dog-details" >>
     petChosen
 }
 
@@ -28,25 +31,25 @@ class DogDetails extends Loggable {
   val formatter = new SimpleDateFormat("MM/yy")
   val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 
-  var currentPets = completedPets.is
+  var currentPets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
   var petName = ""
   var petMonth = ""
   var petYear = ""
   var petSize: Box[AnimalSize.Value] = Empty
   var nameErrors: List[String] = Nil
 
-  val products = FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Dogs"))
+  val products: List[FleaTick] = FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Dogs"))
 
-  val smallDog = getSizeNumber(AnimalSize.DogSmallZo)
-  val mediumDog = getSizeNumber(AnimalSize.DogMediumZo)
-  val largeDog = getSizeNumber(AnimalSize.DogLargeZo)
-  val xlargeDog = getSizeNumber(AnimalSize.DogXLargeZo)
+  val smallDog: Option[AnimalSize.Value] = getSizeNumber(AnimalSize.DogSmallZo)
+  val mediumDog: Option[AnimalSize.Value] = getSizeNumber(AnimalSize.DogMediumZo)
+  val largeDog: Option[AnimalSize.Value] = getSizeNumber(AnimalSize.DogLargeZo)
+  val xlargeDog: Option[AnimalSize.Value] = getSizeNumber(AnimalSize.DogXLargeZo)
 
-  def getSizeNumber(size: AnimalSize.Value) = {
+  def getSizeNumber(size: AnimalSize.Value): Option[AnimalSize.Value] = {
     products.find(_.size.get == size).map(_.size.get)
   }
 
-  def validateNameBirthday = {
+  def validateNameBirthday: List[ValidationError] = {
     (
       checkEmpty(petName, "#pet-name") ::
       checkEmpty(petMonth, "#pet-month") ::
@@ -56,7 +59,7 @@ class DogDetails extends Loggable {
     ).flatten.distinct
   }
 
-  def validateAndNavigate(url: String) = {
+  def validateAndNavigate(url: String): JsCmd = {
     val validateFields = validateNameBirthday
 
     if(validateFields.isEmpty) {
@@ -86,17 +89,17 @@ class DogDetails extends Loggable {
     }
   }
 
-  def goToCreateAccount() =
+  def goToCreateAccount(): JsCmd =
     validateAndNavigate(CreateAccount.menu.loc.calcDefaultHref)
 
-  def addNewPet() =
+  def addNewPet(): JsCmd =
     validateAndNavigate(PetChoice.menu.loc.calcDefaultHref)
 
-  def chooseSize(animalSize: Option[AnimalSize.Value]) = {
+  def chooseSize(animalSize: Option[AnimalSize.Value]): Unit = {
     petSize = animalSize
   }
 
-  def monthDropdown = {
+  def monthDropdown: Elem = {
     SHtml.select(
       ("","") +: List(
         "January", "February", "March", "April", "May", "June",
@@ -107,7 +110,7 @@ class DogDetails extends Loggable {
     )
   }
 
-  def yearDropdown = {
+  def yearDropdown: Elem = {
     SHtml.select(
       ("","") +: List(
         "2020", "2019", "2018", "2017", "2016", "2015",
@@ -119,7 +122,7 @@ class DogDetails extends Loggable {
     )
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     "#pet-name" #> ajaxText(petName, petName = _) &
     "#month-container #pet-month" #> monthDropdown &

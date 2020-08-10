@@ -17,6 +17,8 @@ import com.mypetdefense.util._
 import com.mypetdefense.service._
 import com.mypetdefense.util.RandomIdGenerator._
 
+import scala.xml.NodeSeq
+
 case class AmazonOrderExport(startDate: Box[String], endDate: Box[String], animalType: Box[AnimalType.Value])
 
 object AmazonOrders extends Loggable {
@@ -30,7 +32,7 @@ object AmazonOrders extends Loggable {
     }
   }
 
-  def getExportParameters(rawQuery: String) = {
+  def getExportParameters(rawQuery: String): AmazonOrderExport = {
     println(rawQuery + " 1234")
     val query = rawQuery.split(",")
     val startDate = query.find(_.startsWith("startDate")).map(_.substring(10))
@@ -52,15 +54,15 @@ object AmazonOrders extends Loggable {
     AmazonOrderExport(startDate, endDate, animalType)
   }
 
-  def createExportParameters(order: AmazonOrderExport) ={
+  def createExportParameters(order: AmazonOrderExport): String ={
     s"startDate=${order.startDate.getOrElse("")},endDate=${order.endDate.getOrElse("")},animalType=${order.animalType.getOrElse("")}"
   }
 
-  val menu = Menu.i("Amazon Orders") / "admin" / "amazon-orders" >>
+  val menu: Menu.Menuable = Menu.i("Amazon Orders") / "admin" / "amazon-orders" >>
     mpdAdmin >>
     loggedIn
 
-  val exportAmazonOrder = Menu.param[AmazonOrderExport](
+  val exportAmazonOrder: Menu.ParamMenuable[AmazonOrderExport] = Menu.param[AmazonOrderExport](
     "Export Orders",
     "Export Orders",
     exportParameters => Full(getExportParameters(exportParameters)),
@@ -80,7 +82,7 @@ class AmazonOrders extends Loggable {
 
   val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
 
-  def fileUpload = {
+  def fileUpload: NodeSeq => NodeSeq = {
     var fileHolder: Box[FileParamHolder] = Empty
 
     def uploadFile(file: FileParamHolder): JsCmd = {
@@ -132,7 +134,7 @@ class AmazonOrders extends Loggable {
     }
   }
 
-  def generateExportQuery = {
+  def generateExportQuery: AmazonOrderExport = {
     val animalType = if (petType.toLowerCase.trim == "dog")
       AnimalType.Dog
     else
@@ -141,7 +143,7 @@ class AmazonOrders extends Loggable {
     AmazonOrderExport(Some(startDate), Some(endDate), Some(animalType))
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     val allOrders = AmazonOrder.findAll()
 
     SHtml.makeFormsAjax andThen

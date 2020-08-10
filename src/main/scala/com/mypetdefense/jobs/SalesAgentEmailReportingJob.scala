@@ -1,7 +1,6 @@
 package com.mypetdefense.jobs
 
-import org.quartz.{CronScheduleBuilder, TriggerBuilder, JobBuilder, JobExecutionContext}
-
+import org.quartz.{CronScheduleBuilder, JobBuilder, JobDetail, JobExecutionContext, Trigger, TriggerBuilder}
 import com.mypetdefense.service.ReportingService
 import com.mypetdefense.actor._
 
@@ -90,11 +89,11 @@ class SalesAgentReportEmailJob extends ManagedJob {
 }
 
 object DailyAgentSalesReportEmailJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[SalesAgentReportEmailJob])
+  val detail: JobDetail = JobBuilder.newJob(classOf[SalesAgentReportEmailJob])
     .withIdentity("DailyAgentSalesReportEmailJob")
     .build()
 
-  val trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder.newTrigger()
     .withIdentity("DailyAgentSalesReportEmailJobTrigger")
     .startNow()
     .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * * *"))
@@ -102,11 +101,11 @@ object DailyAgentSalesReportEmailJob extends TriggeredJob {
 }
 
 object FrequentAgentSalesReportEmailJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[SalesAgentReportEmailJob])
+  val detail: JobDetail = JobBuilder.newJob(classOf[SalesAgentReportEmailJob])
     .withIdentity("FrequentAgentSalesReportEmailJob")
     .build
 
-  val trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder.newTrigger()
     .withIdentity("FrequentAgentSalesReportEmailJobTrigger")
     .startNow
     .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 5 minutes

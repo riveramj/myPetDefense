@@ -10,7 +10,7 @@ import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
 
 class InventoryChangeAudit extends LongKeyedMapper[InventoryChangeAudit] with IdPK with OneToMany[Long, InventoryChangeAudit] {
-  def getSingleton = InventoryChangeAudit
+  def getSingleton: KeyedMetaMapper[Long, InventoryChangeAudit] = InventoryChangeAudit
   object inventoryChangeAuditId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -37,7 +37,7 @@ class InventoryChangeAudit extends LongKeyedMapper[InventoryChangeAudit] with Id
     newDescription: String = "",
     originalUnitOfMeasure: String = "",
     newUnitOfMeasure: String = ""
-  ) = {
+  ): InventoryChangeAudit = {
     InventoryChangeAudit.create
     .inventoryChangeAuditId(generateLongId)
     .inventoryItem(inventoryItem)

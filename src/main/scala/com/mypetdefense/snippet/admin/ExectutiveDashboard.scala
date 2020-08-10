@@ -31,31 +31,31 @@ object ExecutiveDashboard extends Loggable {
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Executive Dashboard") / "admin" / "executive-dashboard" >>
+  val menu: Menu.Menuable = Menu.i("Executive Dashboard") / "admin" / "executive-dashboard" >>
     mpdAdmin >>
     loggedIn 
 }
 
 class ExecutiveDashboard extends Loggable {
-  val mpdAgency = Agency.find(By(Agency.name, "My Pet Defense"))
-  val tppAgency = Agency.find(By(Agency.name, "TPP"))
+  val mpdAgency: Box[Agency] = Agency.find(By(Agency.name, "My Pet Defense"))
+  val tppAgency: Box[Agency] = Agency.find(By(Agency.name, "TPP"))
 
   val topLevelAgencies = List(mpdAgency, tppAgency)
 
-  val dollarFormatter = NumberFormat.getCurrencyInstance
-  val numberFormatter = NumberFormat.getIntegerInstance
+  val dollarFormatter: NumberFormat = NumberFormat.getCurrencyInstance
+  val numberFormatter: NumberFormat = NumberFormat.getIntegerInstance
 
-  val mtdShipments = ReportingService.findMtdShipments
-  val mtdShipmentValue = mtdShipments.map { shipment =>
+  val mtdShipments: List[Shipment] = ReportingService.findMtdShipments
+  val mtdShipmentValue: Double = mtdShipments.map { shipment =>
     tryo(shipment.amountPaid.get.toDouble)
   }.flatten.foldLeft(0D)(_+_)
 
-  val todayShipments = ReportingService.findTodayShipments
-  val todayShipmentsValue = todayShipments.map { shipment =>
+  val todayShipments: List[Shipment] = ReportingService.findTodayShipments
+  val todayShipmentsValue: Double = todayShipments.map { shipment =>
     tryo(shipment.amountPaid.get.toDouble)
   }.flatten.foldLeft(0D)(_+_)
 
-  val remainingMonthSubscriptions = ReportingService.findCurrentMonthUpcomingSubscriptions
+  val remainingMonthSubscriptions: List[Subscription] = ReportingService.findCurrentMonthUpcomingSubscriptions
 
   /*
   val remainingMonthValue = {
@@ -70,7 +70,7 @@ class ExecutiveDashboard extends Loggable {
   }.sum
    */
 
-  def render = {
+  def render: CssBindFunc = {
     ".executive-dashboard [class+]" #> "current" &
     ".mtd-shipments .count *"#> numberFormatter.format(mtdShipments.size) &
     ".mtd-shipments .value *"#> dollarFormatter.format(mtdShipmentValue) &

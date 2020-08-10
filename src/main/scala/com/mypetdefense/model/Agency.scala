@@ -10,7 +10,7 @@ import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date 
 
 class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agency] {
-  def getSingleton = Agency
+  def getSingleton: KeyedMetaMapper[Long, Agency] = Agency
   object agencyId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -35,7 +35,7 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
     parent: Box[Agency] = Empty,
     storeCode: String = "",
     petlandStore: Boolean = false
-  ) = {
+  ): Agency = {
     Agency.create
     .agencyId(generateLongId)
     .name(name)
@@ -61,7 +61,7 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
     }
   }
 
-  def getAllHQ = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
+  def getAllHQ: List[Agency] = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
 
   def getAllChildrenCustomers(agency: Agency): List[User] = {
     

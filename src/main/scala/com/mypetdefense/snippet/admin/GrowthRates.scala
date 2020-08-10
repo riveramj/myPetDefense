@@ -2,16 +2,14 @@ package com.mypetdefense.snippet
 package admin
 
 import net.liftweb._
-  import sitemap.Menu
-  import http.SHtml._
-  import http._
-  import js.JsCmds._
-
+import sitemap.Menu
+import http.SHtml._
+import http._
+import js.JsCmds._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.mapper.By
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -21,12 +19,14 @@ import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.actor._
 
+import scala.xml.NodeSeq
+
 object GrowthRates extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Growth Rates") / "admin" / "growth-rates" >>
+  val menu: Menu.Menuable = Menu.i("Growth Rates") / "admin" / "growth-rates" >>
     mpdAdmin >>
     loggedIn
 }
@@ -37,9 +37,9 @@ class GrowthRates extends Loggable {
   var largeAge = ""
   var xlargeAge = ""
 
-  val growthRates = GrowthRate.findAll()
+  val growthRates: List[GrowthRate] = GrowthRate.findAll()
 
-  def createGrowthRate = {
+  def createGrowthRate: Nothing = {
     def convertAgeToInt(age: String) = tryo(age.trim().toInt)
 
     GrowthRate.createGrowthRate(
@@ -52,21 +52,21 @@ class GrowthRates extends Loggable {
     S.redirectTo(GrowthRates.menu.loc.calcDefaultHref)
   }
 
-  def deleteGrowthRate(growthRate: GrowthRate)() = {
+  def deleteGrowthRate(growthRate: GrowthRate)(): Alert = {
     if (growthRate.delete_!)
       S.redirectTo(GrowthRates.menu.loc.calcDefaultHref)
     else
       Alert("An error has occured. Please try again.")
   }
 
-  def formatGrowthMonth(growthMonth: Int) = {
+  def formatGrowthMonth(growthMonth: Int): String = {
     if (growthMonth == -1)
       "-"
     else
       s"$growthMonth months"
   }
   
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".create" #> {
       "#breed" #> text(breed, breed = _) &

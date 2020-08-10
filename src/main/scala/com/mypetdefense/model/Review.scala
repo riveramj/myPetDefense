@@ -9,7 +9,7 @@ import java.util.Date
 import com.mypetdefense.util.RandomIdGenerator._
 
 class Review extends LongKeyedMapper[Review] with IdPK with OneToMany[Long, Review] {
-  def getSingleton = Review
+  def getSingleton: KeyedMetaMapper[Long, Review] = Review
   object reviewId extends MappedLong(this){
     override def dbIndexed_? = true
   }
@@ -29,7 +29,7 @@ class Review extends LongKeyedMapper[Review] with IdPK with OneToMany[Long, Revi
     rating: Double,
     author: String,
     fleaTick: Box[FleaTick]
-  ) = {
+  ): Review = {
     Review.create
     .reviewId(generateLongId)
     .title(title)

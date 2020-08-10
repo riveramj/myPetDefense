@@ -10,10 +10,10 @@ import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
 
 class Packaging extends LongKeyedMapper[Packaging] with IdPK with OneToMany[Long, Packaging] {
-  def getSingleton = Packaging
+  def getSingleton: KeyedMetaMapper[Long, Packaging] = Packaging
   object packagingId extends MappedLong(this) {
     override def dbIndexed_? = true
-    override def defaultValue = generateLongId
+    override def defaultValue: Long = generateLongId
   }
   object name extends MappedString(this, 100)
   object sku extends MappedString(this, 100)
@@ -30,7 +30,7 @@ class Packaging extends LongKeyedMapper[Packaging] with IdPK with OneToMany[Long
     sku: String,
     treatBagMax: Int,
     fleaTickMax: Int
-  ) = {
+  ): Packaging = {
     Packaging.create
       .name(name)
       .weight(weight)
@@ -40,9 +40,9 @@ class Packaging extends LongKeyedMapper[Packaging] with IdPK with OneToMany[Long
       .saveMe
   }
 
-  def getBubbleMailer = Packaging.find(By(Packaging.sku, "bubble1234"))
-  def getSmallBox = Packaging.find(By(Packaging.sku, "smallBox1234"))
-  def getLargeBox = Packaging.find(By(Packaging.sku, "largeBox1234"))
+  def getBubbleMailer: Box[Packaging] = Packaging.find(By(Packaging.sku, "bubble1234"))
+  def getSmallBox: Box[Packaging] = Packaging.find(By(Packaging.sku, "smallBox1234"))
+  def getLargeBox: Box[Packaging] = Packaging.find(By(Packaging.sku, "largeBox1234"))
 }
 
 object Packaging extends Packaging with LongKeyedMetaMapper[Packaging]

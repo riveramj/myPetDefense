@@ -10,11 +10,13 @@ import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.util.Helpers._
 
+import scala.xml.NodeSeq
+
 object ResetPassword extends Loggable {
   import net.liftweb.sitemap._
   import Loc._
 
-  val menu = Menu.param[User](
+  val menu: Menu.ParamMenuable[User] = Menu.param[User](
     "Reset Password", "Reset Password",
     accessKey => KeyService.findUserByKey(accessKey, "resetPasswordKey"),
     user => user.resetPasswordKey.get
@@ -23,9 +25,9 @@ object ResetPassword extends Loggable {
 }
 
 class ResetPassword {
-  val user = ResetPassword.menu.currentValue
+  val user: Box[User] = ResetPassword.menu.currentValue
   var password = ""
-  def resetPassword() = user match {
+  def resetPassword(): Nothing = user match {
     case Full(user) => 
       User.setUserPassword(user, password).resetPasswordKey("").saveMe
       EmailActor ! SendPasswordUpdatedEmail(user)
@@ -34,7 +36,7 @@ class ResetPassword {
     case _ =>
       S.redirectTo(Login.menu.loc.calcDefaultHref)
   }
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     "#password" #> SHtml.password("", password = _) &
     "type=submit" #> SHtml.ajaxSubmit("Reset Password", resetPassword _)
