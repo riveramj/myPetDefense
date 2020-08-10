@@ -9,7 +9,7 @@ import java.util.Date
 import com.mypetdefense.util.RandomIdGenerator._
 
 class Event extends LongKeyedMapper[Event] with IdPK with OneToMany[Long, Event] {
-  def getSingleton = Event
+  def getSingleton: KeyedMetaMapper[Long, Event] = Event
   object eventId extends MappedLong(this){
     override def dbIndexed_? = true
   }
@@ -39,7 +39,7 @@ object Event extends Event with LongKeyedMetaMapper[Event] {
     title: String,
     details: String,
     eventDate: Date = new Date()
-  ) = {
+  ): Event = {
     Event.create
       .eventId(generateLongId)
       .user(user)
@@ -54,7 +54,7 @@ object Event extends Event with LongKeyedMetaMapper[Event] {
       .saveMe
   }
 
-  def unresolvedEvents = findAll(NotBy(Event.eventStatus, EventStatus.Resolved))
+  def unresolvedEvents: List[Event] = findAll(NotBy(Event.eventStatus, EventStatus.Resolved))
 }
 
 object EventType extends Enumeration {

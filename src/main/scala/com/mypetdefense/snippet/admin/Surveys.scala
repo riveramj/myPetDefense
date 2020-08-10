@@ -7,9 +7,8 @@ import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearNodes
 import net.liftweb.http._
-  import js.JsCmds._
+import js.JsCmds._
 import net.liftweb.mapper.By
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -20,12 +19,14 @@ import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.actor._
 
+import scala.xml.NodeSeq
+
 object Surveys extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Surveys") / "admin" / "surveys" >>
+  val menu: Menu.Menuable = Menu.i("Surveys") / "admin" / "surveys" >>
     mpdAdmin >>
     loggedIn
 }
@@ -33,7 +34,7 @@ object Surveys extends Loggable {
 class Surveys extends Loggable {
   val dateFormat = new SimpleDateFormat("MMM dd, YYYY")
 
-  def addCoupon(parent: User, updatedCoupon: Box[Coupon]) = {
+  def addCoupon(parent: User, updatedCoupon: Box[Coupon]): Nothing = {
     parent.coupon(updatedCoupon).saveMe
 
     ParentService.updateCoupon(parent.stripeId.get, updatedCoupon.map(_.couponCode.get))
@@ -41,7 +42,7 @@ class Surveys extends Loggable {
     S.redirectTo(Parents.menu.loc.calcDefaultHref)
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".surveys [class+]" #> "current" &
     "tbody" #> SHtml.idMemoize { renderer =>

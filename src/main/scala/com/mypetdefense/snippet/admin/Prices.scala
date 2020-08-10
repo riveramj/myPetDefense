@@ -2,16 +2,14 @@ package com.mypetdefense.snippet
 package admin
 
 import net.liftweb._
-  import sitemap.Menu
-  import http.SHtml._
-  import http._
-  import js.JsCmds._
-
+import sitemap.Menu
+import http.SHtml._
+import http._
+import js.JsCmds._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
 import net.liftweb.util.ClearClearable
 import net.liftweb.mapper.By
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -19,17 +17,19 @@ import java.time.{LocalDate, ZoneId}
 import com.mypetdefense.model._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.service._
-  import ValidationService._
+import ValidationService._
 import com.mypetdefense.actor._
-
 import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.http.js.JsCmd
+
+import scala.xml.{Elem, NodeSeq}
 
 object Prices extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Prices") / "admin" / "prices" >>
+  val menu: Menu.Menuable = Menu.i("Prices") / "admin" / "prices" >>
     mpdAdmin >>
     loggedIn
 }
@@ -37,8 +37,8 @@ object Prices extends Loggable {
 case class DisplayPrice(code: String, price: Double, productName: String)
 
 class Prices extends Loggable {
-  val productNames = FleaTick.findAll().map(_.name.get).distinct
-  val allPrices = Price.findAll()
+  val productNames: List[String] = FleaTick.findAll().map(_.name.get).distinct
+  val allPrices: List[Price] = Price.findAll()
   val prices: List[DisplayPrice] = allPrices.map { price =>
     DisplayPrice(price.code.get, price.price.get, price.fleaTick.obj.map(_.name.get).openOr(""))
   }.distinct
@@ -47,7 +47,7 @@ class Prices extends Loggable {
   var rawPrice = ""
   var chosenProduct = ""
 
-  def productDropdown = {
+  def productDropdown: Elem = {
     SHtml.select(
       ("","") +: productNames.sortWith(_<_).map(name => (name,name)),
       Full(chosenProduct),
@@ -55,7 +55,7 @@ class Prices extends Loggable {
     )
   }
 
-  def createPrice = {
+  def createPrice: JsCmd = {
     val price = tryo(rawPrice.trim().toDouble).getOrElse(0D)
     val validateFields = List(
       checkEmpty(code, "#code"),
@@ -80,7 +80,7 @@ class Prices extends Loggable {
     }
   }
 
-  def deletePrice(price: DisplayPrice)() = {
+  def deletePrice(price: DisplayPrice)(): Nothing = {
     val products = FleaTick.findAll(By(FleaTick.name, price.productName))
     products.map { product =>
       val prices = Price.findAll(By(Price.fleaTick, product), By(Price.code, price.code))
@@ -90,7 +90,7 @@ class Prices extends Loggable {
     S.redirectTo(Prices.menu.loc.calcDefaultHref)
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".prices [class+]" #> "current" &
     ".create" #> idMemoize { renderer =>

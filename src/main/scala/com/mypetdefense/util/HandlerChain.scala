@@ -17,7 +17,7 @@ trait HandlerChain extends LiftActor with Loggable {
   override lazy val messageHandler: PartialFunction[Any, Unit] =
     handlers.foldRight(defaultHandler)(_ orElse _)
 
-  protected def addHandler(pf: PartialFunction[Any, Unit]) =
+  protected def addHandler(pf: PartialFunction[Any, Unit]): Unit =
     handlers = handlers :+ pf
 }
 

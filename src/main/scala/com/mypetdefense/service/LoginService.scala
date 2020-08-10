@@ -29,7 +29,7 @@ object LoginService extends Loggable {
       }
     }
 
-  def login(email: String, password: String, facebookId: String, boxLogin: Boolean = false) = {
+  def login(email: String, password: String, facebookId: String, boxLogin: Boolean = false): JsCmd = {
     val validateFields = if (facebookId.isEmpty)
       List(
         checkEmpty(email, "#email"),

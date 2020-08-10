@@ -15,7 +15,7 @@ import java.time.{LocalDate, ZoneId, LocalDateTime, Period}
 import java.time.format.DateTimeFormatter
 
 object InventoryService extends Loggable {
-  def updateItemCount(item: InventoryItem, oldCount: Int, newCount: Int) ={
+  def updateItemCount(item: InventoryItem, oldCount: Int, newCount: Int): InventoryItem ={
     InventoryChangeAudit.newChangeAudit(
       inventoryItem = item,
       originalCount = oldCount,
@@ -25,7 +25,7 @@ object InventoryService extends Loggable {
     item.total(newCount).saveMe
   }
 
-  def deductShipmentItems(shipment: Shipment) = {
+  def deductShipmentItems(shipment: Shipment): List[InventoryItem] = {
     val shipmentLineItems = shipment.shipmentLineItems.toList
     
     val products = shipmentLineItems.flatMap(_.fleaTick.obj)

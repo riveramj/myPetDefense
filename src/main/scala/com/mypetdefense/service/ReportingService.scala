@@ -10,7 +10,7 @@ import js.JsCmds._
 import com.mypetdefense.model._
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
-import java.time.{LocalDate, LocalDateTime, YearMonth, ZoneId}
+import java.time.{LocalDate, LocalDateTime, Month, YearMonth, ZoneId, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
@@ -19,84 +19,84 @@ import com.mypetdefense.snippet.admin.AmazonOrderExport
 object ReportingService extends Loggable {
   val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-  def currentDate = LocalDateTime.now()
-  def now = LocalDate.now(ZoneId.of("America/New_York"))
+  def currentDate: LocalDateTime = LocalDateTime.now()
+  def now: LocalDate = LocalDate.now(ZoneId.of("America/New_York"))
 
-  def nowDate = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).toInstant)
+  def nowDate: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).toInstant)
 
-  def yesterday = now.atStartOfDay(ZoneId.of("America/New_York")).minusDays(1)
+  def yesterday: ZonedDateTime = now.atStartOfDay(ZoneId.of("America/New_York")).minusDays(1)
 
-  def yesterdayStart = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant())
+  def yesterdayStart: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant())
 
-  def yesterdayEnd = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).toInstant())
+  def yesterdayEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).toInstant())
 
-  def monthDayOne = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant())
+  def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant())
 
-  def tomorrowStart = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant())
+  def tomorrowStart: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant())
     
-  def beginngNextMonth = Date.from(YearMonth.now().atEndOfMonth().atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant())
+  def beginngNextMonth: Date = Date.from(YearMonth.now().atEndOfMonth().atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant())
 
   
-  def yearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+  def yearMonth: String = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
   
-  def fileNameYearMonth = currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", Locale.ENGLISH))
+  def fileNameYearMonth: String = currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", Locale.ENGLISH))
 
-  def fileNameMonthDayYear = currentDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy", Locale.ENGLISH))
+  def fileNameMonthDayYear: String = currentDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy", Locale.ENGLISH))
   
-  def year = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
+  def year: String = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
 
-  val monthHeaders = "January" :: "February" :: "March" :: "April" :: "May" :: "June" :: "July" :: "August" :: "September" :: "October" :: "November" :: "December" :: Nil
+  val monthHeaders: List[String] = "January" :: "February" :: "March" :: "April" :: "May" :: "June" :: "July" :: "August" :: "September" :: "October" :: "November" :: "December" :: Nil
 
   val spacerRow = List(List(","))
 
-  def getUsersForAgency(agencyName: String) = {
+  def getUsersForAgency(agencyName: String): List[User] = {
     val agency = Agency.find(By(Agency.name, agencyName))
     agency.map(_.customers.toList).openOr(Nil)
   }
 
-  def getShipmentAmountPaid(shipment: Shipment) = {
+  def getShipmentAmountPaid(shipment: Shipment): Double = {
     val amountPaid = tryo(shipment.amountPaid.get.toDouble).getOrElse(0D)
     val taxesPaid = tryo(shipment.taxPaid.get.toDouble).getOrElse(0D) 
     amountPaid - taxesPaid
   }
 
-  def getProcessDateOfShipment(shipment: Shipment) = {
+  def getProcessDateOfShipment(shipment: Shipment): LocalDate = {
     shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
-  def getMailedDateOfShipment(shipment: Shipment) = {
+  def getMailedDateOfShipment(shipment: Shipment): Box[LocalDate] = {
     tryo(shipment.dateShipped.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
   }
 
-  def getStartDateOfSubscription(subscription: Subscription) = {
+  def getStartDateOfSubscription(subscription: Subscription): String = {
     tryo(signupCancelDateFormat.format(subscription.startDate.get)).openOr("")
   }
 
-  def getCancelDateOfSubscription(subscription: Subscription) = {
+  def getCancelDateOfSubscription(subscription: Subscription): String = {
     tryo(signupCancelDateFormat.format(subscription.cancellationDate.get)).openOr("")
   }
 
-  def getCreatedDateOfUser(user: User) = {
+  def getCreatedDateOfUser(user: User): LocalDate = {
     user.createdAt.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
-  def getCreatedDateOfSubscription(subscription: Subscription) = {
+  def getCreatedDateOfSubscription(subscription: Subscription): LocalDate = {
     subscription.createdAt.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
-  def getCancelledDateOfSubscription(subscription: Subscription) = {
+  def getCancelledDateOfSubscription(subscription: Subscription): Box[LocalDate] = {
     tryo(subscription.cancellationDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate())
   }
 
-  def getNextShipDate(subscription: Subscription) = {
+  def getNextShipDate(subscription: Subscription): LocalDate = {
     subscription.nextShipDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
   }
 
-  def getSubscriptions(users: List[User]) = {
+  def getSubscriptions(users: List[User]): List[Subscription] = {
     users.map(_.subscription.toList).flatten
   }
 
-  def getFirstShipments(subscriptions: List[Subscription]) = {
+  def getFirstShipments(subscriptions: List[Subscription]): List[Shipment] = {
     val firstShipments = subscriptions.map(_.shipments.headOption).flatten
 
     firstShipments filter { shipment =>
@@ -104,7 +104,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def filterMailedShipments (shipments: List[Shipment]) = {
+  def filterMailedShipments (shipments: List[Shipment]): List[Shipment] = {
     shipments filter { shipment =>
       val dateProcessed = getProcessDateOfShipment(shipment)
 
@@ -118,27 +118,27 @@ object ReportingService extends Loggable {
     subscriptions.map(getShipments).flatten
   }
 
-  def getShipments(subscription: Subscription) = {
+  def getShipments(subscription: Subscription): List[Shipment] = {
     val shipments = subscription.shipments.toList
 
     filterMailedShipments(shipments)
   }
 
-  def getPetCount(shipments: List[Shipment]) = {
+  def getPetCount(shipments: List[Shipment]): Int = {
     shipments.map(_.shipmentLineItems.toList).flatten.size
   }
 
-  def totalSalesForShipments(shipments: List[Shipment]) = {
+  def totalSalesForShipments(shipments: List[Shipment]): Double = {
     shipments.map { shipment =>
         getShipmentAmountPaid(shipment)
     }.foldLeft(0D)(_+_)
   }
 
-  def totalCommissionForSales(sales: Double) = {
+  def totalCommissionForSales(sales: Double): Double = {
     sales * 0.35
   }
 
-  def findCurrentYearShipments(shipments: List[Shipment]) = {
+  def findCurrentYearShipments(shipments: List[Shipment]): List[Shipment] = {
     shipments.filter { shipment =>
       val mailedDate = getMailedDateOfShipment(shipment)
       
@@ -148,7 +148,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def getDateRange(month: String, year: Int = 2019) = {
+  def getDateRange(month: String, year: Int = 2019): LocalDateTime = {
     if (month == "") {
       currentDate
     } else {
@@ -156,7 +156,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def getYearOrCurrent(year: String) = {
+  def getYearOrCurrent(year: String): Int = {
     if (year == "") {
       currentDate.getYear
     } else {
@@ -164,7 +164,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentMonthShipments(shipments: List[Shipment], month: String = "") = {
+  def findCurrentMonthShipments(shipments: List[Shipment], month: String = ""): List[Shipment] = {
     val date = getDateRange(month)
 
     shipments.filter { shipment =>
@@ -177,7 +177,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentMonthProcessedShipments(shipments: List[Shipment], month: String = "", year: Int = 2019) = {
+  def findCurrentMonthProcessedShipments(shipments: List[Shipment], month: String = "", year: Int = 2019): List[Shipment] = {
     val date = getDateRange(month)
 
     shipments.filter { shipment =>
@@ -190,13 +190,13 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentMonthSubscriptions(subscriptions: List[Subscription]) = {
+  def findCurrentMonthSubscriptions(subscriptions: List[Subscription]): List[Subscription] = {
     subscriptions.filter { subscription =>
       getCreatedDateOfSubscription(subscription).getMonth == currentDate.getMonth
     }
   }
 
-  def findActiveSubscriptionsFirstMonth(subscriptions: List[Subscription]) = {
+  def findActiveSubscriptionsFirstMonth(subscriptions: List[Subscription]): List[Subscription] = {
     subscriptions.filter { subscription =>
       val createdDate = getCreatedDateOfSubscription(subscription)
       val cancellationDate = getCancelledDateOfSubscription(subscription)
@@ -216,24 +216,24 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findActiveSubscriptions(subscriptions: List[Subscription]) = {
+  def findActiveSubscriptions(subscriptions: List[Subscription]): List[Subscription] = {
     subscriptions.filter { subscription =>
       subscription.status != Status.Cancelled
     }
   }
 
-  def findCustomersForAgent(customers: List[User], agentId: String) = {
+  def findCustomersForAgent(customers: List[User], agentId: String): List[User] = {
     customers.filter(_.salesAgentId == agentId)
   }
 
-  def convertMonthToDate(month: String, year: Int) = {
+  def convertMonthToDate(month: String, year: Int): LocalDateTime = {
     val dateFormat = new SimpleDateFormat("MMMM yyyy")
     val monthDate = dateFormat.parse(s"$month $year")
 
     monthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
   }
 
-  def findSubscriptionMonthCancellations(subscriptions: List[Subscription], month: String = "") = {
+  def findSubscriptionMonthCancellations(subscriptions: List[Subscription], month: String = ""): List[Subscription] = {
     val date = getDateRange(month)
 
     subscriptions.filter { subscription =>
@@ -246,7 +246,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findNewCustomersMonth(users: List[User], month: String = "", year: Int = 2019) = {
+  def findNewCustomersMonth(users: List[User], month: String = "", year: Int = 2019): List[User] = {
     val date = getDateRange(month)
 
     users filter { user =>
@@ -259,7 +259,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findPayingUsers(users: List[User], month: String = "", year: Int = 2019) = {
+  def findPayingUsers(users: List[User], month: String = "", year: Int = 2019): List[User] = {
     val date = getDateRange(month)
 
     users filter { user =>
@@ -272,7 +272,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findPaidShipments(subscriptions: List[Subscription]) = {
+  def findPaidShipments(subscriptions: List[Subscription]): List[Shipment] = {
     val shipments = getShipments(subscriptions)
     
     shipments filter { shipment =>
@@ -280,11 +280,11 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCancelledSubscriptions(subscriptions: List[Subscription]) = {
+  def findCancelledSubscriptions(subscriptions: List[Subscription]): List[Subscription] = {
     subscriptions.filter(_.status == Status.Cancelled)
   }
 
-  def findCurrentYearPayingCancelledSubscriptions(subscriptions: List[Subscription]) = {
+  def findCurrentYearPayingCancelledSubscriptions(subscriptions: List[Subscription]): List[Subscription] = {
     subscriptions.filter { subscription =>
       val createdDate = getCreatedDateOfSubscription(subscription)
       val cancellationDate = getCancelledDateOfSubscription(subscription)
@@ -304,7 +304,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findCurrentMonthCancelledSubscriptions(subscriptions: List[Subscription], month: String = "", year: Int = 2019) = {
+  def findCurrentMonthCancelledSubscriptions(subscriptions: List[Subscription], month: String = "", year: Int = 2019): List[Subscription] = {
     val date = getDateRange(month, year)
 
     subscriptions filter { subscription =>
@@ -317,7 +317,7 @@ object ReportingService extends Loggable {
     }
   }
 
-  def generateCSV(csv: String, fileName: String) = {
+  def generateCSV(csv: String, fileName: String): Some[InMemoryResponse] = {
     Some(new InMemoryResponse(
       csv.getBytes("UTF-8"),
       List(
@@ -365,7 +365,7 @@ object ReportingService extends Loggable {
     generateCSV(csv, file)
   }
 
-  def exportCancellationData(name: String) = {
+  def exportCancellationData(name: String): Some[InMemoryResponse] = {
     val possibleAgency = Agency.find(By(Agency.name, name))
     val customers = possibleAgency.map(_.customers.toList).openOr(Nil)
     val cancelledCustomers = customers.filter(_.status == Status.Cancelled)
@@ -856,7 +856,7 @@ object ReportingService extends Loggable {
     generateCSV(csvRows, file)
   }
 
-  def findPreviousWeekSales(agency: String) = {
+  def findPreviousWeekSales(agency: String): Unit = {
     val totalUsers = Agency.find(By(Agency.name, agency)).map(_.customers.toList).getOrElse(Nil)
 
     val lastWeekNewUsers = totalUsers.filter { user =>
@@ -874,14 +874,14 @@ object ReportingService extends Loggable {
     }
   }
 
-  def findYesterdayNewSales = {
+  def findYesterdayNewSales: List[User] = {
      User.findAll(
        By_>(User.createdAt, yesterdayStart),
        By_<(User.createdAt, yesterdayEnd)
      )
   }
 
-  def yesterdayShipments = {
+  def yesterdayShipments: (Int, Int, Double) = {
      val yesterdayShipments = Shipment.findAll(
        By_>(Shipment.dateShipped, yesterdayStart),
        By_<(Shipment.dateShipped, yesterdayEnd)
@@ -894,7 +894,7 @@ object ReportingService extends Loggable {
      (newShipments.size, paidShipments.size, paidGrossSales)
   }
 
-  def yesterdayCancels = {
+  def yesterdayCancels: List[Subscription] = {
     Subscription.findAll(
       By_>(Subscription.cancellationDate, yesterdayStart),
       By_<(Subscription.cancellationDate, yesterdayEnd)
@@ -940,32 +940,32 @@ object ReportingService extends Loggable {
     }.toList.sortBy(_._1)
   }
 
-  def findMtdShipments = {
+  def findMtdShipments: List[Shipment] = {
     Shipment.findAll(
       By_>(Shipment.createdAt, monthDayOne)
     )
   }
 
-  def findTodayShipments = {
+  def findTodayShipments: List[Shipment] = {
     Shipment.findAll(
       By_>(Shipment.dateProcessed, nowDate)
     )
   }
 
-  def findCurrentMonthUpcomingSubscriptions = {
+  def findCurrentMonthUpcomingSubscriptions: List[Subscription] = {
     Subscription.findAll(
       By_>(Subscription.nextShipDate, tomorrowStart),
       By_<(Subscription.nextShipDate, beginngNextMonth)
     )
   }
 
-  def findNewMtdSubscriptions = {
+  def findNewMtdSubscriptions: List[Subscription] = {
     Subscription.findAll(
       By_>(Subscription.createdAt, monthDayOne)
     )
   }
 
-  def findCancelledMtdSubscriptions = {
+  def findCancelledMtdSubscriptions: List[Subscription] = {
     Subscription.findAll(
       By_>(Subscription.cancellationDate, monthDayOne)
     )
@@ -1125,7 +1125,7 @@ object ReportingService extends Loggable {
     generateCSV(csv, file)
   }
 
-  def cancelsByShipment(subscriptions: List[Subscription]) = {
+  def cancelsByShipment(subscriptions: List[Subscription]): List[(String, Int)] = {
     def findCancellationShipmentSize(subscriptions: List[Subscription]) = {
       subscriptions.map { subscription =>
         val shipments = subscription.shipments.toList
@@ -1151,7 +1151,7 @@ object ReportingService extends Loggable {
     cancellationTimes
   }
 
-  def sameDayCancelsByMonth(subscriptions: List[Subscription]) = {
+  def sameDayCancelsByMonth(subscriptions: List[Subscription]): Map[Month, Int] = {
     def findSameDayCancellations(subscriptions: List[Subscription]) = {
       subscriptions.filter { subscription =>
         val shipments = subscription.shipments.toList
@@ -1217,7 +1217,7 @@ object ReportingService extends Loggable {
     generateCSV(csv, file)
   }
 
-  def getPetlandCustomersWithStats = {
+  def getPetlandCustomersWithStats: List[Unit] = {
     val petlandStores = Agency.findAll(By(Agency.petlandStore, true))
     
     val customersByStoreWithInfo = petlandStores.map { store =>

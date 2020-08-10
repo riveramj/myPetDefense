@@ -10,10 +10,10 @@ import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
 
 class Insert extends LongKeyedMapper[Insert] with IdPK {
-  def getSingleton = Insert
+  def getSingleton: KeyedMetaMapper[Long, Insert] = Insert
   object insertId extends MappedLong(this){
     override def dbIndexed_? = true
-    override def defaultValue = generateLongId
+    override def defaultValue: Long = generateLongId
   }
   object name extends MappedString(this, 100)
   object itemNumber extends MappedString(this, 100)
@@ -22,7 +22,7 @@ class Insert extends LongKeyedMapper[Insert] with IdPK {
     override def defaultValue = new Date()
   }
 
-  def createNewInsert(name: String, itemNumber: String, weight: Double) = {
+  def createNewInsert(name: String, itemNumber: String, weight: Double): Insert = {
     Insert.create
       .name(name)
       .itemNumber(itemNumber)
@@ -30,11 +30,11 @@ class Insert extends LongKeyedMapper[Insert] with IdPK {
       .saveMe
   }
 
-  def welcomeInsert = Insert.find(By(Insert.name,"Welcome Insert"))
+  def welcomeInsert: Box[Insert] = Insert.find(By(Insert.name,"Welcome Insert"))
 
-  def tppWelcomeInsert = Insert.find(By(Insert.name, "TPP Registrations Welcome Insert"))
+  def tppWelcomeInsert: Box[Insert] = Insert.find(By(Insert.name, "TPP Registrations Welcome Insert"))
 
-  def petlandWelcomeInsert = Insert.find(By(Insert.name, "Petland Welcome Insert"))
+  def petlandWelcomeInsert: Box[Insert] = Insert.find(By(Insert.name, "Petland Welcome Insert"))
 }
 
 object Insert extends Insert with LongKeyedMetaMapper[Insert]

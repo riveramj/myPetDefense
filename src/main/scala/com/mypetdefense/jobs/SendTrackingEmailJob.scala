@@ -1,21 +1,19 @@
 package com.mypetdefense.jobs
 
 import net.liftweb._
-  import common._
-  import mapper._
-  import util.Helpers._ 
-
-import com.mypetdefense.service.{ShipStationService, ParentService, InventoryService}
+import common._
+import mapper._
+import util.Helpers._
+import com.mypetdefense.service.{InventoryService, ParentService, ShipStationService}
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-
-import org.quartz.{CronScheduleBuilder, TriggerBuilder, JobBuilder, JobExecutionContext}
-
+import org.quartz.{CronScheduleBuilder, JobBuilder, JobDetail, JobExecutionContext, Trigger, TriggerBuilder}
 import java.util.Date
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime, Period}
+import java.time.{LocalDate, LocalDateTime, Period, ZoneId}
 import java.time.format.DateTimeFormatter
+
 import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => ShipStationShipment, _}
 
 class SendTrackingEmailJob extends ManagedJob {
@@ -59,11 +57,11 @@ class SendTrackingEmailJob extends ManagedJob {
 }
 
 object DailyTrackingEmailJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[SendTrackingEmailJob])
+  val detail: JobDetail = JobBuilder.newJob(classOf[SendTrackingEmailJob])
     .withIdentity("DailyTrackingEmailJob")
     .build()
 
-  val trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder.newTrigger()
     .withIdentity("DailyTrackingEmailJobTrigger")
     .startNow()
     .withSchedule(CronScheduleBuilder.cronSchedule("0 0 8 ? * * *"))
@@ -71,11 +69,11 @@ object DailyTrackingEmailJob extends TriggeredJob {
 }
 
 object FrequentTrackingEmailJob extends TriggeredJob {
-  val detail = JobBuilder.newJob(classOf[SendTrackingEmailJob])
+  val detail: JobDetail = JobBuilder.newJob(classOf[SendTrackingEmailJob])
     .withIdentity("FrequentTrackingEmailJob")
     .build
 
-  val trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder.newTrigger()
     .withIdentity("FrequentTrackingEmailJobTrigger")
     .startNow
     .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 5 minutes

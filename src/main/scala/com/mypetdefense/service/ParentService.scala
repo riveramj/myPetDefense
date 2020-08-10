@@ -1,40 +1,41 @@
 package com.mypetdefense.service
 
-import net.liftweb._
-  import common._
-  import mapper._
-  import util._
-  import util.Helpers._
+import java.io
 
-import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => StripeSubscription, Product => StripeProduct, _}
+import net.liftweb._
+import common._
+import mapper._
+import util._
+import util.Helpers._
+import me.frmr.stripe.{Coupon => StripeCoupon, Product => StripeProduct, Subscription => StripeSubscription, _}
 
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 import com.mypetdefense.snippet.TPPApi
-
 import com.mypetdefense.model._
 import com.mypetdefense.actor._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-
-import dispatch._, Defaults._
-
+import dispatch._
+import Defaults._
 import java.util.Date
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime, Period}
+import java.time.{LocalDate, LocalDateTime, Period, ZoneId}
 import java.time.format.DateTimeFormatter
 
+import com.mypetdefense.shipstation.Order
+
 object ParentService extends Loggable {
-  val stripeSecretKey = Props.get("secret.key") openOr ""
-  implicit val e = new StripeExecutor(stripeSecretKey)
+  val stripeSecretKey: String = Props.get("secret.key") openOr ""
+  implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
 
   val whelpDateFormat = new java.text.SimpleDateFormat("M/d/y")
-  val currentPentlandPlan = Props.get("petland.6month.payment") openOr ""
-  val petlandMonthlyPlan = Props.get("petland.1month.payment")
-  val petland5MonthCoupon = Props.get("petland.5month.coupon")
+  val currentPentlandPlan: String = Props.get("petland.6month.payment") openOr ""
+  val petlandMonthlyPlan: Box[String] = Props.get("petland.1month.payment")
+  val petland5MonthCoupon: Box[String] = Props.get("petland.5month.coupon")
 
-  def updateStripeCustomerCard(customerId: String, stripeToken: String, user: User) = {
+  def updateStripeCustomerCard(customerId: String, stripeToken: String, user: User): Unit = {
     if (customerId == "") {
       TPPApi.setupStripeSubscription(
         user,
@@ -78,7 +79,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def updateCoupon(customerId: String, couponCode: Box[String]) = {
+  def updateCoupon(customerId: String, couponCode: Box[String]): Future[Box[StripeObject]] = {
     if (couponCode.isEmpty) {
       Customer.deleteDiscount(customerId)
     } else {
@@ -89,7 +90,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def cancelOpenOrders(oldUser: User) = {
+  def cancelOpenOrders(oldUser: User): List[Box[Order]] = {
     val openShipments = {
       for {
         subscription <- oldUser.subscription.toList
@@ -103,7 +104,7 @@ object ParentService extends Loggable {
     openShipments.map(ShipStationService.cancelShipstationOrder)
   }
 
-  def removeParent(oldUser: User, fullDelete: Boolean = false) = {
+  def removeParent(oldUser: User, fullDelete: Boolean = false): Box[Any] = {
     val user = oldUser.refresh
     val stripeCustomerId = user.map(_.stripeId.get).openOr("")
     
@@ -199,7 +200,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def getUpcomingInvoice(customerId: String) = {
+  def getUpcomingInvoice(customerId: String): Box[UpcomingInvoice] = {
     Try(
       Await.result(Invoice.getUpcoming(customerId), new DurationInt(10).seconds)
     ) match {
@@ -215,7 +216,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def getInvoice(invoiceId: String) = {
+  def getInvoice(invoiceId: String): Box[Invoice] = {
     Try(
       Await.result(Invoice.get(invoiceId), new DurationInt(10).seconds)
     ) match {
@@ -270,7 +271,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def updateNextShipDate(subscription: Subscription, user: Box[User]) = {
+  def updateNextShipDate(subscription: Subscription, user: Box[User]): Serializable = {
     val stripeUserId = user.map(_.stripeId.get).openOr("")
     val stripeSubscriptionId = subscription.stripeSubscriptionId.get
 
@@ -295,7 +296,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def changeStripeBillDate(customerId: String, subscriptionId: String, date: Long) = {
+  def changeStripeBillDate(customerId: String, subscriptionId: String, date: Long): io.Serializable = {
     val updatedSubscription = StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
@@ -318,7 +319,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def notTrialSubscription_?(stripeCustomerId: String, subscriptionId: String) = {
+  def notTrialSubscription_?(stripeCustomerId: String, subscriptionId: String): Boolean = {
     val subscription = getStripeSubscription(stripeCustomerId, subscriptionId)
     val trialStatus = subscription.flatMap(_.status).getOrElse("")
     
@@ -381,7 +382,7 @@ object ParentService extends Loggable {
     processStripeCharge(charge)
   }
 
-  def processNewCard(newCard: Future[Box[Card]]) = {
+  def processNewCard(newCard: Future[Box[Card]]): Box[Card] = {
     Try(Await.result(newCard, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(card)) =>
         Full(card)
@@ -396,7 +397,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def processStripeCharge(newCharge: Future[Box[Charge]]) = {
+  def processStripeCharge(newCharge: Future[Box[Charge]]): Box[Charge] = {
     Try(Await.result(newCharge, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(charge)) =>
         Full(charge)
@@ -523,7 +524,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def getGrowthMonthNumber(growthRate: Box[GrowthRate], size: String) = {
+  def getGrowthMonthNumber(growthRate: Box[GrowthRate], size: String): Int = {
     size match {
       case "medium" => 
         growthRate.map(_.mediumProductMonth.get).openOr(0)
@@ -536,7 +537,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def findGrowthMonth(pet: Pet) = {
+  def findGrowthMonth(pet: Pet): Int = {
     val currentDate = LocalDate.now()
 
     val birthday = tryo(pet.birthday.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
@@ -593,7 +594,7 @@ object ParentService extends Loggable {
     }).flatten
   }
 
-  def updatePuppyProducts(user: User) = {
+  def updatePuppyProducts(user: User): List[Any] = {
     for {
       subscription <- user.subscription.toList
       box <- subscription.subscriptionBoxes
@@ -657,7 +658,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def updateTaxRate(customerId: String, subscriptionId: String, taxRate: Double, email: String) = {
+  def updateTaxRate(customerId: String, subscriptionId: String, taxRate: Double, email: String): io.Serializable = {
     val updatedSubscription = StripeSubscription.update(
       customerId = customerId,
       subscriptionId = subscriptionId,
@@ -679,7 +680,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def getStripeProductPlan(planId: String) = {
+  def getStripeProductPlan(planId: String): Box[Plan] = {
     Try(
       Await.result(Plan.get(planId), new DurationInt(10).seconds)
     ) match {
@@ -696,7 +697,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def getCurrentPetlandProductPlan = {
+  def getCurrentPetlandProductPlan: Box[Plan] = {
     getStripeProductPlan(currentPentlandPlan)
   }
 

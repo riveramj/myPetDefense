@@ -6,18 +6,20 @@ import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.util.Helpers._
 
+import scala.xml.NodeSeq
+
 object Login extends Loggable {
   import net.liftweb.sitemap._
   import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Login") / "login" >>
+  val menu: Menu.Menuable = Menu.i("Login") / "login" >>
     notLoggedIn
 
-  val logoutMenu = Menu.i("Logout") / "logout" >>
+  val logoutMenu: Menu.Menuable = Menu.i("Logout") / "logout" >>
     EarlyResponse(logout _)
 
-  def logout() = {
+  def logout(): Full[RedirectResponse] = {
     S.session.foreach(_.destroySession())
     Full(RedirectResponse(menu.loc.calcDefaultHref))
   }
@@ -26,7 +28,7 @@ object Login extends Loggable {
 class Login extends Loggable {
   import Login._
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     var email = ""
     var password = ""
     var fbId = ""

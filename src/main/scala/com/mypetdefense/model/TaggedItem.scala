@@ -10,10 +10,10 @@ import java.util.Date
 import com.mypetdefense.util.RandomIdGenerator._
 
 class TaggedItem extends LongKeyedMapper[TaggedItem] with IdPK {
-  def getSingleton = TaggedItem
+  def getSingleton: KeyedMetaMapper[Long, TaggedItem] = TaggedItem
   object taggedItemId extends MappedLong(this){
     override def dbIndexed_? = true
-    override def defaultValue = generateLongId
+    override def defaultValue: Long = generateLongId
   }
   object subscription extends MappedLongForeignKey(this, Subscription)
   object fleaTick extends MappedLongForeignKey(this, FleaTick)
@@ -40,7 +40,7 @@ object TaggedItem extends TaggedItem with LongKeyedMetaMapper[TaggedItem] {
                            treat: Box[Product] = Empty,
                            treatOrder: Box[TreatOrder] = Empty,
                            tag: Box[Tag]
-  ) = {
+  ): TaggedItem = {
     TaggedItem.create
       .taggedItemId(generateLongId)
       .user(user)

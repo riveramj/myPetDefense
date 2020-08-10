@@ -10,10 +10,10 @@ import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
 
 class InventoryItemPart extends LongKeyedMapper[InventoryItemPart] with IdPK with OneToMany[Long, InventoryItemPart] {
-  def getSingleton = InventoryItemPart
+  def getSingleton: KeyedMetaMapper[Long, InventoryItemPart] = InventoryItemPart
   object inventoryItemPartId extends MappedLong(this) {
     override def dbIndexed_? = true
-    override def defaultValue = generateLongId
+    override def defaultValue: Long = generateLongId
   }
   object finishedItem extends MappedLongForeignKey(this, InventoryItem)
   object itemPart extends MappedLongForeignKey(this, InventoryItem)
@@ -21,7 +21,7 @@ class InventoryItemPart extends LongKeyedMapper[InventoryItemPart] with IdPK wit
     override def defaultValue = new Date()
   }
 
-  def createNewInventoryItemPart(finishedItem: InventoryItem, itemPart: InventoryItem) = {
+  def createNewInventoryItemPart(finishedItem: InventoryItem, itemPart: InventoryItem): InventoryItemPart = {
     InventoryItemPart.create
     .finishedItem(finishedItem)
     .itemPart(itemPart)

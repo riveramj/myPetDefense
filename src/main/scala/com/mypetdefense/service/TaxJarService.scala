@@ -18,15 +18,15 @@ import scala.math.BigDecimal
 import java.util.Date
 
 object TaxJarService extends Loggable {
-  val calculateTaxUrl = url("https://api.taxjar.com/v2/taxes").secure
-  val createOrderTaxUrl = url("https://api.taxjar.com/v2/transactions/orders").secure
+  val calculateTaxUrl: Req = url("https://api.taxjar.com/v2/taxes").secure
+  val createOrderTaxUrl: Req = url("https://api.taxjar.com/v2/transactions/orders").secure
 
-  val authKey = Props.get("taxjar.api.key") openOr ""
+  val authKey: String = Props.get("taxjar.api.key") openOr ""
 
   val retryAttempts = 10
   
 
-  def calculateTaxRate(city: String, state: String, zip: String) = {
+  def calculateTaxRate(city: String, state: String, zip: String): Double = {
     findTaxAmoutAndRate(city, state, zip, 0D)._2
   }
   def findTaxAmoutAndRate(city: String, state: String, zip: String, amount: Double): (Double, Double) = {
@@ -77,7 +77,7 @@ object TaxJarService extends Loggable {
     }).headOption.getOrElse((0D, 0D))
   }
 
-  def processTaxesCharged(orderIdentifier: String, city: String, state: String, zip: String, subtotal: String, tax: String) = {
+  def processTaxesCharged(orderIdentifier: String, city: String, state: String, zip: String, subtotal: String, tax: String): Any = {
     if (tax != "0") {
       createTaxOrder(
         orderIdentifier,
@@ -91,7 +91,7 @@ object TaxJarService extends Loggable {
     }
   }
 
-  def createTaxOrder(orderIdentifier: String, city: String, state: String, zip: String, amount: String, tax: String, date: String) = {
+  def createTaxOrder(orderIdentifier: String, city: String, state: String, zip: String, amount: String, tax: String, date: String): Box[String] = {
     def orderResponse = {
       Http.default(createOrderTaxUrl << Map(
         "transaction_id" -> orderIdentifier,

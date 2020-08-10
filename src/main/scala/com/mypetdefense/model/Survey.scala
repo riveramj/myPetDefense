@@ -10,7 +10,7 @@ import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
 
 class Survey extends LongKeyedMapper[Survey] with IdPK {
-  def getSingleton = Survey
+  def getSingleton: KeyedMetaMapper[Long, Survey] = Survey
   object surveyId extends MappedLong(this){
     override def dbIndexed_? = true
   }
@@ -30,7 +30,7 @@ class Survey extends LongKeyedMapper[Survey] with IdPK {
     override def defaultValue = new Date()
   }
 
-  def createNewSurvey(user: User) = {
+  def createNewSurvey(user: User): Survey = {
     Survey.create
     .surveyId(generateLongId)
     .user(user)

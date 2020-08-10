@@ -4,9 +4,10 @@ import net.liftweb.mapper._
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.common.Box
 
 class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, FleaTick] {
-  def getSingleton = FleaTick
+  def getSingleton: KeyedMetaMapper[Long, FleaTick] = FleaTick
   object fleaTickId extends MappedLong(this){
     override def dbIndexed_? = true
   }
@@ -29,10 +30,10 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
 
   def getSizeAndSizeName = s"${this.sizeName}, ${this.size.toString()} lbs"
 
-  def zoGuardSmallDog = FleaTick.find(By(FleaTick.size, AnimalSize.DogSmallZo))
-  def zoGuardMediumDog = FleaTick.find(By(FleaTick.size, AnimalSize.DogMediumZo))
-  def zoGuardLargeDog = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeZo))
-  def zoGuardXLargeDog = FleaTick.find(By(FleaTick.size, AnimalSize.DogXLargeZo))
+  def zoGuardSmallDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogSmallZo))
+  def zoGuardMediumDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogMediumZo))
+  def zoGuardLargeDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeZo))
+  def zoGuardXLargeDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogXLargeZo))
 
   def createFleaTick(
     name: String,
@@ -42,7 +43,7 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
     imageName: String,
     weight: Double,
     sku: String
-  ) = {
+  ): FleaTick = {
     FleaTick.create
     .fleaTickId(generateLongId)
     .name(name)
@@ -54,7 +55,7 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
     .saveMe
   }
 
-  def isZoGuard_? = this.name.get.toLowerCase.contains("zoguard")
+  def isZoGuard_? : Boolean = this.name.get.toLowerCase.contains("zoguard")
 }
 
 object FleaTick extends FleaTick with LongKeyedMetaMapper[FleaTick]

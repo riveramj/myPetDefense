@@ -2,16 +2,14 @@ package com.mypetdefense.snippet
 package inventory
 
 import net.liftweb._
-  import sitemap.Menu
-  import http.SHtml._
-  import http._
-  import js.JsCmds._
-
+import sitemap.Menu
+import http.SHtml._
+import http._
+import js.JsCmds._
 import net.liftweb.util.Helpers._
 import net.liftweb.common._
-import net.liftweb.util.ClearNodes
+import net.liftweb.util.{ClearNodes, CssSel}
 import net.liftweb.mapper.By
-
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.time.{LocalDate, ZoneId}
@@ -21,20 +19,23 @@ import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.service.InventoryService
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.actor._
+import net.liftweb.http.js.JsCmd
+
+import scala.xml.NodeSeq
 
 object ItemProduction extends Loggable {
   import net.liftweb.sitemap._
     import Loc._
   import com.mypetdefense.util.Paths._
 
-  val menu = Menu.i("Item Production") / "inventory" / "item-production" >>
+  val menu: Menu.Menuable = Menu.i("Item Production") / "inventory" / "item-production" >>
     mpdAdmin >>
     loggedIn
 }
 
 class ItemProduction extends Loggable {
-  val inventoryItems = InventoryItem.findAll()
-  val inventoryRecipes = inventoryItems.filter(_.itemParts.toList != Nil)
+  val inventoryItems: List[InventoryItem] = InventoryItem.findAll()
+  val inventoryRecipes: List[InventoryItem] = inventoryItems.filter(_.itemParts.toList != Nil)
   
   var buildNewItemRecipe: Box[InventoryItem] = Empty
   var selectedItemPart: Box[InventoryItem] = Empty
@@ -51,7 +52,7 @@ class ItemProduction extends Loggable {
   var reconciliationRenderer: Box[IdMemoizeTransform] = Empty
   var currentReconciliation: Box[ReconciliationEvent] = Empty
   
-  def allRecipesDropDown = {
+  def allRecipesDropDown: xml.Elem = {
     SHtml.ajaxSelectObj(
       List((Empty,"")) ::: inventoryRecipes.map(item => (Full(item), item.description.get)),
       Full(buildNewItemRecipe),
@@ -59,7 +60,7 @@ class ItemProduction extends Loggable {
     )
   }
 
-  def allInventoryItemsDropDown = {
+  def allInventoryItemsDropDown: xml.Elem = {
     SHtml.ajaxSelectObj(
       List((Empty,"")) ::: inventoryItems.map(item => (Full(item), item.description.get)),
       Full(addItemPartToRecipe),
@@ -67,7 +68,7 @@ class ItemProduction extends Loggable {
     )
   }
 
-  def newRecipeDropDown = {
+  def newRecipeDropDown: xml.Elem = {
     SHtml.ajaxSelectObj(
       List((Empty,"")) ::: inventoryItems.map(item => (Full(item), item.description.get)),
       Full(addItemPartToRecipe),
@@ -75,7 +76,7 @@ class ItemProduction extends Loggable {
     )
   }
 
-  def firstRecipeItemDropDown = {
+  def firstRecipeItemDropDown: xml.Elem = {
     SHtml.ajaxSelectObj(
       List((Empty,"")) ::: inventoryItems.map(item => (Full(item), item.description.get)),
       Full(addItemPartToRecipe),
@@ -83,7 +84,7 @@ class ItemProduction extends Loggable {
     )
   }
 
-  def startNewRecipe = {
+  def startNewRecipe: JsCmd = {
     {
       for {
         finishedItem <- newItemRecipe
@@ -95,7 +96,7 @@ class ItemProduction extends Loggable {
     }.openOr(Noop)
   }
 
-  def createItemFromRecipe = {
+  def createItemFromRecipe: JsCmd = {
     val validateFields = List(
       validNumber(buildRecipeItemCount, "#create-count")
     ).flatten
@@ -130,7 +131,7 @@ class ItemProduction extends Loggable {
   def addItemToRecipe(
     finishedItem: InventoryItem,
     renderer: IdMemoizeTransform
-  )() = {
+  )(): JsCmd = {
     addItemPartToRecipe.map { itemPart =>
 
       InventoryItemPart.createNewInventoryItemPart(finishedItem, itemPart)
@@ -143,7 +144,7 @@ class ItemProduction extends Loggable {
   def itemRecipeDetailBindings(
     detailsRenderer: IdMemoizeTransform,
     finishedItem: InventoryItem
-  ) = {
+  ): CssSel = {
     val itemParts = finishedItem.refresh.map(_.itemParts.toList).openOr(Nil)
 
     ".item-part" #> itemParts.sortWith(_.itemPart.obj.map(_.itemNumber.get).openOr("") < _.itemPart.obj.map(_.itemNumber.get).openOr("")).map { itemPart =>
@@ -158,7 +159,7 @@ class ItemProduction extends Loggable {
     }
   }
 
-  def render = {
+  def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
     ".item-production [class+]" #> "current" &
     ".create" #> idMemoize { renderer =>

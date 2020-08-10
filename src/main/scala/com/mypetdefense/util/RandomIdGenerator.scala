@@ -6,11 +6,11 @@ import net.liftweb.common.Loggable
 object RandomIdGenerator extends Loggable {
   private val rng = new SecureRandomNumberGenerator()
 
-  def generateLongId = {
+  def generateLongId: Long = {
     scala.math.abs(scala.util.Random.nextLong)
   }
 
-  def generateStringId = {
+  def generateStringId: String = {
     rng.nextBytes(32).toBase64
   }
 }

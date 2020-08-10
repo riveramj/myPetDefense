@@ -1,30 +1,23 @@
 package com.mypetdefense.actor
 
-import scala.xml.NodeSeq
-import scala.util._
 import java.text.SimpleDateFormat
-
-import net.liftweb._
-import common._
-import actor._
-import util.Helpers._
-import util._
-import http._
-import mapper.By
-import dispatch._
-import org.joda.time._
-import com.mypetdefense.model._
-import com.mypetdefense.snippet._
-import com.mypetdefense.util._
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDateTime, ZoneId}
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.{Date, Locale}
 
-import net.liftweb.util.Mailer
-import Mailer._
+import com.mypetdefense.model._
 import com.mypetdefense.snippet.customer.ShippingBilling
 import com.mypetdefense.snippet.login.{ResetPassword, Signup}
+import com.mypetdefense.util._
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
+import net.liftweb.util.Mailer._
+import net.liftweb.util.{Mailer, _}
+import org.joda.time._
+
+import scala.xml.NodeSeq
 
 sealed trait EmailActorMessage
 case class SendWelcomeEmail(user: Box[User]) extends EmailActorMessage
@@ -117,10 +110,10 @@ case class AddOnReceiptEmail(
 
 trait WelcomeEmailHandling extends EmailHandlerChain {
   val welcomeEmailSubject = "Thanks for Joining My Pet Defense!"
-  val welcomeEmailTemplate = 
+  val welcomeEmailTemplate: NodeSeq =
     Templates("emails-hidden" :: "welcome-email" :: Nil) openOr NodeSeq.Empty
   
-  val hostUrl = Paths.serverUrl
+  val hostUrl: String = Paths.serverUrl
 
   addHandler {
     case SendWelcomeEmail(user) => 
@@ -134,7 +127,7 @@ trait WelcomeEmailHandling extends EmailHandlerChain {
 
 trait PetRemovedEmailHandling extends EmailHandlerChain {
   val petRemovedSubject = "Pet removed from account"
-  val petRemovedTemplate = 
+  val petRemovedTemplate: NodeSeq =
     Templates("emails-hidden" :: "internal-account-changes-email" :: Nil) openOr NodeSeq.Empty
   
   addHandler {
@@ -155,7 +148,7 @@ trait PetRemovedEmailHandling extends EmailHandlerChain {
 
 trait NewPetAddedEmailHandling extends EmailHandlerChain {
   val newPetAddedSubject = "Pet added to account"
-  val newPetAddedTemplate = 
+  val newPetAddedTemplate: NodeSeq =
     Templates("emails-hidden" :: "internal-account-changes-email" :: Nil) openOr NodeSeq.Empty
   
   addHandler {
@@ -176,7 +169,7 @@ trait NewPetAddedEmailHandling extends EmailHandlerChain {
 
 trait BillingUpdatedHandling extends EmailHandlerChain {
   val billingUpdatedSubject = "Parent Billing Updated"
-  val billingUpdatedTemplate = 
+  val billingUpdatedTemplate: NodeSeq =
     Templates("emails-hidden" :: "internal-account-changes-email" :: Nil) openOr NodeSeq.Empty
   
   addHandler {
@@ -197,7 +190,7 @@ trait BillingUpdatedHandling extends EmailHandlerChain {
 
 trait AccountCancelledHandling extends EmailHandlerChain {
   val subject = "Account Cancelled"
-  val template = 
+  val template: NodeSeq =
     Templates("emails-hidden" :: "internal-account-changes-email" :: Nil) openOr NodeSeq.Empty
   
   addHandler {
@@ -273,10 +266,10 @@ trait ParentResumeSubscriptionHandling extends EmailHandlerChain {
 
 trait FeedbackEmailHandling extends EmailHandlerChain {
   val feedbackEmailSubject = "We Value Your Feedback - Free Month"
-  val feedbackEmailTemplate = 
+  val feedbackEmailTemplate: NodeSeq =
     Templates("emails-hidden" :: "feedback-email" :: Nil) openOr NodeSeq.Empty
   
-  val feedbackLink = Paths.serverUrl + Paths.testimonial.loc.calcDefaultHref
+  val feedbackLink: String = Paths.serverUrl + Paths.testimonial.loc.calcDefaultHref
 
   addHandler {
     case SendFeedbackEmail(user) => 
@@ -351,7 +344,7 @@ trait SendNewUserEmailHandling extends EmailHandlerChain {
 
 trait ResetPasswordHandling extends EmailHandlerChain {
   val resetSubject = "Reset your My Pet Defense password"
-  val resetPasswordTemplate = 
+  val resetPasswordTemplate: NodeSeq =
     Templates("emails-hidden" :: "reset-password-email" :: Nil) openOr NodeSeq.Empty
 
   addHandler {
@@ -366,7 +359,7 @@ trait ResetPasswordHandling extends EmailHandlerChain {
 
 trait CompleteResetPasswordHandling extends EmailHandlerChain {
   val completeResetPasswordSubject = "My Pet Defense Password Changed"
-  val completeResetPasswordTemplate = 
+  val completeResetPasswordTemplate: NodeSeq =
     Templates("emails-hidden" :: "complete-reset-password-email" :: Nil) openOr NodeSeq.Empty
 
   addHandler {
@@ -376,7 +369,7 @@ trait CompleteResetPasswordHandling extends EmailHandlerChain {
 }
 
 trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
-  val invoicePaymentFailedEmailTemplate =
+  val invoicePaymentFailedEmailTemplate: NodeSeq =
     Templates("emails-hidden" :: "invoice-payment-failed-email" :: Nil) openOr NodeSeq.Empty
 
   addHandler {
@@ -819,7 +812,7 @@ trait TreatShippedEmailHandling extends EmailHandlerChain {
 }
 
 trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
-  val invoicePaymentSucceededEmailTemplate =
+  val invoicePaymentSucceededEmailTemplate: NodeSeq =
     Templates("emails-hidden" :: "invoice-payment-succeeded-email" :: Nil) openOr NodeSeq.Empty
 
   addHandler {
@@ -957,18 +950,18 @@ trait EmailActor extends EmailHandlerChain
                     with SendShipmentRefundedEmailHandling
                     with TestimonialEmailHandling {
 
-  val baseEmailTemplate = 
+  val baseEmailTemplate: NodeSeq =
     Templates("emails-hidden" :: "email-template" :: Nil) openOr NodeSeq.Empty
 
-  val valentineEmailTemplate = 
+  val valentineEmailTemplate: NodeSeq =
     Templates("emails-hidden" :: "valentine-email-template" :: Nil) openOr NodeSeq.Empty
 
-  val reportingEmailTemplate = 
+  val reportingEmailTemplate: NodeSeq =
     Templates("emails-hidden" :: "reporting-email-template" :: Nil) openOr NodeSeq.Empty
 
   val fromName = "My Pet Defense"
 
-  val envTag = {
+  val envTag: String = {
     import net.liftweb.util.Props.RunModes._
     Props.mode match {
       case Development => "[LCL] "

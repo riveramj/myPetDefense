@@ -1,21 +1,18 @@
 package com.mypetdefense.model
 
 import net.liftweb._
-  import mapper._
-  import common._
-  import util._
-
+import mapper._
+import common._
+import util._
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.snippet.NewAddress
 import com.mypetdefense.util.TitleCase
-
 import org.apache.shiro.crypto.hash.Sha256Hash
 import org.apache.shiro.crypto.SecureRandomNumberGenerator
-
 import java.util.Date
 
 class Address extends LongKeyedMapper[Address] with IdPK {
-  def getSingleton = Address
+  def getSingleton: KeyedMetaMapper[Long, Address] = Address
   object addressId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -27,7 +24,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
   object zip extends MappedString(this, 100)
   object addressType extends MappedEnum(this, AddressType)
   object status extends MappedEnum(this, Status) {
-    override def defaultValue = Status.Active
+    override def defaultValue: Status.Value = Status.Active
   }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
@@ -41,7 +38,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     state: String,
     zip: String,
     addressType: AddressType.Value
-  ) = {
+  ): Address = {
     Address.create
     .addressId(generateLongId)
     .user(user)
@@ -54,7 +51,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     .saveMe
   }
 
-  def createNewAddress(newAddress: NewAddress, user: Box[User]) = {
+  def createNewAddress(newAddress: NewAddress, user: Box[User]): Address = {
     Address.create
     .addressId(generateLongId)
     .user(user)
@@ -67,7 +64,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     .saveMe
   }
 
-  def cancel = {
+  def cancel: Address = {
     this
     .street1("")
     .street2("")
