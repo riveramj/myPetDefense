@@ -119,6 +119,9 @@
   <tail>
     <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
     <script type="text/javascript" data-lift="script-bundle?name=checkout"></script>
+    <script>
+      fbq('track', 'InitiateCheckout');
+    </script>
   </tail>
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=checkout">

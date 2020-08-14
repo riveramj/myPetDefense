@@ -5,7 +5,7 @@ import com.openstudy.sbt.ResourceManagementPlugin._
 
 name := "My Pet Defense"
 
-version := "1.0-RC1"
+version := "1.0"
 
 organization := "com.mypetdefense"
 
