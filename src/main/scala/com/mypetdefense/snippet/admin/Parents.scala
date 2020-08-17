@@ -135,9 +135,9 @@ class Parents extends Loggable {
     }.openOr(Nil)
 
     SHtml.ajaxSelectObj(
-      products.map(product => (product, product.getNameAndSize)),
-      chosenProduct,
-      (possibleProduct: FleaTick) => chosenProduct = Full(possibleProduct)
+      (Empty, "Choose Size") +: products.map(product => (Full(product), product.getNameAndSize)),
+      Full(chosenProduct),
+      (possibleProduct: Box[FleaTick]) => chosenProduct = possibleProduct
     )
   }
 
