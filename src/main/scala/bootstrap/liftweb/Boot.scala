@@ -1,19 +1,16 @@
 package bootstrap.liftweb
 
-import net.liftweb._
-  import util._
-  import Helpers._
-  import mapper._
-  import common._
-  import http._
+import java.util.TimeZone
 
-import com.mypetdefense.util._
+import com.mypetdefense.jobs.JobManager
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
-import com.mypetdefense.service.ReportingService
-import com.mypetdefense.jobs.JobManager
-
-import java.util.TimeZone
+import com.mypetdefense.util._
+import net.liftweb._
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.mapper._
+import net.liftweb.util._
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -81,6 +78,8 @@ class Boot {
     //DataLoader.loadPetlandInsert
     //DataLoader.createBasicExistingBoxes
     //ReportingService.getPetlandCustomersWithStats
+
+    DataLoader.connectCancelledUsersToSubscription()
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")

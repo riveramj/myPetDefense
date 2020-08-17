@@ -2,14 +2,9 @@ package com.mypetdefense.util
 
 import com.mypetdefense.model._
 import com.mypetdefense.service._
-import net.liftweb._
-  import common._
-  import util._
-
-import net.liftweb.util.Helpers._
+import me.frmr.stripe.{Subscription => _}
+import net.liftweb.common._
 import net.liftweb.mapper._
-import me.frmr.stripe.{Coupon => StripeCoupon, Subscription => _}
-import dispatch._, Defaults._
 
 object DataLoader extends Loggable {
   def loadProducts: Any = {
@@ -354,6 +349,15 @@ object DataLoader extends Loggable {
         pet.box(box).saveMe()
         user.subscription(subscription).saveMe()
       }
+    }
+  }
+
+  def connectCancelledUsersToSubscription() {
+    for {
+      user <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Cancelled))
+      subscription <- Subscription.find(By(Subscription.user, user)).toList
+    } yield {
+      user.subscription(subscription).saveMe()
     }
   }
 

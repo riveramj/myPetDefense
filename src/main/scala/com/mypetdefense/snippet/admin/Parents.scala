@@ -1,33 +1,29 @@
 package com.mypetdefense.snippet
 package admin
 
-import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml._
-import net.liftweb.util.Helpers._
-import net.liftweb.util.Props
-import net.liftweb.util.ClearNodes
-import net.liftweb.common._
-import net.liftweb.util._
-import net.liftweb.http._
-import js.JsCmds._
-import net.liftweb.mapper._
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.time.{LocalDate, ZoneId}
+import java.util.Date
 
+import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
-import com.mypetdefense.actor._
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
 import net.liftweb.http.js.JsCmd
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.mapper._
+import net.liftweb.util.Helpers._
+import net.liftweb.util.{ClearNodes, Props, _}
 
 import scala.xml.{Elem, NodeSeq}
 
 object Parents extends Loggable {
-  import net.liftweb.sitemap._
-    import Loc._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu: Menu.Menuable = Menu.i("Parents") / "admin" / "parents" >>
     mpdAdmin >>
@@ -50,8 +46,8 @@ class Parents extends Loggable {
   var email = ""
 
   val coupons: List[Coupon] = Coupon.findAll()
-  val dogProducts: List[FleaTick] = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
-  val catProducts: List[FleaTick] = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
+  val dogProducts: List[FleaTick] = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog)).filter(_.isZoGuard_?)
+  val catProducts: List[FleaTick] = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog)).filter(_.isZoGuard_?)
 
   val stripeBaseUrl: String = Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
   val stripeInvoiceBaseURL = s"${stripeBaseUrl}/invoices"
@@ -89,7 +85,7 @@ class Parents extends Loggable {
       activeParents = activeParentsSearch
       cancelledParents = cancelledParentsSearch
 
-      val cancelledUsers = cancelledParents.map(getOldUserWithInfo).flatten
+      val cancelledUsers = cancelledParents.flatMap(getOldUserWithInfo)
       parents = activeParents ++ cancelledUsers
 
       currentParent = Empty
@@ -248,6 +244,42 @@ class Parents extends Loggable {
       shipmentDate.getOrElse("")
   }
 
+  def subscriptionBinding(detailsRenderer: IdMemoizeTransform, oldSubscription: Option[Subscription]): CssBindFunc = {
+    val subscription = oldSubscription.flatMap(_.refresh)
+    val subscriptionStatus = subscription.map(_.status.get)
+
+    def setSubscriptionStatus(status: Status.Value) = {
+      val updatedSubscription = subscription.map(_.status(status).saveMe())
+
+      if  (status == Status.Active) {
+        val tomorrow = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant)
+        updatedSubscription.map { subscriptionToUpdate =>
+          ParentService.updateNextShipBillDate(subscriptionToUpdate, currentParent, tomorrow)
+        }
+
+        Alert("Subscription Resumed. Will ship tomorrow.") &
+        detailsRenderer.setHtml()
+      } else {
+        val nextShipDate = new SimpleDateFormat("MM/dd/yyyy").parse("08/01/2022")
+        updatedSubscription.map { subscriptionToUpdate =>
+          ParentService.updateNextShipBillDate(subscriptionToUpdate, currentParent, nextShipDate)
+        }
+
+        Alert("Subscription Paused.") &
+        detailsRenderer.setHtml()
+      }
+    }
+
+    ".parent-subscription" #> ClearNodesIf(isCancelled_?(currentParent)) &
+    ".parent-subscription" #> {
+      ".subscription-status *" #> subscriptionStatus.map(_.toString) &
+      ".pause-subscription" #> ClearNodesIf(subscriptionStatus.contains(Status.Paused)) &
+      ".pause-subscription [onclick]" #> SHtml.ajaxInvoke(() => setSubscriptionStatus(Status.Paused)) &
+      ".resume-subscription" #> ClearNodesIf(subscriptionStatus.contains(Status.Active)) &
+      ".resume-subscription [onclick]" #> SHtml.ajaxInvoke(() => setSubscriptionStatus(Status.Active))
+    }
+  }
+
   def parentInformationBinding(detailsRenderer: IdMemoizeTransform, subscription: Option[Subscription]): CssBindFunc = {
     val parent = currentParent
     val address = parent.flatMap(_.addresses.toList.headOption)
@@ -381,7 +413,7 @@ class Parents extends Loggable {
       val petType = pet.map(_.animalType.get)
       val currentProduct = subscriptionBox.flatMap(_.fleaTick.obj)
 
-      val products = petType.map(at =>FleaTick.findAll(By(FleaTick.animalType, at))).openOr(Nil)
+      val products = (petType.map(at =>FleaTick.findAll(By(FleaTick.animalType, at))).openOr(Nil)).filter(_.isZoGuard_?) ++ currentProduct
 
       SHtml.ajaxSelectObj(
         products.map(product => (product, product.getNameAndSize)),
@@ -425,7 +457,7 @@ class Parents extends Loggable {
           ".pet-product *" #> changePetProduct(subscriptionBox) &
           ".pet-delay-growth input" #> ajaxText(s"$nextGrowthDelay months", possibleDelay => updateGrowthDelay(possibleDelay, pet)) &
           ".actions .delete [onclick]" #> Confirm(s"Delete ${pet.name}?",
-            ajaxInvoke(deletePet(parent, pet, renderer) _)
+            ajaxInvoke(deletePet(parent, pet, renderer))
           )
         }
       }
@@ -545,7 +577,8 @@ class Parents extends Loggable {
             if (!currentParent.isEmpty) {
               petBindings andThen
               shipmentBindings(detailsRenderer, subscription) andThen
-              parentInformationBinding(detailsRenderer, subscription)
+              parentInformationBinding(detailsRenderer, subscription) andThen
+              subscriptionBinding(detailsRenderer, subscription)
             }
             else {
               "^" #> ClearNodes
