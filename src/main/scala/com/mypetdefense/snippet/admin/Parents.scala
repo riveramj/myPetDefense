@@ -85,7 +85,7 @@ class Parents extends Loggable {
       activeParents = activeParentsSearch
       cancelledParents = cancelledParentsSearch
 
-      val cancelledUsers = cancelledParents.map(getOldUserWithInfo).flatten
+      val cancelledUsers = cancelledParents.flatMap(getOldUserWithInfo)
       parents = activeParents ++ cancelledUsers
 
       currentParent = Empty
