@@ -269,9 +269,23 @@ section.agency {
   white-space: pre;
 }
 
-
 td.email {
   overflow: hidden;
   max-width: 155px;
   text-overflow: ellipsis;
+}
+
+.parent-subscription {
+  .subscription-status {
+    font-size: 20px;
+  }
+  .change-status {
+    margin-top: 10px;
+    border: none;
+    background: #2E9F9B;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
 }

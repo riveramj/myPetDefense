@@ -1,30 +1,24 @@
 package com.mypetdefense.service
 
 import java.io
+import java.time.{LocalDate, Period, ZoneId}
+import java.util.Date
 
-import net.liftweb._
-import common._
-import mapper._
-import util._
-import util.Helpers._
-import me.frmr.stripe.{Coupon => StripeCoupon, Product => StripeProduct, Subscription => StripeSubscription, _}
-
-import scala.util.{Failure => TryFail, Success => TrySuccess, _}
-import com.mypetdefense.snippet.TPPApi
-import com.mypetdefense.model._
 import com.mypetdefense.actor._
+import com.mypetdefense.model._
+import com.mypetdefense.shipstation.Order
+import com.mypetdefense.snippet.TPPApi
+import dispatch.Defaults._
+import dispatch._
+import me.frmr.stripe.{Subscription => StripeSubscription, _}
+import net.liftweb.common._
+import net.liftweb.mapper._
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import dispatch._
-import Defaults._
-import java.util.Date
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, LocalDateTime, Period, ZoneId}
-import java.time.format.DateTimeFormatter
-
-import com.mypetdefense.shipstation.Order
+import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
 object ParentService extends Loggable {
   val stripeSecretKey: String = Props.get("secret.key") openOr ""
@@ -265,8 +259,7 @@ object ParentService extends Loggable {
     )
 
     updatedSubscription match {
-      case Full(stripeSubscription) => 
-        Full(subscription.nextShipDate(nextDate).saveMe)
+      case Full(_) => Full(subscription.nextShipDate(nextDate).saveMe)
       case _ => Empty
     }
   }
