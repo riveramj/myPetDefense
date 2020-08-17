@@ -433,10 +433,11 @@ object ParentService extends Loggable {
       name = name,
       animalType = animalType,
       size = size,
-      product = product,
       whelpDate = possibleBirthday,
       breed = breed
     )
+
+    oldUser.subscription.obj.map(SubscriptionBox.createBasicBox(_, product, newPet))
 
     val updatedSubscription = updateStripeSubscriptionTotal(oldUser)
 

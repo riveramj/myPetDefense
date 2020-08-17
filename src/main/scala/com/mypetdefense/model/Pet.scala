@@ -1,12 +1,11 @@
 package com.mypetdefense.model
 
-import net.liftweb._
-import mapper._
-import common._
-import util._
+import java.util.Date
+
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
-import java.util.Date
+import net.liftweb.common._
+import net.liftweb.mapper._
 
 class Pet extends LongKeyedMapper[Pet] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, Pet] = Pet
@@ -39,7 +38,6 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
     name: String,
     animalType: AnimalType.Value,
     size: AnimalSize.Value,
-    product: FleaTick,
     whelpDate: Box[Date] = Empty,
     breed: String = ""
   ): Pet = {
@@ -66,7 +64,6 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
       name,
       product.animalType.get,
       product.size.get,
-      product,
       whelpDate,
       breed
     )
