@@ -1,23 +1,14 @@
 package com.mypetdefense.snippet.customer
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
-import java.util.Date
-
-import com.mypetdefense.actor._
+import com.mypetdefense.actor.{EmailActor, UpgradeSubscriptionEmail}
 import com.mypetdefense.model._
 import com.mypetdefense.service.ParentService.updateStripeSubscriptionQuantity
-import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.service._
-import com.mypetdefense.util.SecurityContext._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
-import net.liftweb.http.SHtml._
 import net.liftweb.http._
-import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.util.Helpers._
-import net.liftweb.util._
+import net.liftweb.util.Props
 
 import scala.xml.NodeSeq
 
@@ -45,7 +36,14 @@ class UpgradeAccount extends Loggable {
       boxes.map(SubscriptionItem.createFirstBox)
       val updatedBoxes = boxes.flatMap(_.refresh)
 
-      ParentService.updateCoupon(user.map(_.stripeId.get).openOr(""), Full("upgrade01"))
+      for {
+        box <- updatedBoxes
+        subscription <- userSubscription.toList
+        user <- SecurityContext.currentUser.toList
+        shipmentCount = subscription.shipments.toList.size
+      } yield {
+        SubscriptionUpgrade.createSubscriptionUpgrade(subscription, box, user, shipmentCount)
+      }
 
       val cost = updatedBoxes.map(SubscriptionBox.possiblePrice).sum
 
@@ -54,6 +52,10 @@ class UpgradeAccount extends Loggable {
         updatedSubscription.map(_.stripeSubscriptionId.get).openOr(("")),
         tryo((cost * 100).toInt).openOr(0)
       )
+
+      if (Props.mode != Props.RunModes.Production) {
+        EmailActor ! UpgradeSubscriptionEmail(SecurityContext.currentUser, updatedBoxes.size)
+      }
 
       Alert("Your account has been upgraded! Watch the mail for your new box!")
     }

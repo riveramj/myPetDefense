@@ -48,6 +48,7 @@ class Boot {
       Subscription,
       SubscriptionBox,
       SubscriptionItem,
+      SubscriptionUpgrade,
       Agency,
       Coupon,
       Price,

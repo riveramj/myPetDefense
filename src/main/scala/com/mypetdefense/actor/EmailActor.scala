@@ -28,6 +28,7 @@ case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class SendPasswordResetEmail(user: User) extends EmailActorMessage
 case class SendPasswordUpdatedEmail(user: User) extends EmailActorMessage
 case class NewSaleEmail(user: Box[User], petCount: Int, couponCode: String) extends EmailActorMessage
+case class UpgradeSubscriptionEmail(user: Box[User], boxcount: Int) extends EmailActorMessage
 case class NewPetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class PetRemovedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class BillingUpdatedEmail(user: User) extends EmailActorMessage
@@ -412,15 +413,39 @@ trait NewSaleEmailHandling extends EmailHandlerChain {
       val transform = {
         "#name *" #> user.map(_.name).openOr("") &
         "#email *" #> user.map(_.email.get).openOr("") &
-        "#pet-count *" #> petCount &
+        "#count *" #> petCount &
         "#coupon *" #> couponCode &
         ".amount" #> ClearNodes
       }
 
       sendEmail(subject, "sales@mypetdefense.com", transform(newSaleTemplate))
       sendEmail(subject, "rivera.mj@gmail.com", transform(newSaleTemplate))
+      sendEmail(subject, "calvin.leach@mypetdefense.com", transform(newSaleTemplate))
   }
 }
+
+trait UpgradeSubscriptionEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case UpgradeSubscriptionEmail(user, boxCount) =>
+      val newSaleTemplate =
+        Templates("emails-hidden" :: "sale-email" :: Nil) openOr NodeSeq.Empty
+
+      val subject = "New Subscription Upgrade"
+
+      val transform = {
+        "#name *" #> user.map(_.name).openOr("") &
+          "#email *" #> user.map(_.email.get).openOr("") &
+          "#count *" #> boxCount &
+          ".coupon *" #> ClearNodes &
+          ".amount" #> ClearNodes
+      }
+
+      sendEmail(subject, "sales@mypetdefense.com", transform(newSaleTemplate))
+      sendEmail(subject, "rivera.mj@gmail.com", transform(newSaleTemplate))
+      sendEmail(subject, "calvin.leach@mypetdefense.com", transform(newSaleTemplate))
+  }
+}
+
 
 trait ShipmentReadyEmailHandling extends EmailHandlerChain {
   addHandler {
@@ -948,7 +973,8 @@ trait EmailActor extends EmailHandlerChain
                     with TreatShippedEmailHandling
                     with SixMonthSaleReceiptEmailHandling
                     with SendShipmentRefundedEmailHandling
-                    with TestimonialEmailHandling {
+                    with TestimonialEmailHandling
+                    with UpgradeSubscriptionEmailHandling {
 
   val baseEmailTemplate: NodeSeq =
     Templates("emails-hidden" :: "email-template" :: Nil) openOr NodeSeq.Empty
