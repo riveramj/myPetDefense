@@ -5,13 +5,15 @@ import com.mypetdefense.service._
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.http._
+import net.liftweb.sitemap.Loc.EarlyResponse
 import net.liftweb.util.CssSel
 import net.liftweb.util.Helpers._
 
 object PetChoice extends Loggable {
   import net.liftweb.sitemap._
 
-  val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Pet Choice") / "pet-choice"
+  val menu: Menu.Menuable = Menu.i("Pet Choice") / "pet-choice" >>
+    EarlyResponse(() => S.redirectTo(DogDetails.menu.loc.calcDefaultHref))
 }
 
 class PetChoice extends Loggable {
