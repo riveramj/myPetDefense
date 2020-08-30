@@ -1,13 +1,12 @@
 package com.mypetdefense.snippet.signup
 
 import java.text.SimpleDateFormat
-import java.time.YearMonth
 
 import com.mypetdefense.model.{AnimalSize, _}
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import net.liftweb._
+import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -20,14 +19,17 @@ import scala.collection.mutable
 import scala.xml.{Elem, NodeSeq}
 
 object DogDetails extends Loggable {
-  import com.mypetdefense.util.Paths._
   import net.liftweb.sitemap._
 
-  val menu: Menu.Menuable = Menu.i("Dog Details") / "dog-details" >>
-    petChosen
+  val menu: Menu.Menuable = Menu.i("Dog Details") / "dog-details"
 }
 
 class DogDetails extends Loggable {
+  petChoice(Full(AnimalType.Dog))
+
+  if (petId.is.isEmpty)
+    petId(Full(generateLongId))
+
   val formatter = new SimpleDateFormat("MM/yy")
   val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 

@@ -1,22 +1,20 @@
 package com.mypetdefense.util
 
-import net.liftweb.common._
-import net.liftweb.http.RedirectResponse
-import net.liftweb.sitemap._
-import Loc._
-import net.liftweb.util._
-import Helpers._
-import net.liftweb.util.Props
-import net.liftweb.http._
-import com.mypetdefense.snippet._
 import com.mypetdefense.model._
-import com.mypetdefense.service.{CouponService, PetFlowChoices}
+import com.mypetdefense.service.PetFlowChoices
 import com.mypetdefense.service.PetFlowChoices._
+import com.mypetdefense.snippet._
 import com.mypetdefense.snippet.customer._
 import com.mypetdefense.snippet.login._
 import com.mypetdefense.snippet.shop.{TreatCheckout, TreatList}
 import com.mypetdefense.snippet.signup._
+import net.liftweb.common._
+import net.liftweb.http.{RedirectResponse, _}
 import net.liftweb.mapper.By
+import net.liftweb.sitemap.Loc._
+import net.liftweb.sitemap._
+import net.liftweb.util.Helpers._
+import net.liftweb.util.Props
 
 object Paths {
 
@@ -60,7 +58,7 @@ object Paths {
     PetFlowChoices.coupon(coupon)
     PetFlowChoices.coupon.is
 
-    S.redirectTo(PetChoice.menu.loc.calcDefaultHref)
+    S.redirectTo(DogDetails.menu.loc.calcDefaultHref)
   }
 
   val homePage: Menu.Menuable with Menu.WithSlash = Menu.i("Home") / "index"
