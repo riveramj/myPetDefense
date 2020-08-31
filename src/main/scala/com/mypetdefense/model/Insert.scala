@@ -1,13 +1,10 @@
 package com.mypetdefense.model
 
-import net.liftweb._
-  import mapper._
-  import common._
-  import util._
+import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
-
-import java.util.Date
+import net.liftweb.common._
+import net.liftweb.mapper._
 
 class Insert extends LongKeyedMapper[Insert] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, Insert] = Insert
@@ -31,6 +28,10 @@ class Insert extends LongKeyedMapper[Insert] with IdPK {
   }
 
   def welcomeInsert: Box[Insert] = Insert.find(By(Insert.name,"Welcome Insert"))
+
+  def tryUpgrade: Box[Insert] = Insert.find(By(Insert.name, "Try Upgraded Box"))
+
+  def productBrochure: Box[Insert] = Insert.find(By(Insert.name, "Summer Product Brochure 2020"))
 
   def tppWelcomeInsert: Box[Insert] = Insert.find(By(Insert.name, "TPP Registrations Welcome Insert"))
 

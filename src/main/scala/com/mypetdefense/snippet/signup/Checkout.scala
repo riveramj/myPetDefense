@@ -236,7 +236,8 @@ class Checkout extends Loggable {
       subscriptionId,
       new Date(),
       new Date(),
-      priceCode.is.openOr(Price.defaultPriceCode)
+      priceCode.is.openOr(Price.defaultPriceCode),
+      isUpgraded = true
     )
 
     val userWithSubscription = user.map(_.subscription(mpdSubscription).saveMe())
