@@ -16,6 +16,8 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   }
   object user extends MappedLongForeignKey(this, User)
   object promptedUpgrade extends MappedBoolean(this)
+  object isUpgraded extends MappedBoolean(this)
+  object freeUpgradeSampleDate extends MappedDateTime(this)
   object stripeSubscriptionId extends MappedString(this, 100)
   object startDate extends MappedDateTime(this)
   object renewalDate extends MappedDateTime(this)
@@ -58,6 +60,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     startDate: Date,
     nextShipDate: Date,
     priceCode: String = Price.defaultPriceCode,
+    isUpgraded: Boolean = false,
     contractLength: Int = 0
   ): Subscription = {
     Subscription.create
@@ -67,6 +70,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     .startDate(startDate)
     .nextShipDate(nextShipDate)
     .priceCode(priceCode)
+    .isUpgraded(isUpgraded)
     .contractLength(contractLength)
     .saveMe
   }

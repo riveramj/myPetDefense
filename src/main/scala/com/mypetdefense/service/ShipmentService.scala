@@ -1,12 +1,11 @@
 package com.mypetdefense.service 
 
-import net.liftweb._
-  import common._
-  import mapper._
-  import util._
-  import util.Helpers._
+import java.util.Date
 
 import com.mypetdefense.model._
+import net.liftweb.common.Box.tryo
+import net.liftweb.common._
+import net.liftweb.mapper._
 
 object ShipmentService extends Loggable {
   def getCurrentPastDueShipments: List[Shipment] = {
@@ -38,5 +37,43 @@ object ShipmentService extends Loggable {
         IHaveValidatedThisSQL("mike","2018-01-04")
       )
     )
+  }
+
+  def createNewShipment(user: User, invoicePaymentId: String, chargeId: Box[String], amountPaid: String, tax: String): Box[Shipment] = {
+    for {
+      subscription <- user.subscription
+      shipmentCount = subscription.shipments.toList.size
+    } yield {
+      val agency = user.referer.obj
+
+      val sendFreeUpgradeShipment =  {
+        if (shipmentCount >= 1 && !tryo(subscription.freeUpgradeSampleDate).isEmpty)
+          true
+        else
+          false
+      }
+
+      if (sendFreeUpgradeShipment)
+        subscription.freeUpgradeSampleDate(new Date).saveMe()
+
+      val inserts = Insert.productBrochure.toList ++ {
+        if (sendFreeUpgradeShipment)
+          Insert.tryUpgrade.toList
+        else
+          Nil
+      }
+
+      Shipment.createShipment(
+        user,
+        subscription,
+        invoicePaymentId,
+        chargeId,
+        amountPaid,
+        tax,
+        inserts,
+        ShipmentStatus.Paid,
+        sendFreeUpgradeShipment
+      )
+    }
   }
 }

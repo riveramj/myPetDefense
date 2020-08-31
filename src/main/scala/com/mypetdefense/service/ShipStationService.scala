@@ -1,29 +1,21 @@
 package com.mypetdefense.service
 
-import net.liftweb._ 
-  import common._
-  import util.Helpers.tryo
-  import json._
-  import util.Props
+import java.text.SimpleDateFormat
+import java.time.{LocalDate, ZoneId}
+import java.util.Date
 
-import dispatch._, Defaults._
+import com.mypetdefense.model._
+import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => ShipStationShipment, _}
+import dispatch.Defaults._
+import dispatch._
+import net.liftweb.common._
+import net.liftweb.util.Helpers.tryo
+import net.liftweb.util.Props
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-
-import scala.collection.concurrent.TrieMap
-import scala.math.BigDecimal
-
-import java.util.Date
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime, Period}
-import java.time.format.DateTimeFormatter
-
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
-
-import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => ShipStationShipment, _}
-import com.mypetdefense.model._
 
 object ShipStationService extends Loggable {
   val key: String = Props.get("shipstation.key") openOr ""
@@ -203,26 +195,27 @@ object ShipStationService extends Loggable {
   }
 
   def createShipStationOrder(shipment: Shipment, user: User, subscription: Subscription): Future[Box[Order]] = {
-    val tags = subscription.tags.toList.map(_.tag.get)
+    val tags = subscription.tags.toList.flatMap(_.tag.obj)
 
-    val useBox = Tag.useBox.map(tags.contains(_)).openOr(false)
+    val useBox = Tag.useBox.map(tag => tags.contains(tag)).openOr(false)
 
     val billShipTo = createUserBillShipToAddress(user)
 
     val refreshedShipment = shipment.refresh
-    val shipmentLineItems = refreshedShipment.toList.map(_.shipmentLineItems.toList).flatten
+    val shipmentLineItems = refreshedShipment.toList.flatMap(_.shipmentLineItems.toList)
     val shipmentProducts = shipmentLineItems.filter(!_.fleaTick.obj.isEmpty)
     
     val petNamesProducts = shipmentProducts.map(_.getFleaTickPetNameItemSize).mkString(". ")
 
-    val products = shipmentLineItems.map(_.fleaTick.obj).flatten
-    val inserts = shipmentLineItems.map(_.insert.obj).flatten
+    val fleaTick = shipmentLineItems.flatMap(_.fleaTick.obj)
+    val products = shipmentLineItems.flatMap(_.product.obj)
+    val inserts = shipmentLineItems.flatMap(_.insert.obj)
 
-    val shipStationProductIds = products.map(_.sku.get)
+    val shipStationProductIds = fleaTick.map(_.sku.get) ++ products.map(_.sku.get)
 
     val paidShipment_? = tryo(shipment.amountPaid.get.toDouble).openOr(0.0) > 0.0
 
-    val fleaTickCount = products.size
+    val fleaTickCount = fleaTick.size
 
     val (packaging, packagingId) = (useBox, fleaTickCount) match {
       case (true, count) if count < 6 =>
@@ -246,7 +239,7 @@ object ShipStationService extends Loggable {
         (packaging, packaging.map(_.sku.get).toList)
     }
 
-    val productWeight = products.map(_.weight.get).sum
+    val productWeight = fleaTick.map(_.weight.get).sum
     val insertWeight = inserts.map(_.weight.get).sum
 
     val totalWeight = productWeight + insertWeight + packaging.map(_.weight.get).openOr(0.0)
