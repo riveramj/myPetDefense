@@ -75,8 +75,8 @@ class Boot {
     DataLoader.loadAdmin
     DataLoader.createProducts
     DataLoader.defaultSaleCoupons
-    DataLoader.markUpgradedSubscriptions
-    DataLoader.upgradeInsert
+    //DataLoader.markUpgradedSubscriptions
+    //DataLoader.upgradeInsert
 
     //DataLoader.loadPetlandInsert
     //DataLoader.createBasicExistingBoxes
