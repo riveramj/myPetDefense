@@ -10,7 +10,7 @@ class InternalEmailReportingJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
     val emailScope = context.getMergedJobDataMap.get("scope")
 
-    val internalEmails = List("mike.rivera@mypetdefense.com", "liz.shinn@mypetdefense.com", "calvin.leach@mypetdefense.com")
+    val internalEmails = List("mike.rivera@mypetdefense.com", "calvin.leach@mypetdefense.com")
 
     emailScope match {
       case "daily" => 
