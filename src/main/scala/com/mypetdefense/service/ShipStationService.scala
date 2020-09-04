@@ -8,6 +8,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => ShipStationShipment, _}
 import dispatch.Defaults._
 import dispatch._
+import net.liftweb.common.Box.tryo
 import net.liftweb.common._
 import net.liftweb.util.Props
 
@@ -201,7 +202,15 @@ object ShipStationService extends Loggable {
     val shipmentLineItemsByPet = refreshedShipment.toList.flatMap(_.shipmentLineItems.toList).groupBy(_.pet.obj).filter(_._1.isDefined)
 
     val fleaTick = shipmentLineItems.flatMap(_.fleaTick.obj)
-    val inserts = shipmentLineItems.flatMap(_.insert.obj).distinct
+    val someInserts = shipmentLineItems.flatMap(_.insert.obj).distinct
+
+    val inserts =
+      if (tryo(subscription.freeUpgradeSampleDate).isEmpty) {
+        subscription.refresh.map(_.freeUpgradeSampleDate(new Date).saveMe())
+
+        Insert.tryUpgrade ++ someInserts
+      } else
+        someInserts
 
     val productWeight = fleaTick.map(_.weight.get).sum
     val insertWeight = inserts.map(_.weight.get).sum
@@ -210,7 +219,7 @@ object ShipStationService extends Loggable {
 
     val normalizedWeight = if (totalWeight < 4.0) 4.0 else totalWeight
 
-    val shipStationItems = inserts.zipWithIndex.map { case (insert, index) =>
+    val shipStationItems = inserts.toList.zipWithIndex.map { case (insert, index) =>
       OrderItem(
         lineItemKey = Some(s"9 - ${index}"),
         quantity = 1,
