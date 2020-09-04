@@ -123,7 +123,7 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
         .saveMe
 
 
-      if (sendFreeUpgrade)
+      if (sendFreeUpgrade && pet.animalType.get == AnimalType.Dog)
         sendFreeUpgradeItems(shipment, pet)
 
       subscriptionItems.map { item =>
