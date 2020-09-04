@@ -43,9 +43,11 @@ object ShipmentService extends Loggable {
     for {
       subscription <- user.subscription
       shipmentCount = subscription.shipments.toList.size
+      pets = subscription.getPets
+      dogs = pets.filter(_.animalType.get == AnimalType.Dog)
     } yield {
       val sendFreeUpgradeShipment =  {
-        if (shipmentCount >= 1 && tryo(subscription.freeUpgradeSampleDate) == Full(null))
+        if (shipmentCount >= 1 && tryo(subscription.freeUpgradeSampleDate) == Full(null) && dogs.nonEmpty)
           true
         else
           false

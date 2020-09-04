@@ -202,11 +202,15 @@ object ShipStationService extends Loggable {
 
     val inserts =
       if (subscription.shipments.toList.size >= 2 && tryo(subscription.freeUpgradeSampleDate) == Full(null)) {
-        subscription.refresh.map(_.freeUpgradeSampleDate(new Date).saveMe())
+        val dogs = shipment.refresh.toList.flatMap(_.shipmentLineItems.flatMap(_.pet.obj).toList.distinct).filter(_.animalType.get == AnimalType.Dog)
 
-        val pets = shipment.refresh.toList.flatMap(_.shipmentLineItems.flatMap(_.pet.obj).toList.distinct)
-        pets.map(pet => ShipmentLineItem.sendFreeUpgradeItems(shipment, pet))
-        Insert.tryUpgrade ++ someInserts
+        if (dogs.nonEmpty) {
+          subscription.refresh.map(_.freeUpgradeSampleDate(new Date).saveMe())
+          dogs.map(pet => ShipmentLineItem.sendFreeUpgradeItems(shipment, pet))
+
+          Insert.tryUpgrade ++ someInserts
+        } else
+          someInserts
       } else
         someInserts
 
