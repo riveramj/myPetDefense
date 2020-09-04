@@ -235,7 +235,7 @@ object ShipStationService extends Loggable {
           lineItemKey = Some(s"${index+1} - ${productIndex + 1}"),
           quantity = 1,
           sku = product.sku.get,
-          name = s"${index+1} - ${product.name.get}"
+          name = s"${index+1} - ${product.name.get} for Dogs"
         )
       }
 
