@@ -197,20 +197,23 @@ object ShipStationService extends Loggable {
   def createShipStationOrder(shipment: Shipment, user: User, subscription: Subscription): Future[Box[Order]] = {
     val billShipTo = createUserBillShipToAddress(user)
 
-    val refreshedShipment = shipment.refresh
-    val shipmentLineItems = refreshedShipment.toList.flatMap(_.shipmentLineItems.toList)
-    val shipmentLineItemsByPet = refreshedShipment.toList.flatMap(_.shipmentLineItems.toList).groupBy(_.pet.obj).filter(_._1.isDefined)
-
-    val fleaTick = shipmentLineItems.flatMap(_.fleaTick.obj)
+    val shipmentLineItems = shipment.refresh.toList.flatMap(_.shipmentLineItems.toList)
     val someInserts = shipmentLineItems.flatMap(_.insert.obj).distinct
 
     val inserts =
       if (subscription.shipments.toList.size >= 2 && tryo(subscription.freeUpgradeSampleDate) == Full(null)) {
         subscription.refresh.map(_.freeUpgradeSampleDate(new Date).saveMe())
 
+        val pets = shipment.refresh.toList.flatMap(_.shipmentLineItems.flatMap(_.pet.obj).toList.distinct)
+        pets.map(pet => ShipmentLineItem.sendFreeUpgradeItems(shipment, pet))
         Insert.tryUpgrade ++ someInserts
       } else
         someInserts
+
+    val refreshedShipment = shipment.refresh
+    val shipmentLineItemsByPet = refreshedShipment.toList.flatMap(_.shipmentLineItems.toList).groupBy(_.pet.obj).filter(_._1.isDefined)
+
+    val fleaTick = shipmentLineItems.flatMap(_.fleaTick.obj)
 
     val productWeight = fleaTick.map(_.weight.get).sum
     val insertWeight = inserts.map(_.weight.get).sum
