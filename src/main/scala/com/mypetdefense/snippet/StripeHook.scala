@@ -1,27 +1,17 @@
 package com.mypetdefense.snippet
 
-import net.liftweb._
-  import mapper.By
-  import common._
-  import http._
-    import LiftRules._
-    import rest._
-  import util._
-    import Helpers._
-  import json._
-    import Extraction._
-
+import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service._
-import com.mypetdefense.actor._
-
-import me.frmr.stripe
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.http.rest._
+import net.liftweb.json._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
 import org.joda.time._
+
 import scala.language.postfixOps
-
-import dispatch.{Req => DispatchReq, _} , Defaults._
-
-import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
 object StripeHook extends StripeHook {
   override val emailActor: EmailActor = EmailActor
@@ -78,36 +68,15 @@ trait StripeHook extends RestHelper with Loggable {
             formatAmount(tax)
           )
 
-          ParentService.updatePuppyProducts(user)
+         //ParentService.updatePuppyProducts(user)
 
-          for {
-            subscription <- user.subscription
-            shipmentCount = subscription.shipments.toList.size
-          } yield {
-            val agency = user.referer.obj
-            val agencyName = agency.map(_.name.get).openOr("")
-            val petlandStore_? = agency.map(_.petlandStore.get).openOr(false)
-
-            val inserts = ((shipmentCount, agencyName) match {
-              case (0, "My Pet Defense") =>
-                List(Insert.welcomeInsert)
-              case (0, _) =>
-                List(Insert.welcomeInsert, Insert.tppWelcomeInsert)
-              case _ =>
-                Nil
-            }).flatten
-
-            val shipment = Shipment.createShipment(
-              user,
-              subscription,
-              invoicePaymentId,
-              charge,
-              formatAmount(amountPaid),
-              formatAmount(tax),
-              inserts,
-              ShipmentStatus.Paid
-            )
-          }
+          ShipmentService.createNewShipment(
+            user,
+            invoicePaymentId,
+            charge,
+            formatAmount(amountPaid),
+            formatAmount(tax)
+          )
         }
       }
 

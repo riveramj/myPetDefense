@@ -36,15 +36,6 @@ class UpgradeAccount extends Loggable {
       boxes.map(SubscriptionItem.createFirstBox)
       val updatedBoxes = boxes.flatMap(_.refresh)
 
-      for {
-        box <- updatedBoxes
-        subscription <- userSubscription.toList
-        user <- SecurityContext.currentUser.toList
-        shipmentCount = subscription.shipments.toList.size
-      } yield {
-        SubscriptionUpgrade.createSubscriptionUpgrade(subscription, box, user, shipmentCount)
-      }
-
       val cost = updatedBoxes.map(SubscriptionBox.possiblePrice).sum
 
       updateStripeSubscriptionQuantity(
@@ -55,6 +46,16 @@ class UpgradeAccount extends Loggable {
 
       if (Props.mode != Props.RunModes.Production) {
         EmailActor ! UpgradeSubscriptionEmail(SecurityContext.currentUser, updatedBoxes.size)
+      }
+
+      for {
+        box <- updatedBoxes
+        subscription <- updatedSubscription.toList
+        user <- SecurityContext.currentUser.toList
+        shipmentCount = subscription.shipments.toList.size
+      } yield {
+        SubscriptionUpgrade.createSubscriptionUpgrade(subscription, box, user, shipmentCount)
+        subscription.isUpgraded(true).saveMe()
       }
 
       Alert("Your account has been upgraded! Watch the mail for your new box!")

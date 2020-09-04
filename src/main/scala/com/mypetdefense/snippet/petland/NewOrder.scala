@@ -1,35 +1,27 @@
 package com.mypetdefense.snippet
 package petland
 
-import net.liftweb.sitemap.Menu
-import net.liftweb._
-import http.SHtml._
-import util._
-import util.Helpers._
-import common._
-import util.ClearClearable
-import http._
-import mapper.{By, NullRef}
-import js._
-import JsCmds._
-import com.mypetdefense.service._
-import ValidationService._
-import PetFlowChoices._
-import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
-import com.mypetdefense.model._
-import com.mypetdefense.actor._
-import java.util.Date
-import java.time.MonthDay
-import java.time.{LocalDate, ZoneId}
 import java.text.SimpleDateFormat
+import java.util.Date
 
-import scala.util.{Failure => TryFail, Success => TrySuccess, _}
+import com.mypetdefense.actor._
+import com.mypetdefense.model._
+import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.service._
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import me.frmr.stripe.{Customer, StripeExecutor, Product => _, Subscription => _, _}
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import me.frmr.stripe.{Customer, StripeExecutor, Coupon => StripeCoupon, Subscription => StripeSubscription, Product => _, _}
-import dispatch._
-import Defaults._
-
+import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 import scala.xml.{Elem, NodeSeq}
 
 
@@ -40,9 +32,8 @@ case class OrderSubmitted(email: String) extends MyPetDefenseEvent("order-submit
 case class PetAdded(petName: String) extends MyPetDefenseEvent("pet-added")
 
 object NewOrder extends Loggable {
-  import net.liftweb.sitemap._
-    import Loc._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu: Menu.Menuable = Menu.i("Petland New Order") / "petland" / "new-order" >>
     agentOrAdmin >>
@@ -164,11 +155,11 @@ class NewOrder extends Loggable {
           OrderSubmitted(user.email.get)
 
         case TrySuccess(stripeFailure) =>
-          logger.error(s"create customer failed with stripe error: ${stripeFailure}")
+          logger.error(s"create customer failed with stripe error: $stripeFailure")
           Alert("An error has occured. Please try again. If you continue to receive an error, please contact us at help@mypetdefense.com.")
 
         case TryFail(throwable: Throwable) =>
-          logger.error(s"create customer failed with other error: ${throwable}")
+          logger.error(s"create customer failed with other error: $throwable")
           Alert("An error has occured. Please try again. If you continue to receive an error, please contact us at help@mypetdefense.com.")
       }
     } else {
@@ -210,7 +201,7 @@ class NewOrder extends Loggable {
         subscription <- rawSubscriptions.data.headOption
       } yield {
         subscription.id
-      }).flatMap(identity).getOrElse("")
+      }).flatten.getOrElse("")
 
     Subscription.createNewSubscription(
       Full(newParent),
@@ -218,6 +209,7 @@ class NewOrder extends Loggable {
       new Date(),
       new Date(),
       Price.currentPetlandMonthlyCode,
+      isUpgraded = false,
       6
     )
 
@@ -287,7 +279,7 @@ class NewOrder extends Loggable {
   
   def birthdayYearDropdown: Elem = {
     SHtml.ajaxSelect(
-      List(("", "Year")) ++ ((2019 to 1998 by -1).toList.map(year => (year.toString, year.toString))),
+      List(("", "Year")) ++ (2019 to 1998 by -1).toList.map(year => (year.toString, year.toString)),
       Full(birthdayYear),
       birthdayYear = _
     )
@@ -306,12 +298,11 @@ class NewOrder extends Loggable {
 
     val birthday = tryo(birthdayDateFormat.parse(s"$birthdayMonth $birthdayYear"))
 
-    val newPet = { 
+    val newPet = {
       for {
         animal <- newPetType.toList
         currentSize <- newPetCurrentSize
         adultSize <- newPetAdultSize
-        neededProduct <- product
       } yield {
         val realPetName = {
           if (petName == "")
@@ -333,7 +324,7 @@ class NewOrder extends Loggable {
         else
           birthday.map(possiblePet.birthday(_))
       }
-    }.toList.flatten
+    }.flatten
 
     pets = pets ++ newPet
     petsOrdered(pets)
@@ -366,7 +357,7 @@ class NewOrder extends Loggable {
     )
   }
 
-  def addPetBindings: CssBindFunc = {
+  def addPetBindings(): CssBindFunc = {
     "#new-pet" #> SHtml.idMemoize { renderer =>
       addPetRenderer = Full(renderer)
 
@@ -376,7 +367,7 @@ class NewOrder extends Loggable {
       "#birthday-month" #> birthdayMonthDropdown &
       "#birthday-year" #> birthdayYearDropdown &
       "#new-pet-name" #> text(petName, petName = _) &
-      "#add-to-order" #> SHtml.ajaxSubmit("Add to Order", () => addPet)
+      "#add-to-order" #> SHtml.ajaxSubmit("Add to Order", () => addPet())
     }
   }
 
@@ -392,12 +383,12 @@ class NewOrder extends Loggable {
       }
     } &
     "#empty-cart [class+]" #> { 
-      if (pets.size > 0)
+      if (pets.nonEmpty)
         "hidden"
       else
         ""
     } &
-    ".continue-shopping *" #> (if (pets.size > 0) "Continue Shopping" else "Add Another Pet")
+    ".continue-shopping *" #> (if (pets.nonEmpty) "Continue Shopping" else "Add Another Pet")
   }
 
   def totalSummaryBindings: CssBindFunc = {
@@ -431,6 +422,6 @@ class NewOrder extends Loggable {
     "#phone" #> ajaxText(phone, phone = _) &
     "#email" #> text(email, userEmail => email = userEmail.trim) &
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    ".submit" #> SHtml.ajaxSubmit("Submit", () => signup)
+    ".submit" #> SHtml.ajaxSubmit("Submit", () => signup())
   }
 }
