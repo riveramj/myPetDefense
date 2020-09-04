@@ -44,8 +44,6 @@ object ShipmentService extends Loggable {
       subscription <- user.subscription
       shipmentCount = subscription.shipments.toList.size
     } yield {
-      val agency = user.referer.obj
-
       val sendFreeUpgradeShipment =  {
         if (shipmentCount >= 1 && !tryo(subscription.freeUpgradeSampleDate).isEmpty)
           true
