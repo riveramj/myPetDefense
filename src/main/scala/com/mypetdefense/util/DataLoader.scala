@@ -243,7 +243,7 @@ object DataLoader extends Loggable {
   def createNewPetlandStores: Agency = {
     val petlandAgencies = Agency.findAll(By(Agency.petlandStore, true))
     
-    val agents = petlandAgencies.map(_.members.toList).flatten
+    val agents = petlandAgencies.flatMap(_.members.toList)
 
     agents.map(_.delete_!)
     
@@ -254,7 +254,7 @@ object DataLoader extends Loggable {
       AgencyType.Headquarters,
       Empty,
       "petlandhq",
-      true
+      petlandStore = true
     ))
 
     Agency.createNewAgency(
@@ -262,7 +262,7 @@ object DataLoader extends Loggable {
       AgencyType.Store,
       petlandHQ,
       "zplohcp",
-      true
+      petlandStore = true
     )
 
     Agency.createNewAgency(
@@ -270,7 +270,7 @@ object DataLoader extends Loggable {
       AgencyType.Store,
       petlandHQ,
       "zplohlc",
-      true
+      petlandStore = true
     )
 
     Agency.createNewAgency(
@@ -278,7 +278,7 @@ object DataLoader extends Loggable {
       AgencyType.Store,
       petlandHQ,
       "zplgak",
-      true
+      petlandStore = true
     )
 
     Agency.createNewAgency(
@@ -286,7 +286,7 @@ object DataLoader extends Loggable {
       AgencyType.Store,
       petlandHQ,
       "pmog",
-      true
+      petlandStore = true
     )
 
     Agency.createNewAgency(
@@ -294,7 +294,7 @@ object DataLoader extends Loggable {
       AgencyType.Store,
       petlandHQ,
       "zplfls",
-      true
+      petlandStore = true
     )
 
     Agency.createNewAgency(
@@ -302,7 +302,7 @@ object DataLoader extends Loggable {
       AgencyType.Store,
       petlandHQ,
       "ps68",
-      true
+      petlandStore = true
     )
   }
 
@@ -311,9 +311,7 @@ object DataLoader extends Loggable {
       "PuppySpot",
       AgencyType.Store,
       Empty,
-      "pupspot",
-      false
-    )
+      "pupspot")
 
     val tppAgency = Agency.find(By(Agency.name, "TPP"))
 
@@ -368,4 +366,30 @@ object DataLoader extends Loggable {
       CouponService.createCoupon("100off", mpdAgency, "1", "100", "0")
     }
   }
+
+  def upgradeInsert: Any =
+    if (Insert.tryUpgrade.isEmpty) {
+      Insert.createNewInsert(
+        "Try Upgraded Box",
+        "upgrade-insert",
+        0.1
+      )
+
+      Insert.createNewInsert(
+        "Summer Product Brochure 2020",
+        "summer-brochure-2020",
+        0.1
+      )
+    }
+
+  def markUpgradedSubscriptions: List[Subscription] =
+    for {
+      subscription <- Subscription.findAll()
+      box <- subscription.subscriptionBoxes.headOption
+    } yield {
+      if (box.subscriptionItems.toList.nonEmpty)
+        subscription.isUpgraded(true).saveMe()
+      else
+        subscription.isUpgraded(false).saveMe()
+    }
 }
