@@ -205,7 +205,7 @@ object ShipStationService extends Loggable {
     val someInserts = shipmentLineItems.flatMap(_.insert.obj).distinct
 
     val inserts =
-      if (tryo(subscription.freeUpgradeSampleDate).isEmpty) {
+      if (subscription.shipments.toList.size >= 2 && tryo(subscription.freeUpgradeSampleDate) == Full(null)) {
         subscription.refresh.map(_.freeUpgradeSampleDate(new Date).saveMe())
 
         Insert.tryUpgrade ++ someInserts
