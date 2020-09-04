@@ -28,6 +28,9 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object insert extends MappedString(this, 100)
   object shipmentStatus extends MappedEnum(this, ShipmentStatus)
   object deliveryNotes extends MappedString(this, 100)
+  object freeUpgradeSample extends MappedBoolean(this) {
+    override def defaultValue = false
+  }
   object status extends MappedEnum(this, Status) {
     override def defaultValue: Status.Value = Status.Active
   }
@@ -47,7 +50,8 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
     amountPaid: String,
     taxPaid: String,
     inserts: List[Insert],
-    shipmentStatus: ShipmentStatus.Value
+    shipmentStatus: ShipmentStatus.Value,
+    sendFreeUpgrade: Boolean = false
   ): Shipment = {
     val dateProcessed = new Date()
 
@@ -61,9 +65,10 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
       .amountPaid(amountPaid)
       .taxPaid(taxPaid)
       .shipmentStatus(shipmentStatus)
+      .freeUpgradeSample(sendFreeUpgrade)
       .saveMe
 
-    ShipmentLineItem.createShipmentItems(shipment, user, inserts)
+    ShipmentLineItem.createShipmentItems(shipment, user, inserts, sendFreeUpgrade)
 
     shipment
   }
@@ -77,21 +82,37 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
   }
   object shipment extends MappedLongForeignKey(this, Shipment)
   object fleaTick extends MappedLongForeignKey(this, FleaTick)
+  object product extends MappedLongForeignKey(this, Product)
   object petName extends MappedString(this, 100)
   object pet extends MappedLongForeignKey(this, Pet)
   object insert extends MappedLongForeignKey(this, Insert)
 
   def getFleaTickPetNameItemSize: String = {
     val fleaTickNameSize = this.fleaTick.obj.map(_.getNameAndSize).openOr("")
-    s"${this.petName.get} - ${fleaTickNameSize}".replace("null", "")
+    s"${this.petName.get} - $fleaTickNameSize".replace("null", "")
   }
 
-  def createShipmentItems(shipment: Shipment, user: User, inserts: List[Insert]): List[ShipmentLineItem] = {
+  def sendFreeUpgradeItems(shipment: Shipment, pet: Pet) : List[ShipmentLineItem] = {
+    val products = List(Product.hipAndJoint, Product.calming, Product.multiVitamin, Product.dentalPowder).flatten
+
+    products.map { item =>
+      ShipmentLineItem.create
+        .shipmentLineItemId(generateLongId)
+        .shipment(shipment)
+        .product(item)
+        .pet(pet)
+        .petName(pet.name.get)
+        .saveMe
+    }
+  }
+
+  def createShipmentItems(shipment: Shipment, user: User, inserts: List[Insert], sendFreeUpgrade: Boolean): List[ShipmentLineItem] = {
     for {
       subscription <- user.subscription.toList
       box <- subscription.subscriptionBoxes
-      pet <- box.pet
-      fleaTick <- box.fleaTick
+      pet <- box.pet.obj
+      fleaTick = box.fleaTick.obj
+      subscriptionItems = box.subscriptionItems
     } yield {
       ShipmentLineItem.create
         .shipmentLineItemId(generateLongId)
@@ -100,15 +121,30 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
         .pet(pet)
         .petName(pet.name.get)
         .saveMe
-    }
 
-    inserts.map { insert =>
-      ShipmentLineItem.create
-        .shipment(shipment)
-        .insert(insert)
-        .saveMe
+
+      if (sendFreeUpgrade)
+        sendFreeUpgradeItems(shipment, pet)
+
+      subscriptionItems.map { item =>
+        ShipmentLineItem.create
+          .shipmentLineItemId(generateLongId)
+          .shipment(shipment)
+          .product(item.product.obj)
+          .pet(pet)
+          .petName(pet.name.get)
+          .saveMe
+      }
+
+      inserts.map { insert =>
+        ShipmentLineItem.create
+          .shipmentLineItemId(generateLongId)
+          .shipment(shipment)
+          .insert(insert)
+          .saveMe
+      }
     }
-  }
+  }.flatten
 }
 
 object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem]
