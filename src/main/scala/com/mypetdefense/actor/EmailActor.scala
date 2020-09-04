@@ -28,7 +28,7 @@ case class SendNewUserEmail(user: User) extends EmailActorMessage
 case class SendPasswordResetEmail(user: User) extends EmailActorMessage
 case class SendPasswordUpdatedEmail(user: User) extends EmailActorMessage
 case class NewSaleEmail(user: Box[User], petCount: Int, couponCode: String) extends EmailActorMessage
-case class UpgradeSubscriptionEmail(user: Box[User], boxcount: Int) extends EmailActorMessage
+case class UpgradeSubscriptionEmail(user: Box[User], boxCount: Int) extends EmailActorMessage
 case class NewPetAddedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class PetRemovedEmail(user: User, pet: Pet) extends EmailActorMessage
 case class BillingUpdatedEmail(user: User) extends EmailActorMessage

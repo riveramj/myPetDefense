@@ -44,7 +44,7 @@ class UpgradeAccount extends Loggable {
         tryo((cost * 100).toInt).openOr(0)
       )
 
-      if (Props.mode != Props.RunModes.Production) {
+      if (Props.mode == Props.RunModes.Production) {
         EmailActor ! UpgradeSubscriptionEmail(SecurityContext.currentUser, updatedBoxes.size)
       }
 
