@@ -31,7 +31,7 @@ class Insert extends LongKeyedMapper[Insert] with IdPK {
 
   def tryUpgrade: Box[Insert] = Insert.find(By(Insert.name, "Free Upgraded Box Trial Insert"))
 
-  def productBrochure: Box[Insert] = Insert.find(By(Insert.name, "Summer Product Brochure"))
+  def productBrochure: Box[Insert] = Insert.find(By(Insert.name, "Product Brochure"))
 
   def tppWelcomeInsert: Box[Insert] = Insert.find(By(Insert.name, "TPP Registrations Welcome Insert"))
 
