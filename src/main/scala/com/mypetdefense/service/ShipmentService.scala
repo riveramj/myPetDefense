@@ -4,7 +4,7 @@ import java.util.Date
 
 import com.mypetdefense.model._
 import net.liftweb.common.Box.tryo
-import net.liftweb.common._
+import net.liftweb.common.{Full, _}
 import net.liftweb.mapper._
 
 object ShipmentService extends Loggable {
@@ -43,9 +43,11 @@ object ShipmentService extends Loggable {
     for {
       subscription <- user.subscription
       shipmentCount = subscription.shipments.toList.size
+      pets = subscription.getPets
+      dogs = pets.filter(_.animalType.get == AnimalType.Dog)
     } yield {
       val sendFreeUpgradeShipment =  {
-        if (shipmentCount >= 1 && !tryo(subscription.freeUpgradeSampleDate).isEmpty)
+        if (shipmentCount >= 1 && tryo(subscription.freeUpgradeSampleDate) == Full(null) && dogs.nonEmpty)
           true
         else
           false
