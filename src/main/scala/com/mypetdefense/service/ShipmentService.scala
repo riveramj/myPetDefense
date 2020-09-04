@@ -45,7 +45,7 @@ object ShipmentService extends Loggable {
       shipmentCount = subscription.shipments.toList.size
     } yield {
       val sendFreeUpgradeShipment =  {
-        if (shipmentCount >= 1 && !tryo(subscription.freeUpgradeSampleDate).isEmpty)
+        if (shipmentCount >= 1 && tryo(subscription.freeUpgradeSampleDate).isEmpty)
           true
         else
           false
