@@ -13,8 +13,6 @@ class SalesAgentReportEmailJob extends ManagedJob {
     val dailyAgencyData = ReportingService.findYesterdaySalesByAgency
     val monthlyAgencyData = ReportingService.findMTDSalesByAgency
 
-    /*
-    
     EmailActor ! DailySalesEmail(
       dailyAgentData,
       monthlyAgentData,
@@ -54,9 +52,7 @@ class SalesAgentReportEmailJob extends ManagedJob {
       monthlyAgencyData,
       "toni@thirdpartypet.com"
     )
-
-     */
-
+    
     EmailActor ! DailySalesEmail(
       dailyAgentData,
       monthlyAgentData,
