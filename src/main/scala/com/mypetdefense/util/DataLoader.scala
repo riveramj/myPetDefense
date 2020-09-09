@@ -416,8 +416,9 @@ object DataLoader extends Loggable {
     val endFree = dateFormatter.parse("9/8/2020")
 
     for {
-      shipment <- Shipment.findAll(By_>(Shipment.dateShipped, startFree), By_<(Shipment.dateShipped, endFree))
-        if shipment.dateShipped.get == null && (shipment.trackingNumber.get == null || shipment.trackingNumber.get.isEmpty) && shipment.shipmentStatus.get == ShipmentStatus.LabelCreated
+      shipment <- Shipment.findAll(By_>(Shipment.dateProcessed, startFree), By_<(Shipment.dateProcessed, endFree))
+        if (shipment.trackingNumber.get == null || shipment.trackingNumber.get.isEmpty) && shipment.shipmentStatus.get == ShipmentStatus.LabelCreated
+      subscription <- shipment.subscription.obj
     } yield {
       shipment.shipmentId(0).shipmentStatus(ShipmentStatus.Paid).saveMe()
     }
