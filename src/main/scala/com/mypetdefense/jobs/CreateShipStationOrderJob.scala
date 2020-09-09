@@ -27,35 +27,28 @@ class CreateShipStationOrderJob extends ManagedJob {
     )
 
     println(newShipments.size + " shipment size")
-    var count = 0
 
     for {
       shipment <- newShipments
-      _ = println(count)
       subscription <- shipment.subscription.obj
-      _ = println(count)
       user <- subscription.user.obj
-      _ = println(count)
     } yield {
-
       val shipStationOrder = ShipStationService.createShipStationOrder(shipment, user, subscription)
 
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>
-          println(count + " in success")
           shipment.refresh.map(_.shipStationOrderId(order.orderId).shipmentStatus(ShipmentStatus.LabelCreated).saveMe)
 
+          /*
           if (!sameDateComparison(
             new Date(),
             shipment.expectedShipDate.get
           )) {
-            println(count + " in compare")
             ShipStationService.holdOrderUntil(
               order.orderId,
               shipment.expectedShipDate.get
             ).onComplete {
               case TrySuccess(Full(_)) =>
-                println(count + " in compare success")
 
               case TrySuccess(shipStationFailure) =>
                 logger.error(s"hold order failed with shipStation error: ${shipStationFailure}")
@@ -65,6 +58,7 @@ class CreateShipStationOrderJob extends ManagedJob {
                 logger.error(s"user email is ${user.email.get}")
             }
           }
+         */
 
           case TrySuccess(shipStationFailure) =>
             logger.error(s"create order failed with shipStation error:")
@@ -76,7 +70,6 @@ class CreateShipStationOrderJob extends ManagedJob {
             logger.error(s"user email is ${user.email.get}")
             throwable
       }
-      count = count + 1
     }
   }
 }
