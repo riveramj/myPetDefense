@@ -1,5 +1,7 @@
 package com.mypetdefense.util
 
+import java.text.SimpleDateFormat
+
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import me.frmr.stripe.{Subscription => _}
@@ -382,14 +384,42 @@ object DataLoader extends Loggable {
       )
     }
 
-  def markUpgradedSubscriptions: List[Subscription] =
+  def markUpgradedSubscriptions() {
     for {
       subscription <- Subscription.findAll()
+      if !subscription.isUpgraded.get
       box <- subscription.subscriptionBoxes.headOption
     } yield {
       if (box.subscriptionItems.toList.nonEmpty)
         subscription.isUpgraded(true).saveMe()
-      else
-        subscription.isUpgraded(false).saveMe()
     }
+  }
+
+  def findSeptEarlyShipments() {
+    val dateFormatter = new SimpleDateFormat("M/d/y")
+    val startFree = dateFormatter.parse("8/7/2020")
+    val endFree = dateFormatter.parse("9/6/2020")
+    val freeMonth = dateFormatter.parse("8/1/2020")
+
+      for {
+        shipment <- Shipment.findAll(By_>(Shipment.dateShipped, startFree), By_<(Shipment.dateShipped, endFree))
+        subscription <- shipment.subscription.obj
+          if subscription.freeUpgradeSampleDate.get == null
+      } yield {
+        subscription.freeUpgradeSampleDate(freeMonth).saveMe
+      }
+  }
+
+  def clearRecentShipments() {
+    val dateFormatter = new SimpleDateFormat("M/d/y")
+    val startFree = dateFormatter.parse("9/3/2020")
+    val endFree = dateFormatter.parse("9/8/2020")
+
+    for {
+      shipment <- Shipment.findAll(By_>(Shipment.dateShipped, startFree), By_<(Shipment.dateShipped, endFree))
+        if shipment.dateShipped.get == null && (shipment.trackingNumber.get == null || shipment.trackingNumber.get.isEmpty) && shipment.shipmentStatus.get == ShipmentStatus.LabelCreated
+    } yield {
+      shipment.shipmentId(0).shipmentStatus(ShipmentStatus.Paid).saveMe()
+    }
+  }
 }
