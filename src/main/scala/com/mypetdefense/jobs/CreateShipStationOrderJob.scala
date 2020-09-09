@@ -79,7 +79,7 @@ object HalfHourCreateOrderJob extends TriggeredJob {
     val trigger: Trigger = TriggerBuilder.newTrigger()
       .withIdentity("HalfHourCreateOrderJobTrigger")
       .startNow()
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 47 * ? * * *"))
+      .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * ? * * *"))
       .build()
 }
 
