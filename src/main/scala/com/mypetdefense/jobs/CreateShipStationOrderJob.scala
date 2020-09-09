@@ -26,9 +26,10 @@ class CreateShipStationOrderJob extends ManagedJob {
       By(Shipment.shipmentStatus, ShipmentStatus.Paid),
     )
 
+    println(newShipments.size + " shipment size")
+
     for {
       shipment <- newShipments
-        if (newShipments.size < 400)
       subscription <- shipment.subscription.obj
       user <- subscription.user.obj
     } yield { 
