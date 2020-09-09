@@ -413,13 +413,13 @@ object DataLoader extends Loggable {
   def clearRecentShipments() {
     val dateFormatter = new SimpleDateFormat("M/d/y")
     val startFree = dateFormatter.parse("9/3/2020")
-    val endFree = dateFormatter.parse("9/8/2020")
+    val endFree = dateFormatter.parse("9/10/2020")
 
     for {
       shipment <- Shipment.findAll(By_>(Shipment.dateProcessed, startFree), By_<(Shipment.dateProcessed, endFree))
-        if shipment.shipmentStatus.get == ShipmentStatus.Paid && shipment.shipmentId.get == 0
+        if shipment.shipmentStatus.get == ShipmentStatus.LabelCreated
     } yield {
-      shipment.shipmentId(RandomIdGenerator.generateLongId).shipStationOrderId(0).saveMe()
+      shipment.shipStationOrderId(0).shipmentStatus(ShipmentStatus.Paid).saveMe()
     }
   }
 }

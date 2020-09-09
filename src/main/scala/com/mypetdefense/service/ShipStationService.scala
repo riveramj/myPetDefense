@@ -212,7 +212,9 @@ object ShipStationService extends Loggable {
           Insert.tryUpgrade ++ someInserts
         } else
           someInserts
-      } else
+      } else if (shipment.freeUpgradeSample.get)
+        Insert.tryUpgrade ++ someInserts
+      else
         someInserts
 
     val refreshedShipment = shipment.refresh
