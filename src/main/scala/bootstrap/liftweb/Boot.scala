@@ -77,7 +77,7 @@ class Boot {
     DataLoader.defaultSaleCoupons
     //DataLoader.markUpgradedSubscriptions
     //DataLoader.upgradeInsert
-    //DataLoader.clearRecentShipments()
+    DataLoader.clearRecentShipments()
 
     //DataLoader.loadPetlandInsert
     //DataLoader.createBasicExistingBoxes
