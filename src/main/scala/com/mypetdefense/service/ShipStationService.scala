@@ -194,7 +194,8 @@ object ShipStationService extends Loggable {
 
   }
 
-  def createShipStationOrder(shipment: Shipment, user: User, subscription: Subscription): Future[Box[Order]] = {
+  def createShipStationOrder(shipment: Shipment, user: User, subscription: Subscription, count: Int): Future[Box[Order]] = {
+    println("============================== " + count)
     val billShipTo = createUserBillShipToAddress(user)
 
     val shipmentLineItems = shipment.refresh.toList.flatMap(_.shipmentLineItems.toList)
