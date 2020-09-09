@@ -28,10 +28,11 @@ class CreateShipStationOrderJob extends ManagedJob {
 
     println(newShipments.size + " shipment size")
 
+    println("======================  begin batch")
     var count = 0
 
     for {
-      shipment <- newShipments.take(5)
+      shipment <- newShipments.take(10)
       _ = println(shipment)
       subscription <- shipment.subscription.obj
       _ = println(subscription)
@@ -94,7 +95,7 @@ object HalfHourCreateOrderJob extends TriggeredJob {
     val trigger: Trigger = TriggerBuilder.newTrigger()
       .withIdentity("HalfHourCreateOrderJobTrigger")
       .startNow()
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 */5 * ? * * *"))
+      .withSchedule(CronScheduleBuilder.cronSchedule("0 */3 * ? * * *"))
       .build()
 }
 
