@@ -194,7 +194,8 @@ object ShipStationService extends Loggable {
 
   }
 
-  def createShipStationOrder(shipment: Shipment, user: User, subscription: Subscription): Future[Box[Order]] = {
+  def createShipStationOrder(shipment: Shipment, user: User, subscription: Subscription, count: Int): Future[Box[Order]] = {
+    println("============================== " + count)
     val billShipTo = createUserBillShipToAddress(user)
 
     val shipmentLineItems = shipment.refresh.toList.flatMap(_.shipmentLineItems.toList)
@@ -211,7 +212,9 @@ object ShipStationService extends Loggable {
           Insert.tryUpgrade ++ someInserts
         } else
           someInserts
-      } else
+      } else if (shipment.freeUpgradeSample.get)
+        Insert.tryUpgrade ++ someInserts
+      else
         someInserts
 
     val refreshedShipment = shipment.refresh

@@ -26,18 +26,31 @@ class CreateShipStationOrderJob extends ManagedJob {
       By(Shipment.shipmentStatus, ShipmentStatus.Paid),
     )
 
+    println(newShipments.size + " shipment size")
+
+    println("======================  begin batch")
+    var count = 0
+
     for {
-      shipment <- newShipments
-        if (newShipments.size < 400)
+      shipment <- newShipments.take(10)
+      _ = println(shipment)
       subscription <- shipment.subscription.obj
+      _ = println(subscription)
       user <- subscription.user.obj
-    } yield { 
-      val shipStationOrder = ShipStationService.createShipStationOrder(shipment, user, subscription)
+      _ = println(user)
+    } yield {
+      val thisRun = count
+      println("======================  start" + thisRun)
+      count = count + 1
+      val shipStationOrder = ShipStationService.createShipStationOrder(shipment, user, subscription, thisRun)
+
 
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>
-          shipment.shipStationOrderId(order.orderId).shipmentStatus(ShipmentStatus.LabelCreated).saveMe
+          println("======================  below success" + thisRun)
+          shipment.refresh.map(_.shipStationOrderId(order.orderId).shipmentStatus(ShipmentStatus.LabelCreated).saveMe)
 
+          /*
           if (!sameDateComparison(
             new Date(),
             shipment.expectedShipDate.get
@@ -56,13 +69,16 @@ class CreateShipStationOrderJob extends ManagedJob {
                 logger.error(s"user email is ${user.email.get}")
             }
           }
+         */
 
           case TrySuccess(shipStationFailure) =>
+            println("======================  below error" + thisRun)
             logger.error(s"create order failed with shipStation error:")
             logger.error(shipStationFailure)
             logger.error(s"user email is ${user.email.get}")
 
           case TryFail(throwable: Throwable) =>
+            println("======================  below fail" + thisRun)
             logger.error(s"create order failed with other error: ${throwable}")
             logger.error(s"user email is ${user.email.get}")
             throwable
@@ -79,7 +95,7 @@ object HalfHourCreateOrderJob extends TriggeredJob {
     val trigger: Trigger = TriggerBuilder.newTrigger()
       .withIdentity("HalfHourCreateOrderJobTrigger")
       .startNow()
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 47 * ? * * *"))
+      .withSchedule(CronScheduleBuilder.cronSchedule("0 */3 * ? * * *"))
       .build()
 }
 
