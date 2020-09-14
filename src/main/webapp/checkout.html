@@ -8,14 +8,6 @@
         </picture>
       </a>
     </div>
-    <nav>
-      <ul id="menu-entries">
-        <li class="login"><a href="./login">Login</a></li>
-        <li>
-          <a href="/cart-review" class="shopping-cart">Cart</a>
-        </li>
-      </ul>
-    </nav>
   </div>
   <form class="current-step" data-lift="signup.Checkout.render">
     <h1 class="step-header">Checkout</h1>
@@ -24,35 +16,57 @@
     </h2>
     <input type="hidden" id="stripe-token">
     <div id="left-column">
-     <fieldset class="shipping-info">
-       <legend>Shipping Info</legend>
-       <div>
-         <label>
-           <span class="field-label">First name</span>
-           <input id="first-name" type="text">            
-         </label>
-         <label>
-           <span class="field-label">Last name</span>
-           <input id="last-name" type="text">
-         </label>
-         <label>
-           <span class="field-label">Street Address</span>
-           <input id="street-1" type="text">
-           <input id="street-2" type="text">
-         </label>
-        <label class="short-field city">
-          <span class="field-label">City</span>
-          <input id="city" type="text">
-        </label>
-        <label class="short-field state">
-          <span class="field-label">State</span>
-          <input id="state" type="text" maxlength="2">
-        </label>
-        <label class="short-field zip">
-          <span class="field-label">Zip</span>
-          <input id="zip" type="tel" maxlength="5">
-        </label>
-       </div>
+      <fieldset id="account-container">
+        <legend>Create your account</legend>
+        <div class="facebook-container facebook-create">
+          <div class="facebook-option">
+            <div><input id="facebook-id" class="hidden"></div>
+            <div><button class="hidden connect-facebook">Connect Facebook</button></div>
+            <div class="fb-login-button" data-size="large" data-button-type="login_with" data-layout="default" data-auto-logout-link="false" data-use-continue-as="false" data-width="" onlogin="checkLoginState();" data-scope="public_profile,email"></div>
+
+            <div class="choose-one">- or -</div>
+          </div>
+
+          <label>
+            <div><span class="field-label">Email</span></div>
+            <input id="email" type="text">
+          </label>
+          <label class="password-container">
+            <div><span class="field-label">Password</span></div>
+            <input id="password" type="password">
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="shipping-info">
+        <legend>Shipping Info</legend>
+        <div>
+          <label>
+            <span class="field-label">First name</span>
+            <input id="first-name" type="text">
+          </label>
+          <label>
+            <span class="field-label">Last name</span>
+            <input id="last-name" type="text">
+          </label>
+          <label>
+            <span class="field-label">Street Address</span>
+            <input id="street-1" type="text">
+            <input id="street-2" type="text">
+          </label>
+          <label class="short-field city">
+            <span class="field-label">City</span>
+            <input id="city" type="text">
+          </label>
+          <label class="short-field state">
+            <span class="field-label">State</span>
+            <input id="state" maxlength="2" type="text">
+          </label>
+          <label class="short-field zip">
+            <span class="field-label">Zip</span>
+            <input id="zip" maxlength="5" type="tel">
+          </label>
+        </div>
       </fieldset>
     </div>
 
@@ -60,18 +74,18 @@
       <fieldset class="promo-container promotion-info">
         <legend>Promotion Code</legend>
         <div>
-        <label>
-          <div>
-            <span class="field-label">Enter Code</span>
-            <span id="promo-error" class="hidden">Invalid. Please try another code.</span>
-            <span id="promo-success" class="hidden">Promotion applied.</span>
-          </div>
-          <div class="apply-promo-container">
-            <input size="20" id="promo-code" type="text">
-            <button class="apply-promo mobile" type="button">Apply</button>
-            <button class="apply-promo desktop" type="button">Apply Code</button>
-          </div>
-        </label>
+          <label>
+            <div>
+              <span class="field-label">Enter Code</span>
+              <span class="hidden" id="promo-error">Invalid. Please try another code.</span>
+              <span class="hidden" id="promo-success">Promotion applied.</span>
+            </div>
+            <div class="apply-promo-container">
+              <input id="promo-code" size="20" type="text">
+              <button class="apply-promo mobile" type="button">Apply</button>
+              <button class="apply-promo desktop" type="button">Apply Code</button>
+            </div>
+          </label>
         </div>
       </fieldset>
       <fieldset class="billing-info">
@@ -103,9 +117,10 @@
       </div>
 
       <div class="signup-container">
-        <button type="submit" class="checkout submit select-choice">Place Order</button>
+        <button class="checkout submit select-choice" type="submit">Place Order</button>
         <div id="agreement">
-          By clicking "Place Order" you agree to pay the full monthly amount shown above after promotions have completed.
+          By clicking "Place Order" you agree to pay the full monthly amount shown above after promotions have
+          completed.
         </div>
       </div>
     </div>
@@ -125,5 +140,53 @@
   </tail>
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=checkout">
+
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v7.0&appId=329863464676769&autoLogAppEvents=1" nonce="1SNh4aGH"></script>
+
+    <script>
+      function statusChangeCallback(response) {
+        console.log('statusChangeCallback');
+        console.log(response);
+        if (response.status === 'connected') {
+          FB.api('/me', {fields:"first_name, last_name, email"}, function(response) {
+            $("#facebook-id").val(response.id).trigger("input");
+            $("#first-name").val(response.first_name).trigger("input");
+            $("#last-name").val(response.last_name).trigger("input");
+            $("#email").val(response.email).trigger("input");
+            $(".connect-facebook").click();
+          });
+        }
+      }
+
+      function checkLoginState() {
+        FB.getLoginStatus(function(response) {
+            statusChangeCallback(response);
+        });
+      }
+
+      window.fbAsyncInit = function() {
+        FB.init({
+          appId      : '329863464676769',
+          cookie     : true,
+          xfbml      : true,
+          version    : 'v7.0'
+        });
+
+        FB.AppEvents.logPageView();
+
+        FB.getLoginStatus(function(response) {
+          console.log(response);
+        });
+      };
+
+      (function(d, s, id){
+         var js, fjs = d.getElementsByTagName(s)[0];
+         if (d.getElementById(id)) {return;}
+         js = d.createElement(s); js.id = id;
+         js.src = "https://connect.facebook.net/en_US/sdk.js";
+         fjs.parentNode.insertBefore(js, fjs);
+      }(document, 'script', 'facebook-jssdk'));
+    </script>
   </head_merge>
 </div>
