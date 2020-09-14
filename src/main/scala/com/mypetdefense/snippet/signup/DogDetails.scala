@@ -91,8 +91,8 @@ class DogDetails extends Loggable {
     }
   }
 
-  def goToCreateAccount(): JsCmd =
-    validateAndNavigate(CreateAccount.menu.loc.calcDefaultHref)
+  def goToCheckout(): JsCmd =
+    validateAndNavigate(Checkout.menu.loc.calcDefaultHref)
 
   def addNewPet(): JsCmd =
     validateAndNavigate(PetChoice.menu.loc.calcDefaultHref)
@@ -138,6 +138,6 @@ class DogDetails extends Loggable {
     ".xlarge-dog .weight-number *" #> xlargeDog.map(_.toString + " lb") &
     ".xlarge-dog #xlarge-dog [onclick]" #> ajaxInvoke( () => chooseSize(xlargeDog)) &
     "#add-pet" #> ajaxSubmit("Add Pet", addNewPet _) &
-    "#checkout" #> ajaxSubmit("Checkout", goToCreateAccount _)
+    "#checkout" #> ajaxSubmit("Checkout", goToCheckout _)
   }
 }

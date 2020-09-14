@@ -30,8 +30,7 @@ object Checkout extends Loggable {
   import net.liftweb.sitemap._
 
   val menu: Menu.Menuable = Menu.i("Checkout") / "checkout" >>
-    completedPet >>
-    createdAccount
+    completedPet
 }
 
 case class PromoCodeMessage(status: String) extends MyPetDefenseEvent("promotion-code-message")
@@ -40,11 +39,13 @@ class Checkout extends Loggable {
   val stripeSecretKey: String = Props.get("secret.key") openOr ""
   implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
 
-  val currentUser: Box[User] = SecurityContext.currentUser
-  val email: String = currentUser.map(_.email.get).openOr("")
+  var currentUser: Box[User] = SecurityContext.currentUser
 
+  var email: String = currentUser.map(_.email.get).openOr("")
   var firstName: String = currentUser.map(_.firstName.get).getOrElse("")
   var lastName: String = currentUser.map(_.lastName.get).getOrElse("")
+  var password = ""
+  var facebookId = ""
   var street1 = ""
   var street2 = ""
   var city = ""
@@ -53,6 +54,7 @@ class Checkout extends Loggable {
   var taxRate = 0D
   var taxDue = 0D
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
+  var accountRenderer: Box[IdMemoizeTransform] = None
 
   var stripeToken = ""
   var coupon: Box[Coupon] = PetFlowChoices.coupon.is
@@ -102,6 +104,22 @@ class Checkout extends Loggable {
     }
   }
 
+  def connectFacebook(): JsCmd = {
+    val newUser = User.upsertUser(
+      firstName,
+      lastName,
+      email,
+      password,
+      facebookId,
+      UserType.Parent
+    )
+
+    SecurityContext.logIn(newUser)
+    currentUser = Full(newUser)
+
+    accountRenderer.map(_.setHtml()).openOr(Noop)
+  }
+
   def calculateTax(possibleState: String, possibleZip: String): JsCmd = {
     state = possibleState
     zip = possibleZip
@@ -120,14 +138,25 @@ class Checkout extends Loggable {
   }
 
   def signup(): JsCmd = {
-    val validateFields = List(
+    val passwordError = checkEmpty(password, "#password")
+    val facebookError = checkFacebookId(facebookId, "#facebook-id", true)
+
+    val baseFields = List(
         checkEmpty(firstName, "#first-name"),
         checkEmpty(lastName, "#last-name"),
+        checkEmpty(email, "#email"),
         checkEmpty(street1, "#street-1"),
         checkEmpty(city, "#city"),
         checkEmpty(state, "#state"),
         checkEmpty(zip, "#zip")
-      ).flatten
+      )
+
+    val validateFields = {
+      if (facebookId.isEmpty)
+        passwordError :: baseFields
+      else
+        facebookError :: baseFields
+    }.flatten
 
     if(validateFields.isEmpty) {
       (coupon, petCount) match {
@@ -201,14 +230,39 @@ class Checkout extends Loggable {
   def newUserSetup(customer: Customer): Box[User] = {
     val stripeId = customer.id
 
-    val user = currentUser.map { oldUser =>
-      oldUser
-        .firstName(firstName)
-        .lastName(lastName)
-        .stripeId(stripeId)
-        .coupon(coupon)
-        .referer(coupon.flatMap(_.agency.obj))
-        .saveMe
+    val newUser = User.upsertUser(
+      firstName,
+      lastName,
+      email,
+      password,
+      facebookId,
+      UserType.Parent
+    )
+
+    val user = if (currentUser.isEmpty) {
+      Full(User.createNewUser(
+        firstName,
+        lastName,
+        stripeId,
+        email,
+        password,
+        "",
+        coupon,
+        coupon.flatMap(_.agency.obj),
+        None,
+        UserType.Parent
+      ))
+    } else {
+      currentUser.flatMap(_.refresh).map { oldUser =>
+        oldUser
+          .firstName(firstName)
+          .lastName(lastName)
+          .stripeId(stripeId)
+          .email(email)
+          .coupon(coupon)
+          .referer(coupon.flatMap(_.agency.obj))
+          .saveMe
+      }
     }
 
     Address.createNewAddress(
@@ -245,17 +299,13 @@ class Checkout extends Loggable {
     val boxes = pets.map(SubscriptionBox.createNewBox(mpdSubscription, _))
     boxes.map(SubscriptionItem.createFirstBox)
 
-    TaggedItem.createNewTaggedItem(
-      subscription = Full(mpdSubscription),
-      tag = Tag.useBox
-    )
-
     if (Props.mode == Props.RunModes.Production) {
       EmailActor ! NewSaleEmail(userWithSubscription, petCount, coupon.map(_.couponCode.get).openOr(""))
     }
 
     EmailActor ! SendWelcomeEmail(userWithSubscription)
 
+    userWithSubscription.map(SecurityContext.logIn)
     userWithSubscription
   }
 
@@ -303,18 +353,38 @@ class Checkout extends Loggable {
 
     SHtml.makeFormsAjax andThen
     orderSummary &
-    "#first-name" #> text(firstName, firstName = _) &
-    "#last-name" #> text(lastName, lastName = _) &
-    "#street-1" #> text(street1, street1 = _) &
-    "#street-2" #> text(street2, street2 = _) &
-    "#city" #> ajaxText(city, city = _) &
-    "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
-    "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
+    "#left-column" #> SHtml.idMemoize { renderer =>
+      accountRenderer = Full(renderer)
+
+      {
+        if (currentUser.isEmpty)
+          "#password" #> SHtml.password(password, userPassword => password = userPassword.trim)
+        else {
+          ".password-container" #> ClearNodes &
+          ".facebook-option" #> ClearNodes &
+          "#facebook-id" #> ClearNodes &
+          "#email [disabled]" #> "disabled"
+        }
+      } andThen
+      "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
+      "#facebook-id" #> ajaxText(facebookId, facebookId = _) &
+      "#first-name" #> ajaxText(firstName, firstName = _) &
+      "#last-name" #> ajaxText(lastName, lastName = _) &
+      ".connect-facebook [onClick]" #> SHtml.ajaxInvoke(() =>
+        connectFacebook()
+      ) &
+      "#street-1" #> text(street1, street1 = _) &
+      "#street-2" #> text(street2, street2 = _) &
+      "#city" #> ajaxText(city, city = _) &
+      "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
+      "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
+    } andThen
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
     ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup()) &
     ".promotion-info [class+]" #> successCoupon &
     "#promo-code" #> ajaxText(couponCode, couponCode = _) &
     ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() =>
-      validateCouponCode())
+      validateCouponCode()
+    )
   }
 }
