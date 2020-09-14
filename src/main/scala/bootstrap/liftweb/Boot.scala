@@ -83,7 +83,7 @@ class Boot {
     //DataLoader.createBasicExistingBoxes
     //ReportingService.getPetlandCustomersWithStats
 
-    DataLoader.connectCancelledUsersToSubscription()
+    //DataLoader.connectCancelledUsersToSubscription()
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
