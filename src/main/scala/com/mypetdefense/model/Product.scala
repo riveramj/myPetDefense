@@ -1,13 +1,10 @@
 package com.mypetdefense.model
 
-import net.liftweb._
-  import mapper._
-  import common._
-  import util._
+import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
-
-import java.util.Date
+import net.liftweb.common._
+import net.liftweb.mapper._
 
 class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Product] {
   def getSingleton: KeyedMetaMapper[Long, Product] = Product
@@ -34,6 +31,9 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   def calming: Box[Product] = Product.find(By(Product.name, "Calming Chews"))
   def multiVitamin: Box[Product] = Product.find(By(Product.name, "Multi-Vitamin Chews"))
   def dentalPowder: Box[Product] = Product.find(By(Product.name, "Dental Powder"))
+
+  def skinAndCoat: Box[Product] = Product.find(By(Product.name, "Skin and Coat Chews"))
+  def probiotic: Box[Product] = Product.find(By(Product.name, "Probiotic Chews"))
 }
 
 object Product extends Product with LongKeyedMetaMapper[Product]
