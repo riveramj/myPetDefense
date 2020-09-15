@@ -234,6 +234,11 @@ object DataLoader extends Loggable {
       Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews")
       Product.createNewProduct("Dental Powder", "dentalPowder")
     }
+
+    if (Product.skinAndCoat.isEmpty) {
+      Product.createNewProduct("Skin and Coat Chews",  "skinAndCoatChews")
+      Product.createNewProduct("Probiotic Chews", "probioticChews")
+    }
   }
 
   def createBoxedTag: Any = {

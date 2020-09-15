@@ -93,7 +93,7 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
   }
 
   def sendFreeUpgradeItems(shipment: Shipment, pet: Pet) : List[ShipmentLineItem] = {
-    val products = List(Product.hipAndJoint, Product.calming, Product.multiVitamin, Product.dentalPowder).flatten
+    val products = List(Product.skinAndCoat, Product.multiVitamin, Product.probiotic, Product.dentalPowder).flatten
 
     products.map { item =>
       ShipmentLineItem.create
