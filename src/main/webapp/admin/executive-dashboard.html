@@ -2,6 +2,65 @@
   <div data-lift="admin.ExecutiveDashboard.render?eager_eval=true">
     <div data-lift="embed?what=admin/admin-nav-bar"></div>
     <div id="item-container">
+      <section class="new-starts snapshot">
+        <ul>
+          <li class="header">
+            <h3>New Starts</h3>
+          </li>
+          <li class="key-stat">
+            <div class="chart new-starts">
+              <canvas id="new-starts-chart"></canvas>
+            </div>
+            <div class="key-table">
+              <table>
+                <thead>
+                  <tr class="headers">
+                    <td></td>
+                    <td>Current</td>
+                    <td colspan="2">30 Day</td>
+                    <td colspan="2">12 Month</td>
+                  </tr>
+                  <tr>
+                    <td></td>
+                    <td></td>
+                    <td class="data-type">+/-</td>
+                    <td class="data-type">%</td>
+                    <td class="data-type">+/-</td>
+                    <td class="data-type">%</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="today-stats">
+                    <td class="category">Today</td>
+                    <td class="new-starts">99</td>
+                    <td class="new-starts-last-month-diff">39</td>
+                    <td class="new-starts-last-month-percent">39</td>
+                    <td class="new-starts-last-year-diff">139</td>
+                    <td class="new-starts-last-year-percent">39</td>
+                  </tr>
+                  <tr class="mtd-stats">
+                    <td class="category">MTD</td>
+                    <td class="new-starts">99</td>
+                    <td class="new-starts-last-month-diff">39</td>
+                    <td class="new-starts-last-month-percent">39</td>
+                    <td class="new-starts-last-year-diff">139</td>
+                    <td class="new-starts-last-year-percent">39</td>
+                  </tr>
+                  <tr class="ytd-stats">
+                    <td class="category">YTD</td>
+                    <td class="new-starts">99</td>
+                    <td class="new-starts-last-month-diff">39</td>
+                    <td class="new-starts-last-month-percent">39</td>
+                    <td class="new-starts-last-year-diff">139</td>
+                    <td class="new-starts-last-year-percent">39</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+        </ul>
+      </section>
+
       <section class="mtd-shipments snapshot">
         <ul>
           <li class="header">
@@ -66,11 +125,15 @@
         </ul>
       </section>
     </div>
+    <button class="update-data hidden">Update Data</button>
   </div>
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=executive-dashboard">
   </head_merge>
   <tail>
-    <script type="text/javascript" data-lift="script-bundle?name=dashboard"></script>
+    <script type="text/javascript" src="/static/js/chart.bundle.min.js"></script>
+    <script type="text/javascript" src="/static/js/chartjs-plugin-datalabels.min.js"></script>
+
+    <script type="text/javascript" data-lift="script-bundle?name=executive-dashboard"></script>
   </tail>
 </div>

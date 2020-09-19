@@ -28,10 +28,29 @@ object ReportingService extends Loggable {
 
   def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant)
 
+  def monthDayOneLastMonth: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).minusMonths(1).toInstant)
+
+  def monthDayOneLastMonthEnd: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant)
+
+  def monthDayOneLastYear: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).minusMonths(13).toInstant)
+
+  def monthDayOneLastYearEnd: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).minusMonths(12).toInstant)
+
   def tomorrowStart: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant)
     
   def beginngNextMonth: Date = Date.from(YearMonth.now().atEndOfMonth().atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant)
 
+  def yearDayOne: Date = Date.from(now.withDayOfYear(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant)
+
+  def yearDayOneLastYear: Date = Date.from(now.withDayOfYear(1).atStartOfDay(ZoneId.of("America/New_York")).minusMonths(12).toInstant)
+
+  def todayLastMonth: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusMonths(1).toInstant)
+
+  def todayLastYear: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusMonths(12).toInstant)
+
+  def todayLastYearEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusMonths(12).plusDays(1).toInstant)
+
+  def todayLastMonthEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusMonths(1).plusDays(1).toInstant)
   
   def yearMonth: String = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
   
@@ -955,9 +974,63 @@ object ReportingService extends Loggable {
     )
   }
 
-  def findNewMtdSubscriptions: List[Subscription] = {
+  def findNewTodaySubscriptions: List[Subscription] = {
+    Subscription.findAll(
+      By_>(Subscription.createdAt, nowDate)
+    )
+  }
+
+  def findNewTodaySubscriptionsLastMonth: List[Subscription] = {
+    Subscription.findAll(
+      By_>(Subscription.createdAt, todayLastMonth),
+      By_<(Subscription.createdAt, todayLastMonthEnd)
+    )
+  }
+
+  def findNewTodaySubscriptionsLastYear: List[Subscription] = {
+    Subscription.findAll(
+      By_>(Subscription.createdAt, todayLastYear),
+      By_<(Subscription.createdAt, todayLastYearEnd)
+    )
+  }
+
+  def findNewMTDSubscriptions: List[Subscription] = {
     Subscription.findAll(
       By_>(Subscription.createdAt, monthDayOne)
+    )
+  }
+
+  def findNewMTDSubscriptionsLastMonth: List[Subscription] = {
+    Subscription.findAll(
+      By_>(Subscription.createdAt, monthDayOneLastMonth),
+      By_<(Subscription.createdAt, monthDayOneLastMonthEnd)
+    )
+  }
+
+  def findNewMTDSubscriptionsLastYear: List[Subscription] = {
+    Subscription.findAll(
+      By_>(Subscription.createdAt, monthDayOneLastYear),
+      By_<(Subscription.createdAt, monthDayOneLastYearEnd)
+    )
+  }
+
+  def findNewYTDSubscriptions: List[Subscription] = {
+    Subscription.findAll(
+      By_>(Subscription.createdAt, yearDayOne)
+    )
+  }
+
+  def findNewYTDSubscriptionsLastMonth: List[Subscription] = {
+    Subscription.findAll(
+      By_>(Subscription.createdAt, yearDayOne),
+      By_<(Subscription.createdAt, todayLastMonth)
+    )
+  }
+
+  def findNewYTDSubscriptionsLastYear: List[Subscription] = {
+    Subscription.findAll(
+      By_>(Subscription.createdAt, yearDayOneLastYear),
+      By_<(Subscription.createdAt, yearDayOne)
     )
   }
 

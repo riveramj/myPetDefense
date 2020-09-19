@@ -18,12 +18,11 @@ import java.util.{Date, Locale}
 import java.time.{LocalDate, LocalDateTime, ZoneId}
 import java.time.format.DateTimeFormatter
 
+import com.mypetdefense.snippet.admin.UpdateChartData
 import net.liftweb.http.js.JsCmd
 
 import scala.collection.immutable.ListMap
 import scala.xml.Elem
-
-case class UpdateChartData(chartName: String, newData: Array[Int], newLabels: Array[String] = Array()) extends MyPetDefenseEvent("update-chart-data")
 
 object AgencyOverview extends Loggable { 
   import net.liftweb.sitemap._
