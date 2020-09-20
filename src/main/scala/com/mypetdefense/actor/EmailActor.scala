@@ -848,6 +848,8 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
       amountPaid,
       possibleTrackingNumber
     ) =>
+      val hostUrl: String = Paths.serverUrl
+
       val subject = "My Pet Defense Receipt"
       val shipAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
       val possibleBillAddress = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Billing))
@@ -866,6 +868,7 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
       val boxes = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
       val products = boxes.flatMap(_.fleaTick.obj)
       val priceCode = subscription.map(_.priceCode.get).openOr("")
+      val shipment = subscription.flatMap(_.shipments.toList.sortBy(_.createdAt.get).reverse).headOption
 
       val transform = {
         "#ship-date" #> dateFormatter.format(new Date()) &
@@ -892,7 +895,9 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
         ".with-tracking-number" #> ClearNodesIf(possibleTrackingNumber.isEmpty) andThen
         ".no-tracking-number" #> ClearNodesIf(!possibleTrackingNumber.isEmpty) andThen
         ".tracking-link [href]" #> trackingLink &
-        ".tracking-number *" #> possibleTrackingNumber
+        ".tracking-number *" #> possibleTrackingNumber &
+        ".freeUpgrade img [src]" #> (hostUrl + "/images/wellness-box.jpg") andThen
+        ".freeUpgrade" #> ClearNodesIf(shipment.forall(_.freeUpgradeSample.get == false))
       }
       
       sendEmail(subject, user.email.get, transform(invoicePaymentSucceededEmailTemplate))

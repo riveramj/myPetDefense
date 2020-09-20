@@ -23,6 +23,8 @@ newStartsChart = new Chart(newStarts, {
     },
     plugins: {
       datalabels: {
+        display: (context) ->
+          context.dataset.data[context.dataIndex] != 0
         formatter: (value, context) ->
           value + '%'
         color: [
