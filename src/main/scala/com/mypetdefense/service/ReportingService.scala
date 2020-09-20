@@ -32,9 +32,9 @@ object ReportingService extends Loggable {
 
   def currentDayLastMonthEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).minusMonths(1).toInstant)
 
-  def monthDayOneLastYear: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).minusMonths(12).toInstant)
+  def monthDayOneLastYear: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).minusYears(1).toInstant)
 
-  def currentDayLastYearEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).minusMonths(12).toInstant)
+  def currentDayLastYearEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).minusYears(1).toInstant)
 
   def tomorrowStart: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant)
 
@@ -42,13 +42,13 @@ object ReportingService extends Loggable {
 
   def yearDayOne: Date = Date.from(now.withDayOfYear(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant)
 
-  def yearDayOneLastYear: Date = Date.from(now.withDayOfYear(1).atStartOfDay(ZoneId.of("America/New_York")).minusMonths(12).toInstant)
+  def yearDayOneLastYear: Date = Date.from(now.withDayOfYear(1).atStartOfDay(ZoneId.of("America/New_York")).minusYears(1).toInstant)
 
   def todayLastMonth: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusMonths(1).toInstant)
 
-  def todayLastYear: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusMonths(12).toInstant)
+  def todayLastYear: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusYears(1).toInstant)
 
-  def todayLastYearEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusMonths(12).plusDays(1).toInstant)
+  def todayLastYearEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusYears(1).plusDays(1).toInstant)
 
   def todayLastMonthEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusMonths(1).plusDays(1).toInstant)
 

@@ -73,8 +73,8 @@ class ExecutiveDashboard extends Loggable {
   val newStartsYTD: List[Subscription]  = ReportingService.findNewYTDSubscriptions
   val newStartsYTDLastMonth: List[Subscription] = ReportingService.findNewYTDSubscriptionsLastMonth
   val newStartsYTDLastYear: List[Subscription] = ReportingService.findNewYTDSubscriptionsLastYear
-  val newStartsYTDMonthDiff: Int = newStartsMTD.size - newStartsYTDLastMonth.size
-  val newStartsYTDYearDiff: Int = newStartsMTD.size - newStartsYTDLastYear.size
+  val newStartsYTDMonthDiff: Int = newStartsYTD.size - newStartsYTDLastMonth.size
+  val newStartsYTDYearDiff: Int = newStartsYTD.size - newStartsYTDLastYear.size
 
   val totalStarts: Int = newStartsToday.size + newStartsMTD.size + newStartsYTD.size
 
@@ -89,7 +89,7 @@ class ExecutiveDashboard extends Loggable {
   def calcYearPercentage(starts: Int): Int = calcPercentage(starts, newStartsYTD.size)
 
   def updateCharts(): JsCmd =
-    UpdateChartData("newStarts", Array(calcStartPercentage(newStartsToday.size), calcStartPercentage(newStartsMTD.size), calcStartPercentage(newStartsYTD.size)))
+    UpdateChartData("newStarts", Array(calcStartPercentage(newStartsYTD.size), calcStartPercentage(newStartsMTD.size), calcStartPercentage(newStartsToday.size)))
 
   def newStartBindings: CssSel = {
     ".new-starts .key-stat .key-table" #> {

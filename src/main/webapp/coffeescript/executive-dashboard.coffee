@@ -3,14 +3,14 @@ newStarts = document.getElementById("new-starts-chart").getContext('2d')
 newStartsChart = new Chart(newStarts, {
   type: 'pie',
   data: {
-    labels: ["Today", "MTD", "YTD"],
+    labels: ["YTD", "MTD", "Today"],
     datasets: [{
       label: '# of Customers',
       data: [],
       backgroundColor: [
-        '#1f1d65',
+        '#cc0069',
         '#0092d1',
-        '#cc0069'
+        '#1f1d65',
       ]
     }]
   },
@@ -26,9 +26,9 @@ newStartsChart = new Chart(newStarts, {
         formatter: (value, context) ->
           value + '%'
         color: [
-          '#ffffff',
           '#000000',
-          '#000000'
+          '#000000',
+          '#ffffff',
         ],
         font: {
           size: 18
@@ -39,8 +39,6 @@ newStartsChart = new Chart(newStarts, {
 })
 
 $(document).on "update-chart-data", (event) ->
-  console.log "got it"
-
   chartName = event.chartName
   newData = event.newData
   newLabels = event.newLabels
