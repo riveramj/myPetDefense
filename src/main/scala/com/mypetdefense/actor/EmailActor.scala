@@ -868,7 +868,7 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
       val boxes = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
       val products = boxes.flatMap(_.fleaTick.obj)
       val priceCode = subscription.map(_.priceCode.get).openOr("")
-      val shipment = subscription.flatMap(_.shipments.toList.sortBy(_.createdAt.get).reverse).headOption
+      val shipment: Box[Shipment] = subscription.flatMap(_.shipments.toList.sortBy(_.createdAt.get).reverse.headOption)
 
       val transform = {
         "#ship-date" #> dateFormatter.format(new Date()) &
