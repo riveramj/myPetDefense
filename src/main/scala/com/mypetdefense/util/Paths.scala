@@ -163,6 +163,7 @@ object Paths {
     Success.menu,
     AccountOverview.menu,
     UpgradeAccount.menu,
+    UpgradeAccount.upgradeSubscription,
     ShippingBilling.menu,
     ShippingBilling.menuBilling,
     PetsAndProducts.menu,

@@ -69,6 +69,10 @@ case class SendInvoicePaymentSucceededEmail(
   amountPaid: String,
   possibleTrackingNumber: String
 ) extends EmailActorMessage
+case class SendForeverUpgradeEmail(
+                                   user: User,
+                                   subscription: Subscription
+                                 ) extends EmailActorMessage
 case class ContactUsEmail(
   name: String,
   email: String,
@@ -904,6 +908,29 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
   }
 }
 
+trait ForeverUpgradeEmailHandling extends EmailHandlerChain {
+  val foreverUpgradeEmailTemplate: NodeSeq =
+    Templates("emails-hidden" :: "forever-upgrade-email" :: Nil) openOr NodeSeq.Empty
+
+  addHandler {
+    case SendForeverUpgradeEmail(
+    user,
+    subscription
+    ) =>
+      val hostUrl: String = Paths.serverUrl
+
+      val subject = "Upgrade today!"
+
+      val upgradeLink = Paths.serverUrl + ResetPassword.menu.toLoc.calcHref(user)
+
+      val transform = {
+        ".finish-upgrade [href]" #> upgradeLink
+      }
+
+      sendEmail(subject, user.email.get, transform(foreverUpgradeEmailTemplate))
+  }
+}
+
 trait SixMonthSaleReceiptEmailHandling extends EmailHandlerChain {
   addHandler {
     case Send6MonthSaleReceipt(
@@ -961,7 +988,8 @@ trait EmailActor extends EmailHandlerChain
                     with SendNewAgentEmailHandling
                     with SendNewUserEmailHandling
                     with InvoicePaymentFailedEmailHandling
-                    with InvoicePaymentSucceededEmailHandling 
+                    with InvoicePaymentSucceededEmailHandling
+                    with ForeverUpgradeEmailHandling
                     with NewSaleEmailHandling 
                     with ResetPasswordHandling 
                     with CompleteResetPasswordHandling 

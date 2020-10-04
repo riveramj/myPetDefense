@@ -3,6 +3,7 @@ package com.mypetdefense.util
 import java.text.SimpleDateFormat
 
 import com.mypetdefense.model._
+import com.mypetdefense.service.KeyService.createAccessKey
 import com.mypetdefense.service._
 import me.frmr.stripe.{Subscription => _}
 import net.liftweb.common._
@@ -425,6 +426,18 @@ object DataLoader extends Loggable {
         if shipment.shipmentStatus.get == ShipmentStatus.LabelCreated
     } yield {
       shipment.shipStationOrderId(0).shipmentStatus(ShipmentStatus.Paid).saveMe()
+    }
+  }
+
+  def addUpgradeKey(): Unit = {
+    for {
+      subscription <- Subscription.findAll(
+        By(Subscription.isUpgraded, false),
+        NullRef(Subscription.upgradeKey)
+      )
+      _ = println(subscription.id)
+    } yield {
+      subscription.upgradeKey(createAccessKey()).saveMe
     }
   }
 }

@@ -2,11 +2,13 @@ package com.mypetdefense.snippet.customer
 
 import com.mypetdefense.actor.{EmailActor, UpgradeSubscriptionEmail}
 import com.mypetdefense.model._
+import com.mypetdefense.service.KeyService
 import com.mypetdefense.service.ParentService.updateStripeSubscriptionQuantity
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.js.JsCmds._
+import net.liftweb.sitemap.Loc.{EarlyResponse, Hidden}
 import net.liftweb.util.Helpers._
 import net.liftweb.util.Props
 
@@ -15,6 +17,14 @@ import scala.xml.NodeSeq
 object UpgradeAccount extends Loggable {
   import com.mypetdefense.util.Paths._
   import net.liftweb.sitemap._
+
+  val upgradeSubscription: Menu.ParamMenuable[User] = Menu.param[User](
+    "Upgrade Subscription", "Upgrade Subscription",
+    accessKey => KeyService.logUserInBySubscriptionKey(accessKey, "subscriptionUpgradeKey"),
+    user => user.subscription.obj.map(_.upgradeKey.get).openOr("")
+  ) / "upgrade-subscription" >>
+    Hidden >>
+    EarlyResponse(() => S.redirectTo(menu.loc.calcDefaultHref))
 
   val menu: Menu.Menuable = Menu.i("Upgrade Account") / "upgrade-account" >>
     loggedIn >>

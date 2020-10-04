@@ -4,6 +4,7 @@ import net.liftweb._
 import mapper._
 import java.util.Date
 
+import com.mypetdefense.service.KeyService.createAccessKey
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Box
 
@@ -15,6 +16,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     override def dbIndexed_? = true
   }
   object user extends MappedLongForeignKey(this, User)
+  object upgradeKey extends MappedString(this, 100)
   object promptedUpgrade extends MappedBoolean(this)
   object isUpgraded extends MappedBoolean(this)
   object freeUpgradeSampleDate extends MappedDateTime(this)
@@ -63,7 +65,7 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     isUpgraded: Boolean = false,
     contractLength: Int = 0
   ): Subscription = {
-    Subscription.create
+    val subscription = Subscription.create
     .subscriptionId(generateLongId)
     .user(user)
     .stripeSubscriptionId(stripeSubscriptionId)
@@ -72,7 +74,11 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
     .priceCode(priceCode)
     .isUpgraded(isUpgraded)
     .contractLength(contractLength)
-    .saveMe
+
+    if (isUpgraded)
+      subscription.saveMe()
+    else
+      subscription.upgradeKey(createAccessKey()).saveMe()
   }
 
   def getMonthlyCost: Double = {

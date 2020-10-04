@@ -84,6 +84,7 @@ class Boot {
     //ReportingService.getPetlandCustomersWithStats
 
     //DataLoader.connectCancelledUsersToSubscription()
+    DataLoader.addUpgradeKey()
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
