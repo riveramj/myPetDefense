@@ -75,6 +75,7 @@ class Boot {
     DataLoader.loadAdmin
     DataLoader.createProducts
     DataLoader.defaultSaleCoupons
+    DataLoader.connectBoxToPet
     //DataLoader.markUpgradedSubscriptions
     //DataLoader.upgradeInsert
     //DataLoader.clearRecentShipments()

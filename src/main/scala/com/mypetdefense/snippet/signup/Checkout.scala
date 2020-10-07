@@ -109,7 +109,7 @@ class Checkout extends Loggable {
       firstName,
       lastName,
       email,
-      password,
+      "",
       facebookId,
       UserType.Parent
     )
@@ -230,15 +230,6 @@ class Checkout extends Loggable {
   def newUserSetup(customer: Customer): Box[User] = {
     val stripeId = customer.id
 
-    val newUser = User.upsertUser(
-      firstName,
-      lastName,
-      email,
-      password,
-      facebookId,
-      UserType.Parent
-    )
-
     val user = if (currentUser.isEmpty) {
       Full(User.createNewUser(
         firstName,
@@ -296,7 +287,13 @@ class Checkout extends Loggable {
 
     val userWithSubscription = user.map(_.subscription(mpdSubscription).saveMe())
 
-    val boxes = pets.map(SubscriptionBox.createNewBox(mpdSubscription, _))
+    val boxes = pets.map { pet =>
+      val box = SubscriptionBox.createNewBox(mpdSubscription, pet)
+      pet.box(box).saveMe()
+
+      box
+    }
+
     boxes.map(SubscriptionItem.createFirstBox)
 
     if (Props.mode == Props.RunModes.Production) {
@@ -305,7 +302,8 @@ class Checkout extends Loggable {
 
     EmailActor ! SendWelcomeEmail(userWithSubscription)
 
-    userWithSubscription.map(SecurityContext.logIn)
+    userWithSubscription.flatMap(_.refresh).map(SecurityContext.logIn)
+
     userWithSubscription
   }
 

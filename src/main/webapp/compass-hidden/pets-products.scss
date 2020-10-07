@@ -1,7 +1,7 @@
 @import "base";
 @import "parent-nav-bar";
 @import "parent-account";
-
+@import "product-picker-modal";
 
 .product-price div, .pet-status-container div {
   display: inline-block;
@@ -149,4 +149,15 @@
 
 #new-pet select {
   margin-top: 5px;
+}
+
+.show-pet-product {
+  border: none;
+  background-color: #45ADA9;
+  color: #ffffff;
+  border-radius: 5px;
+  padding: 8px 13px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
 }

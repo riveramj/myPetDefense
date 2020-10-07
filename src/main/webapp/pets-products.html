@@ -3,6 +3,7 @@
   <div data-lift="embed?what=parent-logo-bar"></div>
   <div id="page-body-container">
     <div data-lift="embed?what=parent-nav-bar"></div>
+    <div data-lift="embed?what=product-picker-modal"></div>
     <div class="account-section">
       <h2>Pets &amp; Products</h2>
 
@@ -43,7 +44,7 @@
           <table class="pet-list">
             <tr>
               <th>Pet</th>
-              <th>Product</th>
+              <th>Products</th>
               <th>Price</th>
               <th>Status</th>
               <th></th>
@@ -51,17 +52,15 @@
             <tr class="pet">
               <td class="value">
                 <input type="text" class="pet-name" value="Peter">
+                <button class="pet-action save">Update</button>
               </td>
               <td class="value">
-                <select class="pet-product">
-                  <option value="adventure plus for rabbits">adventure plus for rabbits</option>
-                </select>
+                <button class="show-pet-product">View / Update Products</button>
               </td>
               <td class="value price">$9.99</td>
               <td class="value pet-status">suspense</td>
               <td>
                 <button class="pet-action cancel">Remove</button>
-                <button class="pet-action save">Update</button>
               </td>
             </tr>
           </table>
@@ -77,13 +76,13 @@
           <ul>
             <li>
               <label>
-                <div class="field-label">Pet Name</div>
+                <span class="field-label">Pet Name</span>
                 <input type="text" id="new-pet-name" value="">
               </label>
             </li>
             <li>
               <label>
-                <div class="field-label">Pet Type</div>
+                <span class="field-label">Pet Type</span>
                 <select id="pet-type-select">
                   <option value="rabbit">rabbit</option>
                 </select>
@@ -91,7 +90,7 @@
             </li>
             <li>
               <label>
-                <div class="field-label">Pet Product &amp; Size</div>
+                <span class="field-label">Pet Product &amp; Size</span>
                 <select id="new-pet-product-select">
                   <option value="r12">rabbit, 1-2 pounds</option>
                 </select>
@@ -101,6 +100,7 @@
               <button class="block-action save-changes" id="add-pet">Add Pet</button>
             </li>
           </ul>
+          </form>
         </dd>
 
       </dl>
