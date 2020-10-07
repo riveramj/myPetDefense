@@ -25,3 +25,6 @@ $(document).ready ->
       $('span.cancel').removeClass("selected")
 
     $('.continue-account-changes').prop("disabled","").addClass("selected").removeClass("disabled")
+
+  $(".modal-action.cancel").on "click", (event) ->
+      window.location.href = "/account-overview"

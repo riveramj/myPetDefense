@@ -35,6 +35,7 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
   def basePrice(pet: Pet): Double = pet.size.get match {
     case AnimalSize.DogSmallZo | AnimalSize.DogMediumZo => 24.99
     case AnimalSize.DogLargeZo | AnimalSize.DogXLargeZo => 27.99
+    case AnimalSize.CatAllSize => 12.99
   }
 
   def createNewBox(subscription: Subscription, pet: Pet): SubscriptionBox = {
@@ -60,6 +61,7 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
       .subscription(subscription)
       .pet(pet)
       .fleaTick(fleaTick)
+      .basePrice(basePrice(pet))
       .saveMe()
   }
 }

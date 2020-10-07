@@ -30,6 +30,7 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
 
   def getSizeAndSizeName = s"${this.sizeName}, ${this.size.toString()} lbs"
 
+  def zoGuardCat: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.CatAllSize))
   def zoGuardSmallDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogSmallZo))
   def zoGuardMediumDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogMediumZo))
   def zoGuardLargeDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeZo))
