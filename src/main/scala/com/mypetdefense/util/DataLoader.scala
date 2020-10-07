@@ -427,4 +427,13 @@ object DataLoader extends Loggable {
       shipment.shipStationOrderId(0).shipmentStatus(ShipmentStatus.Paid).saveMe()
     }
   }
+
+  def connectBoxToPet() {
+    for {
+      pet <- Pet.findAll(NullRef(Pet.box))
+      box <- SubscriptionBox.find(By(SubscriptionBox.pet, pet.id.get))
+    } {
+      pet.box(box).saveMe()
+    }
+  }
 }

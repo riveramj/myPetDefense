@@ -29,10 +29,11 @@ class UpgradeAccount extends Loggable {
 
     val upgraded = updatedSubscription.map(_.subscriptionBoxes.toList.map(_.subscriptionItems.toList.nonEmpty)).openOr(Nil).foldLeft(true)(_&&_)
 
-    def upgradeAccount() = {
+    val user = SecurityContext.currentUser
 
+    def upgradeAccount() = {
       val boxes = updatedSubscription.map(_.subscriptionBoxes.toList).openOr(Nil)
-      val user = SecurityContext.currentUser
+
       boxes.map(SubscriptionItem.createFirstBox)
       val updatedBoxes = boxes.flatMap(_.refresh)
 
@@ -67,6 +68,7 @@ class UpgradeAccount extends Loggable {
 
     SHtml.makeFormsAjax andThen
     ".upgrade-account a [class+]" #> "current" &
+    "#user-email *" #> user.map(_.email.get) &
     ".already-upgraded" #> ClearNodesIf(!upgraded) &
     ".upgrade" #> ClearNodesIf(upgraded) andThen
     ".yes-upgrade" #> SHtml.ajaxSubmit("Upgrade me!", upgradeAccount _) &
