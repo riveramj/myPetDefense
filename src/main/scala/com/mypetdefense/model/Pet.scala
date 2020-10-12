@@ -81,24 +81,24 @@ object AnimalType extends Enumeration {
 }
 
 object AnimalSize extends Enumeration {
-  val CatSmall: AnimalSize.Value = Value("1.5-5")
-  val CatMedium: AnimalSize.Value = Value("5-9")
-  val CatLarge: AnimalSize.Value = Value("9+")
+  val CatSmall: AnimalSize.Value = Value("1.5-5") // 0
+  val CatMedium: AnimalSize.Value = Value("5-9") // 1
+  val CatLarge: AnimalSize.Value = Value("9+") // 2
   
-  val DogSmallAdv: AnimalSize.Value = Value("3-10")
-  val DogMediumAdv: AnimalSize.Value = Value("11-20")
-  val DogLargeAdv: AnimalSize.Value = Value("21-55")
-  val DogXLargeAdv: AnimalSize.Value = Value("55+")
+  val DogSmallAdv: AnimalSize.Value = Value("3-10") // 3
+  val DogMediumAdv: AnimalSize.Value = Value("11-20") // 4
+  val DogLargeAdv: AnimalSize.Value = Value("21-55") // 5
+  val DogXLargeAdv: AnimalSize.Value = Value("55+") // 6
 
-  val DogSmallZo: AnimalSize.Value = Value("5-22")
-  val DogMediumZo: AnimalSize.Value = Value("23-44")
-  val DogLargeZo: AnimalSize.Value = Value("45-88")
-  val DogXLargeZo: AnimalSize.Value = Value("89-132")
+  val DogSmallZo: AnimalSize.Value = Value("5-22") // 7
+  val DogMediumZo: AnimalSize.Value = Value("23-44") // 8
+  val DogLargeZo: AnimalSize.Value = Value("45-88") // 9
+  val DogXLargeZo: AnimalSize.Value = Value("89-132") // 10
 
-  val DogSmallShld: AnimalSize.Value = Value("5-15")
-  val DogMediumShld: AnimalSize.Value = Value("16-33")
-  val DogLargeShld: AnimalSize.Value = Value("34-66")
-  val DogXLargeShld: AnimalSize.Value = Value("66+")
+  val DogSmallShld: AnimalSize.Value = Value("5-15") // 11
+  val DogMediumShld: AnimalSize.Value = Value("16-33") // 12
+  val DogLargeShld: AnimalSize.Value = Value("34-66") // 13
+  val DogXLargeShld: AnimalSize.Value = Value("66+") // 14
   
-  val CatAllSize: AnimalSize.Value = Value("1.5+")
+  val CatAllSize: AnimalSize.Value = Value("1.5+") // 15
 }
