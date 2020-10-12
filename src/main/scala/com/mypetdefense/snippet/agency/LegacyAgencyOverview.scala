@@ -1,22 +1,17 @@
 package com.mypetdefense.snippet
 package agency
 
-import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml._
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.util.{ClearClearable, CssSel}
-import net.liftweb.http._
-import js.JsCmds._
-import net.liftweb.mapper.By
 import com.mypetdefense.model._
-import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.service.{CouponService, ReportingService}
-import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import com.mypetdefense.service.ReportingService
+import com.mypetdefense.util.SecurityContext
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.util.CssSel
+import net.liftweb.util.Helpers._
 
 object LegacyAgencyOverview extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   def agencyMtdYtdExport: Box[LiftResponse] = {
@@ -94,6 +89,8 @@ class LegacyAgencyOverview extends Loggable {
     ".june-2020 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("June 2020") &
     ".july-2020 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("July 2020") &
     ".august-2020 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("August 2020") &
+    ".september-2020 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("September 2020") &
+    ".october-2020 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("October 2020") &
     ".month-to-date-export [href]" #> LegacyAgencyOverview.agencyMtdYtdExportMenu.calcHref(agencyName)
   }
 }
