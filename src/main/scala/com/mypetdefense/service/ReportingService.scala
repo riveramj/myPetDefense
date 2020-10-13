@@ -140,7 +140,14 @@ object ReportingService extends Loggable {
   }
 
   def getPetCount(shipments: List[Shipment]): Int = {
-    shipments.flatMap(_.shipmentLineItems.toList.filter(!_.fleaTick.get.isNaN)).size
+    val lineItems = shipments.flatMap(_.shipmentLineItems)
+
+    (for {
+      lineItem <- lineItems
+      ft <- lineItem.fleaTick.obj
+    } yield {
+      ft
+    }).size
   }
 
   def totalSalesForShipments(shipments: List[Shipment]): Double = {
