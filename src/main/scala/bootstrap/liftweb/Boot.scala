@@ -6,11 +6,9 @@ import com.mypetdefense.jobs.JobManager
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
-import net.liftweb._
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
-import net.liftweb.util._
 
 /**
  * A class that's instantiated early and run.  It allows the application
@@ -18,21 +16,9 @@ import net.liftweb.util._
  */
 class Boot {
   def boot {
-
     MailConfig.init
 
-    if (!DB.jndiJdbcConnAvailable_?) {
-
-      val vendor =
-        new StandardDBVendor(Props.get("db.driver") openOr "org.h2.Driver",
-			     Props.get("db.url") openOr
-			     "jdbc:h2:lift_proto.db;AUTO_SERVER=TRUE",
-			     Props.get("db.user"), Props.get("db.password"))
-
-      LiftRules.unloadHooks.append(vendor.closeAllConnections_! _)
-
-      DB.defineConnectionManager(util.DefaultConnectionIdentifier, vendor)
-    }
+    DbSetup.setup
 
     Schemifier.schemify(
       true,
@@ -71,11 +57,11 @@ class Boot {
       AmazonOrder
     )
 
-    DataLoader.loadProducts
-    DataLoader.loadAdmin
-    DataLoader.createProducts
-    DataLoader.defaultSaleCoupons
-    DataLoader.connectBoxToPet
+    //DataLoader.loadProducts
+    //DataLoader.loadAdmin
+    //DataLoader.createProducts
+    //DataLoader.defaultSaleCoupons
+    //DataLoader.connectBoxToPet
     //DataLoader.markUpgradedSubscriptions
     //DataLoader.upgradeInsert
     //DataLoader.clearRecentShipments()

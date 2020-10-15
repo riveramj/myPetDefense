@@ -48,13 +48,15 @@ libraryDependencies ++= {
     "org.postgresql"      %  "postgresql"         % "42.2.5",
     "org.quartz-scheduler" % "quartz"             % "2.3.0",
     "org.eclipse.jetty"   %  "jetty-webapp"       % "9.4.12.v20180830" % "container; compile->default",
+    "org.mockito"         % "mockito-core"        % "3.5.13"    % "test",
     "net.liftweb"         %% "lift-common"        % liftVersion % "compile",
     "net.liftweb"         %% "lift-webkit"        % liftVersion % "compile",
     "net.liftweb"         %% "lift-testkit"       % liftVersion % "test",
     "net.liftweb"         %% "lift-mapper"        % liftVersion % "compile",
+    "org.scalatest"       %% "scalatest"          % "3.2.0"     % "test",
     "me.frmr.stripe"      %% "streifen"           % "0.1.3-SNAPSHOT",
-    "org.dispatchhttp"   %% "dispatch-core"        % "0.14.0",
-    "org.dispatchhttp"   %% "dispatch-lift-json"   % "0.14.0",
+    "org.dispatchhttp"    %% "dispatch-core"      % "0.14.0",
+    "org.dispatchhttp"    %% "dispatch-lift-json" % "0.14.0",
     "com.mypetdefense.shipstation" %% "shipstation-scala" % "0.0.1-SNAPSHOT"
   )
 }

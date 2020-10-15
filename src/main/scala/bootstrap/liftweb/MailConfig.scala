@@ -9,7 +9,7 @@ import javax.mail.internet.{MimeMessage, MimeMultipart}
 object MailConfig extends Loggable {
 
   def init = {
-    if (Props.mode == Props.RunModes.Development) {
+    if (Props.mode == Props.RunModes.Development || Props.mode == Props.RunModes.Test) {
       Mailer.devModeSend.default.set((m: MimeMessage) => logger.info("Dev mode message:\n" + prettyPrintMime(m)))
     } else {
       Mailer.customProperties = Map(
