@@ -86,11 +86,6 @@ object DBTestUtil {
       sendFreeUpgrade
     )
 
-  def createTestData(): Unit = {
-    val parent1 = DBTestUtil.createUser()
-    createSubscription(parent1)
-  }
-
   def clearTables(): Unit = {
     User.findAll().map(_.delete_!)
     Subscription.findAll().map(_.delete_!)
