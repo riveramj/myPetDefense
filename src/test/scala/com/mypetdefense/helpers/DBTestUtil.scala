@@ -2,17 +2,18 @@ package com.mypetdefense.helpers
 
 import java.util.Date
 
-import com.mypetdefense.model.{Agency, Coupon, Price, Subscription, User, UserType}
+import com.mypetdefense.helpers.Random.{generateMoneyString, generateString}
+import com.mypetdefense.model._
 import net.liftweb.common.{Box, Empty, Full}
 
 object DBTestUtil {
 
   def createUser(
-      firstName: String = "Test",
-      lastName: String = "User",
-      stripeId: String = "stripe1234",
-      email: String = "test@mpd.com",
-      password: String = "pass",
+      firstName: String = generateString,
+      lastName: String = generateString,
+      stripeId: String = generateString,
+      email: String = generateString,
+      password: String = generateString,
       phone: String = "123-123-1234",
       coupon: Box[Coupon] = Empty,
       referer: Box[Agency] = Empty,
@@ -34,7 +35,7 @@ object DBTestUtil {
 
   def createSubscription(
       parent: User,
-      stripeSubscriptionId: String = "stripeSubscription1234",
+      stripeSubscriptionId: String = generateString,
       startDate: Date = new Date(),
       nextShipDate: Date = new Date(),
       priceCode: String = Price.defaultPriceCode,
@@ -50,9 +51,43 @@ object DBTestUtil {
     contractLength
   )
 
+  def createPet(
+      user: User,
+      name: String = generateString,
+      animalType: AnimalType.Value,
+      size: AnimalSize.Value,
+      whelpDate: Box[Date] = Empty,
+      breed: String = generateString
+  ): Pet = Pet.createNewPet(user, name, animalType, size, whelpDate, breed)
+
+  def createBox(subscription: Subscription, pet: Pet): SubscriptionBox =
+    SubscriptionBox.createNewBox(subscription, pet)
+
+  def createShipment(
+      user: User,
+      subscription: Subscription,
+      stripePaymentId: String = generateString,
+      stripeChargeId: Box[String],
+      amountPaid: String = generateMoneyString,
+      taxPaid: String = generateMoneyString,
+      inserts: List[Insert],
+      shipmentStatus: ShipmentStatus.Value,
+      sendFreeUpgrade: Boolean = false
+  ): Shipment =
+    Shipment.createShipment(
+      user,
+      subscription,
+      stripePaymentId,
+      stripeChargeId,
+      amountPaid,
+      taxPaid,
+      inserts,
+      shipmentStatus,
+      sendFreeUpgrade
+    )
+
   def createTestData(): Unit = {
     val parent1 = DBTestUtil.createUser()
-
     createSubscription(parent1)
   }
 

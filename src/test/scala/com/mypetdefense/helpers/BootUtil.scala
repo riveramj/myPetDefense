@@ -6,6 +6,7 @@ import com.mypetdefense.model.{
   Address,
   Agency,
   AmazonOrder,
+  ApiRequestBackup,
   CancelledUser,
   Coupon,
   Event,
@@ -78,7 +79,8 @@ object BootUtil {
       TaggedItem,
       Tag,
       AddOnProduct,
-      AmazonOrder
+      AmazonOrder,
+      ApiRequestBackup
     )
   }
 
