@@ -86,6 +86,14 @@ object DBTestUtil {
       sendFreeUpgrade
     )
 
+  def createAgency(
+      name: String = generateString,
+      agencyType: AgencyType.Value = AgencyType.Headquarters,
+      parent: Box[Agency] = Empty,
+      storeCode: String = generateString.take(4),
+      petlandStore: Boolean = false
+  ): Agency = Agency.createNewAgency(name, agencyType, parent, storeCode, petlandStore)
+
   def clearTables(): Unit = {
     User.findAll().map(_.delete_!)
     Subscription.findAll().map(_.delete_!)
