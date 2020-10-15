@@ -384,8 +384,6 @@ object TPPApi extends RestHelper with Loggable {
 
               val createdPets = createPets(pets, currentParent)
 
-              ApiRequestsBackup.updatePets(backup, createdPets.flatten)
-
               if (createdPets.size != pets.size) {
                 logger.error("A pet creation failed. Emailed error.")
                 

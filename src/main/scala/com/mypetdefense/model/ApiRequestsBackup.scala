@@ -2,6 +2,7 @@ package com.mypetdefense.model
 
 import java.util.Date
 
+import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb._
 import net.liftweb.json.JsonAST.JValue
 import mapper._
@@ -11,9 +12,11 @@ import json._
 class ApiRequestsBackup extends LongKeyedMapper[ApiRequestsBackup] with IdPK {
   override def getSingleton: KeyedMetaMapper[Long, ApiRequestsBackup] = ApiRequestsBackup
 
-  object rawJson extends MappedString(this, 2000)
+  object apiRequestsId extends MappedLong(this) {
+    override def dbIndexed_? = true
+  }
 
-  object pets extends MappedString(this, 100)
+  object rawJson extends MappedString(this, 2000)
 
   object agency extends MappedLongForeignKey(this, Agency)
 
@@ -25,14 +28,12 @@ class ApiRequestsBackup extends LongKeyedMapper[ApiRequestsBackup] with IdPK {
 
   def createNewBackupRecord(referer: Box[Agency], rawJson: JValue): ApiRequestsBackup =
     ApiRequestsBackup.create
+      .apiRequestsId(generateLongId)
       .agency(referer)
       .rawJson(prettyRender(rawJson))
       .saveMe
 
   def updateUser(record: ApiRequestsBackup, user: User): ApiRequestsBackup = record.user(user).saveMe()
-
-  def updatePets(record: ApiRequestsBackup, pets: List[Pet]): ApiRequestsBackup =
-    record.pets(pets.map(_.id.get.toString).mkString(",")).saveMe()
 
 }
 
