@@ -9,10 +9,10 @@ import mapper._
 import common._
 import json._
 
-class ApiRequestsBackup extends LongKeyedMapper[ApiRequestsBackup] with IdPK {
-  override def getSingleton: KeyedMetaMapper[Long, ApiRequestsBackup] = ApiRequestsBackup
+class ApiRequestBackup extends LongKeyedMapper[ApiRequestBackup] with IdPK {
+  override def getSingleton: KeyedMetaMapper[Long, ApiRequestBackup] = ApiRequestBackup
 
-  object apiRequestsId extends MappedLong(this) {
+  object apiRequestId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
 
@@ -26,15 +26,15 @@ class ApiRequestsBackup extends LongKeyedMapper[ApiRequestsBackup] with IdPK {
     override def defaultValue = new Date()
   }
 
-  def createNewBackupRecord(referer: Box[Agency], rawJson: JValue): ApiRequestsBackup =
-    ApiRequestsBackup.create
-      .apiRequestsId(generateLongId)
+  def createNewBackupRecord(referer: Box[Agency], rawJson: JValue): ApiRequestBackup =
+    ApiRequestBackup.create
+      .apiRequestId(generateLongId)
       .agency(referer)
       .rawJson(prettyRender(rawJson))
       .saveMe
 
-  def updateUser(record: ApiRequestsBackup, user: User): ApiRequestsBackup = record.user(user).saveMe()
+  def updateUser(record: ApiRequestBackup, user: User): ApiRequestBackup = record.user(user).saveMe()
 
 }
 
-object ApiRequestsBackup extends ApiRequestsBackup with LongKeyedMetaMapper[ApiRequestsBackup]
+object ApiRequestBackup extends ApiRequestBackup with LongKeyedMetaMapper[ApiRequestBackup]

@@ -366,7 +366,7 @@ object TPPApi extends RestHelper with Loggable {
               possibleAgency
           }
 
-          val backup = ApiRequestsBackup.createNewBackupRecord(salesAgency, requestJson)
+          val backup = ApiRequestBackup.createNewBackupRecord(salesAgency, requestJson)
 
           val existingUser = User.find(By(User.email, possibleParent.email), By(User.userType, UserType.Parent))
 
@@ -378,7 +378,7 @@ object TPPApi extends RestHelper with Loggable {
                 agentId
               )
 
-              ApiRequestsBackup.updateUser(backup, currentParent)
+              ApiRequestBackup.updateUser(backup, currentParent)
 
               val parentAddress = Address.createNewAddress(possibleParent.address, Full(currentParent))
 
