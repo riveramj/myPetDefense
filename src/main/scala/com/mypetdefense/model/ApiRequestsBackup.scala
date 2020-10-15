@@ -34,7 +34,8 @@ class ApiRequestsBackup extends LongKeyedMapper[ApiRequestsBackup] with IdPK {
 
   def updateUser(record: ApiRequestsBackup, user: User): ApiRequestsBackup = record.user(user).saveMe()
 
-  def updatePets(record: ApiRequestsBackup, pets: List[Box[Pet]]): ApiRequestsBackup = record.pets(pets.map(_.fold("")(_.id.get.toString)).mkString(",")).saveMe()
+  def updatePets(record: ApiRequestsBackup, pets: List[Box[Pet]]): ApiRequestsBackup =
+    record.pets(pets.map(_.fold("")(_.id.get.toString)).mkString(",")).saveMe()
 
 }
 
