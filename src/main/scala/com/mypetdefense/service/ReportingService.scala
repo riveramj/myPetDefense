@@ -18,26 +18,27 @@ object ReportingService extends Loggable {
 
   def currentDate: LocalDateTime = LocalDateTime.now()
   def now: LocalDate = LocalDate.now(zoneId)
+  def nowAtStartOfDay: ZonedDateTime = now.atStartOfDay(zoneId)
 
-  def nowDate: Date = Date.from(now.atStartOfDay(zoneId).toInstant)
+  def nowDate: Date = Date.from(nowAtStartOfDay.toInstant)
 
-  def yesterday: ZonedDateTime = now.atStartOfDay(zoneId).minusDays(1)
+  def yesterday: ZonedDateTime = nowAtStartOfDay.minusDays(1)
 
-  def yesterdayStart: Date = Date.from(now.atStartOfDay(zoneId).minusDays(1).toInstant)
+  def yesterdayStart: Date = Date.from(nowAtStartOfDay.minusDays(1).toInstant)
 
-  def yesterdayEnd: Date = Date.from(now.atStartOfDay(zoneId).toInstant)
+  def yesterdayEnd: Date = Date.from(nowAtStartOfDay.toInstant)
 
   def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).toInstant)
 
   def monthDayOneLastMonth: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).minusMonths(1).toInstant)
 
-  def currentDayLastMonthEnd: Date = Date.from(now.atStartOfDay(zoneId).plusDays(1).minusMonths(1).toInstant)
+  def currentDayLastMonthEnd: Date = Date.from(nowAtStartOfDay.plusDays(1).minusMonths(1).toInstant)
 
   def monthDayOneLastYear: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).minusYears(1).toInstant)
 
-  def currentDayLastYearEnd: Date = Date.from(now.atStartOfDay(zoneId).plusDays(1).minusYears(1).toInstant)
+  def currentDayLastYearEnd: Date = Date.from(nowAtStartOfDay.plusDays(1).minusYears(1).toInstant)
 
-  def tomorrowStart: Date = Date.from(now.atStartOfDay(zoneId).plusDays(1).toInstant)
+  def tomorrowStart: Date = Date.from(nowAtStartOfDay.plusDays(1).toInstant)
 
   def beginngNextMonth: Date = Date.from(YearMonth.now().atEndOfMonth().atStartOfDay(zoneId).plusDays(1).toInstant)
 
@@ -45,13 +46,13 @@ object ReportingService extends Loggable {
 
   def yearDayOneLastYear: Date = Date.from(now.withDayOfYear(1).atStartOfDay(zoneId).minusYears(1).toInstant)
 
-  def todayLastMonth: Date = Date.from(now.atStartOfDay(zoneId).minusMonths(1).toInstant)
+  def todayLastMonth: Date = Date.from(nowAtStartOfDay.minusMonths(1).toInstant)
 
-  def todayLastYear: Date = Date.from(now.atStartOfDay(zoneId).minusYears(1).toInstant)
+  def todayLastYear: Date = Date.from(nowAtStartOfDay.minusYears(1).toInstant)
 
-  def todayLastYearEnd: Date = Date.from(now.atStartOfDay(zoneId).minusYears(1).plusDays(1).toInstant)
+  def todayLastYearEnd: Date = Date.from(nowAtStartOfDay.minusYears(1).plusDays(1).toInstant)
 
-  def todayLastMonthEnd: Date = Date.from(now.atStartOfDay(zoneId).minusMonths(1).plusDays(1).toInstant)
+  def todayLastMonthEnd: Date = Date.from(nowAtStartOfDay.minusMonths(1).plusDays(1).toInstant)
 
   def yearMonth: String = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
 
