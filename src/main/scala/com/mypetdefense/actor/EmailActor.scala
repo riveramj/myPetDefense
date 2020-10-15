@@ -38,7 +38,6 @@ case class ParentPauseSubscriptionEmail(user: User, subscription: Subscription) 
 case class ParentResumeSubscriptionEmail(user: User, subscription: Subscription) extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
 case class SendAPIErrorEmail(emailBody: String) extends EmailActorMessage
-case class SendTppApiJsonEmail(emailBody: String) extends EmailActorMessage
 case class NotifyParentGrowthRate(pet: Pet, newProduct: String, user: User) extends EmailActorMessage
 case class TreatReceiptEmail(order: TreatOrder) extends EmailActorMessage
 case class TreatShippedEmail(order: TreatOrder) extends EmailActorMessage
@@ -565,23 +564,6 @@ trait SendAPIErrorEmailHandling extends EmailHandlerChain {
   }
 }
 
-trait SendTppApiJsonEmailHandling extends EmailHandlerChain {
-  addHandler {
-    case SendTppApiJsonEmail(emailBody) =>
-      val template =
-        Templates("emails-hidden" :: "tpp-api-json-email" :: Nil) openOr NodeSeq.Empty
-      
-      val subject = "[JSON] API Manual Backup"
-      val hostUrl = Paths.serverUrl
-      
-      val transform = {
-        "#json *" #> emailBody
-      }
-
-      sendEmail(subject, "mike.rivera@mypetdefense.com", transform(template))
-  }
-}
-
 trait NotifyParentGrowthRateHandling extends EmailHandlerChain {
   addHandler {
     case NotifyParentGrowthRate(pet, newProduct, user) =>
@@ -969,7 +951,6 @@ trait EmailActor extends EmailHandlerChain
                     with ContactUsEmailHandling
                     with Send5kEmailHandling
                     with SendAPIErrorEmailHandling
-                    with SendTppApiJsonEmailHandling
                     with NotifyParentGrowthRateHandling
                     with DailySalesEmailHandling
                     with InternalDailyEmailHandling
