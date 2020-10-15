@@ -3,11 +3,10 @@ package com.mypetdefense.model
 import java.util.Date
 
 import net.liftweb._
+import net.liftweb.json.JsonAST.JValue
 import mapper._
 import common._
-import net.liftweb.json.JsonAST.JValue
 import json._
-import net.liftweb.common.Box.box2Option
 
 class ApiRequestsBackup extends LongKeyedMapper[ApiRequestsBackup] with IdPK {
   override def getSingleton: KeyedMetaMapper[Long, ApiRequestsBackup] = ApiRequestsBackup
@@ -32,8 +31,8 @@ class ApiRequestsBackup extends LongKeyedMapper[ApiRequestsBackup] with IdPK {
 
   def updateUser(record: ApiRequestsBackup, user: User): ApiRequestsBackup = record.user(user).saveMe()
 
-  def updatePets(record: ApiRequestsBackup, pets: List[Box[Pet]]): ApiRequestsBackup =
-    record.pets(pets.map(_.fold("")(_.id.get.toString)).mkString(",")).saveMe()
+  def updatePets(record: ApiRequestsBackup, pets: List[Pet]): ApiRequestsBackup =
+    record.pets(pets.map(_.id.get.toString).mkString(",")).saveMe()
 
 }
 
