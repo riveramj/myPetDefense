@@ -9,6 +9,7 @@ import common._
 import net.liftweb.json.JsonAST.JValue
 import json._
 import com.mypetdefense.snippet.shop.UseNewCard.typeHints
+import net.liftweb.common.Box.box2Option
 
 class ApiRequestsBackup extends LongKeyedMapper[ApiRequestsBackup] with IdPK {
   override def getSingleton: KeyedMetaMapper[Long, ApiRequestsBackup] = ApiRequestsBackup
@@ -25,14 +26,15 @@ class ApiRequestsBackup extends LongKeyedMapper[ApiRequestsBackup] with IdPK {
     override def defaultValue = new Date()
   }
 
-  def createNewBackupRecord(referer: Box[Agency], pets: List[NewPet], rawJson: JValue): ApiRequestsBackup =
+  def createNewBackupRecord(referer: Box[Agency], rawJson: JValue): ApiRequestsBackup =
     ApiRequestsBackup.create
       .agency(referer)
       .rawJson(prettyRender(rawJson))
-      .pets(pets.mkString(","))
       .saveMe
 
   def updateUser(record: ApiRequestsBackup, user: User): ApiRequestsBackup = record.user(user).saveMe()
+
+  def updatePets(record: ApiRequestsBackup, pets: List[Box[Pet]]): ApiRequestsBackup = record.pets(pets.map(_.fold("")(_.id.get.toString)).mkString(",")).saveMe()
 
 }
 

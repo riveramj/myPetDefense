@@ -366,7 +366,7 @@ object TPPApi extends RestHelper with Loggable {
               possibleAgency
           }
 
-          val backup = ApiRequestsBackup.createNewBackupRecord(salesAgency, pets, requestJson)
+          val backup = ApiRequestsBackup.createNewBackupRecord(salesAgency, requestJson)
 
           val existingUser = User.find(By(User.email, possibleParent.email), By(User.userType, UserType.Parent))
 
@@ -381,7 +381,9 @@ object TPPApi extends RestHelper with Loggable {
               ApiRequestsBackup.updateUser(backup, currentParent)
               val parentAddress = Address.createNewAddress(possibleParent.address, Full(currentParent))
 
-              val createdPets = createPets(pets, currentParent) 
+              val createdPets = createPets(pets, currentParent)
+
+              ApiRequestsBackup.updatePets(backup, createdPets)
 
               if (createdPets.size != pets.size) {
                 logger.error("A pet creation failed. Emailed error.")
