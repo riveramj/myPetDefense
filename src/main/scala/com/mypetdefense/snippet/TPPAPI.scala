@@ -379,6 +379,7 @@ object TPPApi extends RestHelper with Loggable {
               )
 
               ApiRequestsBackup.updateUser(backup, currentParent)
+
               val parentAddress = Address.createNewAddress(possibleParent.address, Full(currentParent))
 
               val createdPets = createPets(pets, currentParent)

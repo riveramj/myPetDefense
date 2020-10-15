@@ -2,21 +2,19 @@ package com.mypetdefense.model
 
 import java.util.Date
 
-import com.mypetdefense.snippet.NewPet
 import net.liftweb._
 import mapper._
 import common._
 import net.liftweb.json.JsonAST.JValue
 import json._
-import com.mypetdefense.snippet.shop.UseNewCard.typeHints
 import net.liftweb.common.Box.box2Option
 
 class ApiRequestsBackup extends LongKeyedMapper[ApiRequestsBackup] with IdPK {
   override def getSingleton: KeyedMetaMapper[Long, ApiRequestsBackup] = ApiRequestsBackup
 
-  object rawJson extends MappedText(this)
+  object rawJson extends MappedString(this, 2000)
 
-  object pets extends MappedText(this)
+  object pets extends MappedString(this, 100)
 
   object agency extends MappedLongForeignKey(this, Agency)
 
