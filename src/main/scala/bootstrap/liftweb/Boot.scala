@@ -68,7 +68,8 @@ class Boot {
       TaggedItem,
       Tag,
       AddOnProduct,
-      AmazonOrder
+      AmazonOrder,
+      ApiRequestsBackup
     )
 
     DataLoader.loadProducts

@@ -366,7 +366,7 @@ object TPPApi extends RestHelper with Loggable {
               possibleAgency
           }
 
-          EmailActor ! SendTppApiJsonEmail(requestJson.toString)
+          val backup = ApiRequestsBackup.createNewBackupRecord(salesAgency, pets, requestJson)
 
           val existingUser = User.find(By(User.email, possibleParent.email), By(User.userType, UserType.Parent))
 
@@ -378,6 +378,7 @@ object TPPApi extends RestHelper with Loggable {
                 agentId
               )
 
+              ApiRequestsBackup.updateUser(backup, currentParent)
               val parentAddress = Address.createNewAddress(possibleParent.address, Full(currentParent))
 
               val createdPets = createPets(pets, currentParent) 
