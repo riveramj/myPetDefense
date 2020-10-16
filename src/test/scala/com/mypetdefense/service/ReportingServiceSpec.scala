@@ -1,6 +1,7 @@
 package com.mypetdefense.service
 
 import com.mypetdefense.generator.Generator._
+import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers._
 import com.mypetdefense.helpers.db.SubscriptionDbUtils._
@@ -65,6 +66,26 @@ class ReportingServiceSpec
 
       customersForAgent.head.salesAgentId.get shouldBe agentId
       customersForAgentIds should contain theSameElementsAs agentUsersIds
+    }
+  }
+
+  it should "find new customers for month" in {
+    forAll(nonEmptyUsersGen, nonEmptyUsersGen) { (registeredThisMonth, registeredLongTimeAgo) =>
+      val expectedUsersIds =
+        registeredThisMonth.map(createUser(_).createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
+      val unexpectedUsersIds =
+        registeredLongTimeAgo.map(createUser(_).createdAt(anyDayOfLastMonth.toDate).saveMe().id.get)
+
+      val users = User.findAll()
+      val usersIdsRegisteredInThisMonth =
+        ReportingService
+          .findNewCustomersMonth(users, now.getMonth.toString, now.getYear)
+          .map(_.id.get)
+
+      usersIdsRegisteredInThisMonth.size shouldBe expectedUsersIds.size
+      usersIdsRegisteredInThisMonth should contain theSameElementsAs expectedUsersIds
+      clearTables()
+      succeed
     }
   }
 

@@ -9,21 +9,21 @@ object DateUtil {
 
   val zoneId: ZoneId = ZoneId.of("America/New_York")
 
-  def currentDate: LocalDateTime = LocalDateTime.now()
-  def now: LocalDate             = LocalDate.now(zoneId)
-  def today: Date                = now.atStartOfDay(zoneId).toDate
-  def tomorrow: Date             = now.atStartOfDay(zoneId).plusDays(1).toDate
-  def lastMonth: Date            = now.minusMonths(1).atStartOfDay(zoneId).toDate
-  def thisMonth: ZonedDateTime = {
-    val nowDate = now
-    val maxDays = nowDate.lengthOfMonth()
-    val day     = generateIntBetween(1, maxDays)
-    nowDate.withDayOfMonth(day).atStartOfDay(zoneId)
-  }
+  def now: LocalDate                   = LocalDate.now(zoneId)
+  def today: Date                      = now.atStartOfDay(zoneId).toDate
+  def tomorrow: Date                   = now.atStartOfDay(zoneId).plusDays(1).toDate
+  def anyDayOfThisMonth: ZonedDateTime = getAnyDayOfMonth(now)
+  def anyDayOfLastMonth: ZonedDateTime = getAnyDayOfMonth(now.minusMonths(1))
 
   def lastYear: Date = {
     val nowDate = now
     nowDate.minusYears(1).atStartOfDay(zoneId).toDate
+  }
+
+  protected def getAnyDayOfMonth(localDate: LocalDate): ZonedDateTime = {
+    val maxDays = localDate.lengthOfMonth()
+    val day     = generateIntBetween(1, maxDays)
+    localDate.withDayOfMonth(day).atStartOfDay(zoneId)
   }
 
   implicit class ZonedDateTimeSyntax(val i: ZonedDateTime) extends AnyVal {
