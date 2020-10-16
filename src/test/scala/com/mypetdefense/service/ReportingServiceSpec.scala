@@ -129,4 +129,24 @@ class ReportingServiceSpec
     }
   }
 
+  it should "find current month subscriptions" in {
+    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+      (currentMonth, oldOne) =>
+        oldOne.foreach {
+          case (u, s) =>
+            insertUserAndSub(u, s).subscription.createdAt(anyDayOfLastMonth.toDate).saveMe()
+        }
+        val expectedCurrentMonthIds = currentMonth.map {
+          case (u, s) => insertUserAndSub(u, s).subscription.id.get
+        }
+
+        val subscriptions = Subscription.findAll()
+        val result        = ReportingService.findCurrentMonthSubscriptions(subscriptions).map(_.id.get)
+
+        result should contain theSameElementsAs expectedCurrentMonthIds
+        clearTables()
+        succeed
+    }
+  }
+
 }
