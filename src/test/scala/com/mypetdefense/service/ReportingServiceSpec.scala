@@ -38,10 +38,10 @@ class ReportingServiceSpec
             val u = createUser(uData)
             createSubscription(u, sData).id.get
         }
-        val canceledSubsIds = usersWithoutSub.map {
+        usersWithoutSub.map {
           case (uData, sData) =>
             val u = createUser(uData)
-            createSubscription(u, sData).cancel.saveMe().id.get
+            createSubscription(u, sData).cancel.saveMe()
         }
 
         val subscriptions   = Subscription.findAll()
@@ -55,9 +55,9 @@ class ReportingServiceSpec
 
   it should "find customers for agent" in {
     forAll(nonEmptyUsersGen, nonEmptyUsersGen) { (agentUsers, notAgentUsers) =>
-      val agentId          = Random.generateString.take(10)
-      val agentUsersIds    = agentUsers.map(d => createUser(d).salesAgentId(agentId).saveMe().id.get)
-      val notAgentUsersIds = notAgentUsers.map(createUser(_).id.get)
+      val agentId       = Random.generateString.take(10)
+      val agentUsersIds = agentUsers.map(d => createUser(d).salesAgentId(agentId).saveMe().id.get)
+      notAgentUsers.foreach(createUser)
 
       val customers            = User.findAll()
       val customersForAgent    = ReportingService.findCustomersForAgent(customers, agentId)
