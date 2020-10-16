@@ -47,9 +47,7 @@ class ReportingServiceSpec
         val subscriptions   = Subscription.findAll()
         val filteredSubsIds = ReportingService.findActiveSubscriptions(subscriptions).map(_.id.get)
 
-        filteredSubsIds.size shouldBe usersWithSub.size
         filteredSubsIds should contain theSameElementsAs activeSubsIds
-        filteredSubsIds shouldNot contain atLeastOneElementOf canceledSubsIds
         clearTables()
         succeed
     }
@@ -65,10 +63,8 @@ class ReportingServiceSpec
       val customersForAgent    = ReportingService.findCustomersForAgent(customers, agentId)
       val customersForAgentIds = customersForAgent.map(_.id.get)
 
-      customersForAgent.size shouldBe agentUsers.size
       customersForAgent.head.salesAgentId.get shouldBe agentId
       customersForAgentIds should contain theSameElementsAs agentUsersIds
-      customersForAgentIds shouldNot contain atLeastOneElementOf notAgentUsersIds
     }
   }
 
