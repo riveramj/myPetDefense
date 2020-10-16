@@ -15,9 +15,9 @@ object DateUtil {
   def anyDayOfThisMonth: ZonedDateTime = getAnyDayOfMonth(now)
   def anyDayOfLastMonth: ZonedDateTime = getAnyDayOfMonth(now.minusMonths(1))
 
-  def lastYear: Date = {
+  def lastYear: ZonedDateTime = {
     val nowDate = now
-    nowDate.minusYears(1).atStartOfDay(zoneId).toDate
+    nowDate.minusYears(1).atStartOfDay(zoneId)
   }
 
   protected def getAnyDayOfMonth(localDate: LocalDate): ZonedDateTime = {

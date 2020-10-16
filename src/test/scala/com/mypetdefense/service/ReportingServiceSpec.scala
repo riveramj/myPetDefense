@@ -35,9 +35,7 @@ class ReportingServiceSpec
     forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
       (usersWithSub, usersWithoutSub) =>
         val activeSubsIds = usersWithSub.map {
-          case (uData, sData) =>
-            val u = createUser(uData)
-            createSubscription(u, sData).id.get
+          case (uData, sData) => insertUserAndSub(uData, sData).subscription.id.get
         }
         usersWithoutSub.foreach {
           case (uData, sData) =>
@@ -73,8 +71,7 @@ class ReportingServiceSpec
     forAll(nonEmptyUsersGen, nonEmptyUsersGen) { (registeredThisMonth, registeredLongTimeAgo) =>
       val expectedUsersIds =
         registeredThisMonth.map(createUser(_).createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
-      val unexpectedUsersIds =
-        registeredLongTimeAgo.map(createUser(_).createdAt(anyDayOfLastMonth.toDate).saveMe().id.get)
+      registeredLongTimeAgo.foreach(createUser(_).createdAt(anyDayOfLastMonth.toDate).saveMe())
 
       val users = User.findAll()
       val usersIdsRegisteredInThisMonth =
@@ -82,8 +79,51 @@ class ReportingServiceSpec
           .findNewCustomersMonth(users, now.getMonth.toString, now.getYear)
           .map(_.id.get)
 
-      usersIdsRegisteredInThisMonth.size shouldBe expectedUsersIds.size
       usersIdsRegisteredInThisMonth should contain theSameElementsAs expectedUsersIds
+      clearTables()
+      succeed
+    }
+  }
+
+  it should "find active subscriptions first month" in {
+    forAll(
+      nonEmptyMapUserNSubscriptionGen,
+      nonEmptyMapUserNSubscriptionGen,
+      nonEmptyMapUserNSubscriptionGen
+    ) { (activeFirstMonthUsers, canceledLongTimeAgoUsers, canceledThisMonthUsers) =>
+      canceledLongTimeAgoUsers.foreach {
+        case (u, s) =>
+          val date = lastYear
+          insertUserAndSub(u, s).subscription
+            .createdAt(date.toDate)
+            .cancellationDate(date.plusMonths(3).toDate)
+            .saveMe()
+      }
+      val activeFirstMonthUsersIds = activeFirstMonthUsers.map {
+        case (u, s) =>
+          val thisMonthDay = anyDayOfThisMonth
+          insertUserAndSub(u, s).subscription
+            .createdAt(thisMonthDay.toDate)
+            .saveMe()
+            .id
+            .get
+      }
+      val startedAndCanceledThisMonthUsersIds = canceledThisMonthUsers.map {
+        case (u, s) =>
+          val thisMonthDayDate = anyDayOfThisMonth.withDayOfMonth(1)
+          insertUserAndSub(u, s).subscription
+            .createdAt(thisMonthDayDate.toDate)
+            .cancellationDate(thisMonthDayDate.plusDays(2).toDate)
+            .saveMe()
+            .id
+            .get
+      }
+      val expectedUsers = activeFirstMonthUsersIds ++ startedAndCanceledThisMonthUsersIds
+
+      val subscriptions = Subscription.findAll()
+      val result        = ReportingService.findActiveSubscriptionsFirstMonth(subscriptions).map(_.id.get)
+
+      result should contain theSameElementsAs expectedUsers
       clearTables()
       succeed
     }
