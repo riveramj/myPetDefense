@@ -38,7 +38,7 @@ class ReportingServiceSpec
             val u = createUser(uData)
             createSubscription(u, sData).id.get
         }
-        usersWithoutSub.map {
+        usersWithoutSub.foreach {
           case (uData, sData) =>
             val u = createUser(uData)
             createSubscription(u, sData).cancel.saveMe()
