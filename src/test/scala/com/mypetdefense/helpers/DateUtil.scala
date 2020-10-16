@@ -14,11 +14,11 @@ object DateUtil {
   def today: Date                = now.atStartOfDay(zoneId).toDate
   def tomorrow: Date             = now.atStartOfDay(zoneId).plusDays(1).toDate
   def lastMonth: Date            = now.minusMonths(1).atStartOfDay(zoneId).toDate
-  def thisMonth: Date = {
+  def thisMonth: ZonedDateTime = {
     val nowDate = now
     val maxDays = nowDate.lengthOfMonth()
     val day     = generateIntBetween(1, maxDays)
-    nowDate.withDayOfMonth(day).atStartOfDay(zoneId).toDate
+    nowDate.withDayOfMonth(day).atStartOfDay(zoneId)
   }
 
   def lastYear: Date = {

@@ -1,5 +1,6 @@
 package com.mypetdefense.service
 
+import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers._
 import com.mypetdefense.helpers.db.SubscriptionDbUtils._
@@ -9,12 +10,14 @@ import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class ReportingServiceSpec
     extends AnyFlatSpec
     with Matchers
     with BeforeAndAfterEach
-    with BeforeAndAfterAll {
+    with BeforeAndAfterAll
+    with ScalaCheckPropertyChecks {
   override def beforeAll() {
     BootUtil.bootForTests()
   }
@@ -28,26 +31,45 @@ class ReportingServiceSpec
   }
 
   it should "find all active subscriptions" in {
-    val activeSubscriptionUser = createUser()
-    createSubscription(activeSubscriptionUser)
+    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+      (usersWithSub, usersWithoutSub) =>
+        val activeSubsIds = usersWithSub.map {
+          case (uData, sData) =>
+            val u = createUser(uData)
+            createSubscription(u, sData).id.get
+        }
+        val canceledSubsIds = usersWithoutSub.map {
+          case (uData, sData) =>
+            val u = createUser(uData)
+            createSubscription(u, sData).cancel.saveMe().id.get
+        }
 
-    val inactiveSubscriptionUser = createUser()
-    createSubscription(inactiveSubscriptionUser).cancel
+        val subscriptions   = Subscription.findAll()
+        val filteredSubsIds = ReportingService.findActiveSubscriptions(subscriptions).map(_.id.get)
 
-    val subscriptions = Subscription.findAll()
-    ReportingService.findActiveSubscriptions(subscriptions).size shouldBe 1
+        filteredSubsIds.size shouldBe usersWithSub.size
+        filteredSubsIds should contain theSameElementsAs activeSubsIds
+        filteredSubsIds shouldNot contain atLeastOneElementOf canceledSubsIds
+        clearTables()
+        succeed
+    }
   }
 
   it should "find customers for agent" in {
-    val agentId = Random.generateString
-    createUser()
-    createUser()
-    val userForAgent = createUser().salesAgentId(agentId).saveMe()
+    forAll(nonEmptyUsersGen, nonEmptyUsersGen) { (agentUsers, notAgentUsers) =>
+      val agentId          = Random.generateString.take(10)
+      val agentUsersIds    = agentUsers.map(d => createUser(d).salesAgentId(agentId).saveMe().id.get)
+      val notAgentUsersIds = notAgentUsers.map(createUser(_).id.get)
 
-    val customers         = User.findAll()
-    val customersForAgent = ReportingService.findCustomersForAgent(customers, agentId)
-    customersForAgent.size shouldBe 1
-    customersForAgent.map(_.id.get) should contain(userForAgent.id.get)
+      val customers            = User.findAll()
+      val customersForAgent    = ReportingService.findCustomersForAgent(customers, agentId)
+      val customersForAgentIds = customersForAgent.map(_.id.get)
+
+      customersForAgent.size shouldBe agentUsers.size
+      customersForAgent.head.salesAgentId.get shouldBe agentId
+      customersForAgentIds should contain theSameElementsAs agentUsersIds
+      customersForAgentIds shouldNot contain atLeastOneElementOf notAgentUsersIds
+    }
   }
 
 }
