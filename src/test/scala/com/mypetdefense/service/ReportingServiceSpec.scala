@@ -260,4 +260,23 @@ class ReportingServiceSpec
     }
   }
 
+  it should "find current month shipments" in {
+    forAll(genShipmentChainData, genShipmentChainData) {
+      (currentMonthShipments, notInCurrentMonthShipments) =>
+        insertUserSubAndShipment(notInCurrentMonthShipments).shipments
+          .foreach(_.dateShipped(anyDayOfLastYear.toDate).saveMe())
+        val thisMonthShipmentsIds = insertUserSubAndShipment(currentMonthShipments).shipments
+          .map(_.dateShipped(anyDayOfThisMonth.toDate).saveMe().id.get)
+
+        val shipments = Shipment.findAll()
+        val filteredShipmentsIds =
+          ReportingService
+            .findCurrentMonthShipments(shipments)
+            .map(_.id.get)
+
+        filteredShipmentsIds should contain theSameElementsAs thisMonthShipmentsIds
+        cleanUpSuccess()
+    }
+  }
+
 }

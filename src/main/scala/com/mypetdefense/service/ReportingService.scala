@@ -199,7 +199,7 @@ object ReportingService extends Loggable {
       val mailedDate = getMailedDateOfShipment(shipment)
 
       mailedDate map { mailDate =>
-        (mailDate.getYear == 2020) &&
+        (mailDate.getYear == currentYear) &&
         (mailDate.getMonth == date.getMonth)
       } openOr (false)
     }
@@ -242,8 +242,7 @@ object ReportingService extends Loggable {
         val cancelDateYear  = cancellationDate.map(_.getYear)
 
         (cancelDateYear.map(_ == createdDateYear).openOr(false) &&
-          cancelDateMonth.map(_ == createdDateMonth).openOr(false)
-        )
+        cancelDateMonth.map(_ == createdDateMonth).openOr(false))
       }
     }
   }
