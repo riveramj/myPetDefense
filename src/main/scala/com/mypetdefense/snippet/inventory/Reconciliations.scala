@@ -24,7 +24,7 @@ import scala.xml.NodeSeq
 
 object Reconciliations extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable = Menu.i("Reconciliations") / "inventory" / "reconciliations" >>
@@ -36,21 +36,21 @@ class Reconciliations extends Loggable {
   val reconciliationDateFormat = new java.text.SimpleDateFormat("M/d/y")
 
   val reconciliations: List[ReconciliationEvent] = ReconciliationEvent.findAll()
-  
-  var newDate = ""
+
+  var newDate                        = ""
   var chosenItem: Box[InventoryItem] = Empty
 
   var reconciliationRenderer: Box[IdMemoizeTransform] = Empty
   var currentReconciliation: Box[ReconciliationEvent] = Empty
 
   var actualItemCount = ""
-  
+
   def createReconciliationEvent: JsCmd = {
     val validateFields = List(
       validDate(newDate, reconciliationDateFormat, "#new-date")
     ).flatten
 
-    if(validateFields.isEmpty) {
+    if (validateFields.isEmpty) {
       val realDate = reconciliationDateFormat.parse(newDate)
 
       ReconciliationEvent.createNewReconciliationEvent(realDate)
@@ -72,22 +72,26 @@ class Reconciliations extends Loggable {
     val inventoryItems = InventoryItem.findAll()
 
     SHtml.ajaxSelectObj(
-      List((Empty,"")) ::: inventoryItems.map(item => (Full(item), item.description.get)),
+      List((Empty, "")) ::: inventoryItems.map(item => (Full(item), item.description.get)),
       Full(chosenItem),
       (possibleItem: Box[InventoryItem]) => chosenItem = possibleItem
     )
   }
 
   def addItemToReconciliation(
-    reconciliationEvent: ReconciliationEvent,
-    renderer: IdMemoizeTransform
+      reconciliationEvent: ReconciliationEvent,
+      renderer: IdMemoizeTransform
   )(): JsCmd = {
     chosenItem.map { item =>
-
       val expectedCount = item.total.get
-      val realCount = tryo(actualItemCount.toInt).openOr(0)
+      val realCount     = tryo(actualItemCount.toInt).openOr(0)
 
-      ItemReconciliation.createNewItemReconciliation(item, reconciliationEvent, realCount, expectedCount)
+      ItemReconciliation.createNewItemReconciliation(
+        item,
+        reconciliationEvent,
+        realCount,
+        expectedCount
+      )
 
       chosenItem = Empty
       actualItemCount = ""
@@ -97,59 +101,70 @@ class Reconciliations extends Loggable {
   }
 
   def reconciliationDetailBindings(
-    detailsRenderer: IdMemoizeTransform,
-    reconciliation: ReconciliationEvent
+      detailsRenderer: IdMemoizeTransform,
+      reconciliation: ReconciliationEvent
   ): CssSel = {
-    val itemReconciliations = ItemReconciliation.findAll(By(ItemReconciliation.reconciliationEvent, reconciliation))
-    
+    val itemReconciliations =
+      ItemReconciliation.findAll(By(ItemReconciliation.reconciliationEvent, reconciliation))
 
-    ".item-reconciliation" #> itemReconciliations.sortWith(_.inventoryItem.obj.map(_.itemNumber.get).openOr("") < _.inventoryItem.obj.map(_.itemNumber.get).openOr("")).map { itemReconciliation =>
-      val item = itemReconciliation.inventoryItem.obj
+    ".item-reconciliation" #> itemReconciliations
+      .sortWith(
+        _.inventoryItem.obj
+          .map(_.itemNumber.get)
+          .openOr("") < _.inventoryItem.obj.map(_.itemNumber.get).openOr("")
+      )
+      .map { itemReconciliation =>
+        val item = itemReconciliation.inventoryItem.obj
 
-      ".item-number *" #> item.map(_.itemNumber.get) &
-      ".description *" #> item.map(_.description.get) &
-      ".expected-count *" #> itemReconciliation.expectedCount.get &
-      ".actual-count *" #> itemReconciliation.actualCount.get
-    } &
-    ".add-item-container" #> {
-      ".item-select" #> inventoryItemDropdown &
-      ".actual-item-count" #> ajaxText(actualItemCount, actualItemCount = _) &
-      ".create-item-container .create-item [onclick]" #> SHtml.ajaxInvoke(addItemToReconciliation(reconciliation, detailsRenderer) _)
-    }
+        ".item-number *" #> item.map(_.itemNumber.get) &
+          ".description *" #> item.map(_.description.get) &
+          ".expected-count *" #> itemReconciliation.expectedCount.get &
+          ".actual-count *" #> itemReconciliation.actualCount.get
+      } &
+      ".add-item-container" #> {
+        ".item-select" #> inventoryItemDropdown &
+          ".actual-item-count" #> ajaxText(actualItemCount, actualItemCount = _) &
+          ".create-item-container .create-item [onclick]" #> SHtml.ajaxInvoke(
+            addItemToReconciliation(reconciliation, detailsRenderer) _
+          )
+      }
   }
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    ".reconciliation [class+]" #> "current" &
-    ".create" #> idMemoize { renderer =>
-      "#new-date" #> ajaxText(newDate, newDate = _) &
-      "#create-item" #> SHtml.ajaxSubmit("Create Reconciliation", () => createReconciliationEvent)
-    } &
-    "tbody" #> reconciliations.sortWith(_.eventDate.get.getTime > _.eventDate.get.getTime).map { reconciliation =>
-      idMemoize { detailsRenderer =>
-        ".reconciliation-entry" #> {
-          ".date *" #> reconciliationDateFormat.format(reconciliation.eventDate.get) &
-          "^ [onclick]" #> ajaxInvoke(() => {
-            if (currentReconciliation.isEmpty) {
-              currentReconciliation = Full(reconciliation)
-            } else {
-              currentReconciliation = Empty
-            }
-
-            detailsRenderer.setHtml
-          })
+      ".reconciliation [class+]" #> "current" &
+        ".create" #> idMemoize { renderer =>
+          "#new-date" #> ajaxText(newDate, newDate = _) &
+            "#create-item" #> SHtml.ajaxSubmit(
+              "Create Reconciliation",
+              () => createReconciliationEvent
+            )
         } &
-        ".info [class+]" #> {if (currentReconciliation.isEmpty) "" else "expanded"} &
-        "^ [class+]" #> {if (currentReconciliation.isEmpty) "" else "expanded"} &
-        ".reconciliation-info" #> {
-          if (!currentReconciliation.isEmpty) {
-            reconciliationDetailBindings(detailsRenderer, reconciliation)
-          }
-          else {
-            "^" #> ClearNodes
-          }
+        "tbody" #> reconciliations.sortWith(_.eventDate.get.getTime > _.eventDate.get.getTime).map {
+          reconciliation =>
+            idMemoize { detailsRenderer =>
+              ".reconciliation-entry" #> {
+                ".date *" #> reconciliationDateFormat.format(reconciliation.eventDate.get) &
+                  "^ [onclick]" #> ajaxInvoke(() => {
+                    if (currentReconciliation.isEmpty) {
+                      currentReconciliation = Full(reconciliation)
+                    } else {
+                      currentReconciliation = Empty
+                    }
+
+                    detailsRenderer.setHtml
+                  })
+              } &
+                ".info [class+]" #> { if (currentReconciliation.isEmpty) "" else "expanded" } &
+                "^ [class+]" #> { if (currentReconciliation.isEmpty) "" else "expanded" } &
+                ".reconciliation-info" #> {
+                  if (!currentReconciliation.isEmpty) {
+                    reconciliationDetailBindings(detailsRenderer, reconciliation)
+                  } else {
+                    "^" #> ClearNodes
+                  }
+                }
+            }
         }
-      }
-    }
   }
 }

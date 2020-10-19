@@ -12,14 +12,19 @@ import scala.concurrent.duration._
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
 object CouponService extends Loggable {
-  val stripeSecretKey: String = Props.get("secret.key") openOr ""
+  val stripeSecretKey: String    = Props.get("secret.key") openOr ""
   implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
 
   def convertedString(possibleNumber: String): Int = {
     tryo(possibleNumber.trim().toInt).openOr(0)
   }
 
-  def createStripeCoupon(couponCode: String, freeMonths: Int, percentOff: Int, dollarOff: Int): Future[Box[StripeCoupon]] = {
+  def createStripeCoupon(
+      couponCode: String,
+      freeMonths: Int,
+      percentOff: Int,
+      dollarOff: Int
+  ): Future[Box[StripeCoupon]] = {
 
     val (durationType, durationMonths) = {
       if (freeMonths == 0)
@@ -46,11 +51,17 @@ object CouponService extends Loggable {
     }
   }
 
-  def createCoupon(couponCode: String, agency: Box[Agency], rawMonthCount: String, rawPercentOff: String, rawDollarOff: String): Box[Coupon] = {
+  def createCoupon(
+      couponCode: String,
+      agency: Box[Agency],
+      rawMonthCount: String,
+      rawPercentOff: String,
+      rawDollarOff: String
+  ): Box[Coupon] = {
 
     val monthCount = convertedString(rawMonthCount)
     val percentOff = convertedString(rawPercentOff)
-    val dollarOff = convertedString(rawDollarOff)
+    val dollarOff  = convertedString(rawDollarOff)
 
     val newStripeCoupon = createStripeCoupon(
       couponCode,
@@ -61,13 +72,15 @@ object CouponService extends Loggable {
 
     Try(Await.result(newStripeCoupon, new DurationInt(3).seconds)) match {
       case TrySuccess(Full(_)) =>
-        Full(Coupon.createNewCoupon(
-          couponCode,
-          agency,
-          monthCount,
-          percentOff,
-          dollarOff
-        ))
+        Full(
+          Coupon.createNewCoupon(
+            couponCode,
+            agency,
+            monthCount,
+            percentOff,
+            dollarOff
+          )
+        )
 
       case TrySuccess(stripeFailure) =>
         logger.error("create coupon failed with stipe error: " + stripeFailure)
@@ -90,7 +103,7 @@ object CouponService extends Loggable {
       case TrySuccess(stripeFailure) =>
         logger.error("create customer failed with: " + stripeFailure)
         logger.error(s"attempting to delete $coupon locally")
-      
+
         if (coupon.delete_!)
           Full(coupon)
         else

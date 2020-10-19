@@ -5,8 +5,8 @@ import scala.util.Random
 import java.security.SecureRandom
 
 import net.liftweb._
-  import common._
-  import mapper._
+import common._
+import mapper._
 
 import net.liftweb.util.SecurityHelpers._
 
@@ -25,9 +25,9 @@ object KeyService extends Loggable {
   def createProductSalesKey(): String = {
     StringHelpers.randomString(16)
   }
-  
+
   def createResetKey(user: User): User = {
-    val key = StringHelpers.randomString(16)
+    val key     = StringHelpers.randomString(16)
     val curTime = new DateTime()
     user.resetPasswordKey(key).saveMe
   }
@@ -36,24 +36,24 @@ object KeyService extends Loggable {
     User.find(By(User.userId, userId)) match {
       case Full(user) =>
         logger.debug(s"key is ${key}")
-        
+
         keyType match {
           case "accessKey" =>
             user.accessKey.get match {
               case possibleKey if possibleKey == key => true
-              case _ => false
+              case _                                 => false
             }
 
           case "productSalesKey" =>
             user.productSalesKey.get match {
               case possibleKey if possibleKey == key => true
-              case _ => false
+              case _                                 => false
             }
 
           case "resetPasswordKey" =>
             user.resetPasswordKey.get match {
               case possibleKey if possibleKey == key => true
-              case _ => false
+              case _                                 => false
             }
 
           case _ => false
@@ -69,7 +69,7 @@ object KeyService extends Loggable {
     keyType match {
       case "accessKey" =>
         user.accessKey("").saveMe
-      
+
       case "productSalesKey" =>
         user.productSalesKey("").saveMe
 
@@ -84,7 +84,7 @@ object KeyService extends Loggable {
     keyType match {
       case "accessKey" =>
         User.find(By(User.accessKey, key))
-      
+
       case "productSalesKey" =>
         User.find(By(User.productSalesKey, key))
 
@@ -95,4 +95,3 @@ object KeyService extends Loggable {
     }
   }
 }
-

@@ -33,20 +33,20 @@ object ShippingBilling extends Loggable {
 }
 
 class ShippingBilling extends Loggable {
-  val user: Box[User] = currentUser.flatMap(_.refresh)
+  val user: Box[User]          = currentUser.flatMap(_.refresh)
   val stripeCustomerId: String = user.map(_.stripeId.get).openOr("")
 
   var firstName = ""
-  var lastName = ""
-  var street1 = ""
-  var street2 = ""
-  var city = ""
-  var state = ""
-  var zip = ""
-  
+  var lastName  = ""
+  var street1   = ""
+  var street2   = ""
+  var city      = ""
+  var state     = ""
+  var zip       = ""
+
   var cardNumberLastFour = ""
-  var stripeToken = ""
-  var promoCode = ""
+  var stripeToken        = ""
+  var promoCode          = ""
 
   val customerCard: Option[Card] = ParentService.getCustomerCard(stripeCustomerId)
 
@@ -74,7 +74,7 @@ class ShippingBilling extends Loggable {
   def updateBillingAddWinterCoupon(parent: User)(): Nothing = {
     updateCard(parent)
 
-    val coupon = Coupon.find(By(Coupon.couponCode,"winter17"))
+    val coupon = Coupon.find(By(Coupon.couponCode, "winter17"))
     parent.coupon(coupon).saveMe
 
     ParentService.updateCoupon(parent.stripeId.get, coupon.map(_.couponCode.get))
@@ -88,17 +88,17 @@ class ShippingBilling extends Loggable {
 
   def updateAddress(): JsCmd = {
     val validateFields = List(
-        checkEmpty(firstName, "#first-name"),
-        checkEmpty(lastName, "#last-name"),
-        checkEmpty(street1, "#street-1"),
-        checkEmpty(city, "#city"),
-        checkEmpty(state, "#state"),
-        checkEmpty(zip, "#zip")
-      ).flatten
+      checkEmpty(firstName, "#first-name"),
+      checkEmpty(lastName, "#last-name"),
+      checkEmpty(street1, "#street-1"),
+      checkEmpty(city, "#city"),
+      checkEmpty(state, "#state"),
+      checkEmpty(zip, "#zip")
+    ).flatten
 
-    if(validateFields.isEmpty) {
+    if (validateFields.isEmpty) {
       for {
-        user <- user
+        user            <- user
         shippingAddress <- user.addresses.find(_.addressType == AddressType.Shipping)
       } {
         user
@@ -106,13 +106,13 @@ class ShippingBilling extends Loggable {
           .lastName(lastName)
           .saveMe
 
-          shippingAddress
-            .street1(street1)
-            .street2(street2)
-            .city(city)
-            .state(state)
-            .zip(zip)
-            .saveMe
+        shippingAddress
+          .street1(street1)
+          .street2(street2)
+          .city(city)
+          .state(state)
+          .zip(zip)
+          .saveMe
       }
       S.redirectTo(ShippingBilling.menu.loc.calcDefaultHref)
     } else {
@@ -124,7 +124,7 @@ class ShippingBilling extends Loggable {
     val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
     "#page-body-container" #> {
       for {
-        user <- user
+        user            <- user
         shippingAddress <- user.addresses.find(_.addressType == AddressType.Shipping)
       } yield {
         firstName = user.firstName.get
@@ -136,19 +136,19 @@ class ShippingBilling extends Loggable {
         zip = shippingAddress.zip.get
 
         SHtml.makeFormsAjax andThen
-        "#shipping-billing-nav a [class+]" #> "current" &
-        "#user-email *" #> user.email & 
-        "#first-name" #> text(firstName, firstName = _) &
-        "#last-name" #> text(lastName, lastName = _) &
-        "#street-1" #> text(street1, street1 = _) &
-        "#street-2" #> text(street2, street2 = _) &
-        "#city" #> text(city, city = _) &
-        "#state" #> text(state, state = _) &
-        "#zip" #> text(zip, zip = _) &
-        "#old-card-last4 span *" #> cardNumberLastFour &
-        "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-        ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBilling(user) _) &
-        ".save-changes" #> SHtml.ajaxSubmit("Update Address", updateAddress _)
+          "#shipping-billing-nav a [class+]" #> "current" &
+            "#user-email *" #> user.email &
+            "#first-name" #> text(firstName, firstName = _) &
+            "#last-name" #> text(lastName, lastName = _) &
+            "#street-1" #> text(street1, street1 = _) &
+            "#street-2" #> text(street2, street2 = _) &
+            "#city" #> text(city, city = _) &
+            "#state" #> text(state, state = _) &
+            "#zip" #> text(zip, zip = _) &
+            "#old-card-last4 span *" #> cardNumberLastFour &
+            "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
+            ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBilling(user) _) &
+            ".save-changes" #> SHtml.ajaxSubmit("Update Address", updateAddress _)
       }
     }
   }
@@ -163,13 +163,16 @@ class ShippingBilling extends Loggable {
         lastName = user.lastName.get
 
         SHtml.makeFormsAjax andThen
-        "#shipping-billing-nav a [class+]" #> "current" &
-        "#user-email *" #> user.email & 
-        "#first-name" #> text(firstName, firstName = _) &
-        "#last-name" #> text(lastName, lastName = _) &
-        "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-        "#promo-code" #> text(promoCode, promoCode = _) &
-        ".update-billing" #> SHtml.ajaxSubmit("Update Card", updateBillingAddWinterCoupon(user) _)
+          "#shipping-billing-nav a [class+]" #> "current" &
+            "#user-email *" #> user.email &
+            "#first-name" #> text(firstName, firstName = _) &
+            "#last-name" #> text(lastName, lastName = _) &
+            "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
+            "#promo-code" #> text(promoCode, promoCode = _) &
+            ".update-billing" #> SHtml.ajaxSubmit(
+              "Update Card",
+              updateBillingAddWinterCoupon(user) _
+            )
       }
     }
   }

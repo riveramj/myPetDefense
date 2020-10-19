@@ -22,28 +22,31 @@ trait StripeHook extends RestHelper with Loggable {
 
   def invoicePaymentSucceeded(objectJson: JValue): Box[OkResponse] = {
     for {
-      stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
+      stripeCustomerId     <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
       stripeSubscriptionId <- tryo((objectJson \ "subscription").extract[String]) ?~! "No subscription id."
-      subtotal <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
-      tax <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
-      amountPaid <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
-      user <- User.find(By(User.stripeId, stripeCustomerId))
-      subscription <- user.subscription
-      shippingAddress <- Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
+      subtotal             <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
+      tax                  <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
+      amountPaid           <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
+      user                 <- User.find(By(User.stripeId, stripeCustomerId))
+      subscription         <- user.subscription
+      shippingAddress <- Address.find(
+                          By(Address.user, user),
+                          By(Address.addressType, AddressType.Shipping)
+                        )
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
       val charge = tryo((objectJson \ "charge").extract[String])
 
-      val notTrial_? = ParentService.notTrialSubscription_?(stripeCustomerId, stripeSubscriptionId)
-      val city = shippingAddress.city.get
-      val state = shippingAddress.state.get
-      val zip = shippingAddress.zip.get
+      val notTrial_?   = ParentService.notTrialSubscription_?(stripeCustomerId, stripeSubscriptionId)
+      val city         = shippingAddress.city.get
+      val state        = shippingAddress.state.get
+      val zip          = shippingAddress.zip.get
       val activePets_? = user.activePets.nonEmpty
-      
-      def formatAmount(possibleAmount: String) = {
-        val formattedAmount = tryo(possibleAmount.toDouble/100.0).openOr(0D)
 
-        if (formattedAmount == 0D)
+      def formatAmount(possibleAmount: String) = {
+        val formattedAmount = tryo(possibleAmount.toDouble / 100.0).openOr(0d)
+
+        if (formattedAmount == 0d)
           0.toString
         else
           f"$formattedAmount%2.2f"
@@ -68,7 +71,7 @@ trait StripeHook extends RestHelper with Loggable {
             formatAmount(tax)
           )
 
-         //ParentService.updatePuppyProducts(user)
+          //ParentService.updatePuppyProducts(user)
 
           ShipmentService.createNewShipment(
             user,
@@ -86,9 +89,9 @@ trait StripeHook extends RestHelper with Loggable {
 
   def invoicePaymentFailed(objectJson: JValue): Box[OkResponse] = {
     for {
-      stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
-      user <- User.find(By(User.stripeId, stripeCustomerId))
-      subscription <- user.subscription
+      stripeCustomerId   <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
+      user               <- User.find(By(User.stripeId, stripeCustomerId))
+      subscription       <- user.subscription
       totalAmountInCents <- tryo((objectJson \ "total").extract[Long]) ?~! "No total."
     } yield {
       val nextPaymentAttemptSecs: Option[Long] =
@@ -113,8 +116,8 @@ trait StripeHook extends RestHelper with Loggable {
   def subscriptionPastDue(objectJson: JValue): Box[OkResponse] = {
     for {
       stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
-      user <- User.find(By(User.stripeId, stripeCustomerId))
-      accountStatus <- tryo((objectJson \ "status").extract[String]) ?~! "No status."
+      user             <- User.find(By(User.stripeId, stripeCustomerId))
+      accountStatus    <- tryo((objectJson \ "status").extract[String]) ?~! "No status."
     } yield {
       if (accountStatus == "past_due")
         user.subscription.map(_.status(Status.BillingSuspended).saveMe)
@@ -125,27 +128,27 @@ trait StripeHook extends RestHelper with Loggable {
 
   serve {
     case req @ Req("stripe-hook" :: Nil, _, PostRequest) =>
-    for {
-      requestBody <- req.body
-      requestJson <- tryo(Serialization.read[JValue](new String(requestBody)))
-      id <- (requestJson \ "id").extractOpt[String]
-      eventType <- (requestJson \ "type").extractOpt[String]
-      dataJson = (requestJson \ "data")
-      objectJson = (dataJson \ "object")
-    } yield {
-      val result: Box[LiftResponse] = eventType match {
-        case "invoice.payment_succeeded" => invoicePaymentSucceeded(objectJson)
-        case "invoice.payment_failed" => invoicePaymentFailed(objectJson)
-        case "customer.subscription.updated" => subscriptionPastDue(objectJson)
-        case _ => Full(OkResponse())
-      }
+      for {
+        requestBody <- req.body
+        requestJson <- tryo(Serialization.read[JValue](new String(requestBody)))
+        id          <- (requestJson \ "id").extractOpt[String]
+        eventType   <- (requestJson \ "type").extractOpt[String]
+        dataJson   = (requestJson \ "data")
+        objectJson = (dataJson \ "object")
+      } yield {
+        val result: Box[LiftResponse] = eventType match {
+          case "invoice.payment_succeeded"     => invoicePaymentSucceeded(objectJson)
+          case "invoice.payment_failed"        => invoicePaymentFailed(objectJson)
+          case "customer.subscription.updated" => subscriptionPastDue(objectJson)
+          case _                               => Full(OkResponse())
+        }
 
-      result match {
-        case Full(resp) if resp.isInstanceOf[OkResponse] => resp
-        case Full(resp) => resp
-        case Empty => NotFoundResponse()
-        case Failure(msg, _, _) => PlainTextResponse(msg, Nil, 500)
+        result match {
+          case Full(resp) if resp.isInstanceOf[OkResponse] => resp
+          case Full(resp)                                  => resp
+          case Empty                                       => NotFoundResponse()
+          case Failure(msg, _, _)                          => PlainTextResponse(msg, Nil, 500)
+        }
       }
-    }
   }
 }

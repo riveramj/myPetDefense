@@ -214,14 +214,14 @@ object DataLoader extends Loggable {
     val upcomingSubscriptions = Subscription.findAll(
       BySql(
         "nextShipDate > CURRENT_DATE + interval '1 day' and nextShipDate < CURRENT_DATE + interval '3 day'",
-        IHaveValidatedThisSQL("mike","2018-04-24")
+        IHaveValidatedThisSQL("mike", "2018-04-24")
       ),
       By(Subscription.status, Status.Active)
     )
 
     for {
       subscription <- upcomingSubscriptions
-      user <- subscription.user.obj
+      user         <- subscription.user.obj
     } yield {
       ParentService.updateNextShipDate(subscription, Full(user))
     }
@@ -229,14 +229,14 @@ object DataLoader extends Loggable {
 
   def createProducts: Any = {
     if (Product.hipAndJoint.isEmpty) {
-      Product.createNewProduct("Hip & Joint Chews",  "hipJointChews")
+      Product.createNewProduct("Hip & Joint Chews", "hipJointChews")
       Product.createNewProduct("Calming Chews", "calmingChews")
       Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews")
       Product.createNewProduct("Dental Powder", "dentalPowder")
     }
 
     if (Product.skinAndCoat.isEmpty) {
-      Product.createNewProduct("Skin and Coat Chews",  "skinAndCoatChews")
+      Product.createNewProduct("Skin and Coat Chews", "skinAndCoatChews")
       Product.createNewProduct("Probiotic Chews", "probioticChews")
     }
   }
@@ -249,20 +249,22 @@ object DataLoader extends Loggable {
 
   def createNewPetlandStores: Agency = {
     val petlandAgencies = Agency.findAll(By(Agency.petlandStore, true))
-    
+
     val agents = petlandAgencies.flatMap(_.members.toList)
 
     agents.map(_.delete_!)
-    
+
     petlandAgencies.map(_.delete_!)
 
-    val petlandHQ = Full(Agency.createNewAgency(
-      "Petland",
-      AgencyType.Headquarters,
-      Empty,
-      "petlandhq",
-      petlandStore = true
-    ))
+    val petlandHQ = Full(
+      Agency.createNewAgency(
+        "Petland",
+        AgencyType.Headquarters,
+        Empty,
+        "petlandhq",
+        petlandStore = true
+      )
+    )
 
     Agency.createNewAgency(
       "Petland Carriage Place",
@@ -314,11 +316,7 @@ object DataLoader extends Loggable {
   }
 
   def createPuppySpot: List[User] = {
-    val puppySpot = Agency.createNewAgency(
-      "PuppySpot",
-      AgencyType.Store,
-      Empty,
-      "pupspot")
+    val puppySpot = Agency.createNewAgency("PuppySpot", AgencyType.Store, Empty, "pupspot")
 
     val tppAgency = Agency.find(By(Agency.name, "TPP"))
 
@@ -329,15 +327,15 @@ object DataLoader extends Loggable {
 
   def calculateTax: List[Any] = {
     val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
-    
+
     for {
-      parent <- parents
+      parent  <- parents
       address <- parent.shippingAddress
     } yield {
-      if (address.state.get.toLowerCase == "ga" && parent.taxRate.get == 0D) { 
+      if (address.state.get.toLowerCase == "ga" && parent.taxRate.get == 0d) {
         parent.setTaxRate
       } else if (address.state.get.toLowerCase != "ga") {
-        parent.taxRate(0D).saveMe
+        parent.taxRate(0d).saveMe
       }
     }
   }
@@ -345,10 +343,13 @@ object DataLoader extends Loggable {
   def createBasicExistingBoxes: Any = {
     if (SubscriptionBox.findAll().isEmpty) {
       for {
-        user <- User.findAll(By(User.userType, UserType.Parent), By(User.status,Status.Active))
+        user         <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
         subscription <- Subscription.find(By(Subscription.user, user)).toList
-        pet <- subscription.getPets
-        fleaTick <- FleaTick.find(By(FleaTick.size, pet.size.get), By(FleaTick.animalType, pet.animalType.get))
+        pet          <- subscription.getPets
+        fleaTick <- FleaTick.find(
+                     By(FleaTick.size, pet.size.get),
+                     By(FleaTick.animalType, pet.animalType.get)
+                   )
       } yield {
         val box = SubscriptionBox.createBasicBox(subscription, fleaTick, pet)
         pet.box(box).saveMe()
@@ -359,7 +360,7 @@ object DataLoader extends Loggable {
 
   def connectCancelledUsersToSubscription() {
     for {
-      user <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Cancelled))
+      user         <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Cancelled))
       subscription <- Subscription.find(By(Subscription.user, user)).toList
     } yield {
       user.subscription(subscription).saveMe()
@@ -367,7 +368,7 @@ object DataLoader extends Loggable {
   }
 
   def defaultSaleCoupons: Any = {
-    if(Coupon.find(By(Coupon.couponCode, "50off")).isEmpty) {
+    if (Coupon.find(By(Coupon.couponCode, "50off")).isEmpty) {
       val mpdAgency = Agency.find(By(Agency.name, "My Pet Defense"))
       CouponService.createCoupon("50off", mpdAgency, "1", "50", "0")
       CouponService.createCoupon("100off", mpdAgency, "1", "100", "0")
@@ -402,27 +403,33 @@ object DataLoader extends Loggable {
 
   def findSeptEarlyShipments() {
     val dateFormatter = new SimpleDateFormat("M/d/y")
-    val startFree = dateFormatter.parse("8/7/2020")
-    val endFree = dateFormatter.parse("9/6/2020")
-    val freeMonth = dateFormatter.parse("8/1/2020")
+    val startFree     = dateFormatter.parse("8/7/2020")
+    val endFree       = dateFormatter.parse("9/6/2020")
+    val freeMonth     = dateFormatter.parse("8/1/2020")
 
-      for {
-        shipment <- Shipment.findAll(By_>(Shipment.dateShipped, startFree), By_<(Shipment.dateShipped, endFree))
-        subscription <- shipment.subscription.obj
-          if subscription.freeUpgradeSampleDate.get == null
-      } yield {
-        subscription.freeUpgradeSampleDate(freeMonth).saveMe
-      }
+    for {
+      shipment <- Shipment.findAll(
+                   By_>(Shipment.dateShipped, startFree),
+                   By_<(Shipment.dateShipped, endFree)
+                 )
+      subscription <- shipment.subscription.obj
+      if subscription.freeUpgradeSampleDate.get == null
+    } yield {
+      subscription.freeUpgradeSampleDate(freeMonth).saveMe
+    }
   }
 
   def clearRecentShipments() {
     val dateFormatter = new SimpleDateFormat("M/d/y")
-    val startFree = dateFormatter.parse("9/3/2020")
-    val endFree = dateFormatter.parse("9/10/2020")
+    val startFree     = dateFormatter.parse("9/3/2020")
+    val endFree       = dateFormatter.parse("9/10/2020")
 
     for {
-      shipment <- Shipment.findAll(By_>(Shipment.dateProcessed, startFree), By_<(Shipment.dateProcessed, endFree))
-        if shipment.shipmentStatus.get == ShipmentStatus.LabelCreated
+      shipment <- Shipment.findAll(
+                   By_>(Shipment.dateProcessed, startFree),
+                   By_<(Shipment.dateProcessed, endFree)
+                 )
+      if shipment.shipmentStatus.get == ShipmentStatus.LabelCreated
     } yield {
       shipment.shipStationOrderId(0).shipmentStatus(ShipmentStatus.Paid).saveMe()
     }
