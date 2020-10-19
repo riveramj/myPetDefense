@@ -191,12 +191,12 @@ class ReportingServiceSpec
         val cancelledIds = cancelledInCurrentYear.map {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription.cancel
-              .cancellationDate(anyDayOfThisYearUntilPreviousMonth.toDate)
+              .cancellationDate(anyDayUntilPreviousMonth.toDate)
               .saveMe()
               .id
               .get
         }
-        cancelledYearAgo.map {
+        cancelledYearAgo.foreach {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription.cancel
               .cancellationDate(anyDayOfLastYear.toDate)
@@ -206,6 +206,35 @@ class ReportingServiceSpec
         val subs = Subscription.findAll()
         val filteredSubsIds =
           ReportingService.findCurrentYearPayingCancelledSubscriptions(subs).map(_.id.get)
+
+        filteredSubsIds should contain theSameElementsAs cancelledIds
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find current month cancelled subscriptions" in {
+    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+      (cancelledThisMonth, cancelledNotThisMonth) =>
+        cancelledNotThisMonth.foreach {
+          case (uData, sData) =>
+            insertUserAndSub(uData, sData).subscription.cancel
+              .cancellationDate(anyDayUntilPreviousMonth.toDate)
+              .saveMe()
+        }
+        val cancelledIds = cancelledThisMonth.map {
+          case (uData, sData) =>
+            insertUserAndSub(uData, sData).subscription.cancel
+              .cancellationDate(anyDayOfThisMonth.toDate)
+              .saveMe()
+              .id
+              .get
+        }
+
+        val subs = Subscription.findAll()
+        val filteredSubsIds =
+          ReportingService
+            .findCurrentMonthCancelledSubscriptions(subs, year = now.getYear)
+            .map(_.id.get)
 
         filteredSubsIds should contain theSameElementsAs cancelledIds
         cleanUpSuccess()
