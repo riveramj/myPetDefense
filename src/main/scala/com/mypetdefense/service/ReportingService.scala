@@ -14,43 +14,45 @@ import net.liftweb.util.Helpers._
 
 object ReportingService extends Loggable {
   val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val zoneId: ZoneId = ZoneId.of("America/New_York")
 
   def currentDate: LocalDateTime = LocalDateTime.now()
-  def now: LocalDate = LocalDate.now(ZoneId.of("America/New_York"))
+  def now: LocalDate = LocalDate.now(zoneId)
+  def nowAtStartOfDay: ZonedDateTime = now.atStartOfDay(zoneId)
 
-  def nowDate: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).toInstant)
+  def nowDate: Date = Date.from(nowAtStartOfDay.toInstant)
 
-  def yesterday: ZonedDateTime = now.atStartOfDay(ZoneId.of("America/New_York")).minusDays(1)
+  def yesterday: ZonedDateTime = nowAtStartOfDay.minusDays(1)
 
-  def yesterdayStart: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant)
+  def yesterdayStart: Date = Date.from(nowAtStartOfDay.minusDays(1).toInstant)
 
-  def yesterdayEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).toInstant)
+  def yesterdayEnd: Date = Date.from(nowAtStartOfDay.toInstant)
 
-  def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant)
+  def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).toInstant)
 
-  def monthDayOneLastMonth: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).minusMonths(1).toInstant)
+  def monthDayOneLastMonth: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).minusMonths(1).toInstant)
 
-  def currentDayLastMonthEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).minusMonths(1).toInstant)
+  def currentDayLastMonthEnd: Date = Date.from(nowAtStartOfDay.plusDays(1).minusMonths(1).toInstant)
 
-  def monthDayOneLastYear: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(ZoneId.of("America/New_York")).minusYears(1).toInstant)
+  def monthDayOneLastYear: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).minusYears(1).toInstant)
 
-  def currentDayLastYearEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).minusYears(1).toInstant)
+  def currentDayLastYearEnd: Date = Date.from(nowAtStartOfDay.plusDays(1).minusYears(1).toInstant)
 
-  def tomorrowStart: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant)
+  def tomorrowStart: Date = Date.from(nowAtStartOfDay.plusDays(1).toInstant)
 
-  def beginngNextMonth: Date = Date.from(YearMonth.now().atEndOfMonth().atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant)
+  def beginngNextMonth: Date = Date.from(YearMonth.now().atEndOfMonth().atStartOfDay(zoneId).plusDays(1).toInstant)
 
-  def yearDayOne: Date = Date.from(now.withDayOfYear(1).atStartOfDay(ZoneId.of("America/New_York")).toInstant)
+  def yearDayOne: Date = Date.from(now.withDayOfYear(1).atStartOfDay(zoneId).toInstant)
 
-  def yearDayOneLastYear: Date = Date.from(now.withDayOfYear(1).atStartOfDay(ZoneId.of("America/New_York")).minusYears(1).toInstant)
+  def yearDayOneLastYear: Date = Date.from(now.withDayOfYear(1).atStartOfDay(zoneId).minusYears(1).toInstant)
 
-  def todayLastMonth: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusMonths(1).toInstant)
+  def todayLastMonth: Date = Date.from(nowAtStartOfDay.minusMonths(1).toInstant)
 
-  def todayLastYear: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusYears(1).toInstant)
+  def todayLastYear: Date = Date.from(nowAtStartOfDay.minusYears(1).toInstant)
 
-  def todayLastYearEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusYears(1).plusDays(1).toInstant)
+  def todayLastYearEnd: Date = Date.from(nowAtStartOfDay.minusYears(1).plusDays(1).toInstant)
 
-  def todayLastMonthEnd: Date = Date.from(now.atStartOfDay(ZoneId.of("America/New_York")).minusMonths(1).plusDays(1).toInstant)
+  def todayLastMonthEnd: Date = Date.from(nowAtStartOfDay.minusMonths(1).plusDays(1).toInstant)
 
   def yearMonth: String = currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
 
