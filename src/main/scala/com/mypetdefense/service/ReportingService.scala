@@ -241,8 +241,9 @@ object ReportingService extends Loggable {
         val cancelDateMonth = cancellationDate.map(_.getMonth)
         val cancelDateYear  = cancellationDate.map(_.getYear)
 
-        !(cancelDateYear.map(_ == createdDateYear).openOr(false) &&
-          cancelDateMonth.map(_ == createdDateMonth).openOr(false))
+        (cancelDateYear.map(_ == createdDateYear).openOr(false) &&
+          cancelDateMonth.map(_ == createdDateMonth).openOr(false)
+        )
       }
     }
   }
