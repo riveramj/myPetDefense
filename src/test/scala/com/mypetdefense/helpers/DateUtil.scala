@@ -12,6 +12,7 @@ object DateUtil {
   def now: LocalDate                          = LocalDate.now(zoneId)
   def today: Date                             = now.atStartOfDay(zoneId).toDate
   def tomorrow: Date                          = now.atStartOfDay(zoneId).plusDays(1).toDate
+  def thisYear: Int                           = now.getYear
   def anyDayOfThisMonth: ZonedDateTime        = getAnyDayOfMonth(now)
   def anyDayOfLastMonth: ZonedDateTime        = getAnyDayOfMonth(now.minusMonths(1))
   def anyDayOfThisYear: ZonedDateTime         = getAnyDayOfTheYear(now)

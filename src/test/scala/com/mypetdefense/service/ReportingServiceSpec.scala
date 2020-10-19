@@ -233,10 +233,29 @@ class ReportingServiceSpec
         val subs = Subscription.findAll()
         val filteredSubsIds =
           ReportingService
-            .findCurrentMonthCancelledSubscriptions(subs, year = now.getYear)
+            .findCurrentMonthCancelledSubscriptions(subs, year = thisYear)
             .map(_.id.get)
 
         filteredSubsIds should contain theSameElementsAs cancelledIds
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find current month processed shipments" in {
+    forAll(genShipmentChainData, genShipmentChainData) {
+      (currentMonthProcessed, notInCurrentMonthProcessed) =>
+        insertUserSubAndShipment(notInCurrentMonthProcessed).shipments
+          .foreach(_.dateProcessed(anyDayOfLastYear.toDate).saveMe())
+        val processedThisMonthIds = insertUserSubAndShipment(currentMonthProcessed).shipments
+          .map(_.dateProcessed(anyDayOfThisMonth.toDate).saveMe().id.get)
+
+        val shipments = Shipment.findAll()
+        val filteredShipmentsIds =
+          ReportingService
+            .findCurrentMonthProcessedShipments(shipments, year = thisYear)
+            .map(_.id.get)
+
+        filteredShipmentsIds should contain theSameElementsAs processedThisMonthIds
         cleanUpSuccess()
     }
   }
