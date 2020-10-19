@@ -25,7 +25,7 @@ object Generator {
     Gen.posNum[Int].map(i => f"${i.toDouble}%2.2f")
   }
 
-  protected def genBoxString: Gen[Box[String]] = Gen.option(genAlphaStr).map(Box.apply)
+  protected def genBoxString: Gen[Box[String]] = Gen.option(genAlphaStr).map(Box.apply[String])
 
   protected def genNonEmptyStr: Gen[String] =
     for {
@@ -159,14 +159,14 @@ object Generator {
       stripePaymentId <- genNonEmptyStr
       stripeChargeId  <- genBoxString
       amountPaid      <- genMoneyString
-      taxPaid         <- genMoneyString
+      taxPaid = amountPaid.toDouble - 0.3
       shipmentStatus  <- genShipmentStatus
       sendFreeUpgrade <- genBool
     } yield ShipmentCreateGeneratedData(
       stripePaymentId,
       stripeChargeId,
       amountPaid,
-      taxPaid,
+      taxPaid.toString,
       shipmentStatus,
       sendFreeUpgrade
     )

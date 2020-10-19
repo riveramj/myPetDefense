@@ -149,4 +149,24 @@ class ReportingServiceSpec
     }
   }
 
+  it should "find paid shipments" in {
+    forAll(nonEmptyShipmentChainData, nonEmptyShipmentChainData) {
+      (dataWithPaidShipments, dataWithUnpaidShipments) =>
+        val paidShipmentsIds =
+          dataWithPaidShipments
+            .map(insertUserSubAndShipment)
+            .flatMap(_.shipments.map(_.dateShipped(today).saveMe().id.get))
+        dataWithUnpaidShipments
+          .map(insertUserSubAndShipment)
+          .foreach(_.shipments.foreach(_.taxPaid("0").amountPaid("0").saveMe()))
+
+        val subscriptions = Subscription.findAll()
+        val result        = ReportingService.findPaidShipments(subscriptions).map(_.id.get)
+
+        result should contain theSameElementsAs paidShipmentsIds
+        clearTables()
+        succeed
+    }
+  }
+
 }
