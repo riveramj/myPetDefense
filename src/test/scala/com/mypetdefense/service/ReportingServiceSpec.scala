@@ -191,7 +191,7 @@ class ReportingServiceSpec
         val cancelledIds = cancelledInCurrentYear.map {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription.cancel
-              .cancellationDate(anyDayUntilPreviousMonth.toDate)
+              .cancellationDate(anyDayUntilThisMonth.toDate)
               .saveMe()
               .id
               .get
@@ -218,7 +218,7 @@ class ReportingServiceSpec
         cancelledNotThisMonth.foreach {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription.cancel
-              .cancellationDate(anyDayUntilPreviousMonth.toDate)
+              .cancellationDate(anyDayUntilThisMonth.toDate)
               .saveMe()
         }
         val cancelledIds = cancelledThisMonth.map {
@@ -264,7 +264,7 @@ class ReportingServiceSpec
     forAll(genShipmentChainData, genShipmentChainData) {
       (currentMonthShipments, notInCurrentMonthShipments) =>
         insertUserSubAndShipment(notInCurrentMonthShipments).shipments
-          .foreach(_.dateShipped(anyDayOfLastYear.toDate).saveMe())
+          .foreach(_.dateShipped(anyDayUntilThisMonth.toDate).saveMe())
         val thisMonthShipmentsIds = insertUserSubAndShipment(currentMonthShipments).shipments
           .map(_.dateShipped(anyDayOfThisMonth.toDate).saveMe().id.get)
 
@@ -275,6 +275,25 @@ class ReportingServiceSpec
             .map(_.id.get)
 
         filteredShipmentsIds should contain theSameElementsAs thisMonthShipmentsIds
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find current year shipments" in {
+    forAll(genShipmentChainData, genShipmentChainData) {
+      (currentYearShipments, notInCurrentYearShipments) =>
+        insertUserSubAndShipment(notInCurrentYearShipments).shipments
+          .foreach(_.dateShipped(anyDayOfLastYear.toDate).saveMe())
+        val currentYearShipmentsIds = insertUserSubAndShipment(currentYearShipments).shipments
+          .map(_.dateShipped(anyDayOfThisYear.toDate).saveMe().id.get)
+
+        val shipments = Shipment.findAll()
+        val filteredShipmentsIds =
+          ReportingService
+            .findCurrentYearShipments(shipments)
+            .map(_.id.get)
+
+        filteredShipmentsIds should contain theSameElementsAs currentYearShipmentsIds
         cleanUpSuccess()
     }
   }
