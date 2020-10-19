@@ -960,8 +960,8 @@ object ReportingService extends Loggable {
 
   def yesterdayShipments: (Int, Int, Double) = {
     val yesterdayShipments = Shipment.findAll(
-      By_>(Shipment.dateShipped, yesterdayStart),
-      By_<(Shipment.dateShipped, yesterdayEnd)
+      By_>=(Shipment.dateShipped, yesterdayStart),
+      By_<=(Shipment.dateShipped, yesterdayEnd)
     )
 
     val paidShipments  = yesterdayShipments.filter(_.amountPaid.get != "0")
@@ -973,8 +973,8 @@ object ReportingService extends Loggable {
 
   def yesterdayCancels: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.cancellationDate, yesterdayStart),
-      By_<(Subscription.cancellationDate, yesterdayEnd)
+      By_>=(Subscription.cancellationDate, yesterdayStart),
+      By_<=(Subscription.cancellationDate, yesterdayEnd)
     )
   }
 
@@ -1057,47 +1057,47 @@ object ReportingService extends Loggable {
 
   def findNewMTDSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, monthDayOne)
+      By_>=(Subscription.createdAt, monthDayOne)
     )
   }
 
   def findNewMTDSubscriptionsLastMonth: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, monthDayOneLastMonth),
-      By_<(Subscription.createdAt, currentDayLastMonthEnd)
+      By_>=(Subscription.createdAt, monthDayOneLastMonth),
+      By_<=(Subscription.createdAt, currentDayLastMonthEnd)
     )
   }
 
   def findNewMTDSubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, monthDayOneLastYear),
-      By_<(Subscription.createdAt, currentDayLastYearEnd)
+      By_>=(Subscription.createdAt, monthDayOneLastYear),
+      By_<=(Subscription.createdAt, currentDayLastYearEnd)
     )
   }
 
   def findNewYTDSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, yearDayOne)
+      By_>=(Subscription.createdAt, yearDayOne)
     )
   }
 
   def findNewYTDSubscriptionsLastMonth: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, yearDayOne),
-      By_<(Subscription.createdAt, todayLastMonthEnd)
+      By_>=(Subscription.createdAt, yearDayOne),
+      By_<=(Subscription.createdAt, todayLastMonthEnd)
     )
   }
 
   def findNewYTDSubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, yearDayOneLastYear),
-      By_<(Subscription.createdAt, currentDayLastYearEnd)
+      By_>=(Subscription.createdAt, yearDayOneLastYear),
+      By_<=(Subscription.createdAt, currentDayLastYearEnd)
     )
   }
 
   def findCancelledMtdSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.cancellationDate, monthDayOne)
+      By_>=(Subscription.cancellationDate, monthDayOne)
     )
   }
 

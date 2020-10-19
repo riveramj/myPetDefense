@@ -309,4 +309,25 @@ class ReportingServiceSpec
     }
   }
 
+  it should "find yesterday shipments" in {
+    forAll(genShipmentChainData, genShipmentChainData) { (withPaidShipments, newShipments) =>
+      val paidShipments = insertUserSubAndShipment(withPaidShipments).shipments
+        .map(_.dateShipped(yesterday.toDate).saveMe())
+      val newShipmentsSize =
+        insertUserSubAndShipment(newShipments).shipments
+          .map(_.dateShipped(yesterday.toDate).saveMe())
+          .map(_.amountPaid("0").saveMe())
+          .size
+      val expectedTotal =
+        paidShipments.foldLeft(0d)((acc, s) =>
+          (s.amountPaid.get.toDouble - s.taxPaid.get.toDouble) + acc
+        )
+
+      val actualData = ReportingService.yesterdayShipments
+
+      actualData shouldBe (newShipmentsSize, paidShipments.size, expectedTotal)
+      cleanUpSuccess()
+    }
+  }
+
 }
