@@ -1,13 +1,13 @@
 package com.mypetdefense.service
 
 import com.mypetdefense.generator.Generator._
+import com.mypetdefense.generator.{SubscriptionCreateGeneratedData, UserCreateGeneratedData}
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers._
-import com.mypetdefense.helpers.db.SubscriptionDbUtils._
 import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.model._
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
@@ -31,24 +31,32 @@ class ReportingServiceSpec
     clearTables()
   }
 
+  private def cleanUpSuccess(): Assertion = {
+    clearTables()
+    succeed
+  }
+
+  private def createUserAndSubReturnSubId(
+      t: (UserCreateGeneratedData, SubscriptionCreateGeneratedData)
+  ): Long =
+    insertUserAndSub(t._1, t._2).subscription.id.get
+
+  private def createUserAndCancelSubReturnSubId(
+      t: (UserCreateGeneratedData, SubscriptionCreateGeneratedData)
+  ): Long =
+    insertUserAndSub(t._1, t._2).subscription.cancel.saveMe().id.get
+
   it should "find all active subscriptions" in {
     forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
       (usersWithActiveSub, usersWithoutSub) =>
-        val activeSubsIds = usersWithActiveSub.map {
-          case (uData, sData) => insertUserAndSub(uData, sData).subscription.id.get
-        }
-        usersWithoutSub.foreach {
-          case (uData, sData) =>
-            val u = createUser(uData)
-            createSubscription(u, sData).cancel.saveMe()
-        }
+        val activeSubsIds = usersWithActiveSub.map(createUserAndSubReturnSubId)
+        usersWithoutSub.foreach(createUserAndCancelSubReturnSubId)
 
         val subscriptions   = Subscription.findAll()
         val filteredSubsIds = ReportingService.findActiveSubscriptions(subscriptions).map(_.id.get)
 
         filteredSubsIds should contain theSameElementsAs activeSubsIds
-        clearTables()
-        succeed
+        cleanUpSuccess()
     }
   }
 
@@ -64,6 +72,7 @@ class ReportingServiceSpec
 
       customersForAgent.head.salesAgentId.get shouldBe agentId
       customersForAgentIds should contain theSameElementsAs agentUsersIds
+      cleanUpSuccess()
     }
   }
 
@@ -80,8 +89,7 @@ class ReportingServiceSpec
           .map(_.id.get)
 
       usersIdsRegisteredInThisMonth should contain theSameElementsAs expectedUsersIds
-      clearTables()
-      succeed
+      cleanUpSuccess()
     }
   }
 
@@ -124,8 +132,7 @@ class ReportingServiceSpec
       val result        = ReportingService.findActiveSubscriptionsFirstMonth(subscriptions).map(_.id.get)
 
       result should contain theSameElementsAs expectedUsers
-      clearTables()
-      succeed
+      cleanUpSuccess()
     }
   }
 
@@ -136,58 +143,72 @@ class ReportingServiceSpec
           case (u, s) =>
             insertUserAndSub(u, s).subscription.createdAt(anyDayOfLastMonth.toDate).saveMe()
         }
-        val expectedCurrentMonthIds = currentMonth.map {
-          case (u, s) => insertUserAndSub(u, s).subscription.id.get
-        }
+        val expectedCurrentMonthIds = currentMonth.map(createUserAndSubReturnSubId)
 
         val subscriptions = Subscription.findAll()
         val result        = ReportingService.findCurrentMonthSubscriptions(subscriptions).map(_.id.get)
 
         result should contain theSameElementsAs expectedCurrentMonthIds
-        clearTables()
-        succeed
+        cleanUpSuccess()
     }
   }
 
   it should "find paid shipments" in {
-    forAll(nonEmptyShipmentChainData, nonEmptyShipmentChainData) {
+    forAll(genShipmentChainData, genShipmentChainData) {
       (dataWithPaidShipments, dataWithUnpaidShipments) =>
         val paidShipmentsIds =
-          dataWithPaidShipments
-            .map(insertUserSubAndShipment)
-            .flatMap(_.shipments.map(_.dateShipped(today).saveMe().id.get))
-        dataWithUnpaidShipments
-          .map(insertUserSubAndShipment)
-          .foreach(_.shipments.foreach(_.taxPaid("0").amountPaid("0").saveMe()))
+          insertUserSubAndShipment(dataWithPaidShipments).shipments
+            .map(_.dateShipped(today).saveMe().id.get)
+        insertUserSubAndShipment(dataWithUnpaidShipments).shipments
+          .foreach(_.taxPaid("0").amountPaid("0").saveMe())
 
         val subscriptions = Subscription.findAll()
         val result        = ReportingService.findPaidShipments(subscriptions).map(_.id.get)
 
         result should contain theSameElementsAs paidShipmentsIds
-        clearTables()
-        succeed
+        cleanUpSuccess()
     }
   }
 
   it should "find cancelled subscriptions" in {
     forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
       (usersWithCanceledSub, usersWithoutSub) =>
-        val canceledIds = usersWithCanceledSub.map {
-          case (uData, sData) => insertUserAndSub(uData, sData).subscription.cancel.saveMe().id.get
-        }
-        usersWithoutSub.foreach {
-          case (uData, sData) =>
-            val u = createUser(uData)
-            createSubscription(u, sData).saveMe()
-        }
+        val canceledIds = usersWithCanceledSub.map(createUserAndCancelSubReturnSubId)
+        usersWithoutSub.foreach(createUserAndSubReturnSubId)
 
         val subscriptions = Subscription.findAll()
         val filteredSubsIds =
           ReportingService.findCancelledSubscriptions(subscriptions).map(_.id.get)
 
         filteredSubsIds should contain theSameElementsAs canceledIds
-        clearTables()
-        succeed
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find current year paying cancelled subscriptions" in {
+    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+      (cancelledInCurrentYear, cancelledYearAgo) =>
+        val cancelledIds = cancelledInCurrentYear.map {
+          case (uData, sData) =>
+            insertUserAndSub(uData, sData).subscription.cancel
+              .cancellationDate(anyDayOfThisYearUntilPreviousMonth.toDate)
+              .saveMe()
+              .id
+              .get
+        }
+        cancelledYearAgo.map {
+          case (uData, sData) =>
+            insertUserAndSub(uData, sData).subscription.cancel
+              .cancellationDate(anyDayOfLastYear.toDate)
+              .saveMe()
+        }
+
+        val subs = Subscription.findAll()
+        val filteredSubsIds =
+          ReportingService.findCurrentYearPayingCancelledSubscriptions(subs).map(_.id.get)
+
+        filteredSubsIds should contain theSameElementsAs cancelledIds
+        cleanUpSuccess()
     }
   }
 
