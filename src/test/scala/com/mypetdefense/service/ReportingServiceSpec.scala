@@ -298,4 +298,15 @@ class ReportingServiceSpec
     }
   }
 
+  it should "find yesterday new sales" in {
+    forAll(nonEmptyUsersGen) { users2Create =>
+      val expectedIds =
+        users2Create.map(createUser).map(_.createdAt(yesterday.toDate).saveMe().id.get)
+      val actualIds = ReportingService.findYesterdayNewSales.map(_.id.get)
+
+      actualIds should contain theSameElementsAs expectedIds
+      cleanUpSuccess()
+    }
+  }
+
 }

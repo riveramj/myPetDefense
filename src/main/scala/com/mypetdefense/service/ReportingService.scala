@@ -953,8 +953,8 @@ object ReportingService extends Loggable {
 
   def findYesterdayNewSales: List[User] = {
     User.findAll(
-      By_>(User.createdAt, yesterdayStart),
-      By_<(User.createdAt, yesterdayEnd)
+      By_>=(User.createdAt, yesterdayStart),
+      By_<=(User.createdAt, yesterdayEnd)
     )
   }
 

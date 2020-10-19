@@ -9,6 +9,7 @@ object DateUtil {
 
   val zoneId: ZoneId = ZoneId.of("America/New_York")
 
+  def yesterday: ZonedDateTime            = now.atStartOfDay(zoneId).minusDays(1)
   def now: LocalDate                      = LocalDate.now(zoneId)
   def today: Date                         = now.atStartOfDay(zoneId).toDate
   def tomorrow: Date                      = now.atStartOfDay(zoneId).plusDays(1).toDate
