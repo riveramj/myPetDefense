@@ -198,12 +198,12 @@ object ReviewsUploadCSV extends Loggable {
       requiredColumns.size
     }
 
-    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
-      requiredColumns.filter(headerIndex.get(_).isEmpty)
-    }
-
     def requiredColumns: Columns.ValueSet = {
       values.filter(_.required)
+    }
+
+    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
+      requiredColumns.filter(headerIndex.get(_).isEmpty)
     }
 
     def cellBoolean(

@@ -93,6 +93,8 @@ object SecurityContext extends Loggable {
     currentUser.isDefined
   }
 
+  def currentUser: Box[User] = loggedInUser.is
+
   def currentUserId: Long = loggedInUserId.is.openOr(0)
 
   def agent_? : Boolean = {
@@ -102,8 +104,6 @@ object SecurityContext extends Loggable {
   def parent_? : Boolean = {
     currentUser.map(_.userType == UserType.Parent) openOr false
   }
-
-  def currentUser: Box[User] = loggedInUser.is
 
   def mpdAdmin_? : Boolean = {
     (admin_? && currentUser

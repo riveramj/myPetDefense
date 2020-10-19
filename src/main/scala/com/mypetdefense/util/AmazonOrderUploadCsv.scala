@@ -250,17 +250,6 @@ object AmazonOrderUploadCsv extends Loggable {
       cellValue(column, headerIndex, row).flatMap(i => tryo(i.toDouble))
     }
 
-    def cellBoolean(
-        column: HeaderValue,
-        headerIndex: Map[Value, Int],
-        row: Array[String]
-    ): Boolean = {
-      cellValue(column, headerIndex, row).map(_.toLowerCase) match {
-        case Full("1") | Full("y") | Full("yes") => true
-        case _                                   => false
-      }
-    }
-
     def cellValue(
         column: HeaderValue,
         headerIndex: Map[Value, Int],
@@ -275,6 +264,17 @@ object AmazonOrderUploadCsv extends Loggable {
           value
         }
       } or column.default
+    }
+
+    def cellBoolean(
+        column: HeaderValue,
+        headerIndex: Map[Value, Int],
+        row: Array[String]
+    ): Boolean = {
+      cellValue(column, headerIndex, row).map(_.toLowerCase) match {
+        case Full("1") | Full("y") | Full("yes") => true
+        case _                                   => false
+      }
     }
 
     case class HeaderValue(
