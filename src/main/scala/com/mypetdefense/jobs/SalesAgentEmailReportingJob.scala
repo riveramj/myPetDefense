@@ -1,15 +1,8 @@
 package com.mypetdefense.jobs
 
-import org.quartz.{
-  CronScheduleBuilder,
-  JobBuilder,
-  JobDetail,
-  JobExecutionContext,
-  Trigger,
-  TriggerBuilder
-}
-import com.mypetdefense.service.ReportingService
 import com.mypetdefense.actor._
+import com.mypetdefense.service.ReportingService
+import org.quartz._
 
 class SalesAgentReportEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {

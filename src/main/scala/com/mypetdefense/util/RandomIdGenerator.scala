@@ -1,7 +1,7 @@
 package com.mypetdefense.util
 
-import org.apache.shiro.crypto.SecureRandomNumberGenerator
 import net.liftweb.common.Loggable
+import org.apache.shiro.crypto.SecureRandomNumberGenerator
 
 object RandomIdGenerator extends Loggable {
   private val rng = new SecureRandomNumberGenerator()

@@ -1,26 +1,17 @@
 package com.mypetdefense.util
 
-import scala.collection.JavaConverters._
-import scala.util.matching.Regex
 import java.io.StringReader
+import java.nio.charset.StandardCharsets
 import java.util.regex.Pattern
 
-import net.liftweb.http.S
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.mapper.By
 import au.com.bytecode.opencsv.{CSVParser, CSVReader}
+import net.liftweb.common._
+import net.liftweb.http.S
 
+import scala.collection.JavaConverters._
+import scala.language.{implicitConversions, postfixOps}
+import scala.util.matching.Regex
 import xml.Text
-import com.mypetdefense.model._
-import java.nio.charset.StandardCharsets
-
-import scala.language.implicitConversions
-import scala.language.postfixOps
-import java.text.SimpleDateFormat
-import java.util.Date
-
-import com.mypetdefense.util.TrackingUploadCSV.Columns
 
 case class TrackingInfo(recipient: String, trackingNumber: String)
 
@@ -31,61 +22,6 @@ object TrackingUploadCSV extends Loggable {
 
   def parse(source: Array[Byte]): Box[TrackingInfoList] =
     parse(new String(source, StandardCharsets.UTF_8))
-
-  object Columns extends Enumeration {
-    val Recipient: HeaderValue =
-      HeaderValue(name = "Recipient", default = Failure("missing required Recipient"))
-    val TrackingNumber: HeaderValue =
-      HeaderValue(name = "Tracking #", default = Failure("missing required Tracking #"))
-
-    case class HeaderValue(
-        name: String,
-        matcher: Box[Regex] = Empty,
-        parser: String => Box[String] = (rawCell: String) => Full(rawCell.trim).filter(_.nonEmpty),
-        default: Box[String] = Empty
-    ) extends Val(name) {
-      val nameMatcher: Regex = matcher openOr ("""(?i)^\s*""" + Pattern.quote(name) + """\s*$""").r
-      def matches(candidate: String): Boolean = {
-        nameMatcher.unapplySeq(candidate).isDefined
-      }
-      def required: Boolean = {
-        default match {
-          case Failure(_, _, _) => true
-          case _                => false
-        }
-      }
-    }
-
-    def requiredColumns: Columns.ValueSet = {
-      values.filter(_.required)
-    }
-
-    def requiredColumnsCount: Int = {
-      requiredColumns.size
-    }
-
-    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
-      requiredColumns.filter(headerIndex.get(_).isEmpty)
-    }
-
-    def cellValue(
-        column: HeaderValue,
-        headerIndex: Map[Value, Int],
-        row: Array[String]
-    ): Box[String] = {
-      Box {
-        for {
-          index <- headerIndex get column
-          cell  <- row.lift(index)
-          value <- column.parser(cell)
-        } yield {
-          value
-        }
-      } or column.default
-    }
-
-    implicit def valueToHeaderValue(v: Value): HeaderValue = v.asInstanceOf[HeaderValue]
-  }
 
   def parse(source: String): Box[TrackingInfoList] = {
     val trackingInfoList: List[Box[TrackingInfo]] = {
@@ -168,10 +104,6 @@ object TrackingUploadCSV extends Loggable {
     }
   }
 
-  private def failLine(msg: String, line: Int) = {
-    Failure("%s [line %d]" format (msg, line))
-  }
-
   def parseLine(
       fieldList: Array[String],
       lineCount: Int,
@@ -189,6 +121,10 @@ object TrackingUploadCSV extends Loggable {
     }
   }
 
+  private def failLine(msg: String, line: Int) = {
+    Failure("%s [line %d]" format (msg, line))
+  }
+
   def toTrackingInfo(
       fieldList: Array[String],
       lineCount: Int,
@@ -201,5 +137,60 @@ object TrackingUploadCSV extends Loggable {
     val trackingNumber = rawTrackingNumber.filterNot(badChar)
 
     Full(TrackingInfo(recipient, trackingNumber))
+  }
+
+  object Columns extends Enumeration {
+    val Recipient: HeaderValue =
+      HeaderValue(name = "Recipient", default = Failure("missing required Recipient"))
+    val TrackingNumber: HeaderValue =
+      HeaderValue(name = "Tracking #", default = Failure("missing required Tracking #"))
+
+    def requiredColumnsCount: Int = {
+      requiredColumns.size
+    }
+
+    def requiredColumns: Columns.ValueSet = {
+      values.filter(_.required)
+    }
+
+    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
+      requiredColumns.filter(headerIndex.get(_).isEmpty)
+    }
+
+    def cellValue(
+        column: HeaderValue,
+        headerIndex: Map[Value, Int],
+        row: Array[String]
+    ): Box[String] = {
+      Box {
+        for {
+          index <- headerIndex get column
+          cell  <- row.lift(index)
+          value <- column.parser(cell)
+        } yield {
+          value
+        }
+      } or column.default
+    }
+
+    case class HeaderValue(
+        name: String,
+        matcher: Box[Regex] = Empty,
+        parser: String => Box[String] = (rawCell: String) => Full(rawCell.trim).filter(_.nonEmpty),
+        default: Box[String] = Empty
+    ) extends Val(name) {
+      val nameMatcher: Regex = matcher openOr ("""(?i)^\s*""" + Pattern.quote(name) + """\s*$""").r
+      def matches(candidate: String): Boolean = {
+        nameMatcher.unapplySeq(candidate).isDefined
+      }
+      def required: Boolean = {
+        default match {
+          case Failure(_, _, _) => true
+          case _                => false
+        }
+      }
+    }
+
+    implicit def valueToHeaderValue(v: Value): HeaderValue = v.asInstanceOf[HeaderValue]
   }
 }

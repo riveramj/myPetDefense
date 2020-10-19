@@ -1,35 +1,15 @@
 package com.mypetdefense.jobs
 
-import net.liftweb._
-import mapper.NullRef
-import common._
-import mapper._
-import util.Helpers._
-import com.mypetdefense.service.{ParentService, ShipStationService}
-import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import org.quartz.{
-  CronScheduleBuilder,
-  JobBuilder,
-  JobDetail,
-  JobExecutionContext,
-  Trigger,
-  TriggerBuilder
-}
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, LocalDateTime, Period, ZoneId}
-import java.time.format.DateTimeFormatter
-
-import com.mypetdefense.shipstation.{
-  Address => ShipStationAddress,
-  Shipment => ShipStationShipment,
-  _
-}
-
-import scala.util.{Failure => TryFail, Success => TrySuccess, _}
-import dispatch.{Req => DispatchReq, _}
+import com.mypetdefense.service.ShipStationService
+import net.liftweb._
+import common._
+import dispatch._
 import Defaults._
+import mapper._
+import org.quartz._
+
+import scala.util.{Failure => TryFail, Success => TrySuccess}
 
 class CreateTreatLabelJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {

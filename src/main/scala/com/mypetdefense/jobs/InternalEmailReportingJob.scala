@@ -1,10 +1,10 @@
 package com.mypetdefense.jobs
 
-import org.quartz._
-import collection.JavaConversions._
-
-import com.mypetdefense.service.ReportingService
 import com.mypetdefense.actor._
+import com.mypetdefense.service.ReportingService
+import org.quartz._
+
+import collection.JavaConversions._
 
 class InternalEmailReportingJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {

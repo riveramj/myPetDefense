@@ -1,25 +1,14 @@
 package com.mypetdefense.jobs
 
-import net.liftweb._
-import common._
-import mapper._
-import util.Helpers._
-import com.mypetdefense.service.ParentService
+import java.time.{LocalDateTime, ZoneId}
+
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import org.quartz.{
-  CronScheduleBuilder,
-  JobBuilder,
-  JobDetail,
-  JobExecutionContext,
-  Trigger,
-  TriggerBuilder
-}
-import java.util.Date
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, LocalDateTime, Period, ZoneId}
-import java.time.format.DateTimeFormatter
+import com.mypetdefense.service.ParentService
+import net.liftweb._
+import mapper._
+import org.quartz._
+import util.Helpers._
 
 class GrowthNotifyJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {

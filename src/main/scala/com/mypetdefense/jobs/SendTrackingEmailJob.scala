@@ -1,31 +1,15 @@
 package com.mypetdefense.jobs
 
+import java.util.Date
+
+import com.mypetdefense.actor._
+import com.mypetdefense.model._
+import com.mypetdefense.service.{InventoryService, ParentService, ShipStationService}
 import net.liftweb._
 import common._
 import mapper._
+import org.quartz._
 import util.Helpers._
-import com.mypetdefense.service.{InventoryService, ParentService, ShipStationService}
-import com.mypetdefense.actor._
-import com.mypetdefense.model._
-import org.quartz.{
-  CronScheduleBuilder,
-  JobBuilder,
-  JobDetail,
-  JobExecutionContext,
-  Trigger,
-  TriggerBuilder
-}
-import java.util.Date
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, LocalDateTime, Period, ZoneId}
-import java.time.format.DateTimeFormatter
-
-import com.mypetdefense.shipstation.{
-  Address => ShipStationAddress,
-  Shipment => ShipStationShipment,
-  _
-}
 
 class SendTrackingEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {

@@ -9,29 +9,25 @@ import net.liftweb.mapper._
 
 class Pet extends LongKeyedMapper[Pet] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, Pet] = Pet
-  object petId extends MappedLong(this) {
-    override def dbIndexed_? = true
-  }
-  object user            extends MappedLongForeignKey(this, User)
-  object box             extends MappedLongForeignKey(this, SubscriptionBox)
-  object name            extends MappedString(this, 100)
-  object breed           extends MappedString(this, 100)
-  object animalType      extends MappedEnum(this, AnimalType)
-  object size            extends MappedEnum(this, AnimalSize)
-  object adultSize       extends MappedEnum(this, AnimalSize)
-  object birthday        extends MappedDateTime(this)
-  object nextGrowthDelay extends MappedInt(this)
-  object sentDogTag extends MappedBoolean(this) {
-    override def defaultValue = false
-  }
-  object status extends MappedEnum(this, Status) {
-    override def defaultValue: Status.Value = Status.Active
-  }
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
 
   def refresh: Box[Pet] = Pet.find(By(Pet.petId, petId.get))
+
+  def createNewPet(
+      user: User,
+      name: String,
+      product: FleaTick,
+      breed: String,
+      whelpDate: Box[Date]
+  ): Pet = {
+    createNewPet(
+      user,
+      name,
+      product.animalType.get,
+      product.size.get,
+      whelpDate,
+      breed
+    )
+  }
 
   def createNewPet(
       user: User,
@@ -52,25 +48,42 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
       .saveMe
   }
 
-  def createNewPet(
-      user: User,
-      name: String,
-      product: FleaTick,
-      breed: String,
-      whelpDate: Box[Date]
-  ): Pet = {
-    createNewPet(
-      user,
-      name,
-      product.animalType.get,
-      product.size.get,
-      whelpDate,
-      breed
-    )
-  }
-
   def createNewPet(pet: Pet, user: User): Pet = {
     pet.user(user).saveMe
+  }
+
+  object petId extends MappedLong(this) {
+    override def dbIndexed_? = true
+  }
+
+  object user extends MappedLongForeignKey(this, User)
+
+  object box extends MappedLongForeignKey(this, SubscriptionBox)
+
+  object name extends MappedString(this, 100)
+
+  object breed extends MappedString(this, 100)
+
+  object animalType extends MappedEnum(this, AnimalType)
+
+  object size extends MappedEnum(this, AnimalSize)
+
+  object adultSize extends MappedEnum(this, AnimalSize)
+
+  object birthday extends MappedDateTime(this)
+
+  object nextGrowthDelay extends MappedInt(this)
+
+  object sentDogTag extends MappedBoolean(this) {
+    override def defaultValue = false
+  }
+
+  object status extends MappedEnum(this, Status) {
+    override def defaultValue: Status.Value = Status.Active
+  }
+
+  object createdAt extends MappedDateTime(this) {
+    override def defaultValue = new Date()
   }
 }
 

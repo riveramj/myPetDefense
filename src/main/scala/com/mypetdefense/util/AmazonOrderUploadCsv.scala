@@ -1,145 +1,28 @@
 package com.mypetdefense.util
 
-import scala.collection.JavaConverters._
-import scala.util.matching.Regex
 import java.io.StringReader
+import java.nio.charset.StandardCharsets
+import java.time.format.DateTimeFormatter
+import java.time.{Instant, OffsetDateTime}
+import java.util.Date
 import java.util.regex.Pattern
 
+import au.com.bytecode.opencsv.{CSVParser, CSVReader}
+import com.mypetdefense.model._
+import net.liftweb.common._
 import net.liftweb.http.S
 import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.mapper.By
-import au.com.bytecode.opencsv.{CSVParser, CSVReader}
 
+import scala.collection.JavaConverters._
+import scala.language.{implicitConversions, postfixOps}
+import scala.util.matching.Regex
 import xml.Text
-import com.mypetdefense.model._
-import java.nio.charset.StandardCharsets
-import java.time.{Instant, OffsetDateTime}
-import java.time.format.DateTimeFormatter
-
-import scala.language.implicitConversions
-import scala.language.postfixOps
-import java.util.Date
-
-import com.mypetdefense.util.AmazonOrderUploadCsv.Columns
 
 case class AmazonOrders(list: List[AmazonOrder])
 
 object AmazonOrderUploadCsv extends Loggable {
   def parse(source: Array[Byte]): Box[AmazonOrders] =
     parse(new String(source, StandardCharsets.UTF_8))
-
-  object Columns extends Enumeration {
-    val AmazonOrderId: HeaderValue =
-      HeaderValue(name = "amazon-order-id", default = Failure("missing required amazon-order-id"))
-    val BuyerEmail: HeaderValue =
-      HeaderValue(name = "buyer-email", default = Failure("missing required buyer-email"))
-    val BuyerPhone: HeaderValue = HeaderValue(
-      name = "buyer-phone-number",
-      default = Failure("missing required buyer-phone-number")
-    )
-    val ProductName: HeaderValue =
-      HeaderValue(name = "product-name", default = Failure("missing required product-name"))
-    val QuantityPurchased: HeaderValue =
-      HeaderValue(name = "quantity-shipped", default = Failure("missing required quantity-shipped"))
-    val ProductPrice: HeaderValue =
-      HeaderValue(name = "item-price", default = Failure("missing required item-price"))
-    val ProductDiscount: HeaderValue = HeaderValue(
-      name = "item-promotion-discount",
-      default = Failure("missing required item-promotion-discount")
-    )
-    val Carrier: HeaderValue =
-      HeaderValue(name = "carrier", default = Failure("missing required carrier"))
-
-    val Sku: HeaderValue = HeaderValue(name = "sku", default = Failure("missing required sku"))
-    val PurchaseDate: HeaderValue =
-      HeaderValue(name = "purchase-date", default = Failure("missing required purchase-date"))
-    val RecipientName: HeaderValue =
-      HeaderValue(name = "recipient-name", default = Failure("missing required recipient-name"))
-    val ShipAddress1: HeaderValue =
-      HeaderValue(name = "ship-address-1", default = Failure("missing required ship-address-1"))
-    val ShipAddress2: HeaderValue =
-      HeaderValue(name = "ship-address-2", default = Failure("missing required ship-address-2"))
-    val ShipAddress3: HeaderValue =
-      HeaderValue(name = "ship-address-3", default = Failure("missing required ship-address-3"))
-    val ShipCity: HeaderValue =
-      HeaderValue(name = "ship-city", default = Failure("missing required ship-city"))
-    val ShipState: HeaderValue =
-      HeaderValue(name = "ship-state", default = Failure("missing required ship-state"))
-    val ShipZip: HeaderValue =
-      HeaderValue(name = "ship-postal-code", default = Failure("missing required ship-postal-code"))
-
-    case class HeaderValue(
-        name: String,
-        matcher: Box[Regex] = Empty,
-        parser: String => Box[String] = (rawCell: String) => Full(rawCell.trim).filter(_.nonEmpty),
-        default: Box[String] = Empty
-    ) extends Val(name) {
-      val nameMatcher: Regex = matcher openOr ("""(?i)^\s*""" + Pattern.quote(name) + """\s*$""").r
-      def matches(candidate: String): Boolean = {
-        nameMatcher.unapplySeq(candidate).isDefined
-      }
-      def required: Boolean = {
-        default match {
-          case Failure(_, _, _) => true
-          case _                => false
-        }
-      }
-    }
-
-    def requiredColumns: Columns.ValueSet = {
-      values.filter(_.required)
-    }
-
-    def requiredColumnsCount: Int = {
-      requiredColumns.size
-    }
-
-    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
-      requiredColumns.filter(headerIndex.get(_).isEmpty)
-    }
-
-    def cellValue(
-        column: HeaderValue,
-        headerIndex: Map[Value, Int],
-        row: Array[String]
-    ): Box[String] = {
-      Box {
-        for {
-          index <- headerIndex get column
-          cell  <- row.lift(index)
-          value <- column.parser(cell)
-        } yield {
-          value
-        }
-      } or column.default
-    }
-
-    def cellInt(column: HeaderValue, headerIndex: Map[Value, Int], row: Array[String]): Box[Int] = {
-      cellValue(column, headerIndex, row).flatMap(i => tryo(i.toInt))
-    }
-
-    def cellDouble(
-        column: HeaderValue,
-        headerIndex: Map[Value, Int],
-        row: Array[String]
-    ): Box[Double] = {
-      cellValue(column, headerIndex, row).flatMap(i => tryo(i.toDouble))
-    }
-
-    def cellBoolean(
-        column: HeaderValue,
-        headerIndex: Map[Value, Int],
-        row: Array[String]
-    ): Boolean = {
-      cellValue(column, headerIndex, row).map(_.toLowerCase) match {
-        case Full("1") | Full("y") | Full("yes") => true
-        case _                                   => false
-      }
-    }
-
-    implicit def valueToHeaderValue(v: Value): HeaderValue = v.asInstanceOf[HeaderValue]
-  }
 
   def parse(source: String): Box[AmazonOrders] = {
     val amazonOrders: List[Box[AmazonOrder]] = {
@@ -222,10 +105,6 @@ object AmazonOrderUploadCsv extends Loggable {
     }
   }
 
-  private def failLine(msg: String, line: Int) = {
-    Failure("%s [line %d]" format (msg, line))
-  }
-
   def parseLine(
       fieldList: Array[String],
       lineCount: Int,
@@ -241,6 +120,10 @@ object AmazonOrderUploadCsv extends Loggable {
         case _                                      => createAmazonOrder(fieldList, lineCount, headerIndex)
       }
     }
+  }
+
+  private def failLine(msg: String, line: Int) = {
+    Failure("%s [line %d]" format (msg, line))
   }
 
   def createAmazonOrder(
@@ -301,5 +184,117 @@ object AmazonOrderUploadCsv extends Loggable {
         .animalType(animalType)
         .purchaseDate(purchaseDate)
     )
+  }
+
+  object Columns extends Enumeration {
+    val AmazonOrderId: HeaderValue =
+      HeaderValue(name = "amazon-order-id", default = Failure("missing required amazon-order-id"))
+    val BuyerEmail: HeaderValue =
+      HeaderValue(name = "buyer-email", default = Failure("missing required buyer-email"))
+    val BuyerPhone: HeaderValue = HeaderValue(
+      name = "buyer-phone-number",
+      default = Failure("missing required buyer-phone-number")
+    )
+    val ProductName: HeaderValue =
+      HeaderValue(name = "product-name", default = Failure("missing required product-name"))
+    val QuantityPurchased: HeaderValue =
+      HeaderValue(name = "quantity-shipped", default = Failure("missing required quantity-shipped"))
+    val ProductPrice: HeaderValue =
+      HeaderValue(name = "item-price", default = Failure("missing required item-price"))
+    val ProductDiscount: HeaderValue = HeaderValue(
+      name = "item-promotion-discount",
+      default = Failure("missing required item-promotion-discount")
+    )
+    val Carrier: HeaderValue =
+      HeaderValue(name = "carrier", default = Failure("missing required carrier"))
+
+    val Sku: HeaderValue = HeaderValue(name = "sku", default = Failure("missing required sku"))
+    val PurchaseDate: HeaderValue =
+      HeaderValue(name = "purchase-date", default = Failure("missing required purchase-date"))
+    val RecipientName: HeaderValue =
+      HeaderValue(name = "recipient-name", default = Failure("missing required recipient-name"))
+    val ShipAddress1: HeaderValue =
+      HeaderValue(name = "ship-address-1", default = Failure("missing required ship-address-1"))
+    val ShipAddress2: HeaderValue =
+      HeaderValue(name = "ship-address-2", default = Failure("missing required ship-address-2"))
+    val ShipAddress3: HeaderValue =
+      HeaderValue(name = "ship-address-3", default = Failure("missing required ship-address-3"))
+    val ShipCity: HeaderValue =
+      HeaderValue(name = "ship-city", default = Failure("missing required ship-city"))
+    val ShipState: HeaderValue =
+      HeaderValue(name = "ship-state", default = Failure("missing required ship-state"))
+    val ShipZip: HeaderValue =
+      HeaderValue(name = "ship-postal-code", default = Failure("missing required ship-postal-code"))
+
+    def requiredColumnsCount: Int = {
+      requiredColumns.size
+    }
+
+    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
+      requiredColumns.filter(headerIndex.get(_).isEmpty)
+    }
+
+    def requiredColumns: Columns.ValueSet = {
+      values.filter(_.required)
+    }
+
+    def cellInt(column: HeaderValue, headerIndex: Map[Value, Int], row: Array[String]): Box[Int] = {
+      cellValue(column, headerIndex, row).flatMap(i => tryo(i.toInt))
+    }
+
+    def cellDouble(
+        column: HeaderValue,
+        headerIndex: Map[Value, Int],
+        row: Array[String]
+    ): Box[Double] = {
+      cellValue(column, headerIndex, row).flatMap(i => tryo(i.toDouble))
+    }
+
+    def cellBoolean(
+        column: HeaderValue,
+        headerIndex: Map[Value, Int],
+        row: Array[String]
+    ): Boolean = {
+      cellValue(column, headerIndex, row).map(_.toLowerCase) match {
+        case Full("1") | Full("y") | Full("yes") => true
+        case _                                   => false
+      }
+    }
+
+    def cellValue(
+        column: HeaderValue,
+        headerIndex: Map[Value, Int],
+        row: Array[String]
+    ): Box[String] = {
+      Box {
+        for {
+          index <- headerIndex get column
+          cell  <- row.lift(index)
+          value <- column.parser(cell)
+        } yield {
+          value
+        }
+      } or column.default
+    }
+
+    case class HeaderValue(
+        name: String,
+        matcher: Box[Regex] = Empty,
+        parser: String => Box[String] = (rawCell: String) => Full(rawCell.trim).filter(_.nonEmpty),
+        default: Box[String] = Empty
+    ) extends Val(name) {
+      val nameMatcher: Regex = matcher openOr ("""(?i)^\s*""" + Pattern.quote(name) + """\s*$""").r
+      def matches(candidate: String): Boolean = {
+        nameMatcher.unapplySeq(candidate).isDefined
+      }
+      def required: Boolean = {
+        default match {
+          case Failure(_, _, _) => true
+          case _                => false
+        }
+      }
+    }
+
+    implicit def valueToHeaderValue(v: Value): HeaderValue = v.asInstanceOf[HeaderValue]
   }
 }

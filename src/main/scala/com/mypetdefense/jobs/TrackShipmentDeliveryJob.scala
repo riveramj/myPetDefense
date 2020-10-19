@@ -1,34 +1,25 @@
 package com.mypetdefense.jobs
 
+import java.text.SimpleDateFormat
+import java.time.{LocalDate, ZoneId}
+import java.util.Date
+
 import net.liftweb._
 import common._
 import json._
-import Extraction._
-import Xml.{toJson, toXml}
-import mapper._
-import util.Helpers.tryo
+import Xml.toJson
 import dispatch._
 import Defaults._
+import com.mypetdefense.model._
+import ShipmentStatus._
+import mapper._
+import org.quartz._
+import util.Helpers.tryo
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.collection.concurrent.TrieMap
 import scala.util.{Failure => TryFail, _}
-import org.quartz.{
-  CronScheduleBuilder,
-  JobBuilder,
-  JobDetail,
-  JobExecutionContext,
-  Trigger,
-  TriggerBuilder
-}
-import com.mypetdefense.model._
-import ShipmentStatus._
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId}
-import java.time.format.DateTimeFormatter
 
 class TrackShipmentDeliveryJob extends ManagedJob {
   implicit val formats: DefaultFormats.type = DefaultFormats

@@ -1,29 +1,16 @@
 package com.mypetdefense.jobs
 
-import org.quartz.impl.StdSchedulerFactory
 import net.liftweb._
 import common._
 import org.quartz.Scheduler
+import org.quartz.impl.StdSchedulerFactory
 import util._
 
 object JobManager extends SimpleInjector with Loggable {
 
-  val jobs: JobManager.Inject[List[TriggeredJob]] = new Inject(() => calcJobs) {}
-
   // Quartz Scheduler
-  lazy val scheduler: Scheduler = StdSchedulerFactory.getDefaultScheduler()
-
-  // calculate the jobs to run
-  private def calcJobs: List[TriggeredJob] = {
-    import Props.RunModes._
-
-    Props.mode match {
-      case Production => productionJobs
-      case Staging    => Nil
-      case Pilot      => nonproductionJobs
-      case _          => nonproductionJobs
-    }
-  }
+  lazy val scheduler: Scheduler                   = StdSchedulerFactory.getDefaultScheduler()
+  val jobs: JobManager.Inject[List[TriggeredJob]] = new Inject(() => calcJobs) {}
 
   def init(): Unit = {
     val js = jobs.vend
@@ -35,6 +22,18 @@ object JobManager extends SimpleInjector with Loggable {
 
   def shutdown(): Unit = {
     scheduler.shutdown
+  }
+
+  // calculate the jobs to run
+  private def calcJobs: List[TriggeredJob] = {
+    import Props.RunModes._
+
+    Props.mode match {
+      case Production => productionJobs
+      case Staging    => Nil
+      case Pilot      => nonproductionJobs
+      case _          => nonproductionJobs
+    }
   }
 
   private def productionJobs: List[TriggeredJob] = {

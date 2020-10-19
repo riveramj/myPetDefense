@@ -1,103 +1,27 @@
 package com.mypetdefense.util
 
-import scala.collection.JavaConverters._
-import scala.util.matching.Regex
 import java.io.StringReader
+import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 
-import net.liftweb.http.S
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.mapper.By
 import au.com.bytecode.opencsv.{CSVParser, CSVReader}
-
-import xml.Text
 import com.mypetdefense.model._
-import java.nio.charset.StandardCharsets
+import net.liftweb.common._
+import net.liftweb.http.S
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
 
-import scala.language.implicitConversions
-import scala.language.postfixOps
-import java.text.SimpleDateFormat
-
-import com.mypetdefense.util.ReviewsUploadCSV.Columns
+import scala.collection.JavaConverters._
+import scala.language.{implicitConversions, postfixOps}
+import scala.util.matching.Regex
+import xml.Text
 
 case class ReviewsList(list: List[Review])
 
 object ReviewsUploadCSV extends Loggable {
   def parse(source: Array[Byte]): Box[ReviewsList] =
     parse(new String(source, StandardCharsets.UTF_8))
-
-  object Columns extends Enumeration {
-    val Title: HeaderValue =
-      HeaderValue(name = "Title", default = Failure("missing required Title"))
-    val Body: HeaderValue = HeaderValue(name = "Body", default = Failure("missing required Email"))
-    val Rating: HeaderValue =
-      HeaderValue(name = "Rating", default = Failure("missing required Rating"))
-    val Author: HeaderValue =
-      HeaderValue(name = "Author", default = Failure("missing required Author"))
-    val Date: HeaderValue = HeaderValue(name = "Date", default = Failure("missing required Date"))
-    val Product: HeaderValue =
-      HeaderValue(name = "Product", default = Failure("missing required Product"))
-
-    case class HeaderValue(
-        name: String,
-        matcher: Box[Regex] = Empty,
-        parser: String => Box[String] = (rawCell: String) => Full(rawCell.trim).filter(_.nonEmpty),
-        default: Box[String] = Empty
-    ) extends Val(name) {
-      val nameMatcher: Regex = matcher openOr ("""(?i)^\s*""" + Pattern.quote(name) + """\s*$""").r
-      def matches(candidate: String): Boolean = {
-        nameMatcher.unapplySeq(candidate).isDefined
-      }
-      def required: Boolean = {
-        default match {
-          case Failure(_, _, _) => true
-          case _                => false
-        }
-      }
-    }
-
-    def requiredColumns: Columns.ValueSet = {
-      values.filter(_.required)
-    }
-
-    def requiredColumnsCount: Int = {
-      requiredColumns.size
-    }
-
-    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
-      requiredColumns.filter(headerIndex.get(_).isEmpty)
-    }
-
-    def cellValue(
-        column: HeaderValue,
-        headerIndex: Map[Value, Int],
-        row: Array[String]
-    ): Box[String] = {
-      Box {
-        for {
-          index <- headerIndex get column
-          cell  <- row.lift(index)
-          value <- column.parser(cell)
-        } yield {
-          value
-        }
-      } or column.default
-    }
-
-    def cellBoolean(
-        column: HeaderValue,
-        headerIndex: Map[Value, Int],
-        row: Array[String]
-    ): Boolean = {
-      cellValue(column, headerIndex, row).map(_.toLowerCase) match {
-        case Full("1") | Full("y") | Full("yes") => true
-        case _                                   => false
-      }
-    }
-
-    implicit def valueToHeaderValue(v: Value): HeaderValue = v.asInstanceOf[HeaderValue]
-  }
 
   def parse(source: String): Box[ReviewsList] = {
     val reviewsList: List[Box[Review]] = {
@@ -180,10 +104,6 @@ object ReviewsUploadCSV extends Loggable {
     }
   }
 
-  private def failLine(msg: String, line: Int) = {
-    Failure("%s [line %d]" format (msg, line))
-  }
-
   def parseLine(
       fieldList: Array[String],
       lineCount: Int,
@@ -199,6 +119,10 @@ object ReviewsUploadCSV extends Loggable {
         case _                                      => toReview(fieldList, lineCount, headerIndex)
       }
     }
+  }
+
+  private def failLine(msg: String, line: Int) = {
+    Failure("%s [line %d]" format (msg, line))
   }
 
   def toReview(
@@ -241,6 +165,14 @@ object ReviewsUploadCSV extends Loggable {
     }
   }
 
+  def updateProductRatings: List[FleaTick] = {
+    updateRating("ZoGuard Plus for Dogs")
+    updateRating("ZoGuard Plus for Cats")
+    updateRating("Adventure Plus for Dogs")
+    updateRating("Adventure Plus for Cats")
+    updateRating("ShieldTec Plus for Dogs")
+  }
+
   def updateRating(productName: String): List[FleaTick] = {
     val fleaTicks = FleaTick.findAll(By(FleaTick.name, productName))
     val reviews   = fleaTicks.map(_.reviews.toList).flatten
@@ -250,11 +182,75 @@ object ReviewsUploadCSV extends Loggable {
     fleaTicks.map { fleaTick => fleaTick.rating(avgRating).reviewCount(reviews.size).saveMe }
   }
 
-  def updateProductRatings: List[FleaTick] = {
-    updateRating("ZoGuard Plus for Dogs")
-    updateRating("ZoGuard Plus for Cats")
-    updateRating("Adventure Plus for Dogs")
-    updateRating("Adventure Plus for Cats")
-    updateRating("ShieldTec Plus for Dogs")
+  object Columns extends Enumeration {
+    val Title: HeaderValue =
+      HeaderValue(name = "Title", default = Failure("missing required Title"))
+    val Body: HeaderValue = HeaderValue(name = "Body", default = Failure("missing required Email"))
+    val Rating: HeaderValue =
+      HeaderValue(name = "Rating", default = Failure("missing required Rating"))
+    val Author: HeaderValue =
+      HeaderValue(name = "Author", default = Failure("missing required Author"))
+    val Date: HeaderValue = HeaderValue(name = "Date", default = Failure("missing required Date"))
+    val Product: HeaderValue =
+      HeaderValue(name = "Product", default = Failure("missing required Product"))
+
+    def requiredColumnsCount: Int = {
+      requiredColumns.size
+    }
+
+    def missingRequiredHeaders(headerIndex: Map[Columns.Value, Int]): Columns.ValueSet = {
+      requiredColumns.filter(headerIndex.get(_).isEmpty)
+    }
+
+    def requiredColumns: Columns.ValueSet = {
+      values.filter(_.required)
+    }
+
+    def cellBoolean(
+        column: HeaderValue,
+        headerIndex: Map[Value, Int],
+        row: Array[String]
+    ): Boolean = {
+      cellValue(column, headerIndex, row).map(_.toLowerCase) match {
+        case Full("1") | Full("y") | Full("yes") => true
+        case _                                   => false
+      }
+    }
+
+    def cellValue(
+        column: HeaderValue,
+        headerIndex: Map[Value, Int],
+        row: Array[String]
+    ): Box[String] = {
+      Box {
+        for {
+          index <- headerIndex get column
+          cell  <- row.lift(index)
+          value <- column.parser(cell)
+        } yield {
+          value
+        }
+      } or column.default
+    }
+
+    case class HeaderValue(
+        name: String,
+        matcher: Box[Regex] = Empty,
+        parser: String => Box[String] = (rawCell: String) => Full(rawCell.trim).filter(_.nonEmpty),
+        default: Box[String] = Empty
+    ) extends Val(name) {
+      val nameMatcher: Regex = matcher openOr ("""(?i)^\s*""" + Pattern.quote(name) + """\s*$""").r
+      def matches(candidate: String): Boolean = {
+        nameMatcher.unapplySeq(candidate).isDefined
+      }
+      def required: Boolean = {
+        default match {
+          case Failure(_, _, _) => true
+          case _                => false
+        }
+      }
+    }
+
+    implicit def valueToHeaderValue(v: Value): HeaderValue = v.asInstanceOf[HeaderValue]
   }
 }

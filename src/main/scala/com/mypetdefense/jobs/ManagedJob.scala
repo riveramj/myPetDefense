@@ -1,10 +1,10 @@
 package com.mypetdefense.jobs
 
-import org.quartz._
+import java.io.{PrintWriter, StringWriter}
 
 import net.liftweb._
 import common._
-import java.io.{StringWriter, PrintWriter}
+import org.quartz._
 
 /**
   * Extend jobs from this to get a try/catch block and logging.
