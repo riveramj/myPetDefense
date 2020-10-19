@@ -24,7 +24,6 @@ import scala.concurrent.duration._
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 import scala.xml.{Elem, NodeSeq}
 
-
 object petsOrdered extends SessionVar[List[Pet]](Nil)
 
 case class OrderSubmitted(email: String) extends MyPetDefenseEvent("order-submitted")
@@ -41,14 +40,24 @@ object NewOrder extends Loggable {
 }
 
 class NewOrder extends Loggable {
-  val stripeSecretKey: String = Props.get("secret.key") openOr ""
+  val stripeSecretKey: String    = Props.get("secret.key") openOr ""
   implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
 
   val currentUser: Box[User] = SecurityContext.currentUser
-  
+
   val monthsOfyear = List(
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
   )
 
   val dogZoguardProduct: List[FleaTick] = FleaTick.findAll(
@@ -60,38 +69,38 @@ class NewOrder extends Loggable {
   )
 
   var pets: List[Pet] = petsOrdered.is
-  var email = ""
-  var phone = ""
-  var firstName = ""
-  var lastName = ""
-  var street1 = ""
-  var street2 = ""
-  var city = ""
-  var state = ""
-  var zip = ""
-  var taxRate = 0D
-  var taxDue = 0D
-  var subtotal = 0D
-  var total = 0D
-  
-  var newPetType: Box[AnimalType.Value] = Empty
+  var email           = ""
+  var phone           = ""
+  var firstName       = ""
+  var lastName        = ""
+  var street1         = ""
+  var street2         = ""
+  var city            = ""
+  var state           = ""
+  var zip             = ""
+  var taxRate         = 0d
+  var taxDue          = 0d
+  var subtotal        = 0d
+  var total           = 0d
+
+  var newPetType: Box[AnimalType.Value]        = Empty
   var newPetCurrentSize: Box[AnimalSize.Value] = Empty
-  var newPetAdultSize: Box[AnimalSize.Value] = Empty
-  
+  var newPetAdultSize: Box[AnimalSize.Value]   = Empty
+
   var birthdayMonth = ""
-  var birthdayYear = ""
-  var petName = ""
+  var birthdayYear  = ""
+  var petName       = ""
 
   var stripeToken = ""
 
-  var addPetRenderer: Box[IdMemoizeTransform] = Empty
+  var addPetRenderer: Box[IdMemoizeTransform]       = Empty
   var orderDetailsRenderer: Box[IdMemoizeTransform] = Empty
-  var totalsRenderer: Box[IdMemoizeTransform] = Empty
+  var totalsRenderer: Box[IdMemoizeTransform]       = Empty
 
   val birthdayDateFormat = new SimpleDateFormat("MMM yyyy")
 
   val petlandPlan: Box[Plan] = ParentService.getCurrentPetlandProductPlan
-  val petlandPlanId: String = petlandPlan.map(_.id).openOr("")
+  val petlandPlanId: String  = petlandPlan.map(_.id).openOr("")
 
   def calculateTax(possibleState: String, possibleZip: String): JsCmd = {
     state = possibleState
@@ -112,17 +121,17 @@ class NewOrder extends Loggable {
 
   def signup(): JsCmd = {
     val validateFields = List(
-        checkEmail(email, "#email"),
-        checkEmpty(phone, "#phone"),
-        checkEmpty(firstName, "#first-name"),
-        checkEmpty(lastName, "#last-name"),
-        checkEmpty(street1, "#street-1"),
-        checkEmpty(city, "#city"),
-        checkEmpty(state, "#state"),
-        checkEmpty(zip, "#zip")
-      ).flatten
+      checkEmail(email, "#email"),
+      checkEmpty(phone, "#phone"),
+      checkEmpty(firstName, "#first-name"),
+      checkEmpty(lastName, "#last-name"),
+      checkEmpty(street1, "#street-1"),
+      checkEmpty(city, "#city"),
+      checkEmpty(state, "#state"),
+      checkEmpty(zip, "#zip")
+    ).flatten
 
-    if(validateFields.isEmpty) {
+    if (validateFields.isEmpty) {
       val stripeCustomer = {
         Customer.create(
           email = Some(email),
@@ -156,11 +165,15 @@ class NewOrder extends Loggable {
 
         case TrySuccess(stripeFailure) =>
           logger.error(s"create customer failed with stripe error: $stripeFailure")
-          Alert("An error has occured. Please try again. If you continue to receive an error, please contact us at help@mypetdefense.com.")
+          Alert(
+            "An error has occured. Please try again. If you continue to receive an error, please contact us at help@mypetdefense.com."
+          )
 
         case TryFail(throwable: Throwable) =>
           logger.error(s"create customer failed with other error: $throwable")
-          Alert("An error has occured. Please try again. If you continue to receive an error, please contact us at help@mypetdefense.com.")
+          Alert(
+            "An error has occured. Please try again. If you continue to receive an error, please contact us at help@mypetdefense.com."
+          )
       }
     } else {
       validateFields.foldLeft(Noop)(_ & _)
@@ -192,16 +205,15 @@ class NewOrder extends Loggable {
       zip,
       AddressType.Shipping
     )
-    
+
     createNewPets(newParent)
 
-    val subscriptionId = (
-      for {
-        rawSubscriptions <- customer.subscriptions
-        subscription <- rawSubscriptions.data.headOption
-      } yield {
-        subscription.id
-      }).flatten.getOrElse("")
+    val subscriptionId = (for {
+      rawSubscriptions <- customer.subscriptions
+      subscription     <- rawSubscriptions.data.headOption
+    } yield {
+      subscription.id
+    }).flatten.getOrElse("")
 
     Subscription.createNewSubscription(
       Full(newParent),
@@ -217,15 +229,13 @@ class NewOrder extends Loggable {
     if (Props.mode == Props.RunModes.Production) {
       EmailActor ! NewSaleEmail(newParent, cart.size, coupon.map(_.couponCode.get).openOr(""))
     }
-    */
+     */
 
     newParent
   }
 
   def createNewPets(parent: User): List[Pet] = {
-    pets.map { pet =>
-      Pet.createNewPet(pet, parent)
-    }
+    pets.map { pet => Pet.createNewPet(pet, parent) }
   }
 
   def petTypeDropdown(renderer: IdMemoizeTransform): Elem = {
@@ -251,7 +261,8 @@ class NewOrder extends Loggable {
         dogZoguardProduct
     }.openOr(Nil)
 
-    val productChoices = products.map(product => (Full(product.size.get), product.getSizeAndSizeName))
+    val productChoices =
+      products.map(product => (Full(product.size.get), product.getSizeAndSizeName))
 
     newPetCurrentSize = productChoices.headOption.flatMap(_._1)
     newPetAdultSize = productChoices.headOption.flatMap(_._1)
@@ -276,7 +287,7 @@ class NewOrder extends Loggable {
       birthdayMonth = _
     )
   }
-  
+
   def birthdayYearDropdown: Elem = {
     SHtml.ajaxSelect(
       List(("", "Year")) ++ (2019 to 1998 by -1).toList.map(year => (year.toString, year.toString)),
@@ -290,9 +301,7 @@ class NewOrder extends Loggable {
       if (newPetType == Full(AnimalType.Cat)) {
         catZoguardProduct
       } else {
-        dogZoguardProduct.filter { product =>
-          Full(product.size.get) == newPetCurrentSize
-        }
+        dogZoguardProduct.filter { product => Full(product.size.get) == newPetCurrentSize }
       }
     }.headOption
 
@@ -300,9 +309,9 @@ class NewOrder extends Loggable {
 
     val newPet = {
       for {
-        animal <- newPetType.toList
+        animal      <- newPetType.toList
         currentSize <- newPetCurrentSize
-        adultSize <- newPetAdultSize
+        adultSize   <- newPetAdultSize
       } yield {
         val realPetName = {
           if (petName == "")
@@ -337,12 +346,11 @@ class NewOrder extends Loggable {
     birthdayYear = ""
     petName = ""
 
-
     (
       addPetRenderer.map(_.setHtml).openOr(Noop) &
-      orderDetailsRenderer.map(_.setHtml).openOr(Noop) &
-      totalsRenderer.map(_.setHtml).openOr(Noop) &
-      PetAdded(newPet.map(_.name.get).headOption.getOrElse(""))
+        orderDetailsRenderer.map(_.setHtml).openOr(Noop) &
+        totalsRenderer.map(_.setHtml).openOr(Noop) &
+        PetAdded(newPet.map(_.name.get).headOption.getOrElse(""))
     )
   }
 
@@ -353,7 +361,7 @@ class NewOrder extends Loggable {
 
     (
       orderDetailsRenderer.map(_.setHtml).openOr(Noop) &
-      totalsRenderer.map(_.setHtml).openOr(Noop)
+        totalsRenderer.map(_.setHtml).openOr(Noop)
     )
   }
 
@@ -362,12 +370,12 @@ class NewOrder extends Loggable {
       addPetRenderer = Full(renderer)
 
       "#pet-type" #> petTypeDropdown(renderer) &
-      "#current-size" #> petSizeDropdown("current") &
-      "#adult-size" #> petSizeDropdown("adult") &
-      "#birthday-month" #> birthdayMonthDropdown &
-      "#birthday-year" #> birthdayYearDropdown &
-      "#new-pet-name" #> text(petName, petName = _) &
-      "#add-to-order" #> SHtml.ajaxSubmit("Add to Order", () => addPet())
+        "#current-size" #> petSizeDropdown("current") &
+        "#adult-size" #> petSizeDropdown("adult") &
+        "#birthday-month" #> birthdayMonthDropdown &
+        "#birthday-year" #> birthdayYearDropdown &
+        "#new-pet-name" #> text(petName, petName = _) &
+        "#add-to-order" #> SHtml.ajaxSubmit("Add to Order", () => addPet())
     }
   }
 
@@ -378,17 +386,17 @@ class NewOrder extends Loggable {
         val birthday = tryo(birthdayDateFormat.format(pet.birthday.get))
 
         ".pet-name *" #> pet.name.get &
-        ".pet-birthday *" #> birthday &
-        ".remove [onclick]" #> ajaxInvoke(() => removePet(pet))
+          ".pet-birthday *" #> birthday &
+          ".remove [onclick]" #> ajaxInvoke(() => removePet(pet))
       }
     } &
-    "#empty-cart [class+]" #> { 
-      if (pets.nonEmpty)
-        "hidden"
-      else
-        ""
-    } &
-    ".continue-shopping *" #> (if (pets.nonEmpty) "Continue Shopping" else "Add Another Pet")
+      "#empty-cart [class+]" #> {
+        if (pets.nonEmpty)
+          "hidden"
+        else
+          ""
+      } &
+      ".continue-shopping *" #> (if (pets.nonEmpty) "Continue Shopping" else "Add Another Pet")
   }
 
   def totalSummaryBindings: CssBindFunc = {
@@ -400,28 +408,28 @@ class NewOrder extends Loggable {
       total = subtotal + taxDue
 
       ".subtotal-amount *" #> f"$$$subtotal%2.2f" &
-      ".tax-amount *" #> f"$$$taxDue%2.2f" &
-      ".total-price *" #> f"$$$total%2.2f"
+        ".tax-amount *" #> f"$$$taxDue%2.2f" &
+        ".total-price *" #> f"$$$total%2.2f"
     }
   }
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    ".new-order [class+]" #> "current" &
-    ".overview" #> ClearNodesIf(!SecurityContext.admin_?) &
-    addPetBindings &
-    orderBindings &
-    totalSummaryBindings &
-    "#first-name" #> text(firstName, firstName = _) &
-    "#last-name" #> text(lastName, lastName = _) &
-    "#street-1" #> text(street1, street1 = _) &
-    "#street-2" #> text(street2, street2 = _) &
-    "#city" #> ajaxText(city, city = _) &
-    "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
-    "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
-    "#phone" #> ajaxText(phone, phone = _) &
-    "#email" #> text(email, userEmail => email = userEmail.trim) &
-    "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    ".submit" #> SHtml.ajaxSubmit("Submit", () => signup())
+      ".new-order [class+]" #> "current" &
+        ".overview" #> ClearNodesIf(!SecurityContext.admin_?) &
+        addPetBindings &
+        orderBindings &
+        totalSummaryBindings &
+        "#first-name" #> text(firstName, firstName = _) &
+        "#last-name" #> text(lastName, lastName = _) &
+        "#street-1" #> text(street1, street1 = _) &
+        "#street-2" #> text(street2, street2 = _) &
+        "#city" #> ajaxText(city, city = _) &
+        "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
+        "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
+        "#phone" #> ajaxText(phone, phone = _) &
+        "#email" #> text(email, userEmail => email = userEmail.trim) &
+        "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
+        ".submit" #> SHtml.ajaxSubmit("Submit", () => signup())
   }
 }

@@ -9,17 +9,17 @@ import net.liftweb.mapper._
 
 class Pet extends LongKeyedMapper[Pet] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, Pet] = Pet
-  object petId extends MappedLong(this){
+  object petId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-  object user extends MappedLongForeignKey(this, User)
-  object box extends MappedLongForeignKey(this, SubscriptionBox)
-  object name extends MappedString(this, 100)
-  object breed extends MappedString(this, 100)
-  object animalType extends MappedEnum(this, AnimalType)
-  object size extends MappedEnum(this, AnimalSize)
-  object adultSize extends MappedEnum(this, AnimalSize)
-  object birthday extends MappedDateTime(this)
+  object user            extends MappedLongForeignKey(this, User)
+  object box             extends MappedLongForeignKey(this, SubscriptionBox)
+  object name            extends MappedString(this, 100)
+  object breed           extends MappedString(this, 100)
+  object animalType      extends MappedEnum(this, AnimalType)
+  object size            extends MappedEnum(this, AnimalSize)
+  object adultSize       extends MappedEnum(this, AnimalSize)
+  object birthday        extends MappedDateTime(this)
   object nextGrowthDelay extends MappedInt(this)
   object sentDogTag extends MappedBoolean(this) {
     override def defaultValue = false
@@ -34,30 +34,30 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   def refresh: Box[Pet] = Pet.find(By(Pet.petId, petId.get))
 
   def createNewPet(
-    user: User,
-    name: String,
-    animalType: AnimalType.Value,
-    size: AnimalSize.Value,
-    whelpDate: Box[Date] = Empty,
-    breed: String = ""
+      user: User,
+      name: String,
+      animalType: AnimalType.Value,
+      size: AnimalSize.Value,
+      whelpDate: Box[Date] = Empty,
+      breed: String = ""
   ): Pet = {
     Pet.create
-    .petId(generateLongId)
-    .user(user)
-    .name(TitleCase(name))
-    .animalType(animalType)
-    .size(size)
-    .breed(breed)
-    .birthday(whelpDate.openOr(null))
-    .saveMe
+      .petId(generateLongId)
+      .user(user)
+      .name(TitleCase(name))
+      .animalType(animalType)
+      .size(size)
+      .breed(breed)
+      .birthday(whelpDate.openOr(null))
+      .saveMe
   }
 
   def createNewPet(
-    user: User,
-    name: String,
-    product: FleaTick,
-    breed: String,
-    whelpDate: Box[Date]
+      user: User,
+      name: String,
+      product: FleaTick,
+      breed: String,
+      whelpDate: Box[Date]
   ): Pet = {
     createNewPet(
       user,
@@ -81,24 +81,24 @@ object AnimalType extends Enumeration {
 }
 
 object AnimalSize extends Enumeration {
-  val CatSmall: AnimalSize.Value = Value("1.5-5") // 0
-  val CatMedium: AnimalSize.Value = Value("5-9") // 1
-  val CatLarge: AnimalSize.Value = Value("9+") // 2
-  
-  val DogSmallAdv: AnimalSize.Value = Value("3-10") // 3
-  val DogMediumAdv: AnimalSize.Value = Value("11-20") // 4
-  val DogLargeAdv: AnimalSize.Value = Value("21-55") // 5
-  val DogXLargeAdv: AnimalSize.Value = Value("55+") // 6
+  val CatSmall: AnimalSize.Value  = Value("1.5-5") // 0
+  val CatMedium: AnimalSize.Value = Value("5-9")   // 1
+  val CatLarge: AnimalSize.Value  = Value("9+")    // 2
 
-  val DogSmallZo: AnimalSize.Value = Value("5-22") // 7
-  val DogMediumZo: AnimalSize.Value = Value("23-44") // 8
-  val DogLargeZo: AnimalSize.Value = Value("45-88") // 9
+  val DogSmallAdv: AnimalSize.Value  = Value("3-10")  // 3
+  val DogMediumAdv: AnimalSize.Value = Value("11-20") // 4
+  val DogLargeAdv: AnimalSize.Value  = Value("21-55") // 5
+  val DogXLargeAdv: AnimalSize.Value = Value("55+")   // 6
+
+  val DogSmallZo: AnimalSize.Value  = Value("5-22")   // 7
+  val DogMediumZo: AnimalSize.Value = Value("23-44")  // 8
+  val DogLargeZo: AnimalSize.Value  = Value("45-88")  // 9
   val DogXLargeZo: AnimalSize.Value = Value("89-132") // 10
 
-  val DogSmallShld: AnimalSize.Value = Value("5-15") // 11
+  val DogSmallShld: AnimalSize.Value  = Value("5-15")  // 11
   val DogMediumShld: AnimalSize.Value = Value("16-33") // 12
-  val DogLargeShld: AnimalSize.Value = Value("34-66") // 13
-  val DogXLargeShld: AnimalSize.Value = Value("66+") // 14
-  
+  val DogLargeShld: AnimalSize.Value  = Value("34-66") // 13
+  val DogXLargeShld: AnimalSize.Value = Value("66+")   // 14
+
   val CatAllSize: AnimalSize.Value = Value("1.5+") // 15
 }

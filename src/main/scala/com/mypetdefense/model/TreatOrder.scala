@@ -9,34 +9,34 @@ import java.util.Date
 
 class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Long, TreatOrder] {
   def getSingleton: KeyedMetaMapper[Long, TreatOrder] = TreatOrder
-  object treatOrderId extends MappedLong(this){
-    override def dbIndexed_? = true
+  object treatOrderId extends MappedLong(this) {
+    override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
   }
-  object user extends MappedLongForeignKey(this, User)
-  object firstName extends MappedString(this, 100)
-  object lastName extends MappedString(this, 100)
-  object email extends MappedString(this, 100)
-  object street1 extends MappedString(this, 100)
-  object street2 extends MappedString(this, 100)
-  object city extends MappedString(this, 100)
-  object state extends MappedString(this, 100)
-  object zip extends MappedString(this, 100)
+  object user               extends MappedLongForeignKey(this, User)
+  object firstName          extends MappedString(this, 100)
+  object lastName           extends MappedString(this, 100)
+  object email              extends MappedString(this, 100)
+  object street1            extends MappedString(this, 100)
+  object street2            extends MappedString(this, 100)
+  object city               extends MappedString(this, 100)
+  object state              extends MappedString(this, 100)
+  object zip                extends MappedString(this, 100)
   object shipStationOrderId extends MappedInt(this)
-  object stripeChargeId extends MappedString(this, 100)
-  object trackingNumber extends MappedString(this, 100)
-  object dateProcessed extends MappedDateTime(this)
-  object expectedShipDate extends MappedDateTime(this)
-  object dateShipped extends MappedDateTime(this)
-  object dateReceived extends MappedDateTime(this)
-  object taxPaid extends MappedDouble(this)
-  object amountPaid extends MappedDouble(this)
-  object treatsOrdered extends MappedOneToMany(TreatOrderLineItem, TreatOrderLineItem.order)
+  object stripeChargeId     extends MappedString(this, 100)
+  object trackingNumber     extends MappedString(this, 100)
+  object dateProcessed      extends MappedDateTime(this)
+  object expectedShipDate   extends MappedDateTime(this)
+  object dateShipped        extends MappedDateTime(this)
+  object dateReceived       extends MappedDateTime(this)
+  object taxPaid            extends MappedDouble(this)
+  object amountPaid         extends MappedDouble(this)
+  object treatsOrdered      extends MappedOneToMany(TreatOrderLineItem, TreatOrderLineItem.order)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
   object shipmentStatus extends MappedEnum(this, ShipmentStatus)
-  object deliveryNotes extends MappedString(this, 100)
+  object deliveryNotes  extends MappedString(this, 100)
 
   def name: String = this.firstName.get + " " + this.lastName.get
 
@@ -45,15 +45,15 @@ class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Lo
 
 object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
   def createTreatOrder(
-    user: Box[User],
-    firstName: String,
-    lastName: String,
-    email: String,
-    address: Address,
-    stripeChargeId: String,
-    amountPaid: Double,
-    taxPaid: Double,
-    treats: List[(Product, Int)]
+      user: Box[User],
+      firstName: String,
+      lastName: String,
+      email: String,
+      address: Address,
+      stripeChargeId: String,
+      amountPaid: Double,
+      taxPaid: Double,
+      treats: List[(Product, Int)]
   ): TreatOrder = {
     val dateProcessed = new Date()
 
@@ -83,29 +83,30 @@ object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
 
 class TreatOrderLineItem extends LongKeyedMapper[TreatOrderLineItem] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, TreatOrderLineItem] = TreatOrderLineItem
-  object orderLineItemId extends MappedLong(this){
-    override def dbIndexed_? = true
+  object orderLineItemId extends MappedLong(this) {
+    override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
   }
 
-  object order extends MappedLongForeignKey(this, TreatOrder)
-  object product extends MappedLongForeignKey(this, Product)
+  object order    extends MappedLongForeignKey(this, TreatOrder)
+  object product  extends MappedLongForeignKey(this, Product)
   object quantity extends MappedInt(this)
-  object insert extends MappedLongForeignKey(this, Insert)
+  object insert   extends MappedLongForeignKey(this, Insert)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
   def createTreatOrderLineItems(
-                                 treats: List[(Product, Int)],
-                                 order: TreatOrder
+      treats: List[(Product, Int)],
+      order: TreatOrder
   ): List[TreatOrderLineItem] = {
-    treats.map { case (treat, quantity) =>
-      TreatOrderLineItem.create
-      .quantity(quantity)
-      .product(treat)
-      .order(order)
-      .saveMe
+    treats.map {
+      case (treat, quantity) =>
+        TreatOrderLineItem.create
+          .quantity(quantity)
+          .product(treat)
+          .order(order)
+          .saveMe
     }
   }
 }

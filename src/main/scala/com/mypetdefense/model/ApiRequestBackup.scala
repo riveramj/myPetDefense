@@ -22,7 +22,7 @@ class ApiRequestBackup extends LongKeyedMapper[ApiRequestBackup] with IdPK {
 
   object user extends MappedLongForeignKey(this, User)
 
-  object created extends MappedDateTime(this){
+  object created extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
@@ -33,7 +33,8 @@ class ApiRequestBackup extends LongKeyedMapper[ApiRequestBackup] with IdPK {
       .rawJson(prettyRender(rawJson))
       .saveMe
 
-  def updateUser(record: ApiRequestBackup, user: User): ApiRequestBackup = record.user(user).saveMe()
+  def updateUser(record: ApiRequestBackup, user: User): ApiRequestBackup =
+    record.user(user).saveMe()
 
 }
 

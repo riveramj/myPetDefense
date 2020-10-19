@@ -7,15 +7,15 @@ import java.util.Date
 
 class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, AddOnProduct] = AddOnProduct
-  object addOnProductId extends MappedLong(this){
-    override def dbIndexed_? = true
+  object addOnProductId extends MappedLong(this) {
+    override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
   }
 
-  object product extends MappedLongForeignKey(this, Product)
+  object product         extends MappedLongForeignKey(this, Product)
   object subscriptionBox extends MappedLongForeignKey(this, SubscriptionBox)
-  object quantity extends MappedInt(this)
-  object price extends MappedDouble(this)
+  object quantity        extends MappedInt(this)
+  object price           extends MappedDouble(this)
   object frequency extends MappedEnum(this, AddOnFrequency) {
     override def defaultValue: AddOnFrequency.Value = AddOnFrequency.Monthly
   }
@@ -28,10 +28,10 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
   }
 
   def createAddOnProduct(
-    product: Product,
-    subscriptionBox: SubscriptionBox,
-    quantity: Int,
-    price: Double
+      product: Product,
+      subscriptionBox: SubscriptionBox,
+      quantity: Int,
+      price: Double
   ): AddOnProduct = {
     AddOnProduct.create
       .quantity(quantity)

@@ -14,7 +14,7 @@ import com.mypetdefense.snippet.login.Login
 object SecurityContext extends Loggable {
 
   private object loggedInUserId extends SessionVar[Box[Long]](Empty)
-  private object loggedInUser extends SessionVar[Box[User]](Empty)
+  private object loggedInUser   extends SessionVar[Box[User]](Empty)
 
   def logIn(user: User): Unit = {
     loggedInUserId(Full(user.userId.get))
@@ -39,7 +39,10 @@ object SecurityContext extends Loggable {
     }
 
     val seenPrompt = user.subscription.obj.map(_.promptedUpgrade.get).openOr(false)
-    val upgraded = user.subscription.obj.map(_.subscriptionBoxes.toList.map(_.subscriptionItems.toList.nonEmpty)).openOr(Nil).foldLeft(true)(_ && _)
+    val upgraded = user.subscription.obj
+      .map(_.subscriptionBoxes.toList.map(_.subscriptionItems.toList.nonEmpty))
+      .openOr(Nil)
+      .foldLeft(true)(_ && _)
 
     user.userType.get match {
       case UserType.Admin =>
@@ -75,9 +78,9 @@ object SecurityContext extends Loggable {
   def adminRedirect(user: User): String = {
     val agencyName = (for {
       agency <- user.agency.obj
-      } yield {
-        agency.name.get
-      })
+    } yield {
+      agency.name.get
+    })
 
     if (agencyName == "My Pet Defense") {
       ShipmentDashboard.menu.loc.calcDefaultHref
@@ -92,7 +95,7 @@ object SecurityContext extends Loggable {
   }
 
   def currentUser: Box[User] = loggedInUser.is
-  def currentUserId: Long = loggedInUserId.is.openOr(0)
+  def currentUserId: Long    = loggedInUserId.is.openOr(0)
 
   def loggedIn_? : Boolean = {
     currentUser.isDefined
@@ -111,6 +114,9 @@ object SecurityContext extends Loggable {
   }
 
   def mpdAdmin_? : Boolean = {
-    (admin_? && currentUser.map(_.agency.obj.map(_.name.get == "My Pet Defense")).flatten.openOr(false))
+    (admin_? && currentUser
+      .map(_.agency.obj.map(_.name.get == "My Pet Defense"))
+      .flatten
+      .openOr(false))
   }
 }

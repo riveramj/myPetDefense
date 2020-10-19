@@ -1,9 +1,9 @@
-package com.mypetdefense.model 
+package com.mypetdefense.model
 
 import net.liftweb._
-  import mapper._
-  import common._
-  import util._
+import mapper._
+import common._
+import util._
 
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.service.KeyService._
@@ -14,17 +14,20 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator
 
 import java.util.Date
 
-class CancelledUser extends LongKeyedMapper[CancelledUser] with IdPK with OneToMany[Long, CancelledUser] {
+class CancelledUser
+    extends LongKeyedMapper[CancelledUser]
+    with IdPK
+    with OneToMany[Long, CancelledUser] {
   def getSingleton: KeyedMetaMapper[Long, CancelledUser] = CancelledUser
   object cancelledUserId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-  
+
   object firstName extends MappedString(this, 100)
-  object lastName extends MappedString(this, 100)
-  object email extends MappedEmail(this, 50)
-  object address extends MappedString(this, 100)
-  object user extends MappedLongForeignKey(this, User)
+  object lastName  extends MappedString(this, 100)
+  object email     extends MappedEmail(this, 50)
+  object address   extends MappedString(this, 100)
+  object user      extends MappedLongForeignKey(this, User)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -32,11 +35,11 @@ class CancelledUser extends LongKeyedMapper[CancelledUser] with IdPK with OneToM
   def name = s"${firstName} ${lastName}"
 
   def createNewCancelledUser(
-    firstName: String,
-    lastName: String,
-    email: String,
-    address: String,
-    userId: Long
+      firstName: String,
+      lastName: String,
+      email: String,
+      address: String,
+      userId: Long
   ): CancelledUser = {
     CancelledUser.create
       .cancelledUserId(generateLongId)
@@ -50,4 +53,3 @@ class CancelledUser extends LongKeyedMapper[CancelledUser] with IdPK with OneToM
 }
 
 object CancelledUser extends CancelledUser with LongKeyedMetaMapper[CancelledUser]
-

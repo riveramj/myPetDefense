@@ -1,4 +1,4 @@
-package com.mypetdefense.service 
+package com.mypetdefense.service
 
 import java.util.Date
 
@@ -12,7 +12,7 @@ object ShipmentService extends Loggable {
     Shipment.findAll(
       BySql(
         "expectedShipDate < current_date + interval '23 hour' + interval '55 minutes' and expectedShipDate > current_date - interval '20 day'",
-        IHaveValidatedThisSQL("mike","2018-04-24")
+        IHaveValidatedThisSQL("mike", "2018-04-24")
       ),
       NullRef(Shipment.dateShipped),
       NotBy(Shipment.status, Status.Cancelled),
@@ -24,7 +24,7 @@ object ShipmentService extends Loggable {
     Subscription.findAll(
       BySql(
         "nextShipDate > CURRENT_DATE and nextShipDate < CURRENT_DATE + interval '20 day'",
-        IHaveValidatedThisSQL("mike","2018-04-24")
+        IHaveValidatedThisSQL("mike", "2018-04-24")
       ),
       By(Subscription.status, Status.Active)
     )
@@ -34,19 +34,25 @@ object ShipmentService extends Loggable {
     Subscription.findAll(
       BySql(
         "nextShipDate + interval '5 day' < CURRENT_DATE and nextshipdate > current_date - interval '10 day'",
-        IHaveValidatedThisSQL("mike","2018-01-04")
+        IHaveValidatedThisSQL("mike", "2018-01-04")
       )
     )
   }
 
-  def createNewShipment(user: User, invoicePaymentId: String, chargeId: Box[String], amountPaid: String, tax: String): Box[Shipment] = {
+  def createNewShipment(
+      user: User,
+      invoicePaymentId: String,
+      chargeId: Box[String],
+      amountPaid: String,
+      tax: String
+  ): Box[Shipment] = {
     for {
       subscription <- user.subscription
       shipmentCount = subscription.shipments.toList.size
-      pets = subscription.getPets
-      dogs = pets.filter(_.animalType.get == AnimalType.Dog)
+      pets          = subscription.getPets
+      dogs          = pets.filter(_.animalType.get == AnimalType.Dog)
     } yield {
-      val sendFreeUpgradeShipment =  {
+      val sendFreeUpgradeShipment = {
         if (shipmentCount >= 1 && tryo(subscription.freeUpgradeSampleDate) == Full(null) && dogs.nonEmpty)
           true
         else

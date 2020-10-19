@@ -14,9 +14,9 @@ object DbSetup extends Loggable {
       val vendor =
         new StandardDBVendor(
           Props.get("db.driver") openOr "org.h2.Driver",
-          Props.get("db.url") openOr
-            "jdbc:h2:lift_proto.db;AUTO_SERVER=TRUE",
-          Props.get("db.user"), Props.get("db.password")
+          Props.get("db.url") openOr "jdbc:h2:lift_proto.db;AUTO_SERVER=TRUE",
+          Props.get("db.user"),
+          Props.get("db.password")
         )
 
       LiftRules.unloadHooks.append(vendor.closeAllConnections_! _)

@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet 
+package com.mypetdefense.snippet
 package admin
 
 import net.liftweb.sitemap.Menu
@@ -23,7 +23,7 @@ import scala.xml.NodeSeq
 
 object Surveys extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable = Menu.i("Surveys") / "admin" / "surveys" >>
@@ -44,55 +44,55 @@ class Surveys extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    ".surveys [class+]" #> "current" &
-    "tbody" #> SHtml.idMemoize { renderer =>
-      val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
+      ".surveys [class+]" #> "current" &
+        "tbody" #> SHtml.idMemoize { renderer =>
+          val parents =
+            User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
 
-      ".parent-survey" #> parents.sortWith(_.name < _.name).map { parent =>
-        val possibleSurvey = parent.survey.obj
+          ".parent-survey" #> parents.sortWith(_.name < _.name).map { parent =>
+            val possibleSurvey = parent.survey.obj
 
-        def sendSurvey() = {
-          val newSurvey = Survey.createNewSurvey(parent)
-          parent.survey(newSurvey).saveMe
+            def sendSurvey() = {
+              val newSurvey = Survey.createNewSurvey(parent)
+              parent.survey(newSurvey).saveMe
 
-          EmailActor ! SendFeedbackEmail(parent)
+              EmailActor ! SendFeedbackEmail(parent)
 
-          renderer.setHtml
-        }
-
-        ".name *" #> parent.name &
-        ".email *" #> parent.email &
-        {
-          possibleSurvey.map { survey =>
-            val surveyCouponApplied = survey.couponApplied.get
-
-            def applyCoupon() = {
-              ParentService.updateCoupon(parent.stripeId.get, Full("feedbacksurvey"))
-              survey.couponApplied(new Date()).saveMe
               renderer.setHtml
             }
 
-            ".survey-sent *" #> dateFormat.format(survey.sentDate.get) &
-            ".ratings *" #> survey.ratingGiven.get &
-            ".testimonial *" #> survey.testimonialGiven.get &
-            { if (surveyCouponApplied == null) {
-                ".coupon .apply-coupon [onclick]" #> ajaxInvoke(applyCoupon _)
-              } else {
-                ".coupon *" #> dateFormat.format(surveyCouponApplied) &
-                ".actions .resend-survey" #> ClearNodes
-              }
-            } &
-            ".actions .send-survey" #> ClearNodes
-          }.openOr {
-            ".survey-sent *" #> ClearNodes &
-            ".ratings .ratings-given" #> ClearNodes &
-            ".testimonial .testimonial-given" #> ClearNodes &
-            ".coupon .apply-coupon" #> ClearNodes &
-            ".actions .resend-survey" #> ClearNodes
-          } &
-          ".actions .send [onclick]" #> ajaxInvoke(sendSurvey _)
+            ".name *" #> parent.name &
+              ".email *" #> parent.email & {
+              possibleSurvey.map { survey =>
+                val surveyCouponApplied = survey.couponApplied.get
+
+                def applyCoupon() = {
+                  ParentService.updateCoupon(parent.stripeId.get, Full("feedbacksurvey"))
+                  survey.couponApplied(new Date()).saveMe
+                  renderer.setHtml
+                }
+
+                ".survey-sent *" #> dateFormat.format(survey.sentDate.get) &
+                  ".ratings *" #> survey.ratingGiven.get &
+                  ".testimonial *" #> survey.testimonialGiven.get & {
+                  if (surveyCouponApplied == null) {
+                    ".coupon .apply-coupon [onclick]" #> ajaxInvoke(applyCoupon _)
+                  } else {
+                    ".coupon *" #> dateFormat.format(surveyCouponApplied) &
+                      ".actions .resend-survey" #> ClearNodes
+                  }
+                } &
+                  ".actions .send-survey" #> ClearNodes
+              }.openOr {
+                ".survey-sent *" #> ClearNodes &
+                  ".ratings .ratings-given" #> ClearNodes &
+                  ".testimonial .testimonial-given" #> ClearNodes &
+                  ".coupon .apply-coupon" #> ClearNodes &
+                  ".actions .resend-survey" #> ClearNodes
+              } &
+                ".actions .send [onclick]" #> ajaxInvoke(sendSurvey _)
+            }
+          }
         }
-      }
-    }
   }
 }

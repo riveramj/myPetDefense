@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet 
+package com.mypetdefense.snippet
 
 import net.liftweb._
 import http.SHtml._
@@ -19,18 +19,19 @@ import scala.xml.NodeSeq
 
 object AddOnSale extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Add-on Sale") / "add-on"
 
   val addOnSaleMenu: Menu.ParamMenuable[User] =
     Menu.param[User](
-      "Additional Products", "Additional Products",
+      "Additional Products",
+      "Additional Products",
       productSalesKey => KeyService.findUserByKey(productSalesKey, "productSalesKey"),
       user => user.productSalesKey.get
     ) / "add-on" >>
-    MatchWithoutCurrentValue
+      MatchWithoutCurrentValue
 }
 
 class AddOnSale extends Loggable {
@@ -38,11 +39,15 @@ class AddOnSale extends Loggable {
 
   var user: Box[User] = AddOnSale.addOnSaleMenu.currentValue
 
-  val duckTreats: Box[Product] = Product.find(By(Product.name, "Duck Jerky Multivitamin & Immune Maintenance"))
-  val lambTreats: Box[Product] = Product.find(By(Product.name, "Lamb Jerky Digestive Health & Probiotic"))
+  val duckTreats: Box[Product] =
+    Product.find(By(Product.name, "Duck Jerky Multivitamin & Immune Maintenance"))
+  val lambTreats: Box[Product] =
+    Product.find(By(Product.name, "Lamb Jerky Digestive Health & Probiotic"))
   val beefTreats: Box[Product] = Product.find(By(Product.name, "Beef Jerky Hip & Joint Formula"))
-  val salmonTreats: Box[Product] = Product.find(By(Product.name, "Salmon Jerky Skin & Coat Formula"))
-  val fruitTreats: Box[Product] = Product.find(By(Product.name, "Healthy Harvest Fruit and Veggie Mix"))
+  val salmonTreats: Box[Product] =
+    Product.find(By(Product.name, "Salmon Jerky Skin & Coat Formula"))
+  val fruitTreats: Box[Product] =
+    Product.find(By(Product.name, "Healthy Harvest Fruit and Veggie Mix"))
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
@@ -90,41 +95,42 @@ class AddOnSale extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     "#logo-name a [href]" #> AddOnSale.addOnSaleMenu.loc.calcDefaultHref &
-    "#shopping-cart" #> idMemoize { renderer =>
-      val cart = AddOnFlow.addOnShoppingCart.is
+      "#shopping-cart" #> idMemoize { renderer =>
+        val cart = AddOnFlow.addOnShoppingCart.is
 
-      cartRenderer = Full(renderer)
+        cartRenderer = Full(renderer)
 
-      val subtotal = cart.map { case (treat, quantity) =>
-        quantity * treat.price.get
-      }.foldLeft(0D)(_ + _)
+        val subtotal = cart.map {
+          case (treat, quantity) =>
+            quantity * treat.price.get
+        }.foldLeft(0d)(_ + _)
 
-      ".items-in-cart .cart-item" #> cart.map { case (treat, quantity) =>
-        val itemPrice = treat.price.get * quantity
+        ".items-in-cart .cart-item" #> cart.map {
+          case (treat, quantity) =>
+            val itemPrice = treat.price.get * quantity
 
-        ".cart-treat-name *" #> treat.name.get &
-        ".selected-quantity *" #> quantity &
-        ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
-        ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
-        ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
-        ".treat-price *" #> f"$$$itemPrice%2.2f"
-      } &
-      ".cart-footer" #> {
-        ".subtotal *" #> f"$$$subtotal%2.2f" &
-        ".checkout [href]" #> AddOnCheckout.menu.loc.calcDefaultHref
-      } &
-      ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
-      ".cart-actions .checkout [href]" #> AddOnCheckout.menu.loc.calcDefaultHref &
-      ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
-      ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
-      ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
-      ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
-    } andThen
-    ".duck .add-treat [onclick]" #> ajaxInvoke(() => addToCart(duckTreats)) &
-    ".lamb .add-treat [onclick]" #> ajaxInvoke(() => addToCart(lambTreats)) &
-    ".beef .add-treat [onclick]" #> ajaxInvoke(() => addToCart(beefTreats)) &
-    ".salmon .add-treat [onclick]" #> ajaxInvoke(() => addToCart(salmonTreats)) &
-    ".fruit-small .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitTreats))
+            ".cart-treat-name *" #> treat.name.get &
+              ".selected-quantity *" #> quantity &
+              ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
+              ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
+              ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
+              ".treat-price *" #> f"$$$itemPrice%2.2f"
+        } &
+          ".cart-footer" #> {
+            ".subtotal *" #> f"$$$subtotal%2.2f" &
+              ".checkout [href]" #> AddOnCheckout.menu.loc.calcDefaultHref
+          } &
+          ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
+          ".cart-actions .checkout [href]" #> AddOnCheckout.menu.loc.calcDefaultHref &
+          ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
+          ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
+          ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
+          ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
+      } andThen
+      ".duck .add-treat [onclick]" #> ajaxInvoke(() => addToCart(duckTreats)) &
+        ".lamb .add-treat [onclick]" #> ajaxInvoke(() => addToCart(lambTreats)) &
+        ".beef .add-treat [onclick]" #> ajaxInvoke(() => addToCart(beefTreats)) &
+        ".salmon .add-treat [onclick]" #> ajaxInvoke(() => addToCart(salmonTreats)) &
+        ".fruit-small .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitTreats))
   }
 }
-

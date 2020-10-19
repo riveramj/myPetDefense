@@ -7,7 +7,14 @@ import util.Helpers._
 import com.mypetdefense.service.ParentService
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import org.quartz.{CronScheduleBuilder, JobBuilder, JobDetail, JobExecutionContext, Trigger, TriggerBuilder}
+import org.quartz.{
+  CronScheduleBuilder,
+  JobBuilder,
+  JobDetail,
+  JobExecutionContext,
+  Trigger,
+  TriggerBuilder
+}
 import java.util.Date
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
@@ -24,30 +31,33 @@ class GrowthNotifyJob extends ManagedJob {
     )
 
     val upcomingSubscription = allActiveSubscriptions.filter { subscription =>
-      val nextShipDate = tryo(subscription.nextShipDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+      val nextShipDate =
+        tryo(subscription.nextShipDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
 
       val nextShipDateDayOfYear = nextShipDate.map(_.getDayOfYear).openOr(0)
 
       (nextShipDateDayOfYear - currentDate.getDayOfYear == 7)
     }
 
-    val readyToGrowPetsUsers: List[(Pet, String, User)] = upcomingSubscription.flatMap { subscription =>
-      ParentService.findGrowingPets(subscription)
+    val readyToGrowPetsUsers: List[(Pet, String, User)] = upcomingSubscription.flatMap {
+      subscription => ParentService.findGrowingPets(subscription)
     }
 
-
-    readyToGrowPetsUsers.map { case (pet, newFleaTick, user) =>
-      EmailActor ! NotifyParentGrowthRate(pet, newFleaTick, user)
+    readyToGrowPetsUsers.map {
+      case (pet, newFleaTick, user) =>
+        EmailActor ! NotifyParentGrowthRate(pet, newFleaTick, user)
     }
   }
 }
 
 object OneWeekNotifyGrowthJob extends TriggeredJob {
-  val detail: JobDetail = JobBuilder.newJob(classOf[GrowthNotifyJob])
+  val detail: JobDetail = JobBuilder
+    .newJob(classOf[GrowthNotifyJob])
     .withIdentity("OneWeeksNotifyGrowthJob")
     .build()
 
-  val trigger: Trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder
+    .newTrigger()
     .withIdentity("OneWeeksNotifyGrowthJobTrigger")
     .startNow()
     .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * * *"))
@@ -55,11 +65,13 @@ object OneWeekNotifyGrowthJob extends TriggeredJob {
 }
 
 object FrequentNotifyGrowthJob extends TriggeredJob {
-  val detail: JobDetail = JobBuilder.newJob(classOf[GrowthNotifyJob])
+  val detail: JobDetail = JobBuilder
+    .newJob(classOf[GrowthNotifyJob])
     .withIdentity("FrequentNotifyGrowthJob")
     .build
 
-  val trigger: Trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder
+    .newTrigger()
     .withIdentity("FrequentNotifyGrowthJobTrigger")
     .startNow
     .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 5 minutes

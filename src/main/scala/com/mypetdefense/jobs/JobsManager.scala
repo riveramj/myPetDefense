@@ -19,9 +19,9 @@ object JobManager extends SimpleInjector with Loggable {
 
     Props.mode match {
       case Production => productionJobs
-      case Staging => Nil
-      case Pilot => nonproductionJobs
-      case _ => nonproductionJobs
+      case Staging    => Nil
+      case Pilot      => nonproductionJobs
+      case _          => nonproductionJobs
     }
   }
 
@@ -40,11 +40,11 @@ object JobManager extends SimpleInjector with Loggable {
   private def productionJobs: List[TriggeredJob] = {
     //OneWeekNotifyGrowthJob ::
     DailyAgentSalesReportEmailJob ::
-    DailyInternalReportEmailJob ::
-    DailyTrackingEmailJob ::
-    HalfHourCreateOrderJob ::
-    DailyTrackShipmentDeliveryJob ::
-    Nil
+      DailyInternalReportEmailJob ::
+      DailyTrackingEmailJob ::
+      HalfHourCreateOrderJob ::
+      DailyTrackShipmentDeliveryJob ::
+      Nil
   }
 
   private def nonproductionJobs: List[TriggeredJob] = {
@@ -57,4 +57,3 @@ object JobManager extends SimpleInjector with Loggable {
     Nil
   }
 }
-

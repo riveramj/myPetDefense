@@ -62,12 +62,15 @@ object Paths {
   }
 
   val homePage: Menu.Menuable with Menu.WithSlash = Menu.i("Home") / "index"
-  val halfOff: Menu.Menuable = Menu.i("50% Off") / "50off" >> EarlyResponse(() => applyCouponRedirect("50off"))
-  val freeMonth: Menu.Menuable = Menu.i("100% Off") / "100off" >> EarlyResponse(() => applyCouponRedirect("100off"))
+  val halfOff: Menu.Menuable =
+    Menu.i("50% Off") / "50off" >> EarlyResponse(() => applyCouponRedirect("50off"))
+  val freeMonth: Menu.Menuable =
+    Menu.i("100% Off") / "100off" >> EarlyResponse(() => applyCouponRedirect("100off"))
 
-  val termsOfService: Menu.Menuable with Menu.WithSlash = Menu.i("Terms of Service") / "terms-of-service"
-  
-  val thanksPage: Menu.Menuable with Menu.WithSlash = Menu.i("Thanks") / "thanks"
+  val termsOfService: Menu.Menuable with Menu.WithSlash =
+    Menu.i("Terms of Service") / "terms-of-service"
+
+  val thanksPage: Menu.Menuable with Menu.WithSlash        = Menu.i("Thanks") / "thanks"
   val billingThanksPage: Menu.Menuable with Menu.WithSlash = Menu.i("Success!") / "update-success"
 
   val testimonial: Menu.Menuable = Menu.i("Review") / "testimonial" >>
@@ -107,7 +110,7 @@ object Paths {
   )
 
   val notLoggedIn: If = If(
-    () => ! SecurityContext.loggedIn_?,
+    () => !SecurityContext.loggedIn_?,
     RedirectResponse("/logout")
   )
 
@@ -125,7 +128,6 @@ object Paths {
     () => completedPets.nonEmpty,
     () => RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
   )
-
 
   val createdAccount: If = If(
     () => SecurityContext.loggedIn_?,
@@ -220,6 +222,6 @@ object Paths {
     inventory.ItemProduction.menu,
     petland.NewOrder.menu,
     PetChoice.menu,
-    DogDetails.menu,
+    DogDetails.menu
   )
 }

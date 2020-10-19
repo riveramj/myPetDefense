@@ -20,10 +20,10 @@ object CreateAccount extends Loggable {
 }
 
 class CreateAccount extends Loggable {
-  var firstName = ""
-  var lastName = ""
-  var email = ""
-  var password = ""
+  var firstName  = ""
+  var lastName   = ""
+  var email      = ""
+  var password   = ""
   var facebookId = ""
 
   def createAccount(): JsCmd = {
@@ -43,7 +43,7 @@ class CreateAccount extends Loggable {
         facebookError :: baseFields
     }.flatten
 
-    if(validateFields.isEmpty) {
+    if (validateFields.isEmpty) {
       val newUser = User.upsertUser(
         firstName,
         lastName,
@@ -62,11 +62,11 @@ class CreateAccount extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    "#first-name" #> text(firstName, userFirstName => firstName = userFirstName.trim) &
-    "#last-name" #> text(lastName, userLastName => lastName = userLastName.trim) &
-    "#email" #> text(email, userEmail => email = userEmail.trim) &
-    "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
-    "#facebook-id" #> SHtml.password(facebookId, facebookId = _) &
-    ".create-account" #> SHtml.ajaxSubmit("Continue", () => createAccount)
+      "#first-name" #> text(firstName, userFirstName => firstName = userFirstName.trim) &
+        "#last-name" #> text(lastName, userLastName => lastName = userLastName.trim) &
+        "#email" #> text(email, userEmail => email = userEmail.trim) &
+        "#password" #> SHtml.password(password, userPassword => password = userPassword.trim) &
+        "#facebook-id" #> SHtml.password(facebookId, facebookId = _) &
+        ".create-account" #> SHtml.ajaxSubmit("Continue", () => createAccount)
   }
 }

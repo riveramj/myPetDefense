@@ -14,4 +14,3 @@ object RandomIdGenerator extends Loggable {
     rng.nextBytes(32).toBase64
   }
 }
-

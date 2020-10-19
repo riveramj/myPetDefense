@@ -24,7 +24,7 @@ import scala.xml.{Elem, NodeSeq}
 
 object Users extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable = Menu.i("Users") / "admin" / "users" >>
@@ -33,23 +33,25 @@ object Users extends Loggable {
 }
 
 class Users extends Loggable {
-  val users: List[User] = User.findAll(
-    By(User.status, Status.Active)
-  ).filter(_.userType != UserType.Parent)
+  val users: List[User] = User
+    .findAll(
+      By(User.status, Status.Active)
+    )
+    .filter(_.userType != UserType.Parent)
   val allAgencies: List[Agency] = Agency.findAll()
 
-  var firstName = ""
-  var lastName = ""
-  var email = ""
+  var firstName                     = ""
+  var lastName                      = ""
+  var email                         = ""
   var userType: Box[UserType.Value] = Full(UserType.Agent)
-  var chosenAgency: Box[Agency] = Empty
-  
+  var chosenAgency: Box[Agency]     = Empty
+
   def agencyDropdown: Elem = {
     SHtml.selectObj(
-        allAgencies.map(agency => (agency, agency.name.get)),
-        chosenAgency,
-        (agency: Agency) => chosenAgency = Full(agency)
-      )
+      allAgencies.map(agency => (agency, agency.name.get)),
+      chosenAgency,
+      (agency: Agency) => chosenAgency = Full(agency)
+    )
   }
 
   def createUser: JsCmd = {
@@ -59,7 +61,7 @@ class Users extends Loggable {
       checkEmpty(lastName, "#last-name")
     ).flatten
 
-    if(validateFields.isEmpty) {
+    if (validateFields.isEmpty) {
       val newUser = userType.map { selectedType =>
         User.createNewPendingUser(
           firstName,
@@ -71,14 +73,13 @@ class Users extends Loggable {
           ""
         )
       }
-      
+
       if (userType == Full(UserType.Admin))
         newUser.map(EmailActor ! SendNewAdminEmail(_))
       else if (userType == Full(UserType.Agent))
         newUser.map(EmailActor ! SendNewAgentEmail(_))
       else
         newUser.map(EmailActor ! SendNewUserEmail(_))
-
 
       S.redirectTo(Users.menu.loc.calcDefaultHref)
     } else {
@@ -88,8 +89,8 @@ class Users extends Loggable {
 
   def userTypeRadio(renderer: IdMemoizeTransform): NodeSeq = {
     ajaxRadio(
-      List(UserType.Agent, UserType.Admin), 
-      userType, 
+      List(UserType.Agent, UserType.Admin),
+      userType,
       (userSelected: UserType.Value) => {
         userType = Full(userSelected)
         renderer.setHtml
@@ -111,26 +112,25 @@ class Users extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    ".users [class+]" #> "current" &
-    ".create" #> idMemoize { renderer =>
-      "#first-name" #> ajaxText(firstName, firstName = _) &
-      "#last-name" #> ajaxText(lastName, lastName = _) &
-      "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
-      "#user-type-select" #> userTypeRadio(renderer) &
-      "#agency-container #agency-select" #> agencyDropdown &
-      "#create-item" #> SHtml.ajaxSubmit("Create User", () => createUser)
-    } &
-    ".user" #> users.map { user =>
-      ".name *" #> user.name &
-      ".email *" #> user.email &
-      ".type *" #> user.userType &
-      ".agency *" #> user.agency.obj.map(_.name.get) &
-      ".actions .delete" #> ClearNodesIf(user.userType == UserType.Parent) &
-      ".actions .delete [onclick]" #> Confirm(s"Delete ${user.name}?",
-        ajaxInvoke(deleteUser(user) _)
-      )
-    }
+      ".users [class+]" #> "current" &
+        ".create" #> idMemoize { renderer =>
+          "#first-name" #> ajaxText(firstName, firstName = _) &
+            "#last-name" #> ajaxText(lastName, lastName = _) &
+            "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
+            "#user-type-select" #> userTypeRadio(renderer) &
+            "#agency-container #agency-select" #> agencyDropdown &
+            "#create-item" #> SHtml.ajaxSubmit("Create User", () => createUser)
+        } &
+        ".user" #> users.map { user =>
+          ".name *" #> user.name &
+            ".email *" #> user.email &
+            ".type *" #> user.userType &
+            ".agency *" #> user.agency.obj.map(_.name.get) &
+            ".actions .delete" #> ClearNodesIf(user.userType == UserType.Parent) &
+            ".actions .delete [onclick]" #> Confirm(
+              s"Delete ${user.name}?",
+              ajaxInvoke(deleteUser(user) _)
+            )
+        }
   }
 }
-
-

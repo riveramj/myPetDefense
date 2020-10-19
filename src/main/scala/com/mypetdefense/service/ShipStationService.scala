@@ -5,7 +5,11 @@ import java.time.{LocalDate, ZoneId}
 import java.util.Date
 
 import com.mypetdefense.model._
-import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => ShipStationShipment, _}
+import com.mypetdefense.shipstation.{
+  Address => ShipStationAddress,
+  Shipment => ShipStationShipment,
+  _
+}
 import dispatch.Defaults._
 import dispatch._
 import net.liftweb.common.Box.tryo
@@ -18,10 +22,10 @@ import scala.language.postfixOps
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
 object ShipStationService extends Loggable {
-  val key: String = Props.get("shipstation.key") openOr ""
+  val key: String    = Props.get("shipstation.key") openOr ""
   val secret: String = Props.get("shipstation.secret") openOr ""
-  val url: String = Props.get("shipstation.url") openOr ""
-  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val url: String    = Props.get("shipstation.url") openOr ""
+  val dateFormat     = new SimpleDateFormat("MM/dd/yyyy")
 
   implicit val shipStationExecutor: ShipStationExecutor = new ShipStationExecutor(key, secret, url)
 
@@ -31,7 +35,7 @@ object ShipStationService extends Loggable {
     ) match {
       case TrySuccess(Full(shipStationOrder)) =>
         Full(shipStationOrder)
-      
+
       case TrySuccess(shipStationFailure) =>
         logger.error(s"get order failed with shipStation error: ${shipStationFailure}")
         shipStationFailure
@@ -44,11 +48,12 @@ object ShipStationService extends Loggable {
 
   def getReadyOrders(): Box[OrderList] = {
     Try(
-      Await.result(Order.list(List(("orderStatus","awaiting_shipment"))), new DurationInt(10).seconds)
+      Await
+        .result(Order.list(List(("orderStatus", "awaiting_shipment"))), new DurationInt(10).seconds)
     ) match {
       case TrySuccess(Full(shipStationOrder)) =>
         Full(shipStationOrder)
-      
+
       case TrySuccess(shipStationFailure) =>
         logger.error(s"get order failed with shipStation error: ${shipStationFailure}")
         shipStationFailure
@@ -60,13 +65,13 @@ object ShipStationService extends Loggable {
   }
 
   def createOrderLabel(
-    orderId: Int,
-    carrierCode: String,
-    serviceCode: String,
-    packageCode: String,
-    shipDate: String,
-    weight: Weight,
-    testLabel: Boolean = false
+      orderId: Int,
+      carrierCode: String,
+      serviceCode: String,
+      packageCode: String,
+      shipDate: String,
+      weight: Weight,
+      testLabel: Boolean = false
   ): Box[Label] = {
     val createLabel = Order.createLabelForOrder(
       orderId = orderId,
@@ -83,7 +88,7 @@ object ShipStationService extends Loggable {
     ) match {
       case TrySuccess(Full(shipStationLabel)) =>
         Full(shipStationLabel)
-      
+
       case TrySuccess(shipStationFailure) =>
         logger.error(s"get order failed with shipStation error: ${shipStationFailure}")
         shipStationFailure
@@ -111,7 +116,7 @@ object ShipStationService extends Loggable {
     Try(Await.result(cancelOrder, new DurationInt(10).seconds)) match {
       case TrySuccess(Full(order)) =>
         Full(order)
-      
+
       case TrySuccess(shipStationFailure) =>
         logger.error(s"cancel order failed with shipStation error: ${shipStationFailure}")
         shipStationFailure
@@ -150,28 +155,29 @@ object ShipStationService extends Loggable {
     val packaging = Packaging.getLargeBox
 
     val billShipTo = createOrderBillShipToAddress(order)
-    
-    val treatOrderLineItems: List[TreatOrderLineItem] = order.treatsOrdered.toList
-    
-    val treats = treatOrderLineItems.map { treat =>
-      (treat.product.obj, treat.quantity.get)
-    }
 
-    val shipstationTreats = treats.map { case (treat, count) =>
-      (treat.map(_.sku.get).openOr(""), count)
+    val treatOrderLineItems: List[TreatOrderLineItem] = order.treatsOrdered.toList
+
+    val treats = treatOrderLineItems.map { treat => (treat.product.obj, treat.quantity.get) }
+
+    val shipstationTreats = treats.map {
+      case (treat, count) =>
+        (treat.map(_.sku.get).openOr(""), count)
     }
 
     val shipStationProductIds = shipstationTreats ++ packaging.map(pkg => (pkg.sku.get, 1)).toList
 
-    val shipStationItems = shipStationProductIds.map { case (sku, quantity) =>
-      OrderItem(
-        quantity = quantity,
-        sku = sku
-      )
+    val shipStationItems = shipStationProductIds.map {
+      case (sku, quantity) =>
+        OrderItem(
+          quantity = quantity,
+          sku = sku
+        )
     }
 
-    val treatWeights = treats.map { case (treat, count) =>
-      treat.map(_.weight.get).openOr(0D) * count
+    val treatWeights = treats.map {
+      case (treat, count) =>
+        treat.map(_.weight.get).openOr(0d) * count
     }
 
     val totalWeight = treatWeights.sum + packaging.map(_.weight.get).openOr(0.0)
@@ -194,16 +200,25 @@ object ShipStationService extends Loggable {
 
   }
 
-  def createShipStationOrder(shipment: Shipment, user: User, subscription: Subscription, count: Int): Future[Box[Order]] = {
+  def createShipStationOrder(
+      shipment: Shipment,
+      user: User,
+      subscription: Subscription,
+      count: Int
+  ): Future[Box[Order]] = {
     println("============================== " + count)
     val billShipTo = createUserBillShipToAddress(user)
 
     val shipmentLineItems = shipment.refresh.toList.flatMap(_.shipmentLineItems.toList)
-    val someInserts = shipmentLineItems.flatMap(_.insert.obj).distinct
+    val someInserts       = shipmentLineItems.flatMap(_.insert.obj).distinct
 
     val inserts =
-      if (subscription.shipments.toList.size >= 2 && tryo(subscription.freeUpgradeSampleDate) == Full(null)) {
-        val dogs = shipment.refresh.toList.flatMap(_.shipmentLineItems.flatMap(_.pet.obj).toList.distinct).filter(_.animalType.get == AnimalType.Dog)
+      if (subscription.shipments.toList.size >= 2 && tryo(subscription.freeUpgradeSampleDate) == Full(
+            null
+          )) {
+        val dogs = shipment.refresh.toList
+          .flatMap(_.shipmentLineItems.flatMap(_.pet.obj).toList.distinct)
+          .filter(_.animalType.get == AnimalType.Dog)
 
         if (dogs.nonEmpty) {
           subscription.refresh.map(_.freeUpgradeSampleDate(new Date).saveMe())
@@ -218,52 +233,60 @@ object ShipStationService extends Loggable {
         someInserts
 
     val refreshedShipment = shipment.refresh
-    val shipmentLineItemsByPet = refreshedShipment.toList.flatMap(_.shipmentLineItems.toList).groupBy(_.pet.obj).filter(_._1.isDefined)
+    val shipmentLineItemsByPet = refreshedShipment.toList
+      .flatMap(_.shipmentLineItems.toList)
+      .groupBy(_.pet.obj)
+      .filter(_._1.isDefined)
 
     val fleaTick = shipmentLineItems.flatMap(_.fleaTick.obj)
 
     val productWeight = fleaTick.map(_.weight.get).sum
-    val insertWeight = inserts.map(_.weight.get).sum
+    val insertWeight  = inserts.map(_.weight.get).sum
 
     val totalWeight = productWeight + insertWeight
 
     val normalizedWeight = if (totalWeight < 4.0) 4.0 else totalWeight
 
-    val shipStationItems = inserts.toList.zipWithIndex.map { case (insert, index) =>
-      OrderItem(
-        lineItemKey = Some(s"9 - ${index}"),
-        quantity = 1,
-        sku = insert.itemNumber.get,
-        name = s"0 - ${insert.name.get}"
-      )
-    } ++ shipmentLineItemsByPet.zipWithIndex.flatMap { case ((pet, lineItems), index) =>
-      val fleaTick = lineItems.flatMap(_.fleaTick.obj)
-      val products = lineItems.flatMap(_.product.obj)
-
-      val fleaOrderItem = fleaTick.map { ft =>
+    val shipStationItems = inserts.toList.zipWithIndex.map {
+      case (insert, index) =>
         OrderItem(
-          lineItemKey = Some(s"${index+1} - 9"),
+          lineItemKey = Some(s"9 - ${index}"),
           quantity = 1,
-          sku = ft.sku.get,
-          name = s"${index+1} - ${ft.getNameAndSize}"
+          sku = insert.itemNumber.get,
+          name = s"0 - ${insert.name.get}"
         )
-      }
+    } ++ shipmentLineItemsByPet.zipWithIndex.flatMap {
+      case ((pet, lineItems), index) =>
+        val fleaTick = lineItems.flatMap(_.fleaTick.obj)
+        val products = lineItems.flatMap(_.product.obj)
 
-      val productsOrderItems = products.zipWithIndex.map { case (product, productIndex) =>
-        OrderItem(
-          lineItemKey = Some(s"${index+1} - ${productIndex + 1}"),
-          quantity = 1,
-          sku = product.sku.get,
-          name = s"${index+1} - ${product.name.get} for Dogs"
-        )
-      }
+        val fleaOrderItem = fleaTick.map { ft =>
+          OrderItem(
+            lineItemKey = Some(s"${index + 1} - 9"),
+            quantity = 1,
+            sku = ft.sku.get,
+            name = s"${index + 1} - ${ft.getNameAndSize}"
+          )
+        }
 
-      List(OrderItem(
-        lineItemKey = Some(s"${index + 1} - 0"),
-        quantity = 1,
-        sku = "pet",
-        name = s"${index+1} -  ${pet.map(_.name.get).openOr("")}"
-      )) ++ fleaOrderItem ++ productsOrderItems
+        val productsOrderItems = products.zipWithIndex.map {
+          case (product, productIndex) =>
+            OrderItem(
+              lineItemKey = Some(s"${index + 1} - ${productIndex + 1}"),
+              quantity = 1,
+              sku = product.sku.get,
+              name = s"${index + 1} - ${product.name.get} for Dogs"
+            )
+        }
+
+        List(
+          OrderItem(
+            lineItemKey = Some(s"${index + 1} - 0"),
+            quantity = 1,
+            sku = "pet",
+            name = s"${index + 1} -  ${pet.map(_.name.get).openOr("")}"
+          )
+        ) ++ fleaOrderItem ++ productsOrderItems
     }
 
     Order.create(
@@ -289,20 +312,30 @@ object ShipStationService extends Loggable {
 
   def getYesterdayShipments(): Box[ShipmentList] = {
     val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-    val yesterdayDate = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).minusDays(1).toInstant())
+    val yesterdayDate = Date.from(
+      LocalDate
+        .now(ZoneId.of("America/New_York"))
+        .atStartOfDay(ZoneId.of("America/New_York"))
+        .minusDays(1)
+        .toInstant()
+    )
     val shipDate = dateFormat.format(yesterdayDate)
 
     Try(
-      Await.result(ShipStationShipment.list(
-        List(
-          ("shipDateStart", shipDate),
-          ("shipDateEnd", shipDate),
-          ("pageSize", "300")
-      )), new DurationInt(10).seconds)
+      Await.result(
+        ShipStationShipment.list(
+          List(
+            ("shipDateStart", shipDate),
+            ("shipDateEnd", shipDate),
+            ("pageSize", "300")
+          )
+        ),
+        new DurationInt(10).seconds
+      )
     ) match {
       case TrySuccess(Full(shipStationShipments)) =>
         Full(shipStationShipments)
-      
+
       case TrySuccess(shipStationFailure) =>
         logger.error(s"get order failed with shipStation error: ${shipStationFailure}")
         shipStationFailure
