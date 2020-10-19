@@ -33,8 +33,8 @@ class ReportingServiceSpec
 
   it should "find all active subscriptions" in {
     forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
-      (usersWithSub, usersWithoutSub) =>
-        val activeSubsIds = usersWithSub.map {
+      (usersWithActiveSub, usersWithoutSub) =>
+        val activeSubsIds = usersWithActiveSub.map {
           case (uData, sData) => insertUserAndSub(uData, sData).subscription.id.get
         }
         usersWithoutSub.foreach {
@@ -164,6 +164,28 @@ class ReportingServiceSpec
         val result        = ReportingService.findPaidShipments(subscriptions).map(_.id.get)
 
         result should contain theSameElementsAs paidShipmentsIds
+        clearTables()
+        succeed
+    }
+  }
+
+  it should "find cancelled subscriptions" in {
+    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+      (usersWithCanceledSub, usersWithoutSub) =>
+        val canceledIds = usersWithCanceledSub.map {
+          case (uData, sData) => insertUserAndSub(uData, sData).subscription.cancel.saveMe().id.get
+        }
+        usersWithoutSub.foreach {
+          case (uData, sData) =>
+            val u = createUser(uData)
+            createSubscription(u, sData).saveMe()
+        }
+
+        val subscriptions = Subscription.findAll()
+        val filteredSubsIds =
+          ReportingService.findCancelledSubscriptions(subscriptions).map(_.id.get)
+
+        filteredSubsIds should contain theSameElementsAs canceledIds
         clearTables()
         succeed
     }
