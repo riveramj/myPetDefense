@@ -34,8 +34,8 @@ object Generator {
       stripeId  <- genNonEmptyStr
       email     <- genEmailStr
       password  <- genNonEmptyStr
-      phone = "123-123-1234"
-      userType <- Gen.oneOf(UserType.values.toSeq)
+      phone    = "123-123-1234"
+      userType = UserType.Parent
     } yield UserCreateGeneratedData(
       firstName,
       lastName,
@@ -55,20 +55,13 @@ object Generator {
       date         = thisMonth
       startDate    = date.toDate
       nextShipDate = date.plusDays(3).toDate
-      priceCode <- Gen.oneOf(
-                    defaultPriceCode,
-                    currentTppPriceCode,
-                    currentPetlandMonthlyCode,
-                    currentPetland6MonthPaymentCode
-                  )
-      isUpgraded     <- genBool
+      priceCode      <- Gen.oneOf(defaultPriceCode, currentTppPriceCode)
       contractLength <- Gen.posNum[Int]
     } yield SubscriptionCreateGeneratedData(
       stripeSubscriptionId,
       startDate,
       nextShipDate,
       priceCode,
-      isUpgraded,
       contractLength
     )
 

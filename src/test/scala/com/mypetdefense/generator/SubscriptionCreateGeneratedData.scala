@@ -7,6 +7,5 @@ case class SubscriptionCreateGeneratedData(
     startDate: Date,
     nextShipDate: Date,
     priceCode: String,
-    isUpgraded: Boolean,
     contractLength: Int
 )

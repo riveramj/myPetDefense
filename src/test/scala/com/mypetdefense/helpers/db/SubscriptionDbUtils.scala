@@ -15,8 +15,7 @@ object SubscriptionDbUtils {
     data.startDate,
     data.nextShipDate,
     data.priceCode,
-    data.isUpgraded,
-    data.contractLength
+    contractLength = data.contractLength
   )
 
 }
