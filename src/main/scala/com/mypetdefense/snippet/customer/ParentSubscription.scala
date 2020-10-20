@@ -29,43 +29,47 @@ object ParentSubscription extends Loggable {
     loggedIn >>
     parent
 
-  val manageSubscriptionMenu: Menu.Menuable = Menu.i("Manage Subscription") / "manage-subscription" >>
-    loggedIn >>
-    parent
+  val manageSubscriptionMenu: Menu.Menuable =
+    Menu.i("Manage Subscription") / "manage-subscription" >>
+      loggedIn >>
+      parent
 
   val confirmCancelMenu: Menu.Menuable = Menu.i("Confirm Cancel") / "confirm-cancel" >>
     loggedIn >>
     parent
 
   val confirmResumeMenu: Menu.ParamMenuable[String] = Menu.param[String](
-      "Confirm Resume",
-      "Confirm Resume",
-      Full(_),
-      string => string
-    ) / "confirm-resume" >>
+    "Confirm Resume",
+    "Confirm Resume",
+    Full(_),
+    string => string
+  ) / "confirm-resume" >>
     loggedIn >>
     parent
 
-    val successfulResumeMenu: Menu.Menuable = Menu.i("Subscription Resumed") / "subscription-resumed" >>
-    loggedIn >>
-    parent
+  val successfulResumeMenu: Menu.Menuable =
+    Menu.i("Subscription Resumed") / "subscription-resumed" >>
+      loggedIn >>
+      parent
 
   val confirmPauseMenu: Menu.ParamMenuable[String] = Menu.param[String](
-      "Confirm Pause",
-      "Confirm Pause",
-      Full(_),
-      string => string
-    ) / "confirm-pause" >>
+    "Confirm Pause",
+    "Confirm Pause",
+    Full(_),
+    string => string
+  ) / "confirm-pause" >>
     loggedIn >>
     parent
 
-    val successfulPauseMenu: Menu.Menuable = Menu.i("Subscription Paused") / "subscription-paused" >>
+  val successfulPauseMenu: Menu.Menuable = Menu.i("Subscription Paused") / "subscription-paused" >>
     loggedIn >>
     parent
-  
-    val cancelSurveySubscriptionMenu: Menu.Menuable with Menu.WithSlash = Menu.i("Cancellation Survey") / "cancel-survey"
 
-  val surveyCompleteSubscriptionMenu: Menu.Menuable with Menu.WithSlash = Menu.i("Survey Complete") / "survey-complete"
+  val cancelSurveySubscriptionMenu: Menu.Menuable with Menu.WithSlash =
+    Menu.i("Cancellation Survey") / "cancel-survey"
+
+  val surveyCompleteSubscriptionMenu: Menu.Menuable with Menu.WithSlash =
+    Menu.i("Survey Complete") / "survey-complete"
 
   object currentUserSubscription extends SessionVar[Box[Subscription]](Empty)
 }
@@ -73,27 +77,27 @@ object ParentSubscription extends Loggable {
 class ParentSubscription extends Loggable {
   val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-  val user: Box[User] = currentUser
+  val user: Box[User]          = currentUser
   val stripeCustomerId: String = user.map(_.stripeId.get).openOr("")
 
   var email: String = user.map(_.email.get).openOr("")
-  var oldPassword = ""
-  var newPassword = ""
-  
+  var oldPassword   = ""
+  var newPassword   = ""
+
   def updateEmail(): JsCmd = {
     val validateFields = List(
-        checkEmail(email, "#email")
-      ).flatten
+      checkEmail(email, "#email")
+    ).flatten
 
-    if(validateFields.isEmpty) {
+    if (validateFields.isEmpty) {
       for {
         user <- user
-        } {
-          user
-            .email(email)
-            .saveMe
-        }
-        S.redirectTo(ParentSubscription.menu.loc.calcDefaultHref)
+      } {
+        user
+          .email(email)
+          .saveMe
+      }
+      S.redirectTo(ParentSubscription.menu.loc.calcDefaultHref)
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
@@ -101,11 +105,11 @@ class ParentSubscription extends Loggable {
 
   def updatePassword(): JsCmd = {
     val validateFields = List(
-        checkEmpty(oldPassword, "#old-password"),
-        checkEmpty(newPassword, "#new-password")
-      ).flatten
+      checkEmpty(oldPassword, "#old-password"),
+      checkEmpty(newPassword, "#new-password")
+    ).flatten
 
-    if(validateFields.isEmpty) {
+    if (validateFields.isEmpty) {
       val passwordUpdated = (for {
         user <- user
       } yield {
@@ -134,9 +138,7 @@ class ParentSubscription extends Loggable {
 
     user.map(ParentService.removeParent(_))
 
-    user.map { parent =>
-      EmailActor ! ParentCancelledAccountEmail(parent)
-    }
+    user.map { parent => EmailActor ! ParentCancelledAccountEmail(parent) }
 
     SecurityContext.logCurrentUserOut
 
@@ -144,33 +146,35 @@ class ParentSubscription extends Loggable {
   }
 
   def render: NodeSeq => NodeSeq = {
-    val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
+    val userSubscription =
+      SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
 
     SHtml.makeFormsAjax andThen
-    ".subscription a [class+]" #> "current" &
-    "#user-email *" #> email &
-    "#email" #> text(email, userEmail => email = userEmail.trim) &
-    "#old-password" #> SHtml.password(oldPassword, oldPass => oldPassword = oldPass.trim) &
-    "#new-password" #> SHtml.password(newPassword, newPass => newPassword = newPass.trim) &
-    ".update-email" #> SHtml.ajaxSubmit("Save Changes", updateEmail _) &
-    ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword _) &
-    ".status *" #> userSubscription.map(_.status.get.toString)
+      ".subscription a [class+]" #> "current" &
+        "#user-email *" #> email &
+        "#email" #> text(email, userEmail => email = userEmail.trim) &
+        "#old-password" #> SHtml.password(oldPassword, oldPass => oldPassword = oldPass.trim) &
+        "#new-password" #> SHtml.password(newPassword, newPass => newPassword = newPass.trim) &
+        ".update-email" #> SHtml.ajaxSubmit("Save Changes", updateEmail _) &
+        ".update-password" #> SHtml.ajaxSubmit("Save Changes", updatePassword _) &
+        ".status *" #> userSubscription.map(_.status.get.toString)
   }
 
   def manage: NodeSeq => NodeSeq = {
-    val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
+    val userSubscription =
+      SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
 
     var cancelAccount = false
-    var pauseAccount = false
+    var pauseAccount  = false
     var resumeAccount = false
 
     val currentStatus = userSubscription.map(_.status.get)
 
     currentStatus match {
-      case Full(Status.Paused) => pauseAccount = true
+      case Full(Status.Paused)    => pauseAccount = true
       case Full(Status.Cancelled) => cancelAccount = true
-      case Full(_) => resumeAccount = true
-      case _ =>
+      case Full(_)                => resumeAccount = true
+      case _                      =>
     }
     ParentSubscription.currentUserSubscription(userSubscription)
 
@@ -198,41 +202,51 @@ class ParentSubscription extends Loggable {
           cancelAccount = false
           pauseAccount = true
           resumeAccount = false
-        
+
         case _ =>
           cancelAccount = false
           pauseAccount = false
           resumeAccount = true
       }
-      
+
       Noop
     }
 
     SHtml.makeFormsAjax andThen
-    "#user-email *" #> email &
-    ".subscription a [class+]" #> "current" &
-    "#resume-account" #> ClearNodesIf(currentStatus != Status.Paused) &
-    "#resume-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("resume")) &
-    "#pause-account [class+]" #> { if (pauseAccount) "selected" else "" } &
-    "#pause-account .pause [class+]" #> { if (pauseAccount) "selected" else "" } &
-    "#pause-account .next-shipment" #> text(nextShipDate, possibleShipDate => nextShipDate = possibleShipDate.trim) &
-    "#pause-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("pause")) &
-    "#cancel-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("cancel")) &
-    ".continue-account-changes" #> SHtml.ajaxSubmit("Continue", confirmAction _)
+      "#user-email *" #> email &
+        ".subscription a [class+]" #> "current" &
+        "#resume-account" #> ClearNodesIf(currentStatus != Status.Paused) &
+        "#resume-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("resume")) &
+        "#pause-account [class+]" #> { if (pauseAccount) "selected" else "" } &
+        "#pause-account .pause [class+]" #> { if (pauseAccount) "selected" else "" } &
+        "#pause-account .next-shipment" #> text(
+          nextShipDate,
+          possibleShipDate => nextShipDate = possibleShipDate.trim
+        ) &
+        "#pause-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("pause")) &
+        "#cancel-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("cancel")) &
+        ".continue-account-changes" #> SHtml.ajaxSubmit("Continue", confirmAction _)
   }
 
   def resumeSubscription: NodeSeq => NodeSeq = {
-    val nextShipDate = Date.from(LocalDate.now(ZoneId.of("America/New_York")).atStartOfDay(ZoneId.of("America/New_York")).plusDays(1).toInstant())
+    val nextShipDate = Date.from(
+      LocalDate
+        .now(ZoneId.of("America/New_York"))
+        .atStartOfDay(ZoneId.of("America/New_York"))
+        .plusDays(1)
+        .toInstant()
+    )
 
     def confirmResume() = {
       val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
 
       val newShipDate = dateFormat.format(nextShipDate)
-      val updatedShipDateSubscription = subscription.map(_.nextShipDate(nextShipDate).status(Status.Active).saveMe)
+      val updatedShipDateSubscription =
+        subscription.map(_.nextShipDate(nextShipDate).status(Status.Active).saveMe)
       ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
-     
+
       for {
-        parent <- user
+        parent       <- user
         subscription <- updatedShipDateSubscription
       } yield {
         EmailActor ! ParentResumeSubscriptionEmail(parent, subscription)
@@ -242,22 +256,22 @@ class ParentSubscription extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
-    "#user-email *" #> email &
-    ".subscription a [class+]" #> "current" &
-    ".next-shipment *" #> dateFormat.format(nextShipDate) &
-    ".confirm-resume" #> SHtml.ajaxSubmit("Resume Subscription", confirmResume _)
+      "#user-email *" #> email &
+        ".subscription a [class+]" #> "current" &
+        ".next-shipment *" #> dateFormat.format(nextShipDate) &
+        ".confirm-resume" #> SHtml.ajaxSubmit("Resume Subscription", confirmResume _)
   }
 
   def successfulResume: CssBindFunc = {
-    val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+    val subscription        = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
     var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
 
     "#user-email *" #> email &
-    ".subscription a [class+]" #> "current" &
-    ".next-shipment *" #> nextShipDate &
-    ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
+      ".subscription a [class+]" #> "current" &
+      ".next-shipment *" #> nextShipDate &
+      ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
   }
 
   def pauseSubscription: NodeSeq => NodeSeq = {
@@ -268,15 +282,16 @@ class ParentSubscription extends Loggable {
 
       val newShipDate = dateFormat.parse(nextShipDate)
       val updatedShipDateSubscription = subscription.flatMap { sub =>
-        val updatedSubscriptionWithStripe = ParentService.updateNextShipBillDate(sub, user, newShipDate)
+        val updatedSubscriptionWithStripe =
+          ParentService.updateNextShipBillDate(sub, user, newShipDate)
 
         updatedSubscriptionWithStripe.map(_.status(Status.Paused).saveMe)
       }
 
       ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
-     
+
       for {
-        parent <- user
+        parent       <- user
         subscription <- updatedShipDateSubscription
       } yield {
         EmailActor ! ParentPauseSubscriptionEmail(parent, subscription)
@@ -286,36 +301,36 @@ class ParentSubscription extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
-    "#user-email *" #> email &
-    ".subscription a [class+]" #> "current" &
-    ".next-shipment *" #> nextShipDate &
-    ".confirm-pause" #> SHtml.ajaxSubmit("Pause Subscription", confirmPause _)
+      "#user-email *" #> email &
+        ".subscription a [class+]" #> "current" &
+        ".next-shipment *" #> nextShipDate &
+        ".confirm-pause" #> SHtml.ajaxSubmit("Pause Subscription", confirmPause _)
   }
 
   def successfulPause: CssBindFunc = {
-    val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+    val subscription        = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
     var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
 
     "#user-email *" #> email &
-    ".subscription a [class+]" #> "current" &
-    ".next-shipment *" #> nextShipDate &
-    ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
+      ".subscription a [class+]" #> "current" &
+      ".next-shipment *" #> nextShipDate &
+      ".to-account-overview [href]" #> AccountOverview.menu.loc.calcDefaultHref
   }
 
   def confirmCancelSubscription: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    "#user-email *" #> email &
-    ".subscription a [class+]" #> "current" &
-    ".confirm-cancel" #> SHtml.ajaxSubmit("Cancel Subscription", cancelUserAccount _)
-    
+      "#user-email *" #> email &
+        ".subscription a [class+]" #> "current" &
+        ".confirm-cancel" #> SHtml.ajaxSubmit("Cancel Subscription", cancelUserAccount _)
+
   }
 
   def survey: NodeSeq => NodeSeq = {
     val updatedSubscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
 
-    var selectedReason = ""
+    var selectedReason     = ""
     var additionalComments = ""
 
     val cancelReasons = List(
@@ -327,7 +342,9 @@ class ParentSubscription extends Loggable {
     )
 
     def submitSurvey() = {
-      updatedSubscription.map(_.cancellationReason(selectedReason).cancellationComment(additionalComments).saveMe)
+      updatedSubscription.map(
+        _.cancellationReason(selectedReason).cancellationComment(additionalComments).saveMe
+      )
 
       S.redirectTo(ParentSubscription.surveyCompleteSubscriptionMenu.loc.calcDefaultHref)
     }
@@ -335,11 +352,9 @@ class ParentSubscription extends Loggable {
     val cancelChoices = SHtml.radio(cancelReasons, Empty, selectedReason = _).toForm
 
     SHtml.makeFormsAjax andThen
-    ".sign-out" #> ClearNodes &
-    ".survey-answer" #> cancelChoices.map { radio =>
-      "input" #> radio
-    } &
-    ".comments" #> SHtml.textarea(additionalComments, additionalComments = _) &
-    ".submit-survey" #> SHtml.ajaxSubmit("Submit Survey", submitSurvey _)
+      ".sign-out" #> ClearNodes &
+        ".survey-answer" #> cancelChoices.map { radio => "input" #> radio } &
+        ".comments" #> SHtml.textarea(additionalComments, additionalComments = _) &
+        ".submit-survey" #> SHtml.ajaxSubmit("Submit Survey", submitSurvey _)
   }
 }

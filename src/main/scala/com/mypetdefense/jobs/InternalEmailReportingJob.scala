@@ -1,10 +1,10 @@
 package com.mypetdefense.jobs
 
-import org.quartz._
-import collection.JavaConversions._
-
-import com.mypetdefense.service.ReportingService
 import com.mypetdefense.actor._
+import com.mypetdefense.service.ReportingService
+import org.quartz._
+
+import collection.JavaConversions._
 
 class InternalEmailReportingJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
@@ -13,10 +13,11 @@ class InternalEmailReportingJob extends ManagedJob {
     val internalEmails = List("mike.rivera@mypetdefense.com", "calvin.leach@mypetdefense.com")
 
     emailScope match {
-      case "daily" => 
-        val (newShipmentsYesterday: Int, paidShipmentsYesterday: Int, grossSalesYesterday: Double) = ReportingService.yesterdayShipments
+      case "daily" =>
+        val (newShipmentsYesterday: Int, paidShipmentsYesterday: Int, grossSalesYesterday: Double) =
+          ReportingService.yesterdayShipments
 
-        val cancelsYesterday = ReportingService.yesterdayCancels
+        val cancelsYesterday      = ReportingService.yesterdayCancels
         val cancelsYesterdayCount = cancelsYesterday.size
 
         internalEmails.map { email =>
@@ -34,25 +35,29 @@ class InternalEmailReportingJob extends ManagedJob {
 }
 
 object WeeklyInteralReportEmailJob extends TriggeredJob {
-  val detail: JobDetail = JobBuilder.newJob(classOf[InternalEmailReportingJob])
+  val detail: JobDetail = JobBuilder
+    .newJob(classOf[InternalEmailReportingJob])
     .withIdentity("WeeklySalesReportEmailJob")
     .usingJobData(new JobDataMap(Map("scope" -> "weekly")))
     .build()
 
-    val trigger: Trigger = TriggerBuilder.newTrigger()
-      .withIdentity("WeeklySalesReportEmailTrigger")
-      .startNow()
+  val trigger: Trigger = TriggerBuilder
+    .newTrigger()
+    .withIdentity("WeeklySalesReportEmailTrigger")
+    .startNow()
     .withSchedule(CronScheduleBuilder.cronSchedule("0 0 8 ? * 2 *"))
     .build()
 }
 
 object DailyInternalReportEmailJob extends TriggeredJob {
-  val detail: JobDetail = JobBuilder.newJob(classOf[InternalEmailReportingJob])
+  val detail: JobDetail = JobBuilder
+    .newJob(classOf[InternalEmailReportingJob])
     .withIdentity("DailySalesReportEmailJob")
     .usingJobData(new JobDataMap(Map("scope" -> "daily")))
     .build()
 
-  val trigger: Trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder
+    .newTrigger()
     .withIdentity("DailySalesReportEmailJobTrigger")
     .startNow()
     .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * * *"))
@@ -60,15 +65,16 @@ object DailyInternalReportEmailJob extends TriggeredJob {
 }
 
 object FrequentInternalReportEmailJob extends TriggeredJob {
-  val detail: JobDetail = JobBuilder.newJob(classOf[InternalEmailReportingJob])
+  val detail: JobDetail = JobBuilder
+    .newJob(classOf[InternalEmailReportingJob])
     .withIdentity("FrequentSalesReportEmailJob")
     .usingJobData(new JobDataMap(Map("scope" -> "daily")))
     .build
 
-  val trigger: Trigger = TriggerBuilder.newTrigger()
+  val trigger: Trigger = TriggerBuilder
+    .newTrigger()
     .withIdentity("FrequentSalesReportEmailTrigger")
     .startNow
     .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 5 minutes
     .build
 }
-

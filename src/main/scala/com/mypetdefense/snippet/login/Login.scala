@@ -29,9 +29,9 @@ class Login extends Loggable {
   import Login._
 
   def render: NodeSeq => NodeSeq = {
-    var email = ""
+    var email    = ""
     var password = ""
-    var fbId = ""
+    var fbId     = ""
 
     S.request match {
       case Full(request) =>
@@ -42,11 +42,11 @@ class Login extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
-    "#login-container" #> {
-      "#email" #> SHtml.text(email, email = _) &
-      "#password" #> SHtml.password(password, password = _) &
-      "#fb-id" #> SHtml.password(fbId, fbId = _) &
-      "#login" #> SHtml.ajaxSubmit("Log In", () => LoginService.login(email, password, fbId))
-    }
+      "#login-container" #> {
+        "#email" #> SHtml.text(email, email = _) &
+          "#password" #> SHtml.password(password, password = _) &
+          "#fb-id" #> SHtml.password(fbId, fbId = _) &
+          "#login" #> SHtml.ajaxSubmit("Log In", () => LoginService.login(email, password, fbId))
+      }
   }
 }

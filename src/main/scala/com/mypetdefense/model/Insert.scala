@@ -8,13 +8,13 @@ import net.liftweb.mapper._
 
 class Insert extends LongKeyedMapper[Insert] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, Insert] = Insert
-  object insertId extends MappedLong(this){
-    override def dbIndexed_? = true
+  object insertId extends MappedLong(this) {
+    override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
   }
-  object name extends MappedString(this, 100)
+  object name       extends MappedString(this, 100)
   object itemNumber extends MappedString(this, 100)
-  object weight extends MappedDouble(this)
+  object weight     extends MappedDouble(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -27,13 +27,14 @@ class Insert extends LongKeyedMapper[Insert] with IdPK {
       .saveMe
   }
 
-  def welcomeInsert: Box[Insert] = Insert.find(By(Insert.name,"Welcome Insert"))
+  def welcomeInsert: Box[Insert] = Insert.find(By(Insert.name, "Welcome Insert"))
 
   def tryUpgrade: Box[Insert] = Insert.find(By(Insert.name, "Free Upgraded Box Trial Insert"))
 
   def productBrochure: Box[Insert] = Insert.find(By(Insert.name, "Product Brochure"))
 
-  def tppWelcomeInsert: Box[Insert] = Insert.find(By(Insert.name, "TPP Registrations Welcome Insert"))
+  def tppWelcomeInsert: Box[Insert] =
+    Insert.find(By(Insert.name, "TPP Registrations Welcome Insert"))
 
   def petlandWelcomeInsert: Box[Insert] = Insert.find(By(Insert.name, "Petland Welcome Insert"))
 }

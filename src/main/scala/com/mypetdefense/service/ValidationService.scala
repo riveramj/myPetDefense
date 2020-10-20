@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat
 import scala.util.matching.Regex
 
 object ValidationService extends Loggable {
- val emailRegex: Regex = """^([^@]+)@([^@]+\.([^@].?)+)$""".r
+  val emailRegex: Regex = """^([^@]+)@([^@]+\.([^@].?)+)$""".r
 
   def checkEmpty(fieldValue: Option[String], fieldId: String): Box[ValidationError] = {
     checkEmpty(fieldValue getOrElse "", fieldId)
@@ -30,8 +30,8 @@ object ValidationService extends Loggable {
   def checkDuplicateEmail(email: String, errorId: String): Box[ValidationError] = {
     if (email.nonEmpty) {
       User.find(By(User.email, email)) match {
-        case Full(_)  => Full(ValidationError(errorId, S ? "Email already exists."))
-        case _ => Empty
+        case Full(_) => Full(ValidationError(errorId, S ? "Email already exists."))
+        case _       => Empty
       }
     } else {
       Empty
@@ -42,7 +42,7 @@ object ValidationService extends Loggable {
     if (email.nonEmpty) {
       User.find(By(User.email, email)).flatMap(_.subscription.obj) match {
         case Full(_) => Full(ValidationError(errorId, S ? "Email already exists."))
-        case _ => Empty
+        case _       => Empty
       }
     } else {
       Empty
@@ -52,19 +52,22 @@ object ValidationService extends Loggable {
   def checkDuplicateFacebookId(facebookId: String, errorId: String): Box[ValidationError] = {
     if (facebookId.nonEmpty) {
       User.find(By(User.facebookId, facebookId)) match {
-        case Full(_)  => Full(ValidationError(errorId, S ? "Facebook account already exists."))
-        case _ => Empty
+        case Full(_) => Full(ValidationError(errorId, S ? "Facebook account already exists."))
+        case _       => Empty
       }
     } else {
       Empty
     }
   }
 
-  def checkDuplicateFacebookIdWithSubscription(facebookId: String, errorId: String): Box[ValidationError] = {
+  def checkDuplicateFacebookIdWithSubscription(
+      facebookId: String,
+      errorId: String
+  ): Box[ValidationError] = {
     if (facebookId.nonEmpty) {
       User.find(By(User.facebookId, facebookId)).flatMap(_.subscription.obj) match {
-        case Full(_)  => Full(ValidationError(errorId, S ? "Facebook account already exists."))
-        case _ => Empty
+        case Full(_) => Full(ValidationError(errorId, S ? "Facebook account already exists."))
+        case _       => Empty
       }
     } else {
       Empty
@@ -74,8 +77,8 @@ object ValidationService extends Loggable {
   def checkDuplicateCoupon(coupon: String, errorId: String): Box[ValidationError] = {
     if (coupon.nonEmpty) {
       Coupon.find(By(Coupon.couponCode, coupon)) match {
-        case Full(coupon)  => Full(ValidationError(errorId, S ? "Code already exists."))
-        case _ => Empty
+        case Full(coupon) => Full(ValidationError(errorId, S ? "Code already exists."))
+        case _            => Empty
       }
     } else {
       Empty
@@ -85,8 +88,8 @@ object ValidationService extends Loggable {
   def validEmailFormat(email: String, errorId: String): Box[ValidationError] = {
     val badEmail = Full(ValidationError(errorId, S ? "Not valid email address."))
     if (email.nonEmpty) {
-      emailRegex.findFirstIn(email.trim) map {
-        _ => {
+      emailRegex.findFirstIn(email.trim) map { _ =>
+        {
           //  check by trying to use it
           tryo {
             val address = new javax.mail.internet.InternetAddress(email)
@@ -105,13 +108,13 @@ object ValidationService extends Loggable {
   def validNumber(number: String, errorId: String): Box[ValidationError] = {
     tryo(number.toInt) match {
       case Full(realInt) => Empty
-      case _ => Full(ValidationError(errorId, "Not a valid number."))
+      case _             => Full(ValidationError(errorId, "Not a valid number."))
     }
   }
 
   def checkNumber(number: String, errorId: String): Box[ValidationError] = {
     checkEmpty(number, errorId) or
-    validNumber(number, errorId)
+      validNumber(number, errorId)
   }
 
   def checkEmail(email: String, errorId: String, signup: Boolean = false): Box[ValidationError] = {
@@ -121,11 +124,15 @@ object ValidationService extends Loggable {
       else
         checkDuplicateEmail(email, errorId)
     } or
-    checkEmpty(email, errorId) or
-    validEmailFormat(email, errorId)
+      checkEmpty(email, errorId) or
+      validEmailFormat(email, errorId)
   }
 
-  def checkFacebookId(facebookId: String, errorId: String, signup: Boolean = false): Box[ValidationError] = {
+  def checkFacebookId(
+      facebookId: String,
+      errorId: String,
+      signup: Boolean = false
+  ): Box[ValidationError] = {
     {
       if (signup)
         checkDuplicateFacebookIdWithSubscription(facebookId, errorId)
@@ -143,10 +150,14 @@ object ValidationService extends Loggable {
     }
   }
 
-  def checkMonthPercentDollar(months: (String, String), percent: (String, String), dollar: (String, String)): List[Box[ValidationError]] = {
-    val hasMonths_? = months._1.nonEmpty
+  def checkMonthPercentDollar(
+      months: (String, String),
+      percent: (String, String),
+      dollar: (String, String)
+  ): List[Box[ValidationError]] = {
+    val hasMonths_?  = months._1.nonEmpty
     val hasPercent_? = percent._1.nonEmpty
-    val hasDollar_? = dollar._1.nonEmpty
+    val hasDollar_?  = dollar._1.nonEmpty
 
     (hasMonths_?, hasPercent_?, hasDollar_?) match {
       case (false, false, false) =>
@@ -164,7 +175,7 @@ object ValidationService extends Loggable {
 
       case (false, true, false) =>
         List(Empty)
-      
+
       case (false, false, true) =>
         List(Empty)
 
@@ -183,25 +194,29 @@ object ValidationService extends Loggable {
   }
 
   def checkNonZero(
-    quantity1: Int,
-    quantity2: Int,
-    field1: String,
-    field2: String
+      quantity1: Int,
+      quantity2: Int,
+      field1: String,
+      field2: String
   ): List[Box[ValidationError]] = {
     val number1 = tryo(quantity1.toInt).openOr(0)
     val number2 = tryo(quantity1.toInt).openOr(0)
 
     if (number1 <= 0 && number2 <= 0) {
       List(
-          Full(ValidationError(field1, S ? "Need atleast one item ordered.")),
-          Full(ValidationError(field2, S ? "Need atleast one item ordered"))
+        Full(ValidationError(field1, S ? "Need atleast one item ordered.")),
+        Full(ValidationError(field2, S ? "Need atleast one item ordered"))
       )
     } else {
       List(Empty)
     }
   }
-  
-  def validDate(date: String, dateFormat: SimpleDateFormat, errorId: String): Box[ValidationError] = {
+
+  def validDate(
+      date: String,
+      dateFormat: SimpleDateFormat,
+      errorId: String
+  ): Box[ValidationError] = {
     dateFormat.setLenient(false)
 
     if (date.isEmpty) {
@@ -209,14 +224,19 @@ object ValidationService extends Loggable {
     } else {
       tryo(dateFormat.parse(date)) match {
         case Full(_) => Empty
-        case _ => Full(ValidationError(errorId, "Not a valid date format."))
+        case _       => Full(ValidationError(errorId, "Not a valid date format."))
       }
     }
   }
 
-  def checkBirthday(birthday: String, dateFormat: SimpleDateFormat, errorId: String): Box[ValidationError] = {
+  def checkBirthday(
+      birthday: String,
+      dateFormat: SimpleDateFormat,
+      errorId: String
+  ): Box[ValidationError] = {
     validDate(birthday, dateFormat, errorId)
   }
 }
 
-case class ValidationError(fieldSelector: String, error: String) extends MyPetDefenseEvent("form-validation-error")
+case class ValidationError(fieldSelector: String, error: String)
+    extends MyPetDefenseEvent("form-validation-error")

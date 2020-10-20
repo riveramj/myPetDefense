@@ -13,10 +13,11 @@ object ResetPasswordSent extends Loggable {
   import Loc._
 
   val menu: Menu.ParamMenuable[User] = Menu.param[User](
-    "Reset Password Sent", "Reset Password Sent",
+    "Reset Password Sent",
+    "Reset Password Sent",
     userId => User.find(By(User.userId, userId.toLong)),
     user => user.userId.get.toString
-  ) / "reset-password-sent" >> 
+  ) / "reset-password-sent" >>
     Hidden
 }
 

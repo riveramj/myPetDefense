@@ -17,18 +17,19 @@ object ResetPassword extends Loggable {
   import Loc._
 
   val menu: Menu.ParamMenuable[User] = Menu.param[User](
-    "Reset Password", "Reset Password",
+    "Reset Password",
+    "Reset Password",
     accessKey => KeyService.findUserByKey(accessKey, "resetPasswordKey"),
     user => user.resetPasswordKey.get
-  ) / "reset-password" >> 
+  ) / "reset-password" >>
     Hidden
 }
 
 class ResetPassword {
   val user: Box[User] = ResetPassword.menu.currentValue
-  var password = ""
+  var password        = ""
   def resetPassword(): Nothing = user match {
-    case Full(user) => 
+    case Full(user) =>
       User.setUserPassword(user, password).resetPasswordKey("").saveMe
       EmailActor ! SendPasswordUpdatedEmail(user)
 
@@ -38,7 +39,7 @@ class ResetPassword {
   }
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    "#password" #> SHtml.password("", password = _) &
-    "type=submit" #> SHtml.ajaxSubmit("Reset Password", resetPassword _)
+      "#password" #> SHtml.password("", password = _) &
+        "type=submit" #> SHtml.ajaxSubmit("Reset Password", resetPassword _)
   }
 }

@@ -23,7 +23,7 @@ import scala.xml.NodeSeq
 
 object GrowthRates extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable = Menu.i("Growth Rates") / "admin" / "growth-rates" >>
@@ -32,9 +32,9 @@ object GrowthRates extends Loggable {
 }
 
 class GrowthRates extends Loggable {
-  var breed = ""
+  var breed     = ""
   var mediumAge = ""
-  var largeAge = ""
+  var largeAge  = ""
   var xlargeAge = ""
 
   val growthRates: List[GrowthRate] = GrowthRate.findAll()
@@ -65,26 +65,27 @@ class GrowthRates extends Loggable {
     else
       s"$growthMonth months"
   }
-  
+
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    ".create" #> {
-      "#breed" #> text(breed, breed = _) &
-      "#medium-age" #> text(mediumAge, mediumAge = _) &
-      "#large-age" #> text(largeAge, largeAge = _) &
-      "#xlarge-age" #> text(xlargeAge, xlargeAge = _) &
-      "#create-item" #> SHtml.ajaxSubmit("Create Growth Rate", () => createGrowthRate)
-    } &
-    ".growth-rate [class+]" #> "current" &
-    ".growth-rate" #> growthRates.map { growthRate =>
-      ".breed *" #> growthRate.breed.get &
-      ".medium-age *" #> formatGrowthMonth(growthRate.mediumProductMonth.get) &
-      ".large-age *" #> formatGrowthMonth(growthRate.largeProductMonth.get)&
-      ".xlarge-age *" #> formatGrowthMonth(growthRate.xlargeProductMonth.get)&
-      ".actions .delete [onclick]" #> Confirm(s"Delete ${growthRate.breed}?",
-        ajaxInvoke(deleteGrowthRate(growthRate) _)
-      )
-    }
+      ".create" #> {
+        "#breed" #> text(breed, breed = _) &
+          "#medium-age" #> text(mediumAge, mediumAge = _) &
+          "#large-age" #> text(largeAge, largeAge = _) &
+          "#xlarge-age" #> text(xlargeAge, xlargeAge = _) &
+          "#create-item" #> SHtml.ajaxSubmit("Create Growth Rate", () => createGrowthRate)
+      } &
+        ".growth-rate [class+]" #> "current" &
+        ".growth-rate" #> growthRates.map { growthRate =>
+          ".breed *" #> growthRate.breed.get &
+            ".medium-age *" #> formatGrowthMonth(growthRate.mediumProductMonth.get) &
+            ".large-age *" #> formatGrowthMonth(growthRate.largeProductMonth.get) &
+            ".xlarge-age *" #> formatGrowthMonth(growthRate.xlargeProductMonth.get) &
+            ".actions .delete [onclick]" #> Confirm(
+              s"Delete ${growthRate.breed}?",
+              ajaxInvoke(deleteGrowthRate(growthRate) _)
+            )
+        }
 
   }
 }

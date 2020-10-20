@@ -1,30 +1,21 @@
-package com.mypetdefense.jobs 
+package com.mypetdefense.jobs
 
-import net.liftweb._
-import mapper.NullRef
-import common._
-import mapper._
-import util.Helpers._
-import com.mypetdefense.service.{ParentService, ShipStationService}
-import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import org.quartz.{CronScheduleBuilder, JobBuilder, JobDetail, JobExecutionContext, Trigger, TriggerBuilder}
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, LocalDateTime, Period, ZoneId}
-import java.time.format.DateTimeFormatter
-
-import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => ShipStationShipment, _}
-
-import scala.util.{Failure => TryFail, Success => TrySuccess, _}
-import dispatch.{Req => DispatchReq, _}
+import com.mypetdefense.service.ShipStationService
+import net.liftweb._
+import common._
+import dispatch._
 import Defaults._
+import mapper._
+import org.quartz._
+
+import scala.util.{Failure => TryFail, Success => TrySuccess}
 
 class CreateTreatLabelJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
     val treatOrders = TreatOrder.findAll(
       By(TreatOrder.shipStationOrderId, 0),
-      By(TreatOrder.shipmentStatus, ShipmentStatus.Paid),
+      By(TreatOrder.shipmentStatus, ShipmentStatus.Paid)
     )
 
     treatOrders map { treatOrder =>
@@ -32,7 +23,10 @@ class CreateTreatLabelJob extends ManagedJob {
 
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>
-          treatOrder.shipStationOrderId(order.orderId).shipmentStatus(ShipmentStatus.LabelCreated).saveMe
+          treatOrder
+            .shipStationOrderId(order.orderId)
+            .shipmentStatus(ShipmentStatus.LabelCreated)
+            .saveMe
 
         case TrySuccess(shipStationFailure) =>
           logger.error(s"create order failed with shipStation error:")
@@ -49,25 +43,29 @@ class CreateTreatLabelJob extends ManagedJob {
 }
 
 object HalfHourCreateTreatLabelJob extends TriggeredJob {
-  val detail: JobDetail = JobBuilder.newJob(classOf[CreateTreatLabelJob])
+  val detail: JobDetail = JobBuilder
+    .newJob(classOf[CreateTreatLabelJob])
     .withIdentity("HalfHourCreateTreatLabelJob")
     .build()
 
-    val trigger: Trigger = TriggerBuilder.newTrigger()
-      .withIdentity("HalfHourCreateTreatLabelJobTrigger")
-      .startNow()
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 30 * ? * * *"))
-      .build()
+  val trigger: Trigger = TriggerBuilder
+    .newTrigger()
+    .withIdentity("HalfHourCreateTreatLabelJobTrigger")
+    .startNow()
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 30 * ? * * *"))
+    .build()
 }
 
 object FrequentCreateTreatLabelJob extends TriggeredJob {
-  val detail: JobDetail = JobBuilder.newJob(classOf[CreateTreatLabelJob])
+  val detail: JobDetail = JobBuilder
+    .newJob(classOf[CreateTreatLabelJob])
     .withIdentity("FrequentCreateTreatLabelJob")
     .build
 
-    val trigger: Trigger = TriggerBuilder.newTrigger()
-      .withIdentity("FrequentCreateTreatLabelJobTrigger")
-      .startNow
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 1 minutes
-      .build
+  val trigger: Trigger = TriggerBuilder
+    .newTrigger()
+    .withIdentity("FrequentCreateTreatLabelJobTrigger")
+    .startNow
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 */1 * ? * *")) // fire every 1 minutes
+    .build
 }

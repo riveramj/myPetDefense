@@ -1,4 +1,4 @@
-package com.mypetdefense.model 
+package com.mypetdefense.model
 
 import java.util.Date
 
@@ -12,13 +12,13 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
     override def dbIndexed_? = true
   }
 
-  object name extends MappedString(this, 100)
-  object parent extends MappedLongForeignKey(this, Agency)
+  object name       extends MappedString(this, 100)
+  object parent     extends MappedLongForeignKey(this, Agency)
   object agencyType extends MappedEnum(this, AgencyType)
-  object customers extends MappedOneToMany(User, User.referer)
-  object members extends MappedOneToMany(User, User.agency)
-  object storeCode extends MappedString(this, 100)
-  object coupons extends MappedOneToMany(Coupon, Coupon.agency)
+  object customers  extends MappedOneToMany(User, User.referer)
+  object members    extends MappedOneToMany(User, User.agency)
+  object storeCode  extends MappedString(this, 100)
+  object coupons    extends MappedOneToMany(Coupon, Coupon.agency)
   object petlandStore extends MappedBoolean(this) {
     override def defaultValue = false
   }
@@ -27,20 +27,20 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
   }
 
   def createNewAgency(
-    name: String,
-    agencyType: AgencyType.Value = AgencyType.Headquarters,
-    parent: Box[Agency] = Empty,
-    storeCode: String = "",
-    petlandStore: Boolean = false
+      name: String,
+      agencyType: AgencyType.Value = AgencyType.Headquarters,
+      parent: Box[Agency] = Empty,
+      storeCode: String = "",
+      petlandStore: Boolean = false
   ): Agency = {
     Agency.create
-    .agencyId(generateLongId)
-    .name(name)
-    .agencyType(agencyType)
-    .parent(parent)
-    .storeCode(storeCode)
-    .petlandStore(petlandStore)
-    .saveMe
+      .agencyId(generateLongId)
+      .name(name)
+      .agencyType(agencyType)
+      .parent(parent)
+      .storeCode(storeCode)
+      .petlandStore(petlandStore)
+      .saveMe
   }
 
   def getHQFor(agency: Agency): Agency = {
@@ -61,15 +61,13 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
   def getAllHQ: List[Agency] = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
 
   def getAllChildrenCustomers(agency: Agency): List[User] = {
-    
+
     val childrenAgencies = Agency.findAll(By(Agency.parent, agency))
 
     if (childrenAgencies.isEmpty) {
       agency.customers.toList
-    } else{
-      childrenAgencies.flatMap { child =>
-        getAllChildrenCustomers(child)
-      }
+    } else {
+      childrenAgencies.flatMap { child => getAllChildrenCustomers(child) }
     }
   }
 }

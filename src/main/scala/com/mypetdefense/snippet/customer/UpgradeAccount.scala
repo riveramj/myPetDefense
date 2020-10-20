@@ -23,11 +23,15 @@ object UpgradeAccount extends Loggable {
 
 class UpgradeAccount extends Loggable {
   def render: NodeSeq => NodeSeq = {
-    val userSubscription = SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
+    val userSubscription =
+      SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
 
     val updatedSubscription = userSubscription.map(_.promptedUpgrade(true).saveMe())
 
-    val upgraded = updatedSubscription.map(_.subscriptionBoxes.toList.map(_.subscriptionItems.toList.nonEmpty)).openOr(Nil).foldLeft(true)(_&&_)
+    val upgraded = updatedSubscription
+      .map(_.subscriptionBoxes.toList.map(_.subscriptionItems.toList.nonEmpty))
+      .openOr(Nil)
+      .foldLeft(true)(_ && _)
 
     val user = SecurityContext.currentUser
 
@@ -50,9 +54,9 @@ class UpgradeAccount extends Loggable {
       }
 
       for {
-        box <- updatedBoxes
+        box          <- updatedBoxes
         subscription <- updatedSubscription.toList
-        user <- SecurityContext.currentUser.toList
+        user         <- SecurityContext.currentUser.toList
         shipmentCount = subscription.shipments.toList.size
       } yield {
         SubscriptionUpgrade.createSubscriptionUpgrade(subscription, box, user, shipmentCount)
@@ -67,11 +71,11 @@ class UpgradeAccount extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
-    ".upgrade-account a [class+]" #> "current" &
-    "#user-email *" #> user.map(_.email.get) &
-    ".already-upgraded" #> ClearNodesIf(!upgraded) &
-    ".upgrade" #> ClearNodesIf(upgraded) andThen
-    ".yes-upgrade" #> SHtml.ajaxSubmit("Upgrade me!", upgradeAccount _) &
-    ".no-upgrade" #> SHtml.ajaxSubmit("No thanks.", doNotUpgradeAccount _)
+      ".upgrade-account a [class+]" #> "current" &
+        "#user-email *" #> user.map(_.email.get) &
+        ".already-upgraded" #> ClearNodesIf(!upgraded) &
+        ".upgrade" #> ClearNodesIf(upgraded) andThen
+      ".yes-upgrade" #> SHtml.ajaxSubmit("Upgrade me!", upgradeAccount _) &
+        ".no-upgrade" #> SHtml.ajaxSubmit("No thanks.", doNotUpgradeAccount _)
   }
 }
