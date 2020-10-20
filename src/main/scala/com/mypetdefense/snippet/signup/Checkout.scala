@@ -1,15 +1,12 @@
 package com.mypetdefense.snippet.signup
 
-import java.util.Date
-
-import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
-import me.frmr.stripe.{Customer, StripeExecutor}
+import me.frmr.stripe.Customer
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -72,7 +69,7 @@ class Checkout extends Loggable {
   val lgXlPets: Int = petCount - smMedPets
 
   val subtotal: BigDecimal = (smMedPets * BigDecimal(24.99)) + (lgXlPets * BigDecimal(27.99))
-  val discount: BigDecimal = petCount.toInt match {
+  val discount: BigDecimal = petCount match {
     case 0 | 1 => BigDecimal(0)
     case _     => subtotal * 0.1
   }
