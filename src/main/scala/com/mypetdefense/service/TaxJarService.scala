@@ -32,7 +32,7 @@ object TaxJarService extends Loggable {
       city: String,
       state: String,
       zip: String,
-      amount: Double
+      amount: BigDecimal
   ): (Double, Double) = {
     def taxResponse = {
       Http

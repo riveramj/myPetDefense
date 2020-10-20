@@ -422,6 +422,7 @@ trait NewSaleEmailHandling extends EmailHandlerChain {
       sendEmail(subject, "sales@mypetdefense.com", transform(newSaleTemplate))
       sendEmail(subject, "rivera.mj@gmail.com", transform(newSaleTemplate))
       sendEmail(subject, "calvin.leach@mypetdefense.com", transform(newSaleTemplate))
+      sendEmail(subject, "kyle@getskybound.com", transform(newSaleTemplate))
   }
 }
 
