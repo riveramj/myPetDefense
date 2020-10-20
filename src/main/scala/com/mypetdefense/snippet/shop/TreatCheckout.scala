@@ -29,40 +29,41 @@ class TreatCheckout extends Loggable {
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
-  var user: Box[User] = SecurityContext.currentUser
-  var existingUser_? : Boolean =  if (user.isDefined) true else false
-  var useExistingCard = true
+  var user: Box[User]          = SecurityContext.currentUser
+  var existingUser_? : Boolean = if (user.isDefined) true else false
+  var useExistingCard          = true
 
-  var email: String = user.map(_.email.get).openOr("")
-  var firstName: String = user.map(_.firstName.get).openOr("")
-  var lastName: String = user.map(_.lastName.get).openOr("")
+  var email: String         = user.map(_.email.get).openOr("")
+  var firstName: String     = user.map(_.firstName.get).openOr("")
+  var lastName: String      = user.map(_.lastName.get).openOr("")
   var address: Box[Address] = user.flatMap(_.shippingAddress)
-  var street1: String = address.map(_.street1.get).openOr("")
-  var street2: String = address.map(_.street2.get).openOr("")
-  var city: String = address.map(_.city.get).openOr("")
-  var state: String = address.map(_.state.get).openOr("")
-  var zip: String = address.map(_.zip.get).openOr("")
+  var street1: String       = address.map(_.street1.get).openOr("")
+  var street2: String       = address.map(_.street2.get).openOr("")
+  var city: String          = address.map(_.city.get).openOr("")
+  var state: String         = address.map(_.state.get).openOr("")
+  var zip: String           = address.map(_.zip.get).openOr("")
 
   var discountCode = ""
-  var discount_? = false
+  var discount_?   = false
 
   var password = ""
 
-  var taxDue = 0D
-  var taxRate = 0D
+  var taxDue                                          = 0d
+  var taxRate                                         = 0d
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
-  var billingCardRenderer: Box[IdMemoizeTransform] = None
-  var checkoutRenderer: Box[IdMemoizeTransform] = None
-  var loginRenderer: Box[IdMemoizeTransform] = None
+  var billingCardRenderer: Box[IdMemoizeTransform]    = None
+  var checkoutRenderer: Box[IdMemoizeTransform]       = None
+  var loginRenderer: Box[IdMemoizeTransform]          = None
 
   var stripeToken = ""
 
   def findSubtotal: Double = {
     val cart = TreatsFlow.treatShoppingCart.is
 
-    cart.map { case (treat, quantity) =>
-      treat.price.get * quantity
-    }.foldLeft(0D)(_+_)
+    cart.map {
+      case (treat, quantity) =>
+        treat.price.get * quantity
+    }.foldLeft(0d)(_ + _)
   }
 
   def calculateTax(possibleState: String, possibleZip: String): JsCmd = {
@@ -88,7 +89,7 @@ class TreatCheckout extends Loggable {
 
       (
         Alert("Discount applied.") &
-        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+          priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
       )
     } else
       Alert("Invalid discount code.")
@@ -96,31 +97,31 @@ class TreatCheckout extends Loggable {
 
   def orderTreat(): JsCmd = {
     val validateFields = List(
-        validEmailFormat(email, "#checkout-email"),
-        checkEmpty(firstName, "#first-name"),
-        checkEmpty(lastName, "#last-name"),
-        checkEmpty(street1, "#street-1"),
-        checkEmpty(city, "#city"),
-        checkEmpty(state, "#state"),
-        checkEmpty(zip, "#zip")
-      ).flatten
+      validEmailFormat(email, "#checkout-email"),
+      checkEmpty(firstName, "#first-name"),
+      checkEmpty(lastName, "#last-name"),
+      checkEmpty(street1, "#street-1"),
+      checkEmpty(city, "#city"),
+      checkEmpty(state, "#state"),
+      checkEmpty(zip, "#zip")
+    ).flatten
 
     val percentOff = discountCode.toLowerCase match {
-      case "mpd20" => .20
+      case "mpd20"  => .20
       case "mpd 20" => .20
-      case _ => 0
+      case _        => 0
     }
 
     val dollarOff = findSubtotal * percentOff
 
-    if(!validateFields.isEmpty) {
+    if (!validateFields.isEmpty) {
       validateFields.foldLeft(Noop)(_ & _)
     } else {
-      val stripeId = user.map(_.stripeId.get).openOr("")
+      val stripeId   = user.map(_.stripeId.get).openOr("")
       val amountPaid = findSubtotal + taxDue - dollarOff
 
       val treatCharge = {
-        val stripeAmount = (amountPaid * 100).toLong
+        val stripeAmount            = (amountPaid * 100).toLong
         val internalSaleDescription = "Treat Purchase"
 
         if (existingUser_? && useExistingCard) {
@@ -202,7 +203,7 @@ class TreatCheckout extends Loggable {
 
     (
       cartRenderer.map(_.setHtml).openOr(Noop) &
-      priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
     )
   }
 
@@ -220,7 +221,7 @@ class TreatCheckout extends Loggable {
 
     (
       cartRenderer.map(_.setHtml).openOr(Noop) &
-      priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
     )
   }
 
@@ -230,7 +231,7 @@ class TreatCheckout extends Loggable {
     if (loginResult == Noop) {
       (
         checkoutRenderer.map(_.setHtml).openOr(Noop) &
-        loginRenderer.map(_.setHtml).openOr(Noop)
+          loginRenderer.map(_.setHtml).openOr(Noop)
       )
     } else {
       loginResult
@@ -243,11 +244,11 @@ class TreatCheckout extends Loggable {
       val user = SecurityContext.currentUser
 
       ".login-popover" #> ClearNodesIf(!user.isEmpty) &
-      ".login-popover #login-container" #> {
-        "#email" #> SHtml.text(email, email = _) &
-        "#password" #> SHtml.password(password, password = _) &
-        "#login" #> SHtml.ajaxSubmit("Log In", () => login)
-      }
+        ".login-popover #login-container" #> {
+          "#email" #> SHtml.text(email, email = _) &
+            "#password" #> SHtml.password(password, password = _) &
+            "#login" #> SHtml.ajaxSubmit("Log In", () => login)
+        }
     }
   }
 
@@ -270,100 +271,103 @@ class TreatCheckout extends Loggable {
 
         val total = subtotal + taxDue
 
-        ".treat-ordered" #> cart.map { case (treat, quantity) =>
-          val treatTotal = quantity * treat.price.get
-          ".ordered-quantity *" #> quantity &
-          ".ordered-treat-name *" #> treat.name.get &
-          ".treat-total *" #> f"$$$treatTotal%2.2f"
+        ".treat-ordered" #> cart.map {
+          case (treat, quantity) =>
+            val treatTotal = quantity * treat.price.get
+            ".ordered-quantity *" #> quantity &
+              ".ordered-treat-name *" #> treat.name.get &
+              ".treat-total *" #> f"$$$treatTotal%2.2f"
         } &
-        ".subtotal-amount *" #> f"$$$subtotal%2.2f" &
-        "#tax" #> ClearNodesIf(taxDue == 0D) &
-        ".tax-amount *" #> f"$$$taxDue%2.2f" &
-        ".order-amount *" #> f"$$$total%2.2f"
+          ".subtotal-amount *" #> f"$$$subtotal%2.2f" &
+          "#tax" #> ClearNodesIf(taxDue == 0d) &
+          ".tax-amount *" #> f"$$$taxDue%2.2f" &
+          ".order-amount *" #> f"$$$total%2.2f"
       }
     }
 
     SHtml.makeFormsAjax andThen
-    loginBindings &
-    "#shopping-cart" #> idMemoize { renderer =>
-      val cart = TreatsFlow.treatShoppingCart.is
+      loginBindings &
+        "#shopping-cart" #> idMemoize { renderer =>
+          val cart = TreatsFlow.treatShoppingCart.is
 
-      cartRenderer = Full(renderer)
+          cartRenderer = Full(renderer)
 
-      val subtotal = cart.map { case (treat, quantity) =>
-        quantity * treat.price.get
-      }.foldLeft(0D)(_ + _)
+          val subtotal = cart.map {
+            case (treat, quantity) =>
+              quantity * treat.price.get
+          }.foldLeft(0d)(_ + _)
 
-      ".items-in-cart .cart-item" #> cart.map { case (treat, quantity) =>
-        val itemPrice = treat.price.get * quantity
+          ".items-in-cart .cart-item" #> cart.map {
+            case (treat, quantity) =>
+              val itemPrice = treat.price.get * quantity
 
-        ".cart-treat-name *" #> treat.name.get &
-        ".selected-quantity *" #> quantity &
-        ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
-        ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
-        ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
-        ".treat-price *" #> f"$$$itemPrice%2.2f"
-      } &
-      ".cart-footer" #> {
-        ".subtotal *" #> f"$$$subtotal%2.2f" &
-        ".cart-actions .continue-shopping [href]" #> "/treats"
-      } &
-      ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
-      ".cart-actions .continue-shopping [href]" #> "/treats" &
-      ".empty-cart .continue-shopping [href]" #> "/treats" &
-      ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
-      ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
-      ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
-      ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
-    } &
-    ".checkout-container" #> SHtml.idMemoize { renderer =>
-      user = SecurityContext.currentUser
-      existingUser_? =  if (user.isDefined) true else false
-      useExistingCard = true
-
-      email = user.map(_.email.get).openOr("")
-      firstName = user.map(_.firstName.get).openOr("")
-      lastName = user.map(_.lastName.get).openOr("")
-      address = user.flatMap(_.shippingAddress)
-      street1 = address.map(_.street1.get).openOr("")
-      street2 = address.map(_.street2.get).openOr("")
-      city = address.map(_.city.get).openOr("")
-      state = address.map(_.state.get).openOr("")
-      zip = address.map(_.zip.get).openOr("")
-
-      checkoutRenderer = Full(renderer)
-      orderSummary &
-      "#first-name" #> text(firstName, firstName = _) &
-      "#last-name" #> text(lastName, lastName = _) &
-      "#street-1" #> text(street1, street1 = _) &
-      "#street-2" #> text(street2, street2 = _) &
-      "#city" #> ajaxText(city, city = _) &
-      "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
-      "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
-      "#checkout-email" #> text(email, userEmail => email = userEmail.trim) &
-      "#checkout-discount" #> ajaxText(discountCode, discount => discountCode = discount.trim) &
-      ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
-      "#checkout-email" #> {
-        if (existingUser_?) {
-          "^ [class+]" #> "disabled" &
-          "^ [disabled]" #> "disabled"
-        } else {
-          "^ [class+]" #> ""
-        }
-      } &
-      ".billing-container" #> {
-        ".form-row [class+]" #> {
-          if (existingUser_? && useExistingCard)
-            "hide-card"
-          else
-            ""
+              ".cart-treat-name *" #> treat.name.get &
+                ".selected-quantity *" #> quantity &
+                ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
+                ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
+                ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
+                ".treat-price *" #> f"$$$itemPrice%2.2f"
+          } &
+            ".cart-footer" #> {
+              ".subtotal *" #> f"$$$subtotal%2.2f" &
+                ".cart-actions .continue-shopping [href]" #> "/treats"
+            } &
+            ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
+            ".cart-actions .continue-shopping [href]" #> "/treats" &
+            ".empty-cart .continue-shopping [href]" #> "/treats" &
+            ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
+            ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
+            ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
+            ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
         } &
-        ".existing-card" #> ClearNodesIf(!existingUser_? || !useExistingCard) &
-        ".existing-card span *" #> "Card on file" &
-        ".existing-card .change-card [onclick]" #> ajaxInvoke(useNewCard _)
-      } &
-      "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-      ".buy-treat" #> ajaxSubmit("Place Order", () => orderTreat)
-    }
+        ".checkout-container" #> SHtml.idMemoize { renderer =>
+          user = SecurityContext.currentUser
+          existingUser_? = if (user.isDefined) true else false
+          useExistingCard = true
+
+          email = user.map(_.email.get).openOr("")
+          firstName = user.map(_.firstName.get).openOr("")
+          lastName = user.map(_.lastName.get).openOr("")
+          address = user.flatMap(_.shippingAddress)
+          street1 = address.map(_.street1.get).openOr("")
+          street2 = address.map(_.street2.get).openOr("")
+          city = address.map(_.city.get).openOr("")
+          state = address.map(_.state.get).openOr("")
+          zip = address.map(_.zip.get).openOr("")
+
+          checkoutRenderer = Full(renderer)
+          orderSummary &
+            "#first-name" #> text(firstName, firstName = _) &
+            "#last-name" #> text(lastName, lastName = _) &
+            "#street-1" #> text(street1, street1 = _) &
+            "#street-2" #> text(street2, street2 = _) &
+            "#city" #> ajaxText(city, city = _) &
+            "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
+            "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
+            "#checkout-email" #> text(email, userEmail => email = userEmail.trim) &
+            "#checkout-discount" #> ajaxText(discountCode, discount => discountCode = discount.trim) &
+            ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
+            "#checkout-email" #> {
+              if (existingUser_?) {
+                "^ [class+]" #> "disabled" &
+                  "^ [disabled]" #> "disabled"
+              } else {
+                "^ [class+]" #> ""
+              }
+            } &
+            ".billing-container" #> {
+              ".form-row [class+]" #> {
+                if (existingUser_? && useExistingCard)
+                  "hide-card"
+                else
+                  ""
+              } &
+                ".existing-card" #> ClearNodesIf(!existingUser_? || !useExistingCard) &
+                ".existing-card span *" #> "Card on file" &
+                ".existing-card .change-card [onclick]" #> ajaxInvoke(useNewCard _)
+            } &
+            "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
+            ".buy-treat" #> ajaxSubmit("Place Order", () => orderTreat)
+        }
   }
 }

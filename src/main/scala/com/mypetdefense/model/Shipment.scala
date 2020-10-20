@@ -8,26 +8,26 @@ import java.util.Date
 
 class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, Shipment] {
   def getSingleton: KeyedMetaMapper[Long, Shipment] = Shipment
-  object shipmentId extends MappedLong(this){
+  object shipmentId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-  object subscription extends MappedLongForeignKey(this, Subscription)
+  object subscription       extends MappedLongForeignKey(this, Subscription)
   object shipStationOrderId extends MappedInt(this)
-  object stripePaymentId extends MappedString(this, 100)
-  object stripeChargeId extends MappedString(this, 100)
-  object trackingNumber extends MappedString(this, 100)
-  object address extends MappedString(this, 200)
-  object dateProcessed extends MappedDateTime(this)
-  object dateRefunded extends MappedDateTime(this)
-  object expectedShipDate extends MappedDateTime(this)
-  object dateShipped extends MappedDateTime(this)
-  object dateReceived extends MappedDateTime(this)
-  object taxPaid extends MappedString(this, 100)
-  object amountPaid extends MappedString(this, 100)
-  object shipmentLineItems extends MappedOneToMany(ShipmentLineItem, ShipmentLineItem.shipment)
-  object insert extends MappedString(this, 100)
-  object shipmentStatus extends MappedEnum(this, ShipmentStatus)
-  object deliveryNotes extends MappedString(this, 100)
+  object stripePaymentId    extends MappedString(this, 100)
+  object stripeChargeId     extends MappedString(this, 100)
+  object trackingNumber     extends MappedString(this, 100)
+  object address            extends MappedString(this, 200)
+  object dateProcessed      extends MappedDateTime(this)
+  object dateRefunded       extends MappedDateTime(this)
+  object expectedShipDate   extends MappedDateTime(this)
+  object dateShipped        extends MappedDateTime(this)
+  object dateReceived       extends MappedDateTime(this)
+  object taxPaid            extends MappedString(this, 100)
+  object amountPaid         extends MappedString(this, 100)
+  object shipmentLineItems  extends MappedOneToMany(ShipmentLineItem, ShipmentLineItem.shipment)
+  object insert             extends MappedString(this, 100)
+  object shipmentStatus     extends MappedEnum(this, ShipmentStatus)
+  object deliveryNotes      extends MappedString(this, 100)
   object freeUpgradeSample extends MappedBoolean(this) {
     override def defaultValue = false
   }
@@ -43,15 +43,15 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
 
 object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
   def createShipment(
-    user: User,
-    subscription: Subscription,
-    stripePaymentId: String,
-    stripeChargeId: Box[String],
-    amountPaid: String,
-    taxPaid: String,
-    inserts: List[Insert],
-    shipmentStatus: ShipmentStatus.Value,
-    sendFreeUpgrade: Boolean = false
+      user: User,
+      subscription: Subscription,
+      stripePaymentId: String,
+      stripeChargeId: Box[String],
+      amountPaid: String,
+      taxPaid: String,
+      inserts: List[Insert],
+      shipmentStatus: ShipmentStatus.Value,
+      sendFreeUpgrade: Boolean = false
   ): Shipment = {
     val dateProcessed = new Date()
 
@@ -76,24 +76,29 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
 
 class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, ShipmentLineItem] = ShipmentLineItem
-  object shipmentLineItemId extends MappedLong(this){
-    override def dbIndexed_? = true
+  object shipmentLineItemId extends MappedLong(this) {
+    override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
   }
   object shipment extends MappedLongForeignKey(this, Shipment)
   object fleaTick extends MappedLongForeignKey(this, FleaTick)
-  object product extends MappedLongForeignKey(this, Product)
-  object petName extends MappedString(this, 100)
-  object pet extends MappedLongForeignKey(this, Pet)
-  object insert extends MappedLongForeignKey(this, Insert)
+  object product  extends MappedLongForeignKey(this, Product)
+  object petName  extends MappedString(this, 100)
+  object pet      extends MappedLongForeignKey(this, Pet)
+  object insert   extends MappedLongForeignKey(this, Insert)
 
   def getFleaTickPetNameItemSize: String = {
     val fleaTickNameSize = this.fleaTick.obj.map(_.getNameAndSize).openOr("")
     s"${this.petName.get} - $fleaTickNameSize".replace("null", "")
   }
 
-  def sendFreeUpgradeItems(shipment: Shipment, pet: Pet) : List[ShipmentLineItem] = {
-    val products = List(Product.skinAndCoat, Product.multiVitamin, Product.probiotic, Product.dentalPowder).flatten
+  def sendFreeUpgradeItems(shipment: Shipment, pet: Pet): List[ShipmentLineItem] = {
+    val products = List(
+      Product.skinAndCoat,
+      Product.multiVitamin,
+      Product.probiotic,
+      Product.dentalPowder
+    ).flatten
 
     products.map { item =>
       ShipmentLineItem.create
@@ -106,12 +111,17 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
     }
   }
 
-  def createShipmentItems(shipment: Shipment, user: User, inserts: List[Insert], sendFreeUpgrade: Boolean): List[ShipmentLineItem] = {
+  def createShipmentItems(
+      shipment: Shipment,
+      user: User,
+      inserts: List[Insert],
+      sendFreeUpgrade: Boolean
+  ): List[ShipmentLineItem] = {
     for {
       subscription <- user.subscription.toList
-      box <- subscription.subscriptionBoxes
-      pet <- box.pet.obj
-      fleaTick = box.fleaTick.obj
+      box          <- subscription.subscriptionBoxes
+      pet          <- box.pet.obj
+      fleaTick          = box.fleaTick.obj
       subscriptionItems = box.subscriptionItems
     } yield {
       ShipmentLineItem.create
@@ -121,7 +131,6 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
         .pet(pet)
         .petName(pet.name.get)
         .saveMe
-
 
       if (sendFreeUpgrade && pet.animalType.get == AnimalType.Dog)
         sendFreeUpgradeItems(shipment, pet)
@@ -150,12 +159,12 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
 object ShipmentLineItem extends ShipmentLineItem with LongKeyedMetaMapper[ShipmentLineItem]
 
 object ShipmentStatus extends Enumeration {
-  val Paid: ShipmentStatus.Value = Value
-  val LabelCreated: ShipmentStatus.Value = Value("Label Created")
-  val InTransit: ShipmentStatus.Value = Value("In Transit")
-  val Delivered: ShipmentStatus.Value = Value
+  val Paid: ShipmentStatus.Value            = Value
+  val LabelCreated: ShipmentStatus.Value    = Value("Label Created")
+  val InTransit: ShipmentStatus.Value       = Value("In Transit")
+  val Delivered: ShipmentStatus.Value       = Value
   val DelayedDelivery: ShipmentStatus.Value = Value("Delayed Delivery")
-  val Refused: ShipmentStatus.Value = Value
-  val FailedDelivery: ShipmentStatus.Value = Value("Failed Delivery")
-  val Other: ShipmentStatus.Value = Value
+  val Refused: ShipmentStatus.Value         = Value
+  val FailedDelivery: ShipmentStatus.Value  = Value("Failed Delivery")
+  val Other: ShipmentStatus.Value           = Value
 }

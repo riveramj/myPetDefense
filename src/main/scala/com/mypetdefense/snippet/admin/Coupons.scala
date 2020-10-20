@@ -26,13 +26,13 @@ object Coupons extends Loggable {
 }
 
 class Coupons extends Loggable {
-  val coupons: List[Coupon] = Coupon.findAll()
+  val coupons: List[Coupon]     = Coupon.findAll()
   val allAgencies: List[Agency] = Agency.findAll()
 
-  var codeName = ""
-  var monthCount = "0"
-  var percentOff = "0"
-  var dollarOff = "0"
+  var codeName                  = ""
+  var monthCount                = "0"
+  var percentOff                = "0"
+  var dollarOff                 = "0"
   var chosenAgency: Box[Agency] = Empty
 
   def agencyDropdown: Elem = {
@@ -44,17 +44,16 @@ class Coupons extends Loggable {
   }
 
   def createCoupon: JsCmd = {
-    val validateFields = (
-      List(
-        checkEmpty(codeName, "#code-name"),
-        checkCouponValue(percentOff.trim(), "#percent-off"),
-        checkCouponValue(monthCount.trim(), "#month-count"),
-        checkDuplicateCoupon(codeName, "#code-name")
-      ) ++ checkMonthPercentDollar(
-        (monthCount.trim(), "#month-count"),
-        (percentOff.trim(), "#percent-off"),
-        (dollarOff.trim(), "#dollar-off")
-      )).flatten
+    val validateFields = (List(
+      checkEmpty(codeName, "#code-name"),
+      checkCouponValue(percentOff.trim(), "#percent-off"),
+      checkCouponValue(monthCount.trim(), "#month-count"),
+      checkDuplicateCoupon(codeName, "#code-name")
+    ) ++ checkMonthPercentDollar(
+      (monthCount.trim(), "#month-count"),
+      (percentOff.trim(), "#percent-off"),
+      (dollarOff.trim(), "#dollar-off")
+    )).flatten
 
     if (validateFields.isEmpty) {
       CouponService.createCoupon(
@@ -63,11 +62,11 @@ class Coupons extends Loggable {
         monthCount,
         percentOff,
         dollarOff
-      ) match { 
+      ) match {
         case Full(_) =>
           S.redirectTo(Coupons.menu.loc.calcDefaultHref)
 
-        case Empty | Failure(_,_,_) =>
+        case Empty | Failure(_, _, _) =>
           Alert("An error has occurred. Please try again.")
       }
     } else {
@@ -86,47 +85,48 @@ class Coupons extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    ".coupons [class+]" #> "current" &
-    "#code-name" #> text(codeName, codeName = _) &
-    "#month-count" #> text(monthCount, monthCount = _) &
-    "#percent-off" #> text(percentOff, percentOff = _) &
-    "#dollar-off" #> text(dollarOff, dollarOff = _) &
-    "#agency-container #agency-select" #> agencyDropdown &
-    "#create-item" #> SHtml.ajaxSubmit("Create Coupon", () => createCoupon) &
-    ".coupon" #> coupons.map { coupon =>
-      val couponPercent = {
-        if (coupon.dollarOff.get > 0)
-          "-"
-        else if (coupon.percentOff.get == 0)
-          "100%"
-        else 
-          s"${coupon.percentOff.get}%"
-      }
+      ".coupons [class+]" #> "current" &
+        "#code-name" #> text(codeName, codeName = _) &
+        "#month-count" #> text(monthCount, monthCount = _) &
+        "#percent-off" #> text(percentOff, percentOff = _) &
+        "#dollar-off" #> text(dollarOff, dollarOff = _) &
+        "#agency-container #agency-select" #> agencyDropdown &
+        "#create-item" #> SHtml.ajaxSubmit("Create Coupon", () => createCoupon) &
+        ".coupon" #> coupons.map { coupon =>
+          val couponPercent = {
+            if (coupon.dollarOff.get > 0)
+              "-"
+            else if (coupon.percentOff.get == 0)
+              "100%"
+            else
+              s"${coupon.percentOff.get}%"
+          }
 
-      val couponDollar = {
-        if (coupon.dollarOff.get > 0)
-          s"$$${coupon.dollarOff.get}"
-        else
-          "-"
-      }
+          val couponDollar = {
+            if (coupon.dollarOff.get > 0)
+              s"$$${coupon.dollarOff.get}"
+            else
+              "-"
+          }
 
-      val monthCount = {
-        if (coupon.numberOfMonths.get == 0)
-          "-"
-        else
-          coupon.numberOfMonths.get.toString
-      }
+          val monthCount = {
+            if (coupon.numberOfMonths.get == 0)
+              "-"
+            else
+              coupon.numberOfMonths.get.toString
+          }
 
-      ".code *" #> coupon.couponCode &
-      ".months *" #> monthCount &
-      ".percent-off *" #> couponPercent &
-      ".dollar-off *" #> couponDollar &
-      ".usage-count *" #> coupon.users.size &
-      ".agency *" #> coupon.agency.obj.map(_.name.get) &
-      ".actions .delete" #> ClearNodesIf(coupon.users.nonEmpty) &
-      ".actions .delete [onclick]" #> Confirm(s"Delete ${coupon.couponCode}?",
-        ajaxInvoke(deleteCoupon(coupon))
-      )
-    }
+          ".code *" #> coupon.couponCode &
+            ".months *" #> monthCount &
+            ".percent-off *" #> couponPercent &
+            ".dollar-off *" #> couponDollar &
+            ".usage-count *" #> coupon.users.size &
+            ".agency *" #> coupon.agency.obj.map(_.name.get) &
+            ".actions .delete" #> ClearNodesIf(coupon.users.nonEmpty) &
+            ".actions .delete [onclick]" #> Confirm(
+              s"Delete ${coupon.couponCode}?",
+              ajaxInvoke(deleteCoupon(coupon))
+            )
+        }
   }
 }

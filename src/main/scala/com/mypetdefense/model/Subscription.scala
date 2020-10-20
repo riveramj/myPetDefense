@@ -9,20 +9,23 @@ import net.liftweb.common.Box
 
 import scala.collection.mutable
 
-class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMany[Long, Subscription] {
+class Subscription
+    extends LongKeyedMapper[Subscription]
+    with IdPK
+    with OneToMany[Long, Subscription] {
   def getSingleton: KeyedMetaMapper[Long, Subscription] = Subscription
-  object subscriptionId extends MappedLong(this){
+  object subscriptionId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-  object user extends MappedLongForeignKey(this, User)
-  object promptedUpgrade extends MappedBoolean(this)
-  object isUpgraded extends MappedBoolean(this)
+  object user                  extends MappedLongForeignKey(this, User)
+  object promptedUpgrade       extends MappedBoolean(this)
+  object isUpgraded            extends MappedBoolean(this)
   object freeUpgradeSampleDate extends MappedDateTime(this)
-  object stripeSubscriptionId extends MappedString(this, 100)
-  object startDate extends MappedDateTime(this)
-  object renewalDate extends MappedDateTime(this)
-  object nextShipDate extends MappedDateTime(this)
-  object priceCode extends MappedString(this, 100)
+  object stripeSubscriptionId  extends MappedString(this, 100)
+  object startDate             extends MappedDateTime(this)
+  object renewalDate           extends MappedDateTime(this)
+  object nextShipDate          extends MappedDateTime(this)
+  object priceCode             extends MappedString(this, 100)
   object contractLength extends MappedInt(this) {
     override def defaultValue = 0
   }
@@ -33,13 +36,14 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
-  object cancellationDate extends MappedDateTime(this)
-  object cancellationReason extends MappedString(this, 100)
+  object cancellationDate    extends MappedDateTime(this)
+  object cancellationReason  extends MappedString(this, 100)
   object cancellationComment extends MappedText(this)
-  object subscriptionBoxes extends MappedOneToMany(SubscriptionBox, SubscriptionBox.subscription)
-  object tags extends MappedOneToMany(TaggedItem, TaggedItem.subscription)
+  object subscriptionBoxes   extends MappedOneToMany(SubscriptionBox, SubscriptionBox.subscription)
+  object tags                extends MappedOneToMany(TaggedItem, TaggedItem.subscription)
 
-  def refresh: Box[Subscription] = Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
+  def refresh: Box[Subscription] =
+    Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
 
   def getPets: Seq[Pet] = user.obj.map(_.activePets).openOr(Nil)
 
@@ -50,35 +54,33 @@ class Subscription extends LongKeyedMapper[Subscription] with IdPK with OneToMan
       .saveMe
   }
 
-  def getPetAndProducts: mutable.Buffer[(Box[Pet], Box[FleaTick])] = this.subscriptionBoxes.map { box =>
-    (box.pet.obj, box.fleaTick.obj)
+  def getPetAndProducts: mutable.Buffer[(Box[Pet], Box[FleaTick])] = this.subscriptionBoxes.map {
+    box => (box.pet.obj, box.fleaTick.obj)
   }
 
   def createNewSubscription(
-    user: Box[User],
-    stripeSubscriptionId: String,
-    startDate: Date,
-    nextShipDate: Date,
-    priceCode: String = Price.defaultPriceCode,
-    isUpgraded: Boolean = false,
-    contractLength: Int = 0
+      user: Box[User],
+      stripeSubscriptionId: String,
+      startDate: Date,
+      nextShipDate: Date,
+      priceCode: String = Price.defaultPriceCode,
+      isUpgraded: Boolean = false,
+      contractLength: Int = 0
   ): Subscription = {
     Subscription.create
-    .subscriptionId(generateLongId)
-    .user(user)
-    .stripeSubscriptionId(stripeSubscriptionId)
-    .startDate(startDate)
-    .nextShipDate(nextShipDate)
-    .priceCode(priceCode)
-    .isUpgraded(isUpgraded)
-    .contractLength(contractLength)
-    .saveMe
+      .subscriptionId(generateLongId)
+      .user(user)
+      .stripeSubscriptionId(stripeSubscriptionId)
+      .startDate(startDate)
+      .nextShipDate(nextShipDate)
+      .priceCode(priceCode)
+      .isUpgraded(isUpgraded)
+      .contractLength(contractLength)
+      .saveMe
   }
 
   def getMonthlyCost: Double = {
-    this.subscriptionBoxes.map { box =>
-      box.basePrice.get + box.addOnProducts.map(_.price.get).sum
-    }.sum
+    this.subscriptionBoxes.map { box => box.basePrice.get + box.addOnProducts.map(_.price.get).sum }.sum
   }
 }
 

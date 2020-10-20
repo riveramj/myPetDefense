@@ -43,6 +43,6 @@ class PetChoice extends Loggable {
     }
 
     "#dog" #> SHtml.submit("Select", dogFlow _) &
-    "#cat" #> SHtml.submit("Select", catFlow _)
+      "#cat" #> SHtml.submit("Select", catFlow _)
   }
 }

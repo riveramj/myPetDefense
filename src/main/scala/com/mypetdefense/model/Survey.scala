@@ -1,9 +1,9 @@
-package com.mypetdefense.model 
+package com.mypetdefense.model
 
 import net.liftweb._
-  import mapper._
-  import common._
-  import util._
+import mapper._
+import common._
+import util._
 
 import com.mypetdefense.util.RandomIdGenerator._
 
@@ -11,7 +11,7 @@ import java.util.Date
 
 class Survey extends LongKeyedMapper[Survey] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, Survey] = Survey
-  object surveyId extends MappedLong(this){
+  object surveyId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
   object user extends MappedLongForeignKey(this, User)
@@ -32,9 +32,9 @@ class Survey extends LongKeyedMapper[Survey] with IdPK {
 
   def createNewSurvey(user: User): Survey = {
     Survey.create
-    .surveyId(generateLongId)
-    .user(user)
-    .saveMe
+      .surveyId(generateLongId)
+      .user(user)
+      .saveMe
   }
 }
 

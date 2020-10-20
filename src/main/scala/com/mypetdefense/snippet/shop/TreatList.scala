@@ -24,22 +24,27 @@ object TreatList extends Loggable {
 
   val treatListMenu: Menu.ParamMenuable[User] =
     Menu.param[User](
-      "Our Treats", "Our Treats",
+      "Our Treats",
+      "Our Treats",
       productSalesKey => KeyService.findUserByKey(productSalesKey, "productSalesKey"),
       user => user.productSalesKey.get
     ) / "treats" >>
-    MatchWithoutCurrentValue
+      MatchWithoutCurrentValue
 }
 
 class TreatList extends Loggable {
 
   var user: Box[User] = TreatList.treatListMenu.currentValue
 
-  val duckTreats: Box[Product] = Product.find(By(Product.name, "Duck Jerky Multivitamin & Immune Maintenance"))
-  val lambTreats: Box[Product] = Product.find(By(Product.name, "Lamb Jerky Digestive Health & Probiotic"))
+  val duckTreats: Box[Product] =
+    Product.find(By(Product.name, "Duck Jerky Multivitamin & Immune Maintenance"))
+  val lambTreats: Box[Product] =
+    Product.find(By(Product.name, "Lamb Jerky Digestive Health & Probiotic"))
   val beefTreats: Box[Product] = Product.find(By(Product.name, "Beef Jerky Hip & Joint Formula"))
-  val salmonTreats: Box[Product] = Product.find(By(Product.name, "Salmon Jerky Skin & Coat Formula"))
-  val fruitTreats: Box[Product] = Product.find(By(Product.name, "Mind Your Peas Natural Dog Treats"))
+  val salmonTreats: Box[Product] =
+    Product.find(By(Product.name, "Salmon Jerky Skin & Coat Formula"))
+  val fruitTreats: Box[Product] =
+    Product.find(By(Product.name, "Mind Your Peas Natural Dog Treats"))
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
@@ -87,36 +92,38 @@ class TreatList extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     "#logo-name a [href]" #> TreatList.treatListMenu.loc.calcDefaultHref &
-    "#shopping-cart" #> idMemoize { renderer =>
-      val cart = TreatsFlow.treatShoppingCart.is
+      "#shopping-cart" #> idMemoize { renderer =>
+        val cart = TreatsFlow.treatShoppingCart.is
 
-      cartRenderer = Full(renderer)
+        cartRenderer = Full(renderer)
 
-      val subtotal = cart.map { case (treat, quantity) =>
-        quantity * treat.price.get
-      }.foldLeft(0D)(_ + _)
+        val subtotal = cart.map {
+          case (treat, quantity) =>
+            quantity * treat.price.get
+        }.foldLeft(0d)(_ + _)
 
-      ".items-in-cart .cart-item" #> cart.map { case (treat, quantity) =>
-        val itemPrice = treat.price.get * quantity
+        ".items-in-cart .cart-item" #> cart.map {
+          case (treat, quantity) =>
+            val itemPrice = treat.price.get * quantity
 
-        ".cart-treat-name *" #> treat.name.get &
-        ".selected-quantity *" #> quantity &
-        ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
-        ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
-        ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
-        ".treat-price *" #> f"$$$itemPrice%2.2f"
-      } &
-      ".cart-footer" #> {
-        ".subtotal *" #> f"$$$subtotal%2.2f" &
-        ".checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref
-      } &
-      ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
-      ".cart-actions .checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref &
-      ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
-      ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
-      ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
-      ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
-    } andThen
-    ".fruit .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitTreats))
+            ".cart-treat-name *" #> treat.name.get &
+              ".selected-quantity *" #> quantity &
+              ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
+              ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
+              ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
+              ".treat-price *" #> f"$$$itemPrice%2.2f"
+        } &
+          ".cart-footer" #> {
+            ".subtotal *" #> f"$$$subtotal%2.2f" &
+              ".checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref
+          } &
+          ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
+          ".cart-actions .checkout [href]" #> TreatCheckout.menu.loc.calcDefaultHref &
+          ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
+          ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
+          ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
+          ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
+      } andThen
+      ".fruit .add-treat [onclick]" #> ajaxInvoke(() => addToCart(fruitTreats))
   }
 }

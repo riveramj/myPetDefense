@@ -1,5 +1,5 @@
 package com.mypetdefense.snippet
-package admin 
+package admin
 
 import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml
@@ -27,7 +27,7 @@ import scala.xml.NodeSeq
 
 object EventsDashboard extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable = Menu.i("Events Dashboard") / "admin" / "events-dashboard" >>
@@ -37,15 +37,15 @@ object EventsDashboard extends Loggable {
 
 class EventsDashboard extends Loggable {
   val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  
+
   var eventActionRenderer: Box[IdMemoizeTransform] = Empty
-  var unresolvedEvents: List[Event] = Event.unresolvedEvents
+  var unresolvedEvents: List[Event]                = Event.unresolvedEvents
 
   def actionOnEvent(
-    event: Event,
-    eventNotes: String,
-    eventStatus: EventStatus.Value,
-    renderer: IdMemoizeTransform
+      event: Event,
+      eventNotes: String,
+      eventStatus: EventStatus.Value,
+      renderer: IdMemoizeTransform
   )(): JsCmd = {
     val updatedEvent = event.notes(eventNotes).eventStatus(eventStatus)
 
@@ -53,7 +53,7 @@ class EventsDashboard extends Loggable {
       updatedEvent.resolutionDate(new Date()).saveMe
     else
       updatedEvent.saveMe
-    
+
     unresolvedEvents = Event.unresolvedEvents
 
     renderer.setHtml
@@ -61,9 +61,11 @@ class EventsDashboard extends Loggable {
 
   def getEmail(event: Event): Box[String] = {
     val parent = event.user.obj
-    
+
     if (parent.map(_.status == Status.Cancelled).openOr(false)) {
-      event.user.obj.flatMap(user => CancelledUser.find(By(CancelledUser.user, user.userId.get)).map(_.email.get))
+      event.user.obj.flatMap(user =>
+        CancelledUser.find(By(CancelledUser.user, user.userId.get)).map(_.email.get)
+      )
     } else {
       event.user.obj.map(_.email.get)
     }
@@ -71,23 +73,30 @@ class EventsDashboard extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    ".event-dashboard [class+]" #> "current" &
-    ".event-details" #> SHtml.idMemoize { eventActionRenderer =>
-      ".event" #> unresolvedEvents.sortBy(_.eventDate.get.getTime).map { event =>
-        var notes = event.notes.get
-        val trackingNumber = event.shipment.obj.map(_.trackingNumber.get)
+      ".event-dashboard [class+]" #> "current" &
+        ".event-details" #> SHtml.idMemoize { eventActionRenderer =>
+          ".event" #> unresolvedEvents.sortBy(_.eventDate.get.getTime).map { event =>
+            var notes          = event.notes.get
+            val trackingNumber = event.shipment.obj.map(_.trackingNumber.get)
 
-        ".event-date *" #> dateFormat.format(event.eventDate.get) &
-        ".title *" #> event.title.get &
-        ".details *" #> event.details.get &
-        ".account-email *" #> getEmail(event) &
-        ".tracking-number a *" #> trackingNumber &
-        ".tracking-number a [href]" #> s"https://tools.usps.com/go/TrackConfirmAction.action?tLabels=${trackingNumber.openOr("")}" &
-        ".event-type *" #> event.eventType.get.toString &
-        ".notes" #> SHtml.ajaxTextarea(notes, notes = _) & 
-        ".resolve" #> SHtml.ajaxSubmit("Resolved", () => actionOnEvent(event, notes, EventStatus.Resolved, eventActionRenderer)) &
-        ".set-pending" #> SHtml.ajaxSubmit("Pending", () => actionOnEvent(event, notes, EventStatus.Pending, eventActionRenderer))
-      }
-    }
+            ".event-date *" #> dateFormat.format(event.eventDate.get) &
+              ".title *" #> event.title.get &
+              ".details *" #> event.details.get &
+              ".account-email *" #> getEmail(event) &
+              ".tracking-number a *" #> trackingNumber &
+              ".tracking-number a [href]" #> s"https://tools.usps.com/go/TrackConfirmAction.action?tLabels=${trackingNumber
+                .openOr("")}" &
+              ".event-type *" #> event.eventType.get.toString &
+              ".notes" #> SHtml.ajaxTextarea(notes, notes = _) &
+              ".resolve" #> SHtml.ajaxSubmit(
+                "Resolved",
+                () => actionOnEvent(event, notes, EventStatus.Resolved, eventActionRenderer)
+              ) &
+              ".set-pending" #> SHtml.ajaxSubmit(
+                "Pending",
+                () => actionOnEvent(event, notes, EventStatus.Pending, eventActionRenderer)
+              )
+          }
+        }
   }
 }

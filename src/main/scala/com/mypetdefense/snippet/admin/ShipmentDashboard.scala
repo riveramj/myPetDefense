@@ -1,5 +1,5 @@
 package com.mypetdefense.snippet
-package admin 
+package admin
 
 import net.liftweb.sitemap.Menu
 import net.liftweb.http.SHtml
@@ -28,27 +28,30 @@ import scala.xml.NodeSeq
 
 object ShipmentDashboard extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable = Menu.i("Shipment Dashboard") / "admin" / "shipment-dashboard" >>
     mpdAdmin >>
     loggedIn
 
-  val newLabelsExportMenu: Menu.Menuable = Menu.i("Export New Labels") / "admin" / "shipment-dashboard" / "export_new_shipments.csv" >>
-    mpdAdmin >>
-    loggedIn >>
-    EarlyResponse(exportNewUspsLabels _)
+  val newLabelsExportMenu: Menu.Menuable =
+    Menu.i("Export New Labels") / "admin" / "shipment-dashboard" / "export_new_shipments.csv" >>
+      mpdAdmin >>
+      loggedIn >>
+      EarlyResponse(exportNewUspsLabels _)
 
-  val existingLabelsExportMenu: Menu.Menuable = Menu.i("Export Existing Labels") / "admin" / "shipment-dashboard" / "export_existing_shipments.csv" >>
-    mpdAdmin >>
-    loggedIn >>
-    EarlyResponse(exportExistingUspsLabels _)
+  val existingLabelsExportMenu: Menu.Menuable =
+    Menu.i("Export Existing Labels") / "admin" / "shipment-dashboard" / "export_existing_shipments.csv" >>
+      mpdAdmin >>
+      loggedIn >>
+      EarlyResponse(exportExistingUspsLabels _)
 
-  val mpdShipstationExportMenu: Menu.Menuable = Menu.i("Export MPD Shipstation Labels") / "admin" / "shipment-dashboard" / "export_MPD_shipstation.csv" >>
-    mpdAdmin >>
-    loggedIn >>
-    EarlyResponse(exportMpdShipstationLabels _)
+  val mpdShipstationExportMenu: Menu.Menuable =
+    Menu.i("Export MPD Shipstation Labels") / "admin" / "shipment-dashboard" / "export_MPD_shipstation.csv" >>
+      mpdAdmin >>
+      loggedIn >>
+      EarlyResponse(exportMpdShipstationLabels _)
 
   def exportNewUspsLabels: Box[LiftResponse] = {
     LabelExportService.exportNewUspsLabels()
@@ -65,17 +68,17 @@ object ShipmentDashboard extends Loggable {
 
 class ShipmentDashboard extends Loggable {
   var shipmentRenderer: Box[IdMemoizeTransform] = Empty
-  var future = false
+  var future                                    = false
 
-  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val dateFormat                         = new SimpleDateFormat("MM/dd/yyyy")
   val localDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
-  
+
   val currentDate: LocalDate = LocalDate.now()
 
   var fromDate: String = currentDate.format(localDateFormat)
-  var toDate: String = currentDate.plusDays(3).format(localDateFormat)
+  var toDate: String   = currentDate.plusDays(3).format(localDateFormat)
 
-  def paidShipments: List[Shipment] = ShipmentService.getCurrentPastDueShipments
+  def paidShipments: List[Shipment]           = ShipmentService.getCurrentPastDueShipments
   def futureSubscriptions: List[Subscription] = ShipmentService.getUpcomingSubscriptions
 
   def changeDataSet(dataSet: String): JsCmd = {
@@ -86,7 +89,7 @@ class ShipmentDashboard extends Loggable {
         future = true
       case _ =>
     }
-  
+
     shipmentRenderer.map(_.setHtml).openOr(Noop)
   }
 
@@ -96,18 +99,16 @@ class ShipmentDashboard extends Loggable {
   }
 
   def shipProduct(
-    subscription: Box[Subscription],
-    user: Box[User],
-    shipment: Shipment,
-    address: String,
-    renderer: IdMemoizeTransform
+      subscription: Box[Subscription],
+      user: Box[User],
+      shipment: Shipment,
+      address: String,
+      renderer: IdMemoizeTransform
   )(): JsCmd = {
-    subscription.map { subscription =>
-      ParentService.updateNextShipDate(subscription, user)
-    }
+    subscription.map { subscription => ParentService.updateNextShipDate(subscription, user) }
 
     shipment.dateShipped(new Date()).address(address).saveMe
-    
+
     InventoryService.deductShipmentItems(shipment)
 
     EmailActor ! SendInvoicePaymentSucceededEmail(
@@ -117,7 +118,7 @@ class ShipmentDashboard extends Loggable {
       shipment.amountPaid.get,
       shipment.trackingNumber.get
     )
-    
+
     renderer.setHtml
   }
 
@@ -127,10 +128,12 @@ class ShipmentDashboard extends Loggable {
 
   def fileUpload: NodeSeq => NodeSeq = {
     var fileHolder: Box[FileParamHolder] = Empty
-    
+
     def uploadFile(file: FileParamHolder): JsCmd = {
-      logger.info("Received: %s [size=%d, type=%s]" format(file.fileName, file.length, file.mimeType))
-      val parsedFile = TrackingUploadCSV.parse(file.file)
+      logger.info(
+        "Received: %s [size=%d, type=%s]" format (file.fileName, file.length, file.mimeType)
+      )
+      val parsedFile    = TrackingUploadCSV.parse(file.file)
       val trackingInfos = parsedFile.map(_.list).openOr(Nil)
 
       trackingInfos.map(updateShipment)
@@ -139,15 +142,15 @@ class ShipmentDashboard extends Loggable {
     }
 
     def updateShipment(trackingInfo: TrackingInfo) = {
-      val shipments = ShipmentService.getCurrentPastDueShipments
+      val shipments         = ShipmentService.getCurrentPastDueShipments
       val trackingRecipient = trackingInfo.recipient
-      val name = trackingRecipient.split(",").map(_.trim).headOption.getOrElse("")
+      val name              = trackingRecipient.split(",").map(_.trim).headOption.getOrElse("")
 
       val matchingShipment: Option[Shipment] = shipments.find { shipment =>
         val shipmentUserName = {
           for {
             subscription <- shipment.subscription.obj
-            user <- subscription.user.obj
+            user         <- subscription.user.obj
           } yield {
             user.name.trim
           }
@@ -162,22 +165,20 @@ class ShipmentDashboard extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
-    "#tracking-upload" #> SHtml.fileUpload { fph => 
-      fileHolder = Full(fph)
-    } andThen
-    "#upload-tracking-numbers" #> SHtml.ajaxOnSubmit(() => {
+      "#tracking-upload" #> SHtml.fileUpload { fph => fileHolder = Full(fph) } andThen
+      "#upload-tracking-numbers" #> SHtml.ajaxOnSubmit(() => {
 
-      fileHolder.map(uploadFile) openOr {
-        logger.error("Got unexpected Empty when handling partner file upload.")
-        S.error("Missing file")
-      }
-    })  
+        fileHolder.map(uploadFile) openOr {
+          logger.error("Got unexpected Empty when handling partner file upload.")
+          S.error("Missing file")
+        }
+      })
   }
 
   def updateTrackingNumber(trackingNumber: String, shipment: Shipment): JsCmd = {
     if (!trackingNumber.trim.isEmpty) {
       val refreshedShipment = shipment.refresh
-    
+
       refreshedShipment.map(_.trackingNumber(trackingNumber).saveMe)
     }
 
@@ -185,7 +186,7 @@ class ShipmentDashboard extends Loggable {
   }
 
   def convertForecastingDates(date: String): LocalDate = {
-    
+
     val parsedDate = dateFormat.parse(date)
 
     parsedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
@@ -193,126 +194,133 @@ class ShipmentDashboard extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    ".shipment-dashboard [class+]" #> "current" &
-    ".new-export [href]" #> ShipmentDashboard.newLabelsExportMenu.loc.calcDefaultHref &
-    ".existing-export [href]" #> ShipmentDashboard.existingLabelsExportMenu.loc.calcDefaultHref &
-    ".shipstation-export [href]" #> ShipmentDashboard.mpdShipstationExportMenu.loc.calcDefaultHref &
-    "#dashboard-current [onclick]" #> SHtml.ajaxInvoke(() => changeDataSet("current")) &
-    "#dashboard-future [onclick]" #> SHtml.ajaxInvoke(() => changeDataSet("future")) &
-    ".dashboard-details" #> SHtml.idMemoize { renderer =>
-      shipmentRenderer = Full(renderer)
-      
-      def currentShipmentBindings = {
-        ".forecast-dates" #> ClearNodes &
-        ".shipment" #> paidShipments.sortBy(_.expectedShipDate.get.getTime).map { shipment =>
+      ".shipment-dashboard [class+]" #> "current" &
+        ".new-export [href]" #> ShipmentDashboard.newLabelsExportMenu.loc.calcDefaultHref &
+        ".existing-export [href]" #> ShipmentDashboard.existingLabelsExportMenu.loc.calcDefaultHref &
+        ".shipstation-export [href]" #> ShipmentDashboard.mpdShipstationExportMenu.loc.calcDefaultHref &
+        "#dashboard-current [onclick]" #> SHtml.ajaxInvoke(() => changeDataSet("current")) &
+        "#dashboard-future [onclick]" #> SHtml.ajaxInvoke(() => changeDataSet("future")) &
+        ".dashboard-details" #> SHtml.idMemoize { renderer =>
+          shipmentRenderer = Full(renderer)
 
-          val subscription = shipment.subscription.obj
-          val user = subscription.flatMap(_.user.obj)
-          val agencyName = {
-            for {
-              parent <- user
-              agency <- parent.referer
-              } yield {
-                agency.name.get
-          }}.openOr("")
+          def currentShipmentBindings = {
+            ".forecast-dates" #> ClearNodes &
+              ".shipment" #> paidShipments.sortBy(_.expectedShipDate.get.getTime).map { shipment =>
+                val subscription = shipment.subscription.obj
+                val user         = subscription.flatMap(_.user.obj)
+                val agencyName = {
+                  for {
+                    parent <- user
+                    agency <- parent.referer
+                  } yield {
+                    agency.name.get
+                  }
+                }.openOr("")
 
+                var trackingNumber = shipment.trackingNumber.get
 
-          var trackingNumber = shipment.trackingNumber.get
+                val allShipments = subscription.map(_.shipments.toList).openOr(Nil)
 
-          val allShipments = subscription.map(_.shipments.toList).openOr(Nil)
+                val petsAndProducts = subscription.map(_.getPetAndProducts).openOr(Nil)
+                val dateFormat      = new SimpleDateFormat("MMM dd")
 
-          val petsAndProducts = subscription.map(_.getPetAndProducts).openOr(Nil)
-          val dateFormat = new SimpleDateFormat("MMM dd")
+                val shipAddressRaw = Address
+                  .find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
 
-          val shipAddressRaw = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
-
-          val nameAddress = shipAddressRaw.map { ship =>
-          s"""${user.map(_.name).getOrElse("")}
+                val nameAddress = shipAddressRaw.map { ship =>
+                  s"""${user.map(_.name).getOrElse("")}
             |${ship.street1}
             |${ship.street2}
             |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
+                }
+
+                ".name-address *" #> nameAddress &
+                  ".product" #> petsAndProducts.map {
+                    case (pet, product) =>
+                      ".pet-name *" #> pet.map(_.name.get) &
+                        ".product-name *" #> product.map(_.name.get) &
+                        ".product-size *" #> product.map(_.size.get.toString)
+                  } &
+                  ".insert *" #> shipment.insert.get &
+                  ".tracking" #> SHtml.ajaxText(
+                    trackingNumber,
+                    possibleTracking => updateTrackingNumber(possibleTracking, shipment)
+                  ) &
+                  ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
+                    if (shipmentHasShipped_?(shipment)) {
+                      ".ship [class+]" #> "shipped" &
+                        ".ship *" #> "Shipped" &
+                        ".ship [disabled]" #> "disabled"
+                    } else {
+                      ".ship [onclick]" #> SHtml.ajaxInvoke(
+                        shipProduct(
+                          subscription,
+                          user,
+                          shipment,
+                          nameAddress.openOr(""),
+                          shipButtonRenderer
+                        ) _
+                      )
+                    }
+                  }
+              }
           }
 
-          ".name-address *" #> nameAddress &
-          ".product" #> petsAndProducts.map { case (pet, product) =>
-            ".pet-name *" #> pet.map(_.name.get) &
-            ".product-name *" #> product.map(_.name.get) &
-            ".product-size *" #> product.map(_.size.get.toString)
-          } &
-          ".insert *" #> shipment.insert.get &
-          ".tracking" #> SHtml.ajaxText(trackingNumber, possibleTracking => updateTrackingNumber(possibleTracking, shipment)) &
-          ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
-            if (shipmentHasShipped_?(shipment)) {
-              ".ship [class+]" #> "shipped" &
-              ".ship *" #> "Shipped" &
-              ".ship [disabled]" #> "disabled"
-            } else {
-              ".ship [onclick]" #> SHtml.ajaxInvoke(
-                shipProduct(
-                  subscription,
-                  user,
-                  shipment,
-                  nameAddress.openOr(""),
-                  shipButtonRenderer
-                )
-              _)
+          def futureShipmentBindings = {
+            val startDate = convertForecastingDates(fromDate)
+            val endDate   = convertForecastingDates(toDate)
+
+            val selectedFutureSubscriptions = futureSubscriptions.filter { subscription =>
+              val nextShipDate = ReportingService.getNextShipDate(subscription)
+              (nextShipDate.isAfter(startDate.minusDays(1)) && nextShipDate.isBefore(
+                endDate.plusDays(1)
+              ))
             }
-          }
-        }
-      }
 
-      def futureShipmentBindings = {
-        val startDate = convertForecastingDates(fromDate)
-        val endDate = convertForecastingDates(toDate)
+            ".from-date" #> SHtml.ajaxText(fromDate, possibleFromDate => {
+              fromDate = possibleFromDate
+              renderer.setHtml
+            }) &
+              ".to-date" #> SHtml.ajaxText(toDate, possibleToDate => {
+                toDate = possibleToDate
+                renderer.setHtml
+              }) &
+              ".tracking-header" #> ClearNodes &
+              ".ship-header" #> ClearNodes &
+              ".shipment" #> selectedFutureSubscriptions.sortBy(_.nextShipDate.get.getTime).map {
+                subscription =>
+                  val user = subscription.user.obj
 
-        val selectedFutureSubscriptions = futureSubscriptions.filter { subscription =>
-          
-          val nextShipDate = ReportingService.getNextShipDate(subscription)
-          (nextShipDate.isAfter(startDate.minusDays(1)) && nextShipDate.isBefore(endDate.plusDays(1)))
-        }
+                  val petsAndProducts = subscription.getPetAndProducts
+                  val dateFormat      = new SimpleDateFormat("MMM dd")
 
-        ".from-date" #> SHtml.ajaxText(fromDate, possibleFromDate => {
-        fromDate = possibleFromDate
-        renderer.setHtml
-      }) &
-      ".to-date" #> SHtml.ajaxText(toDate, possibleToDate => {
-        toDate = possibleToDate
-        renderer.setHtml
-      }) &
-      ".tracking-header" #> ClearNodes &
-      ".ship-header" #> ClearNodes &
-      ".shipment" #> selectedFutureSubscriptions.sortBy(_.nextShipDate.get.getTime).map { subscription =>
+                  val shipAddressRaw = Address
+                    .find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
 
-          val user = subscription.user.obj
-
-          val petsAndProducts = subscription.getPetAndProducts
-          val dateFormat = new SimpleDateFormat("MMM dd")
-
-          val shipAddressRaw = Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
-
-          val nameAddress = shipAddressRaw.map { ship =>
-          s"""${user.map(_.name).getOrElse("")}
+                  val nameAddress = shipAddressRaw.map { ship =>
+                    s"""${user.map(_.name).getOrElse("")}
             |${ship.street1}
             |${ship.street2}
             |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
+                  }
+
+                  ".name-address *" #> nameAddress &
+                    ".product" #> petsAndProducts.map {
+                      case (pet, product) =>
+                        ".pet-name *" #> pet.map(_.name.get) &
+                          ".product-name *" #> product.map(_.name.get) &
+                          ".product-size *" #> product.map(_.size.get.toString)
+                    } &
+                    ".tracking-number" #> ClearNodes &
+                    ".ship-it" #> ClearNodes
+              }
           }
 
-          ".name-address *" #> nameAddress &
-          ".product" #> petsAndProducts.map { case (pet, product) =>
-            ".pet-name *" #> pet.map(_.name.get) &
-            ".product-name *" #> product.map(_.name.get) &
-            ".product-size *" #> product.map(_.size.get.toString)
-          } &
-          ".tracking-number" #> ClearNodes &
-          ".ship-it" #> ClearNodes
+          if (future) {
+            futureShipmentBindings
+          } else {
+            currentShipmentBindings
+          }
         }
-      }
-
-      if (future) {
-        futureShipmentBindings
-      } else {
-        currentShipmentBindings
-      }
-    }
   }
 }

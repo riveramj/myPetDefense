@@ -22,34 +22,34 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     override def dbIndexed_? = true
   }
 
-  object firstName extends MappedString(this, 100)
-  object lastName extends MappedString(this, 100)
-  object stripeId extends MappedString(this, 100)
+  object firstName  extends MappedString(this, 100)
+  object lastName   extends MappedString(this, 100)
+  object stripeId   extends MappedString(this, 100)
   object facebookId extends MappedString(this, 300)
-  object googleId extends MappedString(this, 300)
-  object email extends MappedEmail(this, 50)
-  object password extends MappedString(this, 100)
-  object salt extends MappedString(this, 100)
-  object phone extends MappedString(this, 100)
-  object accessKey extends MappedString(this, 100)
+  object googleId   extends MappedString(this, 300)
+  object email      extends MappedEmail(this, 50)
+  object password   extends MappedString(this, 100)
+  object salt       extends MappedString(this, 100)
+  object phone      extends MappedString(this, 100)
+  object accessKey  extends MappedString(this, 100)
   object canSeePetlandData extends MappedBoolean(this) {
     override def defaultValue = false
   }
   object resetPasswordKey extends MappedString(this, 100)
-  object productSalesKey extends MappedString(this, 100)
-  object userType extends MappedEnum(this, UserType)
-  object referer extends MappedLongForeignKey(this, Agency)
-  object salesAgentId extends MappedString(this, 100)
-  object coupon extends MappedLongForeignKey(this, Coupon)
-  object agency extends MappedLongForeignKey(this, Agency)
-  object survey extends MappedLongForeignKey(this, Survey)
-  object pets extends MappedOneToMany(Pet, Pet.user)
-  object subscription extends MappedLongForeignKey(this, Subscription)
-  object addresses extends MappedOneToMany(Address, Address.user)
-  object taxRate extends MappedDouble(this)
+  object productSalesKey  extends MappedString(this, 100)
+  object userType         extends MappedEnum(this, UserType)
+  object referer          extends MappedLongForeignKey(this, Agency)
+  object salesAgentId     extends MappedString(this, 100)
+  object coupon           extends MappedLongForeignKey(this, Coupon)
+  object agency           extends MappedLongForeignKey(this, Agency)
+  object survey           extends MappedLongForeignKey(this, Survey)
+  object pets             extends MappedOneToMany(Pet, Pet.user)
+  object subscription     extends MappedLongForeignKey(this, Subscription)
+  object addresses        extends MappedOneToMany(Address, Address.user)
+  object taxRate          extends MappedDouble(this)
   object status extends MappedEnum(this, Status) {
     override def defaultValue: Status.Value = Status.Active
-    override def dbIndexed_? = true
+    override def dbIndexed_?                = true
   }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
@@ -71,18 +71,17 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   }
 
   def upsertUser(
-                     firstName: String,
-                     lastName: String,
-                     email: String,
-                     password: String,
-                     facebookId: String,
-                     userType: UserType.Value
-                   ): User = {
+      firstName: String,
+      lastName: String,
+      email: String,
+      password: String,
+      facebookId: String,
+      userType: UserType.Value
+  ): User = {
     val user = (User.find(By(User.email, email)) match {
       case Full(user) => user
-      case _ => User.create.userId(generateLongId).productSalesKey(createAccessKey)
-    })
-      .firstName(TitleCase(firstName))
+      case _          => User.create.userId(generateLongId).productSalesKey(createAccessKey)
+    }).firstName(TitleCase(firstName))
       .lastName(TitleCase(lastName))
       .email(email)
       .facebookId(facebookId)
@@ -92,16 +91,16 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   }
 
   def createNewUser(
-    firstName: String,
-    lastName: String,
-    stripeId: String,
-    email: String,
-    password: String,
-    phone: String,
-    coupon: Box[Coupon],
-    referer: Box[Agency],
-    agency: Box[Agency],
-    userType: UserType.Value
+      firstName: String,
+      lastName: String,
+      stripeId: String,
+      email: String,
+      password: String,
+      phone: String,
+      coupon: Box[Coupon],
+      referer: Box[Agency],
+      agency: Box[Agency],
+      userType: UserType.Value
   ): User = {
     val user = User.create
       .userId(generateLongId)
@@ -120,32 +119,32 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   }
 
   private def getSalt: String = generateStringId
-  
+
   def hashPassword(password: String, salt: String): String = {
     new Sha256Hash(password, salt, 1024).toBase64
   }
 
   def setUserPassword(user: User, password: String): User = {
-    val salt = getSalt
+    val salt           = getSalt
     val hashedPassword = hashPassword(password, salt)
 
     (if (password != "") {
-      user
-        .password(hashedPassword)
-        .salt(salt)
-    } else {
-      user.accessKey(createAccessKey)
-    }).saveMe
+       user
+         .password(hashedPassword)
+         .salt(salt)
+     } else {
+       user.accessKey(createAccessKey)
+     }).saveMe
   }
 
   def createNewPendingUser(
-    firstName: String,
-    lastName: String,
-    email: String,
-    userType: UserType.Value,
-    agency: Box[Agency],
-    referer: Box[Agency],
-    salesAgentId: String
+      firstName: String,
+      lastName: String,
+      email: String,
+      userType: UserType.Value,
+      agency: Box[Agency],
+      referer: Box[Agency],
+      salesAgentId: String
   ): User = {
     User.create
       .userId(generateLongId)
@@ -162,12 +161,12 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   }
 
   def createNewPendingUser(
-    parentInfo: NewParent,
-    referer: Box[Agency],
-    salesAgentId: String = ""
+      parentInfo: NewParent,
+      referer: Box[Agency],
+      salesAgentId: String = ""
   ): User = {
     val possibleLastName = TitleCase(parentInfo.lastName)
-    val andLocation = possibleLastName.indexOf(" And ")
+    val andLocation      = possibleLastName.indexOf(" And ")
 
     val lastName = {
       if (andLocation > 0)
@@ -191,16 +190,16 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   }
 
   def updatePendingUser(
-    user: User,
-    firstName: String,
-    lastName: String,
-    password: String
+      user: User,
+      firstName: String,
+      lastName: String,
+      password: String
   ): User = {
     val updateduser = user.firstName(TitleCase(firstName)).lastName(TitleCase(lastName))
 
     setUserPassword(updateduser, password)
   }
-  
+
   def findByEmail(email: String): Box[User] = {
     User.find(By(User.email, email))
   }
@@ -252,12 +251,14 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
 
   def getTaxRate: Double = {
     val shippingAddress = this.shippingAddress
-    
-    tryo(TaxJarService.calculateTaxRate(
-      shippingAddress.map(_.city.get).openOr(""),
-      shippingAddress.map(_.state.get).openOr(""),
-      shippingAddress.map(_.zip.get).openOr("")
-    )).openOr(0D)
+
+    tryo(
+      TaxJarService.calculateTaxRate(
+        shippingAddress.map(_.city.get).openOr(""),
+        shippingAddress.map(_.state.get).openOr(""),
+        shippingAddress.map(_.zip.get).openOr("")
+      )
+    ).openOr(0d)
   }
 
   def setTaxRate: User = {

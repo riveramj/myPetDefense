@@ -9,21 +9,21 @@ import java.util.Date
 
 class SubscriptionItem extends LongKeyedMapper[SubscriptionItem] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, SubscriptionItem] = SubscriptionItem
-  object subscriptionItemId extends MappedLong(this){
-    override def dbIndexed_? = true
+  object subscriptionItemId extends MappedLong(this) {
+    override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
   }
 
-  object product extends MappedLongForeignKey(this, Product)
+  object product         extends MappedLongForeignKey(this, Product)
   object subscriptionBox extends MappedLongForeignKey(this, SubscriptionBox)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
   def createSubscriptionItem(
-                              product: Product,
-                              subscriptionBox: SubscriptionBox
-                            ): SubscriptionItem = {
+      product: Product,
+      subscriptionBox: SubscriptionBox
+  ): SubscriptionItem = {
     SubscriptionItem.create
       .product(product)
       .subscriptionBox(subscriptionBox)
@@ -31,7 +31,12 @@ class SubscriptionItem extends LongKeyedMapper[SubscriptionItem] with IdPK {
   }
 
   def createFirstBox(subscriptionBox: SubscriptionBox): List[SubscriptionItem] = {
-    val products = List(Product.skinAndCoat, Product.multiVitamin, Product.probiotic, Product.dentalPowder).flatten
+    val products = List(
+      Product.skinAndCoat,
+      Product.multiVitamin,
+      Product.probiotic,
+      Product.dentalPowder
+    ).flatten
     products.map { product =>
       SubscriptionItem.create
         .product(product)

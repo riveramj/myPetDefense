@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet 
+package com.mypetdefense.snippet
 
 import net.liftweb._
 import http.SHtml._
@@ -19,13 +19,18 @@ import snippet.agency.AgencyOverview
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import com.mypetdefense.actor._
 import com.mypetdefense.snippet.signup.Success
-import me.frmr.stripe.{Customer, StripeExecutor, Coupon => StripeCoupon, Subscription => StripeSubscription}
+import me.frmr.stripe.{
+  Customer,
+  StripeExecutor,
+  Coupon => StripeCoupon,
+  Subscription => StripeSubscription
+}
 
 import scala.xml.NodeSeq
 
 object AddOnCheckout extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Add-on Checkout") / "add-on-checkout"
@@ -36,32 +41,33 @@ class AddOnCheckout extends Loggable {
 
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
-  val user: Box[User] = SecurityContext.currentUser
-  val address: Box[Address] = user.flatMap(_.shippingAddress)
+  val user: Box[User]                 = SecurityContext.currentUser
+  val address: Box[Address]           = user.flatMap(_.shippingAddress)
   val subscription: Box[Subscription] = user.flatMap(_.subscription)
-  val boxes: List[SubscriptionBox] = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
-  
-  var discountCode = ""
-  var discount_? = false
+  val boxes: List[SubscriptionBox]    = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
 
-  var taxDue = 0D
-  var taxRate = 0D
+  var discountCode = ""
+  var discount_?   = false
+
+  var taxDue                                          = 0d
+  var taxRate                                         = 0d
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
-  var checkoutRenderer: Box[IdMemoizeTransform] = None
+  var checkoutRenderer: Box[IdMemoizeTransform]       = None
 
   def findNewMonthlySubtotal: Double = {
     val cart = AddOnFlow.addOnShoppingCart.is
 
-    (cart.map { case (product, quantity) =>
-      product.price.get * quantity
-    }.foldLeft(0D)(_+_)) + subscription.map(_.getMonthlyCost).openOr(0D)
+    (cart.map {
+      case (product, quantity) =>
+        product.price.get * quantity
+    }.foldLeft(0d)(_ + _)) + subscription.map(_.getMonthlyCost).openOr(0d)
   }
 
   def calculateTax(): JsCmd = {
     val possibleTaxRate = user.map(_.taxRate.get)
 
     val taxInfo = if (possibleTaxRate.isDefined) {
-      val taxPercent = possibleTaxRate.openOr(0D)
+      val taxPercent = possibleTaxRate.openOr(0d)
       (findNewMonthlySubtotal * taxPercent, taxPercent)
     } else {
       TaxJarService.findTaxAmoutAndRate(
@@ -84,7 +90,7 @@ class AddOnCheckout extends Loggable {
 
       (
         Alert("Discount applied.") &
-        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+          priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
       )
     } else
       Alert("Invalid discount code.")
@@ -94,17 +100,18 @@ class AddOnCheckout extends Loggable {
     val treatCharge = {
       val cart = AddOnFlow.addOnShoppingCart.is
 
-      val addOnItems = cart.flatMap { case (product, quantity) =>
-        boxes.headOption.map { box =>
-          AddOnProduct.createAddOnProduct(
-            product,
-            box,
-            quantity,
-            1D
-          )
-        }
+      val addOnItems = cart.flatMap {
+        case (product, quantity) =>
+          boxes.headOption.map { box =>
+            AddOnProduct.createAddOnProduct(
+              product,
+              box,
+              quantity,
+              1d
+            )
+          }
       }.toList
-      
+
       EmailActor ! AddOnReceiptEmail(addOnItems, subscription, user)
 
       AddOnFlow.addOnSale(cart)
@@ -120,7 +127,7 @@ class AddOnCheckout extends Loggable {
 
     (
       cartRenderer.map(_.setHtml).openOr(Noop) &
-      priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
     )
   }
 
@@ -138,7 +145,7 @@ class AddOnCheckout extends Loggable {
 
     (
       cartRenderer.map(_.setHtml).openOr(Noop) &
-      priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
     )
   }
 
@@ -161,65 +168,68 @@ class AddOnCheckout extends Loggable {
 
         val total = subtotal + taxDue
 
-        ".treat-ordered" #> cart.map { case (treat, quantity) =>
-          val treatTotal = quantity * treat.price.get
-          ".ordered-quantity *" #> quantity &
-          ".ordered-treat-name *" #> treat.name.get &
-          ".treat-total *" #> f"$$$treatTotal%2.2f"
+        ".treat-ordered" #> cart.map {
+          case (treat, quantity) =>
+            val treatTotal = quantity * treat.price.get
+            ".ordered-quantity *" #> quantity &
+              ".ordered-treat-name *" #> treat.name.get &
+              ".treat-total *" #> f"$$$treatTotal%2.2f"
         } &
-        ".subtotal-amount *" #> f"$$$subtotal%2.2f" &
-        "#tax" #> ClearNodesIf(taxDue == 0D) &
-        ".tax-amount *" #> f"$$$taxDue%2.2f" &
-        ".order-amount *" #> f"$$$total%2.2f"
+          ".subtotal-amount *" #> f"$$$subtotal%2.2f" &
+          "#tax" #> ClearNodesIf(taxDue == 0d) &
+          ".tax-amount *" #> f"$$$taxDue%2.2f" &
+          ".order-amount *" #> f"$$$total%2.2f"
       }
     }
 
     SHtml.makeFormsAjax andThen
-    "#shopping-cart" #> idMemoize { renderer =>
-      val cart = AddOnFlow.addOnShoppingCart.is
+      "#shopping-cart" #> idMemoize { renderer =>
+        val cart = AddOnFlow.addOnShoppingCart.is
 
-      cartRenderer = Full(renderer)
+        cartRenderer = Full(renderer)
 
-      val subtotal = cart.map { case (treat, quantity) =>
-        quantity * treat.price.get
-      }.foldLeft(0D)(_ + _)
+        val subtotal = cart.map {
+          case (treat, quantity) =>
+            quantity * treat.price.get
+        }.foldLeft(0d)(_ + _)
 
-      ".items-in-cart .cart-item" #> cart.map { case (treat, quantity) =>
-        val itemPrice = treat.price.get * quantity
+        ".items-in-cart .cart-item" #> cart.map {
+          case (treat, quantity) =>
+            val itemPrice = treat.price.get * quantity
 
-        ".cart-treat-name *" #> treat.name.get &
-        ".selected-quantity *" #> quantity &
-        ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
-        ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
-        ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
-        ".treat-price *" #> f"$$$itemPrice%2.2f"
+            ".cart-treat-name *" #> treat.name.get &
+              ".selected-quantity *" #> quantity &
+              ".remove-treat [onclick]" #> ajaxInvoke(() => removeTreatFromCart(treat)) &
+              ".subtract [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity - 1)) &
+              ".add [onclick]" #> ajaxInvoke(() => updateCartCount(treat, quantity + 1)) &
+              ".treat-price *" #> f"$$$itemPrice%2.2f"
+        } &
+          ".cart-footer" #> {
+            ".subtotal *" #> f"$$$subtotal%2.2f" &
+              ".cart-actions .continue-shopping [href]" #> "/add-on"
+          } &
+          ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
+          ".cart-actions .continue-shopping [href]" #> "/add-on" &
+          ".empty-cart .continue-shopping [href]" #> "/add-on" &
+          ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
+          ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
+          ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
+          ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
       } &
-      ".cart-footer" #> {
-        ".subtotal *" #> f"$$$subtotal%2.2f" &
-        ".cart-actions .continue-shopping [href]" #> "/add-on"
-      } &
-      ".items-in-cart .subtotal-container .subtotal *" #> f"$$$subtotal%2.2f" &
-      ".cart-actions .continue-shopping [href]" #> "/add-on" &
-      ".empty-cart .continue-shopping [href]" #> "/add-on" &
-      ".items-in-cart" #> ClearNodesIf(cart.isEmpty) &
-      ".cart-footer" #> ClearNodesIf(cart.isEmpty) &
-      ".cart-actions" #> ClearNodesIf(cart.isEmpty) &
-      ".empty-cart" #> ClearNodesIf(!cart.isEmpty)
-    } &
-    ".checkout-container" #> SHtml.idMemoize { renderer =>
-      checkoutRenderer = Full(renderer)
-      orderSummary &
-      "#name *" #> user.map(_.name) &
-      "#street-1 *" #> address.map(_.street1.get) &
-      "#street-2 *" #> address.map(_.street2.get) &
-      "#street-2" #> ClearNodesIf(address.map(_.street2.get).isEmpty) &
-      "#city *" #> address.map(_.city.get) &
-      "#state *" #> address.map(_.state.get) &
-      "#zip *" #> address.map(_.zip.get) &
-      "#checkout-email" #> user.map(_.email.get) &
-      "#checkout-discount" #> ajaxText(discountCode, discount => discountCode = discount.trim) &
-      ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
-      ".buy-treat" #> ajaxSubmit("Place Order", () => orderTreat)
-    }
+        ".checkout-container" #> SHtml.idMemoize { renderer =>
+          checkoutRenderer = Full(renderer)
+          orderSummary &
+            "#name *" #> user.map(_.name) &
+            "#street-1 *" #> address.map(_.street1.get) &
+            "#street-2 *" #> address.map(_.street2.get) &
+            "#street-2" #> ClearNodesIf(address.map(_.street2.get).isEmpty) &
+            "#city *" #> address.map(_.city.get) &
+            "#state *" #> address.map(_.state.get) &
+            "#zip *" #> address.map(_.zip.get) &
+            "#checkout-email" #> user.map(_.email.get) &
+            "#checkout-discount" #> ajaxText(discountCode, discount => discountCode = discount.trim) &
+            ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode()) &
+            ".buy-treat" #> ajaxSubmit("Place Order", () => orderTreat)
+        }
   }
 }

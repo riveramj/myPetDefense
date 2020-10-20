@@ -25,7 +25,7 @@ import scala.xml.{Elem, NodeSeq}
 
 object InventoryItems extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable = Menu.i("Inventory Items") / "inventory" / "items" >>
@@ -35,15 +35,15 @@ object InventoryItems extends Loggable {
 
 class InventoryItems extends Loggable {
   val inventoryItems: List[InventoryItem] = InventoryItem.findAll()
-  
-  var newItemNumber = ""
-  var newDescription = ""
-  var newCount = ""
+
+  var newItemNumber                        = ""
+  var newDescription                       = ""
+  var newCount                             = ""
   var chosenUnit: Box[UnitOfMeasure.Value] = Empty
 
   var itemRenderer: Box[IdMemoizeTransform] = Empty
-  var currentItem: Box[InventoryItem] = Empty
-  
+  var currentItem: Box[InventoryItem]       = Empty
+
   def createItem: JsCmd = {
     val validateFields = List(
       checkEmpty(newItemNumber, "#new-item-number"),
@@ -51,11 +51,12 @@ class InventoryItems extends Loggable {
       validNumber(newCount, "#new-count")
     ).flatten
 
-    if(validateFields.isEmpty) {
+    if (validateFields.isEmpty) {
       val realCount = tryo(newCount.toInt).openOr(0)
 
       chosenUnit.map { unit =>
-        val newItem = InventoryItem.createNewInventoryItem(newItemNumber, newDescription, realCount, unit)
+        val newItem =
+          InventoryItem.createNewInventoryItem(newItemNumber, newDescription, realCount, unit)
 
         InventoryChangeAudit.newChangeAudit(
           inventoryItem = newItem,
@@ -112,15 +113,14 @@ class InventoryItems extends Loggable {
 
     if (badCount) {
       Alert("Count is not valid. Data not saved")
-    }
-    else
+    } else
       Noop
   }
 
   def adjustCount(
-    adjustmentType: String,
-    item: InventoryItem,
-    detailsRenderer: IdMemoizeTransform
+      adjustmentType: String,
+      item: InventoryItem,
+      detailsRenderer: IdMemoizeTransform
   )(): JsCmd = {
     val count = item.total.get
 
@@ -145,56 +145,66 @@ class InventoryItems extends Loggable {
     )
   }
 
-  def inventoryItemDetailBindings(detailsRenderer: IdMemoizeTransform, item: InventoryItem): CssSel = {
-    val itemNumber = item.itemNumber.get
+  def inventoryItemDetailBindings(
+      detailsRenderer: IdMemoizeTransform,
+      item: InventoryItem
+  ): CssSel = {
+    val itemNumber  = item.itemNumber.get
     val description = item.description.get
-    val count = item.total.toString
+    val count       = item.total.toString
 
-    ".change-item-number" #> ajaxText(itemNumber, possibleItem => updateItem(possibleItem, "itemNumber", item)) &
-      ".change-description" #> ajaxText(description, possibleDescription => updateItem(possibleDescription, "description", item)) &
+    ".change-item-number" #> ajaxText(
+      itemNumber,
+      possibleItem => updateItem(possibleItem, "itemNumber", item)
+    ) &
+      ".change-description" #> ajaxText(
+        description,
+        possibleDescription => updateItem(possibleDescription, "description", item)
+      ) &
       ".change-count" #> ajaxText(count, possibleCount => updateItem(possibleCount, "count", item))
   }
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-    ".inventory-items [class+]" #> "current" &
-    ".create" #> idMemoize { renderer =>
-      "#new-item-number" #> ajaxText(newItemNumber, newItemNumber = _) &
-      "#new-description" #> ajaxText(newDescription, newDescription = _) &
-      "#new-count" #> ajaxText(newCount, newCount = _) &
-      "#new-unit-of-measure-select" #> unitOfMeasureDropdown &
-      "#create-item" #> SHtml.ajaxSubmit("Create Item", () => createItem)
-    } &
-    "tbody" #> inventoryItems.sortWith(_.itemNumber.get < _.itemNumber.get).map { item =>
-      idMemoize { detailsRenderer =>
-        ".item-entry" #> {
-          ".item-number *" #> item.itemNumber.get &
-          ".description *" #> item.description.get &
-          ".unit-of-measure *" #> item.unitOfMeasure.get.toString &
-          ".count *" #> item.total.get &
-          ".subtract-one [onclick]" #> ajaxInvoke(adjustCount("subtract", item, detailsRenderer) _) &
-          ".add-one [onclick]" #> ajaxInvoke(adjustCount("add", item, detailsRenderer) _) &
-          ".expand-row [onclick]" #> ajaxInvoke(() => {
-            if (currentItem.isEmpty) {
-              currentItem = Full(item)
-            } else {
-              currentItem = Empty
-            }
-
-            detailsRenderer.setHtml
-          })
+      ".inventory-items [class+]" #> "current" &
+        ".create" #> idMemoize { renderer =>
+          "#new-item-number" #> ajaxText(newItemNumber, newItemNumber = _) &
+            "#new-description" #> ajaxText(newDescription, newDescription = _) &
+            "#new-count" #> ajaxText(newCount, newCount = _) &
+            "#new-unit-of-measure-select" #> unitOfMeasureDropdown &
+            "#create-item" #> SHtml.ajaxSubmit("Create Item", () => createItem)
         } &
-        ".info [class+]" #> {if (currentItem.isEmpty) "" else "expanded"} &
-        "^ [class+]" #> {if (currentItem.isEmpty) "" else "expanded"} &
-        ".item-info" #> {
-          if (!currentItem.isEmpty) {
-            inventoryItemDetailBindings(detailsRenderer, item)
-          }
-          else {
-            "^" #> ClearNodes
+        "tbody" #> inventoryItems.sortWith(_.itemNumber.get < _.itemNumber.get).map { item =>
+          idMemoize { detailsRenderer =>
+            ".item-entry" #> {
+              ".item-number *" #> item.itemNumber.get &
+                ".description *" #> item.description.get &
+                ".unit-of-measure *" #> item.unitOfMeasure.get.toString &
+                ".count *" #> item.total.get &
+                ".subtract-one [onclick]" #> ajaxInvoke(
+                  adjustCount("subtract", item, detailsRenderer) _
+                ) &
+                ".add-one [onclick]" #> ajaxInvoke(adjustCount("add", item, detailsRenderer) _) &
+                ".expand-row [onclick]" #> ajaxInvoke(() => {
+                  if (currentItem.isEmpty) {
+                    currentItem = Full(item)
+                  } else {
+                    currentItem = Empty
+                  }
+
+                  detailsRenderer.setHtml
+                })
+            } &
+              ".info [class+]" #> { if (currentItem.isEmpty) "" else "expanded" } &
+              "^ [class+]" #> { if (currentItem.isEmpty) "" else "expanded" } &
+              ".item-info" #> {
+                if (!currentItem.isEmpty) {
+                  inventoryItemDetailBindings(detailsRenderer, item)
+                } else {
+                  "^" #> ClearNodes
+                }
+              }
           }
         }
-      }
-    }
   }
 }

@@ -24,7 +24,7 @@ import scala.xml.{Elem, NodeSeq}
 
 object PhonePortal extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Phone Portal") / "admin" / "phone-portal"
@@ -33,26 +33,26 @@ object PhonePortal extends Loggable {
 class PhonePortal extends Loggable {
 
   var petType: Box[AnimalType.Value] = Empty
-  var chosenProduct: Box[FleaTick] = Empty
+  var chosenProduct: Box[FleaTick]   = Empty
 
-  var email = ""
+  var email   = ""
   var petName = ""
-  
-  var firstName = ""
-  var cardholderName = ""
-  var lastName = ""
-  var street1 = ""
-  var street2 = ""
-  var city = ""
-  var state = ""
-  var zip = ""
-  var taxRate = 0D
-  var taxDue = 0D
-  var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
-  var orderSummaryRenderer: Box[IdMemoizeTransform] = None
 
-  var stripeToken = ""
-  var couponCode = ""
+  var firstName                                       = ""
+  var cardholderName                                  = ""
+  var lastName                                        = ""
+  var street1                                         = ""
+  var street2                                         = ""
+  var city                                            = ""
+  var state                                           = ""
+  var zip                                             = ""
+  var taxRate                                         = 0d
+  var taxDue                                          = 0d
+  var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
+  var orderSummaryRenderer: Box[IdMemoizeTransform]   = None
+
+  var stripeToken         = ""
+  var couponCode          = ""
   var coupon: Box[Coupon] = None
 
   def petTypeRadio(renderer: IdMemoizeTransform): NodeSeq = {
@@ -64,16 +64,15 @@ class PhonePortal extends Loggable {
 
         (
           renderer.setHtml &
-          orderSummaryRenderer.map(_.setHtml).openOr(Noop)
+            orderSummaryRenderer.map(_.setHtml).openOr(Noop)
         )
       }
     ).toForm
   }
 
   def productDropdown: Elem = {
-    val products = petType.map { animal =>
-      FleaTick.findAll(By(FleaTick.animalType, animal))
-    }.openOr(Nil)
+    val products = petType.map { animal => FleaTick.findAll(By(FleaTick.animalType, animal)) }
+      .openOr(Nil)
 
     SHtml.ajaxSelectObj(
       products.map(product => (product, product.getNameAndSize)),
@@ -99,7 +98,6 @@ class PhonePortal extends Loggable {
     taxDue = taxInfo._1
     taxRate = taxInfo._2
 
-
     priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
   }
 
@@ -108,8 +106,8 @@ class PhonePortal extends Loggable {
       orderSummaryRenderer = Full(renderer)
 
       "#type span *" #> petType.map(_.toString) &
-      "#size span *" #> chosenProduct.map(_.size.toString + " pounds") &
-      "#product span *" #> chosenProduct.map(_.name.toString)
+        "#size span *" #> chosenProduct.map(_.size.toString + " pounds") &
+        "#product span *" #> chosenProduct.map(_.name.toString)
     }
 
     val orderTotal = {
@@ -118,52 +116,51 @@ class PhonePortal extends Loggable {
 
         val total = 12.99 + taxDue
 
-        "#price-additions" #> ClearNodesIf((taxDue == 0D) && (coupon.isEmpty)) &
-        "#price-additions" #> {
-          "#tax" #> ClearNodesIf(taxDue == 0D) &
-          "#promo-discount" #> ClearNodesIf(coupon.isEmpty) &
-          "#promo-discount-note" #> ClearNodesIf(coupon.isEmpty) &
-          "#tax #tax-amount" #> f"$taxDue%2.2f"
-        } &
-        {
-          if(coupon.isEmpty) {
+        "#price-additions" #> ClearNodesIf((taxDue == 0d) && (coupon.isEmpty)) &
+          "#price-additions" #> {
+            "#tax" #> ClearNodesIf(taxDue == 0d) &
+              "#promo-discount" #> ClearNodesIf(coupon.isEmpty) &
+              "#promo-discount-note" #> ClearNodesIf(coupon.isEmpty) &
+              "#tax #tax-amount" #> f"$taxDue%2.2f"
+          } & {
+          if (coupon.isEmpty) {
             "#order-total h3 [class!]" #> "promo" &
-            "#order-total .monthly-charge [class!]" #> "promo" &
-            "#order-total .monthly-charge .amount *" #> f"$$$total%2.2f"
+              "#order-total .monthly-charge [class!]" #> "promo" &
+              "#order-total .monthly-charge .amount *" #> f"$$$total%2.2f"
           } else {
             "#order-total h3 [class+]" #> "promo" &
-            "#order-total .monthly-charge [class+]" #> "promo" &
-            "#order-total .monthly-charge *" #> {
-              val freeMonths = coupon.map(_.numberOfMonths).openOr(0)
-              if (freeMonths == 1) {
-                s"FREE for first ${freeMonths} month"
-              } else {
-                s"FREE for first ${freeMonths} months"
+              "#order-total .monthly-charge [class+]" #> "promo" &
+              "#order-total .monthly-charge *" #> {
+                val freeMonths = coupon.map(_.numberOfMonths).openOr(0)
+                if (freeMonths == 1) {
+                  s"FREE for first ${freeMonths} month"
+                } else {
+                  s"FREE for first ${freeMonths} months"
+                }
               }
-            }
           }
         }
       }
     }
 
     SHtml.makeFormsAjax andThen
-    orderSummary &
-    orderTotal &
-    ".phone-portal [class+]" #> "current" &
-    ".account-info" #> idMemoize { renderer =>
-      ".pet-name" #> ajaxText(petName, petName = _) &
-      ".pet-type-select" #> petTypeRadio(renderer) &
-      ".product-container .product-select" #> productDropdown
-    } &
-    "#first-name" #> text(firstName, firstName = _) &
-    "#last-name" #> text(lastName, lastName = _) &
-    "#street-1" #> text(street1, street1 = _) &
-    "#street-2" #> text(street2, street2 = _) &
-    "#city" #> ajaxText(city, city = _) &
-    "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
-    "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
-    "#email" #> text(email, userEmail => email = userEmail.trim) &
-    "#cardholder-name" #> text(cardholderName, cardholderName = _) &
-    "#stripe-token" #> hidden(stripeToken = _, stripeToken)
+      orderSummary &
+        orderTotal &
+        ".phone-portal [class+]" #> "current" &
+        ".account-info" #> idMemoize { renderer =>
+          ".pet-name" #> ajaxText(petName, petName = _) &
+            ".pet-type-select" #> petTypeRadio(renderer) &
+            ".product-container .product-select" #> productDropdown
+        } &
+        "#first-name" #> text(firstName, firstName = _) &
+        "#last-name" #> text(lastName, lastName = _) &
+        "#street-1" #> text(street1, street1 = _) &
+        "#street-2" #> text(street2, street2 = _) &
+        "#city" #> ajaxText(city, city = _) &
+        "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
+        "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip)) &
+        "#email" #> text(email, userEmail => email = userEmail.trim) &
+        "#cardholder-name" #> text(cardholderName, cardholderName = _) &
+        "#stripe-token" #> hidden(stripeToken = _, stripeToken)
   }
 }

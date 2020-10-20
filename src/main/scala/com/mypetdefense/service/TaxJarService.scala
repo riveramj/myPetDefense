@@ -1,10 +1,10 @@
 package com.mypetdefense.service
 
-import net.liftweb._ 
-  import common._
-  import util.Helpers.tryo
-  import json._
-  import util.Props
+import net.liftweb._
+import common._
+import util.Helpers.tryo
+import json._
+import util.Props
 
 import dispatch._, Defaults._
 import scala.concurrent.Await
@@ -18,45 +18,58 @@ import scala.math.BigDecimal
 import java.util.Date
 
 object TaxJarService extends Loggable {
-  val calculateTaxUrl: Req = url("https://api.taxjar.com/v2/taxes").secure
+  val calculateTaxUrl: Req   = url("https://api.taxjar.com/v2/taxes").secure
   val createOrderTaxUrl: Req = url("https://api.taxjar.com/v2/transactions/orders").secure
 
   val authKey: String = Props.get("taxjar.api.key") openOr ""
 
   val retryAttempts = 10
-  
 
   def calculateTaxRate(city: String, state: String, zip: String): Double = {
-    findTaxAmoutAndRate(city, state, zip, 0D)._2
+    findTaxAmoutAndRate(city, state, zip, 0d)._2
   }
-  def findTaxAmoutAndRate(city: String, state: String, zip: String, amount: Double): (Double, Double) = {
+  def findTaxAmoutAndRate(
+      city: String,
+      state: String,
+      zip: String,
+      amount: Double
+  ): (Double, Double) = {
     def taxResponse = {
-      Http.default(calculateTaxUrl << Map(
-        "to_country" -> "US",
-        "to_zip" -> zip,
-        "to_state" -> state,
-        "to_city" -> city,
-        "amount" -> amount.toString,
-        "shipping" -> "0"
-      ) <:< Map("Authorization" -> s"Bearer ${authKey}") OK as.String).either.map {
-        case Left(throwable) =>
-          logger.error(s"taxjar error: ${throwable}")
-          Failure("Error occured while talking to taxJar.", Full(throwable), Empty)
-        case Right(possibleTaxResponse) =>
-          Full(possibleTaxResponse)
-      }
+      Http
+        .default(
+          calculateTaxUrl << Map(
+            "to_country"            -> "US",
+            "to_zip"                -> zip,
+            "to_state"              -> state,
+            "to_city"               -> city,
+            "amount"                -> amount.toString,
+            "shipping"              -> "0"
+          ) <:< Map("Authorization" -> s"Bearer ${authKey}") OK as.String
+        )
+        .either
+        .map {
+          case Left(throwable) =>
+            logger.error(s"taxjar error: ${throwable}")
+            Failure("Error occured while talking to taxJar.", Full(throwable), Empty)
+          case Right(possibleTaxResponse) =>
+            Full(possibleTaxResponse)
+        }
     }
 
     def rawTax(attemptsLeft: Int): Box[String] = {
       Try(Await.result(taxResponse, 1 seconds)) match {
-        case Success(taxResponse) => 
+        case Success(taxResponse) =>
           taxResponse
         case TryFail(throwable: Throwable) =>
           if (attemptsLeft > 0)
             rawTax(attemptsLeft - 1)
           else {
             logger.error(s"Timeout occured while talking to taxJar for taxt calc with ${throwable}")
-            Failure("Timeout occured while talking to taxJar for taxt calc.", Full(throwable), Empty)
+            Failure(
+              "Timeout occured while talking to taxJar for taxt calc.",
+              Full(throwable),
+              Empty
+            )
           }
 
       }
@@ -65,19 +78,28 @@ object TaxJarService extends Loggable {
     val parsedTax = parse(rawTax(retryAttempts).openOr(""))
 
     (for {
-      JObject(tax) <- parsedTax
+      JObject(tax)                                 <- parsedTax
       JField("amount_to_collect", JDouble(taxDue)) <- tax
-      JField("rate", JDouble(taxRate)) <- tax
-      amount <- tryo(taxDue.toDouble).toList
-      rate <- tryo(taxRate.toDouble).toList
+      JField("rate", JDouble(taxRate))             <- tax
+      amount                                       <- tryo(taxDue.toDouble).toList
+      rate                                         <- tryo(taxRate.toDouble).toList
     } yield {
-      val normalizedRate = tryo(BigDecimal(rate * 100).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble).openOr(0D)
+      val normalizedRate = tryo(
+        BigDecimal(rate * 100).setScale(3, BigDecimal.RoundingMode.HALF_UP).toDouble
+      ).openOr(0d)
 
       (amount, normalizedRate)
-    }).headOption.getOrElse((0D, 0D))
+    }).headOption.getOrElse((0d, 0d))
   }
 
-  def processTaxesCharged(orderIdentifier: String, city: String, state: String, zip: String, subtotal: String, tax: String): Any = {
+  def processTaxesCharged(
+      orderIdentifier: String,
+      city: String,
+      state: String,
+      zip: String,
+      subtotal: String,
+      tax: String
+  ): Any = {
     if (tax != "0") {
       createTaxOrder(
         orderIdentifier,
@@ -91,37 +113,56 @@ object TaxJarService extends Loggable {
     }
   }
 
-  def createTaxOrder(orderIdentifier: String, city: String, state: String, zip: String, amount: String, tax: String, date: String): Box[String] = {
+  def createTaxOrder(
+      orderIdentifier: String,
+      city: String,
+      state: String,
+      zip: String,
+      amount: String,
+      tax: String,
+      date: String
+  ): Box[String] = {
     def orderResponse = {
-      Http.default(createOrderTaxUrl << Map(
-        "transaction_id" -> orderIdentifier,
-        "transaction_date" -> date,
-        "to_country" -> "US",
-        "to_zip" -> zip,
-        "to_state" -> state,
-        "to_city" -> city,
-        "amount" -> amount,
-        "shipping" -> "0",
-        "sales_tax" -> tax
-      ) <:< Map("Authorization" -> s"Bearer ${authKey}") OK as.String).either.map {
-        case Left(throwable) =>
-          logger.error(s"taxjar error: ${throwable}")
-          Failure("Error occured while talking to taxJar.", Full(throwable), Empty)
-        case Right(possibleOrderResponse) =>
-          Full(possibleOrderResponse)
-      }
+      Http
+        .default(
+          createOrderTaxUrl << Map(
+            "transaction_id"        -> orderIdentifier,
+            "transaction_date"      -> date,
+            "to_country"            -> "US",
+            "to_zip"                -> zip,
+            "to_state"              -> state,
+            "to_city"               -> city,
+            "amount"                -> amount,
+            "shipping"              -> "0",
+            "sales_tax"             -> tax
+          ) <:< Map("Authorization" -> s"Bearer ${authKey}") OK as.String
+        )
+        .either
+        .map {
+          case Left(throwable) =>
+            logger.error(s"taxjar error: ${throwable}")
+            Failure("Error occured while talking to taxJar.", Full(throwable), Empty)
+          case Right(possibleOrderResponse) =>
+            Full(possibleOrderResponse)
+        }
     }
 
     def rawOrder(attemptsLeft: Int): Box[String] = {
       Try(Await.result(orderResponse, 1 seconds)) match {
-        case Success(response) => 
+        case Success(response) =>
           response
         case TryFail(throwable: Throwable) =>
           if (attemptsLeft > 0)
             rawOrder(attemptsLeft - 1)
           else {
-            logger.error(s"Timeout occured while talking to taxJar for orderCreate with ${throwable}")
-            Failure("Timeout occured while talking to taxJar for orderCreate.", Full(throwable), Empty)
+            logger.error(
+              s"Timeout occured while talking to taxJar for orderCreate with ${throwable}"
+            )
+            Failure(
+              "Timeout occured while talking to taxJar for orderCreate.",
+              Full(throwable),
+              Empty
+            )
           }
       }
     }

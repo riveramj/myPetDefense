@@ -1,4 +1,4 @@
-package com.mypetdefense.snippet 
+package com.mypetdefense.snippet
 package admin
 
 import net.liftweb._
@@ -31,7 +31,7 @@ import scala.xml.NodeSeq
 
 object Reviews extends Loggable {
   import net.liftweb.sitemap._
-    import Loc._
+  import Loc._
   import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable = Menu.i("Reviews") / "admin" / "reviews" >>
@@ -40,16 +40,18 @@ object Reviews extends Loggable {
 }
 
 class Reviews extends Loggable {
-  var newReviews: List[Review] = Nil
+  var newReviews: List[Review]                    = Nil
   var newReviewsRenderer: Box[IdMemoizeTransform] = Empty
-  
+
   val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
-  
+
   def fileUpload: NodeSeq => NodeSeq = {
     var fileHolder: Box[FileParamHolder] = Empty
-    
+
     def uploadFile(file: FileParamHolder): JsCmd = {
-      logger.info("Received: %s [size=%d, type=%s]" format(file.fileName, file.length, file.mimeType))
+      logger.info(
+        "Received: %s [size=%d, type=%s]" format (file.fileName, file.length, file.mimeType)
+      )
       val parsedFile = ReviewsUploadCSV.parse(file.file)
       newReviews = parsedFile.map(_.list).openOr(Nil)
       newReviewsRenderer.map(_.setHtml).openOr(Noop)
@@ -63,42 +65,40 @@ class Reviews extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
-    "#review-upload" #> SHtml.fileUpload {fph => 
-      fileHolder = Full(fph)
-    } andThen
-    "#upload-reviews" #> SHtml.ajaxOnSubmit(() => {
-      fileHolder.map(uploadFile) openOr {
-        logger.error("Got unexpected Empty when handling partner file upload.")
-        S.error("Missing file")
-      }
-    }) &
-    "#create-reviews" #> SHtml.ajaxOnSubmit(createReviews _) &
-    ".new-reviews" #> SHtml.idMemoize { renderer =>
-      newReviewsRenderer = Full(renderer)
+      "#review-upload" #> SHtml.fileUpload { fph => fileHolder = Full(fph) } andThen
+      "#upload-reviews" #> SHtml.ajaxOnSubmit(() => {
+        fileHolder.map(uploadFile) openOr {
+          logger.error("Got unexpected Empty when handling partner file upload.")
+          S.error("Missing file")
+        }
+      }) &
+        "#create-reviews" #> SHtml.ajaxOnSubmit(createReviews _) &
+        ".new-reviews" #> SHtml.idMemoize { renderer =>
+          newReviewsRenderer = Full(renderer)
 
-      ".new-review" #> newReviews.map { review =>
-        ".title *" #> review.title.get &
-        ".body *" #> review.body.get &
-        ".rating *" #> review.rating.get &
-        ".author *" #> review.author.get &
-        ".date *" #> dateFormat.format(review.date.get) &
-        ".product *" #> review.fleaTick.map(_.name.get)
-      }
-    }
+          ".new-review" #> newReviews.map { review =>
+            ".title *" #> review.title.get &
+              ".body *" #> review.body.get &
+              ".rating *" #> review.rating.get &
+              ".author *" #> review.author.get &
+              ".date *" #> dateFormat.format(review.date.get) &
+              ".product *" #> review.fleaTick.map(_.name.get)
+          }
+        }
   }
 
   def render: NodeSeq => NodeSeq = {
     val allReviews = Review.findAll()
 
     SHtml.makeFormsAjax andThen
-    ".reviews [class+]" #> "current" &
-    ".review" #> allReviews.map { review =>
-      ".title *" #> review.title.get &
-      ".body *" #> review.body.get &
-      ".rating *" #> review.rating.get &
-      ".author *" #> review.author.get &
-      ".date *" #> dateFormat.format(review.date.get) &
-      ".product *" #> review.fleaTick.map(_.name.get)
-    }
+      ".reviews [class+]" #> "current" &
+        ".review" #> allReviews.map { review =>
+          ".title *" #> review.title.get &
+            ".body *" #> review.body.get &
+            ".rating *" #> review.rating.get &
+            ".author *" #> review.author.get &
+            ".date *" #> dateFormat.format(review.date.get) &
+            ".product *" #> review.fleaTick.map(_.name.get)
+        }
   }
 }
