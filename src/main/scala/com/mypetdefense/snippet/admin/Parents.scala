@@ -569,7 +569,7 @@ class Parents extends Loggable {
         ".shipment" #> shipments
           .sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime)
           .map { shipment =>
-            val itemsShipped = shipment.shipmentLineItems.toList.map(_.getFleaTickPetNameItemSize)
+            val itemsShipped = shipment.shipmentLineItems.toList.map(_.getPetNameProductName)
 
             ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
               ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
