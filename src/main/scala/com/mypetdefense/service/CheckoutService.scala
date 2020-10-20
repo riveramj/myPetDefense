@@ -5,14 +5,13 @@ import java.util.Date
 import com.mypetdefense.actor.{EmailActor, NewSaleEmail, SendWelcomeEmail}
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
-import com.mypetdefense.util.SecurityContext
 import me.frmr.stripe.Customer
 import net.liftweb.common.{Box, Full}
 import net.liftweb.util.Props
 
 object CheckoutService {
 
-  private[service] def createNewPets(user: Box[User], pets: List[Pet]): List[Pet] = {
+  private def createNewPets(user: Box[User], pets: List[Pet]): List[Pet] = {
     for {
       usr <- user.toList
       pet <- pets
@@ -21,7 +20,7 @@ object CheckoutService {
     }
   }
 
-  private[service] def createAddress(user: Box[User], address: NewUserAddress): Address = {
+  private def createAddress(user: Box[User], address: NewUserAddress): Address = {
     Address.createNewAddress(
       user,
       address.street1,
@@ -33,7 +32,7 @@ object CheckoutService {
     )
   }
 
-  private[service] def createUserOrUpdate(
+  private def createUserOrUpdate(
       maybeCurrentUser: Box[User],
       newUserData: NewUserData,
       stripeId: String,
@@ -67,14 +66,14 @@ object CheckoutService {
       }
     }
 
-  private[service] def findSubscriptionId(customer: Customer): Option[String] =
+  private def findSubscriptionId(customer: Customer): Option[String] =
     for {
       rawSubscriptions <- customer.subscriptions
       subscription     <- rawSubscriptions.data.headOption
       result           <- subscription.id
     } yield result
 
-  private[service] def createNewSubscription(
+  private def createNewSubscription(
       user: Box[User],
       priceCode: String,
       subscriptionId: String
@@ -89,7 +88,7 @@ object CheckoutService {
     )
   }
 
-  private[service] def sendCheckoutEmails(
+  private def sendCheckoutEmails(
       userWithSubscription: Box[User],
       petCount: Int,
       coupon: Box[Coupon]
@@ -105,7 +104,7 @@ object CheckoutService {
     EmailActor ! SendWelcomeEmail(userWithSubscription)
   }
 
-  private[service] def createNewBox(mpdSubscription: Subscription, pet: Pet) = {
+  private def createNewBox(mpdSubscription: Subscription, pet: Pet) = {
     val box = SubscriptionBox.createNewBox(mpdSubscription, pet)
     pet.box(box).saveMe()
 
@@ -139,8 +138,6 @@ object CheckoutService {
     boxes.map(SubscriptionItem.createFirstBox)
 
     sendCheckoutEmails(userWithSubscription, petCount, coupon)
-
-    userWithSubscription.flatMap(_.refresh).map(SecurityContext.logIn)
 
     userWithSubscription
   }

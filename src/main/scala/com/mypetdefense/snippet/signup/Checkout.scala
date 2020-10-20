@@ -101,13 +101,14 @@ class Checkout extends Loggable {
     val newUserData             = NewUserData(email, firstName, lastName, password, newUserAddress, coupon)
     val petsToCreate            = pets.values.toList
     val priceCodeOfSubscription = priceCode.is.openOr(Price.defaultPriceCode)
-    CheckoutService.newUserSetup(
+    val userWithSubscription = CheckoutService.newUserSetup(
       currentUser,
       petsToCreate,
       priceCodeOfSubscription,
       newUserData,
       customer
     )
+    userWithSubscription.flatMap(_.refresh).map(SecurityContext.logIn)
     updateSessionVars()
     S.redirectTo(Success.menu.loc.calcDefaultHref)
   }
