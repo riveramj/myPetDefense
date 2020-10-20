@@ -57,6 +57,7 @@ libraryDependencies ++= {
     "org.quartz-scheduler"         % "quartz"              % "2.3.0",
     "org.eclipse.jetty"            % "jetty-webapp"        % "9.4.12.v20180830" % "container; compile->default",
     "org.mockito"                  % "mockito-core"        % "3.5.13" % "test",
+    "org.typelevel"                %% "cats-core"          % "2.2.0" % "test",
     "org.scalacheck"               %% "scalacheck"         % "1.14.1" % "test",
     "org.scalatestplus"            %% "scalacheck-1-14"    % "3.2.2.0" % "test",
     "net.liftweb"                  %% "lift-common"        % liftVersion % "compile",

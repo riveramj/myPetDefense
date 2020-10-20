@@ -463,4 +463,27 @@ object DataLoader extends Loggable {
     }
   }
 
+  def removeDupUsers() {
+    val dateFormatter = new SimpleDateFormat("M/d/y")
+    val startDate     = dateFormatter.parse("7/1/2020")
+
+    for {
+      badUser <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
+    } {
+      val dupUsers = User.findAll(By(User.email, badUser.email.get))
+
+      if (dupUsers.size > 1) {
+        val possibleBadUserSub = Subscription.find(By(Subscription.user, badUser)).toList
+        val possibleBadUserAddress = Address.findAll(By(Address.user, badUser))
+        val pets = Pet.findAll(By(Pet.user, badUser))
+
+        val badUserInfo = List(possibleBadUserSub, possibleBadUserAddress, pets).flatten
+
+        if (badUserInfo.isEmpty)
+          badUser.delete_!
+      }
+    }
+  }
+
+
 }
