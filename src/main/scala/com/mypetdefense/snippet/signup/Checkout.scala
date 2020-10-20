@@ -84,6 +84,98 @@ class Checkout extends Loggable {
 
   val pennyCount: Int = (subtotal * 100).toInt
 
+  private def createStripeCustomer() = {
+    val couponId = coupon.map(_.couponCode.get)
+    if (couponId.isEmpty) {
+      Customer.create(
+        email = Some(email),
+        card = Some(stripeToken),
+        plan = Some("pennyProduct"),
+        quantity = Some(pennyCount),
+        taxPercent = Some(taxRate)
+      )
+    } else {
+      Customer.create(
+        email = Some(email),
+        card = Some(stripeToken),
+        plan = Some("pennyProduct"),
+        quantity = Some(pennyCount),
+        taxPercent = Some(taxRate),
+        coupon = couponId
+      )
+    }
+  }
+
+  private def handleStripeFailureOnSignUp(stripeFailure: Box[Customer]): Alert = {
+    logger.error("create customer failed with: " + stripeFailure)
+    Alert(s"""An error has occurred $stripeFailure. Please Try again.""")
+  }
+
+  private def handleUnexpectedErrorOnSignUp(e: Throwable) = {
+    logger.error("create customer failed with: " + e)
+    Alert("An error has occurred. Please try again.")
+  }
+
+  private def setupNewUser(customer: Customer): Nothing = {
+    val newUserAddress = NewUserAddress(street1, street2, city, state, zip)
+    val newUserData =
+      NewUserData(email, firstName, lastName, password, newUserAddress, coupon)
+    CheckoutService.newUserSetup(currentUser, newUserData, customer)
+
+    PetFlowChoices.petCount(Full(petCount))
+
+    PetFlowChoices.completedPets(mutable.LinkedHashMap.empty)
+
+    val total = subtotalWithDiscount + taxDue
+
+    PetFlowChoices.total(Full(total))
+
+    PetFlowChoices.freeMonths(coupon.map(_.numberOfMonths.get))
+
+    S.redirectTo(Success.menu.loc.calcDefaultHref)
+  }
+
+  private def tryToCreateUser = {
+    (coupon, petCount) match {
+      case (Full(_), _) =>
+      case (Empty, 2) =>
+        coupon = Coupon.find(By(Coupon.couponCode, "multiPet"))
+      case (_, _) =>
+    }
+
+    val stripeCustomer = createStripeCustomer()
+
+    Try(Await.result(stripeCustomer, new DurationInt(7).seconds)) match {
+      case TrySuccess(Full(customer))    => setupNewUser(customer)
+      case TrySuccess(stripeFailure)     => handleStripeFailureOnSignUp(stripeFailure)
+      case TryFail(throwable: Throwable) => handleUnexpectedErrorOnSignUp(throwable)
+    }
+  }
+
+  private def validateFields: List[ValidationError] = {
+    val passwordError = checkEmpty(password, "#password")
+    val facebookError = checkFacebookId(facebookId, "#facebook-id", signup = true)
+
+    val baseFields = List(
+      checkEmpty(firstName, "#first-name"),
+      checkEmpty(lastName, "#last-name"),
+      checkEmpty(email, "#email"),
+      checkEmpty(street1, "#street-1"),
+      checkEmpty(city, "#city"),
+      checkEmpty(state, "#state"),
+      checkEmpty(zip, "#zip")
+    )
+
+    val validateFields = {
+      if (facebookId.isEmpty)
+        passwordError :: baseFields
+      else
+        facebookError :: baseFields
+    }.flatten
+
+    validateFields
+  }
+
   def codeMatchesCoupon(code: String, coupon: Box[Coupon]): Boolean =
     coupon.map(_.couponCode.get).contains(code)
 
@@ -138,87 +230,9 @@ class Checkout extends Loggable {
   }
 
   def signup(): JsCmd = {
-    val passwordError = checkEmpty(password, "#password")
-    val facebookError = checkFacebookId(facebookId, "#facebook-id", true)
-
-    val baseFields = List(
-      checkEmpty(firstName, "#first-name"),
-      checkEmpty(lastName, "#last-name"),
-      checkEmpty(email, "#email"),
-      checkEmpty(street1, "#street-1"),
-      checkEmpty(city, "#city"),
-      checkEmpty(state, "#state"),
-      checkEmpty(zip, "#zip")
-    )
-
-    val validateFields = {
-      if (facebookId.isEmpty)
-        passwordError :: baseFields
-      else
-        facebookError :: baseFields
-    }.flatten
-
-    if (validateFields.isEmpty) {
-      (coupon, petCount) match {
-        case (Full(_), _) =>
-        case (Empty, 2) =>
-          coupon = Coupon.find(By(Coupon.couponCode, "multiPet"))
-        case (_, _) =>
-      }
-
-      val couponId = coupon.map(_.couponCode.get)
-
-      val stripeCustomer = {
-        if (couponId.isEmpty) {
-          Customer.create(
-            email = Some(email),
-            card = Some(stripeToken),
-            plan = Some("pennyProduct"),
-            quantity = Some(pennyCount),
-            taxPercent = Some(taxRate)
-          )
-        } else {
-          Customer.create(
-            email = Some(email),
-            card = Some(stripeToken),
-            plan = Some("pennyProduct"),
-            quantity = Some(pennyCount),
-            taxPercent = Some(taxRate),
-            coupon = couponId
-          )
-        }
-      }
-
-      Try(Await.result(stripeCustomer, new DurationInt(7).seconds)) match {
-        case TrySuccess(Full(customer)) =>
-          val newUserAddress = NewUserAddress(street1, street2, city, state, zip)
-          val newUserData =
-            NewUserData(email, firstName, lastName, password, newUserAddress, coupon)
-          CheckoutService.newUserSetup(currentUser, newUserData, customer)
-
-          PetFlowChoices.petCount(Full(petCount))
-
-          PetFlowChoices.completedPets(mutable.LinkedHashMap.empty)
-
-          val total = subtotalWithDiscount + taxDue
-
-          PetFlowChoices.total(Full(total))
-
-          PetFlowChoices.freeMonths(coupon.map(_.numberOfMonths.get))
-
-          S.redirectTo(Success.menu.loc.calcDefaultHref)
-
-        case TrySuccess(stripeFailure) =>
-          logger.error("create customer failed with: " + stripeFailure)
-          Alert(s"""An error has occurred $stripeFailure. Please Try again.""")
-
-        case TryFail(throwable: Throwable) =>
-          logger.error("create customer failed with: " + throwable)
-          Alert("An error has occured. Please try again.")
-      }
-    } else {
-      validateFields.foldLeft(Noop)(_ & _)
-    }
+    val validationErrors = validateFields
+    if (validationErrors.isEmpty) tryToCreateUser
+    else validationErrors.foldLeft(Noop)(_ & _)
   }
 
   def render: NodeSeq => NodeSeq = {
