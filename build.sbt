@@ -16,6 +16,8 @@ seq(resourceManagementSettings: _*)
 
 scalacOptions += "-deprecation"
 
+parallelExecution in Test := false
+
 seq(
   targetJavaScriptDirectory in ResourceCompile <<= (PluginKeys.webappResources in Compile) apply {
     resources => (resources / "static" / "js").get(0)
