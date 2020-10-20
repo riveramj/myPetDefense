@@ -36,9 +36,6 @@ object Checkout extends Loggable {
 case class PromoCodeMessage(status: String) extends MyPetDefenseEvent("promotion-code-message")
 
 class Checkout extends Loggable {
-  val stripeSecretKey: String    = Props.get("secret.key") openOr ""
-  implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
-
   var currentUser: Box[User] = SecurityContext.currentUser
 
   var email: String                                   = currentUser.map(_.email.get).openOr("")
@@ -74,37 +71,15 @@ class Checkout extends Loggable {
 
   val lgXlPets: Int = petCount - smMedPets
 
-  val subtotal: Double = (smMedPets * 24.99) + (lgXlPets * 27.99)
-  val discount: Double = petCount match {
-    case 0 | 1 => 0
+  val subtotal: BigDecimal = (smMedPets * BigDecimal(24.99)) + (lgXlPets * BigDecimal(27.99))
+  val discount: BigDecimal = petCount.toInt match {
+    case 0 | 1 => BigDecimal(0)
     case _     => subtotal * 0.1
   }
-  val promotionAmount: Double      = coupon.map(_.percentOff.get).openOr(0).toDouble / 100 * subtotal
-  val subtotalWithDiscount: Double = subtotal - discount
+  val promotionAmount: BigDecimal      = coupon.map(_.percentOff.get).openOr(0) / 100 * subtotal
+  val subtotalWithDiscount: BigDecimal = subtotal - discount
 
   val pennyCount: Int = (subtotal * 100).toInt
-
-  private def createStripeCustomer() = {
-    val couponId = coupon.map(_.couponCode.get)
-    if (couponId.isEmpty) {
-      Customer.create(
-        email = Some(email),
-        card = Some(stripeToken),
-        plan = Some("pennyProduct"),
-        quantity = Some(pennyCount),
-        taxPercent = Some(taxRate)
-      )
-    } else {
-      Customer.create(
-        email = Some(email),
-        card = Some(stripeToken),
-        plan = Some("pennyProduct"),
-        quantity = Some(pennyCount),
-        taxPercent = Some(taxRate),
-        coupon = couponId
-      )
-    }
-  }
 
   private def handleStripeFailureOnSignUp(stripeFailure: Box[Customer]): Alert = {
     logger.error("create customer failed with: " + stripeFailure)
@@ -135,15 +110,16 @@ class Checkout extends Loggable {
     S.redirectTo(Success.menu.loc.calcDefaultHref)
   }
 
-  private def tryToCreateUser = {
-    (coupon, petCount) match {
-      case (Full(_), _) =>
-      case (Empty, 2) =>
-        coupon = Coupon.find(By(Coupon.couponCode, "multiPet"))
-      case (_, _) =>
-    }
+  private def setMultiPetCouponIfPossible(): Unit = (coupon, petCount) match {
+    case (Empty, 2) => coupon = Coupon.find(By(Coupon.couponCode, "multiPet"))
+    case (_, _)     => ()
+  }
 
-    val stripeCustomer = createStripeCustomer()
+  private def tryToCreateUser = {
+    setMultiPetCouponIfPossible()
+
+    val stripeCustomer =
+      StripeService.createStripeCustomer(coupon, email, stripeToken, pennyCount, taxRate)
 
     Try(Await.result(stripeCustomer, new DurationInt(7).seconds)) match {
       case TrySuccess(Full(customer))    => setupNewUser(customer)
@@ -166,14 +142,14 @@ class Checkout extends Loggable {
       checkEmpty(zip, "#zip")
     )
 
-    val validateFields = {
+    val validationResult = {
       if (facebookId.isEmpty)
         passwordError :: baseFields
       else
         facebookError :: baseFields
     }.flatten
 
-    validateFields
+    validationResult
   }
 
   def codeMatchesCoupon(code: String, coupon: Box[Coupon]): Boolean =
