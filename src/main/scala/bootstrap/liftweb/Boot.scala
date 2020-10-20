@@ -69,6 +69,7 @@ class Boot {
 
     //DataLoader.loadPetlandInsert
     //DataLoader.createBasicExistingBoxes
+    DataLoader.dataCleanUp()
     //ReportingService.getPetlandCustomersWithStats
 
     //DataLoader.connectCancelledUsersToSubscription()

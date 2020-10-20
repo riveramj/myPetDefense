@@ -443,4 +443,24 @@ object DataLoader extends Loggable {
       pet.box(box).saveMe()
     }
   }
+
+  def dataCleanUp() {
+    val dateFormatter = new SimpleDateFormat("M/d/y")
+    val startDate     = dateFormatter.parse("7/1/2020")
+
+    for {
+      user <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
+      subscription <- Subscription.find(By(Subscription.user, user))
+    } {
+      user.subscription(subscription).saveMe()
+    }
+
+    for {
+      pet <- Pet.findAll(NullRef(Pet.box), By_>(Pet.createdAt, startDate))
+      box <- SubscriptionBox.find(By(SubscriptionBox.pet, pet))
+    } {
+      pet.box(box).saveMe()
+    }
+  }
+
 }
