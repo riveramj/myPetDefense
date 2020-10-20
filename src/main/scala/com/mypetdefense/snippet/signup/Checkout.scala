@@ -191,7 +191,10 @@ class Checkout extends Loggable {
 
       Try(Await.result(stripeCustomer, new DurationInt(7).seconds)) match {
         case TrySuccess(Full(customer)) =>
-          newUserSetup(customer)
+          val newUserAddress = NewUserAddress(street1, street2, city, state, zip)
+          val newUserData =
+            NewUserData(email, firstName, lastName, password, newUserAddress, coupon)
+          CheckoutService.newUserSetup(currentUser, newUserData, customer)
 
           PetFlowChoices.petCount(Full(petCount))
 
@@ -216,100 +219,6 @@ class Checkout extends Loggable {
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
-  }
-
-  def createNewPets(user: Box[User]): List[Pet] = {
-    for {
-      usr <- user.toList
-      pet <- pets.values
-    } yield {
-      Pet.createNewPet(pet, usr)
-    }
-  }
-
-  def newUserSetup(customer: Customer): Box[User] = {
-    val stripeId = customer.id
-
-    val user = if (currentUser.isEmpty) {
-      Full(
-        User.createNewUser(
-          firstName,
-          lastName,
-          stripeId,
-          email,
-          password,
-          "",
-          coupon,
-          coupon.flatMap(_.agency.obj),
-          None,
-          UserType.Parent
-        )
-      )
-    } else {
-      currentUser.flatMap(_.refresh).map { oldUser =>
-        oldUser
-          .firstName(firstName)
-          .lastName(lastName)
-          .stripeId(stripeId)
-          .email(email)
-          .coupon(coupon)
-          .referer(coupon.flatMap(_.agency.obj))
-          .saveMe
-      }
-    }
-
-    Address.createNewAddress(
-      user,
-      street1,
-      street2,
-      city,
-      state,
-      zip,
-      AddressType.Shipping
-    )
-
-    val pets = createNewPets(user)
-
-    val subscriptionId = (for {
-      rawSubscriptions <- customer.subscriptions
-      subscription     <- rawSubscriptions.data.headOption
-    } yield {
-      subscription.id
-    }).flatten.getOrElse("")
-
-    val mpdSubscription = Subscription.createNewSubscription(
-      user,
-      subscriptionId,
-      new Date(),
-      new Date(),
-      priceCode.is.openOr(Price.defaultPriceCode),
-      isUpgraded = true
-    )
-
-    val userWithSubscription = user.map(_.subscription(mpdSubscription).saveMe())
-
-    val boxes = pets.map { pet =>
-      val box = SubscriptionBox.createNewBox(mpdSubscription, pet)
-      pet.box(box).saveMe()
-
-      box
-    }
-
-    boxes.map(SubscriptionItem.createFirstBox)
-
-    if (Props.mode == Props.RunModes.Production) {
-      EmailActor ! NewSaleEmail(
-        userWithSubscription,
-        petCount,
-        coupon.map(_.couponCode.get).openOr("")
-      )
-    }
-
-    EmailActor ! SendWelcomeEmail(userWithSubscription)
-
-    userWithSubscription.flatMap(_.refresh).map(SecurityContext.logIn)
-
-    userWithSubscription
   }
 
   def render: NodeSeq => NodeSeq = {
