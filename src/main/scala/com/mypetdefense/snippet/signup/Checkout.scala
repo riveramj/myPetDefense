@@ -88,22 +88,27 @@ class Checkout extends Loggable {
     Alert("An error has occurred. Please try again.")
   }
 
-  private def setupNewUser(customer: Customer): Nothing = {
-    val newUserAddress = NewUserAddress(street1, street2, city, state, zip)
-    val newUserData =
-      NewUserData(email, firstName, lastName, password, newUserAddress, coupon)
-    CheckoutService.newUserSetup(currentUser, newUserData, customer)
-
-    PetFlowChoices.petCount(Full(petCount))
-
-    PetFlowChoices.completedPets(mutable.LinkedHashMap.empty)
-
+  private def updateSessionVars() = {
     val total = subtotalWithDiscount + taxDue
-
+    PetFlowChoices.petCount(Full(petCount))
+    PetFlowChoices.completedPets(mutable.LinkedHashMap.empty)
     PetFlowChoices.total(Full(total))
-
     PetFlowChoices.freeMonths(coupon.map(_.numberOfMonths.get))
+  }
 
+  private def setupNewUserAndRedirect(customer: Customer): Nothing = {
+    val newUserAddress          = NewUserAddress(street1, street2, city, state, zip)
+    val newUserData             = NewUserData(email, firstName, lastName, password, newUserAddress, coupon)
+    val petsToCreate            = pets.values.toList
+    val priceCodeOfSubscription = priceCode.is.openOr(Price.defaultPriceCode)
+    CheckoutService.newUserSetup(
+      currentUser,
+      petsToCreate,
+      priceCodeOfSubscription,
+      newUserData,
+      customer
+    )
+    updateSessionVars()
     S.redirectTo(Success.menu.loc.calcDefaultHref)
   }
 
@@ -119,7 +124,7 @@ class Checkout extends Loggable {
       StripeService.createStripeCustomer(coupon, email, stripeToken, pennyCount, taxRate)
 
     Try(Await.result(stripeCustomer, new DurationInt(7).seconds)) match {
-      case TrySuccess(Full(customer))    => setupNewUser(customer)
+      case TrySuccess(Full(customer))    => setupNewUserAndRedirect(customer)
       case TrySuccess(stripeFailure)     => handleStripeFailureOnSignUp(stripeFailure)
       case TryFail(throwable: Throwable) => handleUnexpectedErrorOnSignUp(throwable)
     }
