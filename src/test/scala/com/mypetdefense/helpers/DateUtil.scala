@@ -35,7 +35,8 @@ object DateUtil {
   def anyDayOfLastYear: ZonedDateTime               = getAnyDayOfTheYear(now.minusYears(1))
   def anyDayOfLastMonthUntilMonthEnd: ZonedDateTime = getAnyDayOfTheMonthUntil(now.minusMonths(1))
   def anyDayOfThisYearUntilMonthAgo: ZonedDateTime  = getAnyDayOfTheYearUntil(now.minusMonths(1))
-  def anyDayOfThisYearFromMonthAgo: ZonedDateTime   = getAnyDayOfYearFrom(now.minusMonths(1))
+  def anyDayOfThisYearFromMonthAgo: ZonedDateTime =
+    getAnyDayOfYearFrom(now.minusMonths(1).plusDays(1))
   def anyDayOfLastYearThisDay: ZonedDateTime =
     getAnyDayOfTheMonthUntil(now.minusYears(1))
 
