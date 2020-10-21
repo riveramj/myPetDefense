@@ -580,4 +580,23 @@ class ReportingServiceSpec
     }
   }
 
+  it should "find new year subscriptions until month ago" in {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
+      (thisYearDataUntilMonthAgo, anyDayFromMonthAgoData) =>
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          thisYearDataUntilMonthAgo,
+          anyDayFromMonthAgoData,
+          _.createdAt(anyDayOfThisYearUntilMonthAgo.toDate)
+            .saveMe(),
+          _.createdAt(anyDayOfThisYearFromMonthAgo.toDate)
+            .saveMe()
+        ).map(_.id.get)
+
+        val actualData = ReportingService.findNewYTDSubscriptionsLastMonth.map(_.id.get)
+
+        actualData should contain theSameElementsAs expectedSubscriptions
+        cleanUpSuccess()
+    }
+  }
+
 }
