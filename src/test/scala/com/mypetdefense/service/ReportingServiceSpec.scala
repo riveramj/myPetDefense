@@ -13,6 +13,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import scala.collection.immutable
 
 class ReportingServiceSpec
     extends AnyFlatSpec
@@ -46,6 +47,22 @@ class ReportingServiceSpec
       t: (UserCreateGeneratedData, SubscriptionCreateGeneratedData)
   ): Long =
     insertUserAndSub(t._1, t._2).subscription.cancel.saveMe().id.get
+
+  private def insertSubscriptoinsForTests(
+      dataToReturn: Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData],
+      dataToIgnore: Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData],
+      dataToReturnFun: Subscription => Subscription,
+      dataToIgnoreFun: Subscription => Subscription
+  ): immutable.Iterable[Subscription] = {
+    dataToIgnore.foreach {
+      case (uData, sData) =>
+        dataToIgnoreFun(insertUserAndSub(uData, sData).subscription)
+    }
+    dataToReturn.map {
+      case (uData, sData) =>
+        dataToReturnFun(insertUserAndSub(uData, sData).subscription)
+    }
+  }
 
   it should "find all active subscriptions" in {
     forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
@@ -414,20 +431,14 @@ class ReportingServiceSpec
   it should "find current month upcoming subscriptions" in {
     forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (fromTomorrowData, nextMonthData) =>
-        nextMonthData.foreach {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .nextShipDate(anyDayOfNextMonth.toDate)
-              .saveMe()
-        }
-        val expectedSubscriptions = fromTomorrowData.map {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .nextShipDate(anyDayOfThisMonthFromTomorrow.toDate)
-              .saveMe()
-              .id
-              .get
-        }
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          fromTomorrowData,
+          nextMonthData,
+          _.nextShipDate(anyDayOfThisMonthFromTomorrow.toDate)
+            .saveMe(),
+          _.nextShipDate(anyDayOfNextMonth.toDate)
+            .saveMe()
+        ).map(_.id.get)
 
         val actualData = ReportingService.findCurrentMonthUpcomingSubscriptions.map(_.id.get)
 
@@ -439,20 +450,14 @@ class ReportingServiceSpec
   it should "find new today subscriptions" in {
     forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (todayData, untilTodayData) =>
-        untilTodayData.foreach {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .createdAt(anyDayUntilToday.toDate)
-              .saveMe()
-        }
-        val expectedSubscriptions = todayData.map {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .createdAt(anyHourOfToday.toDate)
-              .saveMe()
-              .id
-              .get
-        }
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          todayData,
+          untilTodayData,
+          _.createdAt(anyHourOfToday.toDate)
+            .saveMe(),
+          _.createdAt(anyDayUntilToday.toDate)
+            .saveMe()
+        ).map(_.id.get)
 
         val actualData = ReportingService.findNewTodaySubscriptions.map(_.id.get)
 
@@ -464,20 +469,14 @@ class ReportingServiceSpec
   it should "find new subscriptions for this day in last month" in {
     forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (thisDayMonthAgoData, anyDayExceptMonthAgoDayData) =>
-        anyDayExceptMonthAgoDayData.foreach {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .createdAt(anyDayExceptThisDayMonthAgo.toDate)
-              .saveMe()
-        }
-        val expectedSubscriptions = thisDayMonthAgoData.map {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .createdAt(anyHourOfThisDayMonthAgo.toDate)
-              .saveMe()
-              .id
-              .get
-        }
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          thisDayMonthAgoData,
+          anyDayExceptMonthAgoDayData,
+          _.createdAt(anyHourOfThisDayMonthAgo.toDate)
+            .saveMe(),
+          _.createdAt(anyDayExceptThisDayMonthAgo.toDate)
+            .saveMe()
+        ).map(_.id.get)
 
         val actualData = ReportingService.findNewTodaySubscriptionsLastMonth.map(_.id.get)
 
@@ -489,20 +488,14 @@ class ReportingServiceSpec
   it should "find new subscriptions for this day in last year" in {
     forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (thisDayYearAgoData, anyDayExceptYearAgoDayData) =>
-        anyDayExceptYearAgoDayData.foreach {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .createdAt(anyDayExceptThisDayYearAgo.toDate)
-              .saveMe()
-        }
-        val expectedSubscriptions = thisDayYearAgoData.map {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .createdAt(anyHourOfThisDayYearAgo.toDate)
-              .saveMe()
-              .id
-              .get
-        }
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          thisDayYearAgoData,
+          anyDayExceptYearAgoDayData,
+          _.createdAt(anyHourOfThisDayYearAgo.toDate)
+            .saveMe(),
+          _.createdAt(anyDayExceptThisDayYearAgo.toDate)
+            .saveMe()
+        ).map(_.id.get)
 
         val actualData = ReportingService.findNewTodaySubscriptionsLastYear.map(_.id.get)
 
@@ -514,20 +507,14 @@ class ReportingServiceSpec
   it should "find new month subscriptions" in {
     forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (thisMonthData, anyDayUntilThisMonthData) =>
-        anyDayUntilThisMonthData.foreach {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .createdAt(anyDayUntilThisMonth.toDate)
-              .saveMe()
-        }
-        val expectedSubscriptions = thisMonthData.map {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .createdAt(anyDayOfThisMonth.toDate)
-              .saveMe()
-              .id
-              .get
-        }
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          thisMonthData,
+          anyDayUntilThisMonthData,
+          _.createdAt(anyDayOfThisMonth.toDate)
+            .saveMe(),
+          _.createdAt(anyDayUntilThisMonth.toDate)
+            .saveMe()
+        ).map(_.id.get)
 
         val actualData = ReportingService.findNewMTDSubscriptions.map(_.id.get)
 
@@ -539,20 +526,14 @@ class ReportingServiceSpec
   it should "find new month subscriptions last month" in {
     forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (lastMonthData, anyDayUntilLastMonthData) =>
-        anyDayUntilLastMonthData.foreach {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .createdAt(anyDayUntilLastMonth.toDate)
-              .saveMe()
-        }
-        val expectedSubscriptions = lastMonthData.map {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription
-              .createdAt(anyDayOfLastMonthUntilMonthAgo.toDate)
-              .saveMe()
-              .id
-              .get
-        }
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          lastMonthData,
+          anyDayUntilLastMonthData,
+          _.createdAt(anyDayOfLastMonthUntilMonthAgo.toDate)
+            .saveMe(),
+          _.createdAt(anyDayUntilLastMonth.toDate)
+            .saveMe()
+        ).map(_.id.get)
 
         val actualData = ReportingService.findNewMTDSubscriptionsLastMonth.map(_.id.get)
 
