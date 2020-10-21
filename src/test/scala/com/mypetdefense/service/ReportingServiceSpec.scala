@@ -385,4 +385,58 @@ class ReportingServiceSpec
     }
   }
 
+  it should "find mtd shipments" in {
+    forAll(genShipmentChainData, genShipmentChainData) { (dataMonth, dataPreviousMonth) =>
+      insertUserSubAndShipment(dataPreviousMonth).shipments
+        .map(_.createdAt(anyDayUntilThisMonth.toDate).saveMe())
+      val expectedShipments = insertUserSubAndShipment(dataMonth).shipments
+        .map(_.createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
+
+      val actualData = ReportingService.findMtdShipments.map(_.id.get)
+
+      actualData should contain theSameElementsAs expectedShipments
+      cleanUpSuccess()
+    }
+  }
+
+  it should "find today shipments" in {
+    forAll(genShipmentChainData, genShipmentChainData) { (todayData, dataPreviousDays) =>
+      insertUserSubAndShipment(dataPreviousDays).shipments
+        .map(_.dateProcessed(anyDayUntilToday.toDate).saveMe())
+      val expectedShipments = insertUserSubAndShipment(todayData).shipments
+        .map(_.dateProcessed(anyHourOfToday.toDate).saveMe().id.get)
+
+      val actualData = ReportingService.findTodayShipments.map(_.id.get)
+
+      actualData should contain theSameElementsAs expectedShipments
+      cleanUpSuccess()
+    }
+  }
+
+  it should "find current month upcoming subscriptions" in {
+    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+      (fromTomorrowData, nextMonthData) =>
+        nextMonthData.foreach {
+          case (uData, sData) =>
+            insertUserAndSub(uData, sData).subscription
+              .nextShipDate(anyDayOfNextMonth.toDate)
+              .saveMe()
+        }
+        val anyDay = anyDayOfThisMonthFromTomorrow.toDate
+        val expectedSubscriptions = fromTomorrowData.map {
+          case (uData, sData) =>
+            insertUserAndSub(uData, sData).subscription
+              .nextShipDate(anyDay)
+              .saveMe()
+              .id
+              .get
+        }
+
+        val actualData = ReportingService.findCurrentMonthUpcomingSubscriptions.map(_.id.get)
+
+        actualData should contain theSameElementsAs expectedSubscriptions
+        cleanUpSuccess()
+    }
+  }
+
 }

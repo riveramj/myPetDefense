@@ -1004,19 +1004,19 @@ object ReportingService extends Loggable {
 
   def findMtdShipments: List[Shipment] = {
     Shipment.findAll(
-      By_>(Shipment.createdAt, monthDayOne)
+      By_>=(Shipment.createdAt, monthDayOne)
     )
   }
 
   def findTodayShipments: List[Shipment] = {
     Shipment.findAll(
-      By_>(Shipment.dateProcessed, nowDate)
+      By_>=(Shipment.dateProcessed, nowDate)
     )
   }
 
   def findCurrentMonthUpcomingSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.nextShipDate, tomorrowStart),
+      By_>=(Subscription.nextShipDate, tomorrowStart),
       By_<(Subscription.nextShipDate, beginngNextMonth)
     )
   }
