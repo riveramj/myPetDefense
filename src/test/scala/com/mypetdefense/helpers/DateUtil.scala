@@ -33,7 +33,11 @@ object DateUtil {
   def anyDayExceptThisDayMonthAgo: ZonedDateTime    = getAnyDayOfTheYearExcept(now.minusMonths(1))
   def anyDayExceptThisDayYearAgo: ZonedDateTime     = getAnyDayOfTheYearExcept(now.minusYears(1))
   def anyDayOfLastYear: ZonedDateTime               = getAnyDayOfTheYear(now.minusYears(1))
-  def anyDayOfLastMonthUntilMonthAgo: ZonedDateTime = getAnyDayOfTheMonthUntil(now.minusMonths(1))
+  def anyDayOfLastMonthUntilMonthEnd: ZonedDateTime = getAnyDayOfTheMonthUntil(now.minusMonths(1))
+  def anyDayOfLastYearThisDay: ZonedDateTime =
+    getAnyDayOfTheMonthUntil(now.minusYears(1))
+  def anyDayOfLastYearFromThisDayYearAgo: ZonedDateTime =
+    getAnyDayOfYearFrom(now.plusDays(1).minusYears(1))
 
   def lastYear: ZonedDateTime = {
     val nowDate = now
@@ -71,6 +75,13 @@ object DateUtil {
     val dayFrom = localDate.getDayOfMonth
     val day     = generateIntBetween(dayFrom, maxDays)
     localDate.withDayOfMonth(day).atStartOfDay(zoneId)
+  }
+
+  protected def getAnyDayOfYearFrom(localDate: LocalDate): ZonedDateTime = {
+    val maxDays = localDate.lengthOfYear()
+    val dayFrom = localDate.getDayOfYear
+    val day     = generateIntBetween(dayFrom, maxDays)
+    localDate.withDayOfYear(day).atStartOfDay(zoneId)
   }
 
   protected def getAnyDayOfTheYear(localDate: LocalDate): ZonedDateTime = {

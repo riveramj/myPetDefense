@@ -529,13 +529,51 @@ class ReportingServiceSpec
         val expectedSubscriptions = insertSubscriptoinsForTests(
           lastMonthData,
           anyDayUntilLastMonthData,
-          _.createdAt(anyDayOfLastMonthUntilMonthAgo.toDate)
+          _.createdAt(anyDayOfLastMonthUntilMonthEnd.toDate)
             .saveMe(),
           _.createdAt(anyDayUntilLastMonth.toDate)
             .saveMe()
         ).map(_.id.get)
 
         val actualData = ReportingService.findNewMTDSubscriptionsLastMonth.map(_.id.get)
+
+        actualData should contain theSameElementsAs expectedSubscriptions
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find new month subscriptions last year" in {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
+      (thisMonthLastYearData, anyDayFromThisDayYearAgoData) =>
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          thisMonthLastYearData,
+          anyDayFromThisDayYearAgoData,
+          _.createdAt(anyDayOfLastYearThisDay.toDate)
+            .saveMe(),
+          _.createdAt(anyDayOfLastYearFromThisDayYearAgo.toDate)
+            .saveMe()
+        ).map(_.id.get)
+
+        val actualData = ReportingService.findNewMTDSubscriptionsLastYear.map(_.id.get)
+
+        actualData should contain theSameElementsAs expectedSubscriptions
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find new this year subscriptions" in {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
+      (thisYearData, anyDayLastYearData) =>
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          thisYearData,
+          anyDayLastYearData,
+          _.createdAt(anyDayOfThisYear.toDate)
+            .saveMe(),
+          _.createdAt(anyDayOfLastYear.toDate)
+            .saveMe()
+        ).map(_.id.get)
+
+        val actualData = ReportingService.findNewYTDSubscriptions.map(_.id.get)
 
         actualData should contain theSameElementsAs expectedSubscriptions
         cleanUpSuccess()
