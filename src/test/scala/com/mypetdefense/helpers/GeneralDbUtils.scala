@@ -1,18 +1,22 @@
 package com.mypetdefense.helpers
 
 import com.mypetdefense.generator.{
+  PetChainData,
   ShipmentChainData,
   SubscriptionCreateGeneratedData,
   UserCreateGeneratedData
 }
 import com.mypetdefense.helpers.db.ShipmentDbUtils.createShipment
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
+import com.mypetdefense.helpers.db.PetDbUtils.createPet
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
 import com.mypetdefense.model._
 
 object GeneralDbUtils {
 
   case class InsertedUserAndSub(user: User, subscription: Subscription)
+
+  case class InsertedUserAndPet(user: User, pets: List[Pet])
 
   case class InsertedUserSubAndShipment(
       user: User,
@@ -42,6 +46,12 @@ object GeneralDbUtils {
     val su  = createSubscription(u, in.subscriptionCreateGeneratedData)
     val shs = in.shipmentCreateGeneratedData.map(createShipment(u, su, _))
     InsertedUserSubAndShipment(u, su, shs)
+  }
+
+  def insertUserAndPet(in: PetChainData): InsertedUserAndPet = {
+    val u = createUser(in.user)
+    val p = in.petData.map(createPet(u, _))
+    InsertedUserAndPet(u, p)
   }
 
 }

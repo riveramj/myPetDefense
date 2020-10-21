@@ -984,36 +984,22 @@ object ReportingService extends Loggable {
       NotBy(Agency.name, "Petland")
     )
 
-    val usersByAgencies = agencies.map { agency => (agency, agency.customers.toList) }
-
-    val newUsersYesterdayByAgency = usersByAgencies.map {
-      case (agency, users) =>
-        val yesterdayUsers = users.filter { user =>
-          val createdDate = getCreatedDateOfUser(user)
-
-          val createdDateDay   = createdDate.getDayOfMonth
-          val createdDateMonth = createdDate.getMonth
-          val createdDateYear  = createdDate.getYear
-
-          val yesterdayDay   = yesterday.getDayOfMonth
-          val yesterdayMonth = yesterday.getMonth
-          val yesterdayYear  = yesterday.getYear
-
-          (
-            (createdDateDay == yesterdayDay) &&
-            (createdDateMonth == yesterdayMonth) &&
-            (createdDateYear == yesterdayYear)
-          )
-        }
-
-        (agency, yesterdayUsers)
+    val yesterdayCreatedUsersByAgencies = agencies.map { agency =>
+      (
+        agency,
+        User.findAll(
+          By(User.agency, agency),
+          By_>=(User.createdAt, yesterdayStart),
+          By_<=(User.createdAt, yesterdayEnd)
+        )
+      )
     }
 
-    newUsersYesterdayByAgency.map {
+    yesterdayCreatedUsersByAgencies.map {
       case (agency, users) =>
-        val pets = users.flatMap(_.pets.toList)
-        (agency.name.get -> pets.size)
-    }.toList.sortBy(_._1)
+        val pets = users.flatMap(u => Pet.findAll(By(Pet.user, u)))
+        agency.name.get -> pets.size
+    }.sortBy(_._1)
   }
 
   def findMtdShipments: List[Shipment] = {

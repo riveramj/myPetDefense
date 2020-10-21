@@ -6,12 +6,15 @@ import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers._
 import com.mypetdefense.helpers.db.UserDbUtils._
+import com.mypetdefense.helpers.db.AgencyDbUtils._
 import com.mypetdefense.model._
 import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+
+import scala.util.{Success, Try}
 
 class ReportingServiceSpec
     extends AnyFlatSpec
@@ -301,7 +304,7 @@ class ReportingServiceSpec
   it should "find yesterday new sales" in {
     forAll(nonEmptyUsersGen) { users2Create =>
       val expectedIds =
-        users2Create.map(createUser).map(_.createdAt(yesterday.toDate).saveMe().id.get)
+        users2Create.map(createUser).map(_.createdAt(anyHourOfYesterday.toDate).saveMe().id.get)
       val actualIds = ReportingService.findYesterdayNewSales.map(_.id.get)
 
       actualIds should contain theSameElementsAs expectedIds
@@ -312,10 +315,10 @@ class ReportingServiceSpec
   it should "find yesterday shipments" in {
     forAll(genShipmentChainData, genShipmentChainData) { (withPaidShipments, newShipments) =>
       val paidShipments = insertUserSubAndShipment(withPaidShipments).shipments
-        .map(_.dateShipped(yesterday.toDate).saveMe())
+        .map(_.dateShipped(anyHourOfYesterday.toDate).saveMe())
       val newShipmentsSize =
         insertUserSubAndShipment(newShipments).shipments
-          .map(_.dateShipped(yesterday.toDate).saveMe())
+          .map(_.dateShipped(anyHourOfYesterday.toDate).saveMe())
           .map(_.amountPaid("0").saveMe())
           .size
       val expectedTotal =
@@ -327,6 +330,58 @@ class ReportingServiceSpec
 
       actualData shouldBe (newShipmentsSize, paidShipments.size, expectedTotal)
       cleanUpSuccess()
+    }
+  }
+
+  it should "find yesterday cancels" in {
+    forAll(nonEmptyMapUserNSubscriptionGen) { usersAndYesterdayCanceledSubs =>
+      val expectedIds = usersAndYesterdayCanceledSubs.map {
+        case (uData, sData) =>
+          insertUserAndSub(uData, sData).subscription.cancel
+            .cancellationDate(anyHourOfYesterday.toDate)
+            .saveMe()
+            .id
+            .get
+      }
+
+      val actualData = ReportingService.yesterdayCancels.map(_.id.get)
+
+      actualData should contain theSameElementsAs expectedIds
+      cleanUpSuccess()
+    }
+  }
+
+  it should "find yesterday sales by agency" in {
+    forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
+      (yesterdayNotOursSales, myPetDefenseSales, petlandSales) =>
+        val myPetDefenceAgency = createAgency("My Pet Defense")
+        val petlandAgency      = createAgency("Petland")
+        myPetDefenseSales
+          .map(insertUserAndPet)
+          .foreach(
+            _.user.agency(myPetDefenceAgency).createdAt(anyHourOfYesterday.toDate).saveMe()
+          )
+        petlandSales
+          .map(insertUserAndPet)
+          .foreach(_.user.agency(petlandAgency).createdAt(anyHourOfYesterday.toDate).saveMe())
+
+        val someAgencyName = Random.generateString.take(10)
+        val someAgency     = createAgency(someAgencyName)
+
+        val insertedPetsSize = yesterdayNotOursSales
+          .map(insertUserAndPet)
+          .map { inserted =>
+            inserted.user.agency(someAgency).createdAt(anyHourOfYesterday.toDate).saveMe()
+            inserted.pets.size
+          }
+          .sum
+
+        val expectedInResult = someAgencyName -> insertedPetsSize
+
+        val actualData = ReportingService.findYesterdaySalesByAgency
+
+        actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
+        actualData should contain(expectedInResult)
     }
   }
 
