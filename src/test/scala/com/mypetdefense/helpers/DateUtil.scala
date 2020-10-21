@@ -28,10 +28,11 @@ object DateUtil {
   def anyDayUntilThisMonth: ZonedDateTime           = getAnyDayOfTheYearUntil(now.minusMonths(1))
   def anyDayUntilToday: ZonedDateTime               = getAnyDayOfTheYearUntil(now.minusDays(1))
   def anyDayOfThisMonthFromTomorrow: ZonedDateTime  = getAnyDayOfMonthFrom(now.plusDays(1))
-  def anyDayExceptToday: ZonedDateTime              = getAnyDayOfTheYearExcept(now)
-  def anyDayExceptYesterday: ZonedDateTime          = getAnyDayOfTheYearExcept(now.minusDays(1))
-  def anyDayExceptThisDayMonthAgo: ZonedDateTime    = getAnyDayOfTheYearExcept(now.minusMonths(1))
-  def anyDayExceptThisDayYearAgo: ZonedDateTime     = getAnyDayOfTheYearExcept(now.minusYears(1))
+  def anyDayExceptToday: ZonedDateTime              = getAnyDayOfTheYearExceptDay(now)
+  def anyDayExceptYesterday: ZonedDateTime          = getAnyDayOfTheYearExceptDay(now.minusDays(1))
+  def anyDayExceptThisDayMonthAgo: ZonedDateTime    = getAnyDayOfTheYearExceptDay(now.minusMonths(1))
+  def anyDayExceptThisDayYearAgo: ZonedDateTime     = getAnyDayOfTheYearExceptDay(now.minusYears(1))
+  def anyDayExceptThisMonth: ZonedDateTime          = getAnyDayOfTheYearExceptMonth(now.minusYears(1))
   def anyDayOfLastYear: ZonedDateTime               = getAnyDayOfTheYear(now.minusYears(1))
   def anyDayOfLastMonthUntilMonthEnd: ZonedDateTime = getAnyDayOfTheMonthUntil(now.minusMonths(1))
   def anyDayOfThisYearUntilMonthAgo: ZonedDateTime  = getAnyDayOfTheYearUntil(now.minusMonths(1))
@@ -54,10 +55,19 @@ object DateUtil {
   }
 
   @tailrec
-  protected def getAnyDayOfTheYearExcept(localDate: LocalDate): ZonedDateTime = {
+  protected def getAnyDayOfTheYearExceptDay(localDate: LocalDate): ZonedDateTime = {
     val maybeDay = getAnyDayOfTheYear(localDate)
     if (localDate.getDayOfYear == maybeDay.getDayOfYear)
-      getAnyDayOfTheYearExcept(localDate)
+      getAnyDayOfTheYearExceptDay(localDate)
+    else
+      maybeDay
+  }
+
+  @tailrec
+  protected def getAnyDayOfTheYearExceptMonth(localDate: LocalDate): ZonedDateTime = {
+    val maybeDay = getAnyDayOfTheYear(localDate)
+    if (localDate.getMonth == maybeDay.getMonth)
+      getAnyDayOfTheYearExceptMonth(localDate)
     else
       maybeDay
   }

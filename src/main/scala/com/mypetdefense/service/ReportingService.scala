@@ -1076,14 +1076,14 @@ object ReportingService extends Loggable {
 
   def findNewYTDSubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, yearDayOneLastYear),
+      By_>=(Subscription.createdAt, yearDayOneLastYear),
       By_<(Subscription.createdAt, currentDayLastYearEnd)
     )
   }
 
   def findCancelledMtdSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.cancellationDate, monthDayOne)
+      By_>=(Subscription.cancellationDate, monthDayOne)
     )
   }
 

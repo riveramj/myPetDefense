@@ -599,4 +599,42 @@ class ReportingServiceSpec
     }
   }
 
+  it should "find new subscriptions in last year until this day year ago" in {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
+      (thisDayYearAgoData, anyDayExceptThisDayYearAgoData) =>
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          thisDayYearAgoData,
+          anyDayExceptThisDayYearAgoData,
+          _.createdAt(anyDayOfLastYearThisDay.toDate)
+            .saveMe(),
+          _.createdAt(anyDayOfLastYearFromThisDayYearAgo.toDate)
+            .saveMe()
+        ).map(_.id.get)
+
+        val actualData = ReportingService.findNewYTDSubscriptionsLastYear.map(_.id.get)
+
+        actualData should contain theSameElementsAs expectedSubscriptions
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find cancelled month subscriptions" in {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
+      (thisMonthData, anyMonthExceptThisMonthData) =>
+        val expectedSubscriptions = insertSubscriptoinsForTests(
+          thisMonthData,
+          anyMonthExceptThisMonthData,
+          _.cancellationDate(anyDayOfThisMonth.toDate)
+            .saveMe(),
+          _.cancellationDate(anyDayExceptThisMonth.toDate)
+            .saveMe()
+        ).map(_.id.get)
+
+        val actualData = ReportingService.findCancelledMtdSubscriptions.map(_.id.get)
+
+        actualData should contain theSameElementsAs expectedSubscriptions
+        cleanUpSuccess()
+    }
+  }
+
 }
