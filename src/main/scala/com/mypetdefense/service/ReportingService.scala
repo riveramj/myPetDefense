@@ -954,14 +954,14 @@ object ReportingService extends Loggable {
   def findYesterdayNewSales: List[User] = {
     User.findAll(
       By_>=(User.createdAt, yesterdayStart),
-      By_<=(User.createdAt, yesterdayEnd)
+      By_<(User.createdAt, yesterdayEnd)
     )
   }
 
   def yesterdayShipments: (Int, Int, Double) = {
     val yesterdayShipments = Shipment.findAll(
       By_>=(Shipment.dateShipped, yesterdayStart),
-      By_<=(Shipment.dateShipped, yesterdayEnd)
+      By_<(Shipment.dateShipped, yesterdayEnd)
     )
 
     val paidShipments  = yesterdayShipments.filter(_.amountPaid.get != "0")
@@ -974,7 +974,7 @@ object ReportingService extends Loggable {
   def yesterdayCancels: List[Subscription] = {
     Subscription.findAll(
       By_>=(Subscription.cancellationDate, yesterdayStart),
-      By_<=(Subscription.cancellationDate, yesterdayEnd)
+      By_<(Subscription.cancellationDate, yesterdayEnd)
     )
   }
 
@@ -990,7 +990,7 @@ object ReportingService extends Loggable {
         User.findAll(
           By(User.agency, agency),
           By_>=(User.createdAt, yesterdayStart),
-          By_<=(User.createdAt, yesterdayEnd)
+          By_<(User.createdAt, yesterdayEnd)
         )
       )
     }
@@ -1029,27 +1029,27 @@ object ReportingService extends Loggable {
 
   def findNewTodaySubscriptionsLastMonth: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, todayLastMonth),
+      By_>=(Subscription.createdAt, todayLastMonth),
       By_<(Subscription.createdAt, todayLastMonthEnd)
     )
   }
 
   def findNewTodaySubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, todayLastYear),
+      By_>=(Subscription.createdAt, todayLastYear),
       By_<(Subscription.createdAt, todayLastYearEnd)
     )
   }
 
   def findNewMTDSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, monthDayOne)
+      By_>=(Subscription.createdAt, monthDayOne)
     )
   }
 
   def findNewMTDSubscriptionsLastMonth: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, monthDayOneLastMonth),
+      By_>=(Subscription.createdAt, monthDayOneLastMonth),
       By_<(Subscription.createdAt, currentDayLastMonthEnd)
     )
   }

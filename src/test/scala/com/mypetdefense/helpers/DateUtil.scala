@@ -11,23 +11,29 @@ object DateUtil {
 
   val zoneId: ZoneId = ZoneId.of("America/New_York")
 
-  def yesterday: ZonedDateTime                     = now.atStartOfDay(zoneId).minusDays(1)
-  def now: LocalDate                               = LocalDate.now(zoneId)
-  def today: Date                                  = now.atStartOfDay(zoneId).toDate
-  def tomorrow: Date                               = now.atStartOfDay(zoneId).plusDays(1).toDate
-  def thisYear: Int                                = now.getYear
-  def anyHourOfYesterday: ZonedDateTime            = anyHourOf(yesterday.toLocalDate)
-  def anyHourOfToday: ZonedDateTime                = anyHourOf(now)
-  def anyDayOfLastMonth: ZonedDateTime             = getAnyDayOfMonth(now.minusMonths(1))
-  def anyDayOfThisMonth: ZonedDateTime             = getAnyDayOfMonth(now)
-  def anyDayOfNextMonth: ZonedDateTime             = getAnyDayOfMonth(now.plusMonths(1))
-  def anyDayOfThisYear: ZonedDateTime              = getAnyDayOfTheYear(now)
-  def anyDayUntilThisMonth: ZonedDateTime          = getAnyDayOfTheYearUntil(now.minusMonths(1))
-  def anyDayUntilToday: ZonedDateTime              = getAnyDayOfTheYearUntil(now.minusDays(1))
-  def anyDayOfThisMonthFromTomorrow: ZonedDateTime = getAnyDayOfMonthFrom(now.plusDays(1))
-  def anyDayExceptToday: ZonedDateTime             = getAnyDayOfTheYearExcept(now)
-  def anyDayExceptYesterday: ZonedDateTime         = getAnyDayOfTheYearExcept(now.minusDays(1))
-  def anyDayOfLastYear: ZonedDateTime              = getAnyDayOfTheYear(now.minusYears(1))
+  def yesterday: ZonedDateTime                      = now.atStartOfDay(zoneId).minusDays(1)
+  def now: LocalDate                                = LocalDate.now(zoneId)
+  def today: Date                                   = now.atStartOfDay(zoneId).toDate
+  def tomorrow: Date                                = now.atStartOfDay(zoneId).plusDays(1).toDate
+  def thisYear: Int                                 = now.getYear
+  def anyHourOfYesterday: ZonedDateTime             = anyHourOf(yesterday.toLocalDate)
+  def anyHourOfToday: ZonedDateTime                 = anyHourOf(now)
+  def anyHourOfThisDayMonthAgo: ZonedDateTime       = anyHourOf(now.minusMonths(1))
+  def anyHourOfThisDayYearAgo: ZonedDateTime        = anyHourOf(now.minusYears(1))
+  def anyDayOfLastMonth: ZonedDateTime              = getAnyDayOfMonth(now.minusMonths(1))
+  def anyDayOfThisMonth: ZonedDateTime              = getAnyDayOfMonth(now)
+  def anyDayOfNextMonth: ZonedDateTime              = getAnyDayOfMonth(now.plusMonths(1))
+  def anyDayOfThisYear: ZonedDateTime               = getAnyDayOfTheYear(now)
+  def anyDayUntilLastMonth: ZonedDateTime           = getAnyDayOfTheYearUntil(now.minusMonths(2))
+  def anyDayUntilThisMonth: ZonedDateTime           = getAnyDayOfTheYearUntil(now.minusMonths(1))
+  def anyDayUntilToday: ZonedDateTime               = getAnyDayOfTheYearUntil(now.minusDays(1))
+  def anyDayOfThisMonthFromTomorrow: ZonedDateTime  = getAnyDayOfMonthFrom(now.plusDays(1))
+  def anyDayExceptToday: ZonedDateTime              = getAnyDayOfTheYearExcept(now)
+  def anyDayExceptYesterday: ZonedDateTime          = getAnyDayOfTheYearExcept(now.minusDays(1))
+  def anyDayExceptThisDayMonthAgo: ZonedDateTime    = getAnyDayOfTheYearExcept(now.minusMonths(1))
+  def anyDayExceptThisDayYearAgo: ZonedDateTime     = getAnyDayOfTheYearExcept(now.minusYears(1))
+  def anyDayOfLastYear: ZonedDateTime               = getAnyDayOfTheYear(now.minusYears(1))
+  def anyDayOfLastMonthUntilMonthAgo: ZonedDateTime = getAnyDayOfTheMonthUntil(now.minusMonths(1))
 
   def lastYear: ZonedDateTime = {
     val nowDate = now
@@ -46,6 +52,12 @@ object DateUtil {
       getAnyDayOfTheYearExcept(localDate)
     else
       maybeDay
+  }
+
+  protected def getAnyDayOfTheMonthUntil(localDate: LocalDate): ZonedDateTime = {
+    val maxDays = localDate.getDayOfMonth
+    val day     = generateIntBetween(1, maxDays)
+    localDate.withDayOfMonth(day).atStartOfDay(zoneId)
   }
 
   protected def getAnyDayOfTheYearUntil(localDate: LocalDate): ZonedDateTime = {
