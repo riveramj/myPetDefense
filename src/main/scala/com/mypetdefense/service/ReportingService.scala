@@ -1023,7 +1023,7 @@ object ReportingService extends Loggable {
 
   def findNewTodaySubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, nowDate)
+      By_>=(Subscription.createdAt, nowDate)
     )
   }
 

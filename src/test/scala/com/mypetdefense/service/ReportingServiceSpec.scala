@@ -14,8 +14,6 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-import scala.util.{Success, Try}
-
 class ReportingServiceSpec
     extends AnyFlatSpec
     with Matchers
@@ -50,7 +48,7 @@ class ReportingServiceSpec
     insertUserAndSub(t._1, t._2).subscription.cancel.saveMe().id.get
 
   it should "find all active subscriptions" in {
-    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (usersWithActiveSub, usersWithoutSub) =>
         val activeSubsIds = usersWithActiveSub.map(createUserAndSubReturnSubId)
         usersWithoutSub.foreach(createUserAndCancelSubReturnSubId)
@@ -64,7 +62,7 @@ class ReportingServiceSpec
   }
 
   it should "find customers for agent" in {
-    forAll(nonEmptyUsersGen, nonEmptyUsersGen) { (agentUsers, notAgentUsers) =>
+    forAll(listOfNUsersGen(), listOfNUsersGen()) { (agentUsers, notAgentUsers) =>
       val agentId       = Random.generateString.take(10)
       val agentUsersIds = agentUsers.map(d => createUser(d).salesAgentId(agentId).saveMe().id.get)
       notAgentUsers.foreach(createUser)
@@ -80,7 +78,7 @@ class ReportingServiceSpec
   }
 
   it should "find new customers for month" in {
-    forAll(nonEmptyUsersGen, nonEmptyUsersGen) { (registeredThisMonth, registeredLongTimeAgo) =>
+    forAll(listOfNUsersGen(), listOfNUsersGen()) { (registeredThisMonth, registeredLongTimeAgo) =>
       val expectedUsersIds =
         registeredThisMonth.map(createUser(_).createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
       registeredLongTimeAgo.foreach(createUser(_).createdAt(anyDayOfLastMonth.toDate).saveMe())
@@ -98,9 +96,9 @@ class ReportingServiceSpec
 
   it should "find active subscriptions first month" in {
     forAll(
-      nonEmptyMapUserNSubscriptionGen,
-      nonEmptyMapUserNSubscriptionGen,
-      nonEmptyMapUserNSubscriptionGen
+      mapWithNOfUserNSubscriptionGen(),
+      mapWithNOfUserNSubscriptionGen(),
+      mapWithNOfUserNSubscriptionGen()
     ) { (activeFirstMonthUsers, canceledLongTimeAgoUsers, canceledThisMonthUsers) =>
       canceledLongTimeAgoUsers.foreach {
         case (u, s) =>
@@ -140,7 +138,7 @@ class ReportingServiceSpec
   }
 
   it should "find current month subscriptions" in {
-    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (currentMonth, oldOne) =>
         oldOne.foreach {
           case (u, s) =>
@@ -174,7 +172,7 @@ class ReportingServiceSpec
   }
 
   it should "find cancelled subscriptions" in {
-    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (usersWithCanceledSub, usersWithoutSub) =>
         val canceledIds = usersWithCanceledSub.map(createUserAndCancelSubReturnSubId)
         usersWithoutSub.foreach(createUserAndSubReturnSubId)
@@ -189,7 +187,7 @@ class ReportingServiceSpec
   }
 
   it should "find current year paying cancelled subscriptions" in {
-    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (cancelledInCurrentYear, cancelledYearAgo) =>
         val cancelledIds = cancelledInCurrentYear.map {
           case (uData, sData) =>
@@ -216,7 +214,7 @@ class ReportingServiceSpec
   }
 
   it should "find current month cancelled subscriptions" in {
-    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (cancelledThisMonth, cancelledNotThisMonth) =>
         cancelledNotThisMonth.foreach {
           case (uData, sData) =>
@@ -302,7 +300,7 @@ class ReportingServiceSpec
   }
 
   it should "find yesterday new sales" in {
-    forAll(nonEmptyUsersGen) { users2Create =>
+    forAll(listOfNUsersGen()) { users2Create =>
       val expectedIds =
         users2Create.map(createUser).map(_.createdAt(anyHourOfYesterday.toDate).saveMe().id.get)
       val actualIds = ReportingService.findYesterdayNewSales.map(_.id.get)
@@ -334,7 +332,7 @@ class ReportingServiceSpec
   }
 
   it should "find yesterday cancels" in {
-    forAll(nonEmptyMapUserNSubscriptionGen) { usersAndYesterdayCanceledSubs =>
+    forAll(mapWithNOfUserNSubscriptionGen()) { usersAndYesterdayCanceledSubs =>
       val expectedIds = usersAndYesterdayCanceledSubs.map {
         case (uData, sData) =>
           insertUserAndSub(uData, sData).subscription.cancel
@@ -414,7 +412,7 @@ class ReportingServiceSpec
   }
 
   it should "find current month upcoming subscriptions" in {
-    forAll(nonEmptyMapUserNSubscriptionGen, nonEmptyMapUserNSubscriptionGen) {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (fromTomorrowData, nextMonthData) =>
         nextMonthData.foreach {
           case (uData, sData) =>
@@ -422,17 +420,41 @@ class ReportingServiceSpec
               .nextShipDate(anyDayOfNextMonth.toDate)
               .saveMe()
         }
-        val anyDay = anyDayOfThisMonthFromTomorrow.toDate
         val expectedSubscriptions = fromTomorrowData.map {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription
-              .nextShipDate(anyDay)
+              .nextShipDate(anyDayOfThisMonthFromTomorrow.toDate)
               .saveMe()
               .id
               .get
         }
 
         val actualData = ReportingService.findCurrentMonthUpcomingSubscriptions.map(_.id.get)
+
+        actualData should contain theSameElementsAs expectedSubscriptions
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find new today subscriptions" in {
+    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
+      (fromTomorrowData, nextMonthData) =>
+        nextMonthData.foreach {
+          case (uData, sData) =>
+            insertUserAndSub(uData, sData).subscription
+              .createdAt(anyDayUntilToday.toDate)
+              .saveMe()
+        }
+        val expectedSubscriptions = fromTomorrowData.map {
+          case (uData, sData) =>
+            insertUserAndSub(uData, sData).subscription
+              .createdAt(anyHourOfToday.toDate)
+              .saveMe()
+              .id
+              .get
+        }
+
+        val actualData = ReportingService.findNewTodaySubscriptions.map(_.id.get)
 
         actualData should contain theSameElementsAs expectedSubscriptions
         cleanUpSuccess()

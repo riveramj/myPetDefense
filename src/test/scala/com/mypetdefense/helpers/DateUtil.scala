@@ -25,7 +25,8 @@ object DateUtil {
   def anyDayUntilThisMonth: ZonedDateTime          = getAnyDayOfTheYearUntil(now.minusMonths(1))
   def anyDayUntilToday: ZonedDateTime              = getAnyDayOfTheYearUntil(now.minusDays(1))
   def anyDayOfThisMonthFromTomorrow: ZonedDateTime = getAnyDayOfMonthFrom(now.plusDays(1))
-  def anyDayExceptYesterday: ZonedDateTime         = getAnyDayOfTheYearExceptYesterday(now)
+  def anyDayExceptToday: ZonedDateTime             = getAnyDayOfTheYearExcept(now)
+  def anyDayExceptYesterday: ZonedDateTime         = getAnyDayOfTheYearExcept(now.minusDays(1))
   def anyDayOfLastYear: ZonedDateTime              = getAnyDayOfTheYear(now.minusYears(1))
 
   def lastYear: ZonedDateTime = {
@@ -39,11 +40,10 @@ object DateUtil {
   }
 
   @tailrec
-  protected def getAnyDayOfTheYearExceptYesterday(localDate: LocalDate): ZonedDateTime = {
-    val yesterday = localDate.minusDays(1)
-    val maybeDay  = getAnyDayOfTheYear(localDate)
-    if (yesterday.getDayOfYear == maybeDay.getDayOfYear)
-      getAnyDayOfTheYearExceptYesterday(localDate)
+  protected def getAnyDayOfTheYearExcept(localDate: LocalDate): ZonedDateTime = {
+    val maybeDay = getAnyDayOfTheYear(localDate)
+    if (localDate.getDayOfYear == maybeDay.getDayOfYear)
+      getAnyDayOfTheYearExcept(localDate)
     else
       maybeDay
   }
@@ -56,8 +56,8 @@ object DateUtil {
 
   protected def getAnyDayOfMonthFrom(localDate: LocalDate): ZonedDateTime = {
     val maxDays = localDate.lengthOfMonth()
-    val today   = localDate.getDayOfMonth
-    val day     = generateIntBetween(today, maxDays)
+    val dayFrom = localDate.getDayOfMonth
+    val day     = generateIntBetween(dayFrom, maxDays)
     localDate.withDayOfMonth(day).atStartOfDay(zoneId)
   }
 
