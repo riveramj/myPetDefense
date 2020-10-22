@@ -1,6 +1,7 @@
 package com.mypetdefense.service
 
 import java.util.Date
+import java.time.ZoneId
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator.{
   PetChainData,
@@ -757,6 +758,34 @@ class ReportingServiceSpec
         val subs = Subscription.findAll()
 
         val actualData = ReportingService.cancelsByShipment(subs)
+
+        actualData should contain theSameElementsAs expectedData
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find same day cancels by month" in {
+    forAll(listOfNShipmentChainData(), genShipmentChainData, genShipmentChainData) {
+      (shouldBeInStatData, notCanceledData, canceledAndShippedData) =>
+        insertUserSubAndShipment(notCanceledData)
+        val shouldBeCanceledAndHaveShipping = insertUserSubAndShipment(canceledAndShippedData)
+        shouldBeCanceledAndHaveShipping.subscription.cancel
+        shouldBeCanceledAndHaveShipping.shipments.map(
+          _.dateShipped(anyDayOfThisYear.toDate).saveMe()
+        )
+
+        val expectedData = shouldBeInStatData
+          .map(insertUserSubAndShipment)
+          .map { inserted =>
+            inserted.subscription.cancel
+            inserted.subscription.createdAt(anyDayOfThisYear.toDate).saveMe()
+          }
+          .groupBy(_.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate.getMonth)
+          .mapValues(_.size)
+
+        val subs = Subscription.findAll()
+
+        val actualData = ReportingService.sameDayCancelsByMonth(subs)
 
         actualData should contain theSameElementsAs expectedData
         cleanUpSuccess()
