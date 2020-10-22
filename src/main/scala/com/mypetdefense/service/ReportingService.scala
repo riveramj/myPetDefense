@@ -2,75 +2,15 @@ package com.mypetdefense.service
 
 import java.text.SimpleDateFormat
 import java.time._
-import java.time.format.DateTimeFormatter
-import java.util.{Date, Locale}
-
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.admin.AmazonOrderExport
+import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
 
 object ReportingService extends Loggable {
-  val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  val zoneId: ZoneId         = ZoneId.of("America/New_York")
-
-  def currentDate: LocalDateTime     = LocalDateTime.now()
-  def now: LocalDate                 = LocalDate.now(zoneId)
-  def nowAtStartOfDay: ZonedDateTime = now.atStartOfDay(zoneId)
-
-  def nowDate: Date = Date.from(nowAtStartOfDay.toInstant)
-
-  def yesterday: ZonedDateTime = nowAtStartOfDay.minusDays(1)
-
-  def yesterdayStart: Date = Date.from(nowAtStartOfDay.minusDays(1).toInstant)
-
-  def yesterdayEnd: Date = Date.from(nowAtStartOfDay.toInstant)
-
-  def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).toInstant)
-
-  def monthDayOneLastMonth: Date =
-    Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).minusMonths(1).toInstant)
-
-  def currentDayLastMonthEnd: Date = Date.from(nowAtStartOfDay.plusDays(1).minusMonths(1).toInstant)
-
-  def monthDayOneLastYear: Date =
-    Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).minusYears(1).toInstant)
-
-  def currentDayLastYearEnd: Date = Date.from(nowAtStartOfDay.plusDays(1).minusYears(1).toInstant)
-
-  def tomorrowStart: Date = Date.from(nowAtStartOfDay.plusDays(1).toInstant)
-
-  def beginngNextMonth: Date =
-    Date.from(YearMonth.now().atEndOfMonth().atStartOfDay(zoneId).plusDays(1).toInstant)
-
-  def yearDayOne: Date = Date.from(now.withDayOfYear(1).atStartOfDay(zoneId).toInstant)
-
-  def yearDayOneLastYear: Date =
-    Date.from(now.withDayOfYear(1).atStartOfDay(zoneId).minusYears(1).toInstant)
-
-  def todayLastMonth: Date = Date.from(nowAtStartOfDay.minusMonths(1).toInstant)
-
-  def todayLastYear: Date = Date.from(nowAtStartOfDay.minusYears(1).toInstant)
-
-  def todayLastYearEnd: Date = Date.from(nowAtStartOfDay.minusYears(1).plusDays(1).toInstant)
-
-  def todayLastMonthEnd: Date = Date.from(nowAtStartOfDay.minusMonths(1).plusDays(1).toInstant)
-
-  def yearMonth: String =
-    currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
-
-  def fileNameYearMonth: String =
-    currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", Locale.ENGLISH))
-
-  def fileNameMonthDayYear: String =
-    currentDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy", Locale.ENGLISH))
-
-  def year: String = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
-
-  val monthHeaders: List[String] =
-    "January" :: "February" :: "March" :: "April" :: "May" :: "June" :: "July" :: "August" :: "September" :: "October" :: "November" :: "December" :: Nil
 
   val spacerRow = List(List(","))
 
@@ -171,24 +111,8 @@ object ReportingService extends Loggable {
       val mailedDate = getMailedDateOfShipment(shipment)
 
       mailedDate map { date =>
-        (date.getYear == currentDate.getYear)
-      } openOr (false)
-    }
-  }
-
-  def getDateRange(month: String, year: Int = 2019): LocalDateTime = {
-    if (month == "") {
-      currentDate
-    } else {
-      convertMonthToDate(month, year)
-    }
-  }
-
-  def getYearOrCurrent(year: String): Int = {
-    if (year == "") {
-      currentDate.getYear
-    } else {
-      tryo(year.toInt).openOr(0)
+        date.getYear == currentDate.getYear
+      } openOr false
     }
   }
 
@@ -539,7 +463,7 @@ object ReportingService extends Loggable {
 
     val currentYearTotal = totalSalesForShipments(currentYearShipments)
 
-    val currentYearSalesRow = s"${year},$$${currentYearTotal}"
+    val currentYearSalesRow = s"$thisYear,$$$currentYearTotal"
 
     val shipmentsByMonth = allShipments.groupBy { shipment =>
       val processDate = getProcessDateOfShipment(shipment)
