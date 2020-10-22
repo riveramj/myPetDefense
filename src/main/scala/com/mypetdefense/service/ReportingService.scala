@@ -28,6 +28,12 @@ object ReportingService extends Loggable {
 
   def yesterdayEnd: Date = Date.from(nowAtStartOfDay.toInstant)
 
+  def yesterdayMonthStart: Date =
+    Date.from(yesterday.withDayOfMonth(1).toInstant)
+
+  def yesterdayMonthEnd: Date =
+    Date.from(lastDayOfTheMonth(yesterday).toInstant)
+
   def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).toInstant)
 
   def monthDayOneLastMonth: Date =
@@ -68,6 +74,11 @@ object ReportingService extends Loggable {
     currentDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy", Locale.ENGLISH))
 
   def year: String = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
+
+  def lastDayOfTheMonth(time: ZonedDateTime): ZonedDateTime = {
+    val maxDay = time.getMonth.maxLength()
+    time.withDayOfMonth(maxDay)
+  }
 
   val monthHeaders: List[String] =
     "January" :: "February" :: "March" :: "April" :: "May" :: "June" :: "July" :: "August" :: "September" :: "October" :: "November" :: "December" :: Nil
@@ -1092,27 +1103,23 @@ object ReportingService extends Loggable {
       NotBy(Agency.name, "My Pet Defense"),
       NotBy(Agency.name, "Petland")
     )
-    val usersByAgencies = agencies.map { agency => (agency, agency.customers.toList) }
 
-    val newUsersThisMonthByAgency = usersByAgencies.map {
-      case (agency, users) =>
-        val newUsersThisMonth = users.filter { user =>
-          val createdDayDate     = getCreatedDateOfUser(user)
-          val yesterdayDayOfYear = currentDate.getDayOfYear - 1
-
-          (
-            createdDayDate.getYear == yesterday.getYear &&
-            createdDayDate.getMonth == yesterday.getMonth
-          )
-        }
-        (agency, newUsersThisMonth)
+    val newUsersThisMonthByAgency = agencies.map { agency =>
+      (
+        agency,
+        User.findAll(
+          By(User.agency, agency),
+          By_>=(User.createdAt, yesterdayMonthStart),
+          By_<=(User.createdAt, yesterdayMonthEnd)
+        )
+      )
     }
 
     newUsersThisMonthByAgency.map {
       case (agency, users) =>
-        val pets = users.flatMap(_.pets)
-        (agency.name.get -> pets.size)
-    }.toList.sortBy(_._1)
+        val pets = users.flatMap(u => Pet.findAll(By(Pet.user, u)))
+        agency.name.get -> pets.size
+    }.sortBy(_._1)
   }
 
   def findYesterdaySalesByAgent: List[(String, Int)] = {

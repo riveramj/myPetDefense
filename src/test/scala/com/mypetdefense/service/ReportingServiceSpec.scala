@@ -18,7 +18,9 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+
 import scala.collection.immutable
+import scala.util.{Failure, Success, Try}
 
 class ReportingServiceSpec
     extends AnyFlatSpec
@@ -621,6 +623,40 @@ class ReportingServiceSpec
 
         actualData should contain theSameElementsAs expectedSubscriptions
         cleanUpSuccess()
+    }
+  }
+
+  it should "find MTD sales by agency" in {
+    forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
+      (yesterdayMonthNotOursSales, myPetDefenseSales, petlandSales) =>
+        val myPetDefenceAgency = createAgency("My Pet Defense")
+        val petlandAgency      = createAgency("Petland")
+        myPetDefenseSales
+          .map(insertUserAndPet)
+          .foreach(
+            _.user.agency(myPetDefenceAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe()
+          )
+        petlandSales
+          .map(insertUserAndPet)
+          .foreach(_.user.agency(petlandAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe())
+
+        val someAgencyName = Random.generateString.take(10)
+        val someAgency     = createAgency(someAgencyName)
+
+        val insertedPetsSize = yesterdayMonthNotOursSales
+          .map(insertUserAndPet)
+          .map { inserted =>
+            inserted.user.agency(someAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe()
+            inserted.pets.size
+          }
+          .sum
+
+        val expectedInResult = someAgencyName -> insertedPetsSize
+
+        val actualData = ReportingService.findMTDSalesByAgency
+
+        actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
+        actualData should contain(expectedInResult)
     }
   }
 
