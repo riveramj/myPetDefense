@@ -1166,7 +1166,7 @@ object ReportingService extends Loggable {
       .map {
         case (agentId, users) =>
           val pets = users.flatMap(_.pets)
-          (agentId -> pets.size)
+          agentId -> pets.size
       }
       .toList
       .sortBy(_._1)
@@ -1265,8 +1265,6 @@ object ReportingService extends Loggable {
     }
 
     val cancellations = subscriptions.filter(_.status.get == Status.Cancelled)
-
-    val cancellationCount: Double = cancellations.size
 
     val cancellationShipments = findCancellationShipmentSize(cancellations)
 

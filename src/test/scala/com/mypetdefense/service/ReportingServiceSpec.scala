@@ -738,4 +738,29 @@ class ReportingServiceSpec
     }
   }
 
+  it should "find cancels by shipment" in {
+    forAll(listOfNShipmentChainData(), genShipmentChainData, genShipmentChainData) {
+      (shouldBeInStatData, notCanceledData, canceledAndNotShippedData) =>
+        insertUserSubAndShipment(notCanceledData)
+        insertUserSubAndShipment(canceledAndNotShippedData).subscription.cancel
+
+        val canceledShouldBeInResultSize = shouldBeInStatData.map(insertUserSubAndShipment).map {
+          inserted =>
+            inserted.subscription.cancel
+            inserted.shipments.map(_.dateShipped(anyDayOfThisYear.toDate).saveMe()).size
+        }
+
+        val expectedData = ("0", 1) :: List(1, 2, 3, 4, 5).map { count =>
+          (count.toString, canceledShouldBeInResultSize.count(_ == count))
+        } ++ List(("6+", canceledShouldBeInResultSize.count(_ >= 6)))
+
+        val subs = Subscription.findAll()
+
+        val actualData = ReportingService.cancelsByShipment(subs)
+
+        actualData should contain theSameElementsAs expectedData
+        cleanUpSuccess()
+    }
+  }
+
 }
