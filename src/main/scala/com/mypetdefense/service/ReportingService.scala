@@ -19,9 +19,9 @@ object ReportingService extends Loggable {
     agency.map(_.customers.toList).openOr(Nil)
   }
 
-  def getShipmentAmountPaid(shipment: Shipment): Double = {
-    val amountPaid = tryo(shipment.amountPaid.get.toDouble).getOrElse(0d)
-    val taxesPaid  = tryo(shipment.taxPaid.get.toDouble).getOrElse(0d)
+  def getShipmentAmountPaid(shipment: Shipment): BigDecimal = {
+    val amountPaid = tryo(BigDecimal(shipment.amountPaid.get)).getOrElse(BigDecimal(0d))
+    val taxesPaid  = tryo(BigDecimal(shipment.taxPaid.get)).getOrElse(BigDecimal(0d))
     amountPaid - taxesPaid
   }
 
@@ -73,7 +73,7 @@ object ReportingService extends Loggable {
 
       val legacyShipment_? = dateProcessed.isBefore(LocalDate.parse("2018-01-01"))
 
-      (!getMailedDateOfShipment(shipment).isEmpty || legacyShipment_?)
+      !getMailedDateOfShipment(shipment).isEmpty || legacyShipment_?
     }
   }
 
@@ -98,13 +98,11 @@ object ReportingService extends Loggable {
     }).size
   }
 
-  def totalSalesForShipments(shipments: List[Shipment]): Double = {
-    shipments.map { shipment => getShipmentAmountPaid(shipment) }.foldLeft(0d)(_ + _)
+  def totalSalesForShipments(shipments: List[Shipment]): BigDecimal = {
+    shipments.map { shipment => getShipmentAmountPaid(shipment) }.foldLeft(BigDecimal(0d))(_ + _)
   }
 
-  def totalCommissionForSales(sales: Double): Double = {
-    sales * 0.35
-  }
+  def totalCommissionForSales(sales: BigDecimal): BigDecimal = sales * 0.35
 
   def findCurrentYearShipments(shipments: List[Shipment]): List[Shipment] = {
     shipments.filter { shipment =>
@@ -125,7 +123,7 @@ object ReportingService extends Loggable {
       mailedDate map { mailDate =>
         (mailDate.getYear == currentYear) &&
         (mailDate.getMonth == date.getMonth)
-      } openOr (false)
+      } openOr false
     }
   }
 
@@ -139,10 +137,7 @@ object ReportingService extends Loggable {
     shipments.filter { shipment =>
       val processDate = getProcessDateOfShipment(shipment)
 
-      (
-        (processDate.getYear == year) &&
-        (processDate.getMonth == date.getMonth)
-      )
+      (processDate.getYear == year) && (processDate.getMonth == date.getMonth)
     }
   }
 
@@ -165,8 +160,8 @@ object ReportingService extends Loggable {
         val cancelDateMonth = cancellationDate.map(_.getMonth)
         val cancelDateYear  = cancellationDate.map(_.getYear)
 
-        (cancelDateYear.map(_ == createdDateYear).openOr(false) &&
-        cancelDateMonth.map(_ == createdDateMonth).openOr(false))
+        cancelDateYear.map(_ == createdDateYear).openOr(false) &&
+        cancelDateMonth.map(_ == createdDateMonth).openOr(false)
       }
     }
   }
@@ -179,39 +174,11 @@ object ReportingService extends Loggable {
     customers.filter(_.salesAgentId.get == agentId)
   }
 
-  def convertMonthToDate(month: String, year: Int): LocalDateTime = {
-    val dateFormat = new SimpleDateFormat("MMMM yyyy")
-    val monthDate  = dateFormat.parse(s"$month $year")
-
-    monthDate.toInstant.atZone(ZoneId.systemDefault()).toLocalDateTime
-  }
-
-  def findSubscriptionMonthCancellations(
-      subscriptions: List[Subscription],
-      month: String = ""
-  ): List[Subscription] = {
-    val date = getDateRange(month)
-
-    subscriptions.filter { subscription =>
-      val cancelDate = getCancelledDateOfSubscription(subscription)
-
-      (
-        cancelDate.map(_.getYear == 2020).openOr(false) &&
-        cancelDate.map(_.getMonth == date.getMonth).openOr(false)
-      )
-    }
-  }
-
   def findNewCustomersMonth(users: List[User], month: String = "", year: Int = 2019): List[User] = {
     val date = getDateRange(month)
 
     users filter { user =>
-      val userCreatedDate = getCreatedDateOfUser(user)
-
-      (
-        (getCreatedDateOfUser(user).getYear == year) &&
-        (getCreatedDateOfUser(user).getMonth == date.getMonth)
-      )
+      (getCreatedDateOfUser(user).getYear == year) && (getCreatedDateOfUser(user).getMonth == date.getMonth)
     }
   }
 
@@ -248,13 +215,12 @@ object ReportingService extends Loggable {
         false
       } else {
         val createdDateMonth = createdDate.getMonth
-        val createdDateYear  = createdDate.getYear
 
         val cancelDateMonth = cancellationDate.map(_.getMonth)
         val cancelDateYear  = cancellationDate.map(_.getYear)
 
-        (cancelDateYear.map(_ == currentDate.getYear).openOr(false) &&
-        cancelDateMonth.map(_ != createdDateMonth).openOr(false))
+        cancelDateYear.map(_ == currentDate.getYear).openOr(false) &&
+        cancelDateMonth.map(_ != createdDateMonth).openOr(false)
       }
     }
   }
@@ -272,17 +238,17 @@ object ReportingService extends Loggable {
       cancelDate.map { cancelDate =>
         (cancelDate.getYear == year) &&
         (cancelDate.getMonth == date.getMonth)
-      }.openOr(false)
+      }.openOr(default = false)
     }
   }
 
   def generateCSV(csv: String, fileName: String): Some[InMemoryResponse] = {
     Some(
-      new InMemoryResponse(
+      InMemoryResponse(
         csv.getBytes("UTF-8"),
         List(
           "Content-Type"        -> "binary/octet-stream",
-          "Content-Disposition" -> s"attachment; ${fileName}"
+          "Content-Disposition" -> s"attachment; $fileName"
         ),
         Nil,
         200
@@ -310,7 +276,7 @@ object ReportingService extends Loggable {
           mailedDate.toString ::
           customer.userId.toString ::
           customer.name ::
-          s"$$${amountPaid}" ::
+          s"$$$amountPaid" ::
           customer.salesAgentId.get ::
           f"$$$commision%2.2f" ::
           subscription.status.toString ::
@@ -320,7 +286,7 @@ object ReportingService extends Loggable {
 
     val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
 
-    val fileName = s"salesData-${fileNameYearMonth}.csv"
+    val fileName = s"salesData-$fileNameYearMonth.csv"
 
     val file = "filename=\"" + fileName + "\""
 
@@ -411,7 +377,7 @@ object ReportingService extends Loggable {
         val firstShipmentDate = getProcessDateOfShipment(firstShipment)
         val lastShipmentDate  = getProcessDateOfShipment(lastShipment)
         val shipmentCount     = shipments.size
-        val totalGrossSales   = shipments.map(getShipmentAmountPaid).foldLeft(0d)(_ + _)
+        val totalGrossSales   = shipments.map(getShipmentAmountPaid).foldLeft(BigDecimal(0d))(_ + _)
         val totalCommission   = totalGrossSales * .35
 
         customer.userId.toString ::
@@ -419,7 +385,7 @@ object ReportingService extends Loggable {
           lastShipmentDate.getMonth.toString ::
           subscription.status.toString ::
           shipmentCount.toString ::
-          s"$$${totalGrossSales}" ::
+          s"$$$totalGrossSales" ::
           f"$$$totalCommission%2.2f" ::
           Nil
       }
@@ -436,7 +402,7 @@ object ReportingService extends Loggable {
         allCancellationRows
     }.map(_.mkString(",")).mkString("\n")
 
-    val fileName = s"cancellations-${fileNameYearMonth}.csv"
+    val fileName = s"cancellations-$fileNameYearMonth.csv"
 
     val file = "filename=\"" + fileName + "\""
 
@@ -506,16 +472,6 @@ object ReportingService extends Loggable {
     val totalUsers =
       Agency.find(By(Agency.name, name)).headOption.map(_.customers.toList).getOrElse(Nil)
 
-    val currentYearShipments = allShipments.filter { shipment =>
-      val processDate = getProcessDateOfShipment(shipment)
-
-      processDate.getYear == currentDate.getYear
-    }
-
-    val currentYearTotal = totalSalesForShipments(currentYearShipments)
-
-    val yearCommisionAmount = currentYearTotal * .35
-
     val currentYearMTDSalesRow = List(f"Year To Date Totals,${totalUsers.size}")
 
     val usersByCurrentMonth = totalUsers.filter { user =>
@@ -528,10 +484,6 @@ object ReportingService extends Loggable {
       mailedDate.map(_.getMonth == currentDate.getMonth).openOr(false) &&
       mailedDate.map(_.getYear == currentDate.getYear).openOr(false)
     }
-
-    val currentMonthTotal = totalSalesForShipments(shipmentsByCurrentMonth)
-
-    val monthCommisionAmount = currentMonthTotal * .35
 
     val currentMonthSalesRow = List(f"Month To Date Totals,${usersByCurrentMonth.size}")
 
@@ -577,9 +529,6 @@ object ReportingService extends Loggable {
             }
           }.openOr("-")
 
-          val shipmentTotal  = getShipmentAmountPaid(shipment)
-          val commisionTotal = shipmentTotal * .35
-
           f"$agentId,$customerId,${getProcessDateOfShipment(shipment)}"
         }.mkString("\n")
     }.mkString("\n")
@@ -603,7 +552,7 @@ object ReportingService extends Loggable {
         List(allSalesHeaders)
     }.map(_.mkString(",")).mkString("\n") + "\n" + allSalesForMonthData
 
-    val fileName = s"month-to-date-salesData-${fileNameMonthDayYear}.csv"
+    val fileName = s"month-to-date-salesData-$fileNameMonthDayYear.csv"
 
     val file = "filename=\"" + fileName + "\""
 
@@ -640,7 +589,7 @@ object ReportingService extends Loggable {
                 )
       } yield {
         val address =
-          (s"${order.address1.get} ${order.address2.get} ${order.address3.get} ${order.city.get} ${order.state.get} ${order.zip.get}")
+          s"${order.address1.get} ${order.address2.get} ${order.address3.get} ${order.city.get} ${order.state.get} ${order.zip.get}"
             .replaceAll("  ", "")
             .trim()
 
@@ -655,7 +604,7 @@ object ReportingService extends Loggable {
 
     val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
 
-    val fileName = s"amazon-orders-${startDateExport}-${endDateExport}.csv"
+    val fileName = s"amazon-orders-$startDateExport-$endDateExport.csv"
 
     val file = "filename=\"" + fileName + "\""
 
@@ -732,11 +681,11 @@ object ReportingService extends Loggable {
     )
 
     val mtdNewCustomers = List(
-      s"Month to Date,${newUsersMonth.size},${newUsersMonthSubscriptionCancelled.size},${newUsersMonthSubscriptionActive.size},${newUsersMonthShipments.size},${newUsersMonthShippedPetCount}"
+      s"Month to Date,${newUsersMonth.size},${newUsersMonthSubscriptionCancelled.size},${newUsersMonthSubscriptionActive.size},${newUsersMonthShipments.size},$newUsersMonthShippedPetCount"
     )
 
     val ytdNewCustomers = List(
-      s"Year to Date,${newUsersYearSubscriptions.size},${newUsersYearSubscriptionCancelled.size},${newUsersYearSubscriptionFirstMonthActive.size},${newUsersYearShipments.size},${newUsersYearShippedPetCount}"
+      s"Year to Date,${newUsersYearSubscriptions.size},${newUsersYearSubscriptionCancelled.size},${newUsersYearSubscriptionFirstMonthActive.size},${newUsersYearShipments.size},$newUsersYearShippedPetCount"
     )
 
     val allPayingCustomers = findPayingUsers(totalUsers)
@@ -850,29 +799,11 @@ object ReportingService extends Loggable {
         newCustomersByAgent
     }.map(_.mkString(",")).mkString("\n")
 
-    val fileName = s"${name}-mtd-ytd-${fileNameMonthDayYear}.csv"
+    val fileName = s"$name-mtd-ytd-$fileNameMonthDayYear.csv"
 
     val file = "filename=\"" + fileName + "\""
 
     generateCSV(csvRows, file)
-  }
-
-  def findPreviousWeekSales(agency: String): Unit = {
-    val totalUsers = Agency.find(By(Agency.name, agency)).map(_.customers.toList).getOrElse(Nil)
-
-    val lastWeekNewUsers = totalUsers.filter { user =>
-      val createdDayOfYear = getCreatedDateOfUser(user).getDayOfYear
-      val currentDayOfYear = currentDate.getDayOfYear
-
-      (currentDayOfYear - createdDayOfYear) < 8
-    }
-
-    val lastWeekNewSubscriptions = lastWeekNewUsers.flatMap(_.subscription.obj)
-
-    val lastWeekNewSubscriptionCancels = lastWeekNewSubscriptions filter { subscription =>
-      val cancellationDate = getCancelledDateOfSubscription(subscription)
-      !cancellationDate.isEmpty
-    }
   }
 
   def findYesterdayNewSales: List[User] = {
@@ -882,7 +813,7 @@ object ReportingService extends Loggable {
     )
   }
 
-  def yesterdayShipments: (Int, Int, Double) = {
+  def yesterdayShipments: (Int, Int, BigDecimal) = {
     val yesterdayShipments = Shipment.findAll(
       By_>=(Shipment.dateShipped, yesterdayStart),
       By_<(Shipment.dateShipped, yesterdayEnd)
@@ -1112,8 +1043,7 @@ object ReportingService extends Loggable {
     val netNewUsersMonth = newUsersMonth.filter(_.status.get != Status.Cancelled)
     val payingUsers      = findPayingUsers(totalUsers, month, year)
 
-    val allPayingSubscriptions       = getSubscriptions(payingUsers)
-    val allPayingActiveSubscriptions = findActiveSubscriptions(allPayingSubscriptions)
+    val allPayingSubscriptions = getSubscriptions(payingUsers)
 
     val allPaidShipments          = findPaidShipments(allPayingSubscriptions)
     val paidMonthShipments        = findCurrentMonthProcessedShipments(allPaidShipments, month, year)
@@ -1134,7 +1064,7 @@ object ReportingService extends Loggable {
         List(List("Estimated Commission", f"$$$paidMonthCommission%2.2f"))
     }.map(_.mkString(",")).mkString("\n")
 
-    val fileName = s"${name}-${month}-${year}-sales-summary.csv"
+    val fileName = s"$name-$month-$year-sales-summary.csv"
 
     val file = "filename=\"" + fileName + "\""
 
@@ -1181,11 +1111,11 @@ object ReportingService extends Loggable {
 
     val cancellationShipments = findCancellationShipmentSize(cancellations)
 
-    val cancellationTimes = (List(0, 1, 2, 3, 4, 5).map { count =>
+    val cancellationTimes = List(0, 1, 2, 3, 4, 5).map { count =>
       val totalForCount = cancellationShipments.count(_ == count)
 
       (count.toString, totalForCount)
-    }) ++ List(("6+", cancellationShipments.count(_ >= 6)))
+    } ++ List(("6+", cancellationShipments.count(_ >= 6)))
 
     cancellationTimes
   }
@@ -1251,39 +1181,11 @@ object ReportingService extends Loggable {
 
     val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
 
-    val fileName = s"${agencyName}-customers-${fileNameMonthDayYear}.csv"
+    val fileName = s"$agencyName-customers-$fileNameMonthDayYear.csv"
 
     val file = "filename=\"" + fileName + "\""
 
     generateCSV(csv, file)
   }
 
-  def getPetlandCustomersWithStats: List[Unit] = {
-    val petlandStores = Agency.findAll(By(Agency.petlandStore, true))
-
-    val customersByStoreWithInfo = petlandStores.map { store =>
-      val parents = store.customers.toList
-
-      val parentsWithInfo = (for {
-        parent       <- parents
-        subscription <- parent.subscription
-      } yield {
-        val shipmentCount = subscription.shipments.toList.size
-
-        List(
-          store.name.get,
-          parent.userId.get,
-          parent.email.get,
-          parent.name,
-          subscription.startDate.get,
-          subscription.status.get,
-          shipmentCount
-        ).mkString(", ")
-      })
-
-      parentsWithInfo.mkString("\n")
-    }
-
-    customersByStoreWithInfo.map(println(_))
-  }
 }

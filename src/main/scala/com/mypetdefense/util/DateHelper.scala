@@ -4,8 +4,6 @@ import java.text.SimpleDateFormat
 import java.time.{LocalDate, LocalDateTime, YearMonth, ZoneId, ZonedDateTime}
 import java.time.format.DateTimeFormatter
 import java.util.{Date, Locale}
-
-import com.mypetdefense.service.ReportingService.convertMonthToDate
 import net.liftweb.util.Helpers.tryo
 
 object DateHelper {
@@ -90,6 +88,13 @@ object DateHelper {
     } else {
       tryo(year.toInt).openOr(0)
     }
+  }
+
+  def convertMonthToDate(month: String, year: Int): LocalDateTime = {
+    val dateFormat = new SimpleDateFormat("MMMM yyyy")
+    val monthDate  = dateFormat.parse(s"$month $year")
+
+    monthDate.toInstant.atZone(ZoneId.systemDefault()).toLocalDateTime
   }
 
   val monthHeaders: List[String] =

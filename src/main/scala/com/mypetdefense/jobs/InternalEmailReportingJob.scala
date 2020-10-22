@@ -14,7 +14,11 @@ class InternalEmailReportingJob extends ManagedJob {
 
     emailScope match {
       case "daily" =>
-        val (newShipmentsYesterday: Int, paidShipmentsYesterday: Int, grossSalesYesterday: Double) =
+        val (
+          newShipmentsYesterday: Int,
+          paidShipmentsYesterday: Int,
+          grossSalesYesterday: BigDecimal
+        ) =
           ReportingService.yesterdayShipments
 
         val cancelsYesterday      = ReportingService.yesterdayCancels

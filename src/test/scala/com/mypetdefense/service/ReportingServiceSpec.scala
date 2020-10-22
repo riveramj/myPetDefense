@@ -365,13 +365,13 @@ class ReportingServiceSpec
           .map(_.amountPaid("0").saveMe())
           .size
       val expectedTotal =
-        paidShipments.foldLeft(0d)((acc, s) =>
-          (s.amountPaid.get.toDouble - s.taxPaid.get.toDouble) + acc
+        paidShipments.foldLeft(BigDecimal(0d))((acc, s) =>
+          (BigDecimal(s.amountPaid.get) - BigDecimal(s.taxPaid.get)) + acc
         )
 
       val (actualSize, paidShipmentsSize, actualTotal) = ReportingService.yesterdayShipments
 
-      (actualSize, paidShipmentsSize, actualTotal.round) shouldBe (newShipmentsSize, paidShipments.size, expectedTotal.round)
+      (actualSize, paidShipmentsSize, actualTotal) shouldBe (newShipmentsSize, paidShipments.size, expectedTotal)
       cleanUpSuccess()
     }
   }
