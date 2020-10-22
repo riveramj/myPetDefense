@@ -9,6 +9,7 @@ import com.mypetdefense.generator.{
 }
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
+import com.mypetdefense.helpers.Random.randomPosLong
 import com.mypetdefense.helpers._
 import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.helpers.db.AgencyDbUtils._
@@ -20,7 +21,6 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.collection.immutable
-import scala.util.{Failure, Success, Try}
 
 class ReportingServiceSpec
     extends AnyFlatSpec
@@ -634,11 +634,11 @@ class ReportingServiceSpec
         myPetDefenseSales
           .map(insertUserAndPet)
           .foreach(
-            _.user.agency(myPetDefenceAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe()
+            _.user.referer(myPetDefenceAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe()
           )
         petlandSales
           .map(insertUserAndPet)
-          .foreach(_.user.agency(petlandAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe())
+          .foreach(_.user.referer(petlandAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe())
 
         val someAgencyName = Random.generateString.take(10)
         val someAgency     = createAgency(someAgencyName)
@@ -646,7 +646,7 @@ class ReportingServiceSpec
         val insertedPetsSize = yesterdayMonthNotOursSales
           .map(insertUserAndPet)
           .map { inserted =>
-            inserted.user.agency(someAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe()
+            inserted.user.referer(someAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe()
             inserted.pets.size
           }
           .sum
@@ -654,6 +654,45 @@ class ReportingServiceSpec
         val expectedInResult = someAgencyName -> insertedPetsSize
 
         val actualData = ReportingService.findMTDSalesByAgency
+
+        actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
+        actualData should contain(expectedInResult)
+    }
+  }
+
+  it should "find yesterday sales by agent" in {
+    forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
+      (yesterdayNotOursSales, myPetDefenseSales, petlandSales) =>
+        val myPetDefenceAgency = createAgency("My Pet Defense").agencyId(randomPosLong).saveMe()
+        val petlandAgency      = createAgency("Petland").agencyId(randomPosLong).saveMe()
+        myPetDefenseSales
+          .map(insertUserAndPet)
+          .foreach(
+            _.user.referer(myPetDefenceAgency).createdAt(anyHourOfYesterday.toDate).saveMe()
+          )
+        petlandSales
+          .map(insertUserAndPet)
+          .foreach(_.user.referer(petlandAgency).createdAt(anyHourOfYesterday.toDate).saveMe())
+
+        val someAgencyName   = Random.generateString.take(10)
+        val someSalesAgentId = Random.generateString.take(10)
+        val someAgency       = createAgency(someAgencyName).saveMe()
+
+        val insertedPetsSize = yesterdayNotOursSales
+          .map(insertUserAndPet)
+          .map { inserted =>
+            inserted.user
+              .referer(someAgency)
+              .salesAgentId(someSalesAgentId)
+              .createdAt(anyHourOfYesterday.toDate)
+              .saveMe()
+            inserted.pets.size
+          }
+          .sum
+
+        val expectedInResult = someSalesAgentId -> insertedPetsSize
+
+        val actualData = ReportingService.findYesterdaySalesByAgent
 
         actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
         actualData should contain(expectedInResult)

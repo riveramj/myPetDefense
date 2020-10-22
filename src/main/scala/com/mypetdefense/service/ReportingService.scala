@@ -1108,7 +1108,7 @@ object ReportingService extends Loggable {
       (
         agency,
         User.findAll(
-          By(User.agency, agency),
+          By(User.referer, agency),
           By_>=(User.createdAt, yesterdayMonthStart),
           By_<=(User.createdAt, yesterdayMonthEnd)
         )
@@ -1123,37 +1123,25 @@ object ReportingService extends Loggable {
   }
 
   def findYesterdaySalesByAgent: List[(String, Int)] = {
-    val totalUsers = Agency
+    val newUsersYesterday = Agency
       .findAll(
         NotBy(Agency.name, "My Pet Defense"),
         NotBy(Agency.name, "Petland")
       )
-      .flatMap(_.customers.toList)
-
-    val newUsersYesterday = totalUsers.filter { user =>
-      val createdDate = getCreatedDateOfUser(user)
-
-      val createdDateDay   = createdDate.getDayOfMonth
-      val createdDateMonth = createdDate.getMonth
-      val createdDateYear  = createdDate.getYear
-
-      val yesterdayDay   = yesterday.getDayOfMonth
-      val yesterdayMonth = yesterday.getMonth
-      val yesterdayYear  = yesterday.getYear
-
-      (
-        (createdDateDay == yesterdayDay) &&
-        (createdDateMonth == yesterdayMonth) &&
-        (createdDateYear == yesterdayYear)
+      .flatMap(a =>
+        User.findAll(
+          By(User.referer, a),
+          By_>=(User.createdAt, yesterdayStart),
+          By_<(User.createdAt, yesterdayEnd)
+        )
       )
-    }
 
     newUsersYesterday
       .groupBy(_.salesAgentId.get)
       .map {
         case (agentId, users) =>
-          val pets = users.flatMap(_.pets.toList)
-          (agentId -> pets.size)
+          val pets = users.flatMap(u => Pet.findAll(By(Pet.user, u)))
+          agentId -> pets.size
       }
       .toList
       .sortBy(_._1)
