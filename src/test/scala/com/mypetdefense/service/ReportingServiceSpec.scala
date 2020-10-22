@@ -699,4 +699,43 @@ class ReportingServiceSpec
     }
   }
 
+  it should "find MTD sales by agent" in {
+    forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
+      (yesterdayMonthNotOursSales, myPetDefenseSales, petlandSales) =>
+        val myPetDefenceAgency = createAgency("My Pet Defense").agencyId(randomPosLong).saveMe()
+        val petlandAgency      = createAgency("Petland").agencyId(randomPosLong).saveMe()
+        myPetDefenseSales
+          .map(insertUserAndPet)
+          .foreach(
+            _.user.referer(myPetDefenceAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe()
+          )
+        petlandSales
+          .map(insertUserAndPet)
+          .foreach(_.user.referer(petlandAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe())
+
+        val someAgencyName   = Random.generateString.take(10)
+        val someSalesAgentId = Random.generateString.take(10)
+        val someAgency       = createAgency(someAgencyName).saveMe()
+
+        val insertedPetsSize = yesterdayMonthNotOursSales
+          .map(insertUserAndPet)
+          .map { inserted =>
+            inserted.user
+              .referer(someAgency)
+              .salesAgentId(someSalesAgentId)
+              .createdAt(anyDayOfYesterdayMonth.toDate)
+              .saveMe()
+            inserted.pets.size
+          }
+          .sum
+
+        val expectedInResult = someSalesAgentId -> insertedPetsSize
+
+        val actualData = ReportingService.findMTDSalesByAgent
+
+        actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
+        actualData should contain(expectedInResult)
+    }
+  }
+
 }

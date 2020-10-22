@@ -32,7 +32,7 @@ object ReportingService extends Loggable {
     Date.from(yesterday.withDayOfMonth(1).toInstant)
 
   def yesterdayMonthEnd: Date =
-    Date.from(lastDayOfTheMonth(yesterday).toInstant)
+    Date.from(lastDayOfTheMonth(yesterday).plusDays(1).toInstant)
 
   def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).toInstant)
 
@@ -1110,14 +1110,14 @@ object ReportingService extends Loggable {
         User.findAll(
           By(User.referer, agency),
           By_>=(User.createdAt, yesterdayMonthStart),
-          By_<=(User.createdAt, yesterdayMonthEnd)
+          By_<(User.createdAt, yesterdayMonthEnd)
         )
       )
     }
 
     newUsersThisMonthByAgency.map {
       case (agency, users) =>
-        val pets = users.flatMap(u => Pet.findAll(By(Pet.user, u)))
+        val pets = users.flatMap(_.pets)
         agency.name.get -> pets.size
     }.sortBy(_._1)
   }
@@ -1140,7 +1140,7 @@ object ReportingService extends Loggable {
       .groupBy(_.salesAgentId.get)
       .map {
         case (agentId, users) =>
-          val pets = users.flatMap(u => Pet.findAll(By(Pet.user, u)))
+          val pets = users.flatMap(_.pets)
           agentId -> pets.size
       }
       .toList
@@ -1148,22 +1148,18 @@ object ReportingService extends Loggable {
   }
 
   def findMTDSalesByAgent: List[(String, Int)] = {
-    val totalUsers = Agency
+    val newUsersThisMonth = Agency
       .findAll(
         NotBy(Agency.name, "My Pet Defense"),
         NotBy(Agency.name, "Petland")
       )
-      .flatMap(_.customers.toList)
-
-    val newUsersThisMonth = totalUsers.filter { user =>
-      val createdDayDate     = getCreatedDateOfUser(user)
-      val yesterdayDayOfYear = currentDate.getDayOfYear - 1
-
-      (
-        createdDayDate.getYear == yesterday.getYear &&
-        createdDayDate.getMonth == yesterday.getMonth
+      .flatMap(a =>
+        User.findAll(
+          By(User.referer, a),
+          By_>=(User.createdAt, yesterdayMonthStart),
+          By_<(User.createdAt, yesterdayMonthEnd)
+        )
       )
-    }
 
     newUsersThisMonth
       .groupBy(_.salesAgentId.get)
