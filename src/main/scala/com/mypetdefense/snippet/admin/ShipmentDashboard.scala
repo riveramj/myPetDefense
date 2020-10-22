@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter
 
 import com.mypetdefense.model._
 import com.mypetdefense.util.Paths._
+import com.mypetdefense.util.ModelSyntax._
 import com.mypetdefense.util._
 import com.mypetdefense.actor._
 import com.mypetdefense.service._
@@ -271,7 +272,7 @@ class ShipmentDashboard extends Loggable {
             val endDate   = convertForecastingDates(toDate)
 
             val selectedFutureSubscriptions = futureSubscriptions.filter { subscription =>
-              val nextShipDate = ReportingService.getNextShipDate(subscription)
+              val nextShipDate = subscription.getNextShipDate
               (nextShipDate.isAfter(startDate.minusDays(1)) && nextShipDate.isBefore(
                 endDate.plusDays(1)
               ))

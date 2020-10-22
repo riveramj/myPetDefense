@@ -11,6 +11,7 @@ import net.liftweb.mapper._
 import scala.collection.immutable.ListMap
 import com.mypetdefense.model._
 import com.mypetdefense.service.ReportingService
+import com.mypetdefense.util.ModelSyntax._
 import java.text.SimpleDateFormat
 import java.util.{Date, Locale}
 import java.time.{LocalDate, ZoneId}
@@ -57,7 +58,7 @@ class Reporting extends Loggable {
       val endDate   = convertForecastingDates(toDate)
 
       val upcomingSubscriptions = allSubscriptions.filter { subscription =>
-        val nextShipDate = ReportingService.getNextShipDate(subscription)
+        val nextShipDate = subscription.getNextShipDate
 
         (nextShipDate.isAfter(startDate.minusDays(1)) && nextShipDate.isBefore(endDate.plusDays(1)))
       }
@@ -105,7 +106,7 @@ class Reporting extends Loggable {
     ".reporting [class+]" #> "current" &
       ".agency" #> agencies.map { agencyName =>
         val users              = ReportingService.getUsersForAgency(agencyName)
-        val subscriptions      = ReportingService.getSubscriptions(users)
+        val subscriptions      = users.getSubscriptions
         val cancelsByShipment  = ReportingService.cancelsByShipment(subscriptions)
         val shipments          = ReportingService.getShipments(subscriptions)
         val averageShipments   = shipments.size.toDouble / subscriptions.size.toDouble

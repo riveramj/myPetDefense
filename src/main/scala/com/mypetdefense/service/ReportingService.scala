@@ -5,6 +5,7 @@ import java.time._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.admin.AmazonOrderExport
 import com.mypetdefense.util.DateHelper._
+import com.mypetdefense.util.ModelSyntax._
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
@@ -25,55 +26,19 @@ object ReportingService extends Loggable {
     amountPaid - taxesPaid
   }
 
-  def getProcessDateOfShipment(shipment: Shipment): LocalDate = {
-    shipment.dateProcessed.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
-  }
-
-  def getMailedDateOfShipment(shipment: Shipment): Box[LocalDate] = {
-    tryo(shipment.dateShipped.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
-  }
-
-  def getStartDateOfSubscription(subscription: Subscription): String = {
-    tryo(signupCancelDateFormat.format(subscription.startDate.get)).openOr("")
-  }
-
-  def getCancelDateOfSubscription(subscription: Subscription): String = {
-    tryo(signupCancelDateFormat.format(subscription.cancellationDate.get)).openOr("")
-  }
-
-  def getCreatedDateOfUser(user: User): LocalDate = {
-    user.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
-  }
-
-  def getCreatedDateOfSubscription(subscription: Subscription): LocalDate = {
-    subscription.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
-  }
-
-  def getCancelledDateOfSubscription(subscription: Subscription): Box[LocalDate] = {
-    tryo(subscription.cancellationDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
-  }
-
-  def getNextShipDate(subscription: Subscription): LocalDate = {
-    subscription.nextShipDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
-  }
-
-  def getSubscriptions(users: List[User]): List[Subscription] = {
-    users.flatMap(_.subscription.toList)
-  }
-
   def getFirstShipments(subscriptions: List[Subscription]): List[Shipment] = {
     val firstShipments = subscriptions.flatMap(_.shipments.headOption)
 
-    firstShipments filter { shipment => !getMailedDateOfShipment(shipment).isEmpty }
+    firstShipments filter { shipment => !shipment.getMailedDateOfShipment.isEmpty }
   }
 
   def filterMailedShipments(shipments: List[Shipment]): List[Shipment] = {
     shipments filter { shipment =>
-      val dateProcessed = getProcessDateOfShipment(shipment)
+      val dateProcessed = shipment.getProcessDateOfShipment
 
       val legacyShipment_? = dateProcessed.isBefore(LocalDate.parse("2018-01-01"))
 
-      !getMailedDateOfShipment(shipment).isEmpty || legacyShipment_?
+      !shipment.getMailedDateOfShipment.isEmpty || legacyShipment_?
     }
   }
 
@@ -106,7 +71,7 @@ object ReportingService extends Loggable {
 
   def findCurrentYearShipments(shipments: List[Shipment]): List[Shipment] = {
     shipments.filter { shipment =>
-      val mailedDate = getMailedDateOfShipment(shipment)
+      val mailedDate = shipment.getMailedDateOfShipment
 
       mailedDate map { date =>
         date.getYear == currentDate.getYear
@@ -118,7 +83,7 @@ object ReportingService extends Loggable {
     val date = getDateRange(month)
 
     shipments.filter { shipment =>
-      val mailedDate = getMailedDateOfShipment(shipment)
+      val mailedDate = shipment.getMailedDateOfShipment
 
       mailedDate map { mailDate =>
         (mailDate.getYear == currentYear) &&
@@ -135,7 +100,7 @@ object ReportingService extends Loggable {
     val date = getDateRange(month)
 
     shipments.filter { shipment =>
-      val processDate = getProcessDateOfShipment(shipment)
+      val processDate = shipment.getProcessDateOfShipment
 
       (processDate.getYear == year) && (processDate.getMonth == date.getMonth)
     }
@@ -143,14 +108,14 @@ object ReportingService extends Loggable {
 
   def findCurrentMonthSubscriptions(subscriptions: List[Subscription]): List[Subscription] = {
     subscriptions.filter { subscription =>
-      getCreatedDateOfSubscription(subscription).getMonth == currentDate.getMonth
+      subscription.getCreatedDateOfSubscription.getMonth == currentDate.getMonth
     }
   }
 
   def findActiveSubscriptionsFirstMonth(subscriptions: List[Subscription]): List[Subscription] = {
     subscriptions.filter { subscription =>
-      val createdDate      = getCreatedDateOfSubscription(subscription)
-      val cancellationDate = getCancelledDateOfSubscription(subscription)
+      val createdDate      = subscription.getCreatedDateOfSubscription
+      val cancellationDate = subscription.getCancelledDateOfSubscription
       if (cancellationDate.isEmpty) {
         true
       } else {
@@ -178,7 +143,7 @@ object ReportingService extends Loggable {
     val date = getDateRange(month)
 
     users filter { user =>
-      (getCreatedDateOfUser(user).getYear == year) && (getCreatedDateOfUser(user).getMonth == date.getMonth)
+      (user.getCreatedDateOfUser.getYear == year) && (user.getCreatedDateOfUser.getMonth == date.getMonth)
     }
   }
 
@@ -186,7 +151,7 @@ object ReportingService extends Loggable {
     val date = getDateRange(month)
 
     users filter { user =>
-      val userCreatedDate = getCreatedDateOfUser(user)
+      val userCreatedDate = user.getCreatedDateOfUser
 
       !(
         (userCreatedDate.getYear == year) &&
@@ -209,8 +174,8 @@ object ReportingService extends Loggable {
       subscriptions: List[Subscription]
   ): List[Subscription] = {
     subscriptions.filter { subscription =>
-      val createdDate      = getCreatedDateOfSubscription(subscription)
-      val cancellationDate = getCancelledDateOfSubscription(subscription)
+      val createdDate      = subscription.getCreatedDateOfSubscription
+      val cancellationDate = subscription.getCancelledDateOfSubscription
       if (cancellationDate.isEmpty) {
         false
       } else {
@@ -233,7 +198,7 @@ object ReportingService extends Loggable {
     val date = getDateRange(month, year)
 
     subscriptions filter { subscription =>
-      val cancelDate = getCancelledDateOfSubscription(subscription)
+      val cancelDate = subscription.getCancelledDateOfSubscription
 
       cancelDate.map { cancelDate =>
         (cancelDate.getYear == year) &&
@@ -266,7 +231,7 @@ object ReportingService extends Loggable {
         customer     <- agency.customers.toList
         subscription <- customer.subscription.toList
         shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
-        mailedDate   <- getMailedDateOfShipment(shipment)
+        mailedDate   <- shipment.getMailedDateOfShipment
       } yield {
         val amountPaid = getShipmentAmountPaid(shipment)
         val commision  = amountPaid * .35
@@ -318,7 +283,7 @@ object ReportingService extends Loggable {
       for {
         customer     <- cancelledCustomers
         subscription <- customer.subscription
-        if getCancelledDateOfSubscription(subscription)
+        if subscription.getCancelledDateOfSubscription
           .map(_.getYear == currentDate.getYear)
           .openOr(false)
       } yield {
@@ -328,7 +293,7 @@ object ReportingService extends Loggable {
 
     val currentYearCancelShipments =
       currentYearSubscriptionCancels.flatMap(_.shipments.toList).filter { shipment =>
-        !getMailedDateOfShipment(shipment).isEmpty
+        !shipment.getMailedDateOfShipment.isEmpty
       }
 
     val averageShipmentsPerCancelByYear =
@@ -343,13 +308,13 @@ object ReportingService extends Loggable {
     )
 
     val currentMonthSubscriptionCancels = currentYearSubscriptionCancels.filter { subscription =>
-      val cancelDate = getCancelledDateOfSubscription(subscription)
+      val cancelDate = subscription.getCancelledDateOfSubscription
       cancelDate.map(_.getMonth == currentDate.getMonth).openOr(false)
     }
 
     val currentMonthCancelShipments = currentMonthSubscriptionCancels
       .flatMap(_.shipments.toList)
-      .filter(shipment => !getMailedDateOfShipment(shipment).isEmpty)
+      .filter(shipment => !shipment.getMailedDateOfShipment.isEmpty)
 
     val averageShipmentsPerCancelByMonth =
       currentMonthCancelShipments.size.toDouble / currentMonthSubscriptionCancels.size.toDouble
@@ -371,11 +336,11 @@ object ReportingService extends Loggable {
         subscription <- customer.subscription
         shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
         firstShipment <- shipments.headOption
-        if !getMailedDateOfShipment(firstShipment).isEmpty
+        if !firstShipment.getMailedDateOfShipment.isEmpty
         lastShipment <- shipments.lastOption
       } yield {
-        val firstShipmentDate = getProcessDateOfShipment(firstShipment)
-        val lastShipmentDate  = getProcessDateOfShipment(lastShipment)
+        val firstShipmentDate = firstShipment.getProcessDateOfShipment
+        val lastShipmentDate  = lastShipment.getProcessDateOfShipment
         val shipmentCount     = shipments.size
         val totalGrossSales   = shipments.map(getShipmentAmountPaid).foldLeft(BigDecimal(0d))(_ + _)
         val totalCommission   = totalGrossSales * .35
@@ -422,7 +387,7 @@ object ReportingService extends Loggable {
     }
 
     val currentYearShipments = allShipments.filter { shipment =>
-      val processDate = getProcessDateOfShipment(shipment)
+      val processDate = shipment.getProcessDateOfShipment
 
       processDate.getYear == currentDate.getYear
     }
@@ -432,7 +397,7 @@ object ReportingService extends Loggable {
     val currentYearSalesRow = s"$thisYear,$$$currentYearTotal"
 
     val shipmentsByMonth = allShipments.groupBy { shipment =>
-      val processDate = getProcessDateOfShipment(shipment)
+      val processDate = shipment.getProcessDateOfShipment
 
       processDate.getMonth
     }
@@ -475,11 +440,11 @@ object ReportingService extends Loggable {
     val currentYearMTDSalesRow = List(f"Year To Date Totals,${totalUsers.size}")
 
     val usersByCurrentMonth = totalUsers.filter { user =>
-      (getCreatedDateOfUser(user).getMonth == currentDate.getMonth) && (getCreatedDateOfUser(user).getYear == currentDate.getYear)
+      (user.getCreatedDateOfUser.getMonth == currentDate.getMonth) && (user.getCreatedDateOfUser.getYear == currentDate.getYear)
     }
 
     val shipmentsByCurrentMonth = allShipments.filter { shipment =>
-      val mailedDate = getMailedDateOfShipment(shipment)
+      val mailedDate = shipment.getMailedDateOfShipment
 
       mailedDate.map(_.getMonth == currentDate.getMonth).openOr(false) &&
       mailedDate.map(_.getYear == currentDate.getYear).openOr(false)
@@ -529,7 +494,7 @@ object ReportingService extends Loggable {
             }
           }.openOr("-")
 
-          f"$agentId,$customerId,${getProcessDateOfShipment(shipment)}"
+          f"$agentId,$customerId,${shipment.getProcessDateOfShipment}"
         }.mkString("\n")
     }.mkString("\n")
 
@@ -652,14 +617,14 @@ object ReportingService extends Loggable {
     val totalUsers = Agency.find(By(Agency.name, name)).map(_.customers.toList).getOrElse(Nil)
 
     val newUsersYear = totalUsers.filter { user =>
-      getCreatedDateOfUser(user).getYear == currentDate.getYear
+      user.getCreatedDateOfUser.getYear == currentDate.getYear
     }
 
     val newUsersMonth = newUsersYear.filter { user =>
-      getCreatedDateOfUser(user).getMonth == currentDate.getMonth
+      user.getCreatedDateOfUser.getMonth == currentDate.getMonth
     }
 
-    val newUsersYearSubscriptions = getSubscriptions(newUsersYear)
+    val newUsersYearSubscriptions = newUsersYear.getSubscriptions
 
     val newUsersYearShipments  = getFirstShipments(newUsersYearSubscriptions)
     val newUsersMonthShipments = findCurrentMonthShipments(newUsersYearShipments)
@@ -690,7 +655,7 @@ object ReportingService extends Loggable {
 
     val allPayingCustomers = findPayingUsers(totalUsers)
 
-    val allPayingSubscriptions       = getSubscriptions(allPayingCustomers)
+    val allPayingSubscriptions       = allPayingCustomers.getSubscriptions
     val allPayingActiveSubscriptions = findActiveSubscriptions(allPayingSubscriptions)
 
     val allPayingCancelledSubscriptions = findCancelledSubscriptions(allPayingSubscriptions)
@@ -1035,7 +1000,7 @@ object ReportingService extends Loggable {
       }
     }
 
-    val totalSubscriptions = getSubscriptions(totalUsers)
+    val totalSubscriptions = totalUsers.getSubscriptions
     val totalCancelledSubscriptions =
       findCurrentMonthCancelledSubscriptions(totalSubscriptions, month, year)
 
@@ -1043,7 +1008,7 @@ object ReportingService extends Loggable {
     val netNewUsersMonth = newUsersMonth.filter(_.status.get != Status.Cancelled)
     val payingUsers      = findPayingUsers(totalUsers, month, year)
 
-    val allPayingSubscriptions = getSubscriptions(payingUsers)
+    val allPayingSubscriptions = payingUsers.getSubscriptions
 
     val allPaidShipments          = findPaidShipments(allPayingSubscriptions)
     val paidMonthShipments        = findCurrentMonthProcessedShipments(allPaidShipments, month, year)
@@ -1136,7 +1101,7 @@ object ReportingService extends Loggable {
     val sameDayCancels = findSameDayCancellations(cancellations)
 
     val cancelsByMonth = sameDayCancels.groupBy { subscription =>
-      getCreatedDateOfSubscription(subscription).getMonth
+      subscription.getCreatedDateOfSubscription.getMonth
     }
 
     cancelsByMonth.map {
@@ -1167,8 +1132,8 @@ object ReportingService extends Loggable {
             "Inactive"
         }
 
-        val startDate  = getStartDateOfSubscription(subscription)
-        val cancelDate = getCancelDateOfSubscription(subscription)
+        val startDate  = subscription.getStartDateOfSubscription
+        val cancelDate = subscription.getCancelDateOfSubscription
 
         customer.name ::
           status ::
