@@ -374,11 +374,11 @@ class ReportingServiceSpec
         myPetDefenseSales
           .map(insertUserAndPet)
           .foreach(
-            _.user.agency(myPetDefenceAgency).createdAt(anyHourOfYesterday.toDate).saveMe()
+            _.user.referer(myPetDefenceAgency).createdAt(anyHourOfYesterday.toDate).saveMe()
           )
         petlandSales
           .map(insertUserAndPet)
-          .foreach(_.user.agency(petlandAgency).createdAt(anyHourOfYesterday.toDate).saveMe())
+          .foreach(_.user.referer(petlandAgency).createdAt(anyHourOfYesterday.toDate).saveMe())
 
         val someAgencyName = Random.generateString.take(10)
         val someAgency     = createAgency(someAgencyName)
@@ -386,7 +386,7 @@ class ReportingServiceSpec
         val insertedPetsSize = yesterdayNotOursSales
           .map(insertUserAndPet)
           .map { inserted =>
-            inserted.user.agency(someAgency).createdAt(anyHourOfYesterday.toDate).saveMe()
+            inserted.user.referer(someAgency).createdAt(anyHourOfYesterday.toDate).saveMe()
             inserted.pets.size
           }
           .sum

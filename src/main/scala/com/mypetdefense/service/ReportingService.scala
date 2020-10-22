@@ -988,7 +988,7 @@ object ReportingService extends Loggable {
       (
         agency,
         User.findAll(
-          By(User.agency, agency),
+          By(User.referer, agency),
           By_>=(User.createdAt, yesterdayStart),
           By_<(User.createdAt, yesterdayEnd)
         )
