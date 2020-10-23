@@ -73,9 +73,10 @@ class ReportingServiceSpec
       agency: Agency,
       createdAt: Date,
       data: PetChainData
-  ): PetChainData = {
-    insertUserAndPet(data).user.referer(agency).createdAt(createdAt).saveMe()
-    data
+  ): InsertedUserAndPet = {
+    val inserted    = insertUserAndPet(data)
+    val updatedUser = inserted.user.referer(agency).createdAt(createdAt).saveMe()
+    inserted.copy(user = updatedUser)
   }
 
   it should "find all active subscriptions" in {
@@ -396,7 +397,7 @@ class ReportingServiceSpec
         val someAgency     = createAgency(someAgencyName)
 
         val insertedPetsSize = yesterdayNotOursSales
-          .map(insertAgencySalesCreatedAt(someAgency, anyHourOfYesterday.toDate, _).petData.size)
+          .map(insertAgencySalesCreatedAt(someAgency, anyHourOfYesterday.toDate, _).pets.size)
           .sum
 
         val expectedInResult = someAgencyName -> insertedPetsSize
