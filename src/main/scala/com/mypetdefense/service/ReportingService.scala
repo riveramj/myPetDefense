@@ -28,12 +28,6 @@ object ReportingService extends Loggable {
 
   def yesterdayEnd: Date = Date.from(nowAtStartOfDay.toInstant)
 
-  def yesterdayMonthStart: Date =
-    Date.from(yesterday.withDayOfMonth(1).toInstant)
-
-  def yesterdayMonthEnd: Date =
-    Date.from(lastDayOfTheMonth(yesterday).plusDays(1).toInstant)
-
   def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).toInstant)
 
   def monthDayOneLastMonth: Date =
