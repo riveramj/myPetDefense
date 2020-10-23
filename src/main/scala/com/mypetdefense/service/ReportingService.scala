@@ -199,7 +199,7 @@ object ReportingService extends Loggable {
       val mailedDate = getMailedDateOfShipment(shipment)
 
       mailedDate map { mailDate =>
-        (mailDate.getYear == 2020) &&
+        (mailDate.getYear == currentYear) &&
         (mailDate.getMonth == date.getMonth)
       } openOr (false)
     }
@@ -241,8 +241,8 @@ object ReportingService extends Loggable {
         val cancelDateMonth = cancellationDate.map(_.getMonth)
         val cancelDateYear  = cancellationDate.map(_.getYear)
 
-        !(cancelDateYear.map(_ == createdDateYear).openOr(false) &&
-          cancelDateMonth.map(_ == createdDateMonth).openOr(false))
+        (cancelDateYear.map(_ == createdDateYear).openOr(false) &&
+        cancelDateMonth.map(_ == createdDateMonth).openOr(false))
       }
     }
   }
@@ -953,15 +953,15 @@ object ReportingService extends Loggable {
 
   def findYesterdayNewSales: List[User] = {
     User.findAll(
-      By_>(User.createdAt, yesterdayStart),
-      By_<(User.createdAt, yesterdayEnd)
+      By_>=(User.createdAt, yesterdayStart),
+      By_<=(User.createdAt, yesterdayEnd)
     )
   }
 
   def yesterdayShipments: (Int, Int, Double) = {
     val yesterdayShipments = Shipment.findAll(
-      By_>(Shipment.dateShipped, yesterdayStart),
-      By_<(Shipment.dateShipped, yesterdayEnd)
+      By_>=(Shipment.dateShipped, yesterdayStart),
+      By_<=(Shipment.dateShipped, yesterdayEnd)
     )
 
     val paidShipments  = yesterdayShipments.filter(_.amountPaid.get != "0")
@@ -973,8 +973,8 @@ object ReportingService extends Loggable {
 
   def yesterdayCancels: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.cancellationDate, yesterdayStart),
-      By_<(Subscription.cancellationDate, yesterdayEnd)
+      By_>=(Subscription.cancellationDate, yesterdayStart),
+      By_<=(Subscription.cancellationDate, yesterdayEnd)
     )
   }
 

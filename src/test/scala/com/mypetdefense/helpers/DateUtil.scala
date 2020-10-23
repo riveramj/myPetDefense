@@ -9,21 +9,38 @@ object DateUtil {
 
   val zoneId: ZoneId = ZoneId.of("America/New_York")
 
-  def currentDate: LocalDateTime = LocalDateTime.now()
-  def now: LocalDate             = LocalDate.now(zoneId)
-  def today: Date                = now.atStartOfDay(zoneId).toDate
-  def tomorrow: Date             = now.atStartOfDay(zoneId).plusDays(1).toDate
-  def lastMonth: Date            = now.minusMonths(1).atStartOfDay(zoneId).toDate
-  def thisMonth: ZonedDateTime = {
+  def yesterday: ZonedDateTime            = now.atStartOfDay(zoneId).minusDays(1)
+  def now: LocalDate                      = LocalDate.now(zoneId)
+  def today: Date                         = now.atStartOfDay(zoneId).toDate
+  def tomorrow: Date                      = now.atStartOfDay(zoneId).plusDays(1).toDate
+  def thisYear: Int                       = now.getYear
+  def anyDayOfThisMonth: ZonedDateTime    = getAnyDayOfMonth(now)
+  def anyDayOfLastMonth: ZonedDateTime    = getAnyDayOfMonth(now.minusMonths(1))
+  def anyDayOfThisYear: ZonedDateTime     = getAnyDayOfTheYear(now)
+  def anyDayUntilThisMonth: ZonedDateTime = getAnyDayOfTheYearUntil(now.minusMonths(1))
+  def anyDayOfLastYear: ZonedDateTime     = getAnyDayOfTheYear(now.minusYears(1))
+
+  def lastYear: ZonedDateTime = {
     val nowDate = now
-    val maxDays = nowDate.lengthOfMonth()
-    val day     = generateIntBetween(1, maxDays)
-    nowDate.withDayOfMonth(day).atStartOfDay(zoneId)
+    nowDate.minusYears(1).atStartOfDay(zoneId)
   }
 
-  def lastYear: Date = {
-    val nowDate = now
-    nowDate.minusYears(1).atStartOfDay(zoneId).toDate
+  protected def getAnyDayOfTheYearUntil(localDate: LocalDate): ZonedDateTime = {
+    val maxDays = localDate.getDayOfYear
+    val day     = generateIntBetween(1, maxDays)
+    localDate.withDayOfYear(day).atStartOfDay(zoneId)
+  }
+
+  protected def getAnyDayOfTheYear(localDate: LocalDate): ZonedDateTime = {
+    val maxDays = localDate.lengthOfYear
+    val day     = generateIntBetween(1, maxDays)
+    localDate.withDayOfYear(day).atStartOfDay(zoneId)
+  }
+
+  protected def getAnyDayOfMonth(localDate: LocalDate): ZonedDateTime = {
+    val maxDays = localDate.lengthOfMonth()
+    val day     = generateIntBetween(1, maxDays)
+    localDate.withDayOfMonth(day).atStartOfDay(zoneId)
   }
 
   implicit class ZonedDateTimeSyntax(val i: ZonedDateTime) extends AnyVal {
