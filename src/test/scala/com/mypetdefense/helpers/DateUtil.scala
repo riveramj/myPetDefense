@@ -20,7 +20,6 @@ object DateUtil {
   def anyHourOfToday: ZonedDateTime                 = anyHourOf(now)
   def anyHourOfThisDayMonthAgo: ZonedDateTime       = anyHourOf(now.minusMonths(1))
   def anyHourOfThisDayYearAgo: ZonedDateTime        = anyHourOf(now.minusYears(1))
-  def anyDayOfYesterdayMonth: ZonedDateTime         = getAnyDayOfMonth(now.minusDays(1))
   def anyDayOfLastMonth: ZonedDateTime              = getAnyDayOfMonth(now.minusMonths(1))
   def anyDayOfThisMonth: ZonedDateTime              = getAnyDayOfMonth(now)
   def anyDayOfNextMonth: ZonedDateTime              = getAnyDayOfMonth(now.plusMonths(1))

@@ -1109,8 +1109,8 @@ object ReportingService extends Loggable {
         agency,
         User.findAll(
           By(User.referer, agency),
-          By_>=(User.createdAt, yesterdayMonthStart),
-          By_<(User.createdAt, yesterdayMonthEnd)
+          By_>=(User.createdAt, monthDayOne),
+          By_<(User.createdAt, beginngNextMonth)
         )
       )
     }
@@ -1156,8 +1156,8 @@ object ReportingService extends Loggable {
       .flatMap(a =>
         User.findAll(
           By(User.referer, a),
-          By_>=(User.createdAt, yesterdayMonthStart),
-          By_<(User.createdAt, yesterdayMonthEnd)
+          By_>=(User.createdAt, monthDayOne),
+          By_<(User.createdAt, beginngNextMonth)
         )
       )
 

@@ -387,10 +387,10 @@ class ReportingServiceSpec
   it should "find yesterday sales by agency" in {
     forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
       (yesterdayNotOursSales, myPetDefenseSales, petlandSales) =>
-        val myPetDefenceAgency = createAgency("My Pet Defense")
+        val myPetDefenseAgency = createAgency("My Pet Defense")
         val petlandAgency      = createAgency("Petland")
         myPetDefenseSales.foreach(
-          insertAgencySalesCreatedAt(myPetDefenceAgency, anyHourOfYesterday.toDate, _)
+          insertAgencySalesCreatedAt(myPetDefenseAgency, anyHourOfYesterday.toDate, _)
         )
         petlandSales.foreach(
           insertAgencySalesCreatedAt(petlandAgency, anyHourOfYesterday.toDate, _)
@@ -630,26 +630,20 @@ class ReportingServiceSpec
   it should "find MTD sales by agency" in {
     forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
       (yesterdayMonthNotOursSales, myPetDefenseSales, petlandSales) =>
-        val myPetDefenceAgency = createAgency("My Pet Defense")
+        val myPetDefenseAgency = createAgency("My Pet Defense")
         val petlandAgency      = createAgency("Petland")
-        myPetDefenseSales
-          .map(insertUserAndPet)
-          .foreach(
-            _.user.referer(myPetDefenceAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe()
-          )
-        petlandSales
-          .map(insertUserAndPet)
-          .foreach(_.user.referer(petlandAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe())
+        myPetDefenseSales.foreach(
+          insertAgencySalesCreatedAt(myPetDefenseAgency, anyDayOfThisMonth.toDate, _)
+        )
+        petlandSales.foreach(
+          insertAgencySalesCreatedAt(petlandAgency, anyDayOfThisMonth.toDate, _)
+        )
 
         val someAgencyName = Random.generateString.take(10)
         val someAgency     = createAgency(someAgencyName)
 
         val insertedPetsSize = yesterdayMonthNotOursSales
-          .map(insertUserAndPet)
-          .map { inserted =>
-            inserted.user.referer(someAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe()
-            inserted.pets.size
-          }
+          .map(insertAgencySalesCreatedAt(someAgency, anyDayOfThisMonth.toDate, _).pets.size)
           .sum
 
         val expectedInResult = someAgencyName -> insertedPetsSize
@@ -664,29 +658,23 @@ class ReportingServiceSpec
   it should "find yesterday sales by agent" in {
     forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
       (yesterdayNotOursSales, myPetDefenseSales, petlandSales) =>
-        val myPetDefenceAgency = createAgency("My Pet Defense").agencyId(randomPosLong).saveMe()
+        val myPetDefenseAgency = createAgency("My Pet Defense").agencyId(randomPosLong).saveMe()
         val petlandAgency      = createAgency("Petland").agencyId(randomPosLong).saveMe()
-        myPetDefenseSales
-          .map(insertUserAndPet)
-          .foreach(
-            _.user.referer(myPetDefenceAgency).createdAt(anyHourOfYesterday.toDate).saveMe()
-          )
-        petlandSales
-          .map(insertUserAndPet)
-          .foreach(_.user.referer(petlandAgency).createdAt(anyHourOfYesterday.toDate).saveMe())
+        myPetDefenseSales.foreach(
+          insertAgencySalesCreatedAt(myPetDefenseAgency, anyHourOfYesterday.toDate, _)
+        )
+        petlandSales.foreach(
+          insertAgencySalesCreatedAt(petlandAgency, anyHourOfYesterday.toDate, _)
+        )
 
         val someAgencyName   = Random.generateString.take(10)
         val someSalesAgentId = Random.generateString.take(10)
         val someAgency       = createAgency(someAgencyName).saveMe()
 
         val insertedPetsSize = yesterdayNotOursSales
-          .map(insertUserAndPet)
+          .map(insertAgencySalesCreatedAt(someAgency, anyHourOfYesterday.toDate, _))
           .map { inserted =>
-            inserted.user
-              .referer(someAgency)
-              .salesAgentId(someSalesAgentId)
-              .createdAt(anyHourOfYesterday.toDate)
-              .saveMe()
+            inserted.user.salesAgentId(someSalesAgentId).saveMe()
             inserted.pets.size
           }
           .sum
@@ -703,29 +691,23 @@ class ReportingServiceSpec
   it should "find MTD sales by agent" in {
     forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
       (yesterdayMonthNotOursSales, myPetDefenseSales, petlandSales) =>
-        val myPetDefenceAgency = createAgency("My Pet Defense").agencyId(randomPosLong).saveMe()
+        val myPetDefenseAgency = createAgency("My Pet Defense").agencyId(randomPosLong).saveMe()
         val petlandAgency      = createAgency("Petland").agencyId(randomPosLong).saveMe()
-        myPetDefenseSales
-          .map(insertUserAndPet)
-          .foreach(
-            _.user.referer(myPetDefenceAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe()
-          )
-        petlandSales
-          .map(insertUserAndPet)
-          .foreach(_.user.referer(petlandAgency).createdAt(anyDayOfYesterdayMonth.toDate).saveMe())
+        myPetDefenseSales.foreach(
+          insertAgencySalesCreatedAt(myPetDefenseAgency, anyDayOfThisMonth.toDate, _)
+        )
+        petlandSales.foreach(
+          insertAgencySalesCreatedAt(petlandAgency, anyDayOfThisMonth.toDate, _)
+        )
 
         val someAgencyName   = Random.generateString.take(10)
         val someSalesAgentId = Random.generateString.take(10)
         val someAgency       = createAgency(someAgencyName).saveMe()
 
         val insertedPetsSize = yesterdayMonthNotOursSales
-          .map(insertUserAndPet)
+          .map(insertAgencySalesCreatedAt(someAgency, anyDayOfThisMonth.toDate, _))
           .map { inserted =>
-            inserted.user
-              .referer(someAgency)
-              .salesAgentId(someSalesAgentId)
-              .createdAt(anyDayOfYesterdayMonth.toDate)
-              .saveMe()
+            inserted.user.salesAgentId(someSalesAgentId).saveMe()
             inserted.pets.size
           }
           .sum
