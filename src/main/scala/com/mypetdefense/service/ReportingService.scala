@@ -1,9 +1,13 @@
 package com.mypetdefense.service
 
+import java.sql.Date
 import java.text.SimpleDateFormat
 import java.time._
+
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.{AgencyCustomersInfo, CustomerInfo}
 import com.mypetdefense.snippet.admin.AmazonOrderExport
+import com.mypetdefense.util.CSVHelper
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.ModelSyntax._
 import net.liftweb.common._
@@ -207,20 +211,6 @@ object ReportingService extends Loggable {
     }
   }
 
-  def generateCSV(csv: String, fileName: String): Some[InMemoryResponse] = {
-    Some(
-      InMemoryResponse(
-        csv.getBytes("UTF-8"),
-        List(
-          "Content-Type"        -> "binary/octet-stream",
-          "Content-Disposition" -> s"attachment; $fileName"
-        ),
-        Nil,
-        200
-      )
-    )
-  }
-
   def exportRawSales(name: String): Box[LiftResponse] = {
     val headers =
       "Year" :: "Month" :: "Mailed Date" :: "Customer Id" :: "Customer Name" :: "Amount" :: "Call Agent Id" :: "Commision" :: "Customer Status" :: Nil
@@ -255,7 +245,7 @@ object ReportingService extends Loggable {
 
     val file = "filename=\"" + fileName + "\""
 
-    generateCSV(csv, file)
+    CSVHelper.generateCSV(csv, file)
   }
 
   def exportCancellationData(name: String): Some[InMemoryResponse] = {
@@ -371,7 +361,7 @@ object ReportingService extends Loggable {
 
     val file = "filename=\"" + fileName + "\""
 
-    generateCSV(csvRows, file)
+    CSVHelper.generateCSV(csvRows, file)
   }
 
   def exportTotalSales(name: String): Box[LiftResponse] = {
@@ -521,7 +511,7 @@ object ReportingService extends Loggable {
 
     val file = "filename=\"" + fileName + "\""
 
-    generateCSV(csvRows, file)
+    CSVHelper.generateCSV(csvRows, file)
   }
 
   def exportAmazonOrders(amazonOrderExport: AmazonOrderExport): Box[LiftResponse] = {
@@ -573,7 +563,7 @@ object ReportingService extends Loggable {
 
     val file = "filename=\"" + fileName + "\""
 
-    generateCSV(csv, file)
+    CSVHelper.generateCSV(csv, file)
   }
 
   def exportAgencyMtdYtdSales(name: String): Box[LiftResponse] = {
@@ -768,7 +758,7 @@ object ReportingService extends Loggable {
 
     val file = "filename=\"" + fileName + "\""
 
-    generateCSV(csvRows, file)
+    CSVHelper.generateCSV(csvRows, file)
   }
 
   def findYesterdayNewSales: List[User] = {
@@ -1033,7 +1023,7 @@ object ReportingService extends Loggable {
 
     val file = "filename=\"" + fileName + "\""
 
-    generateCSV(csvRows, file)
+    CSVHelper.generateCSV(csvRows, file)
   }
 
   def exportSameDayCancels(name: String): Box[LiftResponse] = {
@@ -1058,7 +1048,7 @@ object ReportingService extends Loggable {
 
     val file = "filename=\"" + fileName + "\""
 
-    generateCSV(csv, file)
+    CSVHelper.generateCSV(csv, file)
   }
 
   def cancelsByShipment(subscriptions: List[Subscription]): List[(String, Int)] = {
@@ -1110,47 +1100,41 @@ object ReportingService extends Loggable {
     }
   }
 
+  def tryGetDataAgencyCustomersInfo(rawAgencyId: String): Box[AgencyCustomersInfo] =
+    for {
+      agencyId <- tryo(rawAgencyId.toLong)
+      agency   <- Agency.find(By(Agency.agencyId, agencyId))
+      agencyName    = agency.name.get
+      customersInfo = getCustomersInfo(agency)
+    } yield AgencyCustomersInfo(agencyName, customersInfo)
+
   def exportAgencyCustomers(rawAgencyId: String): Box[LiftResponse] = {
-    val headers =
-      "Name" :: "Status" :: "Shipment Count" :: "Signup Date" :: "Cancellation Date" :: Nil
+    val headers = List("Name", "Status", "Shipment Count", "Signup Date", "Cancellation Date")
 
-    var agencyName = ""
-
-    val csvRows: List[List[String]] = {
-      for {
-        agencyId     <- tryo(rawAgencyId.toLong).toList
-        agency       <- Agency.find(By(Agency.agencyId, agencyId)).toList
-        customer     <- agency.customers.toList
-        subscription <- customer.subscription.toList
-      } yield {
-        agencyName = agency.name.get
-
-        val status = {
-          if (subscription.status.get == Status.Active)
-            "Active"
-          else
-            "Inactive"
-        }
-
-        val startDate  = subscription.getStartDateOfSubscription
-        val cancelDate = subscription.getCancelDateOfSubscription
-
-        customer.name ::
-          status ::
-          subscription.shipments.toList.size.toString ::
-          startDate ::
-          cancelDate ::
-          Nil
-      }
-    }
-
-    val csv = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
-
-    val fileName = s"$agencyName-customers-$fileNameMonthDayYear.csv"
-
-    val file = "filename=\"" + fileName + "\""
-
-    generateCSV(csv, file)
+    for {
+      data <- tryGetDataAgencyCustomersInfo(rawAgencyId)
+      csvRows  = data.customersInfoToCSVRows
+      csv      = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
+      fileName = s"${data.agencyName}-customers-$fileNameMonthDayYear.csv"
+      file     = "filename=\"" + fileName + "\""
+      result <- CSVHelper.generateCSV(csv, file)
+    } yield result
   }
+
+  private def getCustomersInfo(agency: Agency): List[CustomerInfo] =
+    for {
+      customer     <- agency.customers.toList
+      subscription <- customer.subscription.toList
+    } yield {
+      val startDate  = subscription.getStartDateOfSubscription
+      val cancelDate = subscription.getCancelDateOfSubscription
+      CustomerInfo(
+        customer.name,
+        subscription.status.get,
+        subscription.shipments.toList.size,
+        startDate,
+        cancelDate
+      )
+    }
 
 }
