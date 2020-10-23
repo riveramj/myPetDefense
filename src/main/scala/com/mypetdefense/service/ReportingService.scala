@@ -1117,13 +1117,13 @@ object ReportingService extends Loggable {
         NotBy(Agency.name, "My Pet Defense"),
         NotBy(Agency.name, "Petland")
       )
-      .flatMap(a =>
+      .flatMap { agency =>
         User.findAll(
-          By(User.referer, a),
+          By(User.referer, agency),
           By_>=(User.createdAt, yesterdayStart),
           By_<(User.createdAt, yesterdayEnd)
         )
-      )
+      }
 
     newUsersYesterday
       .groupBy(_.salesAgentId.get)
