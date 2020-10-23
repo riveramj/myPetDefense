@@ -1,6 +1,5 @@
 package com.mypetdefense.service
 
-import java.sql.Date
 import java.text.SimpleDateFormat
 import java.time._
 
@@ -16,6 +15,9 @@ import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
 
 object ReportingService extends Loggable {
+
+  private val myPetDefence = "My Pet Defense"
+  private val petland      = "Petland"
 
   val spacerRow = List(List(","))
 
@@ -243,9 +245,7 @@ object ReportingService extends Loggable {
 
     val fileName = s"salesData-$fileNameYearMonth.csv"
 
-    val file = "filename=\"" + fileName + "\""
-
-    CSVHelper.generateCSV(csv, file)
+    CSVHelper.generateCSV(csv, fileName)
   }
 
   def exportCancellationData(name: String): Some[InMemoryResponse] = {
@@ -359,9 +359,7 @@ object ReportingService extends Loggable {
 
     val fileName = s"cancellations-$fileNameYearMonth.csv"
 
-    val file = "filename=\"" + fileName + "\""
-
-    CSVHelper.generateCSV(csvRows, file)
+    CSVHelper.generateCSV(csvRows, fileName)
   }
 
   def exportTotalSales(name: String): Box[LiftResponse] = {
@@ -509,9 +507,7 @@ object ReportingService extends Loggable {
 
     val fileName = s"month-to-date-salesData-$fileNameMonthDayYear.csv"
 
-    val file = "filename=\"" + fileName + "\""
-
-    CSVHelper.generateCSV(csvRows, file)
+    CSVHelper.generateCSV(csvRows, fileName)
   }
 
   def exportAmazonOrders(amazonOrderExport: AmazonOrderExport): Box[LiftResponse] = {
@@ -561,9 +557,7 @@ object ReportingService extends Loggable {
 
     val fileName = s"amazon-orders-$startDateExport-$endDateExport.csv"
 
-    val file = "filename=\"" + fileName + "\""
-
-    CSVHelper.generateCSV(csv, file)
+    CSVHelper.generateCSV(csv, fileName)
   }
 
   def exportAgencyMtdYtdSales(name: String): Box[LiftResponse] = {
@@ -756,9 +750,7 @@ object ReportingService extends Loggable {
 
     val fileName = s"$name-mtd-ytd-$fileNameMonthDayYear.csv"
 
-    val file = "filename=\"" + fileName + "\""
-
-    CSVHelper.generateCSV(csvRows, file)
+    CSVHelper.generateCSV(csvRows, fileName)
   }
 
   def findYesterdayNewSales: List[User] = {
@@ -790,8 +782,8 @@ object ReportingService extends Loggable {
 
   def findYesterdaySalesByAgency: List[(String, Int)] = {
     val agencies = Agency.findAll(
-      NotBy(Agency.name, "My Pet Defense"),
-      NotBy(Agency.name, "Petland")
+      NotBy(Agency.name, myPetDefence),
+      NotBy(Agency.name, petland)
     )
 
     val yesterdayCreatedUsersByAgencies = agencies.map { agency =>
@@ -899,8 +891,8 @@ object ReportingService extends Loggable {
 
   def findMTDSalesByAgency: List[(String, Int)] = {
     val agencies = Agency.findAll(
-      NotBy(Agency.name, "My Pet Defense"),
-      NotBy(Agency.name, "Petland")
+      NotBy(Agency.name, myPetDefence),
+      NotBy(Agency.name, petland)
     )
 
     val newUsersThisMonthByAgency = agencies.map { agency =>
@@ -924,8 +916,8 @@ object ReportingService extends Loggable {
   def findYesterdaySalesByAgent: List[(String, Int)] = {
     val newUsersYesterday = Agency
       .findAll(
-        NotBy(Agency.name, "My Pet Defense"),
-        NotBy(Agency.name, "Petland")
+        NotBy(Agency.name, myPetDefence),
+        NotBy(Agency.name, petland)
       )
       .flatMap { agency =>
         User.findAll(
@@ -949,8 +941,8 @@ object ReportingService extends Loggable {
   def findMTDSalesByAgent: List[(String, Int)] = {
     val newUsersThisMonth = Agency
       .findAll(
-        NotBy(Agency.name, "My Pet Defense"),
-        NotBy(Agency.name, "Petland")
+        NotBy(Agency.name, myPetDefence),
+        NotBy(Agency.name, petland)
       )
       .flatMap { agency =>
         User.findAll(
@@ -971,24 +963,25 @@ object ReportingService extends Loggable {
       .sortBy(_._1)
   }
 
+  private def getTotalUsers(agencyName: String) =
+    if (agencyName != "TPP")
+      Agency.find(By(Agency.name, agencyName)).map(_.customers.toList).getOrElse(Nil)
+    else {
+      val puppySpot =
+        Agency.find(By(Agency.name, "PuppySpot")).map(_.customers.toList).getOrElse(Nil)
+      val petland =
+        Agency.find(By(Agency.name, petland)).map(Agency.getAllChildrenCustomers).getOrElse(Nil)
+
+      puppySpot ++ petland
+    }
+
   def exportAgencyMonthSales(
       name: String,
       month: String,
       possibleYear: String
   ): Box[LiftResponse] = {
-    val year = getYearOrCurrent(possibleYear)
-    val totalUsers = {
-      if (name != "TPP")
-        Agency.find(By(Agency.name, name)).map(_.customers.toList).getOrElse(Nil)
-      else {
-        val puppySpot =
-          Agency.find(By(Agency.name, "PuppySpot")).map(_.customers.toList).getOrElse(Nil)
-        val petland =
-          Agency.find(By(Agency.name, "Petland")).map(Agency.getAllChildrenCustomers).getOrElse(Nil)
-
-        puppySpot ++ petland
-      }
-    }
+    val year       = getYearOrCurrent(possibleYear)
+    val totalUsers = getTotalUsers(name)
 
     val totalSubscriptions = totalUsers.getSubscriptions
     val totalCancelledSubscriptions =
@@ -1021,9 +1014,7 @@ object ReportingService extends Loggable {
 
     val fileName = s"$name-$month-$year-sales-summary.csv"
 
-    val file = "filename=\"" + fileName + "\""
-
-    CSVHelper.generateCSV(csvRows, file)
+    CSVHelper.generateCSV(csvRows, fileName)
   }
 
   def exportSameDayCancels(name: String): Box[LiftResponse] = {
@@ -1046,9 +1037,7 @@ object ReportingService extends Loggable {
 
     val fileName = s"sameDayCancels-${LocalDate.now()}.csv"
 
-    val file = "filename=\"" + fileName + "\""
-
-    CSVHelper.generateCSV(csv, file)
+    CSVHelper.generateCSV(csv, fileName)
   }
 
   def cancelsByShipment(subscriptions: List[Subscription]): List[(String, Int)] = {
@@ -1116,8 +1105,7 @@ object ReportingService extends Loggable {
       csvRows  = data.customersInfoToCSVRows
       csv      = (List(headers) ++ csvRows).map(_.mkString(",")).mkString("\n")
       fileName = s"${data.agencyName}-customers-$fileNameMonthDayYear.csv"
-      file     = "filename=\"" + fileName + "\""
-      result <- CSVHelper.generateCSV(csv, file)
+      result <- CSVHelper.generateCSV(csv, fileName)
     } yield result
   }
 
