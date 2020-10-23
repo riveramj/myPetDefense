@@ -997,7 +997,7 @@ object ReportingService extends Loggable {
 
     yesterdayCreatedUsersByAgencies.map {
       case (agency, users) =>
-        val pets = users.flatMap(u => Pet.findAll(By(Pet.user, u)))
+        val pets = users.flatMap(_.pets.toList)
         agency.name.get -> pets.size
     }.sortBy(_._1)
   }
