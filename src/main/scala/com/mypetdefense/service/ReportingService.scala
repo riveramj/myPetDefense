@@ -69,11 +69,6 @@ object ReportingService extends Loggable {
 
   def year: String = currentDate.format(DateTimeFormatter.ofPattern("yyyy", Locale.ENGLISH))
 
-  def lastDayOfTheMonth(time: ZonedDateTime): ZonedDateTime = {
-    val maxDay = time.getMonth.maxLength()
-    time.withDayOfMonth(maxDay)
-  }
-
   val monthHeaders: List[String] =
     "January" :: "February" :: "March" :: "April" :: "May" :: "June" :: "July" :: "August" :: "September" :: "October" :: "November" :: "December" :: Nil
 
