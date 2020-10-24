@@ -77,7 +77,7 @@ class Parents extends Loggable {
 
         currentParent = Empty
         parentsRenderer.map(_.setHtml).openOr(Noop)
-        
+
       case userInfo =>
         val formattedSearchTerm = userInfo.trim.split(" ").map(_ + ":*").mkString(" | ")
 
@@ -374,6 +374,17 @@ class Parents extends Loggable {
       Noop
     }
 
+    def sendResetPasswordEmail(possibleUser: Box[User]) = {
+      possibleUser match {
+        case Full(user) =>
+          val userWithResetKey = KeyService.createResetKey(user)
+          EmailActor ! SendPasswordResetEmail(userWithResetKey)
+          Alert("Sent user reset email.")
+        case _ =>
+          Alert("Couldn't send reset email.")
+      }
+    }
+
     {
       if (isCancelled_?(parent)) {
         ".parent-information" #> ClearNodes &
@@ -415,11 +426,14 @@ class Parents extends Loggable {
             possibleAddress => updateAddress(possibleAddress, "zip", address)
           )
       } &
-      ".parent-information .change-email" #> {
+      ".parent-information" #> {
         val currentEmail = parent.map(_.email.get).openOr("")
 
+        ".reset-password [onclick]" #> SHtml.ajaxInvoke(() => sendResetPasswordEmail(parent)) &
+        ".change-email" #> {
         ".parent-email" #> SHtml.ajaxText(currentEmail, email = _) &
           ".update-email [onclick]" #> SHtml.ajaxInvoke(() => changeEmail(parent, email))
+        }
       } &
       ".parent-information .agent-name-container .agent *" #> agent
   }
