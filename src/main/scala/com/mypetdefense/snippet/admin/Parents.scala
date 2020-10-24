@@ -64,32 +64,45 @@ class Parents extends Loggable {
   var currentParent: Box[User]                       = Empty
 
   def searchParents: JsCmd = {
-    if (searchTerm == "")
-      Alert("Search cannot be empty right now.")
-    else {
-      val formattedSearchTerm = searchTerm.split(" ").map(_ + ":*").mkString(" | ")
+    searchTerm match {
+      case empty if empty.isEmpty => Alert("Search cannot be empty right now.")
+      case zipCode if tryo(zipCode.toInt).isDefined =>
+        val addresses = Address.findAll(
+          By(Address.zip, zipCode)
+        )
+        activeParents = addresses.flatMap(_.user.obj)
+        cancelledParents = Nil
 
-      val searchQuery =
-        s"to_tsvector('english', coalesce(firstname,'') || ' ' || coalesce(lastname,'') || ' ' || coalesce(email,'')) @@ to_tsquery('english', '${formattedSearchTerm}')"
+        parents = activeParents
 
-      val activeParentsSearch = User.findAll(
-        By(User.userType, UserType.Parent),
-        BySql(searchQuery, IHaveValidatedThisSQL("mike", "2019-03-09"))
-      )
+        currentParent = Empty
+        parentsRenderer.map(_.setHtml).openOr(Noop)
+        
+      case userInfo =>
+        val formattedSearchTerm = userInfo.trim.split(" ").map(_ + ":*").mkString(" | ")
 
-      val cancelledParentsSearch = CancelledUser.findAll(
-        BySql(searchQuery, IHaveValidatedThisSQL("mike", "2019-03-09"))
-      )
+        val searchQuery =
+          s"to_tsvector('english', coalesce(firstname,'') || ' ' || coalesce(lastname,'') || ' ' || coalesce(email,'')) @@ to_tsquery('english', '${formattedSearchTerm}')"
 
-      activeParents = activeParentsSearch
-      cancelledParents = cancelledParentsSearch
+        val activeParentsSearch = User.findAll(
+          By(User.userType, UserType.Parent),
+          BySql(searchQuery, IHaveValidatedThisSQL("mike", "2019-03-09"))
+        )
 
-      val cancelledUsers = cancelledParents.flatMap(getOldUserWithInfo)
-      parents = activeParents ++ cancelledUsers
+        val cancelledParentsSearch = CancelledUser.findAll(
+          BySql(searchQuery, IHaveValidatedThisSQL("mike", "2019-03-09"))
+        )
 
-      currentParent = Empty
-      parentsRenderer.map(_.setHtml).openOr(Noop)
+        activeParents = activeParentsSearch
+        cancelledParents = cancelledParentsSearch
+
+        val cancelledUsers = cancelledParents.flatMap(getOldUserWithInfo)
+        parents = activeParents ++ cancelledUsers
+
+        currentParent = Empty
+        parentsRenderer.map(_.setHtml).openOr(Noop)
     }
+
   }
 
   def getCancelledUser(parent: User): Box[CancelledUser] = {
