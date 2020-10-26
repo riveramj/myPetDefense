@@ -7,7 +7,6 @@ import com.mypetdefense.model.domain.reports
 import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.snippet.admin.AmazonOrderExport
 import com.mypetdefense.util.CSVHelper
-import com.mypetdefense.util.CSVHelper.spacerRow
 import com.mypetdefense.util.CalculationHelper._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.ModelSyntax._
@@ -214,124 +213,10 @@ object ReportingService extends Loggable {
   }
 
   def exportCancellationData(name: String): Some[InMemoryResponse] = {
-    val possibleAgency     = Agency.find(By(Agency.name, name))
-    val customers          = possibleAgency.map(_.customers.toList).openOr(Nil)
-    val cancelledCustomers = customers.filter(_.status.get == Status.Cancelled)
-
-    val customerStatusBreakdown = customers.groupBy { customer =>
-      customer.subscription.map(_.status.get)
-    }
-
-    val customerStatusTotals = customerStatusBreakdown.map { customer =>
-      s"${customer._1.headOption.getOrElse("")} Users,${customer._2.size.toString}"
-    }.toList.sorted.map(_ :: "," :: Nil)
-
-    val topHeaders = List(
-      "Cancellation Report",
-      "YTD Cancels by Qty",
-      "Avg Shipments",
-      "Gross YTD Cancels by $",
-      "Estimated Commission"
-    )
-
-    val currentYearSubscriptionCancels = {
-      for {
-        customer     <- cancelledCustomers
-        subscription <- customer.subscription
-        if subscription.getCancelledDateOfSubscription
-          .map(_.getYear == currentDate.getYear)
-          .openOr(false)
-      } yield {
-        subscription
-      }
-    }
-
-    val currentYearCancelShipments =
-      currentYearSubscriptionCancels.flatMap(_.shipments.toList).filter { shipment =>
-        !shipment.getMailedDateOfShipment.isEmpty
-      }
-
-    val averageShipmentsPerCancelByYear =
-      currentYearCancelShipments.size.toDouble / currentYearSubscriptionCancels.size.toDouble
-
-    val currentYearCancelTotal = totalSalesForShipments(currentYearCancelShipments)
-
-    val yearCancelCommisionAmount = currentYearCancelTotal * .35
-
-    val currentYearCancelSalesRow = List(
-      f"Year To Date Totals,${currentYearSubscriptionCancels.size},$averageShipmentsPerCancelByYear%3.2f,$$$currentYearCancelTotal,$$$yearCancelCommisionAmount%3.2f"
-    )
-
-    val currentMonthSubscriptionCancels = currentYearSubscriptionCancels.filter { subscription =>
-      val cancelDate = subscription.getCancelledDateOfSubscription
-      cancelDate.map(_.getMonth == currentDate.getMonth).openOr(false)
-    }
-
-    val currentMonthCancelShipments = currentMonthSubscriptionCancels
-      .flatMap(_.shipments.toList)
-      .filter(shipment => !shipment.getMailedDateOfShipment.isEmpty)
-
-    val averageShipmentsPerCancelByMonth =
-      currentMonthCancelShipments.size.toDouble / currentMonthSubscriptionCancels.size.toDouble
-
-    val currentMonthCancelTotal = totalSalesForShipments(currentMonthCancelShipments)
-
-    val monthCancelCommisionAmount = currentMonthCancelTotal * .35
-
-    val currentMonthCancelSalesRow = List(
-      f"Month To Date Totals,${currentMonthSubscriptionCancels.size},$averageShipmentsPerCancelByMonth%3.2f,$$$currentMonthCancelTotal,$$$monthCancelCommisionAmount%3.2f"
-    )
-
-    val headers = List(
-      "Customer Id",
-      "Start Month",
-      "End Month",
-      "Customer Status",
-      "Shipment Count",
-      "Total Gross Sales",
-      "Total Commission"
-    )
-
-    val allCancellationRows: List[List[String]] = {
-      for {
-        customer     <- customers.filter(_.status.get != Status.Active)
-        subscription <- customer.subscription
-        shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
-        firstShipment <- shipments.headOption
-        if !firstShipment.getMailedDateOfShipment.isEmpty
-        lastShipment <- shipments.lastOption
-      } yield {
-        val firstShipmentDate = firstShipment.getProcessDateOfShipment
-        val lastShipmentDate  = lastShipment.getProcessDateOfShipment
-        val shipmentCount     = shipments.size
-        val totalGrossSales   = shipments.map(getShipmentAmountPaid).foldLeft(BigDecimal(0d))(_ + _)
-        val totalCommission   = totalGrossSales * .35
-
-        customer.userId.toString ::
-          firstShipmentDate.getMonth.toString ::
-          lastShipmentDate.getMonth.toString ::
-          subscription.status.toString ::
-          shipmentCount.toString ::
-          s"$$$totalGrossSales" ::
-          f"$$$totalCommission%2.2f" ::
-          Nil
-      }
-    }
-
-    val csvRows = {
-      customerStatusTotals ++
-        spacerRow ++
-        List(topHeaders) ++
-        List(currentYearCancelSalesRow) ++
-        List(currentMonthCancelSalesRow) ++
-        spacerRow ++
-        List(headers) ++
-        allCancellationRows
-    }.map(_.mkString(",")).mkString("\n")
-
+    val data     = exportCancellationReport(name)
     val fileName = s"cancellations-$fileNameYearMonth.csv"
 
-    Some(CSVHelper.generateCSV(csvRows, fileName))
+    Some(CSVHelper.inMemoryCsv(fileName, data))
   }
 
   def exportTotalSales(name: String): Box[LiftResponse] = {
@@ -928,6 +813,109 @@ object ReportingService extends Loggable {
       newCustomersByAgent
     )
   }
+
+  private[service] def exportCancellationReport(agencyName: String): CancellationDataReport = {
+    val possibleAgency     = Agency.find(By(Agency.name, agencyName))
+    val customers          = possibleAgency.map(_.customers.toList).openOr(Nil)
+    val cancelledCustomers = customers.filter(_.status.get == Status.Cancelled)
+
+    val customerStatusTotals = customers.groupBy { customer =>
+      customer.subscription.map(_.status.get)
+    }.map { statusNCustomer =>
+      CustomerStatusTotalsReport(statusNCustomer._1, statusNCustomer._2.size)
+    }.toList
+
+    val currentYearSubscriptionCancels = {
+      for {
+        customer     <- cancelledCustomers
+        subscription <- customer.subscription
+        if subscription.getCancelledDateOfSubscription
+          .map(_.getYear == currentDate.getYear)
+          .openOr(false)
+      } yield {
+        subscription
+      }
+    }
+
+    val currentYearCancelShipments =
+      currentYearSubscriptionCancels.flatMap(_.shipments.toList).filter { shipment =>
+        !shipment.getMailedDateOfShipment.isEmpty
+      }
+
+    val averageShipmentsPerCancelByYear =
+      currentYearCancelShipments.size.toDouble / currentYearSubscriptionCancels.size.toDouble
+
+    val currentYearCancelTotal = totalSalesForShipments(currentYearCancelShipments)
+
+    val yearCancelCommisionAmount = currentYearCancelTotal * .35
+
+    val currentYearCancelSalesRow =
+      CurrentYearSalesReport(
+        currentYearSubscriptionCancels.size,
+        averageShipmentsPerCancelByYear,
+        currentYearCancelTotal,
+        yearCancelCommisionAmount
+      )
+
+    val currentMonthSubscriptionCancels = currentYearSubscriptionCancels.filter { subscription =>
+      val cancelDate = subscription.getCancelledDateOfSubscription
+      cancelDate.map(_.getMonth == currentDate.getMonth).openOr(false)
+    }
+
+    val currentMonthCancelShipments = currentMonthSubscriptionCancels
+      .flatMap(_.shipments.toList)
+      .filter(shipment => !shipment.getMailedDateOfShipment.isEmpty)
+
+    val averageShipmentsPerCancelByMonth =
+      currentMonthCancelShipments.size.toDouble / currentMonthSubscriptionCancels.size.toDouble
+
+    val currentMonthCancelTotal = totalSalesForShipments(currentMonthCancelShipments)
+
+    val monthCancelCommisionAmount = currentMonthCancelTotal * .35
+
+    val currentMonthCancelSalesRow =
+      CurrentMonthCancelSalesReport(
+        currentMonthSubscriptionCancels.size,
+        averageShipmentsPerCancelByMonth,
+        currentMonthCancelTotal,
+        monthCancelCommisionAmount
+      )
+
+    val allCancellationRows = getAllCancellationReport(customers)
+
+    CancellationDataReport(
+      customerStatusTotals,
+      currentYearCancelSalesRow,
+      currentMonthCancelSalesRow,
+      allCancellationRows
+    )
+  }
+
+  private def getAllCancellationReport(customers: List[User]) =
+    for {
+      customer     <- customers.filter(_.status.get != Status.Active)
+      subscription <- customer.subscription
+      shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+      firstShipment <- shipments.headOption
+      if !firstShipment.getMailedDateOfShipment.isEmpty
+      lastShipment <- shipments.lastOption
+    } yield {
+      val firstShipmentDate = firstShipment.getProcessDateOfShipment
+      val lastShipmentDate  = lastShipment.getProcessDateOfShipment
+      val shipmentCount     = shipments.size
+      val totalGrossSales   = shipments.map(getShipmentAmountPaid).foldLeft(BigDecimal(0d))(_ + _)
+      val totalCommission   = totalGrossSales * .35
+
+      AllCancellationReport(
+        customer.userId.get,
+        firstShipmentDate.getMonth,
+        lastShipmentDate.getMonth,
+        subscription.status.get,
+        shipmentCount,
+        totalGrossSales,
+        totalCommission
+      )
+    }
 
   private def getNewCustomersByAgent(
       newUsersMonthShipments: List[Shipment],
