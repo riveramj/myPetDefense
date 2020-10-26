@@ -492,6 +492,7 @@ object DataLoader extends Loggable {
       subscription <- user.subscription.obj.toList
       catFleaTick <- FleaTick.zoGuardCat.toList
     } {
+      println("cat")
       val box = SubscriptionBox.createBasicBox(subscription, catFleaTick, cat)
       cat.box(box).saveMe()
     }
@@ -506,6 +507,7 @@ object DataLoader extends Loggable {
       user <- subscription.user.obj.toList
       pets = user.pets.toList
     } {
+      println("delete 1")
       if (user.status.get != Status.Cancelled)
         user.status(Status.Cancelled).saveMe()
 
@@ -517,6 +519,7 @@ object DataLoader extends Loggable {
       subscription <- user.subscription.obj.toList
       pets = user.pets.toList
     } {
+      println("delete 2")
       if (subscription.status.get != Status.Cancelled)
         subscription.status(Status.Cancelled).saveMe()
 
