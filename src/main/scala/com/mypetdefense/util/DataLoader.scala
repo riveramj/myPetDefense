@@ -497,6 +497,20 @@ object DataLoader extends Loggable {
       updatedCat.box(box).saveMe()
     }
 
+  def createMissingDogBoxes(): Unit =
+    for {
+      dog <- Pet.findAll(By(Pet.animalType, AnimalType.Dog), NullRef(Pet.box))
+      user <- dog.user.obj.toList
+      subscription <- user.subscription.obj.toList
+    } {
+      val box = SubscriptionBox.createNewBox(subscription, dog)
+      dog.box(box).saveMe()
+
+      if (subscription.isUpgraded.get) {
+        SubscriptionItem.createFirstBox(box)
+      }
+    }
+
   def cancellationDataSync(): Unit = {
     def cancelPets(pets: List[Pet]): Unit = {
       pets.filter(_.status.get != Status.Cancelled).foreach(_.status(Status.Cancelled).saveMe())
