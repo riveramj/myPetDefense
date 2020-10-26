@@ -485,16 +485,21 @@ object DataLoader extends Loggable {
     }
   }
 
-  def createMissingCatBoxes(): Unit =
+  def createMissingCatBoxes(): Unit = {
+    println(FleaTick.zoGuardCat.toList)
+
+
     for {
       cat <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
       user <- cat.user.obj.toList
       subscription <- user.subscription.obj.toList
       catFleaTick <- FleaTick.zoGuardCat.toList
     } {
-      val box = SubscriptionBox.createBasicBox(subscription, catFleaTick, cat)
-      cat.box(box).saveMe()
+      val updatedCat = cat.size(catFleaTick.size.get).saveMe
+      val box = SubscriptionBox.createBasicBox(subscription, catFleaTick, updatedCat)
+      updatedCat.box(box).saveMe()
     }
+  }
 
   def cancellationDataSync(): Unit = {
     def cancelPets(pets: List[Pet]): Unit = {
