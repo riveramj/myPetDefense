@@ -1,22 +1,31 @@
 package com.mypetdefense.generator
 
-import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, thisMonth}
+import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisMonth}
 import com.mypetdefense.model.Price.{
   currentPetland6MonthPaymentCode,
   currentPetlandMonthlyCode,
   currentTppPriceCode,
   defaultPriceCode
 }
-import com.mypetdefense.model.{AnimalSize, Pet, UserType}
+import com.mypetdefense.model.{AnimalSize, AnimalType, Pet, ShipmentStatus, UserType}
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
 import me.frmr.stripe.{CardList, Customer}
-import net.liftweb.common.Empty
+import net.liftweb.common.{Box, Empty}
 import org.scalacheck._
 
 object Generator {
 
+  private val STRING_MAX_LENGTH                    = 20
+  private val MAX_LENGTH_OF_GENERATED_TRAVERSABLES = 10
+
   protected def genAlphaStr: Gen[String] =
-    Gen.alphaStr.map(_.take(20))
+    Gen.alphaStr.map(_.take(STRING_MAX_LENGTH))
+
+  protected def genMoneyString: Gen[String] = {
+    Gen.posNum[Int].map(i => f"${i.toDouble}%2.2f")
+  }
+
+  protected def genBoxString: Gen[Box[String]] = Gen.option(genAlphaStr).map(Box.apply[String])
 
   protected def genNonEmptyStr: Gen[String] =
     for {
@@ -30,6 +39,8 @@ object Generator {
 
   protected def genEmailStr: Gen[String] =
     genNonEmptyStr.map(_ + "@foo.com")
+
+  def genUserType: Gen[UserType.Value] = Gen.oneOf(UserType.values.toSeq)
 
   def genUserToCreate: Gen[UserCreateGeneratedData] =
     for {
@@ -53,10 +64,18 @@ object Generator {
       userType
     )
 
+  def genPriceCode: Gen[String] =
+    Gen.oneOf(
+      defaultPriceCode,
+      currentTppPriceCode,
+      currentPetlandMonthlyCode,
+      currentPetland6MonthPaymentCode
+    )
+
   def genSubscriptionToCreate: Gen[SubscriptionCreateGeneratedData] =
     for {
       stripeSubscriptionId <- genNonEmptyStr
-      date         = thisMonth
+      date         = anyDayOfThisMonth
       startDate    = date.toDate
       nextShipDate = date.plusDays(3).toDate
       priceCode      <- Gen.oneOf(defaultPriceCode, currentTppPriceCode)
@@ -127,19 +146,66 @@ object Generator {
       size <- generateDogOfSupportedSize
     } yield Pet.create.name(name).size(size)
 
+  def genPetData: Gen[PetData] =
+    for {
+      petName <- genNonEmptyStr
+      size    <- generateDogOfSupportedSize
+      petType = AnimalType.Dog
+    } yield PetData(petName, petType, size)
+
+  def genPetsChainData: Gen[PetChainData] = {
+    for {
+      user    <- genUserToCreate
+      petData <- Gen.listOfN(5, genPetData)
+    } yield PetChainData(user, petData)
+  }
+
   def userAndSubscriptionGen: Gen[(UserCreateGeneratedData, SubscriptionCreateGeneratedData)] =
     for {
       user <- genUserToCreate
       subs <- genSubscriptionToCreate
     } yield (user, subs)
 
-  def nonEmptyMapUserNSubscriptionGen
-      : Gen[Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData]] =
-    Gen.nonEmptyMap(userAndSubscriptionGen)
+  def genShipmentStatus: Gen[ShipmentStatus.Value] = Gen.oneOf(ShipmentStatus.values.toSeq)
 
-  def nonEmptyUsersGen: Gen[List[UserCreateGeneratedData]] = Gen.nonEmptyListOf(genUserToCreate)
+  def genShipmentToCreate: Gen[ShipmentCreateGeneratedData] =
+    for {
+      stripePaymentId <- genNonEmptyStr
+      stripeChargeId  <- genBoxString
+      amountPaid      <- genMoneyString
+      taxPaid = amountPaid.toDouble - 0.3
+      shipmentStatus  <- genShipmentStatus
+      sendFreeUpgrade <- genBool
+    } yield ShipmentCreateGeneratedData(
+      stripePaymentId,
+      stripeChargeId,
+      amountPaid,
+      taxPaid.toString,
+      shipmentStatus,
+      sendFreeUpgrade
+    )
 
-  def nonEmptySimplePetsGen: Gen[List[Pet]] = Gen.nonEmptyListOf(generateSimplePet)
+  def genShipmentChainData: Gen[ShipmentChainData] =
+    for {
+      user     <- genUserToCreate
+      sub      <- genSubscriptionToCreate
+      shipment <- Gen.listOfN(MAX_LENGTH_OF_GENERATED_TRAVERSABLES, genShipmentToCreate)
+    } yield ShipmentChainData(user, sub, shipment)
+
+  def mapWithNOfUserNSubscriptionGen(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData]] =
+    Gen.mapOfN(length, userAndSubscriptionGen)
+
+  def listOfNPetsChainDataGen(length: Int): Gen[List[PetChainData]] =
+    Gen.listOfN(length, genPetsChainData)
+
+  def listOfNUsersGen(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[UserCreateGeneratedData]] = Gen.listOfN(length, genUserToCreate)
+
+  def listOfNSimplePetsGen(length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES): Gen[List[Pet]] =
+    Gen.listOfN(length, generateSimplePet)
 
   def stripeCustomer(seed: Long = 42L): Customer =
     generateStripeCustomer.pureApply(Gen.Parameters.default, rng.Seed(seed))
@@ -148,7 +214,12 @@ object Generator {
     generateNewUserData.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
   def simplePetsNonEmptyList(seed: Long = 42L): List[Pet] =
-    nonEmptySimplePetsGen.pureApply(Gen.Parameters.default, rng.Seed(seed))
+    listOfNSimplePetsGen().pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def listOfNShipmentChainData(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[ShipmentChainData]] =
+    Gen.listOfN(length, genShipmentChainData)
 
   implicit val arbUserCreation: Arbitrary[UserCreateGeneratedData] = Arbitrary(genUserToCreate)
 

@@ -64,32 +64,45 @@ class Parents extends Loggable {
   var currentParent: Box[User]                       = Empty
 
   def searchParents: JsCmd = {
-    if (searchTerm == "")
-      Alert("Search cannot be empty right now.")
-    else {
-      val formattedSearchTerm = searchTerm.split(" ").map(_ + ":*").mkString(" | ")
+    searchTerm match {
+      case empty if empty.isEmpty => Alert("Search cannot be empty right now.")
+      case zipCode if tryo(zipCode.toInt).isDefined =>
+        val addresses = Address.findAll(
+          By(Address.zip, zipCode)
+        )
+        activeParents = addresses.flatMap(_.user.obj)
+        cancelledParents = Nil
 
-      val searchQuery =
-        s"to_tsvector('english', coalesce(firstname,'') || ' ' || coalesce(lastname,'') || ' ' || coalesce(email,'')) @@ to_tsquery('english', '${formattedSearchTerm}')"
+        parents = activeParents
 
-      val activeParentsSearch = User.findAll(
-        By(User.userType, UserType.Parent),
-        BySql(searchQuery, IHaveValidatedThisSQL("mike", "2019-03-09"))
-      )
+        currentParent = Empty
+        parentsRenderer.map(_.setHtml).openOr(Noop)
 
-      val cancelledParentsSearch = CancelledUser.findAll(
-        BySql(searchQuery, IHaveValidatedThisSQL("mike", "2019-03-09"))
-      )
+      case userInfo =>
+        val formattedSearchTerm = userInfo.trim.split(" ").map(_ + ":*").mkString(" | ")
 
-      activeParents = activeParentsSearch
-      cancelledParents = cancelledParentsSearch
+        val searchQuery =
+          s"to_tsvector('english', coalesce(firstname,'') || ' ' || coalesce(lastname,'') || ' ' || coalesce(email,'')) @@ to_tsquery('english', '${formattedSearchTerm}')"
 
-      val cancelledUsers = cancelledParents.flatMap(getOldUserWithInfo)
-      parents = activeParents ++ cancelledUsers
+        val activeParentsSearch = User.findAll(
+          By(User.userType, UserType.Parent),
+          BySql(searchQuery, IHaveValidatedThisSQL("mike", "2019-03-09"))
+        )
 
-      currentParent = Empty
-      parentsRenderer.map(_.setHtml).openOr(Noop)
+        val cancelledParentsSearch = CancelledUser.findAll(
+          BySql(searchQuery, IHaveValidatedThisSQL("mike", "2019-03-09"))
+        )
+
+        activeParents = activeParentsSearch
+        cancelledParents = cancelledParentsSearch
+
+        val cancelledUsers = cancelledParents.flatMap(getOldUserWithInfo)
+        parents = activeParents ++ cancelledUsers
+
+        currentParent = Empty
+        parentsRenderer.map(_.setHtml).openOr(Noop)
     }
+
   }
 
   def getCancelledUser(parent: User): Box[CancelledUser] = {
@@ -361,6 +374,17 @@ class Parents extends Loggable {
       Noop
     }
 
+    def sendResetPasswordEmail(possibleUser: Box[User]) = {
+      possibleUser match {
+        case Full(user) =>
+          val userWithResetKey = KeyService.createResetKey(user)
+          EmailActor ! SendPasswordResetEmail(userWithResetKey)
+          Alert("Sent user reset email.")
+        case _ =>
+          Alert("Couldn't send reset email.")
+      }
+    }
+
     {
       if (isCancelled_?(parent)) {
         ".parent-information" #> ClearNodes &
@@ -402,11 +426,14 @@ class Parents extends Loggable {
             possibleAddress => updateAddress(possibleAddress, "zip", address)
           )
       } &
-      ".parent-information .change-email" #> {
+      ".parent-information" #> {
         val currentEmail = parent.map(_.email.get).openOr("")
 
+        ".reset-password [onclick]" #> SHtml.ajaxInvoke(() => sendResetPasswordEmail(parent)) &
+        ".change-email" #> {
         ".parent-email" #> SHtml.ajaxText(currentEmail, email = _) &
           ".update-email [onclick]" #> SHtml.ajaxInvoke(() => changeEmail(parent, email))
+        }
       } &
       ".parent-information .agent-name-container .agent *" #> agent
   }

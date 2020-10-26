@@ -294,9 +294,23 @@ input[type="text"] {
   }
 }
 
+.send-reset-password, .agent-name-container {
+  padding-top: 20px;
+}
+
+.reset-password {
+    border: none;
+    background: none;
+    padding: 0 20px;
+    margin: 0;
+    height: 38px;
+    background-color: #DCDBDB;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
 .change-email {
   display: block;
-  padding-top: 20px;
 
   .parent-email {
     width: 339px;
@@ -341,6 +355,6 @@ input[type="text"] {
   }
 }
 
-.agent-name-container {
-  padding: 0 40px;
+.user-info {
+  padding-left: 40px;
 }

@@ -199,7 +199,7 @@ object ReportingService extends Loggable {
       val mailedDate = getMailedDateOfShipment(shipment)
 
       mailedDate map { mailDate =>
-        (mailDate.getYear == 2020) &&
+        (mailDate.getYear == currentYear) &&
         (mailDate.getMonth == date.getMonth)
       } openOr (false)
     }
@@ -241,8 +241,8 @@ object ReportingService extends Loggable {
         val cancelDateMonth = cancellationDate.map(_.getMonth)
         val cancelDateYear  = cancellationDate.map(_.getYear)
 
-        !(cancelDateYear.map(_ == createdDateYear).openOr(false) &&
-          cancelDateMonth.map(_ == createdDateMonth).openOr(false))
+        (cancelDateYear.map(_ == createdDateYear).openOr(false) &&
+        cancelDateMonth.map(_ == createdDateMonth).openOr(false))
       }
     }
   }
@@ -953,14 +953,14 @@ object ReportingService extends Loggable {
 
   def findYesterdayNewSales: List[User] = {
     User.findAll(
-      By_>(User.createdAt, yesterdayStart),
+      By_>=(User.createdAt, yesterdayStart),
       By_<(User.createdAt, yesterdayEnd)
     )
   }
 
   def yesterdayShipments: (Int, Int, Double) = {
     val yesterdayShipments = Shipment.findAll(
-      By_>(Shipment.dateShipped, yesterdayStart),
+      By_>=(Shipment.dateShipped, yesterdayStart),
       By_<(Shipment.dateShipped, yesterdayEnd)
     )
 
@@ -973,7 +973,7 @@ object ReportingService extends Loggable {
 
   def yesterdayCancels: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.cancellationDate, yesterdayStart),
+      By_>=(Subscription.cancellationDate, yesterdayStart),
       By_<(Subscription.cancellationDate, yesterdayEnd)
     )
   }
@@ -984,120 +984,106 @@ object ReportingService extends Loggable {
       NotBy(Agency.name, "Petland")
     )
 
-    val usersByAgencies = agencies.map { agency => (agency, agency.customers.toList) }
-
-    val newUsersYesterdayByAgency = usersByAgencies.map {
-      case (agency, users) =>
-        val yesterdayUsers = users.filter { user =>
-          val createdDate = getCreatedDateOfUser(user)
-
-          val createdDateDay   = createdDate.getDayOfMonth
-          val createdDateMonth = createdDate.getMonth
-          val createdDateYear  = createdDate.getYear
-
-          val yesterdayDay   = yesterday.getDayOfMonth
-          val yesterdayMonth = yesterday.getMonth
-          val yesterdayYear  = yesterday.getYear
-
-          (
-            (createdDateDay == yesterdayDay) &&
-            (createdDateMonth == yesterdayMonth) &&
-            (createdDateYear == yesterdayYear)
-          )
-        }
-
-        (agency, yesterdayUsers)
+    val yesterdayCreatedUsersByAgencies = agencies.map { agency =>
+      (
+        agency,
+        User.findAll(
+          By(User.referer, agency),
+          By_>=(User.createdAt, yesterdayStart),
+          By_<(User.createdAt, yesterdayEnd)
+        )
+      )
     }
 
-    newUsersYesterdayByAgency.map {
+    yesterdayCreatedUsersByAgencies.map {
       case (agency, users) =>
         val pets = users.flatMap(_.pets.toList)
-        (agency.name.get -> pets.size)
-    }.toList.sortBy(_._1)
+        agency.name.get -> pets.size
+    }.sortBy(_._1)
   }
 
   def findMtdShipments: List[Shipment] = {
     Shipment.findAll(
-      By_>(Shipment.createdAt, monthDayOne)
+      By_>=(Shipment.createdAt, monthDayOne)
     )
   }
 
   def findTodayShipments: List[Shipment] = {
     Shipment.findAll(
-      By_>(Shipment.dateProcessed, nowDate)
+      By_>=(Shipment.dateProcessed, nowDate)
     )
   }
 
   def findCurrentMonthUpcomingSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.nextShipDate, tomorrowStart),
+      By_>=(Subscription.nextShipDate, tomorrowStart),
       By_<(Subscription.nextShipDate, beginngNextMonth)
     )
   }
 
   def findNewTodaySubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, nowDate)
+      By_>=(Subscription.createdAt, nowDate)
     )
   }
 
   def findNewTodaySubscriptionsLastMonth: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, todayLastMonth),
+      By_>=(Subscription.createdAt, todayLastMonth),
       By_<(Subscription.createdAt, todayLastMonthEnd)
     )
   }
 
   def findNewTodaySubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, todayLastYear),
+      By_>=(Subscription.createdAt, todayLastYear),
       By_<(Subscription.createdAt, todayLastYearEnd)
     )
   }
 
   def findNewMTDSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, monthDayOne)
+      By_>=(Subscription.createdAt, monthDayOne)
     )
   }
 
   def findNewMTDSubscriptionsLastMonth: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, monthDayOneLastMonth),
+      By_>=(Subscription.createdAt, monthDayOneLastMonth),
       By_<(Subscription.createdAt, currentDayLastMonthEnd)
     )
   }
 
   def findNewMTDSubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, monthDayOneLastYear),
+      By_>=(Subscription.createdAt, monthDayOneLastYear),
       By_<(Subscription.createdAt, currentDayLastYearEnd)
     )
   }
 
   def findNewYTDSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, yearDayOne)
+      By_>=(Subscription.createdAt, yearDayOne)
     )
   }
 
   def findNewYTDSubscriptionsLastMonth: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, yearDayOne),
+      By_>=(Subscription.createdAt, yearDayOne),
       By_<(Subscription.createdAt, todayLastMonthEnd)
     )
   }
 
   def findNewYTDSubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.createdAt, yearDayOneLastYear),
+      By_>=(Subscription.createdAt, yearDayOneLastYear),
       By_<(Subscription.createdAt, currentDayLastYearEnd)
     )
   }
 
   def findCancelledMtdSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>(Subscription.cancellationDate, monthDayOne)
+      By_>=(Subscription.cancellationDate, monthDayOne)
     )
   }
 
@@ -1106,90 +1092,70 @@ object ReportingService extends Loggable {
       NotBy(Agency.name, "My Pet Defense"),
       NotBy(Agency.name, "Petland")
     )
-    val usersByAgencies = agencies.map { agency => (agency, agency.customers.toList) }
 
-    val newUsersThisMonthByAgency = usersByAgencies.map {
-      case (agency, users) =>
-        val newUsersThisMonth = users.filter { user =>
-          val createdDayDate     = getCreatedDateOfUser(user)
-          val yesterdayDayOfYear = currentDate.getDayOfYear - 1
-
-          (
-            createdDayDate.getYear == yesterday.getYear &&
-            createdDayDate.getMonth == yesterday.getMonth
-          )
-        }
-        (agency, newUsersThisMonth)
+    val newUsersThisMonthByAgency = agencies.map { agency =>
+      (
+        agency,
+        User.findAll(
+          By(User.referer, agency),
+          By_>=(User.createdAt, monthDayOne),
+          By_<(User.createdAt, beginngNextMonth)
+        )
+      )
     }
 
     newUsersThisMonthByAgency.map {
       case (agency, users) =>
         val pets = users.flatMap(_.pets)
-        (agency.name.get -> pets.size)
-    }.toList.sortBy(_._1)
+        agency.name.get -> pets.size
+    }.sortBy(_._1)
   }
 
   def findYesterdaySalesByAgent: List[(String, Int)] = {
-    val totalUsers = Agency
+    val newUsersYesterday = Agency
       .findAll(
         NotBy(Agency.name, "My Pet Defense"),
         NotBy(Agency.name, "Petland")
       )
-      .flatMap(_.customers.toList)
-
-    val newUsersYesterday = totalUsers.filter { user =>
-      val createdDate = getCreatedDateOfUser(user)
-
-      val createdDateDay   = createdDate.getDayOfMonth
-      val createdDateMonth = createdDate.getMonth
-      val createdDateYear  = createdDate.getYear
-
-      val yesterdayDay   = yesterday.getDayOfMonth
-      val yesterdayMonth = yesterday.getMonth
-      val yesterdayYear  = yesterday.getYear
-
-      (
-        (createdDateDay == yesterdayDay) &&
-        (createdDateMonth == yesterdayMonth) &&
-        (createdDateYear == yesterdayYear)
-      )
-    }
+      .flatMap { agency =>
+        User.findAll(
+          By(User.referer, agency),
+          By_>=(User.createdAt, yesterdayStart),
+          By_<(User.createdAt, yesterdayEnd)
+        )
+      }
 
     newUsersYesterday
       .groupBy(_.salesAgentId.get)
       .map {
         case (agentId, users) =>
-          val pets = users.flatMap(_.pets.toList)
-          (agentId -> pets.size)
+          val pets = users.flatMap(_.pets)
+          agentId -> pets.size
       }
       .toList
       .sortBy(_._1)
   }
 
   def findMTDSalesByAgent: List[(String, Int)] = {
-    val totalUsers = Agency
+    val newUsersThisMonth = Agency
       .findAll(
         NotBy(Agency.name, "My Pet Defense"),
         NotBy(Agency.name, "Petland")
       )
-      .flatMap(_.customers.toList)
-
-    val newUsersThisMonth = totalUsers.filter { user =>
-      val createdDayDate     = getCreatedDateOfUser(user)
-      val yesterdayDayOfYear = currentDate.getDayOfYear - 1
-
-      (
-        createdDayDate.getYear == yesterday.getYear &&
-        createdDayDate.getMonth == yesterday.getMonth
-      )
-    }
+      .flatMap { agency =>
+        User.findAll(
+          By(User.referer, agency),
+          By_>=(User.createdAt, monthDayOne),
+          By_<(User.createdAt, beginngNextMonth)
+        )
+      }
 
     newUsersThisMonth
       .groupBy(_.salesAgentId.get)
       .map {
         case (agentId, users) =>
           val pets = users.flatMap(_.pets)
-          (agentId -> pets.size)
+          agentId -> pets.size
       }
       .toList
       .sortBy(_._1)
@@ -1288,8 +1254,6 @@ object ReportingService extends Loggable {
     }
 
     val cancellations = subscriptions.filter(_.status.get == Status.Cancelled)
-
-    val cancellationCount: Double = cancellations.size
 
     val cancellationShipments = findCancellationShipmentSize(cancellations)
 
