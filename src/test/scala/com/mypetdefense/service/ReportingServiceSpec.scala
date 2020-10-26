@@ -1,6 +1,7 @@
 package com.mypetdefense.service
 
 import java.util.Date
+import java.time.ZoneId
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator.{
   PetChainData,
@@ -12,12 +13,14 @@ import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers._
 import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.helpers.db.AgencyDbUtils._
+import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
 import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+
 import scala.collection.immutable
 
 class ReportingServiceSpec
@@ -26,6 +29,10 @@ class ReportingServiceSpec
     with BeforeAndAfterEach
     with BeforeAndAfterAll
     with ScalaCheckPropertyChecks {
+
+  private val mpdAgencyName     = "My Pet Defense"
+  private val petLandAgencyName = "Petland"
+
   override def beforeAll() {
     BootUtil.bootForTests()
   }
@@ -77,6 +84,12 @@ class ReportingServiceSpec
     val inserted    = insertUserAndPet(data)
     val updatedUser = inserted.user.referer(agency).createdAt(createdAt).saveMe()
     inserted.copy(user = updatedUser)
+  }
+
+  private def createPetlandAndMPDAgencies(): PetlandAndMPDAgencies = {
+    val myPetDefenseAgency = createAgency(mpdAgencyName)
+    val petlandAgency      = createAgency(petLandAgencyName)
+    PetlandAndMPDAgencies(petlandAgency, myPetDefenseAgency)
   }
 
   it should "find all active subscriptions" in {
@@ -384,13 +397,12 @@ class ReportingServiceSpec
   it should "find yesterday sales by agency" in {
     forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
       (yesterdayNotOursSales, myPetDefenseSales, petlandSales) =>
-        val myPetDefenceAgency = createAgency("My Pet Defense")
-        val petlandAgency      = createAgency("Petland")
+        val mpdAndPetland = createPetlandAndMPDAgencies()
         myPetDefenseSales.foreach(
-          insertAgencySalesCreatedAt(myPetDefenceAgency, anyHourOfYesterday.toDate, _)
+          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyHourOfYesterday.toDate, _)
         )
         petlandSales.foreach(
-          insertAgencySalesCreatedAt(petlandAgency, anyHourOfYesterday.toDate, _)
+          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyHourOfYesterday.toDate, _)
         )
 
         val someAgencyName = Random.generateString.take(10)
@@ -620,6 +632,154 @@ class ReportingServiceSpec
         val actualData = ReportingService.findCancelledMtdSubscriptions.map(_.id.get)
 
         actualData should contain theSameElementsAs expectedSubscriptions
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find MTD sales by agency" in {
+    forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
+      (yesterdayMonthNotOursSales, myPetDefenseSales, petlandSales) =>
+        val mpdAndPetland = createPetlandAndMPDAgencies()
+        myPetDefenseSales.foreach(
+          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyDayOfThisMonth.toDate, _)
+        )
+        petlandSales.foreach(
+          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyDayOfThisMonth.toDate, _)
+        )
+
+        val someAgencyName = Random.generateString.take(10)
+        val someAgency     = createAgency(someAgencyName)
+
+        val insertedPetsSize = yesterdayMonthNotOursSales
+          .map(insertAgencySalesCreatedAt(someAgency, anyDayOfThisMonth.toDate, _).pets.size)
+          .sum
+
+        val expectedInResult = someAgencyName -> insertedPetsSize
+
+        val actualData = ReportingService.findMTDSalesByAgency
+
+        actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
+        actualData should contain(expectedInResult)
+    }
+  }
+
+  it should "find yesterday sales by agent" in {
+    forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
+      (yesterdayNotOursSales, myPetDefenseSales, petlandSales) =>
+        val mpdAndPetland = createPetlandAndMPDAgencies()
+        myPetDefenseSales.foreach(
+          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyHourOfYesterday.toDate, _)
+        )
+        petlandSales.foreach(
+          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyHourOfYesterday.toDate, _)
+        )
+
+        val someAgencyName   = Random.generateString.take(10)
+        val someSalesAgentId = Random.generateString.take(10)
+        val someAgency       = createAgency(someAgencyName).saveMe()
+
+        val insertedPetsSize = yesterdayNotOursSales
+          .map(insertAgencySalesCreatedAt(someAgency, anyHourOfYesterday.toDate, _))
+          .map { inserted =>
+            inserted.user.salesAgentId(someSalesAgentId).saveMe()
+            inserted.pets.size
+          }
+          .sum
+
+        val expectedInResult = someSalesAgentId -> insertedPetsSize
+
+        val actualData = ReportingService.findYesterdaySalesByAgent
+
+        actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
+        actualData should contain(expectedInResult)
+    }
+  }
+
+  it should "find MTD sales by agent" in {
+    forAll(listOfNPetsChainDataGen(3), listOfNPetsChainDataGen(2), listOfNPetsChainDataGen(2)) {
+      (yesterdayMonthNotOursSales, myPetDefenseSales, petlandSales) =>
+        val mpdAndPetland = createPetlandAndMPDAgencies()
+        myPetDefenseSales.foreach(
+          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyDayOfThisMonth.toDate, _)
+        )
+        petlandSales.foreach(
+          insertAgencySalesCreatedAt(
+            createPetlandAndMPDAgencies().petland,
+            anyDayOfThisMonth.toDate,
+            _
+          )
+        )
+
+        val someAgencyName   = Random.generateString.take(10)
+        val someSalesAgentId = Random.generateString.take(10)
+        val someAgency       = createAgency(someAgencyName).saveMe()
+
+        val insertedPetsSize = yesterdayMonthNotOursSales
+          .map(insertAgencySalesCreatedAt(someAgency, anyDayOfThisMonth.toDate, _))
+          .map { inserted =>
+            inserted.user.salesAgentId(someSalesAgentId).saveMe()
+            inserted.pets.size
+          }
+          .sum
+
+        val expectedInResult = someSalesAgentId -> insertedPetsSize
+
+        val actualData = ReportingService.findMTDSalesByAgent
+
+        actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
+        actualData should contain(expectedInResult)
+    }
+  }
+
+  it should "find cancels by shipment" in {
+    forAll(listOfNShipmentChainData(), genShipmentChainData, genShipmentChainData) {
+      (shouldBeInStatisticData, notCanceledData, canceledAndNotShippedData) =>
+        insertUserSubAndShipment(notCanceledData)
+        insertUserSubAndShipment(canceledAndNotShippedData).subscription.cancel
+
+        val canceledShouldBeInResultSize =
+          shouldBeInStatisticData.map(insertUserSubAndShipment).map { inserted =>
+            inserted.subscription.cancel
+            inserted.shipments.map(_.dateShipped(anyDayOfThisYear.toDate).saveMe()).size
+          }
+
+        val expectedData = ("0", 1) :: List(1, 2, 3, 4, 5).map { count =>
+          (count.toString, canceledShouldBeInResultSize.count(_ == count))
+        } ++ List(("6+", canceledShouldBeInResultSize.count(_ >= 6)))
+
+        val subs = Subscription.findAll()
+
+        val actualData = ReportingService.cancelsByShipment(subs)
+
+        actualData should contain theSameElementsAs expectedData
+        cleanUpSuccess()
+    }
+  }
+
+  it should "find same day cancels by month" in {
+    forAll(listOfNShipmentChainData(), genShipmentChainData, genShipmentChainData) {
+      (shouldBeInStatisticData, notCanceledData, canceledAndShippedData) =>
+        insertUserSubAndShipment(notCanceledData)
+        val shouldBeCanceledAndHaveShipping = insertUserSubAndShipment(canceledAndShippedData)
+        shouldBeCanceledAndHaveShipping.subscription.cancel
+        shouldBeCanceledAndHaveShipping.shipments.map(
+          _.dateShipped(anyDayOfThisYear.toDate).saveMe()
+        )
+
+        val expectedData = shouldBeInStatisticData
+          .map(insertUserSubAndShipment)
+          .map { inserted =>
+            inserted.subscription.cancel
+            inserted.subscription.createdAt(anyDayOfThisYear.toDate).saveMe()
+          }
+          .groupBy(_.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate.getMonth)
+          .mapValues(_.size)
+
+        val subs = Subscription.findAll()
+
+        val actualData = ReportingService.sameDayCancelsByMonth(subs)
+
+        actualData should contain theSameElementsAs expectedData
         cleanUpSuccess()
     }
   }

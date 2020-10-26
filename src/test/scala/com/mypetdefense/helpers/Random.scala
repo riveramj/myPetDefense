@@ -6,12 +6,12 @@ object Random {
 
   private val rng = new SecureRandomNumberGenerator()
 
-  def genPosLong: Long = scala.math.abs(scala.util.Random.nextLong)
+  def randomPosLong: Long = scala.math.abs(scala.util.Random.nextLong)
 
-  def genPosInt: Int = scala.math.abs(scala.util.Random.nextInt())
+  def randomPosInt: Int = scala.math.abs(scala.util.Random.nextInt())
 
   def generateMoneyString: String = {
-    f"${genPosLong.toDouble}%2.2f"
+    f"${randomPosLong.toDouble}%2.2f"
   }
 
   def generateString: String = {

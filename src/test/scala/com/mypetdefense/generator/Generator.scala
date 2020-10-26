@@ -189,7 +189,7 @@ object Generator {
     for {
       user     <- genUserToCreate
       sub      <- genSubscriptionToCreate
-      shipment <- Gen.nonEmptyListOf(genShipmentToCreate)
+      shipment <- Gen.listOfN(MAX_LENGTH_OF_GENERATED_TRAVERSABLES, genShipmentToCreate)
     } yield ShipmentChainData(user, sub, shipment)
 
   def mapWithNOfUserNSubscriptionGen(
