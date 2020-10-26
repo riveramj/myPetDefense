@@ -495,4 +495,32 @@ object DataLoader extends Loggable {
       val box = SubscriptionBox.createBasicBox(subscription, catFleaTick, cat)
       cat.box(box).saveMe()
     }
+
+  def cancellationDataSync(): Unit = {
+    def cancelPets(pets: List[Pet]): Unit = {
+      pets.filter(_.status.get != Status.Cancelled).foreach(_.status(Status.Cancelled).saveMe())
+    }
+
+    for {
+      subscription <- Subscription.findAll(By(Subscription.status, Status.Cancelled))
+      user <- subscription.user.obj.toList
+      pets = user.pets.toList
+    } {
+      if (user.status.get != Status.Cancelled)
+        user.status(Status.Cancelled).saveMe()
+
+      cancelPets(pets)
+    }
+
+    for {
+      user <- User.findAll(By(User.status, Status.Cancelled))
+      subscription <- user.subscription.obj.toList
+      pets = user.pets.toList
+    } {
+      if (subscription.status.get != Status.Cancelled)
+        subscription.status(Status.Cancelled).saveMe()
+
+      cancelPets(pets)
+    }
+  }
 }
