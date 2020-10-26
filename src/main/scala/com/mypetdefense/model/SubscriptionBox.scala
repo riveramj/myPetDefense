@@ -36,10 +36,17 @@ class SubscriptionBox
     else
       0d
 
-  def basePrice(pet: Pet): Double = pet.size.get match {
-    case AnimalSize.DogSmallZo | AnimalSize.DogMediumZo => 24.99
-    case AnimalSize.DogLargeZo | AnimalSize.DogXLargeZo => 27.99
-    case AnimalSize.CatAllSize                          => 12.99
+  def basePrice(pet: Pet): Double = {
+    val smallDogs = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
+
+    pet match {
+      case dog if pet.animalType.get == AnimalType.Dog =>
+        if (smallDogs.contains(dog.size.get))
+          24.99
+        else
+          27.99
+      case _ => 12.99
+    }
   }
 
   def createNewBox(subscription: Subscription, pet: Pet): SubscriptionBox = {
