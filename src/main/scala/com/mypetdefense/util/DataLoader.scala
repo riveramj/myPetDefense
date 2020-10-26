@@ -486,9 +486,6 @@ object DataLoader extends Loggable {
   }
 
   def createMissingCatBoxes(): Unit = {
-    println(FleaTick.zoGuardCat.toList)
-
-
     for {
       cat <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
       user <- cat.user.obj.toList
