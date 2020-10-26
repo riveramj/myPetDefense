@@ -282,8 +282,15 @@ object ReportingService extends Loggable {
       f"Month To Date Totals,${currentMonthSubscriptionCancels.size},$averageShipmentsPerCancelByMonth%3.2f,$$$currentMonthCancelTotal,$$$monthCancelCommisionAmount%3.2f"
     )
 
-    val headers =
-      "Customer Id" :: "Start Month" :: "End Month" :: "Customer Status" :: "Shipment Count" :: "Total Gross Sales" :: "Total Commission" :: Nil
+    val headers = List(
+      "Customer Id",
+      "Start Month",
+      "End Month",
+      "Customer Status",
+      "Shipment Count",
+      "Total Gross Sales",
+      "Total Commission"
+    )
 
     val allCancellationRows: List[List[String]] = {
       for {

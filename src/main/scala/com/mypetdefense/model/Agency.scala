@@ -3,7 +3,6 @@ package com.mypetdefense.model
 import java.util.Date
 
 import com.mypetdefense.util.DateHelper.currentDate
-import com.mypetdefense.util.ModelSyntax.ShipmentSyntax
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.mapper._

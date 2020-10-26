@@ -1,6 +1,6 @@
 package com.mypetdefense.model
 
-import java.time.Month
+import java.time.{LocalDate, Month, ZoneId}
 
 import net.liftweb._
 import mapper._
@@ -13,11 +13,7 @@ import com.mypetdefense.service.KeyService._
 import com.mypetdefense.snippet.NewParent
 import com.mypetdefense.util.TitleCase
 import org.apache.shiro.crypto.hash.Sha256Hash
-import org.apache.shiro.crypto.SecureRandomNumberGenerator
 import java.util.Date
-
-import com.mypetdefense.service.ReportingService.filterMailedShipments
-import com.mypetdefense.util.ModelSyntax.SubscriptionSyntax
 
 import scala.collection.mutable
 
@@ -287,6 +283,9 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
         (month, subscriptions.size)
     }
   }
+
+  def getCreatedDateOfUser: LocalDate =
+    this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
 }
 
 object User extends User with LongKeyedMetaMapper[User]

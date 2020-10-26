@@ -1,15 +1,15 @@
 package com.mypetdefense.model
 
-import java.time.{LocalDate, Month}
+import java.time.{LocalDate, ZoneId}
 
 import net.liftweb._
 import mapper._
 import java.util.Date
 
-import com.mypetdefense.service.ReportingService.filterMailedShipments
-import com.mypetdefense.util.ModelSyntax.ShipmentSyntax
+import com.mypetdefense.util.DateHelper.signupCancelDateFormat
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Box
+import net.liftweb.util.Helpers.tryo
 
 import scala.collection.mutable
 
@@ -96,6 +96,21 @@ class Subscription
       !shipment.getMailedDateOfShipment.isEmpty || legacyShipment_?
     }
   }
+
+  def getStartDateOfSubscription: String =
+    tryo(signupCancelDateFormat.format(this.startDate.get)).openOr("")
+
+  def getCancelDateOfSubscription: String =
+    tryo(signupCancelDateFormat.format(this.cancellationDate.get)).openOr("")
+
+  def getCreatedDateOfSubscription: LocalDate =
+    this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+
+  def getCancelledDateOfSubscription: Box[LocalDate] =
+    tryo(this.cancellationDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+
+  def getNextShipDate: LocalDate =
+    this.nextShipDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
 }
 
 object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]

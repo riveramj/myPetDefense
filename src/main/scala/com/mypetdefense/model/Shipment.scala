@@ -1,10 +1,14 @@
 package com.mypetdefense.model
 
+import java.time.{LocalDate, ZoneId}
+
 import net.liftweb._
 import common._
 import mapper._
 import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
+
+import net.liftweb.util.Helpers.tryo
 
 class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, Shipment] {
   def getSingleton: KeyedMetaMapper[Long, Shipment] = Shipment
@@ -39,6 +43,12 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   }
 
   def refresh: Box[Shipment] = Shipment.find(By(Shipment.shipmentId, shipmentId.get))
+
+  def getProcessDateOfShipment: LocalDate =
+    this.dateProcessed.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+
+  def getMailedDateOfShipment: Box[LocalDate] =
+    tryo(this.dateShipped.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
 }
 
 object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
@@ -87,14 +97,13 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
   object pet      extends MappedLongForeignKey(this, Pet)
   object insert   extends MappedLongForeignKey(this, Insert)
 
-
   def getPetNameProductName: String = {
-     val productNAme = this match {
-       case _ if this.fleaTick.obj.isDefined => this.fleaTick.obj.map(_.getNameAndSize).openOr("")
-       case _ if this.product.obj.isDefined => this.product.obj.map(_.name.get).openOr("")
-       case _ if this.insert.obj.isDefined => this.insert.obj.map(_.name.get).openOr("")
-       case _ => ""
-     }
+    val productNAme = this match {
+      case _ if this.fleaTick.obj.isDefined => this.fleaTick.obj.map(_.getNameAndSize).openOr("")
+      case _ if this.product.obj.isDefined  => this.product.obj.map(_.name.get).openOr("")
+      case _ if this.insert.obj.isDefined   => this.insert.obj.map(_.name.get).openOr("")
+      case _                                => ""
+    }
 
     s"${this.petName.get} - $productNAme"
   }
