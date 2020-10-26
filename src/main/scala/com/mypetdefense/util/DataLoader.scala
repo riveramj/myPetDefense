@@ -492,8 +492,9 @@ object DataLoader extends Loggable {
       subscription <- user.subscription.obj.toList
       catFleaTick <- FleaTick.zoGuardCat.toList
     } {
-      val box = SubscriptionBox.createBasicBox(subscription, catFleaTick, cat)
-      cat.box(box).saveMe()
+      val updatedCat = cat.size(catFleaTick.size.get).saveMe
+      val box = SubscriptionBox.createBasicBox(subscription, catFleaTick, updatedCat)
+      updatedCat.box(box).saveMe()
     }
 
   def cancellationDataSync(): Unit = {
