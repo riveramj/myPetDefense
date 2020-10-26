@@ -8,6 +8,7 @@ import mapper._
 import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
 
+import com.mypetdefense.util.DateHelper.{monthDayOne, nowDate}
 import net.liftweb.util.Helpers.tryo
 
 class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, Shipment] {
@@ -49,6 +50,18 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
 
   def getMailedDateOfShipment: Box[LocalDate] =
     tryo(this.dateShipped.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+
+  def findMtdShipments: List[Shipment] = {
+    Shipment.findAll(
+      By_>=(Shipment.createdAt, monthDayOne)
+    )
+  }
+
+  def findTodayShipments: List[Shipment] = {
+    Shipment.findAll(
+      By_>=(Shipment.dateProcessed, nowDate)
+    )
+  }
 }
 
 object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {

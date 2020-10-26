@@ -36,18 +36,18 @@ class ExecutiveDashboard extends Loggable {
   val dollarFormatter: NumberFormat = NumberFormat.getCurrencyInstance
   val numberFormatter: NumberFormat = NumberFormat.getIntegerInstance
 
-  val mtdShipments: List[Shipment] = ReportingService.findMtdShipments
+  val mtdShipments: List[Shipment] = Shipment.findMtdShipments
   val mtdShipmentValue: Double = mtdShipments.flatMap { shipment =>
     tryo(shipment.amountPaid.get.toDouble)
   }.foldLeft(0d)(_ + _)
 
-  val todayShipments: List[Shipment] = ReportingService.findTodayShipments
+  val todayShipments: List[Shipment] = Shipment.findTodayShipments
   val todayShipmentsValue: Double = todayShipments.flatMap { shipment =>
     tryo(shipment.amountPaid.get.toDouble)
   }.foldLeft(0d)(_ + _)
 
   val remainingMonthSubscriptions: List[Subscription] =
-    ReportingService.findCurrentMonthUpcomingSubscriptions
+    Subscription.findCurrentMonthUpcomingSubscriptions
 
   /*
   val remainingMonthValue = {
@@ -62,23 +62,23 @@ class ExecutiveDashboard extends Loggable {
   }.sum
    */
 
-  val newStartsToday: List[Subscription] = ReportingService.findNewTodaySubscriptions
+  val newStartsToday: List[Subscription] = Subscription.findNewTodaySubscriptions
   val newStartsTodayLastMonth: List[Subscription] =
-    ReportingService.findNewTodaySubscriptionsLastMonth
+    Subscription.findNewTodaySubscriptionsLastMonth
   val newStartsTodayLastYear: List[Subscription] =
-    ReportingService.findNewTodaySubscriptionsLastYear
+    Subscription.findNewTodaySubscriptionsLastYear
   val newStartsTodayMonthDiff: Int = newStartsToday.size - newStartsTodayLastMonth.size
   val newStartsTodayYearDiff: Int  = newStartsToday.size - newStartsTodayLastYear.size
 
-  val newStartsMTD: List[Subscription]          = ReportingService.findNewMTDSubscriptions
-  val newStartsMTDLastMonth: List[Subscription] = ReportingService.findNewMTDSubscriptionsLastMonth
-  val newStartsMTDLastYear: List[Subscription]  = ReportingService.findNewMTDSubscriptionsLastYear
+  val newStartsMTD: List[Subscription]          = Subscription.findNewMTDSubscriptions
+  val newStartsMTDLastMonth: List[Subscription] = Subscription.findNewMTDSubscriptionsLastMonth
+  val newStartsMTDLastYear: List[Subscription]  = Subscription.findNewMTDSubscriptionsLastYear
   val newStartsMTDMonthDiff: Int                = newStartsMTD.size - newStartsMTDLastMonth.size
   val newStartsMTDYearDiff: Int                 = newStartsMTD.size - newStartsMTDLastYear.size
 
-  val newStartsYTD: List[Subscription]          = ReportingService.findNewYTDSubscriptions
-  val newStartsYTDLastMonth: List[Subscription] = ReportingService.findNewYTDSubscriptionsLastMonth
-  val newStartsYTDLastYear: List[Subscription]  = ReportingService.findNewYTDSubscriptionsLastYear
+  val newStartsYTD: List[Subscription]          = Subscription.findNewYTDSubscriptions
+  val newStartsYTDLastMonth: List[Subscription] = Subscription.findNewYTDSubscriptionsLastMonth
+  val newStartsYTDLastYear: List[Subscription]  = Subscription.findNewYTDSubscriptionsLastYear
   val newStartsYTDMonthDiff: Int                = newStartsYTD.size - newStartsYTDLastMonth.size
   val newStartsYTDYearDiff: Int                 = newStartsYTD.size - newStartsYTDLastYear.size
 
@@ -143,7 +143,7 @@ class ExecutiveDashboard extends Loggable {
         remainingMonthSubscriptions.size
       ) &
       ".remaining-shipments-month .value *" #> dollarFormatter.format(0.99) &
-      ".mtd-users .new-users-count *" #> ReportingService.findNewMTDSubscriptions.size &
-      ".mtd-users .cancellations-count *" #> ReportingService.findCancelledMtdSubscriptions.size
+      ".mtd-users .new-users-count *" #> Subscription.findNewMTDSubscriptions.size &
+      ".mtd-users .cancellations-count *" #> Subscription.findCancelledMtdSubscriptions.size
   }
 }

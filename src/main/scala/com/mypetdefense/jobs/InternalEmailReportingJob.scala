@@ -1,6 +1,7 @@
 package com.mypetdefense.jobs
 
 import com.mypetdefense.actor._
+import com.mypetdefense.model.Subscription
 import com.mypetdefense.service.ReportingService
 import org.quartz._
 
@@ -21,7 +22,7 @@ class InternalEmailReportingJob extends ManagedJob {
         ) =
           ReportingService.yesterdayShipments
 
-        val cancelsYesterday      = ReportingService.yesterdayCancels
+        val cancelsYesterday      = Subscription.yesterdayCancels
         val cancelsYesterdayCount = cancelsYesterday.size
 
         internalEmails.map { email =>

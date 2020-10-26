@@ -2,6 +2,7 @@ package com.mypetdefense.model
 
 import java.util.Date
 
+import com.mypetdefense.service.ReportingService.petlandName
 import com.mypetdefense.util.DateHelper.currentDate
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
@@ -85,6 +86,23 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
       shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
     } yield {
       shipment
+    }
+
+  def getUsersForAgency(agencyName: String): List[User] = {
+    val agency = Agency.find(By(Agency.name, agencyName))
+    agency.map(_.customers.toList).openOr(Nil)
+  }
+
+  def getTotalUsers(agencyName: String): List[User] =
+    if (agencyName != "TPP")
+      Agency.find(By(Agency.name, agencyName)).map(_.customers.toList).getOrElse(Nil)
+    else {
+      val puppySpot =
+        Agency.find(By(Agency.name, "PuppySpot")).map(_.customers.toList).getOrElse(Nil)
+      val petland =
+        Agency.find(By(Agency.name, petlandName)).map(Agency.getAllChildrenCustomers).getOrElse(Nil)
+
+      puppySpot ++ petland
     }
 }
 

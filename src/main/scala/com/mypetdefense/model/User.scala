@@ -15,6 +15,8 @@ import com.mypetdefense.util.TitleCase
 import org.apache.shiro.crypto.hash.Sha256Hash
 import java.util.Date
 
+import com.mypetdefense.util.DateHelper.{yesterdayEnd, yesterdayStart}
+
 import scala.collection.mutable
 
 class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
@@ -286,6 +288,13 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
 
   def getCreatedDateOfUser: LocalDate =
     this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+
+  def findYesterdayNewSales: List[User] = {
+    User.findAll(
+      By_>=(User.createdAt, yesterdayStart),
+      By_<(User.createdAt, yesterdayEnd)
+    )
+  }
 }
 
 object User extends User with LongKeyedMetaMapper[User]

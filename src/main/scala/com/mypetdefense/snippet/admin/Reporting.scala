@@ -105,7 +105,7 @@ class Reporting extends Loggable {
   def render: CssSel = {
     ".reporting [class+]" #> "current" &
       ".agency" #> agencies.map { agencyName =>
-        val users              = ReportingService.getUsersForAgency(agencyName)
+        val users              = Agency.getUsersForAgency(agencyName)
         val subscriptions      = users.getSubscriptions
         val cancelsByShipment  = ReportingService.cancelsByShipment(subscriptions)
         val shipments          = ReportingService.getShipments(subscriptions)
