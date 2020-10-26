@@ -50,12 +50,7 @@ class SubscriptionBox
   }
 
   def createNewBox(subscription: Subscription, pet: Pet): SubscriptionBox = {
-    val fleaTick = pet.size.get match {
-      case AnimalSize.DogSmallZo  => FleaTick.zoGuardSmallDog
-      case AnimalSize.DogMediumZo => FleaTick.zoGuardMediumDog
-      case AnimalSize.DogLargeZo  => FleaTick.zoGuardLargeDog
-      case AnimalSize.DogXLargeZo => FleaTick.zoGuardXLargeDog
-    }
+    val fleaTick = FleaTick.find(By(FleaTick.size, pet.size.get))
 
     SubscriptionBox.create
       .boxId(generateLongId)
