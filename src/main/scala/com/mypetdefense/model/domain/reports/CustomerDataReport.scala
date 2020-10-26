@@ -1,8 +1,8 @@
-package com.mypetdefense.model.domain
+package com.mypetdefense.model.domain.reports
 
 import com.mypetdefense.model.Status
 
-case class CustomerInfo(
+case class CustomerDataReport(
     name: String,
     subscriptionStatus: Status.Value,
     shipmentsSize: Int,

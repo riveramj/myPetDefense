@@ -2,6 +2,8 @@ package com.mypetdefense.model
 
 import java.util.Date
 
+import com.mypetdefense.util.DateHelper.currentDate
+import com.mypetdefense.util.ModelSyntax.ShipmentSyntax
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.mapper._
@@ -70,6 +72,21 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
       childrenAgencies.flatMap { child => getAllChildrenCustomers(child) }
     }
   }
+
+  def currentMonthShipments: List[Shipment] = this.findAllShipments.filter { shipment =>
+    val mailedDate = shipment.getMailedDateOfShipment
+    mailedDate.map(_.getMonth == currentDate.getMonth).openOr(false) &&
+    mailedDate.map(_.getYear == currentDate.getYear).openOr(false)
+  }
+
+  def findAllShipments: List[Shipment] =
+    for {
+      customer     <- this.customers.toList
+      subscription <- customer.subscription.toList
+      shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+    } yield {
+      shipment
+    }
 }
 
 object Agency extends Agency with LongKeyedMetaMapper[Agency]

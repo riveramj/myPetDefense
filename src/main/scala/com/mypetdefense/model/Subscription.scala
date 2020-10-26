@@ -1,9 +1,13 @@
 package com.mypetdefense.model
 
+import java.time.{LocalDate, Month}
+
 import net.liftweb._
 import mapper._
 import java.util.Date
 
+import com.mypetdefense.service.ReportingService.filterMailedShipments
+import com.mypetdefense.util.ModelSyntax.ShipmentSyntax
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Box
 
@@ -81,6 +85,16 @@ class Subscription
 
   def getMonthlyCost: Double = {
     this.subscriptionBoxes.map { box => box.basePrice.get + box.addOnProducts.map(_.price.get).sum }.sum
+  }
+
+  def filterMailedShipments: List[Shipment] = {
+    this.shipments.toList.filter { shipment =>
+      val dateProcessed = shipment.getProcessDateOfShipment
+
+      val legacyShipment_? = dateProcessed.isBefore(LocalDate.parse("2018-01-01"))
+
+      !shipment.getMailedDateOfShipment.isEmpty || legacyShipment_?
+    }
   }
 }
 

@@ -1,11 +1,13 @@
 package com.mypetdefense.model
 
+import java.text.SimpleDateFormat
+
 import net.liftweb._
 import mapper._
 import common.Box
-
 import java.util.Date
 
+import com.mypetdefense.model.domain.reports.AmazonOrderReport
 import com.mypetdefense.util.RandomIdGenerator._
 
 class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
@@ -75,6 +77,41 @@ class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
       .purchaseDate(purchaseDate)
       .saveMe
   }
+
+  def findOrdersBetween(
+      start: Date,
+      `end`: Date,
+      animalType: AnimalType.Value
+  ): List[AmazonOrder] = {
+    AmazonOrder.findAll(
+      By_>(AmazonOrder.purchaseDate, start),
+      By_<(AmazonOrder.purchaseDate, `end`),
+      By(AmazonOrder.animalType, animalType)
+    )
+  }
+
+  def findOrdersToReport(
+      start: Date,
+      `end`: Date,
+      animalType: AnimalType.Value
+  ): List[AmazonOrderReport] = {
+    findOrdersBetween(start, `end`, animalType).map { order =>
+      AmazonOrderReport(
+        order.name.get,
+        order.address1.get,
+        order.address2.get,
+        order.address3.get,
+        order.city.get,
+        order.state.get,
+        order.zip.get,
+        order.animalType.get,
+        order.purchaseDate.get,
+        order.productName.get
+      )
+    }
+
+  }
+
 }
 
 object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder] {}

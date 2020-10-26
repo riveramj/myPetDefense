@@ -1,5 +1,7 @@
 package com.mypetdefense.model
 
+import java.time.Month
+
 import net.liftweb._
 import mapper._
 import common._
@@ -13,6 +15,9 @@ import com.mypetdefense.util.TitleCase
 import org.apache.shiro.crypto.hash.Sha256Hash
 import org.apache.shiro.crypto.SecureRandomNumberGenerator
 import java.util.Date
+
+import com.mypetdefense.service.ReportingService.filterMailedShipments
+import com.mypetdefense.util.ModelSyntax.SubscriptionSyntax
 
 import scala.collection.mutable
 
@@ -265,6 +270,22 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     val rate = getTaxRate
 
     this.taxRate(rate).saveMe
+  }
+
+  def sameDayCancelsByMonth(subscriptions: List[Subscription]): Map[Month, Int] = {
+    val sameDayCancels =
+      subscriptions
+        .filter(_.status.get == Status.Cancelled)
+        .filter(_.filterMailedShipments.isEmpty)
+
+    val cancelsByMonth = sameDayCancels.groupBy { subscription =>
+      subscription.getCreatedDateOfSubscription.getMonth
+    }
+
+    cancelsByMonth.map {
+      case (month, subscriptions) =>
+        (month, subscriptions.size)
+    }
   }
 }
 
