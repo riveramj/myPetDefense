@@ -1,38 +1,25 @@
 package com.mypetdefense.snippet
 
+import java.time.{LocalDate, ZoneId}
+import java.util.Date
+
 import net.liftweb._
 import common._
-import mapper._
 import http._
-import LiftRules._
+import mapper._
 import rest._
-import js._
-import JE._
-import JsExp._
 import util._
 import Helpers._
 import json._
-import Extraction._
 import JsonDSL._
-
-import com.mypetdefense.model._
-import com.mypetdefense.service.{TaxJarService, ParentService}
 import com.mypetdefense.actor._
+import com.mypetdefense.model._
+import com.mypetdefense.service.{ParentService, TaxJarService}
+import dispatch.Defaults._
+import me.frmr.stripe.{Customer, StripeExecutor, Subscription => StripeSubscription}
 
+import scala.concurrent.Future
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
-import scala.concurrent.{Future, Await}
-import scala.concurrent.duration._
-
-import java.util.Date
-import java.time.{LocalDate, ZoneId}
-
-import me.frmr.stripe.{
-  StripeExecutor,
-  Customer,
-  Coupon => StripeCoupon,
-  Subscription => StripeSubscription
-}
-import dispatch.{Req => DispatchReq, _}, Defaults._
 
 case class NewAddress(
     street1: String,
@@ -392,7 +379,9 @@ object TPPApi extends RestHelper with Loggable {
       } yield {
         val salesAgency = {
           val possibleAgency = Agency.find(By(Agency.storeCode, storeCode))
-          if (possibleAgency.isEmpty)
+          if (storeCode.toLowerCase == "pupspot2")
+            Agency.find(By(Agency.name, "PuppySpot"))
+          else if (possibleAgency.isEmpty)
             tppAgency
           else
             possibleAgency
