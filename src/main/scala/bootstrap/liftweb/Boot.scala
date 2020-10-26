@@ -73,6 +73,7 @@ class Boot {
     //DataLoader.removeDupUsers()
     //DataLoader.createMissingCatBoxes()
     //DataLoader.cancellationDataSync()
+    DataLoader.createMissingDogBoxes()
     //ReportingService.getPetlandCustomersWithStats
 
     //DataLoader.connectCancelledUsersToSubscription()

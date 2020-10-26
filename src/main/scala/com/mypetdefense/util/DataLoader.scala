@@ -486,9 +486,6 @@ object DataLoader extends Loggable {
   }
 
   def createMissingCatBoxes(): Unit = {
-    println(FleaTick.zoGuardCat.toList)
-
-
     for {
       cat <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
       user <- cat.user.obj.toList
@@ -500,6 +497,20 @@ object DataLoader extends Loggable {
       updatedCat.box(box).saveMe()
     }
   }
+
+  def createMissingDogBoxes(): Unit =
+    for {
+      dog <- Pet.findAll(By(Pet.animalType, AnimalType.Dog), NullRef(Pet.box))
+      user <- dog.user.obj.toList
+      subscription <- user.subscription.obj.toList
+    } {
+      val box = SubscriptionBox.createNewBox(subscription, dog)
+      dog.box(box).saveMe()
+
+      if (subscription.isUpgraded.get) {
+        SubscriptionItem.createFirstBox(box)
+      }
+    }
 
   def cancellationDataSync(): Unit = {
     def cancelPets(pets: List[Pet]): Unit = {
