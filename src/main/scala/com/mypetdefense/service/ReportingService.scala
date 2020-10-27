@@ -749,7 +749,7 @@ object ReportingService extends Loggable {
     val upgradedCancelledSubs       = allCancelledSubs.filter(_.isUpgraded.get)
     val allActivePets               = allActiveSubs.getPets
     val allAccountsReport           = AllAccountsReport(allActiveSubs.size, allActivePets.size)
-    val upgradedSubsReport          = upgradedSubscriptionsReport(allActiveSubs, allCancelledSubs)
+    val upgradedSubsReport          = upgradedSubscriptionsReport(allUpgradedSubs, allCancelledSubs)
     val activeUpgradedPetsBySize    = countPetsBySize(allUpgradedSubs.getPets)
     val cancelledUpgradedPetsBySize = countPetsBySize(upgradedCancelledSubs.getPets)
     val upgradedNCancelledSubsByPetsCount = cancelledUpgradedSubscriptionsByPetCount(
@@ -796,11 +796,11 @@ object ReportingService extends Loggable {
 
   private def countUpgradesByAgency(
       canceledSubs: List[Subscription]
-  ): Iterable[CancelledUpgradesByAgency] = {
+  ): Iterable[CountedByAgency] = {
     val subscriptionsAgencies = canceledSubs.flatMap { s => s.user.flatMap(_.referer.toOption) }
     CalculationHelper
       .calculateOccurrences[String, Agency](subscriptionsAgencies, _.name.get)
-      .map(CancelledUpgradesByAgency.tupled)
+      .map(CountedByAgency.tupled)
   }
 
   private def upgradedSubscriptionsReport(
