@@ -111,14 +111,14 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
   object insert   extends MappedLongForeignKey(this, Insert)
 
   def getPetNameProductName: String = {
-    val productNAme = this match {
+    val productName = this match {
       case _ if this.fleaTick.obj.isDefined => this.fleaTick.obj.map(_.getNameAndSize).openOr("")
       case _ if this.product.obj.isDefined  => this.product.obj.map(_.name.get).openOr("")
       case _ if this.insert.obj.isDefined   => this.insert.obj.map(_.name.get).openOr("")
       case _                                => ""
     }
 
-    s"${this.petName.get} - $productNAme"
+    s"${this.petName.get} - $productName"
   }
 
   def sendFreeUpgradeItems(shipment: Shipment, pet: Pet): List[ShipmentLineItem] = {
