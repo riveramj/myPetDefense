@@ -485,6 +485,12 @@ object ReportingService extends Loggable {
       )
     }
 
+  def quickHitReport: Box[InMemoryResponse] = {
+    val data     = getQuickHitReport
+    val fileName = s"quickhit-${LocalDate.now()}.csv"
+    Some(CSVHelper.inMemoryCsv(fileName, data))
+  }
+
   private[service] def rawSalesReport(agencyName: String): List[RawSaleDataReport] = {
     for {
       agency       <- Agency.find(By(Agency.name, agencyName)).toList

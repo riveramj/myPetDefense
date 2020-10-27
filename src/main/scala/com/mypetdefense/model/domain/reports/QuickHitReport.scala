@@ -1,5 +1,7 @@
 package com.mypetdefense.model.domain.reports
 
+import com.mypetdefense.typeclasses.ToCsvStringConverter
+
 case class QuickHitReport(
     allAccountsReport: AllAccountsReport,
     upgradedSubscriptionsReport: UpgradedSubscriptionsReport,
@@ -9,10 +11,37 @@ case class QuickHitReport(
     cancelledUpgradedSubsByShipmentCount: Iterable[CancelledUpgradedSubscriptionsByCount],
     activeUpgradesByAgency: Iterable[CountedByAgency],
     cancelledUpgradesByAgency: Iterable[CountedByAgency]
-)
+) {
+  def toCsv: String =
+    s"""All Accounts,
+       |${allAccountsReport.toCsv}
+       |,
+       |Upgraded Subscription,
+       |${upgradedSubscriptionsReport.toCsv}
+       |,
+       |Active Upgraded Pets By Product,
+       |${activeUpgradedPetsBySize.map(_.toCsvRow).mkString("\n")}
+       |,
+       |Cancelled Upgraded Pets By Product,
+       |${canceledUpgradedPetsBySize.map(_.toCsvRow).mkString("\n")}
+       |,
+       |Cancelled Pet Count By Subscription,
+       |${cancelledUpgradedSubsByPetCount.map(_.toCsvRow("pets").mkString("\n"))}
+       |,
+       |Cancelled Subscription Count By Shipment Count,
+       |${cancelledUpgradedSubsByShipmentCount.map(_.toCsvRow("shipments").mkString("\n"))}
+       |,
+       |Active Upgrades By Agency,
+       |${activeUpgradesByAgency.map(_.toCsvRow).mkString("\n")}
+       |,
+       |,
+       |Cancelled Upgrades By Agency,
+       |${cancelledUpgradesByAgency.map(_.toCsvRow).mkString("\n")}
+       |""".stripMargin
+}
 
 case class AllAccountsReport(activeSubscriptions: Long, activePets: Long) {
-  def toCsvRow: String =
+  def toCsv: String =
     s"""Active Subscriptions ,$activeSubscriptions
        |Active Pets,$activePets""".stripMargin
 }
@@ -22,7 +51,7 @@ case class UpgradedSubscriptionsReport(
     activePets: Long,
     cancelledSubscriptions: Long
 ) {
-  def toCsvRow: String =
+  def toCsv: String =
     s"""Active Subscriptions ,$activeSubscriptions
        |Active Pets,$activePets
        |Cancelled Subscriptions,$cancelledSubscriptions""".stripMargin
@@ -38,4 +67,9 @@ case class CancelledUpgradedSubscriptionsByCount(count: Int, subsCount: Int) {
 
 case class CountedByAgency(agencyName: String, count: Int) {
   def toCsvRow = s"$agencyName,$count"
+}
+
+object QuickHitReport {
+  implicit val toCsvStringConverter: ToCsvStringConverter[QuickHitReport] =
+    (input: QuickHitReport) => input.toCsv
 }
