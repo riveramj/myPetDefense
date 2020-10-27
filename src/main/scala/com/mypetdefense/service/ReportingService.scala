@@ -774,19 +774,19 @@ object ReportingService extends Loggable {
 
   private def cancelledUpgradedSubscriptionsByShipmentCount(
       subs: List[Subscription]
-  ): Iterable[CancelledUpgradedSubscriptionByCount] =
+  ): Iterable[CancelledUpgradedSubscriptionsByCount] =
     CalculationHelper
       .calculateOccurrences[Int, Subscription](subs, _.shipments.toList.size)
-      .map(CancelledUpgradedSubscriptionByCount.tupled)
+      .map(CancelledUpgradedSubscriptionsByCount.tupled)
 
   private def cancelledUpgradedSubscriptionsByPetCount(
       subs: List[Subscription]
-  ): Iterable[CancelledUpgradedSubscriptionByCount] = {
+  ): Iterable[CancelledUpgradedSubscriptionsByCount] = {
     val petsSizes = subs
       .flatMap(_.user.toOption.map(_.pets.toList.size))
     CalculationHelper
       .calculateOccurrences[Int, Int](petsSizes, identity)
-      .map(CancelledUpgradedSubscriptionByCount.tupled)
+      .map(CancelledUpgradedSubscriptionsByCount.tupled)
   }
 
   private def countPetsBySize(pets: List[Pet]): Iterable[PetsBySize] =

@@ -5,8 +5,8 @@ case class QuickHitReport(
     upgradedSubscriptionsReport: UpgradedSubscriptionsReport,
     activeUpgradedPetsBySize: Iterable[PetsBySize],
     canceledUpgradedPetsBySize: Iterable[PetsBySize],
-    cancelledUpgradedSubscriptionByPetCount: Iterable[CancelledUpgradedSubscriptionByCount],
-    cancelledUpgradedSubscriptionByShipmentCount: Iterable[CancelledUpgradedSubscriptionByCount],
+    cancelledUpgradedSubsByPetCount: Iterable[CancelledUpgradedSubscriptionsByCount],
+    cancelledUpgradedSubsByShipmentCount: Iterable[CancelledUpgradedSubscriptionsByCount],
     activeUpgradesByAgency: Iterable[CancelledUpgradesByAgency],
     cancelledUpgradesByAgency: Iterable[CancelledUpgradesByAgency]
 )
@@ -23,6 +23,4 @@ case class PetsBySize(size: String, count: Int)
 
 case class CancelledUpgradesByAgency(agencyName: String, count: Int)
 
-case class CancelledUpgradedPetCountBySubscription(petsCount: Int, subsCount: Int)
-
-case class CancelledUpgradedSubscriptionByCount(count: Int, subsCount: Int)
+case class CancelledUpgradedSubscriptionsByCount(count: Int, subsCount: Int)
