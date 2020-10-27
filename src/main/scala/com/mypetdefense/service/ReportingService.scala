@@ -453,31 +453,6 @@ object ReportingService extends Loggable {
     cancellationTimes
   }
 
-  def sameDayCancelsByMonth(subscriptions: List[Subscription]): Map[Month, Int] = {
-    def findSameDayCancellations(subscriptions: List[Subscription]) = {
-      subscriptions.filter { subscription =>
-        val shipments = subscription.shipments.toList
-
-        val mailedShipments = filterMailedShipments(shipments)
-
-        mailedShipments.isEmpty
-      }
-    }
-
-    val cancellations = subscriptions.filter(_.status.get == Status.Cancelled)
-
-    val sameDayCancels = findSameDayCancellations(cancellations)
-
-    val cancelsByMonth = sameDayCancels.groupBy { subscription =>
-      subscription.getCreatedDateOfSubscription.getMonth
-    }
-
-    cancelsByMonth.map {
-      case (month, subscriptions) =>
-        (month, subscriptions.size)
-    }
-  }
-
   def exportAgencyCustomers(rawAgencyId: String): Box[LiftResponse] =
     for {
       agencyId <- tryo(rawAgencyId.toLong)
@@ -540,7 +515,7 @@ object ReportingService extends Loggable {
       agency <- Agency.find(By(Agency.name, agencyName)).toList
       customers     = agency.customers.toList
       subscriptions = customers.flatMap(_.subscription.obj)
-      cancelsByMonth <- User.sameDayCancelsByMonth(subscriptions)
+      cancelsByMonth <- SubscriptionService.sameDayCancelsByMonth(subscriptions)
     } yield CancelsInMonthReport(cancelsByMonth._1, cancelsByMonth._2)
   }
 

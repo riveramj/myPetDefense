@@ -270,22 +270,6 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     this.taxRate(rate).saveMe
   }
 
-  def sameDayCancelsByMonth(subscriptions: List[Subscription]): Map[Month, Int] = {
-    val sameDayCancels =
-      subscriptions
-        .filter(_.status.get == Status.Cancelled)
-        .filter(_.filterMailedShipments.isEmpty)
-
-    val cancelsByMonth = sameDayCancels.groupBy { subscription =>
-      subscription.getCreatedDateOfSubscription.getMonth
-    }
-
-    cancelsByMonth.map {
-      case (month, subscriptions) =>
-        (month, subscriptions.size)
-    }
-  }
-
   def getCreatedDateOfUser: LocalDate =
     this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
 

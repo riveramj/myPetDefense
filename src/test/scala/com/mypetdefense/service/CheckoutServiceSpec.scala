@@ -1,17 +1,13 @@
 package com.mypetdefense.service
 
 import com.mypetdefense.generator.Generator
-import com.mypetdefense.helpers.{BootUtil, DBTest}
-import com.mypetdefense.helpers.GeneralDbUtils.clearTables
+import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.model.{Address, Pet, Price, Status, Subscription, User}
 import com.mypetdefense.snippet.signup.NewUserAddress
 import cats.syntax.option._
 import net.liftweb.common.{Box, Empty}
-import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must.Matchers
+import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class CheckoutServiceSpec extends DBTest {
 

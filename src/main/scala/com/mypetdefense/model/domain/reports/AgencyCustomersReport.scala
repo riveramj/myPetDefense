@@ -7,7 +7,6 @@ import net.liftweb.http.InMemoryResponse
 case class AgencyCustomersReport(agencyName: String, customersInfo: List[CustomerDataReport]) {
   def customersInfoToCSV(headers: List[String]): String =
     CSVHelper.toStringWithHeadersCsv(headers, customersInfo.map(_.toCsvRow))
-
 }
 
 object AgencyCustomersReport {

@@ -92,7 +92,7 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
     val agency = Agency.find(By(Agency.name, agencyName))
     agency.map(_.customers.toList).openOr(Nil)
   }
-
+  //TODO clean up this
   def getTotalUsers(agencyName: String): List[User] =
     if (agencyName != "TPP")
       Agency.find(By(Agency.name, agencyName)).map(_.customers.toList).getOrElse(Nil)

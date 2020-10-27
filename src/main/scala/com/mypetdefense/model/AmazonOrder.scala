@@ -79,23 +79,23 @@ class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
   }
 
   def findOrdersBetween(
-      start: Date,
-      `end`: Date,
+      startDate: Date,
+      endDate: Date,
       animalType: AnimalType.Value
   ): List[AmazonOrder] = {
     AmazonOrder.findAll(
-      By_>(AmazonOrder.purchaseDate, start),
-      By_<(AmazonOrder.purchaseDate, `end`),
+      By_>(AmazonOrder.purchaseDate, startDate),
+      By_<(AmazonOrder.purchaseDate, endDate),
       By(AmazonOrder.animalType, animalType)
     )
   }
 
   def findOrdersToReport(
-      start: Date,
-      `end`: Date,
+      startDate: Date,
+      endDate: Date,
       animalType: AnimalType.Value
   ): List[AmazonOrderReport] = {
-    findOrdersBetween(start, `end`, animalType).map { order =>
+    findOrdersBetween(startDate, endDate, animalType).map { order =>
       AmazonOrderReport(
         order.name.get,
         order.address1.get,
