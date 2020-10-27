@@ -192,6 +192,12 @@ class Subscription
     )
   }
 
+  def activeAndPausedSubscriptions: List[Subscription] =
+    Subscription.findAll(ByList(Subscription.status, List(Status.Active, Status.Paused)))
+
+  def cancelledSubscriptions: List[Subscription] =
+    Subscription.findAll(By(Subscription.status, Status.Cancelled))
+
 }
 
 object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]

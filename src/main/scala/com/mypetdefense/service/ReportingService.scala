@@ -5,7 +5,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports
 import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.snippet.admin.AmazonOrderExport
-import com.mypetdefense.util.CSVHelper
+import com.mypetdefense.util.{CSVHelper, CalculationHelper}
 import com.mypetdefense.util.CalculationHelper._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.ModelSyntax._
@@ -741,6 +741,77 @@ object ReportingService extends Loggable {
       allCancellationRows
     )
   }
+
+  private[service] def getQuickHitReport = {
+    val allActiveSubs               = Subscription.activeAndPausedSubscriptions
+    val allCancelledSubs            = Subscription.cancelledSubscriptions
+    val allUpgradedSubs             = allActiveSubs.filter(_.isUpgraded.get)
+    val upgradedCancelledSubs       = allCancelledSubs.filter(_.isUpgraded.get)
+    val allActivePets               = allActiveSubs.getPets
+    val allAccountsReport           = AllAccountsReport(allActiveSubs.size, allActivePets.size)
+    val upgradedSubsReport          = upgradedSubscriptionsReport(allActiveSubs, allCancelledSubs)
+    val activeUpgradedPetsBySize    = countPetsBySize(allUpgradedSubs.getPets)
+    val cancelledUpgradedPetsBySize = countPetsBySize(upgradedCancelledSubs.getPets)
+    val upgradedNCancelledPetsCount = cancelledUpgradedSubscriptionByPetCount(
+      allCancelledSubs
+    )
+    val upgradedNCancelledShipmentsCount = cancelledUpgradedSubscriptionByShipmentCount(
+      allCancelledSubs
+    )
+    val activeUpgradesByAgency   = countUpgradesByAgency(allActiveSubs)
+    val canceledUpgradesByAgency = countUpgradesByAgency(allCancelledSubs)
+    QuickHitReport(
+      allAccountsReport,
+      upgradedSubsReport,
+      activeUpgradedPetsBySize,
+      cancelledUpgradedPetsBySize,
+      upgradedNCancelledPetsCount,
+      upgradedNCancelledShipmentsCount,
+      activeUpgradesByAgency,
+      canceledUpgradesByAgency
+    )
+  }
+
+  private def cancelledUpgradedSubscriptionByShipmentCount(
+      subs: List[Subscription]
+  ): Iterable[CancelledUpgradedSubscriptionByCount] =
+    CalculationHelper
+      .calculateOccurrences[Int, Subscription](subs, _.shipments.toList.size)
+      .map(CancelledUpgradedSubscriptionByCount.tupled)
+
+  private def cancelledUpgradedSubscriptionByPetCount(
+      subs: List[Subscription]
+  ): Iterable[CancelledUpgradedSubscriptionByCount] = {
+    val petsSizes = subs
+      .flatMap(_.user.toOption.map(_.pets.toList.size))
+    CalculationHelper
+      .calculateOccurrences[Int, Int](petsSizes, identity)
+      .map(CancelledUpgradedSubscriptionByCount.tupled)
+  }
+
+  private def countPetsBySize(pets: List[Pet]): Iterable[PetsBySize] =
+    CalculationHelper
+      .calculateOccurrences[String, Pet](pets, _.size.get.toString)
+      .map(PetsBySize.tupled)
+
+  private def countUpgradesByAgency(
+      canceledSubs: List[Subscription]
+  ): Iterable[CancelledUpgradesByAgency] = {
+    val subscriptionsAgencies = canceledSubs.flatMap { s => s.user.flatMap(_.referer.toOption) }
+    CalculationHelper
+      .calculateOccurrences[String, Agency](subscriptionsAgencies, _.name.get)
+      .map(CancelledUpgradesByAgency.tupled)
+  }
+
+  private def upgradedSubscriptionsReport(
+      allUpgradedSubs: List[Subscription],
+      upgradedCancelledSubs: List[Subscription]
+  ): UpgradedSubscriptionsReport =
+    UpgradedSubscriptionsReport(
+      allUpgradedSubs.size,
+      allUpgradedSubs.getPets.size,
+      upgradedCancelledSubs.size
+    )
 
   private def getAllSalesForMonthReport(
       input: Map[String, Iterable[Shipment]]

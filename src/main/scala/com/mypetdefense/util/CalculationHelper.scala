@@ -11,4 +11,13 @@ object CalculationHelper {
     amountPaid - taxesPaid
   }
 
+  def calculateOccurrences[K, I](input: List[I], toKeyFun: I => K): Map[K, Int] = {
+    input
+      .foldLeft(Map.empty[K, Int]) { (map, inputElement) =>
+        val key   = toKeyFun(inputElement)
+        val count = map.get(key).fold(1)(_ + 1)
+        map.updated(key, count)
+      }
+  }
+
 }
