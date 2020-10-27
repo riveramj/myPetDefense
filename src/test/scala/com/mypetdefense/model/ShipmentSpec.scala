@@ -10,28 +10,7 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class ShipmentSpec
-    extends AnyFlatSpec
-    with Matchers
-    with BeforeAndAfterEach
-    with BeforeAndAfterAll
-    with ScalaCheckPropertyChecks {
-  override def beforeAll() {
-    BootUtil.bootForTests()
-  }
-
-  override def afterAll(): Unit = {
-    clearTables()
-  }
-
-  override def afterEach(): Unit = {
-    clearTables()
-  }
-
-  private def cleanUpSuccess(): Assertion = {
-    clearTables()
-    succeed
-  }
+class ShipmentSpec extends DBTest {
 
   it should "find mtd shipments" in {
     forAll(genShipmentChainData, genShipmentChainData) { (dataMonth, dataPreviousMonth) =>

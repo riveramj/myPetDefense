@@ -2,40 +2,14 @@ package com.mypetdefense.model
 
 import com.mypetdefense.generator.Generator.mapWithNOfUserNSubscriptionGen
 import com.mypetdefense.generator.{SubscriptionCreateGeneratedData, UserCreateGeneratedData}
-import com.mypetdefense.helpers.BootUtil
+import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.DateUtil._
-import com.mypetdefense.helpers.GeneralDbUtils.{clearTables, insertUserAndSub}
-import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must.Matchers
+import com.mypetdefense.helpers.GeneralDbUtils.insertUserAndSub
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 import scala.collection.immutable
 
-class SubscriptionSpec
-    extends AnyFlatSpec
-    with Matchers
-    with BeforeAndAfterEach
-    with BeforeAndAfterAll
-    with ScalaCheckPropertyChecks {
-
-  override def beforeAll() {
-    BootUtil.bootForTests()
-  }
-
-  override def afterAll(): Unit = {
-    clearTables()
-  }
-
-  override def afterEach(): Unit = {
-    clearTables()
-  }
-
-  private def cleanUpSuccess(): Assertion = {
-    clearTables()
-    succeed
-  }
+class SubscriptionSpec extends DBTest {
 
   private def insertSubscriptionsForTests(
       dataToReturn: Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData],

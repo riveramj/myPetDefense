@@ -15,40 +15,12 @@ import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.helpers.db.AgencyDbUtils._
 import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
-import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-import scala.collection.immutable
-
-class ReportingServiceSpec
-    extends AnyFlatSpec
-    with Matchers
-    with BeforeAndAfterEach
-    with BeforeAndAfterAll
-    with ScalaCheckPropertyChecks {
+class ReportingServiceSpec extends DBTest {
 
   private val mpdAgencyName     = "My Pet Defense"
   private val petLandAgencyName = "Petland"
-
-  override def beforeAll() {
-    BootUtil.bootForTests()
-  }
-
-  override def afterAll(): Unit = {
-    clearTables()
-  }
-
-  override def afterEach(): Unit = {
-    clearTables()
-  }
-
-  private def cleanUpSuccess(): Assertion = {
-    clearTables()
-    succeed
-  }
 
   private def createUserAndSubReturnSubId(
       t: (UserCreateGeneratedData, SubscriptionCreateGeneratedData)
