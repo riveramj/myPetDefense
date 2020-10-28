@@ -2,7 +2,8 @@ package com.mypetdefense.service
 
 import java.util.Date
 import java.time.ZoneId
-import com.mypetdefense.generator.Generator._
+
+import com.mypetdefense.generator.Generator.{listOfNShipmentChainData, _}
 import com.mypetdefense.generator.{
   PetChainData,
   SubscriptionCreateGeneratedData,
@@ -465,6 +466,18 @@ class ReportingServiceSpec extends DBTest {
 
         actualData should contain theSameElementsAs expectedData
         cleanUpSuccess()
+    }
+  }
+
+  it should "form a proper quickhit report" in {
+    forAll(listOfNShipmentChainData(), listOfNShipmentChainData()) { (data1, data2) =>
+      val agency = createPetlandAndMPDAgencies()
+      data1.map(insertUserSubAndShipment)
+      data2.map(insertUserSubAndShipment).foreach(_.subscription.cancel)
+
+      val x = ReportingService.getQuickHitReport
+
+      succeed
     }
   }
 

@@ -750,20 +750,21 @@ object ReportingService extends Loggable {
   }
 
   private[service] def getQuickHitReport = {
-    val allActiveSubs               = Subscription.activeAndPausedSubscriptions
-    val allCancelledSubs            = Subscription.cancelledSubscriptions
-    val allActiveUpgradedSubs       = allActiveSubs.filter(_.isUpgraded.get)
-    val upgradedCancelledSubs       = allCancelledSubs.filter(_.isUpgraded.get)
-    val allActivePets               = allActiveSubs.getPets
-    val allAccountsReport           = AllAccountsReport(allActiveSubs.size, allActivePets.size)
-    val upgradedSubsReport          = upgradedSubscriptionsReport(allActiveUpgradedSubs, allCancelledSubs)
+    val allActiveSubs         = Subscription.activeAndPausedSubscriptions
+    val allCancelledSubs      = Subscription.cancelledSubscriptions
+    val allActiveUpgradedSubs = Subscription.upgradedActiveAndPausedSubscriptions
+    val upgradedCancelledSubs = Subscription.upgradedAndCancelledSubscriptions
+    val allActivePets         = allActiveSubs.getPets
+    val allAccountsReport     = AllAccountsReport(allActiveSubs.size, allActivePets.size)
+    val upgradedSubsReport =
+      upgradedSubscriptionsReport(allActiveUpgradedSubs, allActivePets, allCancelledSubs)
     val activeUpgradedPetsBySize    = countPetsBySize(allActiveUpgradedSubs.getPets)
     val cancelledUpgradedPetsBySize = countPetsBySize(upgradedCancelledSubs.getPets)
     val upgradedNCancelledSubsByPetsCount = cancelledUpgradedSubscriptionsByPetCount(
-      allCancelledSubs
+      upgradedCancelledSubs
     )
     val upgradedNCancelledSubsByShipmentsCount = cancelledUpgradedSubscriptionsByShipmentCount(
-      allCancelledSubs
+      upgradedCancelledSubs
     )
     val activeUpgradesByAgency   = countUpgradesByAgency(allActiveUpgradedSubs)
     val canceledUpgradesByAgency = countUpgradesByAgency(upgradedCancelledSubs)
@@ -817,11 +818,12 @@ object ReportingService extends Loggable {
 
   private def upgradedSubscriptionsReport(
       allActiveUpgradedSubs: List[Subscription],
+      allActivePets: List[Pet],
       upgradedCancelledSubs: List[Subscription]
   ): UpgradedSubscriptionsReport =
     UpgradedSubscriptionsReport(
       allActiveUpgradedSubs.size,
-      allActiveUpgradedSubs.getPets.size,
+      allActivePets.size,
       upgradedCancelledSubs.size
     )
 
