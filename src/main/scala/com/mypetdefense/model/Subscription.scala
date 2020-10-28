@@ -1,11 +1,15 @@
 package com.mypetdefense.model
 
+import java.time.{LocalDate, ZoneId}
+
 import net.liftweb._
 import mapper._
 import java.util.Date
 
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Box
+import net.liftweb.util.Helpers.tryo
 
 import scala.collection.mutable
 
@@ -82,6 +86,112 @@ class Subscription
   def getMonthlyCost: Double = {
     this.subscriptionBoxes.map { box => box.basePrice.get + box.addOnProducts.map(_.price.get).sum }.sum
   }
+
+  def filterMailedShipments: List[Shipment] = {
+    this.shipments.toList.filter { shipment =>
+      val dateProcessed = shipment.getProcessDateOfShipment
+
+      val legacyShipment_? = dateProcessed.isBefore(LocalDate.parse("2018-01-01"))
+
+      !shipment.getMailedDateOfShipment.isEmpty || legacyShipment_?
+    }
+  }
+
+  def getStartDateOfSubscription: String =
+    tryo(signupCancelDateFormat.format(this.startDate.get)).openOr("")
+
+  def getCancelDateOfSubscription: String =
+    tryo(signupCancelDateFormat.format(this.cancellationDate.get)).openOr("")
+
+  def getCreatedDateOfSubscription: LocalDate =
+    this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+
+  def getCancelledDateOfSubscription: Box[LocalDate] =
+    tryo(this.cancellationDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+
+  def getNextShipDate: LocalDate =
+    this.nextShipDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+
+  def findNewYTDSubscriptionsLastYear: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.createdAt, yearDayOneLastYear),
+      By_<(Subscription.createdAt, currentDayLastYearEnd)
+    )
+  }
+
+  def findCancelledMtdSubscriptions: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.cancellationDate, monthDayOne)
+    )
+  }
+
+  def findNewYTDSubscriptionsLastMonth: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.createdAt, yearDayOne),
+      By_<(Subscription.createdAt, todayLastMonthEnd)
+    )
+  }
+
+  def findNewYTDSubscriptions: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.createdAt, yearDayOne)
+    )
+  }
+
+  def findNewMTDSubscriptionsLastYear: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.createdAt, monthDayOneLastYear),
+      By_<(Subscription.createdAt, currentDayLastYearEnd)
+    )
+  }
+
+  def findNewMTDSubscriptionsLastMonth: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.createdAt, monthDayOneLastMonth),
+      By_<(Subscription.createdAt, currentDayLastMonthEnd)
+    )
+  }
+
+  def findNewMTDSubscriptions: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.createdAt, monthDayOne)
+    )
+  }
+
+  def findNewTodaySubscriptionsLastYear: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.createdAt, todayLastYear),
+      By_<(Subscription.createdAt, todayLastYearEnd)
+    )
+  }
+
+  def findNewTodaySubscriptionsLastMonth: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.createdAt, todayLastMonth),
+      By_<(Subscription.createdAt, todayLastMonthEnd)
+    )
+  }
+
+  def findNewTodaySubscriptions: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.createdAt, nowDate)
+    )
+  }
+
+  def findCurrentMonthUpcomingSubscriptions: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.nextShipDate, tomorrowStart),
+      By_<(Subscription.nextShipDate, beginngNextMonth)
+    )
+  }
+
+  def yesterdayCancels: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.cancellationDate, yesterdayStart),
+      By_<(Subscription.cancellationDate, yesterdayEnd)
+    )
+  }
+
 }
 
 object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]

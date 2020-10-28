@@ -15,40 +15,12 @@ import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.helpers.db.AgencyDbUtils._
 import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
-import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-import scala.collection.immutable
-
-class ReportingServiceSpec
-    extends AnyFlatSpec
-    with Matchers
-    with BeforeAndAfterEach
-    with BeforeAndAfterAll
-    with ScalaCheckPropertyChecks {
+class ReportingServiceSpec extends DBTest {
 
   private val mpdAgencyName     = "My Pet Defense"
   private val petLandAgencyName = "Petland"
-
-  override def beforeAll() {
-    BootUtil.bootForTests()
-  }
-
-  override def afterAll(): Unit = {
-    clearTables()
-  }
-
-  override def afterEach(): Unit = {
-    clearTables()
-  }
-
-  private def cleanUpSuccess(): Assertion = {
-    clearTables()
-    succeed
-  }
 
   private def createUserAndSubReturnSubId(
       t: (UserCreateGeneratedData, SubscriptionCreateGeneratedData)
@@ -59,22 +31,6 @@ class ReportingServiceSpec
       t: (UserCreateGeneratedData, SubscriptionCreateGeneratedData)
   ): Long =
     insertUserAndSub(t._1, t._2).subscription.cancel.saveMe().id.get
-
-  private def insertSubscriptionsForTests(
-      dataToReturn: Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData],
-      dataToIgnore: Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData],
-      dataToReturnFun: Subscription => Subscription,
-      dataToIgnoreFun: Subscription => Subscription
-  ): immutable.Iterable[Subscription] = {
-    dataToIgnore.foreach {
-      case (uData, sData) =>
-        dataToIgnoreFun(insertUserAndSub(uData, sData).subscription)
-    }
-    dataToReturn.map {
-      case (uData, sData) =>
-        dataToReturnFun(insertUserAndSub(uData, sData).subscription)
-    }
-  }
 
   private def insertAgencySalesCreatedAt(
       agency: Agency,
@@ -344,17 +300,6 @@ class ReportingServiceSpec
     }
   }
 
-  it should "find yesterday new sales" in {
-    forAll(listOfNUsersGen()) { users2Create =>
-      val expectedIds =
-        users2Create.map(createUser).map(_.createdAt(anyHourOfYesterday.toDate).saveMe().id.get)
-      val actualIds = ReportingService.findYesterdayNewSales.map(_.id.get)
-
-      actualIds should contain theSameElementsAs expectedIds
-      cleanUpSuccess()
-    }
-  }
-
   it should "find yesterday shipments" in {
     forAll(genShipmentChainData, genShipmentChainData) { (withPaidShipments, newShipments) =>
       val paidShipments = insertUserSubAndShipment(withPaidShipments).shipments
@@ -365,31 +310,13 @@ class ReportingServiceSpec
           .map(_.amountPaid("0").saveMe())
           .size
       val expectedTotal =
-        paidShipments.foldLeft(0d)((acc, s) =>
-          (s.amountPaid.get.toDouble - s.taxPaid.get.toDouble) + acc
+        paidShipments.foldLeft(BigDecimal(0d))((acc, s) =>
+          (BigDecimal(s.amountPaid.get) - BigDecimal(s.taxPaid.get)) + acc
         )
 
       val (actualSize, paidShipmentsSize, actualTotal) = ReportingService.yesterdayShipments
 
-      (actualSize, paidShipmentsSize, actualTotal.round) shouldBe (newShipmentsSize, paidShipments.size, expectedTotal.round)
-      cleanUpSuccess()
-    }
-  }
-
-  it should "find yesterday cancels" in {
-    forAll(mapWithNOfUserNSubscriptionGen()) { usersAndYesterdayCanceledSubs =>
-      val expectedIds = usersAndYesterdayCanceledSubs.map {
-        case (uData, sData) =>
-          insertUserAndSub(uData, sData).subscription.cancel
-            .cancellationDate(anyHourOfYesterday.toDate)
-            .saveMe()
-            .id
-            .get
-      }
-
-      val actualData = ReportingService.yesterdayCancels.map(_.id.get)
-
-      actualData should contain theSameElementsAs expectedIds
+      (actualSize, paidShipmentsSize, actualTotal) shouldBe (newShipmentsSize, paidShipments.size, expectedTotal)
       cleanUpSuccess()
     }
   }
@@ -418,221 +345,6 @@ class ReportingServiceSpec
 
         actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
         actualData should contain(expectedInResult)
-    }
-  }
-
-  it should "find mtd shipments" in {
-    forAll(genShipmentChainData, genShipmentChainData) { (dataMonth, dataPreviousMonth) =>
-      insertUserSubAndShipment(dataPreviousMonth).shipments
-        .map(_.createdAt(anyDayUntilThisMonth.toDate).saveMe())
-      val expectedShipments = insertUserSubAndShipment(dataMonth).shipments
-        .map(_.createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
-
-      val actualData = ReportingService.findMtdShipments.map(_.id.get)
-
-      actualData should contain theSameElementsAs expectedShipments
-      cleanUpSuccess()
-    }
-  }
-
-  it should "find today shipments" in {
-    forAll(genShipmentChainData, genShipmentChainData) { (todayData, dataPreviousDays) =>
-      insertUserSubAndShipment(dataPreviousDays).shipments
-        .map(_.dateProcessed(anyDayUntilToday.toDate).saveMe())
-      val expectedShipments = insertUserSubAndShipment(todayData).shipments
-        .map(_.dateProcessed(anyHourOfToday.toDate).saveMe().id.get)
-
-      val actualData = ReportingService.findTodayShipments.map(_.id.get)
-
-      actualData should contain theSameElementsAs expectedShipments
-      cleanUpSuccess()
-    }
-  }
-
-  it should "find current month upcoming subscriptions" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (fromTomorrowData, nextMonthData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          fromTomorrowData,
-          nextMonthData,
-          _.nextShipDate(anyDayOfThisMonthFromTomorrow.toDate).saveMe(),
-          _.nextShipDate(anyDayOfNextMonth.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findCurrentMonthUpcomingSubscriptions.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find new today subscriptions" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (todayData, untilTodayData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          todayData,
-          untilTodayData,
-          _.createdAt(anyHourOfToday.toDate).saveMe(),
-          _.createdAt(anyDayUntilToday.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findNewTodaySubscriptions.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find new subscriptions for this day in last month" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (thisDayMonthAgoData, anyDayExceptMonthAgoDayData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          thisDayMonthAgoData,
-          anyDayExceptMonthAgoDayData,
-          _.createdAt(anyHourOfThisDayMonthAgo.toDate).saveMe(),
-          _.createdAt(anyDayExceptThisDayMonthAgo.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findNewTodaySubscriptionsLastMonth.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find new subscriptions for this day in last year" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (thisDayYearAgoData, anyDayExceptYearAgoDayData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          thisDayYearAgoData,
-          anyDayExceptYearAgoDayData,
-          _.createdAt(anyHourOfThisDayYearAgo.toDate).saveMe(),
-          _.createdAt(anyDayExceptThisDayYearAgo.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findNewTodaySubscriptionsLastYear.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find new month subscriptions" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (thisMonthData, anyDayUntilThisMonthData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          thisMonthData,
-          anyDayUntilThisMonthData,
-          _.createdAt(anyDayOfThisMonth.toDate).saveMe(),
-          _.createdAt(anyDayUntilThisMonth.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findNewMTDSubscriptions.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find new month subscriptions last month" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (lastMonthData, anyDayUntilLastMonthData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          lastMonthData,
-          anyDayUntilLastMonthData,
-          _.createdAt(anyDayOfLastMonthUntilMonthEnd.toDate).saveMe(),
-          _.createdAt(anyDayUntilLastMonth.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findNewMTDSubscriptionsLastMonth.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find new month subscriptions last year" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (thisMonthLastYearData, anyDayFromThisDayYearAgoData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          thisMonthLastYearData,
-          anyDayFromThisDayYearAgoData,
-          _.createdAt(anyDayOfLastYearThisDay.toDate).saveMe(),
-          _.createdAt(anyDayOfLastYearFromThisDayYearAgo.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findNewMTDSubscriptionsLastYear.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find new this year subscriptions" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (thisYearData, anyDayLastYearData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          thisYearData,
-          anyDayLastYearData,
-          _.createdAt(anyDayOfThisYear.toDate).saveMe(),
-          _.createdAt(anyDayOfLastYear.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findNewYTDSubscriptions.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find new year subscriptions until month ago" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (thisYearDataUntilMonthAgo, anyDayFromMonthAgoData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          thisYearDataUntilMonthAgo,
-          anyDayFromMonthAgoData,
-          _.createdAt(anyDayOfThisYearUntilMonthAgo.toDate).saveMe(),
-          _.createdAt(anyDayOfThisYearFromMonthAgo.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findNewYTDSubscriptionsLastMonth.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find new subscriptions in last year until this day year ago" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (thisDayYearAgoData, anyDayExceptThisDayYearAgoData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          thisDayYearAgoData,
-          anyDayExceptThisDayYearAgoData,
-          _.createdAt(anyDayOfLastYearThisDay.toDate).saveMe(),
-          _.createdAt(anyDayOfLastYearFromThisDayYearAgo.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findNewYTDSubscriptionsLastYear.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find cancelled month subscriptions" in {
-    forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
-      (thisMonthData, anyMonthExceptThisMonthData) =>
-        val expectedSubscriptions = insertSubscriptionsForTests(
-          thisMonthData,
-          anyMonthExceptThisMonthData,
-          _.cancellationDate(anyDayOfThisMonth.toDate).saveMe(),
-          _.cancellationDate(anyDayExceptThisMonth.toDate).saveMe()
-        ).map(_.id.get)
-
-        val actualData = ReportingService.findCancelledMtdSubscriptions.map(_.id.get)
-
-        actualData should contain theSameElementsAs expectedSubscriptions
-        cleanUpSuccess()
     }
   }
 
@@ -750,34 +462,6 @@ class ReportingServiceSpec
         val subs = Subscription.findAll()
 
         val actualData = ReportingService.cancelsByShipment(subs)
-
-        actualData should contain theSameElementsAs expectedData
-        cleanUpSuccess()
-    }
-  }
-
-  it should "find same day cancels by month" in {
-    forAll(listOfNShipmentChainData(), genShipmentChainData, genShipmentChainData) {
-      (shouldBeInStatisticData, notCanceledData, canceledAndShippedData) =>
-        insertUserSubAndShipment(notCanceledData)
-        val shouldBeCanceledAndHaveShipping = insertUserSubAndShipment(canceledAndShippedData)
-        shouldBeCanceledAndHaveShipping.subscription.cancel
-        shouldBeCanceledAndHaveShipping.shipments.map(
-          _.dateShipped(anyDayOfThisYear.toDate).saveMe()
-        )
-
-        val expectedData = shouldBeInStatisticData
-          .map(insertUserSubAndShipment)
-          .map { inserted =>
-            inserted.subscription.cancel
-            inserted.subscription.createdAt(anyDayOfThisYear.toDate).saveMe()
-          }
-          .groupBy(_.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate.getMonth)
-          .mapValues(_.size)
-
-        val subs = Subscription.findAll()
-
-        val actualData = ReportingService.sameDayCancelsByMonth(subs)
 
         actualData should contain theSameElementsAs expectedData
         cleanUpSuccess()

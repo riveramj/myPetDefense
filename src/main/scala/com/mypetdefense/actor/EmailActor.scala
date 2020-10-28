@@ -57,7 +57,7 @@ case class DailySalesEmail(
 case class InternalDailyEmail(
     newShipmentCount: Int,
     paidShipmentCount: Int,
-    grossSales: Double,
+    grossSales: BigDecimal,
     cancelsCount: Int,
     email: String
 ) extends EmailActorMessage

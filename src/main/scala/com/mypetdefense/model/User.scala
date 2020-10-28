@@ -1,5 +1,7 @@
 package com.mypetdefense.model
 
+import java.time.{LocalDate, Month, ZoneId}
+
 import net.liftweb._
 import mapper._
 import common._
@@ -11,8 +13,9 @@ import com.mypetdefense.service.KeyService._
 import com.mypetdefense.snippet.NewParent
 import com.mypetdefense.util.TitleCase
 import org.apache.shiro.crypto.hash.Sha256Hash
-import org.apache.shiro.crypto.SecureRandomNumberGenerator
 import java.util.Date
+
+import com.mypetdefense.util.DateHelper.{yesterdayEnd, yesterdayStart}
 
 import scala.collection.mutable
 
@@ -265,6 +268,16 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     val rate = getTaxRate
 
     this.taxRate(rate).saveMe
+  }
+
+  def getCreatedDateOfUser: LocalDate =
+    this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+
+  def findYesterdayNewSales: List[User] = {
+    User.findAll(
+      By_>=(User.createdAt, yesterdayStart),
+      By_<(User.createdAt, yesterdayEnd)
+    )
   }
 }
 
