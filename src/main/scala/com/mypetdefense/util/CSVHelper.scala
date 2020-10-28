@@ -2,6 +2,7 @@ package com.mypetdefense.util
 
 import com.mypetdefense.typeclasses.ToCsvStringConverter._
 import com.mypetdefense.typeclasses.ToCsvStringConverter
+import net.liftweb.common.{Box, Full}
 import net.liftweb.http.InMemoryResponse
 
 object CSVHelper {
@@ -26,8 +27,8 @@ object CSVHelper {
   def toStringWithHeadersCsv(headers: List[String], data: CSVInput): String =
     (List(headers) ++ data).map(_.mkString(",")).mkString("\n")
 
-  def inMemoryCsv[T: ToCsvStringConverter](fileName: String, input: T): InMemoryResponse = {
-    generateCSV(input.toCsvString, fileName)
+  def inMemoryCsv[T: ToCsvStringConverter](fileName: String, input: T): Box[InMemoryResponse] = {
+    Full(generateCSV(input.toCsvString, fileName))
   }
 
 }

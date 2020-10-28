@@ -204,14 +204,14 @@ object ReportingService extends Loggable {
   def exportRawSales(name: String): Box[LiftResponse] = {
     val data     = rawSalesReport(name)
     val fileName = s"salesData-$fileNameYearMonth.csv"
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
-  def exportCancellationData(name: String): Some[InMemoryResponse] = {
+  def exportCancellationData(name: String): Box[InMemoryResponse] = {
     val data     = exportCancellationReport(name)
     val fileName = s"cancellations-$fileNameYearMonth.csv"
 
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def exportTotalSales(name: String): Box[LiftResponse] = {
@@ -267,7 +267,7 @@ object ReportingService extends Loggable {
 
     val fileName = s"month-to-date-salesData-$fileNameMonthDayYear.csv"
 
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def exportAmazonOrders(amazonOrderExport: AmazonOrderExport): Box[LiftResponse] = {
@@ -290,14 +290,14 @@ object ReportingService extends Loggable {
 
     val fileName = s"amazon-orders-$startDateExport-$endDateExport.csv"
 
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def exportAgencyMtdYtdSales(name: String): Box[LiftResponse] = {
     val data     = agencyMtdYtdSalesReport(name)
     val fileName = s"$name-mtd-ytd-$fileNameMonthDayYear.csv"
 
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def yesterdayShipments: (Int, Int, BigDecimal) = {
@@ -421,13 +421,13 @@ object ReportingService extends Loggable {
 
     val fileName = s"$name-$month-$year-sales-summary.csv"
 
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def exportSameDayCancels(name: String): Box[LiftResponse] = {
     val data     = sameDayCancelsReport(name)
     val fileName = s"sameDayCancels-${LocalDate.now()}.csv"
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def cancelsByShipment(subscriptions: List[Subscription]): List[(String, Int)] = {
@@ -459,7 +459,7 @@ object ReportingService extends Loggable {
       agencyId <- tryo(rawAgencyId.toLong)
       data     <- agencyNameAndCustomerReport(agencyId)
       fileName = s"${data.agencyName}-customers-$fileNameMonthDayYear.csv"
-      csv <- Some(CSVHelper.inMemoryCsv(fileName, data))
+      csv <- CSVHelper.inMemoryCsv(fileName, data)
     } yield csv
 
   def agencyNameAndCustomerReport(agencyId: Long): Box[AgencyCustomersReport] = {
@@ -489,7 +489,7 @@ object ReportingService extends Loggable {
   def executiveSnapshot: Box[InMemoryResponse] = {
     val data     = executiveSnapshotReport
     val fileName = s"executive-snapshot-${LocalDate.now()}.csv"
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   private[service] def rawSalesReport(agencyName: String): List[RawSaleDataReport] = {
