@@ -751,13 +751,17 @@ object ReportingService extends Loggable {
 
   private[service] def getQuickHitReport = {
     val allActiveSubs         = Subscription.activeAndPausedSubscriptions
-    val allCancelledSubs      = Subscription.cancelledSubscriptions
     val allActiveUpgradedSubs = Subscription.upgradedActiveAndPausedSubscriptions
     val upgradedCancelledSubs = Subscription.upgradedAndCancelledSubscriptions
     val allActivePets         = allActiveSubs.getPets
+    val allActiveUpgradedPets = allActiveUpgradedSubs.getPets
     val allAccountsReport     = AllAccountsReport(allActiveSubs.size, allActivePets.size)
     val upgradedSubsReport =
-      upgradedSubscriptionsReport(allActiveUpgradedSubs, allActivePets, allCancelledSubs)
+      upgradedSubscriptionsReport(
+        allActiveUpgradedSubs,
+        allActiveUpgradedPets,
+        upgradedCancelledSubs
+      )
     val activeUpgradedPetsBySize    = countPetsBySize(allActiveUpgradedSubs.getPets)
     val cancelledUpgradedPetsBySize = countPetsBySize(upgradedCancelledSubs.getPets)
     val upgradedNCancelledSubsByPetsCount = cancelledUpgradedSubscriptionsByPetCount(
