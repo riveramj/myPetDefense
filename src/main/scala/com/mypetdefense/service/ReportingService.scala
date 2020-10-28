@@ -16,7 +16,7 @@ import net.liftweb.util.Helpers._
 
 object ReportingService extends Loggable {
 
-  val TPPName          = "TPP"
+  val tppName          = "TPP"
   val myPetDefenseName = "My Pet Defense"
   val petlandName      = "Petland"
 
@@ -808,7 +808,7 @@ object ReportingService extends Loggable {
       subscription.user.flatMap(_.referer.toOption)
     }.filter { agency =>
       val agencyName = agency.name.get
-      agencyName == myPetDefenseName || agencyName == TPPName
+      agencyName == myPetDefenseName || agencyName == tppName
     }.map(Agency.getHQFor)
     CalculationHelper
       .calculateOccurrences[String, Agency](subscriptionsAgencies, _.name.get)
