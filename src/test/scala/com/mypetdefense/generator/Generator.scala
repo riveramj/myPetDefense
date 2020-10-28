@@ -227,12 +227,12 @@ object Generator {
   def simplePetsNonEmptyList(seed: Long = 42L): List[Pet] =
     listOfNSimplePetsGen().pureApply(Gen.Parameters.default, rng.Seed(seed))
 
-  def listOfNShipmentChainData(
+  def listOfNShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[ShipmentChainData]] =
     Gen.listOfN(length, genShipmentChainData)
 
-  def listOfNPetsAndShipmentChainData(
+  def listOfNPetsAndShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[PetsAndShipmentChainData]] =
     Gen.listOfN(length, genPetAndShipmentChainData)

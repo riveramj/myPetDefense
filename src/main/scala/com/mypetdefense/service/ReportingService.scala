@@ -809,12 +809,13 @@ object ReportingService extends Loggable {
   private def countUpgradesByAgency(
       canceledSubs: List[Subscription]
   ): Iterable[CountedByAgency] = {
-    val subscriptionsAgencies = canceledSubs.flatMap { subscription =>
-      subscription.user.flatMap(_.referer.toOption)
-    }.filter { agency =>
-      val agencyName = agency.name.get
-      agencyName == myPetDefenseName || agencyName == tppName
-    }.map(Agency.getHQFor)
+    val subscriptionsAgencies = canceledSubs
+      .flatMap(_.user.flatMap(_.referer))
+      .map(Agency.getHQFor)
+      .filter { agency =>
+        val agencyName = agency.name.get
+        agencyName == myPetDefenseName || agencyName == tppName
+      }
     CalculationHelper
       .calculateOccurrences[String, Agency](subscriptionsAgencies, _.name.get)
       .map(CountedByAgency.tupled)
