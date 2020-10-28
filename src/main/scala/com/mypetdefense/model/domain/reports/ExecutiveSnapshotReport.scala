@@ -28,12 +28,14 @@ case class ExecutiveSnapshotReport(
        |Cancelled Pet Count By Subscription,
        |${cancelledUpgradedSubsByPetCount.toList
          .sortBy(_.count)
-         .map(_.toCsvRow("pets").mkString("\n"))}
+         .map(_.toCsvRow("pets"))
+         .mkString("\n")}
        |,
        |Cancelled Subscription Count By Shipment Count,
        |${cancelledUpgradedSubsByShipmentCount.toList
          .sortBy(_.count)
-         .map(_.toCsvRow("shipments").mkString("\n"))}
+         .map(_.toCsvRow("shipments"))
+         .mkString("\n")}
        |,
        |Active Upgrades By Agency,
        |${activeUpgradesByAgency.toList.sortBy(_.count).map(_.toCsvRow).mkString("\n")}
