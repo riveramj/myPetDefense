@@ -16,6 +16,7 @@ import net.liftweb.util.Helpers._
 
 object ReportingService extends Loggable {
 
+  val TPPName          = "TPP"
   val myPetDefenseName = "My Pet Defense"
   val petlandName      = "Petland"
 
@@ -764,8 +765,8 @@ object ReportingService extends Loggable {
     val upgradedNCancelledSubsByShipmentsCount = cancelledUpgradedSubscriptionsByShipmentCount(
       allCancelledSubs
     )
-    val activeUpgradesByAgency   = countUpgradesByAgency(allActiveSubs)
-    val canceledUpgradesByAgency = countUpgradesByAgency(allCancelledSubs)
+    val activeUpgradesByAgency   = countUpgradesByAgency(allActiveUpgradedSubs)
+    val canceledUpgradesByAgency = countUpgradesByAgency(upgradedCancelledSubs)
     QuickHitReport(
       allAccountsReport,
       upgradedSubsReport,
@@ -803,7 +804,12 @@ object ReportingService extends Loggable {
   private def countUpgradesByAgency(
       canceledSubs: List[Subscription]
   ): Iterable[CountedByAgency] = {
-    val subscriptionsAgencies = canceledSubs.flatMap { s => s.user.flatMap(_.referer.toOption) }
+    val subscriptionsAgencies = canceledSubs.flatMap { subscription =>
+      subscription.user.flatMap(_.referer.toOption)
+    }.filter { agency =>
+      val agencyName = agency.name.get
+      agencyName == myPetDefenseName || agencyName == TPPName
+    }.map(Agency.getHQFor)
     CalculationHelper
       .calculateOccurrences[String, Agency](subscriptionsAgencies, _.name.get)
       .map(CountedByAgency.tupled)

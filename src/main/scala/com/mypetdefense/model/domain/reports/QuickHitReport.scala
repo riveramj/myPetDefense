@@ -6,7 +6,7 @@ case class QuickHitReport(
     allAccountsReport: AllAccountsReport,
     upgradedSubscriptionsReport: UpgradedSubscriptionsReport,
     activeUpgradedPetsBySize: Iterable[PetsBySize],
-    canceledUpgradedPetsBySize: Iterable[PetsBySize],
+    cancelledUpgradedPetsBySize: Iterable[PetsBySize],
     cancelledUpgradedSubsByPetCount: Iterable[CancelledUpgradedSubscriptionsByCount],
     cancelledUpgradedSubsByShipmentCount: Iterable[CancelledUpgradedSubscriptionsByCount],
     activeUpgradesByAgency: Iterable[CountedByAgency],
@@ -20,23 +20,27 @@ case class QuickHitReport(
        |${upgradedSubscriptionsReport.toCsv}
        |,
        |Active Upgraded Pets By Product,
-       |${activeUpgradedPetsBySize.map(_.toCsvRow).mkString("\n")}
+       |${activeUpgradedPetsBySize.toList.sortBy(_.size).map(_.toCsvRow).mkString("\n")}
        |,
        |Cancelled Upgraded Pets By Product,
-       |${canceledUpgradedPetsBySize.map(_.toCsvRow).mkString("\n")}
+       |${cancelledUpgradedPetsBySize.toList.sortBy(_.size).map(_.toCsvRow).mkString("\n")}
        |,
        |Cancelled Pet Count By Subscription,
-       |${cancelledUpgradedSubsByPetCount.map(_.toCsvRow("pets").mkString("\n"))}
+       |${cancelledUpgradedSubsByPetCount.toList
+         .sortBy(_.count)
+         .map(_.toCsvRow("pets").mkString("\n"))}
        |,
        |Cancelled Subscription Count By Shipment Count,
-       |${cancelledUpgradedSubsByShipmentCount.map(_.toCsvRow("shipments").mkString("\n"))}
+       |${cancelledUpgradedSubsByShipmentCount.toList
+         .sortBy(_.count)
+         .map(_.toCsvRow("shipments").mkString("\n"))}
        |,
        |Active Upgrades By Agency,
-       |${activeUpgradesByAgency.map(_.toCsvRow).mkString("\n")}
+       |${activeUpgradesByAgency.toList.sortBy(_.count).map(_.toCsvRow).mkString("\n")}
        |,
        |,
        |Cancelled Upgrades By Agency,
-       |${cancelledUpgradesByAgency.map(_.toCsvRow).mkString("\n")}
+       |${cancelledUpgradesByAgency.toList.sortBy(_.count).map(_.toCsvRow).mkString("\n")}
        |""".stripMargin
 }
 
