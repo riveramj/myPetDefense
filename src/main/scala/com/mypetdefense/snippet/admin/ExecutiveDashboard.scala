@@ -35,7 +35,7 @@ object ExecutiveDashboard extends Loggable {
     loggedIn >>
     EarlyResponse(exportexecutiveSnapshot _)
 
-  def exportexecutiveSnapshot: Box[LiftResponse] = ReportingService.quickHitReport
+  def exportexecutiveSnapshot: Box[LiftResponse] = ReportingService.executiveSnapshot
 }
 
 class ExecutiveDashboard extends Loggable {
@@ -143,10 +143,10 @@ class ExecutiveDashboard extends Loggable {
   }
 
   def render: CssBindFunc = {
-    ".executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
     newStartBindings &
     ".executive-dashboard [class+]" #> "current" &
     ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
+    ".executive-snapshot .executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
     ".mtd-shipments .count *" #> numberFormatter.format(mtdShipments.size) &
     ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentValue) &
     ".today-shipments .count *" #> numberFormatter.format(todayShipments.size) &
