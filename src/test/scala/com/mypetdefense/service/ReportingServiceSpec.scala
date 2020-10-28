@@ -469,13 +469,15 @@ class ReportingServiceSpec extends DBTest {
     }
   }
 
-  it should "form a proper quickhit report" in {
-    forAll(listOfNShipmentChainData(), listOfNShipmentChainData()) { (data1, data2) =>
-      val agency = createPetlandAndMPDAgencies()
-      data1.map(insertUserSubAndShipment)
-      data2.map(insertUserSubAndShipment).foreach(_.subscription.cancel)
+  it should "form a proper executive snapshot report" in {
+    forAll(listOfNPetsAndShipmentChainData(), listOfNPetsAndShipmentChainData()) { (data1, data2) =>
+      createPetlandAndMPDAgencies()
+      data1.map(insertPetsAndShipmentChainData)
+      data2
+        .map(insertPetsAndShipmentChainData)
+        .foreach(_.subscription.cancel.isUpgraded(true).saveMe())
 
-      val x = ReportingService.getQuickHitReport
+      val x = ReportingService.executiveSnapshotReport
 
       succeed
     }

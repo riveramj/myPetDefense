@@ -2,7 +2,7 @@ package com.mypetdefense.model.domain.reports
 
 import com.mypetdefense.typeclasses.ToCsvStringConverter
 
-case class QuickHitReport(
+case class ExecutiveSnapshotReport(
     allAccountsReport: AllAccountsReport,
     upgradedSubscriptionsReport: UpgradedSubscriptionsReport,
     activeUpgradedPetsBySize: Iterable[PetsBySize],
@@ -73,7 +73,7 @@ case class CountedByAgency(agencyName: String, count: Int) {
   def toCsvRow = s"$agencyName,$count"
 }
 
-object QuickHitReport {
-  implicit val toCsvStringConverter: ToCsvStringConverter[QuickHitReport] =
-    (input: QuickHitReport) => input.toCsv
+object ExecutiveSnapshotReport {
+  implicit val toCsvStringConverter: ToCsvStringConverter[ExecutiveSnapshotReport] =
+    (input: ExecutiveSnapshotReport) => input.toCsv
 }

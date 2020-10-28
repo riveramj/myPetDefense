@@ -192,6 +192,17 @@ object Generator {
       shipment <- Gen.listOfN(MAX_LENGTH_OF_GENERATED_TRAVERSABLES, genShipmentToCreate)
     } yield ShipmentChainData(user, sub, shipment)
 
+  def genPetAndShipmentChainData: Gen[PetsAndShipmentChainData] =
+    for {
+      shipmentChainData <- genShipmentChainData
+      pets              <- Gen.listOfN(MAX_LENGTH_OF_GENERATED_TRAVERSABLES, genPetData)
+    } yield PetsAndShipmentChainData(
+      shipmentChainData.user,
+      shipmentChainData.subscriptionCreateGeneratedData,
+      shipmentChainData.shipmentCreateGeneratedData,
+      pets
+    )
+
   def mapWithNOfUserNSubscriptionGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData]] =
@@ -220,6 +231,11 @@ object Generator {
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[ShipmentChainData]] =
     Gen.listOfN(length, genShipmentChainData)
+
+  def listOfNPetsAndShipmentChainData(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[PetsAndShipmentChainData]] =
+    Gen.listOfN(length, genPetAndShipmentChainData)
 
   implicit val arbUserCreation: Arbitrary[UserCreateGeneratedData] = Arbitrary(genUserToCreate)
 

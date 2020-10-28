@@ -486,9 +486,9 @@ object ReportingService extends Loggable {
       )
     }
 
-  def quickHitReport: Box[InMemoryResponse] = {
-    val data     = getQuickHitReport
-    val fileName = s"quickhit-${LocalDate.now()}.csv"
+  def executiveSnapshot: Box[InMemoryResponse] = {
+    val data     = executiveSnapshotReport
+    val fileName = s"executive-snapshot-${LocalDate.now()}.csv"
     Some(CSVHelper.inMemoryCsv(fileName, data))
   }
 
@@ -749,7 +749,7 @@ object ReportingService extends Loggable {
     )
   }
 
-  private[service] def getQuickHitReport = {
+  private[service] def executiveSnapshotReport = {
     val allActiveSubs         = Subscription.activeAndPausedSubscriptions
     val allActiveUpgradedSubs = Subscription.upgradedActiveAndPausedSubscriptions
     val upgradedCancelledSubs = Subscription.upgradedAndCancelledSubscriptions
@@ -772,7 +772,7 @@ object ReportingService extends Loggable {
     )
     val activeUpgradesByAgency   = countUpgradesByAgency(allActiveUpgradedSubs)
     val canceledUpgradesByAgency = countUpgradesByAgency(upgradedCancelledSubs)
-    QuickHitReport(
+    ExecutiveSnapshotReport(
       allAccountsReport,
       upgradedSubsReport,
       activeUpgradedPetsBySize,
