@@ -85,6 +85,8 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+
+  def allWithoutBox: List[Pet] = Pet.findAll(NullRef(Pet.box))
 }
 
 object Pet extends Pet with LongKeyedMetaMapper[Pet]

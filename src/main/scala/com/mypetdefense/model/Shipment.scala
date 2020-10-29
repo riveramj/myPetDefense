@@ -95,6 +95,13 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
 
     shipment
   }
+
+  def allWithoutTrackingNumber(createdUntil: Date): List[Shipment] =
+    Shipment
+      .findAll(
+        By_<=(Shipment.dateProcessed, createdUntil),
+        NullRef(Shipment.trackingNumber)
+      )
 }
 
 class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
