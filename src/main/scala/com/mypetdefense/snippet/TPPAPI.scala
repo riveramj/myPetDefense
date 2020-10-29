@@ -90,7 +90,15 @@ object TPPApi extends RestHelper with Loggable {
       ===============
     """
 
-    EmailActor ! SendAPIErrorEmail(errorMsg)
+    Event.createEvent(
+      parent,
+      Empty,
+      Empty,
+      Empty,
+      EventType.Billing,
+      "Something went wrong with stripe creation.",
+      errorMsg
+    )
   }
 
   def setupStripeSubscription(
@@ -118,7 +126,8 @@ object TPPApi extends RestHelper with Loggable {
     val subtotalWithDiscount = (pennyCount - discountAmount) / 100
 
     if (pennyCount == 0) {
-      logger.error("Penny count is 0. This seems wrong.")
+      val errorMsgTitle = "Penny count is 0. This seems wrong."
+      logger.error(errorMsgTitle)
 
       val errorMsg = s"""
         Something went wrong with price association.
@@ -153,8 +162,7 @@ object TPPApi extends RestHelper with Loggable {
         ${12.99}
         ==============
       """
-
-      EmailActor ! SendAPIErrorEmail(errorMsg)
+      Event.createEvent(parent, Empty, Empty, Empty, EventType.Billing, errorMsgTitle, errorMsg)
     }
 
     val (taxDue, taxRate) = address.map { address =>
@@ -320,7 +328,8 @@ object TPPApi extends RestHelper with Loggable {
       )
 
       if (product == Empty) {
-        logger.error("Didnt match product. Need manual resolution. Email sent.")
+        val errorMsgTitle = "Didn't match product. Need manual resolution."
+        logger.error(errorMsgTitle)
         val errorMsg = s"""
         Something went wrong with product matching.
           
@@ -347,7 +356,15 @@ object TPPApi extends RestHelper with Loggable {
         ===============
       """
 
-        EmailActor ! SendAPIErrorEmail(errorMsg)
+        Event.createEvent(
+          Full(parent),
+          Empty,
+          Empty,
+          Empty,
+          EventType.Product,
+          errorMsgTitle,
+          errorMsg
+        )
       }
 
       val possibleWhelpDate = pet.whelpDate.getOrElse("")
@@ -408,7 +425,8 @@ object TPPApi extends RestHelper with Loggable {
             val createdPets = createPets(pets, currentParent)
 
             if (createdPets.size != pets.size) {
-              logger.error("A pet creation failed. Emailed error.")
+              val errorMsgTitle = "A pet creation failed. Emailed error."
+              logger.error(errorMsgTitle)
 
               val errorMsg = s"""
                   Something went wrong with creating a pet matching.
@@ -433,7 +451,15 @@ object TPPApi extends RestHelper with Loggable {
                   ===============
                 """
 
-              EmailActor ! SendAPIErrorEmail(errorMsg)
+              Event.createEvent(
+                Full(currentParent),
+                Empty,
+                Empty,
+                Empty,
+                EventType.Pets,
+                errorMsgTitle,
+                errorMsg
+              )
             }
 
             setupStripeSubscription(currentParent, possibleParent.stripeToken)
@@ -446,8 +472,9 @@ object TPPApi extends RestHelper with Loggable {
             )
           }
 
-          case other => {
-            logger.error("Conflict on user createation. Email sent.")
+          case _ => {
+            val errorMsgTitle = "Conflict on user creation."
+            logger.error(errorMsgTitle)
 
             val errorMsg = s"""
                 Something went wrong with user creation.
@@ -475,7 +502,15 @@ object TPPApi extends RestHelper with Loggable {
                 ===============
               """
 
-            EmailActor ! SendAPIErrorEmail(errorMsg)
+            Event.createEvent(
+              existingUser,
+              Empty,
+              Empty,
+              Empty,
+              EventType.User,
+              errorMsgTitle,
+              errorMsg
+            )
 
             JsonResponse(
               ("message" -> "possible duplicate parent found. data logged"),

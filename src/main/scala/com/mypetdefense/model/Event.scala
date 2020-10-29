@@ -58,7 +58,7 @@ object Event extends Event with LongKeyedMetaMapper[Event] {
 }
 
 object EventType extends Enumeration {
-  val Shipping, Billing, Signup = Value
+  val Shipping, Billing, Signup, Pets, Product, User = Value
 }
 
 object EventStatus extends Enumeration {
