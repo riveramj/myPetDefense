@@ -6,7 +6,9 @@ import net.liftweb.common._
 import org.quartz._
 
 class DataIntegrityCheckJob extends ManagedJob {
-  override def execute(context: JobExecutionContext): Unit = {
+  override def execute(context: JobExecutionContext): Unit = checkDataIntegrity()
+
+  private[jobs] def checkDataIntegrity(): Unit = {
     val shipmentsPanicDate = DateHelper.threeDaysAgo
 
     val usersWithoutSub                   = User.allWithoutSubscription
@@ -20,18 +22,37 @@ class DataIntegrityCheckJob extends ManagedJob {
     oldShipmentsWithoutTrackingNumber.foreach(logOldShipmentWithoutTrackingNumber)
   }
 
-  private def logOldShipmentWithoutTrackingNumber(shipment: Shipment) = {
-    val title = "Pet doesn't have a box"
+  private def logOldShipmentWithoutTrackingNumber(shipment: Shipment): Event = {
+    val title        = "Shipment doesn't have a tracking number for three days."
+    val subscription = shipment.subscription
+    val shipmentUser = subscription.flatMap(_.user)
     val details =
-      "During regular data integrity job, that pet was found, manual handling is needed."
-    Event.createEvent(Empty, Empty, Full(shipment), Empty, EventType.Subscription, title, details)
+      "During regular data integrity job, that shipment was found, manual handling is needed."
+    Event.createEvent(
+      shipmentUser,
+      subscription,
+      Full(shipment),
+      Empty,
+      EventType.Shipping,
+      title,
+      details
+    )
   }
 
   private def logPetsWithoutBox(pet: Pet): Event = {
-    val title = "Pet doesn't have a box"
+    val title   = "Pet doesn't have a box"
+    val petUser = pet.user
     val details =
       "During regular data integrity job, that pet was found, manual handling is needed."
-    Event.createEvent(Empty, Empty, Empty, Full(pet), EventType.Subscription, title, details)
+    Event.createEvent(
+      petUser,
+      petUser.flatMap(_.subscription),
+      Empty,
+      Full(pet),
+      EventType.Pets,
+      title,
+      details
+    )
   }
 
   private def logSubsWithoutUser(sub: Subscription): Event = {
@@ -45,7 +66,7 @@ class DataIntegrityCheckJob extends ManagedJob {
     val title = "User doesn't have a subscription"
     val details =
       "During regular data integrity job, that user was found, manual handling is needed."
-    Event.createEvent(Full(user), Empty, Empty, Empty, EventType.User, title, details)
+    Event.createEvent(Full(user), user.subscription, Empty, Empty, EventType.User, title, details)
   }
 }
 

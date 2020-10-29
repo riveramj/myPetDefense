@@ -1,17 +1,12 @@
 package com.mypetdefense.helpers
 
-import com.mypetdefense.generator.{
-  PetChainData,
-  PetsAndShipmentChainData,
-  ShipmentChainData,
-  SubscriptionCreateGeneratedData,
-  UserCreateGeneratedData
-}
+import com.mypetdefense.generator._
 import com.mypetdefense.helpers.db.ShipmentDbUtils.createShipment
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
 import com.mypetdefense.helpers.db.PetDbUtils.createPet
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
 import com.mypetdefense.model._
+import net.liftweb.common._
 
 object GeneralDbUtils {
 
@@ -35,6 +30,7 @@ object GeneralDbUtils {
   def clearTables(): Unit = {
     Address.findAll().map(_.delete_!)
     Agency.findAll().map(_.delete_!)
+    Event.findAll().map(_.delete_!)
     Pet.findAll().map(_.delete_!)
     Subscription.findAll().map(_.delete_!)
     SubscriptionBox.findAll().map(_.delete_!)
@@ -47,14 +43,18 @@ object GeneralDbUtils {
       sIn: SubscriptionCreateGeneratedData
   ): InsertedUserAndSub = {
     val u = createUser(uIn)
-    InsertedUserAndSub(u, createSubscription(u, sIn))
+    InsertedUserAndSub(u, createSubscription(Full(u), sIn))
   }
 
+  def insertSubWithoutUser(sIn: SubscriptionCreateGeneratedData): Subscription =
+    createSubscription(Empty, sIn)
+
   def insertUserSubAndShipment(in: ShipmentChainData): InsertedUserSubAndShipment = {
-    val u   = createUser(in.user)
-    val su  = createSubscription(u, in.subscriptionCreateGeneratedData)
-    val shs = in.shipmentCreateGeneratedData.map(createShipment(u, su, _))
-    InsertedUserSubAndShipment(u, su, shs)
+    val u        = createUser(in.user)
+    val su       = createSubscription(Full(u), in.subscriptionCreateGeneratedData)
+    val updatedU = u.subscription(su).saveMe()
+    val shs      = in.shipmentCreateGeneratedData.map(createShipment(u, su, _))
+    InsertedUserSubAndShipment(updatedU, su, shs)
   }
 
   def insertUserAndPet(in: PetChainData): InsertedUserAndPet = {
@@ -67,7 +67,7 @@ object GeneralDbUtils {
       in: PetsAndShipmentChainData
   ): InsertedPetsUserSubAndShipment = {
     val u   = createUser(in.user)
-    val su  = createSubscription(u, in.subscriptionCreateGeneratedData)
+    val su  = createSubscription(Full(u), in.subscriptionCreateGeneratedData)
     val shs = in.shipmentCreateGeneratedData.map(createShipment(u, su, _))
     val pets = in.pets.map { pData =>
       val createdPet = createPet(u, pData)

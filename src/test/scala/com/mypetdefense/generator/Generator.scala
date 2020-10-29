@@ -208,7 +208,9 @@ object Generator {
   ): Gen[Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData]] =
     Gen.mapOfN(length, userAndSubscriptionGen)
 
-  def listOfNPetsChainDataGen(length: Int): Gen[List[PetChainData]] =
+  def listOfNPetsChainDataGen(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[PetChainData]] =
     Gen.listOfN(length, genPetsChainData)
 
   def listOfNUsersGen(
@@ -227,6 +229,9 @@ object Generator {
   def simplePetsNonEmptyList(seed: Long = 42L): List[Pet] =
     listOfNSimplePetsGen().pureApply(Gen.Parameters.default, rng.Seed(seed))
 
+  def subscription(seed: Long = 42L): SubscriptionCreateGeneratedData =
+    genSubscriptionToCreate.pureApply(Gen.Parameters.default, rng.Seed(seed))
+
   def listOfNShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[ShipmentChainData]] =
@@ -236,6 +241,11 @@ object Generator {
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[PetsAndShipmentChainData]] =
     Gen.listOfN(length, genPetAndShipmentChainData)
+
+  def listOfSubscriptionToCreateGen(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[SubscriptionCreateGeneratedData]] =
+    Gen.listOfN(length, genSubscriptionToCreate)
 
   implicit val arbUserCreation: Arbitrary[UserCreateGeneratedData] = Arbitrary(genUserToCreate)
 

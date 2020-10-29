@@ -100,7 +100,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
     Shipment
       .findAll(
         By_<=(Shipment.dateProcessed, createdUntil),
-        NullRef(Shipment.trackingNumber)
+        By(Shipment.trackingNumber, "") // "" default value
       )
 }
 
