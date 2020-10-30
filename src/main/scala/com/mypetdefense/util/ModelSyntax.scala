@@ -8,11 +8,7 @@ object ModelSyntax {
   }
 
   implicit class ListOfSubscriptionsSyntax(val v: List[Subscription]) extends AnyVal {
-    def getPets: List[Pet] =
-      for {
-        user    <- v.flatMap(_.user.toList)
-        userPet <- user.activePets
-      } yield userPet
+    def getAllActivePets: List[Pet] = v.flatMap(_.getPets)
   }
 
 }

@@ -37,6 +37,7 @@ object GeneralDbUtils {
     Agency.findAll().map(_.delete_!)
     Pet.findAll().map(_.delete_!)
     Subscription.findAll().map(_.delete_!)
+    SubscriptionBox.findAll().map(_.delete_!)
     Shipment.findAll().map(_.delete_!)
     User.findAll().map(_.delete_!)
   }
@@ -65,11 +66,15 @@ object GeneralDbUtils {
   def insertPetsAndShipmentChainData(
       in: PetsAndShipmentChainData
   ): InsertedPetsUserSubAndShipment = {
-    val u    = createUser(in.user)
-    val su   = createSubscription(u, in.subscriptionCreateGeneratedData)
-    val shs  = in.shipmentCreateGeneratedData.map(createShipment(u, su, _))
-    val pets = in.pets.map(createPet(u, _))
-    InsertedPetsUserSubAndShipment(u, su, shs, pets)
+    val u   = createUser(in.user)
+    val su  = createSubscription(u, in.subscriptionCreateGeneratedData)
+    val shs = in.shipmentCreateGeneratedData.map(createShipment(u, su, _))
+    val pets = in.pets.map { pData =>
+      val createdPet = createPet(u, pData)
+      SubscriptionBox.createNewBox(su, createdPet)
+      createdPet
+    }
+    InsertedPetsUserSubAndShipment(u, su.refresh.toOption.get, shs, pets)
   }
 
 }

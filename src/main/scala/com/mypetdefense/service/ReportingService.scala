@@ -753,8 +753,8 @@ object ReportingService extends Loggable {
     val allActiveSubs         = Subscription.activeAndPausedSubscriptions
     val allActiveUpgradedSubs = Subscription.upgradedActiveAndPausedSubscriptions
     val upgradedCancelledSubs = Subscription.upgradedAndCancelledSubscriptions
-    val allActivePets         = allActiveSubs.getPets
-    val allActiveUpgradedPets = allActiveUpgradedSubs.getPets
+    val allActivePets         = allActiveSubs.getAllActivePets
+    val allActiveUpgradedPets = allActiveUpgradedSubs.getAllActivePets
     val allAccountsReport     = AllAccountsReport(allActiveSubs.size, allActivePets.size)
     val upgradedSubsReport =
       upgradedSubscriptionsReport(
@@ -762,8 +762,8 @@ object ReportingService extends Loggable {
         allActiveUpgradedPets,
         upgradedCancelledSubs
       )
-    val activeUpgradedPetsBySize    = countPetsBySize(allActiveUpgradedSubs.getPets)
-    val cancelledUpgradedPetsBySize = countPetsBySize(upgradedCancelledSubs.getPets)
+    val activeUpgradedPetsBySize    = countPetsByProduct(allActiveUpgradedSubs)
+    val cancelledUpgradedPetsBySize = countPetsByProduct(upgradedCancelledSubs)
     val upgradedNCancelledSubsByPetsCount = cancelledUpgradedSubscriptionsByPetCount(
       upgradedCancelledSubs
     )
@@ -801,10 +801,12 @@ object ReportingService extends Loggable {
       .map(CancelledUpgradedSubscriptionsByCount.tupled)
   }
 
-  private def countPetsBySize(pets: List[Pet]): Iterable[PetsBySize] =
+  private def countPetsByProduct(subs: List[Subscription]): Iterable[PetsByProduct] = {
+    val fleaTick = subs.flatMap(_.subscriptionBoxes).flatMap(_.fleaTick.toList)
     CalculationHelper
-      .calculateOccurrences[String, Pet](pets, _.size.get.toString)
-      .map(PetsBySize.tupled)
+      .calculateOccurrences[String, FleaTick](fleaTick, _.getNameAndSize)
+      .map(PetsByProduct.tupled)
+  }
 
   private def countUpgradesByAgency(
       canceledSubs: List[Subscription]

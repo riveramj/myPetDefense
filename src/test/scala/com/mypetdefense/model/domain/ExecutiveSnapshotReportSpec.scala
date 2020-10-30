@@ -9,8 +9,8 @@ class ExecutiveSnapshotReportSpec extends AnyFlatSpec with Matchers {
   it should "properly converted to csv when needed" in {
     val allAccountsReport           = AllAccountsReport(1, 10)
     val upgradedSubscriptionsReport = UpgradedSubscriptionsReport(30, 12, 11)
-    val activeUpgradedPetsBySize    = List(PetsBySize("big", 13), PetsBySize("xxs", 10))
-    val cancelledUpgradedPetsBySize = List(PetsBySize("strange", 4), PetsBySize("nano", 3))
+    val activeUpgradedPetsBySize    = List(PetsByProduct("big", 13), PetsByProduct("xxs", 10))
+    val cancelledUpgradedPetsBySize = List(PetsByProduct("strange", 4), PetsByProduct("nano", 3))
     val cancelledUpgradedSubsByPetCount = List(
       CancelledUpgradedSubscriptionsByCount(1, 10),
       CancelledUpgradedSubscriptionsByCount(132, 55)

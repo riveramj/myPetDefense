@@ -5,8 +5,8 @@ import com.mypetdefense.typeclasses.ToCsvStringConverter
 case class ExecutiveSnapshotReport(
     allAccountsReport: AllAccountsReport,
     upgradedSubscriptionsReport: UpgradedSubscriptionsReport,
-    activeUpgradedPetsBySize: Iterable[PetsBySize],
-    cancelledUpgradedPetsBySize: Iterable[PetsBySize],
+    activeUpgradedPetsByProduct: Iterable[PetsByProduct],
+    cancelledUpgradedPetsByProduct: Iterable[PetsByProduct],
     cancelledUpgradedSubsByPetCount: Iterable[CancelledUpgradedSubscriptionsByCount],
     cancelledUpgradedSubsByShipmentCount: Iterable[CancelledUpgradedSubscriptionsByCount],
     activeUpgradesByAgency: Iterable[CountedByAgency],
@@ -20,10 +20,10 @@ case class ExecutiveSnapshotReport(
        |${upgradedSubscriptionsReport.toCsv}
        |,
        |Active Upgraded Pets By Product,
-       |${activeUpgradedPetsBySize.toList.sortBy(_.size).map(_.toCsvRow).mkString("\n")}
+       |${activeUpgradedPetsByProduct.toList.sortBy(_.product).map(_.toCsvRow).mkString("\n")}
        |,
        |Cancelled Upgraded Pets By Product,
-       |${cancelledUpgradedPetsBySize.toList.sortBy(_.size).map(_.toCsvRow).mkString("\n")}
+       |${cancelledUpgradedPetsByProduct.toList.sortBy(_.product).map(_.toCsvRow).mkString("\n")}
        |,
        |Cancelled Pet Count By Subscription,
        |${cancelledUpgradedSubsByPetCount.toList
@@ -63,8 +63,8 @@ case class UpgradedSubscriptionsReport(
        |Cancelled Subscriptions,$cancelledSubscriptions""".stripMargin
 }
 
-case class PetsBySize(size: String, count: Int) {
-  def toCsvRow: String = s"$size,$count"
+case class PetsByProduct(product: String, count: Int) {
+  def toCsvRow: String = s"$product,$count"
 }
 
 case class CancelledUpgradedSubscriptionsByCount(count: Int, subsCount: Int) {

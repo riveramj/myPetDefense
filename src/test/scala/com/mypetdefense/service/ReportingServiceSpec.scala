@@ -108,15 +108,14 @@ class ReportingServiceSpec extends DBTest {
       )
       .map(CancelledUpgradedSubscriptionsByCount.tupled)
 
-  private def calculateOccurrencesPetsBySize(
+  private def calculateOccurrencesPetsByProduct(
       input: List[InsertedPetsUserSubAndShipment]
-  ): Iterable[PetsBySize] =
+  ): Iterable[PetsByProduct] = {
+    val fleaTick = input.flatMap(_.subscription.subscriptionBoxes).flatMap(_.fleaTick.toList)
     CalculationHelper
-      .calculateOccurrences[String, Pet](
-        input.flatMap(_.pets),
-        _.size.get.toString
-      )
-      .map(PetsBySize.tupled)
+      .calculateOccurrences[String, FleaTick](fleaTick, _.getNameAndSize)
+      .map(PetsByProduct.tupled)
+  }
 
   it should "find all active subscriptions" in {
     forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
@@ -592,8 +591,9 @@ class ReportingServiceSpec extends DBTest {
         allActiveUpgradedPetsSize,
         allCancelledUpgradedData.size
       )
-      val expectedActiveUpdPetsBySize    = calculateOccurrencesPetsBySize(allActiveUpgradedData)
-      val expectedCancelledUpdPetsBySize = calculateOccurrencesPetsBySize(allCancelledUpgradedData)
+      val expectedActiveUpdPetsBySize = calculateOccurrencesPetsByProduct(allActiveUpgradedData)
+      val expectedCancelledUpdPetsBySize =
+        calculateOccurrencesPetsByProduct(allCancelledUpgradedData)
       val expectedCancelledUpgradedSubsByPetCount =
         calculateOccurrencesPetsByCount(allCancelledUpgradedData)
       val expectedCancelledUpgradedSubsByShipmentCount =
@@ -605,8 +605,8 @@ class ReportingServiceSpec extends DBTest {
 
       actualData.allAccountsReport shouldBe expectedAllAccountsReport
       actualData.upgradedSubscriptionsReport shouldBe expectedUpgradedSubscriptionsReport
-      actualData.activeUpgradedPetsBySize should contain theSameElementsAs expectedActiveUpdPetsBySize
-      actualData.cancelledUpgradedPetsBySize should contain theSameElementsAs expectedCancelledUpdPetsBySize
+      actualData.activeUpgradedPetsByProduct should contain theSameElementsAs expectedActiveUpdPetsBySize
+      actualData.cancelledUpgradedPetsByProduct should contain theSameElementsAs expectedCancelledUpdPetsBySize
       actualData.cancelledUpgradedSubsByPetCount should contain theSameElementsAs expectedCancelledUpgradedSubsByPetCount
       actualData.cancelledUpgradedSubsByShipmentCount should contain theSameElementsAs expectedCancelledUpgradedSubsByShipmentCount
       actualData.activeUpgradesByAgency should contain theSameElementsAs expectedActiveUpgradesByAgency
