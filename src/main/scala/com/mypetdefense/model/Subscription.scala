@@ -193,11 +193,11 @@ class Subscription
   }
 
   def activeAndPausedSubscriptions: List[Subscription] =
-    Subscription.findAll(ByList(Subscription.status, List(Status.Active, Status.Paused)))
+    Subscription.findAll(By(Subscription.status, Status.Active))
 
   def upgradedActiveAndPausedSubscriptions: List[Subscription] =
     Subscription.findAll(
-      ByList(Subscription.status, List(Status.Active, Status.Paused)),
+      By(Subscription.status, Status.Active),
       By(Subscription.isUpgraded, true)
     )
 

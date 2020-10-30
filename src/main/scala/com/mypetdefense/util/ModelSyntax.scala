@@ -11,7 +11,7 @@ object ModelSyntax {
     def getPets: List[Pet] =
       for {
         user    <- v.flatMap(_.user.toList)
-        userPet <- user.pets.toList
+        userPet <- user.activePets
       } yield userPet
   }
 
