@@ -49,7 +49,7 @@ object TPPApi extends RestHelper with Loggable {
   implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
   val tppAgency: Box[Agency]     = Agency.find(By(Agency.name, "TPP"))
 
-  def sendStripeErrorEmail(
+  def createEventForStripeError(
       failedStepMessage: String,
       stripeFailure: Any,
       parent: Box[User],
@@ -243,7 +243,7 @@ object TPPApi extends RestHelper with Loggable {
               "create customer failed with: " + stripeFailure + ". Email sent to log error."
             )
 
-            sendStripeErrorEmail(
+            createEventForStripeError(
               "We did not create a Stripe subscription or an internal subscription.",
               stripeFailure,
               parent,
@@ -257,7 +257,7 @@ object TPPApi extends RestHelper with Loggable {
           case TryFail(throwable: Throwable) =>
             logger.error("create customer failed with: " + throwable + ". Email sent to log error.")
 
-            sendStripeErrorEmail(
+            createEventForStripeError(
               "We did not create a Stripe subscription or an internal subscription.",
               throwable,
               parent,
@@ -273,7 +273,7 @@ object TPPApi extends RestHelper with Loggable {
       case TrySuccess(stripeFailure) =>
         logger.error("create customer failed with: " + stripeFailure + ". Email sent to log error.")
 
-        sendStripeErrorEmail(
+        createEventForStripeError(
           "We did not create a Stripe subscription or an internal subscription.",
           Left(stripeFailure),
           parent,
@@ -287,7 +287,7 @@ object TPPApi extends RestHelper with Loggable {
       case TryFail(throwable: Throwable) =>
         logger.error("create customer failed with: " + throwable + ". Email sent to log error.")
 
-        sendStripeErrorEmail(
+        createEventForStripeError(
           "We did not create a Stripe subscription or an internal subscription.",
           Right(throwable),
           parent,
