@@ -2,6 +2,7 @@ package com.mypetdefense.helpers
 
 import com.mypetdefense.generator.{
   PetChainData,
+  PetsAndShipmentChainData,
   ShipmentChainData,
   SubscriptionCreateGeneratedData,
   UserCreateGeneratedData
@@ -24,11 +25,19 @@ object GeneralDbUtils {
       shipments: List[Shipment]
   )
 
+  case class InsertedPetsUserSubAndShipment(
+      user: User,
+      subscription: Subscription,
+      shipments: List[Shipment],
+      pets: List[Pet]
+  )
+
   def clearTables(): Unit = {
     Address.findAll().map(_.delete_!)
     Agency.findAll().map(_.delete_!)
     Pet.findAll().map(_.delete_!)
     Subscription.findAll().map(_.delete_!)
+    SubscriptionBox.findAll().map(_.delete_!)
     Shipment.findAll().map(_.delete_!)
     User.findAll().map(_.delete_!)
   }
@@ -52,6 +61,20 @@ object GeneralDbUtils {
     val u = createUser(in.user)
     val p = in.petData.map(createPet(u, _))
     InsertedUserAndPet(u, p)
+  }
+
+  def insertPetsAndShipmentChainData(
+      in: PetsAndShipmentChainData
+  ): InsertedPetsUserSubAndShipment = {
+    val u   = createUser(in.user)
+    val su  = createSubscription(u, in.subscriptionCreateGeneratedData)
+    val shs = in.shipmentCreateGeneratedData.map(createShipment(u, su, _))
+    val pets = in.pets.map { pData =>
+      val createdPet = createPet(u, pData)
+      SubscriptionBox.createNewBox(su, createdPet)
+      createdPet
+    }
+    InsertedPetsUserSubAndShipment(u, su.refresh.toOption.get, shs, pets)
   }
 
 }
