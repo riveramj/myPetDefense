@@ -8,7 +8,7 @@ import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
-import com.mypetdefense.model.{Event, EventType, Pet, Shipment, SubscriptionBox, User}
+import com.mypetdefense.model.{Event, EventType, Pet, Shipment, Subscription, SubscriptionBox, User}
 import net.liftweb.common.Full
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
@@ -17,7 +17,7 @@ class DataIntegrityCheckJobSpec extends DBTest {
   private val threeDaysAgoDate: Date = threeDaysAgo.toDate
   private val sixtyDaysAgo: Date     = anyDayOfThisYearUntilSixtyDaysAgo.toDate
 
-  it should "properly check data integrity" in {
+  it should "properly check data integrity and don't make duplicates" in {
     forAll(
       listOfNUsersGen(2),
       listOfSubscriptionToCreateGen(2),
@@ -50,29 +50,24 @@ class DataIntegrityCheckJobSpec extends DBTest {
               .map(setRandomTrackingNumber)
           )
 
-        new DataIntegrityCheckJob().checkDataIntegrity()
+        val job = new DataIntegrityCheckJob()
+        job.checkDataIntegrity()
+        job.checkDataIntegrity()
 
-        val subs1 = insertedOldEmptyLineItemsShipments.flatMap(
-          _.subscription.toOption
+        val expectedShipments =
+          insertedOldShipmentsWithoutTrackingNumbers ++ insertedOldEmptyLineItemsShipments
+        val expectedPets = insertedPetsWithoutBoxes.flatMap(_.pets)
+        val expectedSubs = getExpectedSubs(
+          insertedSubsWithoutUsers,
+          insertedOldShipmentsWithoutTrackingNumbers,
+          insertedOldEmptyLineItemsShipments
         )
-        val ship = insertedOldEmptyLineItemsShipments
-
-        val expectedShipments = insertedOldShipmentsWithoutTrackingNumbers ++ ship
-        val expectedPets      = insertedPetsWithoutBoxes.flatMap(_.pets)
-        val expectedSubs = insertedSubsWithoutUsers ++ insertedOldShipmentsWithoutTrackingNumbers
-          .flatMap(_.subscription.toList) ++ subs1
-        val insertedWithoutTrackedNumberUsers = insertedOldShipmentsWithoutTrackingNumbers
-          .flatMap(
-            _.subscription.map(_.user.toList)
-          )
-          .flatten
-        val insertedOELIShipmentsUsers = insertedOldEmptyLineItemsShipments
-          .flatMap(
-            _.subscription.map(_.user.toList)
-          )
-          .flatten
-        val expectedUsers =
-          (insertedUsersWithoutSubs ++ insertedPetsWithoutBoxes.map(_.user) ++ insertedWithoutTrackedNumberUsers ++ insertedOELIShipmentsUsers).toSet
+        val expectedUsers = getExpectedUsers(
+          insertedUsersWithoutSubs,
+          insertedPetsWithoutBoxes,
+          insertedOldShipmentsWithoutTrackingNumbers,
+          insertedOldEmptyLineItemsShipments
+        )
         val expectedTitles = List(
           "Shipment doesn't have a tracking number for three days.",
           "Pet doesn't have a box",
@@ -109,6 +104,36 @@ class DataIntegrityCheckJobSpec extends DBTest {
         cleanUpSuccess()
     }
   }
+
+  private def getExpectedUsers(
+      insertedUsersWithoutSubs: List[User],
+      insertedPetsWithoutBoxes: List[InsertedUserAndPet],
+      insertedOldShipmentsWTNumbers: List[Shipment],
+      insertedOldEmptyLineItemsShipments: List[Shipment]
+  ): Set[User] = {
+    val insertedWithoutTrackedNumberUsers = getUsersOfShipments(insertedOldShipmentsWTNumbers)
+    val insertedOELIShipmentsUsers        = getUsersOfShipments(insertedOldEmptyLineItemsShipments)
+    (insertedUsersWithoutSubs ++ insertedPetsWithoutBoxes.map(_.user) ++ insertedWithoutTrackedNumberUsers ++ insertedOELIShipmentsUsers).toSet
+  }
+
+  private def getExpectedSubs(
+      insertedSubsWithoutUsers: List[Subscription],
+      insertedOldShipmentsWTNumbers: List[Shipment],
+      insertedOldEmptyLineItemsShipments: List[Shipment]
+  ): List[Subscription] = {
+    val insertedOldShipmentsWTNumbersSubs = getSubsOfShipments(insertedOldShipmentsWTNumbers)
+    val insertedOldEmptyLineItemsSubs     = getSubsOfShipments(insertedOldEmptyLineItemsShipments)
+    insertedSubsWithoutUsers ++ insertedOldShipmentsWTNumbersSubs ++ insertedOldEmptyLineItemsSubs
+  }
+
+  private def getSubsOfShipments(in: List[Shipment]): List[Subscription] =
+    in.flatMap(_.subscription.toList)
+
+  private def getUsersOfShipments(in: List[Shipment]): List[User] =
+    in.flatMap(
+        _.subscription.map(_.user.toList)
+      )
+      .flatten
 
   private def setProcessedDateToMoreThanThreeDaysAgo(in: Shipment): Shipment =
     in.dateProcessed(threeDaysAgoDate).saveMe()
