@@ -1,6 +1,6 @@
 package com.mypetdefense.model
 
-import java.time.{LocalDate, Month, ZoneId}
+import java.time.{LocalDate, ZoneId}
 
 import net.liftweb._
 import mapper._
@@ -279,6 +279,9 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       By_<(User.createdAt, yesterdayEnd)
     )
   }
+
+  def notCancelledWithoutSubscription: List[User] =
+    User.findAll(NotBy(User.status, Status.Cancelled), NullRef(User.subscription))
 }
 
 object User extends User with LongKeyedMetaMapper[User]

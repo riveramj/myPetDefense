@@ -49,7 +49,7 @@ object TPPApi extends RestHelper with Loggable {
   implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
   val tppAgency: Box[Agency]     = Agency.find(By(Agency.name, "TPP"))
 
-  def sendStripeErrorEmail(
+  def createEventForStripeError(
       failedStepMessage: String,
       stripeFailure: Any,
       parent: Box[User],
@@ -90,7 +90,12 @@ object TPPApi extends RestHelper with Loggable {
       ===============
     """
 
-    EmailActor ! SendAPIErrorEmail(errorMsg)
+    Event.createEvent(
+      user = parent,
+      eventType = EventType.Billing,
+      title = "Something went wrong with stripe creation.",
+      details = errorMsg
+    )
   }
 
   def setupStripeSubscription(
@@ -118,7 +123,8 @@ object TPPApi extends RestHelper with Loggable {
     val subtotalWithDiscount = (pennyCount - discountAmount) / 100
 
     if (pennyCount == 0) {
-      logger.error("Penny count is 0. This seems wrong.")
+      val errorMsgTitle = "Penny count is 0. This seems wrong."
+      logger.error(errorMsgTitle)
 
       val errorMsg = s"""
         Something went wrong with price association.
@@ -153,8 +159,12 @@ object TPPApi extends RestHelper with Loggable {
         ${12.99}
         ==============
       """
-
-      EmailActor ! SendAPIErrorEmail(errorMsg)
+      Event.createEvent(
+        user = parent,
+        eventType = EventType.Billing,
+        title = errorMsgTitle,
+        details = errorMsg
+      )
     }
 
     val (taxDue, taxRate) = address.map { address =>
@@ -233,7 +243,7 @@ object TPPApi extends RestHelper with Loggable {
               "create customer failed with: " + stripeFailure + ". Email sent to log error."
             )
 
-            sendStripeErrorEmail(
+            createEventForStripeError(
               "We did not create a Stripe subscription or an internal subscription.",
               stripeFailure,
               parent,
@@ -247,7 +257,7 @@ object TPPApi extends RestHelper with Loggable {
           case TryFail(throwable: Throwable) =>
             logger.error("create customer failed with: " + throwable + ". Email sent to log error.")
 
-            sendStripeErrorEmail(
+            createEventForStripeError(
               "We did not create a Stripe subscription or an internal subscription.",
               throwable,
               parent,
@@ -263,7 +273,7 @@ object TPPApi extends RestHelper with Loggable {
       case TrySuccess(stripeFailure) =>
         logger.error("create customer failed with: " + stripeFailure + ". Email sent to log error.")
 
-        sendStripeErrorEmail(
+        createEventForStripeError(
           "We did not create a Stripe subscription or an internal subscription.",
           Left(stripeFailure),
           parent,
@@ -277,7 +287,7 @@ object TPPApi extends RestHelper with Loggable {
       case TryFail(throwable: Throwable) =>
         logger.error("create customer failed with: " + throwable + ". Email sent to log error.")
 
-        sendStripeErrorEmail(
+        createEventForStripeError(
           "We did not create a Stripe subscription or an internal subscription.",
           Right(throwable),
           parent,
@@ -320,7 +330,8 @@ object TPPApi extends RestHelper with Loggable {
       )
 
       if (product == Empty) {
-        logger.error("Didnt match product. Need manual resolution. Email sent.")
+        val errorMsgTitle = "Didn't match product. Need manual resolution."
+        logger.error(errorMsgTitle)
         val errorMsg = s"""
         Something went wrong with product matching.
           
@@ -347,7 +358,12 @@ object TPPApi extends RestHelper with Loggable {
         ===============
       """
 
-        EmailActor ! SendAPIErrorEmail(errorMsg)
+        Event.createEvent(
+          user = Full(parent),
+          eventType = EventType.Product,
+          title = errorMsgTitle,
+          details = errorMsg
+        )
       }
 
       val possibleWhelpDate = pet.whelpDate.getOrElse("")
@@ -408,7 +424,8 @@ object TPPApi extends RestHelper with Loggable {
             val createdPets = createPets(pets, currentParent)
 
             if (createdPets.size != pets.size) {
-              logger.error("A pet creation failed. Emailed error.")
+              val errorMsgTitle = "A pet creation failed. Emailed error."
+              logger.error(errorMsgTitle)
 
               val errorMsg = s"""
                   Something went wrong with creating a pet matching.
@@ -433,7 +450,12 @@ object TPPApi extends RestHelper with Loggable {
                   ===============
                 """
 
-              EmailActor ! SendAPIErrorEmail(errorMsg)
+              Event.createEvent(
+                user = Full(currentParent),
+                eventType = EventType.Pets,
+                title = errorMsgTitle,
+                details = errorMsg
+              )
             }
 
             setupStripeSubscription(currentParent, possibleParent.stripeToken)
@@ -446,8 +468,9 @@ object TPPApi extends RestHelper with Loggable {
             )
           }
 
-          case other => {
-            logger.error("Conflict on user createation. Email sent.")
+          case _ => {
+            val errorMsgTitle = "Conflict on user creation."
+            logger.error(errorMsgTitle)
 
             val errorMsg = s"""
                 Something went wrong with user creation.
@@ -475,7 +498,12 @@ object TPPApi extends RestHelper with Loggable {
                 ===============
               """
 
-            EmailActor ! SendAPIErrorEmail(errorMsg)
+            Event.createEvent(
+              user = existingUser,
+              eventType = EventType.User,
+              title = errorMsgTitle,
+              details = errorMsg
+            )
 
             JsonResponse(
               ("message" -> "possible duplicate parent found. data logged"),
