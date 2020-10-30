@@ -88,7 +88,7 @@ class DataIntegrityCheckJobSpec extends DBTest {
         actualUsers should contain theSameElementsAs expectedUsers
         actualTitles should contain theSameElementsAs expectedTitles
         actualDetails should contain theSameElementsAs expectedDetails
-        actualEventTypes should contain theSameElementsAs actualEventTypes
+        actualEventTypes should contain theSameElementsAs expectedEventTypes
 
         cleanUpSuccess()
     }

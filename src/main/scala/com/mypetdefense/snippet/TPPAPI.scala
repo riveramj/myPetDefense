@@ -91,13 +91,10 @@ object TPPApi extends RestHelper with Loggable {
     """
 
     Event.createEvent(
-      parent,
-      Empty,
-      Empty,
-      Empty,
-      EventType.Billing,
-      "Something went wrong with stripe creation.",
-      errorMsg
+      user = parent,
+      eventType = EventType.Billing,
+      title = "Something went wrong with stripe creation.",
+      details = errorMsg
     )
   }
 
@@ -162,7 +159,12 @@ object TPPApi extends RestHelper with Loggable {
         ${12.99}
         ==============
       """
-      Event.createEvent(parent, Empty, Empty, Empty, EventType.Billing, errorMsgTitle, errorMsg)
+      Event.createEvent(
+        user = parent,
+        eventType = EventType.Billing,
+        title = errorMsgTitle,
+        details = errorMsg
+      )
     }
 
     val (taxDue, taxRate) = address.map { address =>
@@ -357,13 +359,10 @@ object TPPApi extends RestHelper with Loggable {
       """
 
         Event.createEvent(
-          Full(parent),
-          Empty,
-          Empty,
-          Empty,
-          EventType.Product,
-          errorMsgTitle,
-          errorMsg
+          user = Full(parent),
+          eventType = EventType.Product,
+          title = errorMsgTitle,
+          details = errorMsg
         )
       }
 
@@ -452,13 +451,10 @@ object TPPApi extends RestHelper with Loggable {
                 """
 
               Event.createEvent(
-                Full(currentParent),
-                Empty,
-                Empty,
-                Empty,
-                EventType.Pets,
-                errorMsgTitle,
-                errorMsg
+                user = Full(currentParent),
+                eventType = EventType.Pets,
+                title = errorMsgTitle,
+                details = errorMsg
               )
             }
 
@@ -503,13 +499,10 @@ object TPPApi extends RestHelper with Loggable {
               """
 
             Event.createEvent(
-              existingUser,
-              Empty,
-              Empty,
-              Empty,
-              EventType.User,
-              errorMsgTitle,
-              errorMsg
+              user = existingUser,
+              eventType = EventType.User,
+              title = errorMsgTitle,
+              details = errorMsg
             )
 
             JsonResponse(

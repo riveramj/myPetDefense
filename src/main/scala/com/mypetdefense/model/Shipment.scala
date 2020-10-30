@@ -96,9 +96,10 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
     shipment
   }
 
-  def allWithoutTrackingNumber(createdUntil: Date): List[Shipment] =
+  def cancelledWithoutTrackingNumber(createdUntil: Date): List[Shipment] =
     Shipment
       .findAll(
+        NotBy(Shipment.status, Status.Cancelled),
         By_<=(Shipment.dateProcessed, createdUntil),
         By(Shipment.trackingNumber, "") // "" default value
       )

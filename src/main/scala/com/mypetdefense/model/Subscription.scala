@@ -210,6 +210,9 @@ class Subscription
   def allWithoutUser: List[Subscription] =
     Subscription.findAll(NullRef(Subscription.user))
 
+  def notCancelledWithoutUser: List[Subscription] =
+    Subscription.findAll(NotBy(Subscription.status, Status.Cancelled), NullRef(Subscription.user))
+
 }
 
 object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]

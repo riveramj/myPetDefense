@@ -31,10 +31,10 @@ class Event extends LongKeyedMapper[Event] with IdPK with OneToMany[Long, Event]
 
 object Event extends Event with LongKeyedMetaMapper[Event] {
   def createEvent(
-      user: Box[User],
-      subscription: Box[Subscription],
-      shipment: Box[Shipment],
-      pet: Box[Pet],
+      user: Box[User] = Empty,
+      subscription: Box[Subscription] = Empty,
+      shipment: Box[Shipment] = Empty,
+      pet: Box[Pet] = Empty,
       eventType: EventType.Value,
       title: String,
       details: String,

@@ -11,10 +11,11 @@ class DataIntegrityCheckJob extends ManagedJob {
   private[jobs] def checkDataIntegrity(): Unit = {
     val shipmentsPanicDate = DateHelper.threeDaysAgo
 
-    val usersWithoutSub                   = User.allWithoutSubscription
-    val subsWithoutUser                   = Subscription.allWithoutUser
-    val petsWithoutBox                    = Pet.allWithoutBox
-    val oldShipmentsWithoutTrackingNumber = Shipment.allWithoutTrackingNumber(shipmentsPanicDate)
+    val usersWithoutSub = User.notCancelledWithoutSubscription
+    val subsWithoutUser = Subscription.notCancelledWithoutUser
+    val petsWithoutBox  = Pet.notCancelledWithoutBox
+    val oldShipmentsWithoutTrackingNumber =
+      Shipment.cancelledWithoutTrackingNumber(shipmentsPanicDate)
 
     usersWithoutSub.foreach(logUserWithoutSub)
     subsWithoutUser.foreach(logSubsWithoutUser)
@@ -29,13 +30,12 @@ class DataIntegrityCheckJob extends ManagedJob {
     val details =
       "During regular data integrity job, that shipment was found, manual handling is needed."
     Event.createEvent(
-      shipmentUser,
-      subscription,
-      Full(shipment),
-      Empty,
-      EventType.Shipping,
-      title,
-      details
+      user = shipmentUser,
+      subscription = subscription,
+      shipment = Full(shipment),
+      eventType = EventType.Shipping,
+      title = title,
+      details = details
     )
   }
 
@@ -45,13 +45,12 @@ class DataIntegrityCheckJob extends ManagedJob {
     val details =
       "During regular data integrity job, that pet was found, manual handling is needed."
     Event.createEvent(
-      petUser,
-      petUser.flatMap(_.subscription),
-      Empty,
-      Full(pet),
-      EventType.Pets,
-      title,
-      details
+      user = petUser,
+      subscription = petUser.flatMap(_.subscription),
+      pet = Full(pet),
+      eventType = EventType.Pets,
+      title = title,
+      details = details
     )
   }
 
@@ -59,14 +58,25 @@ class DataIntegrityCheckJob extends ManagedJob {
     val title = "Subscription doesn't have an owner"
     val details =
       "During regular data integrity job, that subscription was found, manual handling is needed."
-    Event.createEvent(Empty, Full(sub), Empty, Empty, EventType.Subscription, title, details)
+    Event.createEvent(
+      subscription = Full(sub),
+      eventType = EventType.Subscription,
+      title = title,
+      details = details
+    )
   }
 
   private def logUserWithoutSub(user: User): Event = {
     val title = "User doesn't have a subscription"
     val details =
       "During regular data integrity job, that user was found, manual handling is needed."
-    Event.createEvent(Full(user), user.subscription, Empty, Empty, EventType.User, title, details)
+    Event.createEvent(
+      user = Full(user),
+      subscription = user.subscription,
+      eventType = EventType.User,
+      title = title,
+      details = details
+    )
   }
 }
 

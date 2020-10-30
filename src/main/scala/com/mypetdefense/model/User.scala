@@ -280,7 +280,8 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     )
   }
 
-  def allWithoutSubscription: List[User] = User.findAll(NullRef(User.subscription))
+  def notCancelledWithoutSubscription: List[User] =
+    User.findAll(NotBy(User.status, Status.Cancelled), NullRef(User.subscription))
 }
 
 object User extends User with LongKeyedMetaMapper[User]
