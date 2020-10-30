@@ -1,6 +1,7 @@
 package com.mypetdefense.jobs
 
 import com.mypetdefense.actor._
+import com.mypetdefense.model.Subscription
 import com.mypetdefense.service.ReportingService
 import org.quartz._
 
@@ -14,10 +15,14 @@ class InternalEmailReportingJob extends ManagedJob {
 
     emailScope match {
       case "daily" =>
-        val (newShipmentsYesterday: Int, paidShipmentsYesterday: Int, grossSalesYesterday: Double) =
+        val (
+          newShipmentsYesterday: Int,
+          paidShipmentsYesterday: Int,
+          grossSalesYesterday: BigDecimal
+        ) =
           ReportingService.yesterdayShipments
 
-        val cancelsYesterday      = ReportingService.yesterdayCancels
+        val cancelsYesterday      = Subscription.yesterdayCancels
         val cancelsYesterdayCount = cancelsYesterday.size
 
         internalEmails.map { email =>

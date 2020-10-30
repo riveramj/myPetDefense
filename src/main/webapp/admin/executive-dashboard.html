@@ -1,7 +1,19 @@
 <div id="main" data-lift="surround?with=admin-template;at=content">
   <div data-lift="admin.ExecutiveDashboard.render?eager_eval=true">
     <div data-lift="embed?what=admin/admin-nav-bar"></div>
+
     <div id="item-container">
+      <section class="executive-snapshot snapshot">
+        <ul>
+          <li class="header">
+            <h3>Daily Snapshot</h3>
+          </li>
+          <li>
+            <a href="/executive-snapshot" class="executive-snapshot-export">Export Daily Snapshot</a>
+          </li>
+        </ul>
+      </section>
+
       <section class="new-starts snapshot">
         <ul>
           <li class="header">

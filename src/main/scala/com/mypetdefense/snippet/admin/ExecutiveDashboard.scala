@@ -6,9 +6,11 @@ import java.text.NumberFormat
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import net.liftweb.common._
+import net.liftweb.http.LiftResponse
 import net.liftweb.http.SHtml.ajaxInvoke
 import net.liftweb.http.js.JsCmd
 import net.liftweb.mapper.By
+import net.liftweb.sitemap.Loc.EarlyResponse
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
@@ -25,6 +27,15 @@ object ExecutiveDashboard extends Loggable {
   val menu: Menu.Menuable = Menu.i("Executive Dashboard") / "admin" / "executive-dashboard" >>
     mpdAdmin >>
     loggedIn
+
+  val executiveSnapshotExportMenu: Menu.Menuable = Menu.i(
+    "Export Executive Snapshot"
+  ) / "admin" / "executive-dashboard" / "executive-snapshot.csv" >>
+    mpdAdmin >>
+    loggedIn >>
+    EarlyResponse(exportexecutiveSnapshot _)
+
+  def exportexecutiveSnapshot: Box[LiftResponse] = ReportingService.executiveSnapshot
 }
 
 class ExecutiveDashboard extends Loggable {
@@ -36,18 +47,18 @@ class ExecutiveDashboard extends Loggable {
   val dollarFormatter: NumberFormat = NumberFormat.getCurrencyInstance
   val numberFormatter: NumberFormat = NumberFormat.getIntegerInstance
 
-  val mtdShipments: List[Shipment] = ReportingService.findMtdShipments
+  val mtdShipments: List[Shipment] = Shipment.findMtdShipments
   val mtdShipmentValue: Double = mtdShipments.flatMap { shipment =>
     tryo(shipment.amountPaid.get.toDouble)
   }.foldLeft(0d)(_ + _)
 
-  val todayShipments: List[Shipment] = ReportingService.findTodayShipments
+  val todayShipments: List[Shipment] = Shipment.findTodayShipments
   val todayShipmentsValue: Double = todayShipments.flatMap { shipment =>
     tryo(shipment.amountPaid.get.toDouble)
   }.foldLeft(0d)(_ + _)
 
   val remainingMonthSubscriptions: List[Subscription] =
-    ReportingService.findCurrentMonthUpcomingSubscriptions
+    Subscription.findCurrentMonthUpcomingSubscriptions
 
   /*
   val remainingMonthValue = {
@@ -62,23 +73,23 @@ class ExecutiveDashboard extends Loggable {
   }.sum
    */
 
-  val newStartsToday: List[Subscription] = ReportingService.findNewTodaySubscriptions
+  val newStartsToday: List[Subscription] = Subscription.findNewTodaySubscriptions
   val newStartsTodayLastMonth: List[Subscription] =
-    ReportingService.findNewTodaySubscriptionsLastMonth
+    Subscription.findNewTodaySubscriptionsLastMonth
   val newStartsTodayLastYear: List[Subscription] =
-    ReportingService.findNewTodaySubscriptionsLastYear
+    Subscription.findNewTodaySubscriptionsLastYear
   val newStartsTodayMonthDiff: Int = newStartsToday.size - newStartsTodayLastMonth.size
   val newStartsTodayYearDiff: Int  = newStartsToday.size - newStartsTodayLastYear.size
 
-  val newStartsMTD: List[Subscription]          = ReportingService.findNewMTDSubscriptions
-  val newStartsMTDLastMonth: List[Subscription] = ReportingService.findNewMTDSubscriptionsLastMonth
-  val newStartsMTDLastYear: List[Subscription]  = ReportingService.findNewMTDSubscriptionsLastYear
+  val newStartsMTD: List[Subscription]          = Subscription.findNewMTDSubscriptions
+  val newStartsMTDLastMonth: List[Subscription] = Subscription.findNewMTDSubscriptionsLastMonth
+  val newStartsMTDLastYear: List[Subscription]  = Subscription.findNewMTDSubscriptionsLastYear
   val newStartsMTDMonthDiff: Int                = newStartsMTD.size - newStartsMTDLastMonth.size
   val newStartsMTDYearDiff: Int                 = newStartsMTD.size - newStartsMTDLastYear.size
 
-  val newStartsYTD: List[Subscription]          = ReportingService.findNewYTDSubscriptions
-  val newStartsYTDLastMonth: List[Subscription] = ReportingService.findNewYTDSubscriptionsLastMonth
-  val newStartsYTDLastYear: List[Subscription]  = ReportingService.findNewYTDSubscriptionsLastYear
+  val newStartsYTD: List[Subscription]          = Subscription.findNewYTDSubscriptions
+  val newStartsYTDLastMonth: List[Subscription] = Subscription.findNewYTDSubscriptionsLastMonth
+  val newStartsYTDLastYear: List[Subscription]  = Subscription.findNewYTDSubscriptionsLastYear
   val newStartsYTDMonthDiff: Int                = newStartsYTD.size - newStartsYTDLastMonth.size
   val newStartsYTDYearDiff: Int                 = newStartsYTD.size - newStartsYTDLastYear.size
 
@@ -133,17 +144,18 @@ class ExecutiveDashboard extends Loggable {
 
   def render: CssBindFunc = {
     newStartBindings &
-      ".executive-dashboard [class+]" #> "current" &
-      ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
-      ".mtd-shipments .count *" #> numberFormatter.format(mtdShipments.size) &
-      ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentValue) &
-      ".today-shipments .count *" #> numberFormatter.format(todayShipments.size) &
-      ".today-shipments .value *" #> dollarFormatter.format(todayShipmentsValue) &
-      ".remaining-shipments-month .count *" #> numberFormatter.format(
-        remainingMonthSubscriptions.size
-      ) &
-      ".remaining-shipments-month .value *" #> dollarFormatter.format(0.99) &
-      ".mtd-users .new-users-count *" #> ReportingService.findNewMTDSubscriptions.size &
-      ".mtd-users .cancellations-count *" #> ReportingService.findCancelledMtdSubscriptions.size
+    ".executive-dashboard [class+]" #> "current" &
+    ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
+    ".executive-snapshot .executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
+    ".mtd-shipments .count *" #> numberFormatter.format(mtdShipments.size) &
+    ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentValue) &
+    ".today-shipments .count *" #> numberFormatter.format(todayShipments.size) &
+    ".today-shipments .value *" #> dollarFormatter.format(todayShipmentsValue) &
+    ".remaining-shipments-month .count *" #> numberFormatter.format(
+      remainingMonthSubscriptions.size
+    ) &
+    ".remaining-shipments-month .value *" #> dollarFormatter.format(0.99) &
+    ".mtd-users .new-users-count *" #> Subscription.findNewMTDSubscriptions.size &
+    ".mtd-users .cancellations-count *" #> Subscription.findCancelledMtdSubscriptions.size
   }
 }

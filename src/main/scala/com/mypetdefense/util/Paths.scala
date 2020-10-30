@@ -161,6 +161,7 @@ object Paths {
     ParentSubscription.cancelSurveySubscriptionMenu,
     ParentSubscription.surveyCompleteSubscriptionMenu,
     admin.ExecutiveDashboard.menu,
+    admin.ExecutiveDashboard.executiveSnapshotExportMenu,
     admin.ShipmentDashboard.menu,
     admin.ShipmentDashboard.newLabelsExportMenu,
     admin.ShipmentDashboard.existingLabelsExportMenu,
