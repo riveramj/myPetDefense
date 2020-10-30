@@ -103,6 +103,15 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
         By_<=(Shipment.dateProcessed, createdUntil),
         By(Shipment.trackingNumber, "") // "" default value
       )
+
+  def cancelledWithEmptyLineItems(createdUntil: Date): List[Shipment] = {
+    Shipment
+      .findAll(
+        ByList(Shipment.shipmentStatus, List(ShipmentStatus.LabelCreated, ShipmentStatus.Paid)),
+        By_<=(Shipment.dateProcessed, createdUntil)
+      )
+      .filter(_.shipmentLineItems.isEmpty)
+  }
 }
 
 class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
