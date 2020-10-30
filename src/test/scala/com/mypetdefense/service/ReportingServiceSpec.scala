@@ -1,24 +1,23 @@
 package com.mypetdefense.service
 
 import java.util.Date
-import java.time.ZoneId
 import com.mypetdefense.generator.Generator._
-import com.mypetdefense.generator.{
-  PetChainData,
-  SubscriptionCreateGeneratedData,
-  UserCreateGeneratedData
-}
+import com.mypetdefense.generator._
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
+import com.mypetdefense.helpers.ListUtil.ListOps
 import com.mypetdefense.helpers._
 import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.helpers.db.AgencyDbUtils._
 import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.reports._
+import com.mypetdefense.util.CalculationHelper
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class ReportingServiceSpec extends DBTest {
 
+  private val tppAgencyName     = "TPP"
   private val mpdAgencyName     = "My Pet Defense"
   private val petLandAgencyName = "Petland"
 
@@ -42,10 +41,80 @@ class ReportingServiceSpec extends DBTest {
     inserted.copy(user = updatedUser)
   }
 
+  private def insertUpgradeAndCancelPetsAndShipmentData(
+      data: List[PetsAndShipmentChainData],
+      agency: Agency
+  ): List[InsertedPetsUserSubAndShipment] =
+    data
+      .map(insertPetAndShipmentsChainAtAgency(_, agency, subUpgraded = true))
+      .map(cancelSubscription)
+
+  private def insertPetsAndShipmentData(
+      data: List[PetsAndShipmentChainData],
+      agency: Agency,
+      subUpgraded: Boolean
+  ): List[InsertedPetsUserSubAndShipment] =
+    data.map(insertPetAndShipmentsChainAtAgency(_, agency, subUpgraded))
+
+  private def insertPetAndShipmentsChainAtAgency(
+      data: PetsAndShipmentChainData,
+      agency: Agency,
+      subUpgraded: Boolean
+  ): InsertedPetsUserSubAndShipment = {
+    val inserted    = insertPetsAndShipmentChainData(data)
+    val updatedUser = inserted.user.referer(agency).saveMe()
+    val updatedSub  = inserted.subscription.isUpgraded(subUpgraded).saveMe()
+    inserted.copy(user = updatedUser, subscription = updatedSub)
+  }
+
+  private def cancelSubscription(in: InsertedPetsUserSubAndShipment) =
+    in.copy(subscription = in.subscription.cancel)
+
   private def createPetlandAndMPDAgencies(): PetlandAndMPDAgencies = {
     val myPetDefenseAgency = createAgency(mpdAgencyName)
     val petlandAgency      = createAgency(petLandAgencyName)
     PetlandAndMPDAgencies(petlandAgency, myPetDefenseAgency)
+  }
+
+  private def upgradedSubsByAgency(
+      input: List[InsertedPetsUserSubAndShipment]
+  ): Iterable[CountedByAgency] = {
+    val agenciesNames = input.flatMap(_.user.referer.toList).map { a =>
+      a.name.get match {
+        case "Some agency1" => mpdAgencyName
+        case "Some agency2" => tppAgencyName
+        case x              => x
+      }
+    }
+    CalculationHelper
+      .calculateOccurrences[String, String](agenciesNames, identity)
+      .map(CountedByAgency.tupled)
+  }
+
+  private def calculateOccurrencesSubsByShipments(
+      input: List[InsertedPetsUserSubAndShipment]
+  ): Iterable[CancelledUpgradedSubscriptionsByCount] =
+    CalculationHelper
+      .calculateOccurrences[Int, InsertedPetsUserSubAndShipment](input, _.shipments.size)
+      .map(CancelledUpgradedSubscriptionsByCount.tupled)
+
+  private def calculateOccurrencesPetsByCount(
+      input: List[InsertedPetsUserSubAndShipment]
+  ): Iterable[CancelledUpgradedSubscriptionsByCount] =
+    CalculationHelper
+      .calculateOccurrences[Int, Int](
+        input.map(_.pets.size),
+        identity
+      )
+      .map(CancelledUpgradedSubscriptionsByCount.tupled)
+
+  private def calculateOccurrencesPetsByProduct(
+      input: List[InsertedPetsUserSubAndShipment]
+  ): Iterable[PetsByProduct] = {
+    val fleaTick = input.flatMap(_.subscription.subscriptionBoxes).flatMap(_.fleaTick.toList)
+    CalculationHelper
+      .calculateOccurrences[String, FleaTick](fleaTick, _.getNameAndSize)
+      .map(PetsByProduct.tupled)
   }
 
   it should "find all active subscriptions" in {
@@ -444,7 +513,7 @@ class ReportingServiceSpec extends DBTest {
   }
 
   it should "find cancels by shipment" in {
-    forAll(listOfNShipmentChainData(), genShipmentChainData, genShipmentChainData) {
+    forAll(listOfNShipmentChainDataGen(), genShipmentChainData, genShipmentChainData) {
       (shouldBeInStatisticData, notCanceledData, canceledAndNotShippedData) =>
         insertUserSubAndShipment(notCanceledData)
         insertUserSubAndShipment(canceledAndNotShippedData).subscription.cancel
@@ -465,6 +534,85 @@ class ReportingServiceSpec extends DBTest {
 
         actualData should contain theSameElementsAs expectedData
         cleanUpSuccess()
+    }
+  }
+
+  it should "form a proper executive snapshot report" in {
+    forAll(
+      listOfNPetsAndShipmentChainDataGen(6),
+      listOfNPetsAndShipmentChainDataGen(4),
+      listOfNPetsAndShipmentChainDataGen(2),
+      listOfNPetsAndShipmentChainDataGen(2)
+    ) { (upgradeActiveData, upgradedAndCancelledData, otherUpgradedData, otherNotUpgradedData) =>
+      val myPetDefenseAgency                                 = createAgency(mpdAgencyName)
+      val tppAgency                                          = createAgency(tppAgencyName)
+      val someAgency1                                        = createAgency("Some agency1").parent(myPetDefenseAgency).saveMe()
+      val someAgency2                                        = createAgency("Some agency2").parent(tppAgency).saveMe()
+      val (otherActiveUpdatedData1, otherActiveUpdatedData2) = otherUpgradedData.splitInTwo
+      val (upgradedMPD, upgradedTPP)                         = upgradeActiveData.splitInTwo
+      val (upgradedCancelledMPD, upgradedCancelledTPP)       = upgradedAndCancelledData.splitInTwo
+
+      val insertedCldUpgMpd =
+        insertUpgradeAndCancelPetsAndShipmentData(upgradedCancelledMPD, myPetDefenseAgency)
+      val insertedCldUpgTPP =
+        insertUpgradeAndCancelPetsAndShipmentData(upgradedCancelledTPP, tppAgency)
+      val insertedUpgMPD =
+        insertPetsAndShipmentData(upgradedMPD, myPetDefenseAgency, subUpgraded = true)
+      val insertedUpgTPP = insertPetsAndShipmentData(upgradedTPP, tppAgency, subUpgraded = true)
+      val insertedUpgActiveOtherData1 =
+        insertPetsAndShipmentData(otherActiveUpdatedData1, someAgency1, subUpgraded = true)
+      val insertedUpgActiveOtherData2 =
+        insertPetsAndShipmentData(otherActiveUpdatedData2, someAgency2, subUpgraded = true)
+
+      val insertedNotUpgradedActiveData =
+        insertPetsAndShipmentData(otherNotUpgradedData, tppAgency, subUpgraded = false)
+
+      val allActiveData = List(
+        insertedUpgMPD,
+        insertedUpgTPP,
+        insertedUpgActiveOtherData1,
+        insertedUpgActiveOtherData2,
+        insertedNotUpgradedActiveData
+      ).flatten
+      val allActiveUpgradedData = List(
+        insertedUpgMPD,
+        insertedUpgTPP,
+        insertedUpgActiveOtherData1,
+        insertedUpgActiveOtherData2
+      ).flatten
+      val allCancelledUpgradedData = List(insertedCldUpgMpd, insertedCldUpgTPP).flatten
+
+      val allPetsSize               = allActiveData.map(_.pets.size).sum
+      val allActiveUpgradedPetsSize = allActiveUpgradedData.map(_.pets.size).sum
+
+      val expectedAllAccountsReport = AllAccountsReport(allActiveData.size, allPetsSize)
+      val expectedUpgradedSubscriptionsReport = UpgradedSubscriptionsReport(
+        allActiveUpgradedData.size,
+        allActiveUpgradedPetsSize,
+        allCancelledUpgradedData.size
+      )
+      val expectedActiveUpdPetsBySize = calculateOccurrencesPetsByProduct(allActiveUpgradedData)
+      val expectedCancelledUpdPetsBySize =
+        calculateOccurrencesPetsByProduct(allCancelledUpgradedData)
+      val expectedCancelledUpgradedSubsByPetCount =
+        calculateOccurrencesPetsByCount(allCancelledUpgradedData)
+      val expectedCancelledUpgradedSubsByShipmentCount =
+        calculateOccurrencesSubsByShipments(allCancelledUpgradedData)
+      val expectedActiveUpgradesByAgency    = upgradedSubsByAgency(allActiveUpgradedData)
+      val expectedCancelledUpgradesByAgency = upgradedSubsByAgency(allCancelledUpgradedData)
+
+      val actualData = ReportingService.executiveSnapshotReport
+
+      actualData.allAccountsReport shouldBe expectedAllAccountsReport
+      actualData.upgradedSubscriptionsReport shouldBe expectedUpgradedSubscriptionsReport
+      actualData.activeUpgradedPetsByProduct should contain theSameElementsAs expectedActiveUpdPetsBySize
+      actualData.cancelledUpgradedPetsByProduct should contain theSameElementsAs expectedCancelledUpdPetsBySize
+      actualData.cancelledUpgradedSubsByPetCount should contain theSameElementsAs expectedCancelledUpgradedSubsByPetCount
+      actualData.cancelledUpgradedSubsByShipmentCount should contain theSameElementsAs expectedCancelledUpgradedSubsByShipmentCount
+      actualData.activeUpgradesByAgency should contain theSameElementsAs expectedActiveUpgradesByAgency
+      actualData.cancelledUpgradesByAgency should contain theSameElementsAs expectedCancelledUpgradesByAgency
+
+      cleanUpSuccess()
     }
   }
 

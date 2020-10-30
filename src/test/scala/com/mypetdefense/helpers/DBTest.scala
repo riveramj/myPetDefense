@@ -1,6 +1,7 @@
 package com.mypetdefense.helpers
 
 import com.mypetdefense.helpers.GeneralDbUtils.clearTables
+import com.mypetdefense.util.DataLoader
 import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
@@ -14,6 +15,7 @@ trait DBTest
     with ScalaCheckPropertyChecks {
   override def beforeAll() {
     BootUtil.bootForTests()
+    DataLoader.loadProducts
   }
 
   override def afterAll(): Unit = {

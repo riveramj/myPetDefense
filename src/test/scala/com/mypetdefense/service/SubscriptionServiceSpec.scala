@@ -1,7 +1,7 @@
 package com.mypetdefense.service
 
 import java.time.ZoneId
-import com.mypetdefense.generator.Generator.{genShipmentChainData, listOfNShipmentChainData}
+import com.mypetdefense.generator.Generator.{genShipmentChainData, listOfNShipmentChainDataGen}
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisYear}
 import com.mypetdefense.helpers.GeneralDbUtils.insertUserSubAndShipment
 import com.mypetdefense.model.Subscription
@@ -11,7 +11,7 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 class SubscriptionServiceSpec extends DBTest {
 
   it should "find same day cancels by month" in {
-    forAll(listOfNShipmentChainData(), genShipmentChainData, genShipmentChainData) {
+    forAll(listOfNShipmentChainDataGen(), genShipmentChainData, genShipmentChainData) {
       (shouldBeInStatisticData, notCanceledData, canceledAndShippedData) =>
         insertUserSubAndShipment(notCanceledData)
         val shouldBeCanceledAndHaveShipping = insertUserSubAndShipment(canceledAndShippedData)

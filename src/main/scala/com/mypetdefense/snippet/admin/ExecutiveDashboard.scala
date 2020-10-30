@@ -6,9 +6,11 @@ import java.text.NumberFormat
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import net.liftweb.common._
+import net.liftweb.http.LiftResponse
 import net.liftweb.http.SHtml.ajaxInvoke
 import net.liftweb.http.js.JsCmd
 import net.liftweb.mapper.By
+import net.liftweb.sitemap.Loc.EarlyResponse
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
@@ -25,6 +27,15 @@ object ExecutiveDashboard extends Loggable {
   val menu: Menu.Menuable = Menu.i("Executive Dashboard") / "admin" / "executive-dashboard" >>
     mpdAdmin >>
     loggedIn
+
+  val executiveSnapshotExportMenu: Menu.Menuable = Menu.i(
+    "Export Executive Snapshot"
+  ) / "admin" / "executive-dashboard" / "executive-snapshot.csv" >>
+    mpdAdmin >>
+    loggedIn >>
+    EarlyResponse(exportexecutiveSnapshot _)
+
+  def exportexecutiveSnapshot: Box[LiftResponse] = ReportingService.executiveSnapshot
 }
 
 class ExecutiveDashboard extends Loggable {
@@ -133,17 +144,18 @@ class ExecutiveDashboard extends Loggable {
 
   def render: CssBindFunc = {
     newStartBindings &
-      ".executive-dashboard [class+]" #> "current" &
-      ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
-      ".mtd-shipments .count *" #> numberFormatter.format(mtdShipments.size) &
-      ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentValue) &
-      ".today-shipments .count *" #> numberFormatter.format(todayShipments.size) &
-      ".today-shipments .value *" #> dollarFormatter.format(todayShipmentsValue) &
-      ".remaining-shipments-month .count *" #> numberFormatter.format(
-        remainingMonthSubscriptions.size
-      ) &
-      ".remaining-shipments-month .value *" #> dollarFormatter.format(0.99) &
-      ".mtd-users .new-users-count *" #> Subscription.findNewMTDSubscriptions.size &
-      ".mtd-users .cancellations-count *" #> Subscription.findCancelledMtdSubscriptions.size
+    ".executive-dashboard [class+]" #> "current" &
+    ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
+    ".executive-snapshot .executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
+    ".mtd-shipments .count *" #> numberFormatter.format(mtdShipments.size) &
+    ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentValue) &
+    ".today-shipments .count *" #> numberFormatter.format(todayShipments.size) &
+    ".today-shipments .value *" #> dollarFormatter.format(todayShipmentsValue) &
+    ".remaining-shipments-month .count *" #> numberFormatter.format(
+      remainingMonthSubscriptions.size
+    ) &
+    ".remaining-shipments-month .value *" #> dollarFormatter.format(0.99) &
+    ".mtd-users .new-users-count *" #> Subscription.findNewMTDSubscriptions.size &
+    ".mtd-users .cancellations-count *" #> Subscription.findCancelledMtdSubscriptions.size
   }
 }

@@ -5,7 +5,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports
 import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.snippet.admin.AmazonOrderExport
-import com.mypetdefense.util.CSVHelper
+import com.mypetdefense.util.{CSVHelper, CalculationHelper}
 import com.mypetdefense.util.CalculationHelper._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.ModelSyntax._
@@ -16,6 +16,7 @@ import net.liftweb.util.Helpers._
 
 object ReportingService extends Loggable {
 
+  val tppName          = "TPP"
   val myPetDefenseName = "My Pet Defense"
   val petlandName      = "Petland"
 
@@ -203,14 +204,14 @@ object ReportingService extends Loggable {
   def exportRawSales(name: String): Box[LiftResponse] = {
     val data     = rawSalesReport(name)
     val fileName = s"salesData-$fileNameYearMonth.csv"
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
-  def exportCancellationData(name: String): Some[InMemoryResponse] = {
+  def exportCancellationData(name: String): Box[InMemoryResponse] = {
     val data     = exportCancellationReport(name)
     val fileName = s"cancellations-$fileNameYearMonth.csv"
 
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def exportTotalSales(name: String): Box[LiftResponse] = {
@@ -266,7 +267,7 @@ object ReportingService extends Loggable {
 
     val fileName = s"month-to-date-salesData-$fileNameMonthDayYear.csv"
 
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def exportAmazonOrders(amazonOrderExport: AmazonOrderExport): Box[LiftResponse] = {
@@ -289,14 +290,14 @@ object ReportingService extends Loggable {
 
     val fileName = s"amazon-orders-$startDateExport-$endDateExport.csv"
 
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def exportAgencyMtdYtdSales(name: String): Box[LiftResponse] = {
     val data     = agencyMtdYtdSalesReport(name)
     val fileName = s"$name-mtd-ytd-$fileNameMonthDayYear.csv"
 
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def yesterdayShipments: (Int, Int, BigDecimal) = {
@@ -420,13 +421,13 @@ object ReportingService extends Loggable {
 
     val fileName = s"$name-$month-$year-sales-summary.csv"
 
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def exportSameDayCancels(name: String): Box[LiftResponse] = {
     val data     = sameDayCancelsReport(name)
     val fileName = s"sameDayCancels-${LocalDate.now()}.csv"
-    Some(CSVHelper.inMemoryCsv(fileName, data))
+    CSVHelper.inMemoryCsv(fileName, data)
   }
 
   def cancelsByShipment(subscriptions: List[Subscription]): List[(String, Int)] = {
@@ -458,7 +459,7 @@ object ReportingService extends Loggable {
       agencyId <- tryo(rawAgencyId.toLong)
       data     <- agencyNameAndCustomerReport(agencyId)
       fileName = s"${data.agencyName}-customers-$fileNameMonthDayYear.csv"
-      csv <- Some(CSVHelper.inMemoryCsv(fileName, data))
+      csv <- CSVHelper.inMemoryCsv(fileName, data)
     } yield csv
 
   def agencyNameAndCustomerReport(agencyId: Long): Box[AgencyCustomersReport] = {
@@ -484,6 +485,12 @@ object ReportingService extends Loggable {
         cancelDate
       )
     }
+
+  def executiveSnapshot: Box[InMemoryResponse] = {
+    val data     = executiveSnapshotReport
+    val fileName = s"executive-snapshot-${LocalDate.now()}.csv"
+    CSVHelper.inMemoryCsv(fileName, data)
+  }
 
   private[service] def rawSalesReport(agencyName: String): List[RawSaleDataReport] = {
     for {
@@ -741,6 +748,91 @@ object ReportingService extends Loggable {
       allCancellationRows
     )
   }
+
+  private[service] def executiveSnapshotReport: ExecutiveSnapshotReport = {
+    val allActiveSubs         = Subscription.activeAndPausedSubscriptions
+    val allActiveUpgradedSubs = Subscription.upgradedActiveAndPausedSubscriptions
+    val upgradedCancelledSubs = Subscription.upgradedAndCancelledSubscriptions
+    val allActivePets         = allActiveSubs.getAllActivePets
+    val allActiveUpgradedPets = allActiveUpgradedSubs.getAllActivePets
+    val allAccountsReport     = AllAccountsReport(allActiveSubs.size, allActivePets.size)
+    val upgradedSubsReport =
+      upgradedSubscriptionsReport(
+        allActiveUpgradedSubs,
+        allActiveUpgradedPets,
+        upgradedCancelledSubs
+      )
+    val activeUpgradedPetsBySize    = countPetsByProduct(allActiveUpgradedSubs)
+    val cancelledUpgradedPetsBySize = countPetsByProduct(upgradedCancelledSubs)
+    val upgradedNCancelledSubsByPetsCount = cancelledUpgradedSubscriptionsByPetCount(
+      upgradedCancelledSubs
+    )
+    val upgradedNCancelledSubsByShipmentsCount = cancelledUpgradedSubscriptionsByShipmentCount(
+      upgradedCancelledSubs
+    )
+    val activeUpgradesByAgency   = countUpgradesByAgency(allActiveUpgradedSubs)
+    val canceledUpgradesByAgency = countUpgradesByAgency(upgradedCancelledSubs)
+    ExecutiveSnapshotReport(
+      allAccountsReport,
+      upgradedSubsReport,
+      activeUpgradedPetsBySize,
+      cancelledUpgradedPetsBySize,
+      upgradedNCancelledSubsByPetsCount,
+      upgradedNCancelledSubsByShipmentsCount,
+      activeUpgradesByAgency,
+      canceledUpgradesByAgency
+    )
+  }
+
+  private def cancelledUpgradedSubscriptionsByShipmentCount(
+      subs: List[Subscription]
+  ): Iterable[CancelledUpgradedSubscriptionsByCount] =
+    CalculationHelper
+      .calculateOccurrences[Int, Subscription](subs, _.shipments.toList.size)
+      .map(CancelledUpgradedSubscriptionsByCount.tupled)
+
+  private def cancelledUpgradedSubscriptionsByPetCount(
+      subs: List[Subscription]
+  ): Iterable[CancelledUpgradedSubscriptionsByCount] = {
+    val petsSizes = subs
+      .flatMap(_.user.toOption.map(_.pets.toList.size))
+    CalculationHelper
+      .calculateOccurrences[Int, Int](petsSizes, identity)
+      .map(CancelledUpgradedSubscriptionsByCount.tupled)
+  }
+
+  private def countPetsByProduct(subs: List[Subscription]): Iterable[PetsByProduct] = {
+    val fleaTick = subs.flatMap(_.subscriptionBoxes).flatMap(_.fleaTick.toList)
+    CalculationHelper
+      .calculateOccurrences[String, FleaTick](fleaTick, _.getNameAndSize)
+      .map(PetsByProduct.tupled)
+  }
+
+  private def countUpgradesByAgency(
+      canceledSubs: List[Subscription]
+  ): Iterable[CountedByAgency] = {
+    val subscriptionsAgencies = canceledSubs
+      .flatMap(_.user.flatMap(_.referer))
+      .map(Agency.getHQFor)
+      .filter { agency =>
+        val agencyName = agency.name.get
+        agencyName == myPetDefenseName || agencyName == tppName
+      }
+    CalculationHelper
+      .calculateOccurrences[String, Agency](subscriptionsAgencies, _.name.get)
+      .map(CountedByAgency.tupled)
+  }
+
+  private def upgradedSubscriptionsReport(
+      allActiveUpgradedSubs: List[Subscription],
+      allActivePets: List[Pet],
+      upgradedCancelledSubs: List[Subscription]
+  ): UpgradedSubscriptionsReport =
+    UpgradedSubscriptionsReport(
+      allActiveUpgradedSubs.size,
+      allActivePets.size,
+      upgradedCancelledSubs.size
+    )
 
   private def getAllSalesForMonthReport(
       input: Map[String, Iterable[Shipment]]
