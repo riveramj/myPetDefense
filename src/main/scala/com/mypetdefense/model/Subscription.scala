@@ -8,7 +8,7 @@ import java.util.Date
 
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
-import net.liftweb.common.Box
+import net.liftweb.common.{Box, Empty}
 import net.liftweb.util.Helpers.tryo
 
 import scala.collection.mutable
@@ -206,6 +206,12 @@ class Subscription
       By(Subscription.status, Status.Cancelled),
       By(Subscription.isUpgraded, true)
     )
+
+  def allWithoutUser: List[Subscription] =
+    Subscription.findAll(NullRef(Subscription.user))
+
+  def notCancelledWithoutUser: List[Subscription] =
+    Subscription.findAll(NotBy(Subscription.status, Status.Cancelled), NullRef(Subscription.user))
 
 }
 

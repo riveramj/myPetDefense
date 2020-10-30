@@ -2,15 +2,15 @@ package com.mypetdefense.helpers.db
 
 import com.mypetdefense.generator.SubscriptionCreateGeneratedData
 import com.mypetdefense.model.{Subscription, User}
-import net.liftweb.common.Full
+import net.liftweb.common.Box
 
 object SubscriptionDbUtils {
 
   def createSubscription(
-      parent: User,
+      parent: Box[User],
       data: SubscriptionCreateGeneratedData
   ): Subscription = Subscription.createNewSubscription(
-    Full(parent),
+    parent,
     data.stripeSubscriptionId,
     data.startDate,
     data.nextShipDate,

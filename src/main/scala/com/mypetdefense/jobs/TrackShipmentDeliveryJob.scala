@@ -99,14 +99,13 @@ class TrackShipmentDeliveryJob extends ManagedJob {
 
       if (existingEvent.isEmpty) {
         Event.createEvent(
-          user,
-          subscription,
-          Full(shipment),
-          Empty,
-          EventType.Shipping,
-          title,
-          description,
-          shipment.dateShipped.get
+          user = user,
+          subscription = subscription,
+          shipment = Full(shipment),
+          eventType = EventType.Shipping,
+          title = title,
+          details = description,
+          eventDate = shipment.dateShipped.get
         )
       }
     }

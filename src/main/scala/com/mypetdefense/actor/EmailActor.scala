@@ -40,7 +40,6 @@ case class ParentPauseSubscriptionEmail(user: User, subscription: Subscription)
 case class ParentResumeSubscriptionEmail(user: User, subscription: Subscription)
     extends EmailActorMessage
 case class PaymentReceivedEmail(user: User, amount: Double) extends EmailActorMessage
-case class SendAPIErrorEmail(emailBody: String)             extends EmailActorMessage
 case class NotifyParentGrowthRate(pet: Pet, newProduct: String, user: User)
     extends EmailActorMessage
 case class TreatReceiptEmail(order: TreatOrder) extends EmailActorMessage
@@ -558,23 +557,6 @@ trait Send5kEmailHandling extends EmailHandlerChain {
   }
 }
 
-trait SendAPIErrorEmailHandling extends EmailHandlerChain {
-  addHandler {
-    case SendAPIErrorEmail(emailBody) =>
-      val template =
-        Templates("emails-hidden" :: "api-error-email" :: Nil) openOr NodeSeq.Empty
-
-      val subject = "API Error - Manual Work Needed"
-      val hostUrl = Paths.serverUrl
-
-      val transform = {
-        "#error *" #> emailBody
-      }
-
-      sendEmail(subject, "help@mypetdefense.com", transform(template), "error@mypetdefense.com")
-  }
-}
-
 trait NotifyParentGrowthRateHandling extends EmailHandlerChain {
   addHandler {
     case NotifyParentGrowthRate(pet, newProduct, user) =>
@@ -970,7 +952,6 @@ trait EmailActor
     with ShipmentReadyEmailHandling
     with ContactUsEmailHandling
     with Send5kEmailHandling
-    with SendAPIErrorEmailHandling
     with NotifyParentGrowthRateHandling
     with DailySalesEmailHandling
     with InternalDailyEmailHandling
