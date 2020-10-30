@@ -8,7 +8,7 @@ import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
-import com.mypetdefense.model.{Event, Pet, Shipment, SubscriptionBox, User}
+import com.mypetdefense.model.{Event, EventType, Pet, Shipment, SubscriptionBox, User}
 import net.liftweb.common.Full
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
@@ -59,16 +59,36 @@ class DataIntegrityCheckJobSpec extends DBTest {
           .flatten
         val expectedUsers =
           (insertedUsersWithoutSubs ++ insertedPetsWithoutBoxes.map(_.user) ++ insertedWithoutTrackedNumberUsers).toSet
+        val expectedTitles = List(
+          "Shipment doesn't have a tracking number for three days.",
+          "Pet doesn't have a box",
+          "Subscription doesn't have an owner",
+          "User doesn't have a subscription"
+        ).toSet
+        val expectedDetails = List(
+          "During regular data integrity job, that shipment was found, manual handling is needed.",
+          "During regular data integrity job, that pet was found, manual handling is needed.",
+          "During regular data integrity job, that subscription was found, manual handling is needed.",
+          "During regular data integrity job, that user was found, manual handling is needed."
+        ).toSet
+        val expectedEventTypes =
+          List(EventType.Shipping, EventType.Pets, EventType.Subscription, EventType.User).toSet
 
         val allEvents              = Event.findAll()
         val actualProblemShipments = allEvents.flatMap(_.shipment.toList)
         val actualPets             = allEvents.flatMap(_.pet.toList)
         val actualSubs             = allEvents.flatMap(_.subscription.toList)
         val actualUsers            = allEvents.flatMap(_.user.toList).toSet
+        val actualTitles           = allEvents.map(_.title.get).toSet
+        val actualDetails          = allEvents.map(_.details.get).toSet
+        val actualEventTypes       = allEvents.map(_.eventType.get).toSet
         actualProblemShipments should contain theSameElementsAs expectedShipments
         actualPets should contain theSameElementsAs expectedPets
         actualSubs should contain theSameElementsAs expectedSubs
         actualUsers should contain theSameElementsAs expectedUsers
+        actualTitles should contain theSameElementsAs expectedTitles
+        actualDetails should contain theSameElementsAs expectedDetails
+        actualEventTypes should contain theSameElementsAs actualEventTypes
 
         cleanUpSuccess()
     }
