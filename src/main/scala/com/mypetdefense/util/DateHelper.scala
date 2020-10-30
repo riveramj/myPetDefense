@@ -37,7 +37,7 @@ object DateHelper {
   def monthDayOneLastMonth: Date =
     Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).minusMonths(1).toInstant)
 
-  def currentDayLastMonthEnd: Date = Date.from(nowAtStartOfDay.plusDays(1).minusMonths(1).toInstant)
+  def currentDayLastMonthEnd: Date = Date.from(nowAtStartOfDay.withDayOfMonth(1).toInstant)
 
   def monthDayOneLastYear: Date =
     Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).minusYears(1).toInstant)
