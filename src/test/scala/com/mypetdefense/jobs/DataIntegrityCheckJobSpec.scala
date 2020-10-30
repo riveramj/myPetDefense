@@ -15,14 +15,15 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 class DataIntegrityCheckJobSpec extends DBTest {
 
   private val threeDaysAgoDate: Date = threeDaysAgo.toDate
+  private val sixtyDaysAgo: Date     = anyDayOfThisYearUntilSixtyDaysAgo.toDate
 
   it should "properly check data integrity" in {
     forAll(
-      listOfNUsersGen(3),
-      listOfSubscriptionToCreateGen(3),
-      listOfNPetsChainDataGen(3),
+      listOfNUsersGen(2),
+      listOfSubscriptionToCreateGen(2),
+      listOfNPetsChainDataGen(2),
       listOfNPetsChainDataGen(1),
-      listOfNShipmentChainDataGen(3),
+      listOfNShipmentChainDataGen(2),
       listOfNShipmentChainDataGen(1)
     ) {
       (
@@ -31,7 +32,7 @@ class DataIntegrityCheckJobSpec extends DBTest {
           petsWithoutBoxes,
           petsWithBoxes,
           oldUntraceableShipments,
-          trackableOldShipments
+          oldEmptyLineItemsShipments
       ) =>
         val insertedUsersWithoutSubs = usersWithoutSubs.map(createUser)
         val insertedSubsWithoutUsers = subsWithoutUsers.map(insertSubWithoutUser)
@@ -40,36 +41,51 @@ class DataIntegrityCheckJobSpec extends DBTest {
           .map(insertUserSubAndShipment)
           .flatMap(inserted => inserted.shipments.map(setProcessedDateToMoreThanThreeDaysAgo))
         petsWithBoxes.map(insertUserAndPet).map(createBoxAndSubscription)
-        trackableOldShipments
+        val insertedOldEmptyLineItemsShipments = oldEmptyLineItemsShipments
           .map(insertUserSubAndShipment)
-          .foreach(
-            _.shipments.map(setProcessedDateToMoreThanThreeDaysAgo).map(setRandomTrackingNumber)
+          .flatMap(
+            _.shipments
+              .map(setProcessedDateToMoreThanSixtyDaysAgo)
+              .map(setStatusLabelCreatedOrPaid)
+              .map(setRandomTrackingNumber)
           )
 
         new DataIntegrityCheckJob().checkDataIntegrity()
 
-        val expectedShipments = insertedOldShipmentsWithoutTrackingNumbers
+        val subs1 = insertedOldEmptyLineItemsShipments.flatMap(
+          _.subscription.toOption
+        )
+        val ship = insertedOldEmptyLineItemsShipments
+
+        val expectedShipments = insertedOldShipmentsWithoutTrackingNumbers ++ ship
         val expectedPets      = insertedPetsWithoutBoxes.flatMap(_.pets)
         val expectedSubs = insertedSubsWithoutUsers ++ insertedOldShipmentsWithoutTrackingNumbers
-          .flatMap(_.subscription.toList)
+          .flatMap(_.subscription.toList) ++ subs1
         val insertedWithoutTrackedNumberUsers = insertedOldShipmentsWithoutTrackingNumbers
           .flatMap(
             _.subscription.map(_.user.toList)
           )
           .flatten
+        val insertedOELIShipmentsUsers = insertedOldEmptyLineItemsShipments
+          .flatMap(
+            _.subscription.map(_.user.toList)
+          )
+          .flatten
         val expectedUsers =
-          (insertedUsersWithoutSubs ++ insertedPetsWithoutBoxes.map(_.user) ++ insertedWithoutTrackedNumberUsers).toSet
+          (insertedUsersWithoutSubs ++ insertedPetsWithoutBoxes.map(_.user) ++ insertedWithoutTrackedNumberUsers ++ insertedOELIShipmentsUsers).toSet
         val expectedTitles = List(
           "Shipment doesn't have a tracking number for three days.",
           "Pet doesn't have a box",
           "Subscription doesn't have an owner",
-          "User doesn't have a subscription"
+          "User doesn't have a subscription",
+          "Shipment doesn't have shipping line items for sixty days."
         ).toSet
         val expectedDetails = List(
           "During regular data integrity job, that shipment was found, manual handling is needed.",
           "During regular data integrity job, that pet was found, manual handling is needed.",
           "During regular data integrity job, that subscription was found, manual handling is needed.",
-          "During regular data integrity job, that user was found, manual handling is needed."
+          "During regular data integrity job, that user was found, manual handling is needed.",
+          "During regular data integrity job, that shipment was found, manual handling is needed."
         ).toSet
         val expectedEventTypes =
           List(EventType.Shipping, EventType.Pets, EventType.Subscription, EventType.User).toSet
@@ -96,6 +112,12 @@ class DataIntegrityCheckJobSpec extends DBTest {
 
   private def setProcessedDateToMoreThanThreeDaysAgo(in: Shipment): Shipment =
     in.dateProcessed(threeDaysAgoDate).saveMe()
+
+  private def setProcessedDateToMoreThanSixtyDaysAgo(in: Shipment): Shipment =
+    in.dateProcessed(sixtyDaysAgo).saveMe()
+
+  private def setStatusLabelCreatedOrPaid(in: Shipment): Shipment =
+    in.shipmentStatus(statusLabelCreatedOrPaid()).saveMe()
 
   private def setRandomTrackingNumber(in: Shipment): Shipment =
     in.trackingNumber(Random.generateString.take(10)).saveMe()
