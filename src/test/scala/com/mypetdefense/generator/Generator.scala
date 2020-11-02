@@ -1,6 +1,7 @@
 package com.mypetdefense.generator
 
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisMonth}
+import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.model.Price._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
@@ -66,6 +67,13 @@ object Generator {
       currentPetlandMonthlyCode,
       currentPetland6MonthPaymentCode
     )
+
+  def genInsertData: Gen[InsertGenData] =
+    for {
+      name       <- genAlphaStr
+      itemNumber <- Gen.posNum[Int]
+      weight = generateMoneyString.toDouble
+    } yield InsertGenData(name, itemNumber, weight)
 
   def genSubscriptionToCreate: Gen[SubscriptionCreateGeneratedData] =
     for {
@@ -227,6 +235,11 @@ object Generator {
   def listOfNSimplePetsGen(length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES): Gen[List[Pet]] =
     Gen.listOfN(length, generateSimplePet)
 
+  def listOfNInsertDataGen(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[InsertGenData]] =
+    Gen.listOfN(length, genInsertData)
+
   def stripeCustomer(seed: Long = 42L): Customer =
     generateStripeCustomer.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
@@ -247,6 +260,12 @@ object Generator {
 
   def address(seed: Long = 42L): AddressGeneratedData =
     generateAddress.pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def insertData(
+      seed: Long = 42L,
+      listSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): List[InsertGenData] =
+    listOfNInsertDataGen(listSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
 
   def listOfNShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES

@@ -3,7 +3,9 @@ package com.mypetdefense.service
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.GeneralDbUtils._
-import com.mypetdefense.helpers.db.AddressDbUtil.createAddress
+import com.mypetdefense.helpers.db.AddressDbUtil._
+import com.mypetdefense.helpers.db.InsertsDbHelper._
+import com.mypetdefense.model.{FleaTick, ShipmentLineItem, SubscriptionBox}
 import com.mypetdefense.shipstation._
 import dispatch.{Future, Req}
 import net.liftweb.common._
@@ -13,14 +15,25 @@ import org.scalatest.matchers.should.Matchers._
 class ShipstationServiceSpec extends DBTest {
 
   it should "create ship station order" in {
-    var evidence    = false
-    val mpdAndPld   = createPetlandAndMPDAgencies()
-    val userAddress = address()
-    val data        = petsAndShipmentChainDataGen()
-    val inserted =
-      insertPetAndShipmentsChainAtAgency(data, mpdAndPld.mpd, subUpgraded = false)
+    var evidence      = false
+    val mpdAndPld     = createPetlandAndMPDAgencies()
+    val userAddress   = address()
+    val userAndPet    = petsAndShipmentChainDataGen()
+    val insertGenData = insertData(listSize = 2)
+    val inserts       = insertGenData.map(createInsert)
+    val inserted = {
+      insertPetAndShipmentsChainAtAgency(userAndPet, mpdAndPld.mpd, subUpgraded = false)
+    }
     val insertedUser = inserted.user
     createAddress(userAddress, insertedUser)
+    ShipmentLineItem.createShipmentItems(
+      inserted.shipments.head,
+      insertedUser,
+      inserts,
+      sendFreeUpgrade = false
+    )
+    val insertsTotalWeight = insertGenData.foldLeft(0d)(_ + _.weight)
+    val expectedWeight     = if (insertsTotalWeight > 4.0) 4.0 else insertsTotalWeight
 
     def testFun(in: Map[String, String]): Unit = {
       in.get("orderStatus").fold(fail("there is no order status in request")) { oStatus =>
@@ -44,13 +57,16 @@ class ShipstationServiceSpec extends DBTest {
       in.get("state").fold(fail("there is no state field in request")) { state =>
         state.toLowerCase shouldBe userAddress.state.toLowerCase
       }
+      in.get("weight-value").fold(fail("there is no weight-value field in request")) { weight =>
+        weight.toDouble shouldBe expectedWeight
+      }
       evidence = true
     }
 
     val shipment    = inserted.shipments.head
     val testService = new TestShipStationService(testFun)
     testService.createShipStationOrder(shipment, insertedUser, inserted.subscription, 1)
-    succeed
+    evidence shouldBe true
   }
 }
 
@@ -61,15 +77,16 @@ class TestShipStationService(onRequest: Map[String, String] => Unit)
     override def executeFor[T <: ShipStationObject](
         request: Req
     )(implicit mf: Manifest[T]): Future[Box[T]] = {
-      val mapRequest = request.toRequest.getStringData
+      val mapRequest1 = request.toRequest.getStringData
         .replace("{", "")
         .replace("}", "")
         .split(",")
-        .map { string =>
-          val array = string.split(":").map(_.replace("\"", ""))
-          (array.head, array.tail.head)
-        }
-        .toMap
+
+      val mapRequest = mapRequest1.map { string =>
+        val array = string.split(":").map(_.replace("\"", ""))
+        if (array.length > 2) (array.head + "-" + array.tail.head, array.drop(2).head)
+        else (array.head, array.tail.head)
+      }.toMap
       onRequest(mapRequest)
       Future.successful(
         Full(
