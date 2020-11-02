@@ -17,9 +17,9 @@ class DataIntegrityCheckJob extends ManagedJob {
     val subsWithoutUser = Subscription.notCancelledWithoutUser
     val petsWithoutBox  = Pet.notCancelledWithoutBox
     val oldShipmentsWithoutTrackingNumber =
-      Shipment.cancelledWithoutTrackingNumber(shipmentsWithoutTrackingPanicDate)
+      Shipment.notCancelledWithoutTrackingNumber(shipmentsWithoutTrackingPanicDate)
     val oldsShipmentsZeroLineItems =
-      Shipment.cancelledWithEmptyLineItems(shipmentsWithoutLineItemsPanicDate)
+      Shipment.notCancelledWithEmptyLineItems(shipmentsWithoutLineItemsPanicDate)
 
     usersWithoutSub.foreach(logUserWithoutSub)
     subsWithoutUser.foreach(logSubsWithoutUser)
@@ -82,7 +82,7 @@ class DataIntegrityCheckJob extends ManagedJob {
   }
 
   private def createOldShipmentWithoutLineItemsEvent(shipment: Shipment): Event = {
-    val title        = "Shipment doesn't have shipping line items for sixty days."
+    val title        = "Shipment doesn't have shipping line items."
     val subscription = shipment.subscription
     val shipmentUser = subscription.flatMap(_.user)
     val details =

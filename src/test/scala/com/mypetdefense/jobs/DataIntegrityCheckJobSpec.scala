@@ -73,7 +73,7 @@ class DataIntegrityCheckJobSpec extends DBTest {
           "Pet doesn't have a box",
           "Subscription doesn't have an owner",
           "User doesn't have a subscription",
-          "Shipment doesn't have shipping line items for sixty days."
+          "Shipment doesn't have shipping line items."
         ).toSet
         val expectedDetails = List(
           "During regular data integrity job, that shipment was found, manual handling is needed.",
