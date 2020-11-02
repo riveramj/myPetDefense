@@ -1,14 +1,20 @@
 package com.mypetdefense.helpers
 
 import com.mypetdefense.generator._
+import com.mypetdefense.helpers.db.AgencyDbUtils.createAgency
 import com.mypetdefense.helpers.db.ShipmentDbUtils.createShipment
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
 import com.mypetdefense.helpers.db.PetDbUtils.createPet
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
+import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
 import net.liftweb.common._
 
 object GeneralDbUtils {
+
+  val tppAgencyName     = "TPP"
+  val mpdAgencyName     = "My Pet Defense"
+  val petLandAgencyName = "Petland"
 
   case class InsertedUserAndSub(user: User, subscription: Subscription)
 
@@ -77,6 +83,30 @@ object GeneralDbUtils {
       createdPet
     }
     InsertedPetsUserSubAndShipment(u, su.refresh.toOption.get, shs, pets)
+  }
+
+  def insertPetsAndShipmentData(
+      data: List[PetsAndShipmentChainData],
+      agency: Agency,
+      subUpgraded: Boolean
+  ): List[InsertedPetsUserSubAndShipment] =
+    data.map(insertPetAndShipmentsChainAtAgency(_, agency, subUpgraded))
+
+  def insertPetAndShipmentsChainAtAgency(
+      data: PetsAndShipmentChainData,
+      agency: Agency,
+      subUpgraded: Boolean
+  ): InsertedPetsUserSubAndShipment = {
+    val inserted    = insertPetsAndShipmentChainData(data)
+    val updatedUser = inserted.user.referer(agency).saveMe()
+    val updatedSub  = inserted.subscription.isUpgraded(subUpgraded).saveMe()
+    inserted.copy(user = updatedUser, subscription = updatedSub)
+  }
+
+  def createPetlandAndMPDAgencies(): PetlandAndMPDAgencies = {
+    val myPetDefenseAgency = createAgency(mpdAgencyName)
+    val petlandAgency      = createAgency(petLandAgencyName)
+    PetlandAndMPDAgencies(petlandAgency, myPetDefenseAgency)
   }
 
 }

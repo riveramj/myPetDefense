@@ -1,13 +1,8 @@
 package com.mypetdefense.generator
 
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisMonth}
-import com.mypetdefense.model.Price.{
-  currentPetland6MonthPaymentCode,
-  currentPetlandMonthlyCode,
-  currentTppPriceCode,
-  defaultPriceCode
-}
-import com.mypetdefense.model.{AnimalSize, AnimalType, Pet, ShipmentStatus, UserType}
+import com.mypetdefense.model.Price._
+import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
 import me.frmr.stripe.{CardList, Customer}
 import net.liftweb.common.{Box, Empty}
@@ -132,6 +127,15 @@ object Generator {
       address   <- generateNewUserAddress
     } yield NewUserData(email, firstName, lastName, password, address, Empty)
 
+  def generateAddress: Gen[AddressGeneratedData] =
+    for {
+      street1 <- genNonEmptyStr
+      street2 <- genNonEmptyStr
+      city    <- genNonEmptyStr
+      state = "GA"
+      zip   = "30312"
+    } yield AddressGeneratedData(street1, street2, city, state, zip, AddressType.Shipping)
+
   def generateDogOfSupportedSize: Gen[AnimalSize.Value] =
     Gen.oneOf(
       AnimalSize.DogSmallZo,
@@ -237,6 +241,12 @@ object Generator {
 
   def statusLabelCreatedOrPaid(seed: Long = 42L): ShipmentStatus.Value =
     genStatusLabelCreatedOrPaid.pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def petsAndShipmentChainDataGen(seed: Long = 42L): PetsAndShipmentChainData =
+    genPetAndShipmentChainData.pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def address(seed: Long = 42L): AddressGeneratedData =
+    generateAddress.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
   def listOfNShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
