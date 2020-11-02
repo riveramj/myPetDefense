@@ -42,8 +42,10 @@ object GeneralDbUtils {
       uIn: UserCreateGeneratedData,
       sIn: SubscriptionCreateGeneratedData
   ): InsertedUserAndSub = {
-    val u = createUser(uIn)
-    InsertedUserAndSub(u, createSubscription(Full(u), sIn))
+    val u  = createUser(uIn)
+    val s  = createSubscription(Full(u), sIn)
+    val uU = u.subscription(s).saveMe()
+    InsertedUserAndSub(uU, s)
   }
 
   def insertSubWithoutUser(sIn: SubscriptionCreateGeneratedData): Subscription =
