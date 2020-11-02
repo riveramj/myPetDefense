@@ -203,6 +203,9 @@ object Generator {
       pets
     )
 
+  def genStatusLabelCreatedOrPaid: Gen[ShipmentStatus.Value] =
+    Gen.oneOf(ShipmentStatus.LabelCreated, ShipmentStatus.Paid)
+
   def mapWithNOfUserNSubscriptionGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData]] =
@@ -231,6 +234,9 @@ object Generator {
 
   def subscription(seed: Long = 42L): SubscriptionCreateGeneratedData =
     genSubscriptionToCreate.pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def statusLabelCreatedOrPaid(seed: Long = 42L): ShipmentStatus.Value =
+    genStatusLabelCreatedOrPaid.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
   def listOfNShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
