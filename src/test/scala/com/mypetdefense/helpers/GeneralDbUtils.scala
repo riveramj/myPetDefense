@@ -72,17 +72,21 @@ object GeneralDbUtils {
   }
 
   def insertPetsAndShipmentChainData(
-      in: PetsAndShipmentChainData
+      in: PetsAndShipmentChainData,
+      inserts: List[Insert] = List.empty[Insert]
   ): InsertedPetsUserSubAndShipment = {
-    val u   = createUser(in.user)
-    val su  = createSubscription(Full(u), in.subscriptionCreateGeneratedData)
-    val shs = in.shipmentCreateGeneratedData.map(createShipment(u, su, _))
+    val u           = createUser(in.user)
+    val su          = createSubscription(Full(u), in.subscriptionCreateGeneratedData)
+    val updatedUser = u.subscription(su).saveMe().refresh.toOption.get
     val pets = in.pets.map { pData =>
       val createdPet = createPet(u, pData)
       SubscriptionBox.createNewBox(su, createdPet)
       createdPet
     }
-    InsertedPetsUserSubAndShipment(u, su.refresh.toOption.get, shs, pets)
+    val uSubscription = su.refresh.toOption.get
+    val shs =
+      in.shipmentCreateGeneratedData.map(createShipment(updatedUser, uSubscription, _, inserts))
+    InsertedPetsUserSubAndShipment(updatedUser, uSubscription, shs, pets)
   }
 
   def insertPetsAndShipmentData(
@@ -95,9 +99,10 @@ object GeneralDbUtils {
   def insertPetAndShipmentsChainAtAgency(
       data: PetsAndShipmentChainData,
       agency: Agency,
-      subUpgraded: Boolean
+      subUpgraded: Boolean,
+      inserts: List[Insert] = List.empty[Insert]
   ): InsertedPetsUserSubAndShipment = {
-    val inserted    = insertPetsAndShipmentChainData(data)
+    val inserted    = insertPetsAndShipmentChainData(data, inserts)
     val updatedUser = inserted.user.referer(agency).saveMe()
     val updatedSub  = inserted.subscription.isUpgraded(subUpgraded).saveMe()
     inserted.copy(user = updatedUser, subscription = updatedSub)
