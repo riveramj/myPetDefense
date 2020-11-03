@@ -5,8 +5,9 @@ import java.util.Date
 import com.mypetdefense.generator.{AddressGeneratedData, InsertGenData}
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
+import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, yesterday}
 import com.mypetdefense.helpers.GeneralDbUtils._
-import com.mypetdefense.helpers.Random.{randomPosInt, randomPosLong}
+import com.mypetdefense.helpers.Random.randomPosInt
 import com.mypetdefense.helpers.db.AddressDbUtil._
 import com.mypetdefense.helpers.db.InsertsDbHelper._
 import com.mypetdefense.model.Pet
@@ -15,13 +16,15 @@ import dispatch.{Future, Req}
 import net.liftweb.common._
 import net.liftweb.http.rest._
 import net.liftweb.json._
+import org.asynchttpclient.Param
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers._
+import scala.collection.JavaConverters._
 
 class ShipstationServiceSpec extends DBTest with RestHelper {
 
-  private val someAddress = Address(street1 = "", city = "", state = "", postalCode = "")
-
+  private val expDateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  private val someAddress   = Address(street1 = "", city = "", state = "", postalCode = "")
   private val defaultResponseOrder: Box[ShipStationObject] =
     Full[ShipStationObject](
       Order(1, "", orderDate = "", orderStatus = "", billTo = someAddress, shipTo = someAddress)
@@ -29,7 +32,6 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
 
   it should "create ship station order" in {
     var evidence      = false
-    val expDateFormat = new SimpleDateFormat("MM/dd/yyyy")
     val mpdAndPld     = createPetlandAndMPDAgencies()
     val userAddress   = address()
     val userAndPet    = petsAndShipmentChainDataGen()
@@ -98,6 +100,28 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
     succeed
   }
 
+  it should "get yesterday shipments" in {
+    var evidenceSize  = false
+    var evidenceStart = false
+    var evidenceEnd   = false
+    def queryParamsAssertFun(maybeIn: List[Param]): Unit = {
+      val yesterdayFormatted = expDateFormat.format(yesterday.toDate).replaceAll("/", "%2F")
+      evidenceSize = maybeIn.find(_.getName == "pageSize").exists(_.getValue == "300")
+      evidenceStart =
+        maybeIn.find(_.getName == "shipDateStart").exists(_.getValue == yesterdayFormatted)
+      evidenceEnd =
+        maybeIn.find(_.getName == "shipDateEnd").exists(_.getValue == yesterdayFormatted)
+    }
+    val testService = new TestShipStationService(
+      onRequest = assertQueryParamsOnExecFor(queryParamsAssertFun)
+    )
+    testService.getYesterdayShipments()
+
+    evidenceSize shouldBe true
+    evidenceStart shouldBe true
+    evidenceEnd shouldBe true
+  }
+
   private def compareItems(in: JValue, inserts: List[InsertGenData], pets: List[Pet]): Assertion = {
     val itemsList  = in.extract[List[JValue]]
     val itemsNames = itemsList.map(_ \ "name").map(_.extract[String])
@@ -114,6 +138,14 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
     val requestJson   = requestString.map(parse)
     jsonAssert(requestJson)
     response
+  }
+
+  private def assertQueryParamsOnExecFor[T <: ShipStationObject](
+      queryParamsAssert: List[Param] => Unit
+  )(req: Req): Box[ShipStationObject] = {
+    val params = req.toRequest.getQueryParams.asScala.toList
+    queryParamsAssert(params)
+    defaultResponseOrder
   }
 
   private def compareWeight(expected: Double, actualData: JValue): Assertion = {
