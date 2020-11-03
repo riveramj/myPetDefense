@@ -6,6 +6,7 @@ import com.mypetdefense.generator.{AddressGeneratedData, InsertGenData}
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.GeneralDbUtils._
+import com.mypetdefense.helpers.Random.{randomPosInt, randomPosLong}
 import com.mypetdefense.helpers.db.AddressDbUtil._
 import com.mypetdefense.helpers.db.InsertsDbHelper._
 import com.mypetdefense.model.Pet
@@ -18,6 +19,13 @@ import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers._
 
 class ShipstationServiceSpec extends DBTest with RestHelper {
+
+  private val someAddress = Address(street1 = "", city = "", state = "", postalCode = "")
+
+  private val defaultResponseOrder: Box[ShipStationObject] =
+    Full[ShipStationObject](
+      Order(1, "", orderDate = "", orderStatus = "", billTo = someAddress, shipTo = someAddress)
+    )
 
   it should "create ship station order" in {
     var evidence      = false
@@ -36,26 +44,58 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
     val expectedWeight = if (insertsTotalWeight < 4.0) BigDecimal(4.0) else insertsTotalWeight
     val shipment       = inserted.shipments.head.refresh.toOption.get
 
-    def testFun(in: JValue): Unit = {
-      in \ "orderStatus" shouldBe JString("awaiting_shipment")
-      in \ "serviceCode" shouldBe JString("usps_first_class_mail")
-      in \ "carrierCode" shouldBe JString("stamps_com")
-      in \ "orderDate" shouldBe JString(expDateFormat.format(new Date()))
-      in \ "customerEmail" shouldBe JString(inserted.user.email.get)
-      val addressBillTo = in \ "billTo"
-      val addressShipTo = in \ "shipTo"
-      val items         = in \ "items"
-      val weightData    = in \ "weight"
-      compareItems(items, insertGenData, inserted.pets)
-      compareAddress(userAddress, insertedUser.name, addressBillTo)
-      compareAddress(userAddress, insertedUser.name, addressShipTo)
-      compareWeight(expectedWeight.toDouble, weightData)
-      evidence = true
+    def jsonAssertFun(maybeIn: Option[JValue]): Unit = {
+      maybeIn.fold(fail("json is empty")) { in =>
+        in \ "orderStatus" shouldBe JString("awaiting_shipment")
+        in \ "serviceCode" shouldBe JString("usps_first_class_mail")
+        in \ "carrierCode" shouldBe JString("stamps_com")
+        in \ "orderDate" shouldBe JString(expDateFormat.format(new Date()))
+        in \ "customerEmail" shouldBe JString(inserted.user.email.get)
+        val addressBillTo = in \ "billTo"
+        val addressShipTo = in \ "shipTo"
+        val items         = in \ "items"
+        val weightData    = in \ "weight"
+        compareItems(items, insertGenData, inserted.pets)
+        compareAddress(userAddress, insertedUser.name, addressBillTo)
+        compareAddress(userAddress, insertedUser.name, addressShipTo)
+        compareWeight(expectedWeight.toDouble, weightData)
+        evidence = true
+      }
     }
 
-    val testService = new TestShipStationService(testFun)
+    val testService = new TestShipStationService(onRequest = assertRequestOnExecFor(jsonAssertFun))
     testService.createShipStationOrder(shipment, insertedUser, inserted.subscription, 1)
     evidence shouldBe true
+  }
+
+  it should "cancel shipstation order properly" in {
+    val mpdAndPld   = createPetlandAndMPDAgencies()
+    val userAndPet  = petsAndShipmentChainDataGen()
+    val orderNumber = randomPosInt
+    val inserted =
+      insertPetAndShipmentsChainAtAgency(userAndPet, mpdAndPld.mpd, subUpgraded = false)
+    val shipmentToDelete = inserted.shipments.head.shipStationOrderId(orderNumber).saveMe()
+    def requestAssertFun(maybeIn: Option[JValue]): Unit = {
+      maybeIn.fold(succeed) { in =>
+        (in \ "orderStatus").extract[String] shouldBe "cancelled"
+        (in \ "orderNumber").extract[String] shouldBe orderNumber.toString
+      }
+    }
+    val orderResponse = Order(
+      1,
+      orderNumber.toString,
+      orderDate = "",
+      orderStatus = "",
+      billTo = someAddress,
+      shipTo = someAddress
+    )
+
+    val testService = new TestShipStationService(
+      onRequest = assertRequestOnExecFor(requestAssertFun, Full(orderResponse))
+    )
+
+    testService.cancelShipstationOrder(shipmentToDelete)
+    succeed
   }
 
   private def compareItems(in: JValue, inserts: List[InsertGenData], pets: List[Pet]): Assertion = {
@@ -64,6 +104,16 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
     itemsNames.size shouldBe ((pets.size * 2) + inserts.size) // x 2 because of flea tick
     inserts.forall(insert => itemsNames.exists(_.contains(insert.name))) shouldBe true
     pets.forall(pet => itemsNames.exists(_.contains(pet.name.get))) shouldBe true
+  }
+
+  private def assertRequestOnExecFor[T <: ShipStationObject](
+      jsonAssert: Option[JValue] => Unit,
+      response: Box[ShipStationObject] = defaultResponseOrder
+  )(req: Req): Box[ShipStationObject] = {
+    val requestString = Option(req.toRequest.getStringData)
+    val requestJson   = requestString.map(parse)
+    jsonAssert(requestJson)
+    response
   }
 
   private def compareWeight(expected: Double, actualData: JValue): Assertion = {
@@ -86,20 +136,11 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
 
 }
 
-class TestShipStationService(onRequest: JValue => Unit) extends ShipStationServiceTrait {
+class TestShipStationService(onRequest: Req => Box[ShipStationObject])
+    extends ShipStationServiceTrait {
   override implicit val shipStationExecutor: ShipStationExecutor = new ShipStationExecutor("", "") {
-    val someAddress: Address = Address(street1 = "", city = "", state = "", postalCode = "")
-    override def executeFor[T <: ShipStationObject](
-        request: Req
-    )(implicit mf: Manifest[T]): Future[Box[T]] = {
-      val requestString = request.toRequest.getStringData
-      val requestJson   = parse(requestString)
-      onRequest(requestJson)
-      Future.successful(
-        Full(
-          Order(1, "", orderDate = "", orderStatus = "", billTo = someAddress, shipTo = someAddress)
-        ).asA[T]
-      )
-    }
+    override def executeFor[T <: ShipStationObject](request: Req)(
+        implicit mf: Manifest[T]
+    ): Future[Box[T]] = Future.successful(onRequest(request).asA[T])
   }
 }
