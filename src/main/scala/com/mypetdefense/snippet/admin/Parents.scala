@@ -49,7 +49,7 @@ class Parents extends Loggable {
   val dogProducts: List[FleaTick] =
     FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog)).filter(_.isZoGuard_?)
   val catProducts: List[FleaTick] =
-    FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog)).filter(_.isZoGuard_?)
+    FleaTick.findAll(By(FleaTick.animalType, AnimalType.Cat)).filter(_.isZoGuard_?)
 
   val stripeBaseUrl: String =
     Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
