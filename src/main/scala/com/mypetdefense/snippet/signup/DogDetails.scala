@@ -163,7 +163,7 @@ class DogDetails extends Loggable {
         ".large-dog #large-dog [onclick]" #> ajaxInvoke(() => chooseSize(largeDog)) &
         ".xlarge-dog .weight-number *" #> xlargeDog.map(_.toString + " lb") &
         ".xlarge-dog #xlarge-dog [onclick]" #> ajaxInvoke(() => chooseSize(xlargeDog)) &
-        "#add-pet" #> ajaxSubmit("Add Pet", addNewPet _) &
-        "#checkout" #> ajaxSubmit("Checkout", goToCheckout _)
+        "#add-pet" #> ajaxSubmit("Add Another Dog", addNewPet _) &
+        "#checkout" #> ajaxSubmit("Add & Checkout", goToCheckout _)
   }
 }
