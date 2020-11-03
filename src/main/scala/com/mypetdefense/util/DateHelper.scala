@@ -30,12 +30,14 @@ object DateHelper {
 
   def threeDaysAgo: Date = Date.from(now.minusDays(3).atStartOfDay(zoneId).toInstant)
 
+  def sixtyDaysAgo: Date = Date.from(now.minusDays(60).atStartOfDay(zoneId).toInstant)
+
   def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).toInstant)
 
   def monthDayOneLastMonth: Date =
     Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).minusMonths(1).toInstant)
 
-  def currentDayLastMonthEnd: Date = Date.from(nowAtStartOfDay.plusDays(1).minusMonths(1).toInstant)
+  def currentDayLastMonthEnd: Date = Date.from(nowAtStartOfDay.withDayOfMonth(1).toInstant)
 
   def monthDayOneLastYear: Date =
     Date.from(now.withDayOfMonth(1).atStartOfDay(zoneId).minusYears(1).toInstant)
