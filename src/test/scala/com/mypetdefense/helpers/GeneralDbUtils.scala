@@ -38,9 +38,12 @@ object GeneralDbUtils {
     Agency.findAll().map(_.delete_!)
     Event.findAll().map(_.delete_!)
     Pet.findAll().map(_.delete_!)
+    Insert.findAll().map(_.delete_!)
     Subscription.findAll().map(_.delete_!)
     SubscriptionBox.findAll().map(_.delete_!)
+    SubscriptionItem.findAll().map(_.delete_!)
     Shipment.findAll().map(_.delete_!)
+    ShipmentLineItem.findAll().map(_.delete_!)
     User.findAll().map(_.delete_!)
   }
 

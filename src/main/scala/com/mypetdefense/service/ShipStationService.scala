@@ -240,12 +240,12 @@ trait ShipStationServiceTrait extends Loggable {
 
     val fleaTick = shipmentLineItems.flatMap(_.fleaTick.obj)
 
-    val productWeight = fleaTick.map(_.weight.get).sum
-    val insertWeight  = inserts.map(_.weight.get).sum
+    val productWeight = fleaTick.map(fleaT => BigDecimal(fleaT.weight.get)).sum
+    val insertWeight  = inserts.map(insert => BigDecimal(insert.weight.get)).sum
 
     val totalWeight = productWeight + insertWeight
 
-    val normalizedWeight = if (totalWeight < 4.0) 4.0 else totalWeight
+    val normalizedWeight = if (totalWeight < 4.0) BigDecimal(4.0) else totalWeight
 
     val shipStationItems = inserts.toList.zipWithIndex.map {
       case (insert, index) =>
@@ -296,7 +296,7 @@ trait ShipStationServiceTrait extends Loggable {
       billTo = billShipTo,
       shipTo = billShipTo,
       items = Some(shipStationItems.sortBy(_.lineItemKey)),
-      weight = Some(Weight(normalizedWeight, "ounces")),
+      weight = Some(Weight(normalizedWeight.toDouble, "ounces")),
       carrierCode = Some("stamps_com"),
       serviceCode = Some("usps_first_class_mail"),
       packageCode = Some("package"),
