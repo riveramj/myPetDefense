@@ -46,7 +46,8 @@ object DateUtil {
     getAnyDayOfTheMonthUntil(now.minusYears(1))
   def validDateForGetCurrentPastDueShipments: ZonedDateTime =
     minusRangeDaysFromTomorrow(now, 1, 20)
-
+  def validDateForGetPastDueShipments: ZonedDateTime   = minusRangeDaysFromTomorrow(now, 6, 10)
+  def invalidDateForGetPastDueShipments: ZonedDateTime = minusRangeDaysFromTomorrow(now, 1, 5)
   def anyDayOfLastYearFromThisDayYearAgo: ZonedDateTime =
     getAnyDayOfYearFrom(now.plusDays(1).minusYears(1))
 
