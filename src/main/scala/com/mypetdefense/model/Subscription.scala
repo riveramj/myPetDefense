@@ -62,27 +62,6 @@ class Subscription
     box => (box.pet.obj, box.fleaTick.obj)
   }
 
-  def createNewSubscription(
-      user: Box[User],
-      stripeSubscriptionId: String,
-      startDate: Date,
-      nextShipDate: Date,
-      priceCode: String = Price.defaultPriceCode,
-      isUpgraded: Boolean = false,
-      contractLength: Int = 0
-  ): Subscription = {
-    Subscription.create
-      .subscriptionId(generateLongId)
-      .user(user)
-      .stripeSubscriptionId(stripeSubscriptionId)
-      .startDate(startDate)
-      .nextShipDate(nextShipDate)
-      .priceCode(priceCode)
-      .isUpgraded(isUpgraded)
-      .contractLength(contractLength)
-      .saveMe
-  }
-
   def getMonthlyCost: Double = {
     this.subscriptionBoxes.map { box => box.basePrice.get + box.addOnProducts.map(_.price.get).sum }.sum
   }
@@ -111,6 +90,30 @@ class Subscription
 
   def getNextShipDate: LocalDate =
     this.nextShipDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+
+}
+
+object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] {
+  def createNewSubscription(
+      user: Box[User],
+      stripeSubscriptionId: String,
+      startDate: Date,
+      nextShipDate: Date,
+      priceCode: String = Price.defaultPriceCode,
+      isUpgraded: Boolean = false,
+      contractLength: Int = 0
+  ): Subscription = {
+    Subscription.create
+      .subscriptionId(generateLongId)
+      .user(user)
+      .stripeSubscriptionId(stripeSubscriptionId)
+      .startDate(startDate)
+      .nextShipDate(nextShipDate)
+      .priceCode(priceCode)
+      .isUpgraded(isUpgraded)
+      .contractLength(contractLength)
+      .saveMe
+  }
 
   def findNewYTDSubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
@@ -212,10 +215,7 @@ class Subscription
 
   def notCancelledWithoutUser: List[Subscription] =
     Subscription.findAll(NotBy(Subscription.status, Status.Cancelled), NullRef(Subscription.user))
-
 }
-
-object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]
 
 object Status extends Enumeration {
   val Active, Inactive, UserSuspended, BillingSuspended, Cancelled, Paused = Value

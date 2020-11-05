@@ -26,6 +26,9 @@ class ApiRequestBackup extends LongKeyedMapper[ApiRequestBackup] with IdPK {
     override def defaultValue = new Date()
   }
 
+}
+
+object ApiRequestBackup extends ApiRequestBackup with LongKeyedMetaMapper[ApiRequestBackup] {
   def createNewBackupRecord(referer: Box[Agency], rawJson: JValue): ApiRequestBackup =
     ApiRequestBackup.create
       .apiRequestId(generateLongId)
@@ -35,7 +38,4 @@ class ApiRequestBackup extends LongKeyedMapper[ApiRequestBackup] with IdPK {
 
   def updateUser(record: ApiRequestBackup, user: User): ApiRequestBackup =
     record.user(user).saveMe()
-
 }
-
-object ApiRequestBackup extends ApiRequestBackup with LongKeyedMetaMapper[ApiRequestBackup]

@@ -26,7 +26,9 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object AddOnProduct extends AddOnProduct with LongKeyedMetaMapper[AddOnProduct] {
   def createAddOnProduct(
       product: Product,
       subscriptionBox: SubscriptionBox,
@@ -41,8 +43,6 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
       .saveMe
   }
 }
-
-object AddOnProduct extends AddOnProduct with LongKeyedMetaMapper[AddOnProduct]
 
 object AddOnFrequency extends Enumeration {
   val Monthly, SemiMonthly, Yearly = Value

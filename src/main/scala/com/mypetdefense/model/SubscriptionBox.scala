@@ -30,6 +30,10 @@ class SubscriptionBox
 
   def refresh: Box[SubscriptionBox] = SubscriptionBox.find(By(SubscriptionBox.boxId, boxId.get))
 
+}
+
+object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[SubscriptionBox] {
+
   def possiblePrice(subscriptionBox: SubscriptionBox): Double =
     if (subscriptionBox.subscriptionItems.toList.nonEmpty)
       subscriptionBox.pet.obj.map(basePrice).openOr(0d)
@@ -76,5 +80,3 @@ class SubscriptionBox
       .saveMe()
   }
 }
-
-object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[SubscriptionBox]

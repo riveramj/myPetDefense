@@ -20,7 +20,11 @@ class ReconciliationEvent
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object ReconciliationEvent
+    extends ReconciliationEvent
+    with LongKeyedMetaMapper[ReconciliationEvent] {
   def createNewReconciliationEvent(eventDate: Date): ReconciliationEvent = {
     ReconciliationEvent.create
       .reconciliationEventId(generateLongId)
@@ -28,5 +32,3 @@ class ReconciliationEvent
       .saveMe
   }
 }
-
-object ReconciliationEvent extends ReconciliationEvent with LongKeyedMetaMapper[ReconciliationEvent]

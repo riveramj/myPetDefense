@@ -19,14 +19,6 @@ class Insert extends LongKeyedMapper[Insert] with IdPK {
     override def defaultValue = new Date()
   }
 
-  def createNewInsert(name: String, itemNumber: String, weight: Double): Insert = {
-    Insert.create
-      .name(name)
-      .itemNumber(itemNumber)
-      .weight(weight)
-      .saveMe
-  }
-
   def welcomeInsert: Box[Insert] = Insert.find(By(Insert.name, "Welcome Insert"))
 
   def tryUpgrade: Box[Insert] = Insert.find(By(Insert.name, "Free Upgraded Box Trial Insert"))
@@ -39,4 +31,12 @@ class Insert extends LongKeyedMapper[Insert] with IdPK {
   def petlandWelcomeInsert: Box[Insert] = Insert.find(By(Insert.name, "Petland Welcome Insert"))
 }
 
-object Insert extends Insert with LongKeyedMetaMapper[Insert]
+object Insert extends Insert with LongKeyedMetaMapper[Insert] {
+  def createNewInsert(name: String, itemNumber: String, weight: Double): Insert = {
+    Insert.create
+      .name(name)
+      .itemNumber(itemNumber)
+      .weight(weight)
+      .saveMe
+  }
+}

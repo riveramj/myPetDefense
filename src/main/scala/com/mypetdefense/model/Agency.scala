@@ -28,6 +28,23 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
     override def defaultValue = new Date()
   }
 
+  def currentMonthShipments: List[Shipment] = this.findAllShipments.filter { shipment =>
+    val mailedDate = shipment.getMailedDateOfShipment
+    mailedDate.map(_.getMonth == currentDate.getMonth).openOr(false) &&
+    mailedDate.map(_.getYear == currentDate.getYear).openOr(false)
+  }
+
+  def findAllShipments: List[Shipment] =
+    for {
+      customer     <- this.customers.toList
+      subscription <- customer.subscription.toList
+      shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+    } yield {
+      shipment
+    }
+}
+
+object Agency extends Agency with LongKeyedMetaMapper[Agency] {
   def createNewAgency(
       name: String,
       agencyType: AgencyType.Value = AgencyType.Headquarters,
@@ -73,25 +90,11 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
     }
   }
 
-  def currentMonthShipments: List[Shipment] = this.findAllShipments.filter { shipment =>
-    val mailedDate = shipment.getMailedDateOfShipment
-    mailedDate.map(_.getMonth == currentDate.getMonth).openOr(false) &&
-    mailedDate.map(_.getYear == currentDate.getYear).openOr(false)
-  }
-
-  def findAllShipments: List[Shipment] =
-    for {
-      customer     <- this.customers.toList
-      subscription <- customer.subscription.toList
-      shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
-    } yield {
-      shipment
-    }
-
   def getUsersForAgency(agencyName: String): List[User] = {
     val agency = Agency.find(By(Agency.name, agencyName))
     agency.map(_.customers.toList).openOr(Nil)
   }
+
   //TODO clean up this
   def getTotalUsers(agencyName: String): List[User] =
     if (agencyName != "TPP")
@@ -105,8 +108,6 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
       puppySpot ++ petland
     }
 }
-
-object Agency extends Agency with LongKeyedMetaMapper[Agency]
 
 object AgencyType extends Enumeration {
   val Headquarters, Store = Value

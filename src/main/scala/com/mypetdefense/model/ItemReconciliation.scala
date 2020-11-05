@@ -24,7 +24,9 @@ class ItemReconciliation
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object ItemReconciliation extends ItemReconciliation with LongKeyedMetaMapper[ItemReconciliation] {
   def createNewItemReconciliation(
       inventoryItem: InventoryItem,
       event: ReconciliationEvent,
@@ -40,5 +42,3 @@ class ItemReconciliation
       .saveMe
   }
 }
-
-object ItemReconciliation extends ItemReconciliation with LongKeyedMetaMapper[ItemReconciliation]

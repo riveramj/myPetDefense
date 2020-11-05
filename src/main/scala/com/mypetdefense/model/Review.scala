@@ -22,7 +22,9 @@ class Review extends LongKeyedMapper[Review] with IdPK with OneToMany[Long, Revi
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object Review extends Review with LongKeyedMetaMapper[Review] {
   def createReview(
       title: String,
       body: String,
@@ -40,5 +42,3 @@ class Review extends LongKeyedMapper[Review] with IdPK with OneToMany[Long, Revi
       .saveMe
   }
 }
-
-object Review extends Review with LongKeyedMetaMapper[Review] {}

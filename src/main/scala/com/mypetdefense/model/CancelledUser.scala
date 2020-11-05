@@ -34,6 +34,9 @@ class CancelledUser
 
   def name = s"${firstName} ${lastName}"
 
+}
+
+object CancelledUser extends CancelledUser with LongKeyedMetaMapper[CancelledUser] {
   def createNewCancelledUser(
       firstName: String,
       lastName: String,
@@ -51,5 +54,3 @@ class CancelledUser
       .saveMe
   }
 }
-
-object CancelledUser extends CancelledUser with LongKeyedMetaMapper[CancelledUser]

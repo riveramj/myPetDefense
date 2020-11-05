@@ -20,7 +20,14 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object Price extends Price with LongKeyedMetaMapper[Price] {
+  final val defaultPriceCode    = Props.get("default.price.code").openOr("default")
+  final val currentTppPriceCode = Props.get("tpp.price.code").openOr(defaultPriceCode)
+  final val currentPetland6MonthPaymentCode =
+    Props.get("petland.6month.payment").openOr(defaultPriceCode)
+  final val currentPetlandMonthlyCode = Props.get("petland.1month.payment").openOr(defaultPriceCode)
   def createPrice(
       priceId: Long,
       price: Double,
@@ -53,12 +60,4 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
       By(Price.active, active)
     )
   }
-}
-
-object Price extends Price with LongKeyedMetaMapper[Price] {
-  final val defaultPriceCode    = Props.get("default.price.code").openOr("default")
-  final val currentTppPriceCode = Props.get("tpp.price.code").openOr(defaultPriceCode)
-  final val currentPetland6MonthPaymentCode =
-    Props.get("petland.6month.payment").openOr(defaultPriceCode)
-  final val currentPetlandMonthlyCode = Props.get("petland.1month.payment").openOr(defaultPriceCode)
 }

@@ -1,10 +1,7 @@
 package com.mypetdefense.model
 
-import java.text.SimpleDateFormat
-
 import net.liftweb._
 import mapper._
-import common.Box
 import java.util.Date
 
 import com.mypetdefense.model.domain.reports.AmazonOrderReport
@@ -36,7 +33,9 @@ class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder] {
   def createAmazonOrder(
       amazonOrderId: String,
       email: String,
@@ -109,9 +108,6 @@ class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
         order.productName.get
       )
     }
-
   }
 
 }
-
-object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder] {}
