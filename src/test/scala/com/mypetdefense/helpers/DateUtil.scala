@@ -25,6 +25,8 @@ object DateUtil {
   def anyDayOfThisMonth: ZonedDateTime                 = getAnyDayOfMonth(now)
   def anyDayOfNextMonth: ZonedDateTime                 = getAnyDayOfMonth(now.plusMonths(1))
   def anyDayOfThisYear: ZonedDateTime                  = getAnyDayOfTheYear(now)
+  def anyDayOfNext19Days: ZonedDateTime                = plusRangeDays(now, 1, 19)
+  def anyDayOFromPlus21Days: ZonedDateTime             = getAnyDayOfYearFrom(now.plusDays(21))
   def anyDayUntilLastMonth: ZonedDateTime              = getAnyDayOfTheYearUntil(now.minusMonths(2))
   def anyDayUntilThisMonth: ZonedDateTime              = getAnyDayOfTheYearUntil(now.minusMonths(1))
   def anyDayUntilToday: ZonedDateTime                  = getAnyDayOfTheYearUntil(now.minusDays(1))
@@ -74,6 +76,15 @@ object DateUtil {
       getAnyDayOfTheYearExceptMonth(localDate)
     else
       maybeDay
+  }
+
+  protected def plusRangeDays(
+      localDate: LocalDate,
+      rangeStart: Int,
+      rangeEnd: Int
+  ): ZonedDateTime = {
+    val day = generateIntBetween(rangeStart, rangeEnd)
+    localDate.plusDays(1).plusDays(day).atStartOfDay(zoneId)
   }
 
   protected def minusRangeDaysFromTomorrow(

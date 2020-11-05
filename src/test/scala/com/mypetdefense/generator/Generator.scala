@@ -257,6 +257,12 @@ object Generator {
   def statusLabelCreatedOrPaid(seed: Long = 42L): ShipmentStatus.Value =
     genStatusLabelCreatedOrPaid.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
+  def mapWithNOfUserNSubscription(
+      seed: Long = 42L,
+      mapSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData] =
+    mapWithNOfUserNSubscriptionGen(mapSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
+
   def listOfNShipmentChainData(
       seed: Long = 42L,
       listSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES

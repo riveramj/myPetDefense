@@ -2,6 +2,7 @@ package com.mypetdefense.service
 
 import java.util.Date
 import com.mypetdefense.generator.Generator._
+import com.mypetdefense.generator._
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
@@ -93,6 +94,25 @@ class ShipmentServiceSpec extends DBTest {
     actualDataIds should contain theSameElementsAs insertedProperDataIds
   }
 
+  it should "get upcoming subscriptions" in {
+    val shouldBeProperData    = mapWithNOfUserNSubscription()
+    val shouldBeCancelledData = mapWithNOfUserNSubscription()
+    val shouldBeTooFutureData = mapWithNOfUserNSubscription()
+    val insertedExpectedIds = shouldBeProperData
+      .map(insertUserAndSubTupled)
+      .map(setStatusAndNextShipDate(_, anyDayOfNext19Days.toDate, Status.Active))
+      .map(_.id.get)
+    shouldBeCancelledData
+      .map(insertUserAndSubTupled)
+      .map(setStatusAndNextShipDate(_, anyDayOfNext19Days.toDate, Status.Cancelled))
+    shouldBeTooFutureData
+      .map(insertUserAndSubTupled)
+      .map(setStatusAndNextShipDate(_, anyDayOFromPlus21Days.toDate, Status.Active))
+    val actualDataIds = ShipmentService.getUpcomingSubscriptions.map(_.id.get)
+
+    actualDataIds should contain theSameElementsAs insertedExpectedIds
+  }
+
   private def setExpShipDateStatusAndShipmentStatus(
       in: InsertedUserSubAndShipment,
       expectedShipData: Date,
@@ -105,5 +125,12 @@ class ShipmentServiceSpec extends DBTest {
         .status(status)
         .saveMe()
     )
+
+  private def setStatusAndNextShipDate(
+      in: InsertedUserAndSub,
+      nextShipDate: Date,
+      status: Status.Value
+  ): Subscription =
+    in.subscription.nextShipDate(nextShipDate).status(status).saveMe()
 
 }

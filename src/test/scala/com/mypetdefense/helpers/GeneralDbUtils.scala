@@ -33,6 +33,10 @@ object GeneralDbUtils {
       pets: List[Pet]
   )
 
+  val insertUserAndSubTupled
+      : ((UserCreateGeneratedData, SubscriptionCreateGeneratedData)) => InsertedUserAndSub =
+    (insertUserAndSub _).tupled
+
   def clearTables(): Unit = {
     Address.findAll().map(_.delete_!)
     Agency.findAll().map(_.delete_!)
