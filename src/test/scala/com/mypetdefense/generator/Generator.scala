@@ -269,6 +269,11 @@ object Generator {
   ): List[ShipmentChainData] =
     listOfNShipmentChainDataGen(listSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
 
+  def shipmentChainData(
+      seed: Long = 42L
+  ): ShipmentChainData =
+    genShipmentChainData.pureApply(Gen.Parameters.default, rng.Seed(seed))
+
   def petsAndShipmentChainDataGen(
       seed: Long = 42L,
       petsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
