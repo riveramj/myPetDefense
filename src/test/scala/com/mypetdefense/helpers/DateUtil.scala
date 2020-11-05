@@ -42,6 +42,8 @@ object DateUtil {
     getAnyDayOfYearFrom(now.minusMonths(1).plusDays(1))
   def anyDayOfLastYearThisDay: ZonedDateTime =
     getAnyDayOfTheMonthUntil(now.minusYears(1))
+  def validDateForGetCurrentPastDueShipments: ZonedDateTime =
+    minusRangeDaysFromTomorrow(now, 1, 20)
 
   def anyDayOfLastYearFromThisDayYearAgo: ZonedDateTime =
     getAnyDayOfYearFrom(now.plusDays(1).minusYears(1))
@@ -72,6 +74,15 @@ object DateUtil {
       getAnyDayOfTheYearExceptMonth(localDate)
     else
       maybeDay
+  }
+
+  protected def minusRangeDaysFromTomorrow(
+      localDate: LocalDate,
+      rangeStart: Int,
+      rangeEnd: Int
+  ): ZonedDateTime = {
+    val day = generateIntBetween(rangeStart, rangeEnd)
+    localDate.plusDays(1).minusDays(day).atStartOfDay(zoneId)
   }
 
   protected def getAnyDayOfTheMonthUntil(localDate: LocalDate): ZonedDateTime = {
