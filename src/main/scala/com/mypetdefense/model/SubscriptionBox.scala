@@ -37,6 +37,10 @@ class SubscriptionBox
 
 object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[SubscriptionBox] {
 
+  def getAllUnmodifiedByUser: List[SubscriptionBox] = {
+    SubscriptionBox.findAll(By(SubscriptionBox.userModified, false))
+  }
+
   def possiblePrice(subscriptionBox: SubscriptionBox): Double =
     if (subscriptionBox.subscriptionItems.toList.nonEmpty)
       subscriptionBox.pet.obj.map(basePrice).openOr(0d)

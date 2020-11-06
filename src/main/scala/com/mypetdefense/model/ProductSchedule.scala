@@ -2,6 +2,7 @@ package com.mypetdefense.model
 
 import java.util.Date
 
+import com.mypetdefense.util.DateHelper.nowDate
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.mapper._
 
@@ -29,7 +30,15 @@ class ProductSchedule
 
 }
 
-object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductSchedule] {}
+object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductSchedule] {
+  def getNextSchedule: Option[ProductSchedule] =
+    ProductSchedule
+      .findAll(
+        By(ProductSchedule.startDate, nowDate),
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Scheduled)
+      )
+      .headOption
+}
 
 object ProductScheduleStatus extends Enumeration {
   val Scheduled, Completed = Value
