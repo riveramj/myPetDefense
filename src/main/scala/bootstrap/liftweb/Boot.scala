@@ -55,7 +55,9 @@ class Boot {
       Tag,
       AddOnProduct,
       AmazonOrder,
-      ApiRequestBackup
+      ApiRequestBackup,
+      ProductSchedule,
+      ProductScheduleItem
     )
 
     //DataLoader.loadProducts
