@@ -2,6 +2,8 @@ package com.mypetdefense.model
 
 import java.util.Date
 
+import com.mypetdefense.shipstation.OrderItem
+import com.mypetdefense.typeclasses.ToOrderItemConverter
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
 import net.liftweb.common._
@@ -88,6 +90,14 @@ object Pet extends Pet with LongKeyedMetaMapper[Pet] {
   }
   def notCancelledWithoutBox: List[Pet] =
     Pet.findAll(NotBy(Pet.status, Status.Cancelled), NullRef(Pet.box))
+
+  implicit val toOrderItemConverter: ToOrderItemConverter[Pet] = (input: Pet, index: Int) =>
+    OrderItem(
+      lineItemKey = Some(s"${index + 1} - 0"),
+      quantity = 1,
+      sku = "pet",
+      name = s"${index + 1} -  ${input.name.get}"
+    )
 }
 
 object AnimalType extends Enumeration {
