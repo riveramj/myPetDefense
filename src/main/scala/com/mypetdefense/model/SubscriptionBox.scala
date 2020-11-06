@@ -27,6 +27,9 @@ class SubscriptionBox
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+  object userModified extends MappedBoolean(this) {
+    override def defaultValue: Boolean = false
+  }
 }
 
 object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[SubscriptionBox] {
