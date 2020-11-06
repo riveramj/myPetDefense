@@ -50,6 +50,14 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
 
   def getMailedDateOfShipment: Box[LocalDate] =
     tryo(this.dateShipped.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+
+  def actualShipmentLineItems: List[ShipmentLineItem] =
+    this.refresh.toList.flatMap(_.shipmentLineItems.toList)
+
+  def shipmentLineItemsByPets: Map[Pet, List[ShipmentLineItem]] =
+    this.shipmentLineItems.toList
+      .groupBy(_.pet.obj)
+      .collect { case (Full(pet), items) => pet -> items }
 }
 
 object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
