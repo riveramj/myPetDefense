@@ -15,5 +15,4 @@ $(document).ready ->
       else ""
 
     if dogValue > 0
-      console.log dogSizeName
-      # fbq('track', 'AddToCart', {currency: "USD", value: dogValue, content_name: dogSizeName})
+      fbq('track', 'AddToCart', {currency: "USD", value: dogValue, content_name: dogSizeName})
