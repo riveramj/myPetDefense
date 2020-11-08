@@ -1,5 +1,5 @@
 $(document).ready ->
-  fbq('track', 'ViewContent', {content_type: "product_group", content_name: "Dog Details"})
+  fbq('track', 'ViewContent')
 
   $("#next-actions").on "click", '#add-pet', (event) ->
     dogSize = $(".dog-sizes li.selected .weight-number").text()
