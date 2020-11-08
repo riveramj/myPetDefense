@@ -1,4 +1,5 @@
 checkout
+checkout.js
 promo-code.js
 base.js
 stripe.js
@@ -89,3 +90,11 @@ petland-store-overview.js
 executive-dashboard
 dashboard
 executive-dashboard.js
+
+dog-details
+dog-details.js
+base.js
+
+success
+success.js
+base.js
