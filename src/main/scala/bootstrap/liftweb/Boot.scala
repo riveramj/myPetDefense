@@ -20,45 +20,7 @@ class Boot {
 
     DbSetup.setup
 
-    Schemifier.schemify(
-      true,
-      Schemifier.infoF _,
-      User,
-      CancelledUser,
-      Address,
-      Pet,
-      FleaTick,
-      Shipment,
-      Event,
-      ShipmentLineItem,
-      Subscription,
-      SubscriptionBox,
-      SubscriptionItem,
-      SubscriptionUpgrade,
-      Agency,
-      Coupon,
-      Price,
-      GrowthRate,
-      Review,
-      Survey,
-      TreatOrder,
-      ItemReconciliation,
-      ReconciliationEvent,
-      InventoryItem,
-      InventoryChangeAudit,
-      Insert,
-      InventoryItemPart,
-      Product,
-      TreatOrderLineItem,
-      Packaging,
-      TaggedItem,
-      Tag,
-      AddOnProduct,
-      AmazonOrder,
-      ApiRequestBackup,
-      ProductSchedule,
-      ProductScheduleItem
-    )
+    DbSetup.migrateTables
 
     //DataLoader.loadProducts
     //DataLoader.loadAdmin

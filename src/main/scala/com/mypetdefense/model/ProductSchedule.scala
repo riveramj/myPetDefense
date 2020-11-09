@@ -34,10 +34,16 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
   def getNextSchedule: Option[ProductSchedule] =
     ProductSchedule
       .findAll(
-        By(ProductSchedule.startDate, nowDate),
+        By_<=(ProductSchedule.startDate, nowDate),
         By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Scheduled)
       )
       .headOption
+
+  def createNew(startDate: Date, products: List[Product]): ProductSchedule = {
+    val schedule = ProductSchedule.create.startDate(startDate).saveMe()
+    products.map(ProductScheduleItem.createNew(_, schedule))
+    schedule.reload
+  }
 }
 
 object ProductScheduleStatus extends Enumeration {

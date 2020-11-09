@@ -1,9 +1,9 @@
 package bootstrap.liftweb
 
+import com.mypetdefense.model._
 import net.liftweb.common._
 import net.liftweb.http.LiftRules
-import net.liftweb.mapper.DB
-import net.liftweb.mapper.StandardDBVendor
+import net.liftweb.mapper._
 import net.liftweb.util
 import net.liftweb.util.Props
 
@@ -24,4 +24,45 @@ object DbSetup extends Loggable {
       DB.defineConnectionManager(util.DefaultConnectionIdentifier, vendor)
     }
   }
+
+  def migrateTables: List[String] = Schemifier.schemify(
+    true,
+    Schemifier.infoF _,
+    User,
+    CancelledUser,
+    Address,
+    Pet,
+    FleaTick,
+    Shipment,
+    Event,
+    ShipmentLineItem,
+    Subscription,
+    SubscriptionBox,
+    SubscriptionItem,
+    SubscriptionUpgrade,
+    Agency,
+    Coupon,
+    Price,
+    GrowthRate,
+    Review,
+    Survey,
+    TreatOrder,
+    ItemReconciliation,
+    ReconciliationEvent,
+    InventoryItem,
+    InventoryChangeAudit,
+    Insert,
+    InventoryItemPart,
+    Product,
+    TreatOrderLineItem,
+    Packaging,
+    TaggedItem,
+    Tag,
+    AddOnProduct,
+    AmazonOrder,
+    ApiRequestBackup,
+    ProductSchedule,
+    ProductScheduleItem
+  )
+
 }
