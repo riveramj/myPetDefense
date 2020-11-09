@@ -13,8 +13,9 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
   }
 
   def updateSubscriptionBoxes(schedule: ProductSchedule): Unit = {
-    val newProducts = schedule.scheduledItems.flatMap(_.product.obj).toList
-    val boxes       = SubscriptionBox.getAllUnmodifiedByUser
+    val scheduleItems = schedule.scheduledItems.toList
+    val newProducts   = scheduleItems.flatMap(_.product.toList)
+    val boxes         = SubscriptionBox.getAllUnmodifiedByUser
     boxes.foreach { box =>
       box.subscriptionItems.toList.forall(_.delete_!)
       newProducts.map(SubscriptionItem.createSubscriptionItem(_, box))

@@ -5,6 +5,8 @@ import com.mypetdefense.helpers.db.AgencyDbUtils.createAgency
 import com.mypetdefense.helpers.db.ShipmentDbUtils.createShipment
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
 import com.mypetdefense.helpers.db.PetDbUtils.createPet
+import com.mypetdefense.helpers.db.ProductDbUtils.createNewProduct
+import com.mypetdefense.helpers.db.ProductScheduleDbUtils
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
 import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
@@ -33,6 +35,11 @@ object GeneralDbUtils {
       pets: List[Pet]
   )
 
+  case class InsertedScheduleAndProduct(
+      schedule: ProductSchedule,
+      products: List[Product]
+  )
+
   val insertUserAndSubTupled
       : ((UserCreateGeneratedData, SubscriptionCreateGeneratedData)) => InsertedUserAndSub =
     (insertUserAndSub _).tupled
@@ -48,6 +55,9 @@ object GeneralDbUtils {
     SubscriptionItem.findAll().map(_.delete_!)
     Shipment.findAll().map(_.delete_!)
     ShipmentLineItem.findAll().map(_.delete_!)
+    ProductScheduleItem.findAll().map(_.delete_!)
+    ProductSchedule.findAll().map(_.delete_!)
+    Product.findAll().map(_.delete_!)
     User.findAll().map(_.delete_!)
   }
 
@@ -113,6 +123,15 @@ object GeneralDbUtils {
     val updatedUser = inserted.user.referer(agency).saveMe()
     val updatedSub  = inserted.subscription.isUpgraded(subUpgraded).saveMe()
     inserted.copy(user = updatedUser, subscription = updatedSub)
+  }
+
+  def insertProductScheduleGeneratedData(
+      in: ProductScheduleGeneratedChainData
+  ): InsertedScheduleAndProduct = {
+    val insertedProducts = in.productData.map(createNewProduct)
+    val schedule =
+      ProductScheduleDbUtils.createProductSchedule(in.scheduleStartData, insertedProducts)
+    InsertedScheduleAndProduct(schedule, insertedProducts)
   }
 
   def createPetlandAndMPDAgencies(): PetlandAndMPDAgencies = {
