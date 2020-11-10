@@ -4,6 +4,7 @@ import java.util.Date
 
 import com.mypetdefense.util.DateHelper.nowDate
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
+import net.liftweb.common.Box
 import net.liftweb.mapper._
 
 class ProductSchedule
@@ -50,8 +51,17 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
     products.map(ProductScheduleItem.createNew(_, schedule))
     schedule.reload
   }
+
+  def getFirstBoxProducts: Box[List[Product]] = {
+    ProductSchedule
+      .find(
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
+        By(ProductSchedule.firstBox, true)
+      )
+      .map(_.scheduledItems.toList.flatMap(_.product.obj))
+  }
 }
 
 object ProductScheduleStatus extends Enumeration {
-  val Scheduled, Completed = Value
+  val Active, Scheduled, Completed = Value
 }
