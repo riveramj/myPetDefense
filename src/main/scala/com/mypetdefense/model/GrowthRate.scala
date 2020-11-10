@@ -19,7 +19,9 @@ class GrowthRate extends LongKeyedMapper[GrowthRate] with IdPK with OneToMany[Lo
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object GrowthRate extends GrowthRate with LongKeyedMetaMapper[GrowthRate] {
   def createGrowthRate(
       breed: String,
       medium: Option[Int] = None,
@@ -35,5 +37,3 @@ class GrowthRate extends LongKeyedMapper[GrowthRate] with IdPK with OneToMany[Lo
       .saveMe
   }
 }
-
-object GrowthRate extends GrowthRate with LongKeyedMetaMapper[GrowthRate]

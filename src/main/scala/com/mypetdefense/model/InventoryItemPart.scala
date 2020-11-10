@@ -23,7 +23,9 @@ class InventoryItemPart
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object InventoryItemPart extends InventoryItemPart with LongKeyedMetaMapper[InventoryItemPart] {
   def createNewInventoryItemPart(
       finishedItem: InventoryItem,
       itemPart: InventoryItem
@@ -34,5 +36,3 @@ class InventoryItemPart
       .saveMe
   }
 }
-
-object InventoryItemPart extends InventoryItemPart with LongKeyedMetaMapper[InventoryItemPart]

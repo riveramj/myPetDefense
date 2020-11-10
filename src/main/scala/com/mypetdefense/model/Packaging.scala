@@ -23,7 +23,9 @@ class Packaging extends LongKeyedMapper[Packaging] with IdPK with OneToMany[Long
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object Packaging extends Packaging with LongKeyedMetaMapper[Packaging] {
   def createNewPackaging(
       name: String,
       weight: Double,
@@ -39,10 +41,7 @@ class Packaging extends LongKeyedMapper[Packaging] with IdPK with OneToMany[Long
       .fleaTickMax(fleaTickMax)
       .saveMe
   }
-
   def getBubbleMailer: Box[Packaging] = Packaging.find(By(Packaging.sku, "bubble1234"))
   def getSmallBox: Box[Packaging]     = Packaging.find(By(Packaging.sku, "smallBox1234"))
   def getLargeBox: Box[Packaging]     = Packaging.find(By(Packaging.sku, "largeBox1234"))
 }
-
-object Packaging extends Packaging with LongKeyedMetaMapper[Packaging]

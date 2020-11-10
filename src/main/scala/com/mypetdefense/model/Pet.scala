@@ -12,6 +12,43 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
 
   def refresh: Box[Pet] = Pet.find(By(Pet.petId, petId.get))
 
+  object petId extends MappedLong(this) {
+    override def dbIndexed_? = true
+  }
+
+  object user extends MappedLongForeignKey(this, User)
+
+  object box extends MappedLongForeignKey(this, SubscriptionBox)
+
+  object name extends MappedString(this, 100)
+
+  object breed extends MappedString(this, 100)
+
+  object animalType extends MappedEnum(this, AnimalType)
+
+  object size extends MappedEnum(this, AnimalSize)
+
+  object adultSize extends MappedEnum(this, AnimalSize)
+
+  object birthday extends MappedDateTime(this)
+
+  object nextGrowthDelay extends MappedInt(this)
+
+  object sentDogTag extends MappedBoolean(this) {
+    override def defaultValue = false
+  }
+
+  object status extends MappedEnum(this, Status) {
+    override def defaultValue: Status.Value = Status.Active
+  }
+
+  object createdAt extends MappedDateTime(this) {
+    override def defaultValue = new Date()
+  }
+
+}
+
+object Pet extends Pet with LongKeyedMetaMapper[Pet] {
   def createNewPet(
       user: User,
       name: String,
@@ -51,46 +88,9 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   def createNewPet(pet: Pet, user: User): Pet = {
     pet.user(user).saveMe
   }
-
-  object petId extends MappedLong(this) {
-    override def dbIndexed_? = true
-  }
-
-  object user extends MappedLongForeignKey(this, User)
-
-  object box extends MappedLongForeignKey(this, SubscriptionBox)
-
-  object name extends MappedString(this, 100)
-
-  object breed extends MappedString(this, 100)
-
-  object animalType extends MappedEnum(this, AnimalType)
-
-  object size extends MappedEnum(this, AnimalSize)
-
-  object adultSize extends MappedEnum(this, AnimalSize)
-
-  object birthday extends MappedDateTime(this)
-
-  object nextGrowthDelay extends MappedInt(this)
-
-  object sentDogTag extends MappedBoolean(this) {
-    override def defaultValue = false
-  }
-
-  object status extends MappedEnum(this, Status) {
-    override def defaultValue: Status.Value = Status.Active
-  }
-
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
-
   def notCancelledWithoutBox: List[Pet] =
     Pet.findAll(NotBy(Pet.status, Status.Cancelled), NullRef(Pet.box))
 }
-
-object Pet extends Pet with LongKeyedMetaMapper[Pet]
 
 object AnimalType extends Enumeration {
   val Dog, Cat = Value

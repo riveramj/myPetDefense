@@ -19,7 +19,9 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object Product extends Product with LongKeyedMetaMapper[Product] {
   def createNewProduct(name: String, sku: String): Product = {
     Product.create
       .name(name)
@@ -35,5 +37,3 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   def skinAndCoat: Box[Product] = Product.find(By(Product.name, "Skin and Coat Chews"))
   def probiotic: Box[Product]   = Product.find(By(Product.name, "Probiotic Chews"))
 }
-
-object Product extends Product with LongKeyedMetaMapper[Product]

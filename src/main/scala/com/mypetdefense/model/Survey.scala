@@ -29,7 +29,9 @@ class Survey extends LongKeyedMapper[Survey] with IdPK {
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object Survey extends Survey with LongKeyedMetaMapper[Survey] {
   def createNewSurvey(user: User): Survey = {
     Survey.create
       .surveyId(generateLongId)
@@ -37,5 +39,3 @@ class Survey extends LongKeyedMapper[Survey] with IdPK {
       .saveMe
   }
 }
-
-object Survey extends Survey with LongKeyedMetaMapper[Survey]
