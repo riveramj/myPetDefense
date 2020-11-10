@@ -178,9 +178,9 @@ class ShipmentDashboard extends Loggable {
 
   def updateTrackingNumber(trackingNumber: String, shipment: Shipment): JsCmd = {
     if (!trackingNumber.trim.isEmpty) {
-      val refreshedShipment = shipment.refresh
+      val refreshedShipment = shipment.reload
 
-      refreshedShipment.map(_.trackingNumber(trackingNumber).saveMe)
+      refreshedShipment.trackingNumber(trackingNumber).saveMe
     }
 
     Noop

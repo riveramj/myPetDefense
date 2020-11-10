@@ -10,8 +10,6 @@ import net.liftweb.mapper._
 class Pet extends LongKeyedMapper[Pet] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, Pet] = Pet
 
-  def refresh: Box[Pet] = Pet.find(By(Pet.petId, petId.get))
-
   object petId extends MappedLong(this) {
     override def dbIndexed_? = true
   }

@@ -33,7 +33,7 @@ object ShippingBilling extends Loggable {
 }
 
 class ShippingBilling extends Loggable {
-  val user: Box[User]          = currentUser.flatMap(_.refresh)
+  val user: Box[User]          = currentUser.map(_.reload)
   val stripeCustomerId: String = user.map(_.stripeId.get).openOr("")
 
   var firstName = ""

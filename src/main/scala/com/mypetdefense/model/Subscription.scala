@@ -46,9 +46,6 @@ class Subscription
   object subscriptionBoxes   extends MappedOneToMany(SubscriptionBox, SubscriptionBox.subscription)
   object tags                extends MappedOneToMany(TaggedItem, TaggedItem.subscription)
 
-  def refresh: Box[Subscription] =
-    Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
-
   def getPets: Seq[Pet] = user.obj.map(_.activePets).openOr(Nil)
 
   def cancel: Subscription = {

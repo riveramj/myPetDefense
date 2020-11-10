@@ -54,7 +54,7 @@ object CheckoutService {
         )
       )
     } else {
-      maybeCurrentUser.flatMap(_.refresh).map { oldUser =>
+      maybeCurrentUser.map(_.reload).map { oldUser =>
         oldUser
           .firstName(newUserData.firstName)
           .lastName(newUserData.lastName)

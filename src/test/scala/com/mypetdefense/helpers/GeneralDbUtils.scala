@@ -84,13 +84,13 @@ object GeneralDbUtils {
   ): InsertedPetsUserSubAndShipment = {
     val u           = createUser(in.user)
     val su          = createSubscription(Full(u), in.subscriptionCreateGeneratedData)
-    val updatedUser = u.subscription(su).saveMe().refresh.toOption.get
+    val updatedUser = u.subscription(su).saveMe().reload
     val pets = in.pets.map { pData =>
       val createdPet = createPet(u, pData)
       SubscriptionBox.createNewBox(su, createdPet)
       createdPet
     }
-    val uSubscription = su.refresh.toOption.get
+    val uSubscription = su.reload
     val shs =
       in.shipmentCreateGeneratedData.map(createShipment(updatedUser, uSubscription, _, inserts))
     InsertedPetsUserSubAndShipment(updatedUser, uSubscription, shs, pets)
