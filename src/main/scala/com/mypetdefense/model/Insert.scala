@@ -2,8 +2,6 @@ package com.mypetdefense.model
 
 import java.util.Date
 
-import com.mypetdefense.shipstation.OrderItem
-import com.mypetdefense.typeclasses.ToOrderItemConverter
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.mapper._
@@ -41,13 +39,4 @@ object Insert extends Insert with LongKeyedMetaMapper[Insert] {
       .weight(weight)
       .saveMe
   }
-
-  implicit val toOrderItemConverter: ToOrderItemConverter[Insert] =
-    (input: Insert, index: Int) =>
-      OrderItem(
-        lineItemKey = Some(s"9 - $index"),
-        quantity = 1,
-        sku = input.itemNumber.get,
-        name = s"0 - ${input.name.get}"
-      )
 }

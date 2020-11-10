@@ -3,8 +3,6 @@ package com.mypetdefense.model
 import net.liftweb.mapper._
 import java.util.Date
 
-import com.mypetdefense.shipstation.OrderItem
-import com.mypetdefense.typeclasses.ToOrderItemConverter
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Box
 
@@ -61,13 +59,4 @@ object FleaTick extends FleaTick with LongKeyedMetaMapper[FleaTick] {
       .sku(sku)
       .saveMe
   }
-
-  implicit val toOrderItemConverter: ToOrderItemConverter[FleaTick] =
-    (input: FleaTick, index: Int) =>
-      OrderItem(
-        lineItemKey = Some(s"${index + 1} - 9"),
-        quantity = 1,
-        sku = input.sku.get,
-        name = s"${index + 1} - ${input.getNameAndSize}"
-      )
 }
