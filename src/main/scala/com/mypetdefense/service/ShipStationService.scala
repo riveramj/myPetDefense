@@ -10,7 +10,6 @@ import com.mypetdefense.shipstation.{
   Shipment => ShipStationShipment,
   _
 }
-import com.mypetdefense.typeclasses.ToOrderItemConverter.ToOrderItemConverterOps
 import com.mypetdefense.util.CalculationHelper
 import com.mypetdefense.util.ModelSyntax.ListOfShipmentLineItemsSyntax
 import dispatch.Defaults._
@@ -225,7 +224,7 @@ trait ShipStationServiceTrait extends Loggable {
     val normalizedWeight = CalculationHelper.calculateInsertsWeight(fleaTick, allInserts)
 
     val shipStationItems = allInserts.toList.zipWithIndex.map {
-      case (insert, index) => insert.toOrderItem(index)
+      case (insert, index) => insertToOrderItem(insert, index)
     } ++ shipmentLineItemsByPet.zipWithIndex.flatMap {
       case ((pet, lineItems), index) => petFleaTickAndProductsToOrderItems(pet, lineItems, index)
     }
@@ -341,15 +340,37 @@ trait ShipStationServiceTrait extends Loggable {
     val fleaTick = lineItems.flatMap(_.fleaTick.obj)
     val products = lineItems.flatMap(_.product.obj)
 
-    val fleaOrderItem = fleaTick.map(_.toOrderItem(index))
+    val fleaOrderItem = fleaTick.map(fleaTickToOrderItem(_, index))
 
     val productsOrderItems = products.zipWithIndex.map {
       case (product, productIndex) =>
         productWithIndexAndProductIndexToOrderItem(product, index, productIndex)
     }
 
-    List(pet.toOrderItem(index)) ++ fleaOrderItem ++ productsOrderItems
+    List(petToOrderItem(pet, index)) ++ fleaOrderItem ++ productsOrderItems
   }
+
+  private def fleaTickToOrderItem(input: FleaTick, index: Int) =
+    OrderItem(
+      lineItemKey = Some(s"${index + 1} - 9"),
+      quantity = 1,
+      sku = input.sku.get,
+      name = s"${index + 1} - ${input.getNameAndSize}"
+    )
+
+  private def petToOrderItem(input: Pet, index: Int) = OrderItem(
+    lineItemKey = Some(s"${index + 1} - 0"),
+    quantity = 1,
+    sku = "pet",
+    name = s"${index + 1} -  ${input.name.get}"
+  )
+
+  private def insertToOrderItem(input: Insert, index: Int) = OrderItem(
+    lineItemKey = Some(s"9 - $index"),
+    quantity = 1,
+    sku = input.itemNumber.get,
+    name = s"0 - ${input.name.get}"
+  )
 
 }
 
