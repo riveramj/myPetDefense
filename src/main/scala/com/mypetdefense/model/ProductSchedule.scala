@@ -22,6 +22,8 @@ class ProductSchedule
   object scheduledItems
       extends MappedOneToMany(ProductScheduleItem, ProductScheduleItem.productSchedule)
 
+  object firstBox extends MappedBoolean(this)
+
   object startDate extends MappedDateTime(this)
 
   object createdAt extends MappedDateTime(this) {
@@ -39,8 +41,12 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
       )
       .headOption
 
-  def createNew(startDate: Date, products: List[Product]): ProductSchedule = {
-    val schedule = ProductSchedule.create.startDate(startDate).saveMe()
+  def createNew(
+      startDate: Date,
+      products: List[Product],
+      firstBox: Boolean = false
+  ): ProductSchedule = {
+    val schedule = ProductSchedule.create.startDate(startDate).firstBox(firstBox).saveMe()
     products.map(ProductScheduleItem.createNew(_, schedule))
     schedule.reload
   }
