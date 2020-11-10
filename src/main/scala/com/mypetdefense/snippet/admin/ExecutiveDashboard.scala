@@ -5,6 +5,7 @@ import java.text.NumberFormat
 
 import com.mypetdefense.model._
 import com.mypetdefense.service._
+import com.mypetdefense.util.CalculationHelper.calcRelativePercentageOfOldData
 import net.liftweb.common._
 import net.liftweb.http.LiftResponse
 import net.liftweb.http.SHtml.ajaxInvoke
@@ -100,11 +101,14 @@ class ExecutiveDashboard extends Loggable {
 
   def calcStartPercentage(starts: Int): Int = calcPercentage(starts, totalStarts)
 
-  def calcTodayPercentage(starts: Int): Int = calcPercentage(starts, newStartsToday.size)
+  def calcTodayPercentage(starts: Int): Int =
+    calcRelativePercentageOfOldData(starts, newStartsToday.size)
 
-  def calcMonthPercentage(starts: Int): Int = calcPercentage(starts, newStartsMTD.size)
+  def calcMonthPercentage(starts: Int): Int =
+    calcRelativePercentageOfOldData(starts, newStartsMTD.size)
 
-  def calcYearPercentage(starts: Int): Int = calcPercentage(starts, newStartsYTD.size)
+  def calcYearPercentage(starts: Int): Int =
+    calcRelativePercentageOfOldData(starts, newStartsYTD.size)
 
   def updateCharts(): JsCmd =
     UpdateChartData(
@@ -121,41 +125,41 @@ class ExecutiveDashboard extends Loggable {
       ".today-stats" #> {
         ".new-starts *" #> newStartsToday.size &
           ".new-starts-last-month-diff *" #> (newStartsToday.size - newStartsTodayLastMonth.size) &
-          ".new-starts-last-month-percent *" #> calcTodayPercentage(newStartsTodayMonthDiff) &
+          ".new-starts-last-month-percent *" #> calcTodayPercentage(newStartsTodayLastMonth.size) &
           ".new-starts-last-year-diff *" #> (newStartsToday.size - newStartsTodayLastYear.size) &
-          ".new-starts-last-year-percent *" #> calcTodayPercentage(newStartsTodayYearDiff)
+          ".new-starts-last-year-percent *" #> calcTodayPercentage(newStartsTodayLastYear.size)
       } &
         ".mtd-stats" #> {
           ".new-starts *" #> newStartsMTD.size &
             ".new-starts-last-month-diff *" #> (newStartsMTD.size - newStartsMTDLastMonth.size) &
-            ".new-starts-last-month-percent *" #> calcMonthPercentage(newStartsMTDMonthDiff) &
+            ".new-starts-last-month-percent *" #> calcMonthPercentage(newStartsMTDLastMonth.size) &
             ".new-starts-last-year-diff *" #> (newStartsMTD.size - newStartsMTDLastYear.size) &
-            ".new-starts-last-year-percent *" #> calcMonthPercentage(newStartsMTDYearDiff)
+            ".new-starts-last-year-percent *" #> calcMonthPercentage(newStartsMTDLastYear.size)
         } &
         ".ytd-stats" #> {
           ".new-starts *" #> newStartsYTD.size &
             ".new-starts-last-month-diff *" #> (newStartsYTD.size - newStartsYTDLastMonth.size) &
-            ".new-starts-last-month-percent *" #> calcYearPercentage(newStartsYTDMonthDiff) &
+            ".new-starts-last-month-percent *" #> calcYearPercentage(newStartsYTDLastMonth.size) &
             ".new-starts-last-year-diff *" #> (newStartsYTD.size - newStartsYTDLastYear.size) &
-            ".new-starts-last-year-percent *" #> calcYearPercentage(newStartsYTDYearDiff)
+            ".new-starts-last-year-percent *" #> calcYearPercentage(newStartsYTDLastYear.size)
         }
     }
   }
 
   def render: CssBindFunc = {
     newStartBindings &
-    ".executive-dashboard [class+]" #> "current" &
-    ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
-    ".executive-snapshot .executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
-    ".mtd-shipments .count *" #> numberFormatter.format(mtdShipments.size) &
-    ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentValue) &
-    ".today-shipments .count *" #> numberFormatter.format(todayShipments.size) &
-    ".today-shipments .value *" #> dollarFormatter.format(todayShipmentsValue) &
-    ".remaining-shipments-month .count *" #> numberFormatter.format(
-      remainingMonthSubscriptions.size
-    ) &
-    ".remaining-shipments-month .value *" #> dollarFormatter.format(0.99) &
-    ".mtd-users .new-users-count *" #> Subscription.findNewMTDSubscriptions.size &
-    ".mtd-users .cancellations-count *" #> Subscription.findCancelledMtdSubscriptions.size
+      ".executive-dashboard [class+]" #> "current" &
+      ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
+      ".executive-snapshot .executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
+      ".mtd-shipments .count *" #> numberFormatter.format(mtdShipments.size) &
+      ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentValue) &
+      ".today-shipments .count *" #> numberFormatter.format(todayShipments.size) &
+      ".today-shipments .value *" #> dollarFormatter.format(todayShipmentsValue) &
+      ".remaining-shipments-month .count *" #> numberFormatter.format(
+        remainingMonthSubscriptions.size
+      ) &
+      ".remaining-shipments-month .value *" #> dollarFormatter.format(0.99) &
+      ".mtd-users .new-users-count *" #> Subscription.findNewMTDSubscriptions.size &
+      ".mtd-users .cancellations-count *" #> Subscription.findCancelledMtdSubscriptions.size
   }
 }

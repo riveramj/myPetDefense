@@ -20,4 +20,15 @@ object CalculationHelper {
       }
   }
 
+  def calcRelativePercentageOfOldData(old: Int, actual: Int): Int = {
+    if (old == 0) {
+      0
+    } else {
+      val a = BigDecimal(actual)
+      val o = BigDecimal(old)
+      val x = 100 * ((o - a) / o)
+      100 - x.toInt
+    }
+  }
+
 }

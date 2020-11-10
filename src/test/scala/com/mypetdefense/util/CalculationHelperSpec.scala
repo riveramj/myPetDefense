@@ -11,4 +11,13 @@ class CalculationHelperSpec extends AnyFlatSpec with Matchers {
     val actualData   = CalculationHelper.calculateOccurrences[Int, Int](inputData, identity)
     actualData shouldBe expectedData
   }
+
+  it should "calculate percent properly" in {
+    val prevMonthSales = 3
+    val thisMonthSales = 2
+    val expectedDiff   = 67
+    val actualData =
+      CalculationHelper.calcRelativePercentageOfOldData(prevMonthSales, thisMonthSales)
+    actualData shouldBe expectedDiff
+  }
 }
