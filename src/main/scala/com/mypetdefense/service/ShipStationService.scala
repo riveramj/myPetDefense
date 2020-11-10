@@ -21,15 +21,15 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 
-object ShipStationService extends Loggable {
+trait ShipStationServiceTrait extends Loggable {
   val key: String    = Props.get("shipstation.key") openOr ""
   val secret: String = Props.get("shipstation.secret") openOr ""
   val url: String    = Props.get("shipstation.url") openOr ""
   val dateFormat     = new SimpleDateFormat("MM/dd/yyyy")
 
-  implicit val shipStationExecutor: ShipStationExecutor = new ShipStationExecutor(key, secret, url)
+  implicit val shipStationExecutor: ShipStationExecutor
 
-  def getOrder(orderId: Int): Box[Order] = {
+  private def getOrder(orderId: Int): Box[Order] = {
     Try(
       Await.result(Order.get(orderId.toString), new DurationInt(10).seconds)
     ) match {
@@ -127,7 +127,7 @@ object ShipStationService extends Loggable {
     }
   }
 
-  def createUserBillShipToAddress(user: User): ShipStationAddress = {
+  private def createUserBillShipToAddress(user: User): ShipStationAddress = {
     val userAddress = user.shippingAddress
 
     ShipStationAddress(
@@ -140,7 +140,7 @@ object ShipStationService extends Loggable {
     )
   }
 
-  def createOrderBillShipToAddress(order: TreatOrder): ShipStationAddress = {
+  private def createOrderBillShipToAddress(order: TreatOrder): ShipStationAddress = {
     ShipStationAddress(
       name = Some(order.name),
       street1 = order.street1.get,
@@ -240,12 +240,12 @@ object ShipStationService extends Loggable {
 
     val fleaTick = shipmentLineItems.flatMap(_.fleaTick.obj)
 
-    val productWeight = fleaTick.map(_.weight.get).sum
-    val insertWeight  = inserts.map(_.weight.get).sum
+    val productWeight = fleaTick.map(fleaT => BigDecimal(fleaT.weight.get)).sum
+    val insertWeight  = inserts.map(insert => BigDecimal(insert.weight.get)).sum
 
     val totalWeight = productWeight + insertWeight
 
-    val normalizedWeight = if (totalWeight < 4.0) 4.0 else totalWeight
+    val normalizedWeight = if (totalWeight < 4.0) BigDecimal(4.0) else totalWeight
 
     val shipStationItems = inserts.toList.zipWithIndex.map {
       case (insert, index) =>
@@ -296,7 +296,7 @@ object ShipStationService extends Loggable {
       billTo = billShipTo,
       shipTo = billShipTo,
       items = Some(shipStationItems.sortBy(_.lineItemKey)),
-      weight = Some(Weight(normalizedWeight, "ounces")),
+      weight = Some(Weight(normalizedWeight.toDouble, "ounces")),
       carrierCode = Some("stamps_com"),
       serviceCode = Some("usps_first_class_mail"),
       packageCode = Some("package"),
@@ -345,4 +345,9 @@ object ShipStationService extends Loggable {
         Empty
     }
   }
+}
+
+object ShipStationService extends ShipStationServiceTrait {
+  override implicit val shipStationExecutor: ShipStationExecutor =
+    new ShipStationExecutor(key, secret, url)
 }

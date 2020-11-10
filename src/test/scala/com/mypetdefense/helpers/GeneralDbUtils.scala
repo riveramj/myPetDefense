@@ -1,14 +1,20 @@
 package com.mypetdefense.helpers
 
 import com.mypetdefense.generator._
+import com.mypetdefense.helpers.db.AgencyDbUtils.createAgency
 import com.mypetdefense.helpers.db.ShipmentDbUtils.createShipment
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
 import com.mypetdefense.helpers.db.PetDbUtils.createPet
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
+import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
 import net.liftweb.common._
 
 object GeneralDbUtils {
+
+  val tppAgencyName     = "TPP"
+  val mpdAgencyName     = "My Pet Defense"
+  val petLandAgencyName = "Petland"
 
   case class InsertedUserAndSub(user: User, subscription: Subscription)
 
@@ -27,14 +33,21 @@ object GeneralDbUtils {
       pets: List[Pet]
   )
 
+  val insertUserAndSubTupled
+      : ((UserCreateGeneratedData, SubscriptionCreateGeneratedData)) => InsertedUserAndSub =
+    (insertUserAndSub _).tupled
+
   def clearTables(): Unit = {
     Address.findAll().map(_.delete_!)
     Agency.findAll().map(_.delete_!)
     Event.findAll().map(_.delete_!)
     Pet.findAll().map(_.delete_!)
+    Insert.findAll().map(_.delete_!)
     Subscription.findAll().map(_.delete_!)
     SubscriptionBox.findAll().map(_.delete_!)
+    SubscriptionItem.findAll().map(_.delete_!)
     Shipment.findAll().map(_.delete_!)
+    ShipmentLineItem.findAll().map(_.delete_!)
     User.findAll().map(_.delete_!)
   }
 
@@ -42,8 +55,10 @@ object GeneralDbUtils {
       uIn: UserCreateGeneratedData,
       sIn: SubscriptionCreateGeneratedData
   ): InsertedUserAndSub = {
-    val u = createUser(uIn)
-    InsertedUserAndSub(u, createSubscription(Full(u), sIn))
+    val u  = createUser(uIn)
+    val s  = createSubscription(Full(u), sIn)
+    val uU = u.subscription(s).saveMe()
+    InsertedUserAndSub(uU, s)
   }
 
   def insertSubWithoutUser(sIn: SubscriptionCreateGeneratedData): Subscription =
@@ -64,17 +79,46 @@ object GeneralDbUtils {
   }
 
   def insertPetsAndShipmentChainData(
-      in: PetsAndShipmentChainData
+      in: PetsAndShipmentChainData,
+      inserts: List[Insert] = List.empty[Insert]
   ): InsertedPetsUserSubAndShipment = {
-    val u   = createUser(in.user)
-    val su  = createSubscription(Full(u), in.subscriptionCreateGeneratedData)
-    val shs = in.shipmentCreateGeneratedData.map(createShipment(u, su, _))
+    val u           = createUser(in.user)
+    val su          = createSubscription(Full(u), in.subscriptionCreateGeneratedData)
+    val updatedUser = u.subscription(su).saveMe().refresh.toOption.get
     val pets = in.pets.map { pData =>
       val createdPet = createPet(u, pData)
       SubscriptionBox.createNewBox(su, createdPet)
       createdPet
     }
-    InsertedPetsUserSubAndShipment(u, su.refresh.toOption.get, shs, pets)
+    val uSubscription = su.refresh.toOption.get
+    val shs =
+      in.shipmentCreateGeneratedData.map(createShipment(updatedUser, uSubscription, _, inserts))
+    InsertedPetsUserSubAndShipment(updatedUser, uSubscription, shs, pets)
+  }
+
+  def insertPetsAndShipmentData(
+      data: List[PetsAndShipmentChainData],
+      agency: Agency,
+      subUpgraded: Boolean
+  ): List[InsertedPetsUserSubAndShipment] =
+    data.map(insertPetAndShipmentsChainAtAgency(_, agency, subUpgraded))
+
+  def insertPetAndShipmentsChainAtAgency(
+      data: PetsAndShipmentChainData,
+      agency: Agency,
+      subUpgraded: Boolean,
+      inserts: List[Insert] = List.empty[Insert]
+  ): InsertedPetsUserSubAndShipment = {
+    val inserted    = insertPetsAndShipmentChainData(data, inserts)
+    val updatedUser = inserted.user.referer(agency).saveMe()
+    val updatedSub  = inserted.subscription.isUpgraded(subUpgraded).saveMe()
+    inserted.copy(user = updatedUser, subscription = updatedSub)
+  }
+
+  def createPetlandAndMPDAgencies(): PetlandAndMPDAgencies = {
+    val myPetDefenseAgency = createAgency(mpdAgencyName)
+    val petlandAgency      = createAgency(petLandAgencyName)
+    PetlandAndMPDAgencies(petlandAgency, myPetDefenseAgency)
   }
 
 }

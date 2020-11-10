@@ -9,17 +9,12 @@ import com.mypetdefense.helpers.ListUtil.ListOps
 import com.mypetdefense.helpers._
 import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.helpers.db.AgencyDbUtils._
-import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.util.CalculationHelper
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class ReportingServiceSpec extends DBTest {
-
-  private val tppAgencyName     = "TPP"
-  private val mpdAgencyName     = "My Pet Defense"
-  private val petLandAgencyName = "Petland"
 
   private def createUserAndSubReturnSubId(
       t: (UserCreateGeneratedData, SubscriptionCreateGeneratedData)
@@ -49,32 +44,8 @@ class ReportingServiceSpec extends DBTest {
       .map(insertPetAndShipmentsChainAtAgency(_, agency, subUpgraded = true))
       .map(cancelSubscription)
 
-  private def insertPetsAndShipmentData(
-      data: List[PetsAndShipmentChainData],
-      agency: Agency,
-      subUpgraded: Boolean
-  ): List[InsertedPetsUserSubAndShipment] =
-    data.map(insertPetAndShipmentsChainAtAgency(_, agency, subUpgraded))
-
-  private def insertPetAndShipmentsChainAtAgency(
-      data: PetsAndShipmentChainData,
-      agency: Agency,
-      subUpgraded: Boolean
-  ): InsertedPetsUserSubAndShipment = {
-    val inserted    = insertPetsAndShipmentChainData(data)
-    val updatedUser = inserted.user.referer(agency).saveMe()
-    val updatedSub  = inserted.subscription.isUpgraded(subUpgraded).saveMe()
-    inserted.copy(user = updatedUser, subscription = updatedSub)
-  }
-
   private def cancelSubscription(in: InsertedPetsUserSubAndShipment) =
     in.copy(subscription = in.subscription.cancel)
-
-  private def createPetlandAndMPDAgencies(): PetlandAndMPDAgencies = {
-    val myPetDefenseAgency = createAgency(mpdAgencyName)
-    val petlandAgency      = createAgency(petLandAgencyName)
-    PetlandAndMPDAgencies(petlandAgency, myPetDefenseAgency)
-  }
 
   private def upgradedSubsByAgency(
       input: List[InsertedPetsUserSubAndShipment]
