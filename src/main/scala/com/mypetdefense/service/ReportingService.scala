@@ -315,22 +315,34 @@ object ReportingService extends Loggable {
 
   def findYesterdaySalesByAgency: List[(String, Int)] = {
     val agencies = Agency.findAll(
-      NotBy(Agency.name, myPetDefenseName),
-      NotBy(Agency.name, petlandName)
+      NotBy(Agency.name, "My Pet Defense"),
+      NotBy(Agency.name, "Petland")
     )
 
-    val yesterdayCreatedUsersByAgencies = agencies.map { agency =>
-      (
-        agency,
-        User.findAll(
-          By(User.referer, agency),
-          By_>=(User.createdAt, yesterdayStart),
-          By_<(User.createdAt, yesterdayEnd)
-        )
-      )
+    val usersByAgencies = agencies.map { agency => (agency, agency.customers.toList) }
+
+    val newUsersYesterdayByAgency = usersByAgencies.map {
+      case (agency, users) =>
+        val yesterdayUsers = users.filter { user =>
+          val createdDate = user.getCreatedDateOfUser
+
+          val createdDateDay   = createdDate.getDayOfMonth
+          val createdDateMonth = createdDate.getMonth
+          val createdDateYear  = createdDate.getYear
+
+          val yesterdayDay   = yesterday.getDayOfMonth
+          val yesterdayMonth = yesterday.getMonth
+          val yesterdayYear  = yesterday.getYear
+
+          (createdDateDay == yesterdayDay) &&
+          (createdDateMonth == yesterdayMonth) &&
+          (createdDateYear == yesterdayYear)
+        }
+
+        (agency, yesterdayUsers)
     }
 
-    yesterdayCreatedUsersByAgencies.map {
+    newUsersYesterdayByAgency.map {
       case (agency, users) =>
         val pets = users.flatMap(_.pets.toList)
         agency.name.get -> pets.size
@@ -342,16 +354,17 @@ object ReportingService extends Loggable {
       NotBy(Agency.name, myPetDefenseName),
       NotBy(Agency.name, petlandName)
     )
+    val usersByAgencies = agencies.map { agency => (agency, agency.customers.toList) }
 
-    val newUsersThisMonthByAgency = agencies.map { agency =>
-      (
-        agency,
-        User.findAll(
-          By(User.referer, agency),
-          By_>=(User.createdAt, monthDayOne),
-          By_<(User.createdAt, beginngNextMonth)
-        )
-      )
+    val newUsersThisMonthByAgency = usersByAgencies.map {
+      case (agency, users) =>
+        val newUsersThisMonth = users.filter { user =>
+          val createdDayDate = user.getCreatedDateOfUser
+
+          createdDayDate.getYear == yesterday.getYear &&
+          createdDayDate.getMonth == yesterday.getMonth
+        }
+        (agency, newUsersThisMonth)
     }
 
     newUsersThisMonthByAgency.map {
@@ -362,24 +375,34 @@ object ReportingService extends Loggable {
   }
 
   def findYesterdaySalesByAgent: List[(String, Int)] = {
-    val newUsersYesterday = Agency
+    val totalUsers = Agency
       .findAll(
         NotBy(Agency.name, myPetDefenseName),
         NotBy(Agency.name, petlandName)
       )
-      .flatMap { agency =>
-        User.findAll(
-          By(User.referer, agency),
-          By_>=(User.createdAt, yesterdayStart),
-          By_<(User.createdAt, yesterdayEnd)
-        )
-      }
+      .flatMap(_.customers.toList)
+
+    val newUsersYesterday = totalUsers.filter { user =>
+      val createdDate = user.getCreatedDateOfUser
+
+      val createdDateDay   = createdDate.getDayOfMonth
+      val createdDateMonth = createdDate.getMonth
+      val createdDateYear  = createdDate.getYear
+
+      val yesterdayDay   = yesterday.getDayOfMonth
+      val yesterdayMonth = yesterday.getMonth
+      val yesterdayYear  = yesterday.getYear
+
+      (createdDateDay == yesterdayDay) &&
+      (createdDateMonth == yesterdayMonth) &&
+      (createdDateYear == yesterdayYear)
+    }
 
     newUsersYesterday
       .groupBy(_.salesAgentId.get)
       .map {
         case (agentId, users) =>
-          val pets = users.flatMap(_.pets)
+          val pets = users.flatMap(_.pets.toList)
           agentId -> pets.size
       }
       .toList
@@ -387,18 +410,19 @@ object ReportingService extends Loggable {
   }
 
   def findMTDSalesByAgent: List[(String, Int)] = {
-    val newUsersThisMonth = Agency
+    val totalUsers = Agency
       .findAll(
         NotBy(Agency.name, myPetDefenseName),
         NotBy(Agency.name, petlandName)
       )
-      .flatMap { agency =>
-        User.findAll(
-          By(User.referer, agency),
-          By_>=(User.createdAt, monthDayOne),
-          By_<(User.createdAt, beginngNextMonth)
-        )
-      }
+      .flatMap(_.customers.toList)
+
+    val newUsersThisMonth = totalUsers.filter { user =>
+      val createdDayDate = user.getCreatedDateOfUser
+
+      createdDayDate.getYear == yesterday.getYear &&
+      createdDayDate.getMonth == yesterday.getMonth
+    }
 
     newUsersThisMonth
       .groupBy(_.salesAgentId.get)
