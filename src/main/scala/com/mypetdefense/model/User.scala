@@ -62,8 +62,6 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
 
   def activePets: mutable.Buffer[Pet] = pets.filter(_.status.get == Status.Active)
 
-  def refresh: Box[User] = User.find(By(User.userId, userId.get))
-
   def petlandData_? : Boolean = tryo(canSeePetlandData.get).openOr(false)
 
   def shippingAddress: Box[Address] = {

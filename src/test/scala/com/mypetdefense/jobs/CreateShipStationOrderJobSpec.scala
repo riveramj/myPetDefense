@@ -40,7 +40,7 @@ class CreateShipStationOrderJobSpec extends DBTest {
     }
 
     testJob.createShipStationOrders()
-    val updatedShipments = insertedShipments.flatMap(_.refresh)
+    val updatedShipments = insertedShipments.map(_.reload)
 
     calledShipmentsIds should contain theSameElementsAs updatedShipments.map(_.id.get)
     updatedShipments.map(_.shipStationOrderId.get) should contain theSameElementsAs expectedIds

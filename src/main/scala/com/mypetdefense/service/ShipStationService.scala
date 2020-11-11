@@ -209,19 +209,21 @@ trait ShipStationServiceTrait extends Loggable {
     println("============================== " + count)
     val billShipTo = createUserBillShipToAddress(user)
 
-    val shipmentLineItems = shipment.refresh.toList.flatMap(_.shipmentLineItems.toList)
+    val shipmentLineItems = shipment.reload.shipmentLineItems.toList
     val someInserts       = shipmentLineItems.flatMap(_.insert.obj).distinct
 
     val inserts =
       if (subscription.shipments.toList.size >= 2 && tryo(subscription.freeUpgradeSampleDate) == Full(
             null
           )) {
-        val dogs = shipment.refresh.toList
-          .flatMap(_.shipmentLineItems.flatMap(_.pet.obj).toList.distinct)
+        val dogs = shipment.reload.shipmentLineItems
+          .flatMap(_.pet.obj)
+          .toList
+          .distinct
           .filter(_.animalType.get == AnimalType.Dog)
 
         if (dogs.nonEmpty) {
-          subscription.refresh.map(_.freeUpgradeSampleDate(new Date).saveMe())
+          subscription.reload.freeUpgradeSampleDate(new Date).saveMe()
           dogs.map(pet => ShipmentLineItem.sendFreeUpgradeItems(shipment, pet))
 
           Insert.tryUpgrade ++ someInserts
@@ -232,9 +234,8 @@ trait ShipStationServiceTrait extends Loggable {
       else
         someInserts
 
-    val refreshedShipment = shipment.refresh
-    val shipmentLineItemsByPet = refreshedShipment.toList
-      .flatMap(_.shipmentLineItems.toList)
+    val refreshedShipment = shipment.reload
+    val shipmentLineItemsByPet = refreshedShipment.shipmentLineItems.toList
       .groupBy(_.pet.obj)
       .filter(_._1.isDefined)
 
@@ -290,7 +291,7 @@ trait ShipStationServiceTrait extends Loggable {
     }
 
     Order.create(
-      orderNumber = s"${refreshedShipment.map(_.shipmentId.get).openOr("")}",
+      orderNumber = s"${refreshedShipment.shipmentId.get}",
       orderDate = dateFormat.format(new Date()),
       orderStatus = "awaiting_shipment",
       billTo = billShipTo,

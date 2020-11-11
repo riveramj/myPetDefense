@@ -24,9 +24,9 @@ object AccountOverview extends Loggable {
 
 class AccountOverview extends Loggable {
   val oldUser: Box[User]              = currentUser
-  val user: Box[User]                 = currentUser.flatMap(_.refresh)
+  val user: Box[User]                 = currentUser.map(_.reload)
   val pets: Seq[Pet]                  = user.map(_.activePets).openOr(Nil)
-  val subscription: Box[Subscription] = user.flatMap(_.subscription).flatMap(_.refresh)
+  val subscription: Box[Subscription] = user.flatMap(_.subscription).map(_.reload)
   val priceCode: String               = subscription.map(_.priceCode.get).getOrElse("")
 
   val shippingAddress: Box[Address] = Address.find(

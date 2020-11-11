@@ -43,8 +43,6 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
     override def defaultValue = new Date()
   }
 
-  def refresh: Box[Shipment] = Shipment.find(By(Shipment.shipmentId, shipmentId.get))
-
   def getProcessDateOfShipment: LocalDate =
     this.dateProcessed.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
 

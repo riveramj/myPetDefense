@@ -27,9 +27,6 @@ class SubscriptionBox
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
-
-  def refresh: Box[SubscriptionBox] = SubscriptionBox.find(By(SubscriptionBox.boxId, boxId.get))
-
 }
 
 object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[SubscriptionBox] {

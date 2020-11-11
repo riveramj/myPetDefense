@@ -714,7 +714,7 @@ trait TreatReceiptEmailHandling extends EmailHandlerChain {
       val subject = "My Pet Defense Receipt"
       val email   = order.email.get
 
-      val treats   = order.refresh.map(_.treatsOrdered.toList).openOr(Nil)
+      val treats   = order.reload.treatsOrdered.toList
       val subtotal = (order.amountPaid.get - order.taxPaid.get)
 
       val transform = {

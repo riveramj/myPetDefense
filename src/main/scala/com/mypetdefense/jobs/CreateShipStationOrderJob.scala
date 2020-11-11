@@ -50,10 +50,10 @@ trait CreateShipStationOrderJobTrait extends ManagedJob {
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>
           println("======================  below success" + thisRun)
-          shipment.refresh.map(
-            _.shipStationOrderId(order.orderId).shipmentStatus(ShipmentStatus.LabelCreated).saveMe
-          )
-
+          shipment.reload
+            .shipStationOrderId(order.orderId)
+            .shipmentStatus(ShipmentStatus.LabelCreated)
+            .saveMe
         /*
           if (!sameDateComparison(
             new Date(),

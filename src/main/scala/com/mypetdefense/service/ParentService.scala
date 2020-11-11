@@ -105,15 +105,15 @@ object ParentService extends Loggable {
   }
 
   def removeParent(oldUser: User, fullDelete: Boolean = false): Box[Any] = {
-    val user             = oldUser.refresh
-    val stripeCustomerId = user.map(_.stripeId.get).openOr("")
+    val user             = oldUser.reload
+    val stripeCustomerId = user.stripeId.get
 
-    val subscription = user.flatMap(_.subscription.obj)
+    val subscription = user.subscription.obj
     val paidOpenShipments = subscription
       .map(_.shipments.toList)
       .openOr(Nil)
       .filter(_.shipmentStatus.get == ShipmentStatus.Paid)
-    val addresses = user.map(_.addresses.toList).openOr(Nil)
+    val addresses = user.addresses.toList
 
     cancelOpenOrders(oldUser)
     val removeCustomer = Customer.delete(stripeCustomerId)
@@ -127,21 +127,21 @@ object ParentService extends Loggable {
           }
           addresses.map(_.delete_!)
           subscription.map(_.delete_!)
-          user.map { realUser =>
-            realUser.pets.toList.map(_.delete_!)
-            realUser.delete_!
+          Full {
+            user.pets.toList.map(_.delete_!)
+            user.delete_!
           }
         } else {
-          user.map(_.cancel)
-          paidOpenShipments.map(shipment => refundShipment(shipment, user))
+          user.cancel
+          paidOpenShipments.map(shipment => refundShipment(shipment, Full(user)))
           addresses.map(_.cancel)
           subscription.map(_.cancel)
         }
       case TrySuccess(stripeFailure) =>
         logger.error(s"remove customer failed with stipe error: ${stripeFailure}")
 
-        user.map(_.cancel)
-        paidOpenShipments.map(shipment => refundShipment(shipment, user))
+        user.cancel
+        paidOpenShipments.map(shipment => refundShipment(shipment, Full(user)))
         addresses.map(_.cancel)
         subscription.map(_.cancel)
 
@@ -150,8 +150,8 @@ object ParentService extends Loggable {
       case TryFail(throwable: Throwable) =>
         logger.error(s"remove customer failed with other error: ${throwable}")
 
-        user.map(_.cancel)
-        paidOpenShipments.map(shipment => refundShipment(shipment, user))
+        user.cancel
+        paidOpenShipments.map(shipment => refundShipment(shipment, Full(user)))
         addresses.map(_.cancel)
         subscription.map(_.cancel)
 
@@ -479,12 +479,12 @@ object ParentService extends Loggable {
   }
 
   def updateStripeSubscriptionTotal(oldUser: User): Box[StripeSubscription] = {
-    val updatedUser = oldUser.refresh
+    val updatedUser       = oldUser.reload
+    val maybeSubscription = updatedUser.subscription.obj
 
     val products: List[FleaTick] = {
       for {
-        user         <- updatedUser.toList
-        subscription <- user.subscription.toList
+        subscription <- maybeSubscription.toList
         boxes        <- subscription.subscriptionBoxes
         fleaTick     <- boxes.fleaTick
       } yield {
@@ -494,8 +494,7 @@ object ParentService extends Loggable {
 
     val (subscriptionId, priceCode) = (
       for {
-        user         <- updatedUser
-        subscription <- user.subscription.obj
+        subscription <- updatedUser.subscription.obj
       } yield {
         (subscription.stripeSubscriptionId.get, subscription.priceCode.get)
       }
@@ -508,7 +507,7 @@ object ParentService extends Loggable {
     val totalCost = "%.2f".format(prices.foldLeft(0d)(_ + _)).toDouble
 
     updateStripeSubscriptionQuantity(
-      updatedUser.map(_.stripeId.get).openOr(""),
+      updatedUser.stripeId.get,
       subscriptionId,
       tryo((totalCost * 100).toInt).openOr(0)
     )
@@ -533,12 +532,12 @@ object ParentService extends Loggable {
 
     val updatedSubscription = updateStripeSubscriptionTotal(oldUser)
 
-    val updatedUser = oldUser.refresh
+    val updatedUser = oldUser.reload
 
     updatedSubscription match {
       case Full(stripeSub) =>
-        if (updatedUser.map(_.activePets.isEmpty).openOr(false)) {
-          val subscription = updatedUser.flatMap(_.subscription.obj)
+        if (updatedUser.activePets.isEmpty) {
+          val subscription = updatedUser.subscription.obj
           subscription.map(_.status(Status.UserSuspended).saveMe)
         }
 
