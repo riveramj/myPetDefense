@@ -9,14 +9,19 @@ import cats.syntax.option._
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
-  it should "update boxes properly" in {
+  it should "do regular schedule job properly" in {
     val mpdAndPld                      = createPetlandAndMPDAgencies()
     val someGeneratedProduct           = product()
     val someOldInsertedProduct         = createNewProduct(someGeneratedProduct)
     val scheduleGeneratedData          = productUpdateSchedule(productsSize = 3)
+    val previousScheduleGeneratedData  = productUpdateSchedule(productsSize = 3)
     val insertedProductsUpdateSchedule = insertProductScheduleGeneratedData(scheduleGeneratedData)
-    val userAndPetShouldBeAffected     = petsAndShipmentChainDataGen()
-    val userAndPetShouldNotBeAffected  = petsAndShipmentChainDataGen()
+    val insertedPreviousSchedule =
+      insertProductScheduleGeneratedData(previousScheduleGeneratedData).schedule
+        .scheduleStatus(ProductScheduleStatus.Active)
+        .saveMe()
+    val userAndPetShouldBeAffected    = petsAndShipmentChainDataGen()
+    val userAndPetShouldNotBeAffected = petsAndShipmentChainDataGen()
     val shouldBeAffectedData =
       insertPetAndShipmentsChainAtAgency(
         userAndPetShouldBeAffected,
@@ -35,7 +40,10 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
       .map(SubscriptionItem.createSubscriptionItem(someOldInsertedProduct, _))
 
     val job = new SubscriptionBoxProductsUpdateJob
-    job.executeNextOrActiveRegularSchedule(insertedProductsUpdateSchedule.schedule.some, None)
+    job.executeNextOrActiveRegularSchedule(
+      insertedProductsUpdateSchedule.schedule.some,
+      insertedPreviousSchedule.some
+    )
     val productsInSubsBoxesUpdateIds = insertedProductsUpdateSchedule.products.map(_.id.get)
 
     val allSubsItems           = SubscriptionItem.findAll
@@ -47,6 +55,29 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
       someOldInsertedProduct.id.get
     )
     shouldBeNewProductsIds.toSet should contain theSameElementsAs productsInSubsBoxesUpdateIds
+    insertedPreviousSchedule.scheduleStatus.get shouldBe ProductScheduleStatus.Completed
+  }
+
+  it should "do first box schedule job properly" in {
+    val scheduleGeneratedData          = productUpdateSchedule(productsSize = 3)
+    val previousScheduleGeneratedData  = productUpdateSchedule(productsSize = 3)
+    val insertedProductsUpdateSchedule = insertProductScheduleGeneratedData(scheduleGeneratedData)
+    val insertedPreviousSchedule =
+      insertProductScheduleGeneratedData(previousScheduleGeneratedData).schedule
+        .firstBox(true)
+        .scheduleStatus(ProductScheduleStatus.Active)
+        .saveMe()
+    insertedProductsUpdateSchedule.schedule.firstBox(true).saveMe()
+    val expectedProductsIds = insertedProductsUpdateSchedule.products.map(_.id.get)
+
+    val job = new SubscriptionBoxProductsUpdateJob
+    job.executeFirstBoxSchedule(
+      insertedProductsUpdateSchedule.schedule.some,
+      insertedPreviousSchedule.some
+    )
+
+    val firstBoxProductsIds = ProductSchedule.getFirstBoxProducts.map(_.id.get)
+    firstBoxProductsIds should contain theSameElementsAs expectedProductsIds
   }
 
   private def getProducts(in: InsertedPetsUserSubAndShipment): List[Product] =
