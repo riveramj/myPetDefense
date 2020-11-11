@@ -57,13 +57,13 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
     schedule.reload
   }
 
-  def getFirstBoxProducts: Box[List[Product]] = {
+  def getFirstBoxProducts: Iterable[Product] = {
     ProductSchedule
       .find(
         By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
         By(ProductSchedule.firstBox, true)
       )
-      .map(_.scheduledItems.toList.flatMap(_.product.obj))
+      .flatMap(_.scheduledItems.toList.flatMap(_.product.obj))
   }
 }
 
