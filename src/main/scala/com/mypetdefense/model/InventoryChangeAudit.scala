@@ -29,7 +29,11 @@ class InventoryChangeAudit
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object InventoryChangeAudit
+    extends InventoryChangeAudit
+    with LongKeyedMetaMapper[InventoryChangeAudit] {
   def newChangeAudit(
       inventoryItem: InventoryItem,
       originalItemNumber: String = "",
@@ -55,7 +59,3 @@ class InventoryChangeAudit
       .saveMe
   }
 }
-
-object InventoryChangeAudit
-    extends InventoryChangeAudit
-    with LongKeyedMetaMapper[InventoryChangeAudit]

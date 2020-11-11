@@ -39,8 +39,6 @@ class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Lo
   object deliveryNotes  extends MappedString(this, 100)
 
   def name: String = this.firstName.get + " " + this.lastName.get
-
-  def refresh: Box[TreatOrder] = TreatOrder.find(By(TreatOrder.treatOrderId, treatOrderId.get))
 }
 
 object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {

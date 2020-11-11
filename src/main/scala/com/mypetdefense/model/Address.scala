@@ -30,6 +30,17 @@ class Address extends LongKeyedMapper[Address] with IdPK {
     override def defaultValue = new Date()
   }
 
+  def cancel: Address = {
+    this
+      .street1("")
+      .street2("")
+      .zip("")
+      .status(Status.Cancelled)
+      .saveMe
+  }
+}
+
+object Address extends Address with LongKeyedMetaMapper[Address] {
   def createNewAddress(
       user: Box[User],
       street1: String,
@@ -63,18 +74,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
       .addressType(AddressType.Shipping)
       .saveMe
   }
-
-  def cancel: Address = {
-    this
-      .street1("")
-      .street2("")
-      .zip("")
-      .status(Status.Cancelled)
-      .saveMe
-  }
 }
-
-object Address extends Address with LongKeyedMetaMapper[Address]
 
 object AddressType extends Enumeration {
   val Shipping, Billing = Value

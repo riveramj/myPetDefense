@@ -43,14 +43,14 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
     override def defaultValue = new Date()
   }
 
-  def refresh: Box[Shipment] = Shipment.find(By(Shipment.shipmentId, shipmentId.get))
-
   def getProcessDateOfShipment: LocalDate =
     this.dateProcessed.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
 
   def getMailedDateOfShipment: Box[LocalDate] =
     tryo(this.dateShipped.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+}
 
+object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
   def findMtdShipments: List[Shipment] = {
     Shipment.findAll(
       By_>=(Shipment.createdAt, monthDayOne)
@@ -62,9 +62,7 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
       By_>=(Shipment.dateProcessed, nowDate)
     )
   }
-}
 
-object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
   def createShipment(
       user: User,
       subscription: Subscription,

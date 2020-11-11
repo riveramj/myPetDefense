@@ -1,13 +1,9 @@
 package com.mypetdefense.generator
 
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisMonth}
-import com.mypetdefense.model.Price.{
-  currentPetland6MonthPaymentCode,
-  currentPetlandMonthlyCode,
-  currentTppPriceCode,
-  defaultPriceCode
-}
-import com.mypetdefense.model.{AnimalSize, AnimalType, Pet, ShipmentStatus, UserType}
+import com.mypetdefense.helpers.Random.generateMoneyString
+import com.mypetdefense.model.Price._
+import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
 import me.frmr.stripe.{CardList, Customer}
 import net.liftweb.common.{Box, Empty}
@@ -72,6 +68,13 @@ object Generator {
       currentPetland6MonthPaymentCode
     )
 
+  def genInsertData: Gen[InsertGenData] =
+    for {
+      name       <- genAlphaStr
+      itemNumber <- Gen.posNum[Int]
+      weight = generateMoneyString.toDouble
+    } yield InsertGenData(name, itemNumber, weight)
+
   def genSubscriptionToCreate: Gen[SubscriptionCreateGeneratedData] =
     for {
       stripeSubscriptionId <- genNonEmptyStr
@@ -131,6 +134,15 @@ object Generator {
       password  <- genNonEmptyStr
       address   <- generateNewUserAddress
     } yield NewUserData(email, firstName, lastName, password, address, Empty)
+
+  def generateAddress: Gen[AddressGeneratedData] =
+    for {
+      street1 <- genNonEmptyStr
+      street2 <- genNonEmptyStr
+      city    <- genNonEmptyStr
+      state = "GA"
+      zip   = "30312"
+    } yield AddressGeneratedData(street1, street2, city, state, zip, AddressType.Shipping)
 
   def generateDogOfSupportedSize: Gen[AnimalSize.Value] =
     Gen.oneOf(
@@ -192,10 +204,12 @@ object Generator {
       shipment <- Gen.listOfN(MAX_LENGTH_OF_GENERATED_TRAVERSABLES, genShipmentToCreate)
     } yield ShipmentChainData(user, sub, shipment)
 
-  def genPetAndShipmentChainData: Gen[PetsAndShipmentChainData] =
+  def genPetAndShipmentChainData(
+      petsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[PetsAndShipmentChainData] =
     for {
       shipmentChainData <- genShipmentChainData
-      pets              <- Gen.listOfN(MAX_LENGTH_OF_GENERATED_TRAVERSABLES, genPetData)
+      pets              <- Gen.listOfN(petsSize, genPetData)
     } yield PetsAndShipmentChainData(
       shipmentChainData.user,
       shipmentChainData.subscriptionCreateGeneratedData,
@@ -223,6 +237,11 @@ object Generator {
   def listOfNSimplePetsGen(length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES): Gen[List[Pet]] =
     Gen.listOfN(length, generateSimplePet)
 
+  def listOfNInsertDataGen(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[InsertGenData]] =
+    Gen.listOfN(length, genInsertData)
+
   def stripeCustomer(seed: Long = 42L): Customer =
     generateStripeCustomer.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
@@ -238,6 +257,38 @@ object Generator {
   def statusLabelCreatedOrPaid(seed: Long = 42L): ShipmentStatus.Value =
     genStatusLabelCreatedOrPaid.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
+  def mapWithNOfUserNSubscription(
+      seed: Long = 42L,
+      mapSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData] =
+    mapWithNOfUserNSubscriptionGen(mapSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def listOfNShipmentChainData(
+      seed: Long = 42L,
+      listSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): List[ShipmentChainData] =
+    listOfNShipmentChainDataGen(listSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def shipmentChainData(
+      seed: Long = 42L
+  ): ShipmentChainData =
+    genShipmentChainData.pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def petsAndShipmentChainDataGen(
+      seed: Long = 42L,
+      petsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): PetsAndShipmentChainData =
+    genPetAndShipmentChainData(petsSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def address(seed: Long = 42L): AddressGeneratedData =
+    generateAddress.pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def insertData(
+      seed: Long = 42L,
+      listSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): List[InsertGenData] =
+    listOfNInsertDataGen(listSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
+
   def listOfNShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[ShipmentChainData]] =
@@ -246,7 +297,7 @@ object Generator {
   def listOfNPetsAndShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[PetsAndShipmentChainData]] =
-    Gen.listOfN(length, genPetAndShipmentChainData)
+    Gen.listOfN(length, genPetAndShipmentChainData())
 
   def listOfSubscriptionToCreateGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES

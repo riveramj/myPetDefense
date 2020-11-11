@@ -24,7 +24,7 @@ object UpgradeAccount extends Loggable {
 class UpgradeAccount extends Loggable {
   def render: NodeSeq => NodeSeq = {
     val userSubscription =
-      SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
+      SecurityContext.currentUser.flatMap(_.subscription.obj).map(_.reload)
 
     val updatedSubscription = userSubscription.map(_.promptedUpgrade(true).saveMe())
 
@@ -39,7 +39,7 @@ class UpgradeAccount extends Loggable {
       val boxes = updatedSubscription.map(_.subscriptionBoxes.toList).openOr(Nil)
 
       boxes.map(SubscriptionItem.createFirstBox)
-      val updatedBoxes = boxes.flatMap(_.refresh)
+      val updatedBoxes = boxes.map(_.reload)
 
       val cost = updatedBoxes.map(SubscriptionBox.possiblePrice).sum
 

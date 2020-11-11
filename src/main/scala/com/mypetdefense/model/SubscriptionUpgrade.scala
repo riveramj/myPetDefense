@@ -24,7 +24,11 @@ class SubscriptionUpgrade extends LongKeyedMapper[SubscriptionUpgrade] with IdPK
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
+object SubscriptionUpgrade
+    extends SubscriptionUpgrade
+    with LongKeyedMetaMapper[SubscriptionUpgrade] {
   def createSubscriptionUpgrade(
       subscription: Subscription,
       subscriptionBox: SubscriptionBox,
@@ -39,5 +43,3 @@ class SubscriptionUpgrade extends LongKeyedMapper[SubscriptionUpgrade] with IdPK
       .saveMe
   }
 }
-
-object SubscriptionUpgrade extends SubscriptionUpgrade with LongKeyedMetaMapper[SubscriptionUpgrade]

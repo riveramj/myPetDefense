@@ -62,8 +62,6 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
 
   def activePets: mutable.Buffer[Pet] = pets.filter(_.status.get == Status.Active)
 
-  def refresh: Box[User] = User.find(By(User.userId, userId.get))
-
   def petlandData_? : Boolean = tryo(canSeePetlandData.get).openOr(false)
 
   def shippingAddress: Box[Address] = {
@@ -73,6 +71,63 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     )
   }
 
+  def nameAndEmail = s"${this.name} <${this.email}>"
+
+  def cancel: User = {
+    val shipAddress = this.addresses.toList.find(_.addressType.get == AddressType.Shipping)
+
+    val address = shipAddress.map { ship =>
+      s"""${ship.street1}
+      |${ship.street2}
+      |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
+    }.getOrElse("")
+
+    CancelledUser.createNewCancelledUser(
+      this.firstName.get,
+      this.lastName.get,
+      this.email.get,
+      address,
+      this.userId.get
+    )
+
+    this
+      .firstName("")
+      .lastName("")
+      .email("")
+      .password("")
+      .salt("")
+      .phone("")
+      .accessKey("")
+      .resetPasswordKey("")
+      .productSalesKey("")
+      .facebookId("")
+      .status(Status.Cancelled)
+      .saveMe
+  }
+
+  def getTaxRate: Double = {
+    val shippingAddress = this.shippingAddress
+
+    tryo(
+      TaxJarService.calculateTaxRate(
+        shippingAddress.map(_.city.get).openOr(""),
+        shippingAddress.map(_.state.get).openOr(""),
+        shippingAddress.map(_.zip.get).openOr("")
+      )
+    ).openOr(0d)
+  }
+
+  def setTaxRate: User = {
+    val rate = getTaxRate
+
+    this.taxRate(rate).saveMe
+  }
+
+  def getCreatedDateOfUser: LocalDate =
+    this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+}
+
+object User extends User with LongKeyedMetaMapper[User] {
   def upsertUser(
       firstName: String,
       lastName: String,
@@ -218,61 +273,6 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     user.password.get == hashPassword(password, user.salt.get)
   }
 
-  def nameAndEmail = s"${this.name} <${this.email}>"
-
-  def cancel: User = {
-    val shipAddress = this.addresses.toList.find(_.addressType.get == AddressType.Shipping)
-
-    val address = shipAddress.map { ship =>
-      s"""${ship.street1}
-      |${ship.street2}
-      |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
-    }.getOrElse("")
-
-    CancelledUser.createNewCancelledUser(
-      this.firstName.get,
-      this.lastName.get,
-      this.email.get,
-      address,
-      this.userId.get
-    )
-
-    this
-      .firstName("")
-      .lastName("")
-      .email("")
-      .password("")
-      .salt("")
-      .phone("")
-      .accessKey("")
-      .resetPasswordKey("")
-      .productSalesKey("")
-      .facebookId("")
-      .status(Status.Cancelled)
-      .saveMe
-  }
-
-  def getTaxRate: Double = {
-    val shippingAddress = this.shippingAddress
-
-    tryo(
-      TaxJarService.calculateTaxRate(
-        shippingAddress.map(_.city.get).openOr(""),
-        shippingAddress.map(_.state.get).openOr(""),
-        shippingAddress.map(_.zip.get).openOr("")
-      )
-    ).openOr(0d)
-  }
-
-  def setTaxRate: User = {
-    val rate = getTaxRate
-
-    this.taxRate(rate).saveMe
-  }
-
-  def getCreatedDateOfUser: LocalDate =
-    this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
-
   def findYesterdayNewSales: List[User] = {
     User.findAll(
       By_>=(User.createdAt, yesterdayStart),
@@ -283,8 +283,6 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def notCancelledWithoutSubscription: List[User] =
     User.findAll(NotBy(User.status, Status.Cancelled), NullRef(User.subscription))
 }
-
-object User extends User with LongKeyedMetaMapper[User]
 
 object UserType extends Enumeration {
   val Agent, Parent, Admin = Value
