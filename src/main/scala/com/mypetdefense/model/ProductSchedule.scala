@@ -69,11 +69,6 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
         By(ProductSchedule.firstBox, true)
       )
 
-  def completeActiveSchedule(): Unit =
-    ProductSchedule
-      .find(By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active))
-      .foreach(_.scheduleStatus(ProductScheduleStatus.Completed).saveMe())
-
   def createNew(
       startDate: Date,
       products: List[Product],
