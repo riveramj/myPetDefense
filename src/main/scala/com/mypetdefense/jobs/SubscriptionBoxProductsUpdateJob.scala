@@ -1,6 +1,7 @@
 package com.mypetdefense.jobs
 
 import com.mypetdefense.model._
+import com.mypetdefense.util.DateHelper.DateOps
 import org.quartz._
 
 class SubscriptionBoxProductsUpdateJob extends ManagedJob {
@@ -22,12 +23,12 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
       actualRegularSchedule: Option[ProductSchedule]
   ): Unit =
     nextRegularSchedule
-      .map(executeRegularSchedule)
+      .map(executeRegularSchedule(_, onlyForYesterdayUsers = false))
       .flatMap { nextSchedule =>
         nextSchedule.makeActive
         actualRegularSchedule.map(_.complete)
       }
-      .orElse(actualRegularSchedule.map(executeRegularSchedule))
+      .orElse(actualRegularSchedule.map(executeRegularSchedule(_, onlyForYesterdayUsers = true)))
 
   def executeFirstBoxSchedule(
       nextFirstBoxSchedule: Option[ProductSchedule],
@@ -38,11 +39,19 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
       actualFirstBoxSchedule.foreach(_.complete)
     }
 
-  private def executeRegularSchedule(schedule: ProductSchedule): ProductSchedule = {
-    val scheduleItems = schedule.scheduledItems.toList
-    val newProducts   = scheduleItems.flatMap(_.product.toList)
-    val boxes         = SubscriptionBox.getAllUnmodifiedByUser
-    boxes.foreach { box =>
+  private def executeRegularSchedule(
+      schedule: ProductSchedule,
+      onlyForYesterdayUsers: Boolean
+  ): ProductSchedule = {
+    val scheduleItems   = schedule.scheduledItems.toList
+    val newProducts     = scheduleItems.flatMap(_.product.toList)
+    val unmodifiedBoxes = SubscriptionBox.getAllUnmodifiedByUser
+    val boxesToUpdate =
+      if (onlyForYesterdayUsers)
+        unmodifiedBoxes.filter(_.subscription.obj.exists(_.createdAt.get.isYesterday))
+      else
+        unmodifiedBoxes
+    boxesToUpdate.foreach { box =>
       box.subscriptionItems.toList.foreach(_.delete_!)
       newProducts.map(SubscriptionItem.createSubscriptionItem(_, box))
     }

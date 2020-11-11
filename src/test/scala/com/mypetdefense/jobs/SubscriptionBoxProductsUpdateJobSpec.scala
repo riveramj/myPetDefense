@@ -6,6 +6,7 @@ import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.db.ProductDbUtils.createNewProduct
 import com.mypetdefense.model._
 import cats.syntax.option._
+import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayExceptYesterday, yesterday}
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
@@ -80,11 +81,58 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
     firstBoxProductsIds should contain theSameElementsAs expectedProductsIds
   }
 
+  it should "run previous job only for yesterdays subs" in {
+    val mpdAndPld                      = createPetlandAndMPDAgencies()
+    val someGeneratedProduct           = product()
+    val someOldInsertedProduct         = createNewProduct(someGeneratedProduct)
+    val scheduleGeneratedData          = productUpdateSchedule(productsSize = 3)
+    val insertedProductsUpdateSchedule = insertProductScheduleGeneratedData(scheduleGeneratedData)
+    val userAndPetShouldBeAffected     = petsAndShipmentChainDataGen()
+    val userAndPetShouldNotBeAffected  = petsAndShipmentChainDataGen()
+    val shouldBeAffectedData =
+      insertPetAndShipmentsChainAtAgency(
+        userAndPetShouldBeAffected,
+        mpdAndPld.mpd,
+        subUpgraded = false
+      )
+    val shouldNotBeAffectedData =
+      insertPetAndShipmentsChainAtAgency(
+        userAndPetShouldNotBeAffected,
+        mpdAndPld.mpd,
+        subUpgraded = false
+      )
+    shouldBeAffectedData.subscription.createdAt(yesterday.toDate).saveMe()
+    shouldNotBeAffectedData.subscription.createdAt(anyDayExceptYesterday.toDate).saveMe()
+    insertProductToToSubBoxes(shouldBeAffectedData.subscription, someOldInsertedProduct)
+    insertProductToToSubBoxes(shouldNotBeAffectedData.subscription, someOldInsertedProduct)
+
+    val job = new SubscriptionBoxProductsUpdateJob
+    job.executeNextOrActiveRegularSchedule(
+      none,
+      insertedProductsUpdateSchedule.schedule.some
+    )
+
+    val allSubsItems                 = SubscriptionItem.findAll
+    val shouldBeNewProductsIds       = getProducts(shouldBeAffectedData).map(_.id.get)
+    val shouldBeOldProductsIds       = getProducts(shouldNotBeAffectedData).map(_.id.get)
+    val productsInSubsBoxesUpdateIds = insertedProductsUpdateSchedule.products.map(_.id.get)
+    val schedulers                   = ProductSchedule.findAll()
+
+    allSubsItems.size shouldBe (shouldBeNewProductsIds.size + shouldBeOldProductsIds.size)
+    schedulers.size shouldBe 1
+    schedulers.head.scheduleStatus.get shouldBe ProductScheduleStatus.Active
+    shouldBeNewProductsIds.toSet should contain theSameElementsAs productsInSubsBoxesUpdateIds
+  }
+
   private def getProducts(in: InsertedPetsUserSubAndShipment): List[Product] =
     in.subscription.subscriptionBoxes
       .map(_.reload)
       .flatMap(_.subscriptionItems.toList)
       .flatMap(_.product.toList)
       .toList
+
+  private def insertProductToToSubBoxes(subscription: Subscription, product: Product): Unit =
+    subscription.subscriptionBoxes.toList
+      .foreach(SubscriptionItem.createSubscriptionItem(product, _))
 
 }
