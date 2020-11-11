@@ -1,8 +1,8 @@
 [Database]
 db.driver=org.postgresql.Driver
-db.url=jdbc:postgresql:mypetdefense
-db.user=mypetdefense
-db.password=mypetdefense
+db.url=jdbc:postgresql:mpdtest
+db.user=mpdtest
+db.password=mpdtest
 
 [Postmark]
 mail.smtp.host=localhost
