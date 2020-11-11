@@ -34,7 +34,7 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
       .map(SubscriptionItem.createSubscriptionItem(someOldInsertedProduct, _))
 
     val job = new SubscriptionBoxProductsUpdateJob
-    job.updateSubscriptionBoxes(insertedProductsUpdateSchedule.schedule)
+    job.executeSchedule(insertedProductsUpdateSchedule.schedule)
     val productsInSubsBoxesUpdateIds = insertedProductsUpdateSchedule.products.map(_.id.get)
 
     val allSubsItems           = SubscriptionItem.findAll

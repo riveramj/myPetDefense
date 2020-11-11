@@ -2,7 +2,7 @@ package com.mypetdefense.model
 
 import java.util.Date
 
-import com.mypetdefense.util.DateHelper.nowDate
+import com.mypetdefense.util.DateHelper.tomorrowStart
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.Box
 import net.liftweb.mapper._
@@ -37,10 +37,15 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
   def getNextSchedule: Option[ProductSchedule] =
     ProductSchedule
       .findAll(
-        By_<=(ProductSchedule.startDate, nowDate),
+        By_<(ProductSchedule.startDate, tomorrowStart),
         By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Scheduled)
       )
       .headOption
+
+  def completeActiveSchedule(): Unit =
+    ProductSchedule
+      .find(By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active))
+      .foreach(_.scheduleStatus(ProductScheduleStatus.Completed).saveMe())
 
   def createNew(
       startDate: Date,

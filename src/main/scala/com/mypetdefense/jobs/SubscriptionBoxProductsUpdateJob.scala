@@ -9,10 +9,10 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
 
   def tryToUpdateBoxes(): Unit = {
     val schedule = ProductSchedule.getNextSchedule
-    schedule.foreach(updateSubscriptionBoxes)
+    schedule.foreach(executeSchedule)
   }
 
-  def updateSubscriptionBoxes(schedule: ProductSchedule): Unit = {
+  def executeSchedule(schedule: ProductSchedule): Unit = {
     val scheduleItems = schedule.scheduledItems.toList
     val newProducts   = scheduleItems.flatMap(_.product.toList)
     val boxes         = SubscriptionBox.getAllUnmodifiedByUser
@@ -20,7 +20,8 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
       box.subscriptionItems.toList.foreach(_.delete_!)
       newProducts.map(SubscriptionItem.createSubscriptionItem(_, box))
     }
-    schedule.scheduleStatus(ProductScheduleStatus.Completed).saveMe()
+    ProductSchedule.completeActiveSchedule()
+    schedule.scheduleStatus(ProductScheduleStatus.Active).saveMe()
   }
 
 }
