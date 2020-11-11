@@ -23,7 +23,9 @@ class ProductSchedule
   object scheduledItems
       extends MappedOneToMany(ProductScheduleItem, ProductScheduleItem.productSchedule)
 
-  object firstBox extends MappedBoolean(this)
+  object firstBox extends MappedBoolean(this) {
+    override def defaultValue: Boolean = false
+  }
 
   object startDate extends MappedDateTime(this)
 
@@ -31,16 +33,41 @@ class ProductSchedule
     override def defaultValue = new Date()
   }
 
+  def complete: ProductSchedule = this.scheduleStatus(ProductScheduleStatus.Completed).saveMe()
+
+  def makeActive: ProductSchedule = this.scheduleStatus(ProductScheduleStatus.Active).saveMe()
+
 }
 
 object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductSchedule] {
-  def getNextSchedule: Option[ProductSchedule] =
+  def getNextRegularSchedule: Option[ProductSchedule] =
     ProductSchedule
-      .findAll(
+      .find(
         By_<(ProductSchedule.startDate, tomorrowStart),
-        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Scheduled)
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Scheduled),
+        By(ProductSchedule.firstBox, false)
       )
-      .headOption
+
+  def getActiveRegularSchedule: Option[ProductSchedule] =
+    ProductSchedule.find(
+      By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
+      By(ProductSchedule.firstBox, false)
+    )
+
+  def getNextScheduleForFirstBox: Option[ProductSchedule] =
+    ProductSchedule
+      .find(
+        By_<(ProductSchedule.startDate, tomorrowStart),
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Scheduled),
+        By(ProductSchedule.firstBox, true)
+      )
+
+  def getActiveScheduleForFirstBox: Option[ProductSchedule] =
+    ProductSchedule
+      .find(
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
+        By(ProductSchedule.firstBox, true)
+      )
 
   def completeActiveSchedule(): Unit =
     ProductSchedule
@@ -57,12 +84,13 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
     schedule.reload
   }
 
-  def getFirstBoxProducts: Iterable[Product] = {
+  def getFirstBoxProducts: List[Product] = {
     ProductSchedule
       .find(
         By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
         By(ProductSchedule.firstBox, true)
       )
+      .toList
       .flatMap(_.scheduledItems.toList.flatMap(_.product.obj))
   }
 }

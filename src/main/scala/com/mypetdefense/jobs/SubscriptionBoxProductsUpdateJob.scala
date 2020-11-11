@@ -8,11 +8,37 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
   override def execute(context: JobExecutionContext): Unit = tryToUpdateBoxes()
 
   def tryToUpdateBoxes(): Unit = {
-    val schedule = ProductSchedule.getNextSchedule
-    schedule.foreach(executeSchedule)
+    val nextRegularSchedule    = ProductSchedule.getNextRegularSchedule
+    val actualRegularSchedule  = ProductSchedule.getActiveRegularSchedule
+    val nextFirstBoxSchedule   = ProductSchedule.getNextScheduleForFirstBox
+    val actualFirstBoxSchedule = ProductSchedule.getActiveScheduleForFirstBox
+
+    executeNextOrActiveRegularSchedule(nextRegularSchedule, actualRegularSchedule)
+    executeFirstBoxSchedule(nextFirstBoxSchedule, actualFirstBoxSchedule)
   }
 
-  def executeSchedule(schedule: ProductSchedule): Unit = {
+  def executeNextOrActiveRegularSchedule(
+      nextRegularSchedule: Option[ProductSchedule],
+      actualRegularSchedule: Option[ProductSchedule]
+  ): Unit =
+    nextRegularSchedule
+      .map(executeRegularSchedule)
+      .flatMap { nextSchedule =>
+        nextSchedule.makeActive
+        actualRegularSchedule.map(_.complete)
+      }
+      .orElse(actualRegularSchedule.map(executeRegularSchedule))
+
+  def executeFirstBoxSchedule(
+      nextFirstBoxSchedule: Option[ProductSchedule],
+      actualFirstBoxSchedule: Option[ProductSchedule]
+  ): Unit =
+    nextFirstBoxSchedule.foreach { nextSchedule =>
+      nextSchedule.makeActive
+      actualFirstBoxSchedule.foreach(_.complete)
+    }
+
+  private def executeRegularSchedule(schedule: ProductSchedule): ProductSchedule = {
     val scheduleItems = schedule.scheduledItems.toList
     val newProducts   = scheduleItems.flatMap(_.product.toList)
     val boxes         = SubscriptionBox.getAllUnmodifiedByUser
@@ -20,8 +46,7 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
       box.subscriptionItems.toList.foreach(_.delete_!)
       newProducts.map(SubscriptionItem.createSubscriptionItem(_, box))
     }
-    ProductSchedule.completeActiveSchedule()
-    schedule.scheduleStatus(ProductScheduleStatus.Active).saveMe()
+    schedule
   }
 
 }

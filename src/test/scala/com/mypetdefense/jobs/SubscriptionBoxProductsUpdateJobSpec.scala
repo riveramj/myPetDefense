@@ -5,6 +5,7 @@ import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.db.ProductDbUtils.createNewProduct
 import com.mypetdefense.model._
+import cats.syntax.option._
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
@@ -34,7 +35,7 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
       .map(SubscriptionItem.createSubscriptionItem(someOldInsertedProduct, _))
 
     val job = new SubscriptionBoxProductsUpdateJob
-    job.executeSchedule(insertedProductsUpdateSchedule.schedule)
+    job.executeNextOrActiveRegularSchedule(insertedProductsUpdateSchedule.schedule.some, None)
     val productsInSubsBoxesUpdateIds = insertedProductsUpdateSchedule.products.map(_.id.get)
 
     val allSubsItems           = SubscriptionItem.findAll
