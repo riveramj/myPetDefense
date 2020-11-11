@@ -50,7 +50,7 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
 
   private def getProducts(in: InsertedPetsUserSubAndShipment): List[Product] =
     in.subscription.subscriptionBoxes
-      .flatMap(_.refresh)
+      .map(_.reload)
       .flatMap(_.subscriptionItems.toList)
       .flatMap(_.product.toList)
       .toList
