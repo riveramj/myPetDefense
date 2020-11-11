@@ -108,7 +108,7 @@ class Checkout extends Loggable {
       newUserData,
       customer
     )
-    userWithSubscription.flatMap(_.refresh).map(SecurityContext.logIn)
+    userWithSubscription.map(_.reload).map(SecurityContext.logIn)
     updateSessionVars()
     S.redirectTo(Success.menu.loc.calcDefaultHref)
   }

@@ -46,9 +46,6 @@ class Subscription
   object subscriptionBoxes   extends MappedOneToMany(SubscriptionBox, SubscriptionBox.subscription)
   object tags                extends MappedOneToMany(TaggedItem, TaggedItem.subscription)
 
-  def refresh: Box[Subscription] =
-    Subscription.find(By(Subscription.subscriptionId, subscriptionId.get))
-
   def getPets: Seq[Pet] = user.obj.map(_.activePets).openOr(Nil)
 
   def cancel: Subscription = {
@@ -60,27 +57,6 @@ class Subscription
 
   def getPetAndProducts: mutable.Buffer[(Box[Pet], Box[FleaTick])] = this.subscriptionBoxes.map {
     box => (box.pet.obj, box.fleaTick.obj)
-  }
-
-  def createNewSubscription(
-      user: Box[User],
-      stripeSubscriptionId: String,
-      startDate: Date,
-      nextShipDate: Date,
-      priceCode: String = Price.defaultPriceCode,
-      isUpgraded: Boolean = false,
-      contractLength: Int = 0
-  ): Subscription = {
-    Subscription.create
-      .subscriptionId(generateLongId)
-      .user(user)
-      .stripeSubscriptionId(stripeSubscriptionId)
-      .startDate(startDate)
-      .nextShipDate(nextShipDate)
-      .priceCode(priceCode)
-      .isUpgraded(isUpgraded)
-      .contractLength(contractLength)
-      .saveMe
   }
 
   def getMonthlyCost: Double = {
@@ -111,6 +87,30 @@ class Subscription
 
   def getNextShipDate: LocalDate =
     this.nextShipDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+
+}
+
+object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] {
+  def createNewSubscription(
+      user: Box[User],
+      stripeSubscriptionId: String,
+      startDate: Date,
+      nextShipDate: Date,
+      priceCode: String = Price.defaultPriceCode,
+      isUpgraded: Boolean = false,
+      contractLength: Int = 0
+  ): Subscription = {
+    Subscription.create
+      .subscriptionId(generateLongId)
+      .user(user)
+      .stripeSubscriptionId(stripeSubscriptionId)
+      .startDate(startDate)
+      .nextShipDate(nextShipDate)
+      .priceCode(priceCode)
+      .isUpgraded(isUpgraded)
+      .contractLength(contractLength)
+      .saveMe
+  }
 
   def findNewYTDSubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
@@ -212,10 +212,7 @@ class Subscription
 
   def notCancelledWithoutUser: List[Subscription] =
     Subscription.findAll(NotBy(Subscription.status, Status.Cancelled), NullRef(Subscription.user))
-
 }
-
-object Subscription extends Subscription with LongKeyedMetaMapper[Subscription]
 
 object Status extends Enumeration {
   val Active, Inactive, UserSuspended, BillingSuspended, Cancelled, Paused = Value

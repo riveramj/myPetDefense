@@ -36,6 +36,10 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
   def zoGuardLargeDog: Box[FleaTick]  = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeZo))
   def zoGuardXLargeDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogXLargeZo))
 
+  def isZoGuard_? : Boolean = this.name.get.toLowerCase.contains("zoguard")
+}
+
+object FleaTick extends FleaTick with LongKeyedMetaMapper[FleaTick] {
   def createFleaTick(
       name: String,
       animalType: AnimalType.Value,
@@ -55,8 +59,4 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
       .sku(sku)
       .saveMe
   }
-
-  def isZoGuard_? : Boolean = this.name.get.toLowerCase.contains("zoguard")
 }
-
-object FleaTick extends FleaTick with LongKeyedMetaMapper[FleaTick]

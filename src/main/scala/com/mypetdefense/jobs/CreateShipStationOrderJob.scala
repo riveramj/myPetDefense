@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.mypetdefense.model._
-import com.mypetdefense.service.ShipStationService
+import com.mypetdefense.service._
 import dispatch.Defaults._
 import net.liftweb.common._
 import net.liftweb.mapper._
@@ -12,9 +12,11 @@ import org.quartz._
 
 import scala.util.{Failure => TryFail, Success => TrySuccess}
 
-class CreateShipStationOrderJob extends ManagedJob {
-  def execute(context: JobExecutionContext): Unit = executeOp(context) {
+trait CreateShipStationOrderJobTrait extends ManagedJob {
 
+  val shipStationService: ShipStationServiceTrait
+
+  def createShipStationOrders(): Unit = {
     def sameDateComparison(date1: Date, date2: Date) = {
       val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
@@ -43,15 +45,15 @@ class CreateShipStationOrderJob extends ManagedJob {
       println("======================  start" + thisRun)
       count = count + 1
       val shipStationOrder =
-        ShipStationService.createShipStationOrder(shipment, user, subscription, thisRun)
+        shipStationService.createShipStationOrder(shipment, user, subscription, thisRun)
 
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>
           println("======================  below success" + thisRun)
-          shipment.refresh.map(
-            _.shipStationOrderId(order.orderId).shipmentStatus(ShipmentStatus.LabelCreated).saveMe
-          )
-
+          shipment.reload
+            .shipStationOrderId(order.orderId)
+            .shipmentStatus(ShipmentStatus.LabelCreated)
+            .saveMe
         /*
           if (!sameDateComparison(
             new Date(),
@@ -87,6 +89,11 @@ class CreateShipStationOrderJob extends ManagedJob {
       }
     }
   }
+}
+
+class CreateShipStationOrderJob extends CreateShipStationOrderJobTrait {
+  override val shipStationService: ShipStationServiceTrait = ShipStationService
+  def execute(context: JobExecutionContext): Unit          = executeOp(context)(createShipStationOrders())
 }
 
 object HalfHourCreateOrderJob extends TriggeredJob {

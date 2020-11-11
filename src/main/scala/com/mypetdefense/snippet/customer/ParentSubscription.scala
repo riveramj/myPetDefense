@@ -147,7 +147,7 @@ class ParentSubscription extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     val userSubscription =
-      SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
+      SecurityContext.currentUser.flatMap(_.subscription.obj).map(_.reload)
 
     SHtml.makeFormsAjax andThen
       ".subscription a [class+]" #> "current" &
@@ -162,7 +162,7 @@ class ParentSubscription extends Loggable {
 
   def manage: NodeSeq => NodeSeq = {
     val userSubscription =
-      SecurityContext.currentUser.flatMap(_.subscription.obj).flatMap(_.refresh)
+      SecurityContext.currentUser.flatMap(_.subscription.obj).map(_.reload)
 
     var cancelAccount = false
     var pauseAccount  = false
@@ -238,7 +238,7 @@ class ParentSubscription extends Loggable {
     )
 
     def confirmResume() = {
-      val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+      val subscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
 
       val newShipDate = dateFormat.format(nextShipDate)
       val updatedShipDateSubscription =
@@ -263,7 +263,7 @@ class ParentSubscription extends Loggable {
   }
 
   def successfulResume: CssBindFunc = {
-    val subscription        = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+    val subscription        = ParentSubscription.currentUserSubscription.is.map(_.reload)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
     var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
@@ -278,7 +278,7 @@ class ParentSubscription extends Loggable {
     val nextShipDate = ParentSubscription.confirmPauseMenu.currentValue.openOr("")
 
     def confirmPause() = {
-      val subscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+      val subscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
 
       val newShipDate = dateFormat.parse(nextShipDate)
       val updatedShipDateSubscription = subscription.flatMap { sub =>
@@ -308,7 +308,7 @@ class ParentSubscription extends Loggable {
   }
 
   def successfulPause: CssBindFunc = {
-    val subscription        = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+    val subscription        = ParentSubscription.currentUserSubscription.is.map(_.reload)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
     var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
@@ -328,7 +328,7 @@ class ParentSubscription extends Loggable {
   }
 
   def survey: NodeSeq => NodeSeq = {
-    val updatedSubscription = ParentSubscription.currentUserSubscription.is.flatMap(_.refresh)
+    val updatedSubscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
 
     var selectedReason     = ""
     var additionalComments = ""

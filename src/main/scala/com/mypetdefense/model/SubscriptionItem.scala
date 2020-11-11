@@ -20,6 +20,9 @@ class SubscriptionItem extends LongKeyedMapper[SubscriptionItem] with IdPK {
     override def defaultValue = new Date()
   }
 
+}
+
+object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[SubscriptionItem] {
   def createSubscriptionItem(
       product: Product,
       subscriptionBox: SubscriptionBox
@@ -45,5 +48,3 @@ class SubscriptionItem extends LongKeyedMapper[SubscriptionItem] with IdPK {
     }
   }
 }
-
-object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[SubscriptionItem]

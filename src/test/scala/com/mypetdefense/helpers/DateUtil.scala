@@ -25,6 +25,8 @@ object DateUtil {
   def anyDayOfThisMonth: ZonedDateTime                 = getAnyDayOfMonth(now)
   def anyDayOfNextMonth: ZonedDateTime                 = getAnyDayOfMonth(now.plusMonths(1))
   def anyDayOfThisYear: ZonedDateTime                  = getAnyDayOfTheYear(now)
+  def anyDayOfNext19Days: ZonedDateTime                = plusRangeDays(now, 1, 19)
+  def anyDayOFromPlus21Days: ZonedDateTime             = getAnyDayOfYearFrom(now.plusDays(21))
   def anyDayUntilLastMonth: ZonedDateTime              = getAnyDayOfTheYearUntil(now.minusMonths(2))
   def anyDayUntilThisMonth: ZonedDateTime              = getAnyDayOfTheYearUntil(now.minusMonths(1))
   def anyDayUntilToday: ZonedDateTime                  = getAnyDayOfTheYearUntil(now.minusDays(1))
@@ -42,7 +44,9 @@ object DateUtil {
     getAnyDayOfYearFrom(now.minusMonths(1).plusDays(1))
   def anyDayOfLastYearThisDay: ZonedDateTime =
     getAnyDayOfTheMonthUntil(now.minusYears(1))
-
+  def validDateForGetCurrentPastDueShipments: ZonedDateTime = minusRangeDays(now.plusDays(1), 1, 20)
+  def validDateForGetPastDueShipments: ZonedDateTime        = minusRangeDays(now, 6, 9)
+  def invalidDateForGetPastDueShipments: ZonedDateTime      = minusRangeDays(now.plusDays(1), 1, 5)
   def anyDayOfLastYearFromThisDayYearAgo: ZonedDateTime =
     getAnyDayOfYearFrom(now.plusDays(1).minusYears(1))
 
@@ -72,6 +76,24 @@ object DateUtil {
       getAnyDayOfTheYearExceptMonth(localDate)
     else
       maybeDay
+  }
+
+  protected def plusRangeDays(
+      localDate: LocalDate,
+      rangeStart: Int,
+      rangeEnd: Int
+  ): ZonedDateTime = {
+    val day = generateIntBetween(rangeStart, rangeEnd)
+    localDate.plusDays(day).atStartOfDay(zoneId)
+  }
+
+  protected def minusRangeDays(
+      localDate: LocalDate,
+      rangeStart: Int,
+      rangeEnd: Int
+  ): ZonedDateTime = {
+    val day = generateIntBetween(rangeStart, rangeEnd)
+    localDate.minusDays(day).atStartOfDay(zoneId)
   }
 
   protected def getAnyDayOfTheMonthUntil(localDate: LocalDate): ZonedDateTime = {

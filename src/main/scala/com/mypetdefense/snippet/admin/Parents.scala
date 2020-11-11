@@ -267,7 +267,7 @@ class Parents extends Loggable {
       detailsRenderer: IdMemoizeTransform,
       oldSubscription: Option[Subscription]
   ): CssBindFunc = {
-    val subscription       = oldSubscription.flatMap(_.refresh)
+    val subscription       = oldSubscription.map(_.reload)
     val subscriptionStatus = subscription.map(_.status.get)
 
     def setSubscriptionStatus(status: Status.Value) = {
@@ -358,7 +358,7 @@ class Parents extends Loggable {
     }
 
     def changeEmail(parent: Box[User], email: String) = {
-      val updatedParent = parent.map(_.refresh).flatten
+      val updatedParent = parent.map(_.reload)
       updatedParent.map(_.email(email).saveMe)
 
       Alert("Email Updated")
@@ -430,10 +430,10 @@ class Parents extends Loggable {
         val currentEmail = parent.map(_.email.get).openOr("")
 
         ".reset-password [onclick]" #> SHtml.ajaxInvoke(() => sendResetPasswordEmail(parent)) &
-        ".change-email" #> {
-        ".parent-email" #> SHtml.ajaxText(currentEmail, email = _) &
-          ".update-email [onclick]" #> SHtml.ajaxInvoke(() => changeEmail(parent, email))
-        }
+          ".change-email" #> {
+            ".parent-email" #> SHtml.ajaxText(currentEmail, email = _) &
+              ".update-email [onclick]" #> SHtml.ajaxInvoke(() => changeEmail(parent, email))
+          }
       } &
       ".parent-information .agent-name-container .agent *" #> agent
   }

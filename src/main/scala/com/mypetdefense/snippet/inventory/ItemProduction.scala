@@ -105,8 +105,8 @@ class ItemProduction extends Loggable {
       val realCreateCount = tryo(buildRecipeItemCount.toInt).openOr(0)
 
       for {
-        staleRecipe   <- buildNewItemRecipe.toList
-        recipe        <- staleRecipe.refresh.toList
+        staleRecipe <- buildNewItemRecipe.toList
+        recipe = staleRecipe.reload
         itemPart      <- recipe.itemParts.toList
         inventoryItem <- itemPart.itemPart.toList
       } yield {
@@ -148,7 +148,7 @@ class ItemProduction extends Loggable {
       detailsRenderer: IdMemoizeTransform,
       finishedItem: InventoryItem
   ): CssSel = {
-    val itemParts = finishedItem.refresh.map(_.itemParts.toList).openOr(Nil)
+    val itemParts = finishedItem.reload.itemParts.toList
 
     ".item-part" #> itemParts
       .sortWith(

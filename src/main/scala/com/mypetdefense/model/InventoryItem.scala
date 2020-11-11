@@ -25,10 +25,9 @@ class InventoryItem
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+}
 
-  def refresh: Box[InventoryItem] =
-    InventoryItem.find(By(InventoryItem.inventoryItemId, inventoryItemId.get))
-
+object InventoryItem extends InventoryItem with LongKeyedMetaMapper[InventoryItem] {
   def createNewInventoryItem(
       itemNumber: String,
       description: String,
@@ -44,8 +43,6 @@ class InventoryItem
       .saveMe
   }
 }
-
-object InventoryItem extends InventoryItem with LongKeyedMetaMapper[InventoryItem]
 
 object UnitOfMeasure extends Enumeration {
   val Each, Carton = Value
