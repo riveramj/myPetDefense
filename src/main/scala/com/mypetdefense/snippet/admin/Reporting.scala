@@ -63,7 +63,7 @@ class Reporting extends Loggable {
         val subscriptions      = users.getSubscriptions
         val cancelsByShipment  = ReportingService.cancelsByShipment(subscriptions)
         val shipments          = ReportingService.getShipments(subscriptions)
-        val averageShipments   = BigDecimal(shipments.size) / BigDecimal(subscriptions.size)
+        val averageShipments   = shipments.size.toDouble / subscriptions.size.toDouble
         val totalCancellations = cancelsByShipment.map(_._2).sum
 
         ".agency-name *" #> agencyName &
