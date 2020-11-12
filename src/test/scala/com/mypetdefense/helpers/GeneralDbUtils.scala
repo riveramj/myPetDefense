@@ -140,4 +140,8 @@ object GeneralDbUtils {
     PetlandAndMPDAgencies(petlandAgency, myPetDefenseAgency)
   }
 
+  def insertProductToToSubBoxes(subscription: Subscription, product: Product): Unit =
+    subscription.subscriptionBoxes.toList
+      .foreach(SubscriptionItem.createSubscriptionItem(product, _))
+
 }
