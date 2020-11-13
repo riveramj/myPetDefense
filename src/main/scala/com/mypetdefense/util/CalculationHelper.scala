@@ -19,10 +19,12 @@ object CalculationHelper {
         map.updated(key, count)
       }
   }
-
-  def calculatePercentageDiff(a: BigDecimal, b: BigDecimal): BigDecimal = {
-    if (b.toInt == 0) -a
-    else ((b - a) / b) * 100
+  /*
+    used formula -> https://www.percentage-change-calculator.com/index.html
+   */
+  def calculatePercentageDiff(startValue: BigDecimal, endValue: BigDecimal): BigDecimal = {
+    if (startValue.toInt == 0) 0
+    else ((endValue - startValue) / startValue) * 100
   }
 
 }
