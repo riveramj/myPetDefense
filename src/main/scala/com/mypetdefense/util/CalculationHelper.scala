@@ -20,4 +20,9 @@ object CalculationHelper {
       }
   }
 
+  def calculatePercentageDiff(a: BigDecimal, b: BigDecimal): BigDecimal = {
+    if (b.toInt == 0) -a
+    else ((b - a) / b) * 100
+  }
+
 }

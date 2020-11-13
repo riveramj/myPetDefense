@@ -3,13 +3,14 @@ package admin
 
 import java.text.NumberFormat
 
+import com.mypetdefense.model.Agency._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.service._
 import net.liftweb.common._
 import net.liftweb.http.LiftResponse
 import net.liftweb.http.SHtml.ajaxInvoke
 import net.liftweb.http.js.JsCmd
-import net.liftweb.mapper.By
 import net.liftweb.sitemap.Loc.EarlyResponse
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
@@ -39,26 +40,11 @@ object ExecutiveDashboard extends Loggable {
 }
 
 class ExecutiveDashboard extends Loggable {
-  val mpdAgency: Box[Agency] = Agency.find(By(Agency.name, "My Pet Defense"))
-  val tppAgency: Box[Agency] = Agency.find(By(Agency.name, "TPP"))
-
   val topLevelAgencies = List(mpdAgency, tppAgency)
 
-  val dollarFormatter: NumberFormat = NumberFormat.getCurrencyInstance
-  val numberFormatter: NumberFormat = NumberFormat.getIntegerInstance
-
-  val mtdShipments: List[Shipment] = Shipment.findMtdShipments
-  val mtdShipmentValue: Double = mtdShipments.flatMap { shipment =>
-    tryo(shipment.amountPaid.get.toDouble)
-  }.foldLeft(0d)(_ + _)
-
-  val todayShipments: List[Shipment] = Shipment.findTodayShipments
-  val todayShipmentsValue: Double = todayShipments.flatMap { shipment =>
-    tryo(shipment.amountPaid.get.toDouble)
-  }.foldLeft(0d)(_ + _)
-
-  val remainingMonthSubscriptions: List[Subscription] =
-    Subscription.findCurrentMonthUpcomingSubscriptions
+  val dollarFormatter: NumberFormat    = NumberFormat.getCurrencyInstance
+  val numberFormatter: NumberFormat    = NumberFormat.getIntegerInstance
+  val report: ExecutiveDashboardReport = ReportingService.executiveDashboardReport
 
   /*
   val remainingMonthValue = {
@@ -73,89 +59,60 @@ class ExecutiveDashboard extends Loggable {
   }.sum
    */
 
+  val todayData: TodayRelatedData            = report.newStartsTodayData
+  val mtdData: MTDData                       = report.newStartsMTDData
+  val ytdData: YTDData                       = report.newStartsYTDData
+  val todayShipmentsData: TodayShipmentsData = report.todayShipmentsData
+  val mtdShipmentsData: MTDShipmentsData     = report.mtdShipmentData
+
   val newStartsToday: List[Subscription] = Subscription.findNewTodaySubscriptions
-  val newStartsTodayLastMonth: List[Subscription] =
-    Subscription.findNewTodaySubscriptionsLastMonth
-  val newStartsTodayLastYear: List[Subscription] =
-    Subscription.findNewTodaySubscriptionsLastYear
-  val newStartsTodayMonthDiff: Int = newStartsToday.size - newStartsTodayLastMonth.size
-  val newStartsTodayYearDiff: Int  = newStartsToday.size - newStartsTodayLastYear.size
 
-  val newStartsMTD: List[Subscription]          = Subscription.findNewMTDSubscriptions
-  val newStartsMTDLastMonth: List[Subscription] = Subscription.findNewMTDSubscriptionsLastMonth
-  val newStartsMTDLastYear: List[Subscription]  = Subscription.findNewMTDSubscriptionsLastYear
-  val newStartsMTDMonthDiff: Int                = newStartsMTD.size - newStartsMTDLastMonth.size
-  val newStartsMTDYearDiff: Int                 = newStartsMTD.size - newStartsMTDLastYear.size
+  val newStartsMTD: List[Subscription] = Subscription.findNewMTDSubscriptions
 
-  val newStartsYTD: List[Subscription]          = Subscription.findNewYTDSubscriptions
-  val newStartsYTDLastMonth: List[Subscription] = Subscription.findNewYTDSubscriptionsLastMonth
-  val newStartsYTDLastYear: List[Subscription]  = Subscription.findNewYTDSubscriptionsLastYear
-  val newStartsYTDMonthDiff: Int                = newStartsYTD.size - newStartsYTDLastMonth.size
-  val newStartsYTDYearDiff: Int                 = newStartsYTD.size - newStartsYTDLastYear.size
+  val newStartsYTD: List[Subscription] = Subscription.findNewYTDSubscriptions
 
-  val totalStarts: Int = newStartsToday.size + newStartsMTD.size + newStartsYTD.size
-
-  def calcPercentage(numerator: Int, denominator: Int): Int =
-    ((numerator / denominator.toDouble) * 100).round.toInt
-
-  def calcStartPercentage(starts: Int): Int = calcPercentage(starts, totalStarts)
-
-  def calcTodayPercentage(starts: Int): Int = calcPercentage(starts, newStartsToday.size)
-
-  def calcMonthPercentage(starts: Int): Int = calcPercentage(starts, newStartsMTD.size)
-
-  def calcYearPercentage(starts: Int): Int = calcPercentage(starts, newStartsYTD.size)
-
-  def updateCharts(): JsCmd =
-    UpdateChartData(
-      "newStarts",
-      Array(
-        calcStartPercentage(newStartsYTD.size),
-        calcStartPercentage(newStartsMTD.size),
-        calcStartPercentage(newStartsToday.size)
-      )
-    )
+  def updateCharts(): JsCmd = UpdateChartData("newStarts", report.newStartsPercentage)
 
   def newStartBindings: CssSel = {
     ".new-starts .key-stat .key-table" #> {
       ".today-stats" #> {
-        ".new-starts *" #> newStartsToday.size &
-          ".new-starts-last-month-diff *" #> (newStartsToday.size - newStartsTodayLastMonth.size) &
-          ".new-starts-last-month-percent *" #> calcTodayPercentage(newStartsTodayMonthDiff) &
-          ".new-starts-last-year-diff *" #> (newStartsToday.size - newStartsTodayLastYear.size) &
-          ".new-starts-last-year-percent *" #> calcTodayPercentage(newStartsTodayYearDiff)
+        ".new-starts *" #> todayData.newStartsToday &
+          ".new-starts-last-month-diff *" #> todayData.monthDiff &
+          ".new-starts-last-month-percent *" #> todayData.monthDiffPercentage &
+          ".new-starts-last-year-diff *" #> todayData.yearDiff &
+          ".new-starts-last-year-percent *" #> todayData.yearDiffPercentage
       } &
         ".mtd-stats" #> {
-          ".new-starts *" #> newStartsMTD.size &
-            ".new-starts-last-month-diff *" #> (newStartsMTD.size - newStartsMTDLastMonth.size) &
-            ".new-starts-last-month-percent *" #> calcMonthPercentage(newStartsMTDMonthDiff) &
-            ".new-starts-last-year-diff *" #> (newStartsMTD.size - newStartsMTDLastYear.size) &
-            ".new-starts-last-year-percent *" #> calcMonthPercentage(newStartsMTDYearDiff)
+          ".new-starts *" #> mtdData.newStartsMTD &
+            ".new-starts-last-month-diff *" #> mtdData.monthDiff &
+            ".new-starts-last-month-percent *" #> mtdData.monthDiffPercentage &
+            ".new-starts-last-year-diff *" #> mtdData.yearDiff &
+            ".new-starts-last-year-percent *" #> mtdData.yearDiffPercentage
         } &
         ".ytd-stats" #> {
-          ".new-starts *" #> newStartsYTD.size &
-            ".new-starts-last-month-diff *" #> (newStartsYTD.size - newStartsYTDLastMonth.size) &
-            ".new-starts-last-month-percent *" #> calcYearPercentage(newStartsYTDMonthDiff) &
-            ".new-starts-last-year-diff *" #> (newStartsYTD.size - newStartsYTDLastYear.size) &
-            ".new-starts-last-year-percent *" #> calcYearPercentage(newStartsYTDYearDiff)
+          ".new-starts *" #> ytdData.newStartsYTD &
+            ".new-starts-last-month-diff *" #> ytdData.monthDiff &
+            ".new-starts-last-month-percent *" #> ytdData.monthDiffPercentage &
+            ".new-starts-last-year-diff *" #> ytdData.yearDiff &
+            ".new-starts-last-year-percent *" #> ytdData.yearDiffPercentage
         }
     }
   }
 
   def render: CssBindFunc = {
     newStartBindings &
-    ".executive-dashboard [class+]" #> "current" &
-    ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
-    ".executive-snapshot .executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
-    ".mtd-shipments .count *" #> numberFormatter.format(mtdShipments.size) &
-    ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentValue) &
-    ".today-shipments .count *" #> numberFormatter.format(todayShipments.size) &
-    ".today-shipments .value *" #> dollarFormatter.format(todayShipmentsValue) &
-    ".remaining-shipments-month .count *" #> numberFormatter.format(
-      remainingMonthSubscriptions.size
-    ) &
-    ".remaining-shipments-month .value *" #> dollarFormatter.format(0.99) &
-    ".mtd-users .new-users-count *" #> Subscription.findNewMTDSubscriptions.size &
-    ".mtd-users .cancellations-count *" #> Subscription.findCancelledMtdSubscriptions.size
+      ".executive-dashboard [class+]" #> "current" &
+      ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
+      ".executive-snapshot .executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
+      ".mtd-shipments .count *" #> numberFormatter.format(mtdShipmentsData.numberOfShipments) &
+      ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentsData.totalAmount.toDouble) &
+      ".today-shipments .count *" #> numberFormatter.format(todayShipmentsData.numberOfShipments) &
+      ".today-shipments .value *" #> dollarFormatter.format(todayShipmentsData.totalAmount.toDouble) &
+      ".remaining-shipments-month .count *" #> numberFormatter.format(
+        report.remainingMonthSubscriptions
+      ) &
+      ".remaining-shipments-month .value *" #> dollarFormatter.format(0.99) &
+      ".mtd-users .new-users-count *" #> report.newUserCount &
+      ".mtd-users .cancellations-count *" #> report.cancellationsCount
   }
 }
