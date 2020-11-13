@@ -65,12 +65,6 @@ class ExecutiveDashboard extends Loggable {
   val todayShipmentsData: TodayShipmentsData = report.todayShipmentsData
   val mtdShipmentsData: MTDShipmentsData     = report.mtdShipmentData
 
-  val newStartsToday: List[Subscription] = Subscription.findNewTodaySubscriptions
-
-  val newStartsMTD: List[Subscription] = Subscription.findNewMTDSubscriptions
-
-  val newStartsYTD: List[Subscription] = Subscription.findNewYTDSubscriptions
-
   def updateCharts(): JsCmd = UpdateChartData("newStarts", report.newStartsPercentage)
 
   def newStartBindings: CssSel = {
