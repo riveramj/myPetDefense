@@ -1,27 +1,29 @@
 package bootstrap.liftweb
 
-import java.util.TimeZone
+import java.util.{Locale, TimeZone}
 
 import com.mypetdefense.jobs.JobManager
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
+import com.stripe.Stripe
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
+import net.liftweb.util.Props
 
 /**
   * A class that's instantiated early and run.  It allows the application
   * to modify lift's environment
   */
 class Boot {
-  def boot {
+  def boot(): Unit = {
     MailConfig.init
 
     DbSetup.setup
 
     Schemifier.schemify(
-      true,
+      performWrite = true,
       Schemifier.infoF _,
       User,
       CancelledUser,
@@ -93,13 +95,13 @@ class Boot {
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
 
     // Use HTML5 for rendering
-    LiftRules.htmlProperties.default.set((r: Req) => new Html5Properties(r.userAgent))
+    LiftRules.htmlProperties.default.set((r: Req) => Html5Properties(r.userAgent))
 
     // Make a transaction span the whole HTTP request
     S.addAround(DB.buildLoanWrapper)
 
     // set DocType to HTML5
-    LiftRules.htmlProperties.default.set((r: Req) => new Html5Properties(r.userAgent))
+    LiftRules.htmlProperties.default.set((r: Req) => Html5Properties(r.userAgent))
 
     LiftRules.statelessDispatch.append(StripeHook)
     LiftRules.statelessDispatch.append(TPPApi)
@@ -140,6 +142,11 @@ class Boot {
   )
 
   TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
+  Locale.setDefault(Locale.US)
+
+  // Initialize Stripe SDK
+  Stripe.apiKey = Props.get("secret.key") openOr ""
+  Stripe.apiVersion = "2018-02-28"
 
   // startup quartz scheduler
   JobManager.init()

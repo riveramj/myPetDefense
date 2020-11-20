@@ -5,7 +5,7 @@ import com.mypetdefense.model.Subscription
 import com.mypetdefense.service.ReportingService
 import org.quartz._
 
-import collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 class InternalEmailReportingJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
@@ -43,7 +43,7 @@ object WeeklyInteralReportEmailJob extends TriggeredJob {
   val detail: JobDetail = JobBuilder
     .newJob(classOf[InternalEmailReportingJob])
     .withIdentity("WeeklySalesReportEmailJob")
-    .usingJobData(new JobDataMap(Map("scope" -> "weekly")))
+    .usingJobData(new JobDataMap(Map("scope" -> "weekly").asJava))
     .build()
 
   val trigger: Trigger = TriggerBuilder
@@ -58,7 +58,7 @@ object DailyInternalReportEmailJob extends TriggeredJob {
   val detail: JobDetail = JobBuilder
     .newJob(classOf[InternalEmailReportingJob])
     .withIdentity("DailySalesReportEmailJob")
-    .usingJobData(new JobDataMap(Map("scope" -> "daily")))
+    .usingJobData(new JobDataMap(Map("scope" -> "daily").asJava))
     .build()
 
   val trigger: Trigger = TriggerBuilder
@@ -73,7 +73,7 @@ object FrequentInternalReportEmailJob extends TriggeredJob {
   val detail: JobDetail = JobBuilder
     .newJob(classOf[InternalEmailReportingJob])
     .withIdentity("FrequentSalesReportEmailJob")
-    .usingJobData(new JobDataMap(Map("scope" -> "daily")))
+    .usingJobData(new JobDataMap(Map("scope" -> "daily").asJava))
     .build
 
   val trigger: Trigger = TriggerBuilder

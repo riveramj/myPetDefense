@@ -1,11 +1,13 @@
 package com.mypetdefense.generator
 
+import java.util.{Collections => JCollections}
+
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisMonth}
 import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.model.Price._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
-import me.frmr.stripe.{CardList, Customer}
+import com.stripe.model.{Customer, ExternalAccount, ExternalAccountCollection}
 import net.liftweb.common.{Box, Empty}
 import org.scalacheck._
 
@@ -95,27 +97,26 @@ object Generator {
     for {
       id       <- genNonEmptyStr
       liveMode <- genBool
-      cardList = CardList(List())
+      cardList = {
+        val c = new ExternalAccountCollection
+        c.setData(JCollections.emptyList[ExternalAccount])
+        c
+      }
       created  <- genPosLong
       aBalance <- genPosLong
       currency = "USD"
       delinquent <- genBool
-    } yield Customer(
-      id,
-      liveMode,
-      cardList,
-      created,
-      aBalance,
-      currency,
-      delinquent,
-      None,
-      None,
-      None,
-      None,
-      Map.empty,
-      None,
-      None
-    )
+    } yield {
+      val c = new Customer
+      c.setId(id)
+      c.setLivemode(liveMode)
+      c.setSources(cardList)
+      c.setCreated(created)
+      c.setAccountBalance(aBalance)
+      c.setCurrency(currency)
+      c.setDelinquent(delinquent)
+      c
+    }
 
   def generateNewUserAddress: Gen[NewUserAddress] =
     for {

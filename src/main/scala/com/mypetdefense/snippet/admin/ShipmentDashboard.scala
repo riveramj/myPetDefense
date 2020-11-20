@@ -1,29 +1,23 @@
 package com.mypetdefense.snippet
 package admin
 
-import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml
-import net.liftweb.util._
-import net.liftweb.util.Helpers._
-import net.liftweb.http.js.JE._
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZoneId}
+import java.util.{Date, Locale}
+
+import com.mypetdefense.actor._
+import com.mypetdefense.model._
+import com.mypetdefense.service._
+import com.mypetdefense.util._
+import net.liftweb.common._
+import net.liftweb.http._
 import net.liftweb.http.js.JsCmd._
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js._
-import net.liftweb.common._
-import net.liftweb.http._
-import js.JsCmds._
-import net.liftweb.mapper.{By, BySql, IHaveValidatedThisSQL}
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId}
-import java.time.format.DateTimeFormatter
-
-import com.mypetdefense.model._
-import com.mypetdefense.util.Paths._
-import com.mypetdefense.util.ModelSyntax._
-import com.mypetdefense.util._
-import com.mypetdefense.actor._
-import com.mypetdefense.service._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
 
 import scala.xml.NodeSeq
 
@@ -106,7 +100,7 @@ class ShipmentDashboard extends Loggable {
       address: String,
       renderer: IdMemoizeTransform
   )(): JsCmd = {
-    subscription.map { subscription => ParentService.updateNextShipDate(subscription, user) }
+    subscription.map { subscription => ParentService.updateNextShipDate(subscription) }
 
     shipment.dateShipped(new Date()).address(address).saveMe
 

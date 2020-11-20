@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat
 
 import com.mypetdefense.model._
 import com.mypetdefense.service._
-import me.frmr.stripe.{Subscription => _}
 import net.liftweb.common._
 import net.liftweb.mapper._
 
@@ -223,7 +222,7 @@ object DataLoader extends Loggable {
       subscription <- upcomingSubscriptions
       user         <- subscription.user.obj
     } yield {
-      ParentService.updateNextShipDate(subscription, Full(user))
+      ParentService.updateNextShipDate(subscription)
     }
   }
 
@@ -449,7 +448,7 @@ object DataLoader extends Loggable {
     val startDate     = dateFormatter.parse("7/1/2020")
 
     for {
-      user <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
+      user         <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
       subscription <- Subscription.find(By(Subscription.user, user))
     } {
       user.subscription(subscription).saveMe()
@@ -473,9 +472,9 @@ object DataLoader extends Loggable {
       val dupUsers = User.findAll(By(User.email, badUser.email.get))
 
       if (dupUsers.size > 1) {
-        val possibleBadUserSub = Subscription.find(By(Subscription.user, badUser)).toList
+        val possibleBadUserSub     = Subscription.find(By(Subscription.user, badUser)).toList
         val possibleBadUserAddress = Address.findAll(By(Address.user, badUser))
-        val pets = Pet.findAll(By(Pet.user, badUser))
+        val pets                   = Pet.findAll(By(Pet.user, badUser))
 
         val badUserInfo = List(possibleBadUserSub, possibleBadUserAddress, pets).flatten
 
@@ -487,20 +486,20 @@ object DataLoader extends Loggable {
 
   def createMissingCatBoxes(): Unit =
     for {
-      cat <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
-      user <- cat.user.obj.toList
+      cat          <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
+      user         <- cat.user.obj.toList
       subscription <- user.subscription.obj.toList
-      catFleaTick <- FleaTick.zoGuardCat.toList
+      catFleaTick  <- FleaTick.zoGuardCat.toList
     } {
       val updatedCat = cat.size(catFleaTick.size.get).saveMe
-      val box = SubscriptionBox.createBasicBox(subscription, catFleaTick, updatedCat)
+      val box        = SubscriptionBox.createBasicBox(subscription, catFleaTick, updatedCat)
       updatedCat.box(box).saveMe()
     }
 
   def createMissingDogBoxes(): Unit =
     for {
-      dog <- Pet.findAll(By(Pet.animalType, AnimalType.Dog), NullRef(Pet.box))
-      user <- dog.user.obj.toList
+      dog          <- Pet.findAll(By(Pet.animalType, AnimalType.Dog), NullRef(Pet.box))
+      user         <- dog.user.obj.toList
       subscription <- user.subscription.obj.toList
     } {
       val box = SubscriptionBox.createNewBox(subscription, dog)
@@ -518,7 +517,7 @@ object DataLoader extends Loggable {
 
     for {
       subscription <- Subscription.findAll(By(Subscription.status, Status.Cancelled))
-      user <- subscription.user.obj.toList
+      user         <- subscription.user.obj.toList
       pets = user.pets.toList
     } {
       if (user.status.get != Status.Cancelled)
@@ -528,7 +527,7 @@ object DataLoader extends Loggable {
     }
 
     for {
-      user <- User.findAll(By(User.status, Status.Cancelled))
+      user         <- User.findAll(By(User.status, Status.Cancelled))
       subscription <- user.subscription.obj.toList
       pets = user.pets.toList
     } {

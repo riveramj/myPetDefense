@@ -44,8 +44,7 @@ class UpgradeAccount extends Loggable {
       val cost = updatedBoxes.map(SubscriptionBox.possiblePrice).sum
 
       updateStripeSubscriptionQuantity(
-        user.map(_.stripeId.get).openOr(""),
-        updatedSubscription.map(_.stripeSubscriptionId.get).openOr(("")),
+        updatedSubscription.map(_.stripeSubscriptionId.get).openOr(""),
         tryo((cost * 100).toInt).openOr(0)
       )
 
