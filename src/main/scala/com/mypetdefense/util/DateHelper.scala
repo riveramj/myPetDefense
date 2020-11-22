@@ -116,4 +116,15 @@ object DateHelper {
       "November",
       "December"
     )
+
+  implicit class DateOps(val v: Date) extends AnyVal {
+    def toLocalDate: LocalDate = v.toInstant.atZone(zoneId).toLocalDate
+    def isYesterday: Boolean = {
+      val localDate    = toLocalDate
+      val day          = localDate.getDayOfYear
+      val year         = localDate.getYear
+      val yesterdayDay = yesterday
+      day == yesterdayDay.getDayOfYear && year == yesterdayDay.getYear
+    }
+  }
 }

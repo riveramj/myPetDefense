@@ -34,17 +34,12 @@ object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[Subscr
   }
 
   def createFirstBox(subscriptionBox: SubscriptionBox): List[SubscriptionItem] = {
-    val products = List(
-      Product.skinAndCoat,
-      Product.multiVitamin,
-      Product.probiotic,
-      Product.dentalPowder
-    ).flatten
+    val products = ProductSchedule.getFirstBoxProducts
     products.map { product =>
       SubscriptionItem.create
         .product(product)
         .subscriptionBox(subscriptionBox)
         .saveMe
-    }
+    }.toList
   }
 }

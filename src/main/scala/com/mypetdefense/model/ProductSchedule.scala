@@ -2,8 +2,9 @@ package com.mypetdefense.model
 
 import java.util.Date
 
-import com.mypetdefense.util.DateHelper.nowDate
+import com.mypetdefense.util.DateHelper.tomorrowStart
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
+import net.liftweb.common.Box
 import net.liftweb.mapper._
 
 class ProductSchedule
@@ -22,30 +23,73 @@ class ProductSchedule
   object scheduledItems
       extends MappedOneToMany(ProductScheduleItem, ProductScheduleItem.productSchedule)
 
+  object firstBox extends MappedBoolean(this) {
+    override def defaultValue: Boolean = false
+  }
+
   object startDate extends MappedDateTime(this)
 
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
+  def complete: ProductSchedule = this.scheduleStatus(ProductScheduleStatus.Completed).saveMe()
+
+  def makeActive: ProductSchedule = this.scheduleStatus(ProductScheduleStatus.Active).saveMe()
+
 }
 
 object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductSchedule] {
-  def getNextSchedule: Option[ProductSchedule] =
+  def getNextRegularSchedule: Option[ProductSchedule] =
     ProductSchedule
-      .findAll(
-        By_<=(ProductSchedule.startDate, nowDate),
-        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Scheduled)
+      .find(
+        By_<(ProductSchedule.startDate, tomorrowStart),
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Scheduled),
+        By(ProductSchedule.firstBox, false)
       )
-      .headOption
 
-  def createNew(startDate: Date, products: List[Product]): ProductSchedule = {
-    val schedule = ProductSchedule.create.startDate(startDate).saveMe()
+  def getActiveRegularSchedule: Option[ProductSchedule] =
+    ProductSchedule.find(
+      By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
+      By(ProductSchedule.firstBox, false)
+    )
+
+  def getNextScheduleForFirstBox: Option[ProductSchedule] =
+    ProductSchedule
+      .find(
+        By_<(ProductSchedule.startDate, tomorrowStart),
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Scheduled),
+        By(ProductSchedule.firstBox, true)
+      )
+
+  def getActiveScheduleForFirstBox: Option[ProductSchedule] =
+    ProductSchedule
+      .find(
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
+        By(ProductSchedule.firstBox, true)
+      )
+
+  def createNew(
+      startDate: Date,
+      products: List[Product],
+      firstBox: Boolean = false
+  ): ProductSchedule = {
+    val schedule = ProductSchedule.create.startDate(startDate).firstBox(firstBox).saveMe()
     products.map(ProductScheduleItem.createNew(_, schedule))
     schedule.reload
+  }
+
+  def getFirstBoxProducts: List[Product] = {
+    ProductSchedule
+      .find(
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
+        By(ProductSchedule.firstBox, true)
+      )
+      .toList
+      .flatMap(_.scheduledItems.toList.flatMap(_.product.obj))
   }
 }
 
 object ProductScheduleStatus extends Enumeration {
-  val Scheduled, Completed = Value
+  val Active, Scheduled, Completed = Value
 }
