@@ -45,6 +45,9 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
 }
 
 object Agency extends Agency with LongKeyedMetaMapper[Agency] {
+  val mpdAgency: Box[Agency] = Agency.find(By(Agency.name, "My Pet Defense"))
+  val tppAgency: Box[Agency] = Agency.find(By(Agency.name, "TPP"))
+
   def createNewAgency(
       name: String,
       agencyType: AgencyType.Value = AgencyType.Headquarters,
