@@ -7,8 +7,8 @@ import java.util.{Date, Locale}
 import net.liftweb.util.Helpers.tryo
 
 object DateHelper {
-  val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  val zoneId: ZoneId         = ZoneId.of("America/New_York")
+  val dateFormat     = new SimpleDateFormat("MM/dd/yyyy")
+  val zoneId: ZoneId = ZoneId.of("America/New_York")
 
   def currentDate: LocalDateTime     = LocalDateTime.now()
   def now: LocalDate                 = LocalDate.now(zoneId)
