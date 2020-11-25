@@ -52,12 +52,7 @@ class Checkout extends Loggable {
 
   var stripeToken         = ""
   var coupon: Box[Coupon] = PetFlowChoices.coupon.is
-  var couponCode: String = {
-    if (is50Off(coupon))
-      ""
-    else
-      coupon.map(_.couponCode.get.toLowerCase()).openOr("")
-  }
+  var couponCode: String = coupon.map(_.couponCode.get.toLowerCase()).openOr("")
 
   val pets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
   val petCount: Int                          = pets.size
@@ -284,9 +279,9 @@ class Checkout extends Loggable {
           "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
     } andThen
     "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-      ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup()) &
-      ".promotion-info [class+]" #> successCoupon &
-      "#promo-code" #> ajaxText(couponCode, couponCode = _) &
-      ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
+    ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup()) &
+    ".promotion-info [class+]" #> successCoupon &
+    "#promo-code" #> ajaxText(couponCode, couponCode = _) &
+    ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
   }
 }
