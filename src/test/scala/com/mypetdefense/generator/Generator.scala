@@ -7,7 +7,7 @@ import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.model.Price._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
-import com.stripe.model.{Customer, ExternalAccount, ExternalAccountCollection}
+import com.stripe.model.{Customer, PaymentSource, PaymentSourceCollection}
 import net.liftweb.common.{Box, Empty}
 import org.scalacheck._
 
@@ -98,12 +98,12 @@ object Generator {
       id       <- genNonEmptyStr
       liveMode <- genBool
       cardList = {
-        val c = new ExternalAccountCollection
-        c.setData(JCollections.emptyList[ExternalAccount])
+        val c = new PaymentSourceCollection
+        c.setData(JCollections.emptyList[PaymentSource])
         c
       }
-      created  <- genPosLong
-      aBalance <- genPosLong
+      created <- genPosLong
+      balance <- genPosLong
       currency = "USD"
       delinquent <- genBool
     } yield {
@@ -112,7 +112,7 @@ object Generator {
       c.setLivemode(liveMode)
       c.setSources(cardList)
       c.setCreated(created)
-      c.setAccountBalance(aBalance)
+      c.setBalance(balance)
       c.setCurrency(currency)
       c.setDelinquent(delinquent)
       c

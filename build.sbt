@@ -56,7 +56,7 @@ libraryDependencies ++= {
     "ch.qos.logback"               % "logback-classic"     % "1.2.3",
     "net.sf.opencsv"               % "opencsv"             % "2.3",
     "org.postgresql"               % "postgresql"          % "42.2.5",
-    "com.stripe"                   % "stripe-java"         % "5.33.2",
+    "com.stripe"                   % "stripe-java"         % "20.29.0",
     "org.quartz-scheduler"         % "quartz"              % "2.3.0",
     "org.eclipse.jetty"            % "jetty-webapp"        % "9.4.12.v20180830" % "container; compile->default",
     "org.mockito"                  % "mockito-core"        % "3.5.13" % "test",

@@ -15,7 +15,6 @@ import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.math.BigDecimal
 import scala.util.{Failure => TryFail, _}
 
 object TaxJarService extends Loggable {

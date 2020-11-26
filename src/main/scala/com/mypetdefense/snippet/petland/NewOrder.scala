@@ -8,7 +8,6 @@ import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.StripeHelper._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import com.stripe.model.{Customer, Plan}
 import net.liftweb.common._
@@ -128,15 +127,10 @@ class NewOrder extends Loggable {
     ).flatten
 
     if (validateFields.isEmpty) {
-      val params = ParamsMap(
-        "email" --> email,
-        "card" --> stripeToken,
-        "tax_percent" --> taxRate,
-        "plan" --> petlandPlanId,
-        "quantity" --> pets.size
-      )
+      val customer =
+        StripeService.createStripeCustomer(email, stripeToken, petlandPlanId, pets.size, taxRate)
 
-      Box.tryo { Customer.create(params) } match {
+      customer match {
         case Full(customer) =>
           val user = newUserSetup(customer)
 

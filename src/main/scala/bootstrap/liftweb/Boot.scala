@@ -146,7 +146,6 @@ class Boot {
 
   // Initialize Stripe SDK
   Stripe.apiKey = Props.get("secret.key") openOr ""
-  Stripe.apiVersion = "2018-02-28"
 
   // startup quartz scheduler
   JobManager.init()

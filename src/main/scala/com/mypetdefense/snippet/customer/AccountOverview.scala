@@ -49,7 +49,7 @@ class AccountOverview extends Loggable {
       discount <- Option(invoice.getDiscount)
       coupon   <- Option(discount.getCoupon)
     } yield {
-      val percentOff = Option(coupon.getPercentOff).map(_.toInt).getOrElse(0)
+      val percentOff = Option(coupon.getPercentOff).map(p => BigDecimal(p).toInt).getOrElse(0)
       val amountOff  = Option(coupon.getAmountOff).map(_.toLong).getOrElse(0L)
 
       if (percentOff > 0)
@@ -71,7 +71,7 @@ class AccountOverview extends Loggable {
   val totalDue: Double =
     upcomingInvoice.flatMap(i => Option(i.getAmountDue)).map(_.toDouble / 100d).openOr(0d)
   val nextBillDateRaw: Box[Long] =
-    upcomingInvoice.flatMap(i => Option(i.getDate)).map(_.toLong)
+    upcomingInvoice.flatMap(i => Option(i.getCreated)).map(_.toLong)
 
   val nextBillDate: Box[Date] = nextBillDateRaw.map { date => new Date(date * 1000) }
 

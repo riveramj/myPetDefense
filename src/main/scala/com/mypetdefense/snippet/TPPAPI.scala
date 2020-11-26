@@ -5,9 +5,10 @@ import java.util.Date
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import com.mypetdefense.service.{ParentService, TaxJarService}
+import com.mypetdefense.service.{ParentService, StripeService, TaxJarService}
 import com.mypetdefense.util.StripeHelper._
-import com.stripe.model.{Customer, Subscription => StripeSubscription}
+import com.stripe.model.Customer
+import com.stripe.param.CustomerCreateParams
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.rest._
@@ -49,7 +50,7 @@ object TPPApi extends RestHelper with Loggable {
       stripeToken: String,
       pennyCount: Int,
       couponName: Option[String],
-      taxRate: Double
+      taxRate: BigDecimal
   ): Unit = {
     val errorMsg = s"""
       Something went wrong with stripe creation.
@@ -171,27 +172,26 @@ object TPPApi extends RestHelper with Loggable {
 
     val stripeCustomer = Box.tryo {
       Customer.create(
-        ParamsMap(
-          "email" --> parent.email.get,
-          "card" --> stripeToken,
-          "coupon" -?> couponName
-        )
+        CustomerCreateParams.builder
+          .setEmail("email")
+          .setSource(stripeToken)
+          .whenDefined(couponName)(_.setCoupon)
+          .build
       )
     }
 
     stripeCustomer match {
       case Full(customer) =>
-        val stripeSubscription = Box.tryo {
-          StripeSubscription.create(
-            ParamsMap(
-              "customer" --> customer.getId,
-              "quantity" --> pennyCount,
-              "coupon" --> "tpp",
-              "tax_percent" --> taxRate,
-              "plan" --> "tpp-pennyPlan"
-            )
-          )
-        }
+        val stripeSubscription = for {
+          txr <- StripeService.retrieveOrCreateTaxRate(taxRate)
+          sub <- StripeService.createStripeSubscription(
+                  customer,
+                  txr,
+                  plan = "tpp-pennyPlan",
+                  pennyCount,
+                  coupon = Some("tpp")
+                )
+        } yield sub
 
         stripeSubscription match {
           case Full(subscription) =>

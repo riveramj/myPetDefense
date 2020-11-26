@@ -114,7 +114,14 @@ class Checkout extends Loggable {
     setMultiPetCouponIfPossible()
 
     val stripeCustomer =
-      StripeService.createStripeCustomer(coupon, email, stripeToken, pennyCount, taxRate)
+      StripeService.createStripeCustomer(
+        email,
+        stripeToken,
+        plan = "pennyProduct",
+        pennyCount,
+        taxRate,
+        coupon
+      )
 
     stripeCustomer match {
       case Full(customer) => setupNewUserAndRedirect(customer)
