@@ -7,9 +7,8 @@ import java.util.Date
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.service._
+import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
-import com.stripe.model.{Customer, Plan}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -19,7 +18,6 @@ import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
-import scala.collection.JavaConverters._
 import scala.xml.{Elem, NodeSeq}
 
 object petsOrdered extends SessionVar[List[Pet]](Nil)
@@ -94,8 +92,8 @@ class NewOrder extends Loggable {
 
   val birthdayDateFormat = new SimpleDateFormat("MMM yyyy")
 
-  val petlandPlan: Box[Plan] = ParentService.getCurrentPetlandProductPlan
-  val petlandPlanId: String  = petlandPlan.flatMap(p => Option(p.getId)).openOr("")
+  val petlandPlan: Box[Stripe.Plan] = ParentService.getCurrentPetlandProductPlan
+  val petlandPlanId: String         = petlandPlan.map(_.id).openOr("")
 
   def calculateTax(possibleState: String, possibleZip: String): JsCmd = {
     state = possibleState
@@ -128,7 +126,13 @@ class NewOrder extends Loggable {
 
     if (validateFields.isEmpty) {
       val customer =
-        StripeService.createStripeCustomer(email, stripeToken, petlandPlanId, pets.size, taxRate)
+        StripeFacade.Customer.createWithSubscription(
+          email,
+          stripeToken,
+          petlandPlanId,
+          pets.size,
+          taxRate
+        )
 
       customer match {
         case Full(customer) =>
@@ -162,8 +166,8 @@ class NewOrder extends Loggable {
     }
   }
 
-  def newUserSetup(customer: Customer): User = {
-    val stripeId = customer.getId
+  def newUserSetup(customer: Stripe.Customer): User = {
+    val stripeId = customer.id
 
     val newParent = User.createNewUser(
       firstName = firstName,
@@ -191,10 +195,9 @@ class NewOrder extends Loggable {
     createNewPets(newParent)
 
     val subscriptionId: String = (for {
-      rawSubscriptions <- Option(customer.getSubscriptions)
-      subscription     <- rawSubscriptions.getData.asScala.headOption
-      id               <- Option(subscription.getId)
-    } yield id).getOrElse("")
+      rawSubscriptions <- customer.subscriptions
+      subscription     <- rawSubscriptions.data.headOption
+    } yield subscription.id).getOrElse("")
 
     Subscription.createNewSubscription(
       Full(newParent),

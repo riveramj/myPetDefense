@@ -1,8 +1,8 @@
 package com.mypetdefense.service
 
 import com.mypetdefense.model._
-import com.mypetdefense.util.StripeHelper.{deleteCoupon => deleteStripeCoupon, _}
-import com.stripe.model.{Coupon => StripeCoupon}
+import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
+import com.mypetdefense.util.StripeHelper._
 import com.stripe.param.CouponCreateParams
 import net.liftweb.common._
 import net.liftweb.util.Helpers.tryo
@@ -18,7 +18,7 @@ object CouponService extends Loggable {
       freeMonths: Long,
       percentOff: BigDecimal,
       dollarOff: Int
-  ): Box[StripeCoupon] = {
+  ): Box[Stripe.Coupon] = {
 
     val (durationType, durationMonths) = {
       import CouponCreateParams.Duration._
@@ -41,7 +41,7 @@ object CouponService extends Loggable {
         }
         .build
 
-    Box.tryo { StripeCoupon.create(params) }
+    Stripe.Coupon.create(params)
   }
 
   def createCoupon(
@@ -82,7 +82,7 @@ object CouponService extends Loggable {
   }
 
   def deleteCoupon(coupon: Coupon): Box[Coupon] = {
-    deleteStripeCoupon(coupon.couponCode.get) match {
+    StripeFacade.Coupon.delete(coupon.couponCode.get) match {
       case Full(_) =>
         coupon.delete_!
         Full(coupon)

@@ -4,10 +4,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.mypetdefense.model._
-import com.mypetdefense.service.ParentService
+import com.mypetdefense.service.{ParentService, StripeBoxAdapter => Stripe}
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.SecurityContext._
-import com.stripe.model.Invoice
 import net.liftweb.common._
 import net.liftweb.mapper.By
 import net.liftweb.util.CssSel
@@ -38,19 +37,19 @@ class AccountOverview extends Loggable {
 
   val stripeCustomerId: String = user.map(_.stripeId.get).openOr("")
 
-  val upcomingInvoice: Box[Invoice] = ParentService.getUpcomingInvoice(stripeCustomerId)
+  val upcomingInvoice: Box[Stripe.Invoice] = ParentService.getUpcomingInvoice(stripeCustomerId)
 
   val productSubtotal: Double =
-    upcomingInvoice.flatMap(i => Option(i.getSubtotal)).map(_ / 100d).openOr(0d)
+    upcomingInvoice.flatMap(_.subtotal).map(_ / 100d).openOr(0d)
 
   val discount: Box[Double] = {
     for {
       invoice  <- upcomingInvoice
-      discount <- Option(invoice.getDiscount)
-      coupon   <- Option(discount.getCoupon)
+      discount <- invoice.discount
+      coupon   <- discount.coupon
     } yield {
-      val percentOff = Option(coupon.getPercentOff).map(p => BigDecimal(p).toInt).getOrElse(0)
-      val amountOff  = Option(coupon.getAmountOff).map(_.toLong).getOrElse(0L)
+      val percentOff = coupon.percentOff.map(_.toInt).getOrElse(0)
+      val amountOff  = coupon.amountOff.getOrElse(0L)
 
       if (percentOff > 0)
         (percentOff.toDouble / 100d) * productSubtotal
@@ -67,11 +66,11 @@ class AccountOverview extends Loggable {
   }
 
   val taxDue: Double =
-    upcomingInvoice.flatMap(i => Option(i.getTax)).map(_.toDouble / 100d).openOr(0d)
+    upcomingInvoice.flatMap(_.tax).map(_.toDouble / 100d).openOr(0d)
   val totalDue: Double =
-    upcomingInvoice.flatMap(i => Option(i.getAmountDue)).map(_.toDouble / 100d).openOr(0d)
+    upcomingInvoice.flatMap(_.amountDue).map(_.toDouble / 100d).openOr(0d)
   val nextBillDateRaw: Box[Long] =
-    upcomingInvoice.flatMap(i => Option(i.getCreated)).map(_.toLong)
+    upcomingInvoice.flatMap(_.created)
 
   val nextBillDate: Box[Date] = nextBillDateRaw.map { date => new Date(date * 1000) }
 

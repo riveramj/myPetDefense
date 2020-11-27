@@ -6,6 +6,7 @@ import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisMonth
 import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.model.Price._
 import com.mypetdefense.model._
+import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
 import com.stripe.model.{Customer, PaymentSource, PaymentSourceCollection}
 import net.liftweb.common.{Box, Empty}
@@ -93,7 +94,7 @@ object Generator {
       contractLength
     )
 
-  def generateStripeCustomer: Gen[Customer] =
+  def generateStripeCustomer: Gen[Stripe.Customer] =
     for {
       id       <- genNonEmptyStr
       liveMode <- genBool
@@ -115,7 +116,7 @@ object Generator {
       c.setBalance(balance)
       c.setCurrency(currency)
       c.setDelinquent(delinquent)
-      c
+      Stripe.Customer(c)
     }
 
   def generateNewUserAddress: Gen[NewUserAddress] =
@@ -243,7 +244,7 @@ object Generator {
   ): Gen[List[InsertGenData]] =
     Gen.listOfN(length, genInsertData)
 
-  def stripeCustomer(seed: Long = 42L): Customer =
+  def stripeCustomer(seed: Long = 42L): Stripe.Customer =
     generateStripeCustomer.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
   def newUserData(seed: Long = 42L): NewUserData =

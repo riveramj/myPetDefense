@@ -5,9 +5,8 @@ import java.util.Date
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import com.mypetdefense.service.{ParentService, StripeService, TaxJarService}
+import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
 import com.mypetdefense.util.StripeHelper._
-import com.stripe.model.Customer
 import com.stripe.param.CustomerCreateParams
 import net.liftweb.common._
 import net.liftweb.http._
@@ -170,35 +169,30 @@ object TPPApi extends RestHelper with Loggable {
       )
     }.getOrElse((0d, 0d))
 
-    val stripeCustomer = Box.tryo {
-      Customer.create(
+    val stripeCustomer =
+      Stripe.Customer.create(
         CustomerCreateParams.builder
           .setEmail("email")
           .setSource(stripeToken)
           .whenDefined(couponName)(_.setCoupon)
           .build
       )
-    }
 
     stripeCustomer match {
       case Full(customer) =>
-        val stripeSubscription = for {
-          txr <- StripeService.retrieveOrCreateTaxRate(taxRate)
-          sub <- StripeService.createStripeSubscription(
-                  customer,
-                  txr,
-                  plan = "tpp-pennyPlan",
-                  pennyCount,
-                  coupon = Some("tpp")
-                )
-        } yield sub
+        val stripeSubscription =
+          StripeFacade.Subscription.createWithTaxRate(
+            customer,
+            taxRate,
+            plan = "tpp-pennyPlan",
+            pennyCount,
+            coupon = Some("tpp")
+          )
 
         stripeSubscription match {
           case Full(subscription) =>
             val refreshedParent = parent.reload
-            val updatedParent   = refreshedParent.stripeId(customer.getId).saveMe
-
-            val subscriptionId = Option(subscription.getId).getOrElse("")
+            val updatedParent   = refreshedParent.stripeId(customer.id).saveMe
 
             val plusOneDayTime = LocalDate
               .now(ZoneId.of("America/New_York"))
@@ -210,7 +204,7 @@ object TPPApi extends RestHelper with Loggable {
 
             val mpdSubscription = Subscription.createNewSubscription(
               Full(updatedParent),
-              subscriptionId,
+              subscription.id,
               new Date(),
               plusOneDayDate,
               Price.currentTppPriceCode
