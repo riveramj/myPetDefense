@@ -138,7 +138,7 @@ class Checkout extends Loggable {
     val baseFields = List(
       checkEmpty(firstName, "#first-name"),
       checkEmpty(lastName, "#last-name"),
-      checkEmpty(email, "#email"),
+      checkEmail(email, "#email", signup = true),
       checkEmpty(street1, "#street-1"),
       checkEmpty(city, "#city"),
       checkEmpty(state, "#state"),

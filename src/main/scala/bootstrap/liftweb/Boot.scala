@@ -1,6 +1,6 @@
 package bootstrap.liftweb
 
-import java.util.TimeZone
+import java.util.{Locale, TimeZone}
 
 import com.mypetdefense.jobs.JobManager
 import com.mypetdefense.model._
@@ -140,6 +140,7 @@ class Boot {
   )
 
   TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
+  Locale.setDefault(Locale.US)
 
   // startup quartz scheduler
   JobManager.init()
