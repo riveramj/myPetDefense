@@ -1,14 +1,14 @@
 package com.mypetdefense.service
 
-import net.liftweb._
-import common._
-import http.S
-import util.Helpers._
-import mapper.By
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
-import java.util.Date
-import java.text.SimpleDateFormat
+import net.liftweb.common._
+import net.liftweb.http.S
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
 
 import scala.util.matching.Regex
 
@@ -236,6 +236,20 @@ object ValidationService extends Loggable {
   ): Box[ValidationError] = {
     validDate(birthday, dateFormat, errorId)
   }
+
+  def futureDate(
+      date: String,
+      dateFormat: SimpleDateFormat,
+      now: Date,
+      fieldId: String
+  ): Box[ValidationError] = {
+    Box.tryo(dateFormat.parse(date)).map(_.after(now)) match {
+      case Full(true)  => Empty
+      case Full(false) => Full(ValidationError(fieldId, "Not a future date."))
+      case _           => Full(ValidationError(fieldId, "Not a valid date format."))
+    }
+  }
+
 }
 
 case class ValidationError(fieldSelector: String, error: String)

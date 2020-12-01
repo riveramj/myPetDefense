@@ -8,12 +8,25 @@ import net.liftweb.common.{Box, Empty}
 
 object StripeFacade {
 
+  final case class CustomerWithSources(value: Stripe.Customer)       extends AnyVal
+  final case class CustomerWithSubscriptions(value: Stripe.Customer) extends AnyVal
+
   object Coupon {
     def delete(couponId: String): Box[Stripe.Coupon] =
       Stripe.Coupon.retrieve(couponId).flatMap(_.delete())
   }
 
   object Customer {
+    def retrieveWithSources(customerId: String): Box[CustomerWithSources] = {
+      val params = CustomerRetrieveParams.builder.addExpand("sources").build
+      Stripe.Customer.retrieve(customerId, params).map(CustomerWithSources)
+    }
+
+    def retrieveWithSubscriptions(customerId: String): Box[CustomerWithSubscriptions] = {
+      val params = CustomerRetrieveParams.builder.addExpand("subscriptions").build
+      Stripe.Customer.retrieve(customerId, params).map(CustomerWithSubscriptions)
+    }
+
     def create(
         email: String,
         stripeToken: String,
@@ -37,11 +50,11 @@ object StripeFacade {
         quantity: Int,
         taxRate: BigDecimal,
         coupon: Box[Coupon] = Empty
-    ): Box[Stripe.Customer] =
+    ): Box[CustomerWithSubscriptions] =
       for {
         customer <- Customer.create(email, stripeToken, coupon)
         _        <- Subscription.createWithTaxRate(customer, taxRate, plan, quantity)
-        updated  <- Stripe.Customer.retrieve(customer.id)
+        updated  <- Customer.retrieveWithSubscriptions(customer.id)
       } yield updated
 
     def update(customerId: String, params: CustomerUpdateParams): Box[Stripe.Customer] =
@@ -51,13 +64,12 @@ object StripeFacade {
       Stripe.Customer.retrieve(customerId).flatMap(_.delete())
 
     def createCard(customerId: String, stripeToken: String): Box[Stripe.Card] = {
-      val customerRetrieveParams = CustomerRetrieveParams.builder.addExpand("sources").build
       val cardCreateParams =
         PaymentSourceCollectionCreateParams.builder.setSource(stripeToken).build
 
       for {
-        customer  <- Stripe.Customer.retrieve(customerId, customerRetrieveParams)
-        sources   <- customer.sources
+        customer  <- Customer.retrieveWithSources(customerId)
+        sources   <- customer.value.sources
         newSource <- sources.create(cardCreateParams)
         if newSource.isCard
       } yield newSource.asCard

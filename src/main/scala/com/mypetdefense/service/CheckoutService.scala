@@ -4,8 +4,8 @@ import java.util.Date
 
 import com.mypetdefense.actor.{EmailActor, NewSaleEmail, SendWelcomeEmail}
 import com.mypetdefense.model._
-import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
+import com.mypetdefense.util.DateHelper.tomorrowStart
 import net.liftweb.common.{Box, Full}
 import net.liftweb.util.Props
 
@@ -66,9 +66,9 @@ object CheckoutService {
       }
     }
 
-  private def findSubscriptionId(customer: Stripe.Customer): Option[String] =
+  private def findSubscriptionId(customer: StripeFacade.CustomerWithSubscriptions): Option[String] =
     for {
-      rawSubscriptions <- customer.subscriptions
+      rawSubscriptions <- customer.value.subscriptions
       subscription     <- rawSubscriptions.data.headOption
     } yield subscription.id
 
@@ -81,7 +81,7 @@ object CheckoutService {
       user,
       subscriptionId,
       new Date(),
-      new Date(),
+      tomorrowStart,
       priceCode,
       isUpgraded = true
     )
@@ -115,9 +115,9 @@ object CheckoutService {
       petsToCreate: List[Pet],
       priceCode: String,
       newUserData: NewUserData,
-      customer: Stripe.Customer
+      customer: StripeFacade.CustomerWithSubscriptions
   ): Box[User] = {
-    val stripeId = customer.id
+    val stripeId = customer.value.id
     val coupon   = newUserData.coupon
     val petCount = petsToCreate.size
     val user     = createUserOrUpdate(maybeCurrentUser, newUserData, stripeId, coupon)

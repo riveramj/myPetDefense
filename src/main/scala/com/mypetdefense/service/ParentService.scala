@@ -10,13 +10,12 @@ import com.mypetdefense.shipstation.Order
 import com.mypetdefense.snippet.TPPApi
 import com.mypetdefense.util.StripeHelper._
 import com.stripe.param._
-import net.liftweb.common.BoxLogging._
 import net.liftweb.common._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
-object ParentService extends Loggable {
+object ParentService extends LoggableBoxLogging {
   val whelpDateFormat                  = new java.text.SimpleDateFormat("M/d/y")
   val currentPentlandPlan: String      = Props.get("petland.6month.payment") openOr ""
   val petlandMonthlyPlan: Box[String]  = Props.get("petland.1month.payment")
@@ -127,6 +126,11 @@ object ParentService extends Loggable {
       .retrieve(customerId)
       .logFailure("get customer failed with stripe error")
 
+  def getStripeCustomerWithSources(customerId: String): Box[StripeFacade.CustomerWithSources] =
+    StripeFacade.Customer
+      .retrieveWithSources(customerId)
+      .logFailure("get customer failed with stripe error")
+
   def getStripeCustomerDiscount(customerId: String): Box[Stripe.Discount] =
     getStripeCustomer(customerId).flatMap(_.discount)
 
@@ -156,8 +160,8 @@ object ParentService extends Loggable {
 
   def getCustomerCard(customerId: String): Box[Stripe.Card] =
     for {
-      customer <- getStripeCustomer(customerId)
-      sources  <- customer.sources
+      customer <- getStripeCustomerWithSources(customerId)
+      sources  <- customer.value.sources
       source   <- sources.data.headOption
       if source.isCard
     } yield source.asCard
@@ -210,7 +214,9 @@ object ParentService extends Loggable {
     //TODO actually use this result or do something, not just yelling into the void
     StripeFacade.Subscription
       .update(subscriptionId, params)
-      .logFailure("update subscription failed with stripe error")
+      .logFailure(
+        s"update subscription [subscriptionId=$subscriptionId, date=$date] failed with stripe error"
+      )
   }
 
   def notTrialSubscription_?(subscriptionId: String): Boolean = {
@@ -339,24 +345,24 @@ object ParentService extends Loggable {
       }
     }
 
-    val (subscriptionId, priceCode) = (
-      for {
-        subscription <- updatedUser.subscription.obj
-      } yield {
-        (subscription.stripeSubscriptionId.get, subscription.priceCode.get)
+    val update = for {
+      subscription <- updatedUser.subscription.obj
+      subscriptionId = subscription.stripeSubscriptionId.get if !subscriptionId.isBlank
+      priceCode      = subscription.priceCode.get
+
+      prices = products.map { product =>
+        Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0d)
       }
-    ).openOr(("", ""))
+      totalCost = "%.2f".format(prices.foldLeft(0d)(_ + _)).toDouble
 
-    val prices: List[Double] = products.map { product =>
-      Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0d)
-    }
+      updated <- updateStripeSubscriptionQuantity(
+                  subscriptionId,
+                  tryo((totalCost * 100).toInt).openOr(0)
+                )
+    } yield updated
 
-    val totalCost = "%.2f".format(prices.foldLeft(0d)(_ + _)).toDouble
-
-    updateStripeSubscriptionQuantity(
-      subscriptionId,
-      tryo((totalCost * 100).toInt).openOr(0)
-    )
+    update
+      .logEmptyBox("update stripe subscription total failed")
   }
 
   def removePet(oldUser: Box[User], pet: Pet): Box[Pet] = {

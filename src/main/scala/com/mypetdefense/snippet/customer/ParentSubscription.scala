@@ -8,6 +8,7 @@ import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
+import com.mypetdefense.util.DateHelper.nowDate
 import com.mypetdefense.util.SecurityContext._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
@@ -139,7 +140,7 @@ class ParentSubscription extends Loggable {
 
     user.map { parent => EmailActor ! ParentCancelledAccountEmail(parent) }
 
-    SecurityContext.logCurrentUserOut
+    SecurityContext.logCurrentUserOut()
 
     S.redirectTo(ParentSubscription.cancelSurveySubscriptionMenu.loc.calcDefaultHref)
   }
@@ -179,18 +180,32 @@ class ParentSubscription extends Loggable {
 
     val currentNextShipDate = userSubscription.map(_.nextShipDate.get)
 
-    var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
+    var nextShipDate = currentNextShipDate.map(dateFormat.format).getOrElse("")
 
-    def confirmAction() = {
-      if (cancelAccount)
-        S.redirectTo(ParentSubscription.confirmCancelMenu.loc.calcDefaultHref)
-      else if (pauseAccount)
-        S.redirectTo(ParentSubscription.confirmPauseMenu.toLoc.calcHref(nextShipDate))
-      else
-        S.redirectTo(ParentSubscription.confirmResumeMenu.toLoc.calcHref(nextShipDate))
+    def validateFields: List[ValidationError] = {
+      val checkPause =
+        if (!pauseAccount) Empty
+        else futureDate(nextShipDate, dateFormat, nowDate, "#pause-account .next-shipment")
+
+      checkPause.toList
     }
 
-    def updateSubscriptionStatus(action: String)() = {
+    def confirmAction(): JsCmd = {
+      val validationErrors = validateFields
+
+      if (validationErrors.nonEmpty)
+        validationErrors.foldLeft(Noop)(_ & _)
+      else {
+        if (cancelAccount)
+          S.redirectTo(ParentSubscription.confirmCancelMenu.loc.calcDefaultHref)
+        else if (pauseAccount)
+          S.redirectTo(ParentSubscription.confirmPauseMenu.toLoc.calcHref(nextShipDate))
+        else
+          S.redirectTo(ParentSubscription.confirmResumeMenu.toLoc.calcHref(nextShipDate))
+      }
+    }
+
+    def updateSubscriptionStatus(action: String) = {
       action match {
         case "cancel" =>
           cancelAccount = true
@@ -214,7 +229,7 @@ class ParentSubscription extends Loggable {
     SHtml.makeFormsAjax andThen
       "#user-email *" #> email &
         ".subscription a [class+]" #> "current" &
-        "#resume-account" #> ClearNodesIf(currentStatus != Status.Paused) &
+        "#resume-account" #> ClearNodesIf(!(currentStatus contains Status.Paused)) &
         "#resume-account [onclick]" #> SHtml.ajaxInvoke(() => updateSubscriptionStatus("resume")) &
         "#pause-account [class+]" #> { if (pauseAccount) "selected" else "" } &
         "#pause-account .pause [class+]" #> { if (pauseAccount) "selected" else "" } &
@@ -233,13 +248,12 @@ class ParentSubscription extends Loggable {
         .now(ZoneId.of("America/New_York"))
         .atStartOfDay(ZoneId.of("America/New_York"))
         .plusDays(1)
-        .toInstant()
+        .toInstant
     )
 
     def confirmResume() = {
       val subscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
 
-      val newShipDate = dateFormat.format(nextShipDate)
       val updatedShipDateSubscription =
         subscription.map(_.nextShipDate(nextShipDate).status(Status.Active).saveMe)
       ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
@@ -265,7 +279,7 @@ class ParentSubscription extends Loggable {
     val subscription        = ParentSubscription.currentUserSubscription.is.map(_.reload)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
-    var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
+    val nextShipDate = currentNextShipDate.map(dateFormat.format).getOrElse("")
 
     "#user-email *" #> email &
       ".subscription a [class+]" #> "current" &
@@ -276,7 +290,7 @@ class ParentSubscription extends Loggable {
   def pauseSubscription: NodeSeq => NodeSeq = {
     val nextShipDate = ParentSubscription.confirmPauseMenu.currentValue.openOr("")
 
-    def confirmPause() = {
+    def confirmPause(): Nothing = {
       val subscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
 
       val newShipDate = dateFormat.parse(nextShipDate)
@@ -310,7 +324,7 @@ class ParentSubscription extends Loggable {
     val subscription        = ParentSubscription.currentUserSubscription.is.map(_.reload)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
-    var nextShipDate = currentNextShipDate.map(dateFormat.format(_)).getOrElse("")
+    val nextShipDate = currentNextShipDate.map(dateFormat.format).getOrElse("")
 
     "#user-email *" #> email &
       ".subscription a [class+]" #> "current" &

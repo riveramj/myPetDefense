@@ -8,6 +8,7 @@ import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
+import com.mypetdefense.util.DateHelper.tomorrowStart
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -166,8 +167,8 @@ class NewOrder extends Loggable {
     }
   }
 
-  def newUserSetup(customer: Stripe.Customer): User = {
-    val stripeId = customer.id
+  def newUserSetup(customer: StripeFacade.CustomerWithSubscriptions): User = {
+    val stripeId = customer.value.id
 
     val newParent = User.createNewUser(
       firstName = firstName,
@@ -195,7 +196,7 @@ class NewOrder extends Loggable {
     createNewPets(newParent)
 
     val subscriptionId: String = (for {
-      rawSubscriptions <- customer.subscriptions
+      rawSubscriptions <- customer.value.subscriptions
       subscription     <- rawSubscriptions.data.headOption
     } yield subscription.id).getOrElse("")
 
@@ -203,7 +204,7 @@ class NewOrder extends Loggable {
       Full(newParent),
       subscriptionId,
       new Date(),
-      new Date(),
+      tomorrowStart,
       Price.currentPetlandMonthlyCode,
       isUpgraded = false,
       6

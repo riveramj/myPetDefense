@@ -1,11 +1,11 @@
 package com.mypetdefense.snippet
 
-import java.time.{LocalDate, ZoneId}
 import java.util.Date
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
+import com.mypetdefense.util.DateHelper.tomorrowStart
 import com.mypetdefense.util.StripeHelper._
 import com.stripe.param.CustomerCreateParams
 import net.liftweb.common._
@@ -194,19 +194,11 @@ object TPPApi extends RestHelper with Loggable {
             val refreshedParent = parent.reload
             val updatedParent   = refreshedParent.stripeId(customer.id).saveMe
 
-            val plusOneDayTime = LocalDate
-              .now(ZoneId.of("America/New_York"))
-              .plusDays(1)
-              .atStartOfDay(ZoneId.of("America/New_York"))
-              .toInstant
-
-            val plusOneDayDate = Date.from(plusOneDayTime)
-
             val mpdSubscription = Subscription.createNewSubscription(
               Full(updatedParent),
               subscription.id,
               new Date(),
-              plusOneDayDate,
+              tomorrowStart,
               Price.currentTppPriceCode
             )
 
