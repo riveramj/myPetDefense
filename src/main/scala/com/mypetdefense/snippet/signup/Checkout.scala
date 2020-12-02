@@ -118,7 +118,7 @@ class Checkout extends Loggable {
       StripeFacade.Customer.createWithSubscription(
         email,
         stripeToken,
-        plan = "pennyProduct",
+        priceId = "pennyProduct",
         pennyCount,
         taxRate,
         coupon

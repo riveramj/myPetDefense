@@ -69,7 +69,7 @@ object TPPApi extends RestHelper with Loggable {
       token:
       $stripeToken
 
-      plan:
+      price:
       tpp-pennyPlan
 
       quantity:
@@ -132,7 +132,7 @@ object TPPApi extends RestHelper with Loggable {
         parent:
         $parent
 
-        plan:
+        price:
         tpp-pennyPlan
         
         pennyCount:
@@ -184,7 +184,7 @@ object TPPApi extends RestHelper with Loggable {
           StripeFacade.Subscription.createWithTaxRate(
             customer,
             taxRate,
-            plan = "tpp-pennyPlan",
+            priceId = "tpp-pennyPlan",
             pennyCount,
             coupon = Some("tpp")
           )

@@ -46,14 +46,14 @@ object StripeFacade {
     def createWithSubscription(
         email: String,
         stripeToken: String,
-        plan: String,
+        priceId: String,
         quantity: Int,
         taxRate: BigDecimal,
         coupon: Box[Coupon] = Empty
     ): Box[CustomerWithSubscriptions] =
       for {
         customer <- Customer.create(email, stripeToken, coupon)
-        _        <- Subscription.createWithTaxRate(customer, taxRate, plan, quantity)
+        _        <- Subscription.createWithTaxRate(customer, taxRate, priceId, quantity)
         updated  <- Customer.retrieveWithSubscriptions(customer.id)
       } yield updated
 
@@ -83,7 +83,7 @@ object StripeFacade {
     def create(
         customer: Stripe.Customer,
         taxRate: Stripe.TaxRate,
-        plan: String,
+        priceId: String,
         quantity: Int,
         coupon: Box[String] = Empty
     ): Box[Stripe.Subscription] =
@@ -94,7 +94,7 @@ object StripeFacade {
           .addDefaultTaxRate(taxRate.id)
           .addItem(
             SubscriptionCreateParams.Item.builder
-              .setPlan(plan) // TODO: probably should migrate to prices
+              .setPrice(priceId)
               .setQuantity(quantity)
               .build
           )
@@ -104,13 +104,13 @@ object StripeFacade {
     def createWithTaxRate(
         customer: Stripe.Customer,
         taxRate: BigDecimal,
-        plan: String,
+        priceId: String,
         quantity: Int,
         coupon: Box[String] = Empty
     ): Box[Stripe.Subscription] =
       for {
         txr <- TaxRate.retrieveOrCreate(taxRate)
-        sub <- Subscription.create(customer, txr, plan, quantity, coupon)
+        sub <- Subscription.create(customer, txr, priceId, quantity, coupon)
       } yield sub
 
     def update(subscriptionId: String, params: SubscriptionUpdateParams): Box[Stripe.Subscription] =
@@ -131,15 +131,23 @@ object StripeFacade {
       } yield sub
 
     def updateFirstItem(
+        subscription: Stripe.Subscription,
+        params: SubscriptionItemUpdateParams
+    ): Box[Stripe.Subscription] =
+      for {
+        items   <- subscription.items
+        first   <- items.data.headOption
+        _       <- first.update(params)
+        updated <- Stripe.Subscription.retrieve(subscription.id)
+      } yield updated
+
+    def updateFirstItem(
         subscriptionId: String,
         params: SubscriptionItemUpdateParams
     ): Box[Stripe.Subscription] =
       for {
         subscription <- Stripe.Subscription.retrieve(subscriptionId)
-        items        <- subscription.items
-        first        <- items.data.headOption
-        _            <- first.update(params)
-        updated      <- Stripe.Subscription.retrieve(subscriptionId)
+        updated      <- Subscription.updateFirstItem(subscription, params)
       } yield updated
   }
 
