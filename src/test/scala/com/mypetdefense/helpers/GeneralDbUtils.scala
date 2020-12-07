@@ -9,6 +9,7 @@ import com.mypetdefense.helpers.db.UserDbUtils.createUser
 import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
 import net.liftweb.common._
+import net.liftweb.mapper.NotNullRef
 
 object GeneralDbUtils {
 
@@ -48,7 +49,7 @@ object GeneralDbUtils {
     SubscriptionItem.findAll().map(_.delete_!)
     Shipment.findAll().map(_.delete_!)
     ShipmentLineItem.findAll().map(_.delete_!)
-    User.findAll().map(_.delete_!)
+    User.bulkDelete_!!(NotNullRef(User.userId))
   }
 
   def insertUserAndSub(

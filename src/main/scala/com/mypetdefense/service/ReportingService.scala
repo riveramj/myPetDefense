@@ -134,7 +134,7 @@ object ReportingService extends Loggable {
   }
 
   def findNewCustomersMonth(users: List[User], month: String = "", year: Int = 2019): List[User] = {
-    val date = getDateRange(month)
+    val date = getDateRange(month, year)
 
     users filter { user =>
       (user.getCreatedDateOfUser.getYear == year) && (user.getCreatedDateOfUser.getMonth == date.getMonth)
