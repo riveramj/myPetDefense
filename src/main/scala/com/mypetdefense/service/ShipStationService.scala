@@ -208,7 +208,6 @@ trait ShipStationServiceTrait extends Loggable {
       subscription: Subscription,
       count: Int
   ): Future[Box[Order]] = {
-    println("============================== " + count)
     val billShipTo = createUserBillShipToAddress(user)
 
     val shipmentLineItems        = shipment.actualShipmentLineItems

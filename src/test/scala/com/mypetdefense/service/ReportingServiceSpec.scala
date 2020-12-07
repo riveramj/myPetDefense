@@ -1,14 +1,15 @@
 package com.mypetdefense.service
 
 import java.util.Date
+
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator._
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.ListUtil.ListOps
 import com.mypetdefense.helpers._
-import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.helpers.db.AgencyDbUtils._
+import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.util.CalculationHelper
@@ -120,11 +121,12 @@ class ReportingServiceSpec extends DBTest {
 
   it should "find new customers for month" in {
     forAll(listOfNUsersGen(), listOfNUsersGen()) { (registeredThisMonth, registeredLongTimeAgo) =>
-      val expectedUsersIds =
-        registeredThisMonth.map(createUser(_).createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
-      registeredLongTimeAgo.foreach(createUser(_).createdAt(anyDayOfLastMonth.toDate).saveMe())
+
+      val expectedUsersIds = registeredThisMonth.map(createUser(_).createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
+      val oldIds = registeredLongTimeAgo.map(createUser(_).createdAt(anyDayOfLastMonth.toDate).saveMe().id.get)
 
       val users = User.findAll()
+
       val usersIdsRegisteredInThisMonth =
         ReportingService
           .findNewCustomersMonth(users, now.getMonth.toString, now.getYear)

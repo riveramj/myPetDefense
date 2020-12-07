@@ -134,7 +134,7 @@ object ReportingService extends Loggable {
   }
 
   def findNewCustomersMonth(users: List[User], month: String = "", year: Int = 2019): List[User] = {
-    val date = getDateRange(month)
+    val date = getDateRange(month, year)
 
     users filter { user =>
       (user.getCreatedDateOfUser.getYear == year) && (user.getCreatedDateOfUser.getMonth == date.getMonth)
@@ -490,6 +490,44 @@ object ReportingService extends Loggable {
     val data     = executiveSnapshotReport
     val fileName = s"executive-snapshot-${LocalDate.now()}.csv"
     CSVHelper.inMemoryCsv(fileName, data)
+  }
+
+  def executiveDashboardReport: ExecutiveDashboardReport = {
+    val newStartsTodayData = TodayRelatedData(
+      Subscription.findNewTodaySubscriptions.size,
+      Subscription.findNewTodaySubscriptionsLastMonth.size,
+      Subscription.findNewTodaySubscriptionsLastYear.size
+    )
+    val newStartsMTDData = MTDData(
+      Subscription.findNewMTDSubscriptions.size,
+      Subscription.findNewMTDSubscriptionsLastMonth.size,
+      Subscription.findNewMTDSubscriptionsLastYear.size
+    )
+    val newStartsYTDData = YTDData(
+      Subscription.findNewYTDSubscriptions.size,
+      Subscription.findNewYTDSubscriptionsLastMonth.size,
+      Subscription.findNewYTDSubscriptionsLastYear.size
+    )
+
+    val mtdShipments       = Shipment.findMtdShipments
+    val mtdShipmentData    = MTDShipmentsData(mtdShipments.size, mtdShipments.sumAmountPaid)
+    val todayShipments     = Shipment.findTodayShipments
+    val todayShipmentsData = TodayShipmentsData(todayShipments.size, todayShipments.sumAmountPaid)
+
+    val newUserCount       = Subscription.findNewMTDSubscriptions.size
+    val cancellationsCount = Subscription.findCancelledMtdSubscriptions.size
+
+    val remainingMonthSubscriptions: Int = Subscription.findCurrentMonthUpcomingSubscriptions.size
+    ExecutiveDashboardReport(
+      newStartsTodayData,
+      newStartsMTDData,
+      newStartsYTDData,
+      mtdShipmentData,
+      todayShipmentsData,
+      remainingMonthSubscriptions,
+      newUserCount,
+      cancellationsCount
+    )
   }
 
   private[service] def rawSalesReport(agencyName: String): List[RawSaleDataReport] = {

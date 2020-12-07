@@ -19,6 +19,13 @@ object CalculationHelper {
         map.updated(key, count)
       }
   }
+  /*
+    used formula -> https://www.percentage-change-calculator.com/index.html
+   */
+  def calculatePercentageDiff(startValue: BigDecimal, endValue: BigDecimal): BigDecimal = {
+    if (startValue.toInt == 0) 0
+    else ((endValue - startValue) / startValue) * 100
+  }
 
   def calculateInsertsWeight(
       fleaTick: Iterable[FleaTick],

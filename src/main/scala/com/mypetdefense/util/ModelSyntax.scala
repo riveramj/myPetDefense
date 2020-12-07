@@ -1,6 +1,6 @@
 package com.mypetdefense.util
 
-import com.mypetdefense.model.{Insert, Pet, ShipmentLineItem, Subscription, User}
+import com.mypetdefense.model._
 
 object ModelSyntax {
   implicit class ListOfUsersSyntax(val v: List[User]) extends AnyVal {
@@ -15,4 +15,7 @@ object ModelSyntax {
     def distinctInserts: List[Insert] = v.flatMap(_.insert.obj).distinct
   }
 
+  implicit class ListOfShipmentsSyntax(val v: List[Shipment]) extends AnyVal {
+    def sumAmountPaid: BigDecimal = v.map(_.amountPaid.get).map(amount => BigDecimal(amount)).sum
+  }
 }
