@@ -126,14 +126,6 @@ class ReportingServiceSpec extends DBTest {
       val oldIds = registeredLongTimeAgo.map(createUser(_).createdAt(anyDayOfLastMonth.toDate).saveMe().id.get)
 
       val users = User.findAll()
-      println("=========")
-      println(users.size + " user size")
-      println(registeredThisMonth.size + " this month")
-      println(expectedUsersIds.size + " this month")
-
-      println(registeredLongTimeAgo.size + " last month")
-      println(oldIds.size + " last month")
-      println("=========")
 
       val usersIdsRegisteredInThisMonth =
         ReportingService
