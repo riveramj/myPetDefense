@@ -1,7 +1,7 @@
-import sbt._
-import Keys._
 import com.earldouglas.xsbtwebplugin._
 import com.openstudy.sbt.ResourceManagementPlugin._
+import sbt.Keys._
+import sbt._
 
 name := "My Pet Defense"
 
@@ -59,6 +59,7 @@ libraryDependencies ++= {
     "org.quartz-scheduler"         % "quartz"              % "2.3.0",
     "org.eclipse.jetty"            % "jetty-webapp"        % "9.4.12.v20180830" % "container; compile->default",
     "org.mockito"                  % "mockito-core"        % "3.5.13" % "test",
+    "com.h2database"               % "h2"                  % "1.4.200" % "test",
     "org.typelevel"                %% "cats-core"          % "2.2.0" % "test",
     "org.scalacheck"               %% "scalacheck"         % "1.14.1" % "test",
     "org.scalatestplus"            %% "scalacheck-1-14"    % "3.2.2.0" % "test",
