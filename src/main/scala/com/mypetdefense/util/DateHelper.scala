@@ -1,9 +1,10 @@
 package com.mypetdefense.util
 
 import java.text.SimpleDateFormat
-import java.time.{LocalDate, LocalDateTime, YearMonth, ZoneId, ZonedDateTime}
 import java.time.format.DateTimeFormatter
+import java.time._
 import java.util.{Date, Locale}
+
 import net.liftweb.util.Helpers.tryo
 
 object DateHelper {
@@ -100,6 +101,9 @@ object DateHelper {
 
     monthDate.toInstant.atZone(ZoneId.systemDefault()).toLocalDateTime
   }
+
+  def mkDate(y: Int, m: Int, d: Int): Date =
+    Date.from(LocalDate.of(y, m, d).atStartOfDay(zoneId).toInstant)
 
   val monthHeaders: List[String] =
     List(

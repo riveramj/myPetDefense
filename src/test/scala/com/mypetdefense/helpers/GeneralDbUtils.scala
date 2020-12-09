@@ -46,6 +46,8 @@ object GeneralDbUtils {
       Event,
       Pet,
       Insert,
+      InventoryChangeAudit,
+      InventoryItem,
       Subscription,
       SubscriptionBox,
       SubscriptionItem,
