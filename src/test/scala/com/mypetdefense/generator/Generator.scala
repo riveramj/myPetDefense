@@ -3,49 +3,82 @@ package com.mypetdefense.generator
 import java.util.{Collections => JCollections}
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfNextMonth, anyDayOfThisMonth}
 import com.mypetdefense.helpers.Random.generateMoneyString
+import com.mypetdefense.helpers.ScalaCheckHelper
 import com.mypetdefense.model.Price._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
+import net.liftweb.common.{Box, Empty, Full}
 import com.stripe.model.{Customer, ExternalAccount, ExternalAccountCollection}
 import net.liftweb.common.{Box, Empty}
 import org.scalacheck._
 
-object Generator {
+object Generator extends ScalaCheckHelper {
 
-  private val STRING_MAX_LENGTH                    = 20
+  private val ALPHA_STRING_MAX_LENGTH              = 20
+  private val NUM_STRING_MAX_LENGTH                = 9
   private val MAX_LENGTH_OF_GENERATED_TRAVERSABLES = 10
 
-  protected def genAlphaStr: Gen[String] =
-    Gen.alphaStr.map(_.take(STRING_MAX_LENGTH))
+  private def boundedStringGen(min: Int, max: Int)(charGen: Gen[Char]): Gen[String] =
+    Gen
+      .choose(min, max)
+      .flatMap(Gen.listOfN(_, charGen))
+      .map(_.mkString)
+      .suchThat { s =>
+        val l = s.length
+        min <= l && l <= max
+      }
 
-  protected def genMoneyString: Gen[String] = {
-    Gen.posNum[Int].map(i => f"${i.toDouble}%2.2f")
+  lazy val genAlphaStr: Gen[String] =
+    boundedStringGen(0, ALPHA_STRING_MAX_LENGTH)(Gen.alphaChar)
+  lazy val genNonEmptyAlphaStr: Gen[String] =
+    boundedStringGen(1, ALPHA_STRING_MAX_LENGTH)(Gen.alphaChar)
+  lazy val genNumStr: Gen[String] =
+    boundedStringGen(0, NUM_STRING_MAX_LENGTH)(Gen.numChar)
+  lazy val genNonEmptyNumStr: Gen[String] =
+    boundedStringGen(1, NUM_STRING_MAX_LENGTH)(Gen.numChar)
+
+  lazy val genBool: Gen[Boolean] = Gen.oneOf(true, false)
+
+  private def genNonNegNum[T](implicit num: Numeric[T], c: Gen.Choose[T]): Gen[T] = {
+    import num._
+    Gen.sized(n => c.choose(zero, max(fromInt(n), one)))
   }
+  private def genNonPosNum[T](implicit num: Numeric[T], c: Gen.Choose[T]): Gen[T] =
+    genNonNegNum.map(num.negate)
 
-  protected def genBoxString: Gen[Box[String]] = Gen.option(genAlphaStr).map(Box.apply[String])
+  lazy val genPosLong: Gen[Long]    = Gen.posNum[Long]
+  lazy val genNegLong: Gen[Long]    = Gen.negNum[Long]
+  lazy val genNonNegLong: Gen[Long] = genNonNegNum[Long]
+  lazy val genNonPosLong: Gen[Long] = genNonPosNum[Long]
 
-  protected def genNonEmptyStr: Gen[String] =
+  lazy val genPosInt: Gen[Int]    = Gen.posNum[Int]
+  lazy val genNegInt: Gen[Int]    = Gen.negNum[Int]
+  lazy val genNonNegInt: Gen[Int] = genNonNegNum[Int]
+  lazy val genNonPosInt: Gen[Int] = genNonPosNum[Int]
+
+  def genMoneyString: Gen[String] = Gen.posNum[Int].map(i => f"${i.toDouble}%2.2f")
+
+  def genBoxString: Gen[Box[String]] = Gen.option(genAlphaStr).map(Box.apply[String])
+
+  def genNonEmptyBoxStr: Gen[Box[String]] = genNonEmptyAlphaStr.map(Full.apply[String])
+
+  def genEmailStr: Gen[String] = genNonEmptyAlphaStr.map(_ + "@foo.com")
+
+  def genSignedNumStr: Gen[String] =
     for {
-      str <- genAlphaStr
-      refinedStr = str + "some"
-    } yield refinedStr
-
-  protected def genBool: Gen[Boolean] = Gen.oneOf(true, false)
-
-  protected def genPosLong: Gen[Long] = Gen.posNum[Long]
-
-  protected def genEmailStr: Gen[String] =
-    genNonEmptyStr.map(_ + "@foo.com")
+      num  <- genNonEmptyNumStr
+      sign <- Gen.oneOf("-", "")
+    } yield s"$sign$num"
 
   def genUserType: Gen[UserType.Value] = Gen.oneOf(UserType.values.toSeq)
 
   def genUserToCreate: Gen[UserCreateGeneratedData] =
     for {
-      firstName <- genNonEmptyStr
-      lastName  <- genNonEmptyStr
-      stripeId  <- genNonEmptyStr
+      firstName <- genNonEmptyAlphaStr
+      lastName  <- genNonEmptyAlphaStr
+      stripeId  <- genNonEmptyAlphaStr
       email     <- genEmailStr
-      password  <- genNonEmptyStr
+      password  <- genNonEmptyAlphaStr
       phone    = "123-123-1234"
       userType = UserType.Parent
     } yield UserCreateGeneratedData(
@@ -76,9 +109,24 @@ object Generator {
       weight = generateMoneyString.toDouble
     } yield InsertGenData(name, itemNumber, weight)
 
+  def genUnitOfMeasure: Gen[UnitOfMeasure.Value] =
+    Gen.oneOf(UnitOfMeasure.values)
+
+  def genInventoryItem: Gen[InventoryItem] =
+    for {
+      itemNumber <- genNonEmptyAlphaStr
+      desc       <- genNonEmptyAlphaStr
+      unit       <- genUnitOfMeasure
+      total      <- genPosInt
+    } yield InventoryItem.create
+      .itemNumber(itemNumber)
+      .description(desc)
+      .unitOfMeasure(unit)
+      .total(total)
+
   def genSubscriptionToCreate: Gen[SubscriptionCreateGeneratedData] =
     for {
-      stripeSubscriptionId <- genNonEmptyStr
+      stripeSubscriptionId <- genNonEmptyAlphaStr
       date         = anyDayOfThisMonth
       startDate    = date.toDate
       nextShipDate = date.plusDays(3).toDate
@@ -94,7 +142,7 @@ object Generator {
 
   def generateStripeCustomer: Gen[Customer] =
     for {
-      id       <- genNonEmptyStr
+      id       <- genNonEmptyAlphaStr
       liveMode <- genBool
       cardList = {
         val c = new ExternalAccountCollection
@@ -119,9 +167,9 @@ object Generator {
 
   def generateNewUserAddress: Gen[NewUserAddress] =
     for {
-      street1 <- genNonEmptyStr
-      street2 <- genNonEmptyStr
-      city    <- genNonEmptyStr
+      street1 <- genNonEmptyAlphaStr
+      street2 <- genNonEmptyAlphaStr
+      city    <- genNonEmptyAlphaStr
       state = "GA"
       zip   = "30312"
     } yield NewUserAddress(street1, street2, city, state, zip)
@@ -129,17 +177,17 @@ object Generator {
   def generateNewUserData: Gen[NewUserData] =
     for {
       email     <- genEmailStr
-      firstName <- genNonEmptyStr
-      lastName  <- genNonEmptyStr
-      password  <- genNonEmptyStr
+      firstName <- genNonEmptyAlphaStr
+      lastName  <- genNonEmptyAlphaStr
+      password  <- genNonEmptyAlphaStr
       address   <- generateNewUserAddress
     } yield NewUserData(email, firstName, lastName, password, address, Empty)
 
   def generateAddress: Gen[AddressGeneratedData] =
     for {
-      street1 <- genNonEmptyStr
-      street2 <- genNonEmptyStr
-      city    <- genNonEmptyStr
+      street1 <- genNonEmptyAlphaStr
+      street2 <- genNonEmptyAlphaStr
+      city    <- genNonEmptyAlphaStr
       state = "GA"
       zip   = "30312"
     } yield AddressGeneratedData(street1, street2, city, state, zip, AddressType.Shipping)
@@ -154,13 +202,13 @@ object Generator {
 
   def generateSimplePet: Gen[Pet] =
     for {
-      name <- genNonEmptyStr
+      name <- genNonEmptyAlphaStr
       size <- generateDogOfSupportedSize
     } yield Pet.create.name(name).size(size)
 
   def genPetData: Gen[PetData] =
     for {
-      petName <- genNonEmptyStr
+      petName <- genNonEmptyAlphaStr
       size    <- generateDogOfSupportedSize
       petType = AnimalType.Dog
     } yield PetData(petName, petType, size)
@@ -182,7 +230,7 @@ object Generator {
 
   def genShipmentToCreate: Gen[ShipmentCreateGeneratedData] =
     for {
-      stripePaymentId <- genNonEmptyStr
+      stripePaymentId <- genNonEmptyAlphaStr
       stripeChargeId  <- genBoxString
       amountPaid      <- genMoneyString
       taxPaid = amountPaid.toDouble - 0.3
@@ -255,6 +303,16 @@ object Generator {
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[InsertGenData]] =
     Gen.listOfN(length, genInsertData)
+
+  def listOfNInventoryItemsGen(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[InventoryItem]] =
+    Gen.listOfN(length, genInventoryItem)
+
+  def listOfNPosIntsGen(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[Int]] =
+    Gen.listOfN(length, genPosInt)
 
   def stripeCustomer(seed: Long = 42L): Customer =
     generateStripeCustomer.pureApply(Gen.Parameters.default, rng.Seed(seed))

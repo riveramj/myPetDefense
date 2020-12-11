@@ -4,11 +4,10 @@ import com.mypetdefense.generator._
 import com.mypetdefense.helpers.BootUtil.testDatabase
 import com.mypetdefense.helpers.db.AgencyDbUtils.createAgency
 import com.mypetdefense.helpers.db.PetDbUtils.createPet
-import com.mypetdefense.helpers.db.ShipmentDbUtils.createShipment
-import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
-import com.mypetdefense.helpers.db.PetDbUtils.createPet
 import com.mypetdefense.helpers.db.ProductDbUtils.createNewProduct
 import com.mypetdefense.helpers.db.ProductScheduleDbUtils
+import com.mypetdefense.helpers.db.ShipmentDbUtils.createShipment
+import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
 import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
@@ -54,6 +53,8 @@ object GeneralDbUtils {
       Event,
       Pet,
       Insert,
+      InventoryChangeAudit,
+      InventoryItem,
       Subscription,
       SubscriptionBox,
       SubscriptionItem,
