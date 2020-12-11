@@ -1,14 +1,16 @@
 package com.mypetdefense.service
 
 import java.util.Date
+
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.Random._
+import com.mypetdefense.helpers.TestTags.PostgresOnlyTest
 import com.mypetdefense.model._
-import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 import net.liftweb.common.Full
+import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class ShipmentServiceSpec extends DBTest {
 
@@ -39,7 +41,7 @@ class ShipmentServiceSpec extends DBTest {
     }
   }
 
-  it should "get current past due shipments" in {
+  it should "get current past due shipments" taggedAs PostgresOnlyTest in {
     val properDate            = validDateForGetCurrentPastDueShipments
     val shouldBeProperData    = listOfNShipmentChainData()
     val shouldBeCancelledData = listOfNShipmentChainData()
@@ -93,7 +95,7 @@ class ShipmentServiceSpec extends DBTest {
     actualDataIds should contain theSameElementsAs insertedProperDataIds
   }
 
-  it should "get upcoming subscriptions" in {
+  it should "get upcoming subscriptions" taggedAs PostgresOnlyTest in {
     val shouldBeProperData    = mapWithNOfUserNSubscription()
     val shouldBeCancelledData = mapWithNOfUserNSubscription()
     val shouldBeTooFutureData = mapWithNOfUserNSubscription()
@@ -112,7 +114,7 @@ class ShipmentServiceSpec extends DBTest {
     actualDataIds should contain theSameElementsAs insertedExpectedIds
   }
 
-  it should "get past due shipments" in {
+  it should "get past due shipments" taggedAs PostgresOnlyTest in {
     val shouldBeProperData    = mapWithNOfUserNSubscription()
     val shouldBeTooFutureData = mapWithNOfUserNSubscription()
     val insertedExpectedIds = shouldBeProperData
