@@ -182,6 +182,7 @@ class Parents extends Loggable {
           animalType = pet,
           size = size,
           product = product,
+          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
           breed = petBreed,
           birthday = petBirthday
         )
@@ -282,7 +283,7 @@ class Parents extends Loggable {
             .toInstant
         )
         updatedSubscription.map { subscriptionToUpdate =>
-          ParentService.updateNextShipBillDate(subscriptionToUpdate, currentParent, tomorrow)
+          ParentService.updateNextShipBillDate(subscriptionToUpdate, tomorrow)
         }
 
         Alert("Subscription Resumed. Will ship tomorrow.") &
@@ -290,7 +291,7 @@ class Parents extends Loggable {
       } else {
         val nextShipDate = new SimpleDateFormat("MM/dd/yyyy").parse("08/01/2022")
         updatedSubscription.map { subscriptionToUpdate =>
-          ParentService.updateNextShipBillDate(subscriptionToUpdate, currentParent, nextShipDate)
+          ParentService.updateNextShipBillDate(subscriptionToUpdate, nextShipDate)
         }
 
         Alert("Subscription Paused.") &
@@ -569,13 +570,13 @@ class Parents extends Loggable {
     }.getOrElse(Nil)
 
     var updateNextShipDate =
-      nextShipDate.map(date => nextShipDateFormat.format(date).toString).getOrElse("")
+      nextShipDate.map(date => nextShipDateFormat.format(date)).getOrElse("")
 
     def updateShipDate() = {
       val updatedDate = nextShipDateFormat.parse(updateNextShipDate)
 
       subscription.map { oldSubscription =>
-        ParentService.updateNextShipBillDate(oldSubscription, parent, updatedDate)
+        ParentService.updateNextShipBillDate(oldSubscription, updatedDate)
         oldSubscription.nextShipDate(updatedDate).saveMe
       }
 

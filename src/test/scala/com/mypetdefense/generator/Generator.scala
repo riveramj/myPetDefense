@@ -1,11 +1,12 @@
 package com.mypetdefense.generator
 
-import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisMonth}
+import java.util.{Collections => JCollections}
+import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfNextMonth, anyDayOfThisMonth}
 import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.model.Price._
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
-import me.frmr.stripe.{CardList, Customer}
+import com.stripe.model.{Customer, ExternalAccount, ExternalAccountCollection}
 import net.liftweb.common.{Box, Empty}
 import org.scalacheck._
 
@@ -95,27 +96,26 @@ object Generator {
     for {
       id       <- genNonEmptyStr
       liveMode <- genBool
-      cardList = CardList(List())
+      cardList = {
+        val c = new ExternalAccountCollection
+        c.setData(JCollections.emptyList[ExternalAccount])
+        c
+      }
       created  <- genPosLong
       aBalance <- genPosLong
       currency = "USD"
       delinquent <- genBool
-    } yield Customer(
-      id,
-      liveMode,
-      cardList,
-      created,
-      aBalance,
-      currency,
-      delinquent,
-      None,
-      None,
-      None,
-      None,
-      Map.empty,
-      None,
-      None
-    )
+    } yield {
+      val c = new Customer
+      c.setId(id)
+      c.setLivemode(liveMode)
+      c.setSources(cardList)
+      c.setCreated(created)
+      c.setAccountBalance(aBalance)
+      c.setCurrency(currency)
+      c.setDelinquent(delinquent)
+      c
+    }
 
   def generateNewUserAddress: Gen[NewUserAddress] =
     for {
@@ -217,6 +217,20 @@ object Generator {
       pets
     )
 
+  def genProduct: Gen[ProductGeneratedData] =
+    for {
+      productName <- genAlphaStr
+      sku         <- genAlphaStr
+    } yield ProductGeneratedData(productName, sku)
+
+  def genProductsSchedule(
+      productsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[ProductScheduleGeneratedChainData] =
+    for {
+      products <- Gen.listOfN(productsSize, genProduct)
+      startDate = anyDayOfNextMonth.toDate
+    } yield ProductScheduleGeneratedChainData(products, startDate)
+
   def genStatusLabelCreatedOrPaid: Gen[ShipmentStatus.Value] =
     Gen.oneOf(ShipmentStatus.LabelCreated, ShipmentStatus.Paid)
 
@@ -288,6 +302,17 @@ object Generator {
       listSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): List[InsertGenData] =
     listOfNInsertDataGen(listSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def productUpdateSchedule(
+      seed: Long = 42L,
+      productsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): ProductScheduleGeneratedChainData =
+    genProductsSchedule(productsSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def product(
+      seed: Long = 42L
+  ): ProductGeneratedData =
+    genProduct.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
   def listOfNShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES

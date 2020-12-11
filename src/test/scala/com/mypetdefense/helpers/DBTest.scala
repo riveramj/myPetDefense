@@ -8,6 +8,8 @@ import org.scalatest.matchers.must.Matchers
 import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
+import java.util.{Locale, TimeZone}
+
 trait DBTest
     extends AnyFlatSpec
     with Matchers
@@ -23,6 +25,9 @@ trait DBTest
   override def beforeAll(): Unit = {
     BootUtil.bootOnceForTests
     DataLoader.loadProducts
+    DataLoader.loadProducts
+    TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
+    Locale.setDefault(Locale.US)
   }
 
   override def beforeEach(): Unit = {

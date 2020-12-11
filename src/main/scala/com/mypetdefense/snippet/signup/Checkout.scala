@@ -6,7 +6,7 @@ import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
-import me.frmr.stripe.Customer
+import com.stripe.model.Customer
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -17,9 +17,6 @@ import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
 import scala.collection.mutable
-import scala.concurrent.Await
-import scala.concurrent.duration._
-import scala.util.{Failure => TryFail, Success => TrySuccess, _}
 import scala.xml.NodeSeq
 
 object Checkout extends Loggable {
@@ -78,11 +75,6 @@ class Checkout extends Loggable {
     Alert(s"""An error has occurred $stripeFailure. Please Try again.""")
   }
 
-  private def handleUnexpectedErrorOnSignUp(e: Throwable) = {
-    logger.error("create customer failed with: " + e)
-    Alert("An error has occurred. Please try again.")
-  }
-
   private def updateSessionVars() = {
     val total = subtotalWithDiscount + taxDue
     PetFlowChoices.petCount(Full(petCount))
@@ -119,10 +111,9 @@ class Checkout extends Loggable {
     val stripeCustomer =
       StripeService.createStripeCustomer(coupon, email, stripeToken, pennyCount, taxRate)
 
-    Try(Await.result(stripeCustomer, new DurationInt(7).seconds)) match {
-      case TrySuccess(Full(customer))    => setupNewUserAndRedirect(customer)
-      case TrySuccess(stripeFailure)     => handleStripeFailureOnSignUp(stripeFailure)
-      case TryFail(throwable: Throwable) => handleUnexpectedErrorOnSignUp(throwable)
+    stripeCustomer match {
+      case Full(customer) => setupNewUserAndRedirect(customer)
+      case stripeFailure  => handleStripeFailureOnSignUp(stripeFailure)
     }
   }
 
@@ -190,7 +181,7 @@ class Checkout extends Loggable {
     state = possibleState
     zip = possibleZip
 
-    val taxInfo = TaxJarService.findTaxAmoutAndRate(
+    val taxInfo = TaxJarService.findTaxAmountAndRate(
       city,
       state,
       zip,
