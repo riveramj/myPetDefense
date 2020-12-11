@@ -1,9 +1,6 @@
 package bootstrap.liftweb
 
-import java.util.{Locale, TimeZone}
-
 import com.mypetdefense.jobs.JobManager
-import com.mypetdefense.model._
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
 import com.stripe.Stripe
@@ -11,6 +8,8 @@ import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
 import net.liftweb.util.Props
+
+import java.util.{Locale, TimeZone}
 
 /**
   * A class that's instantiated early and run.  It allows the application
@@ -21,44 +20,7 @@ class Boot {
     MailConfig.init
 
     DbSetup.setup
-
-    Schemifier.schemify(
-      performWrite = true,
-      Schemifier.infoF _,
-      User,
-      CancelledUser,
-      Address,
-      Pet,
-      FleaTick,
-      Shipment,
-      Event,
-      ShipmentLineItem,
-      Subscription,
-      SubscriptionBox,
-      SubscriptionItem,
-      SubscriptionUpgrade,
-      Agency,
-      Coupon,
-      Price,
-      GrowthRate,
-      Review,
-      Survey,
-      TreatOrder,
-      ItemReconciliation,
-      ReconciliationEvent,
-      InventoryItem,
-      InventoryChangeAudit,
-      Insert,
-      InventoryItemPart,
-      Product,
-      TreatOrderLineItem,
-      Packaging,
-      TaggedItem,
-      Tag,
-      AddOnProduct,
-      AmazonOrder,
-      ApiRequestBackup
-    )
+    DbSetup.migrateTables
 
     //DataLoader.loadProducts
     //DataLoader.loadAdmin
@@ -77,6 +39,9 @@ class Boot {
     //DataLoader.cancellationDataSync()
     //DataLoader.createMissingDogBoxes()
     //ReportingService.getPetlandCustomersWithStats
+
+    //DataLoader.upgradeSubscriptionBoxDetails()
+    //DataLoader.subscriptionBoxCheck()
 
     //DataLoader.connectCancelledUsersToSubscription()
 

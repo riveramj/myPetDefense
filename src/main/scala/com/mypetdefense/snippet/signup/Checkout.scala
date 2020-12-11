@@ -48,12 +48,7 @@ class Checkout extends Loggable {
 
   var stripeToken         = ""
   var coupon: Box[Coupon] = PetFlowChoices.coupon.is
-  var couponCode: String = {
-    if (is50Off(coupon))
-      ""
-    else
-      coupon.map(_.couponCode.get.toLowerCase()).openOr("")
-  }
+  var couponCode: String  = coupon.map(_.couponCode.get.toLowerCase()).openOr("")
 
   val pets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
   val petCount: Int                          = pets.size
@@ -69,7 +64,7 @@ class Checkout extends Loggable {
     case 0 | 1 => BigDecimal(0)
     case _     => subtotal * 0.1
   }
-  val promotionAmount: BigDecimal      = coupon.map(_.percentOff.get).openOr(0) / 100 * subtotal
+  var promotionAmount: BigDecimal      = (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
   val subtotalWithDiscount: BigDecimal = subtotal - discount
 
   val pennyCount: Int = (subtotal * 100).toInt
@@ -137,7 +132,7 @@ class Checkout extends Loggable {
     val baseFields = List(
       checkEmpty(firstName, "#first-name"),
       checkEmpty(lastName, "#last-name"),
-      checkEmpty(email, "#email"),
+      checkEmail(email, "#email", signup = true),
       checkEmpty(street1, "#street-1"),
       checkEmpty(city, "#city"),
       checkEmpty(state, "#state"),
@@ -218,6 +213,8 @@ class Checkout extends Loggable {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
 
+        promotionAmount = (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
+
         val monthlyTotal = subtotalWithDiscount + taxDue
         val todayTotal   = subtotalWithDiscount + taxDue - promotionAmount
 
@@ -248,38 +245,38 @@ class Checkout extends Loggable {
     }
 
     val successCoupon = {
-      if (!coupon.isEmpty && !coupon.equals(Coupon.halfOffCoupon))
+      if (!coupon.isEmpty)
         "promo-success"
       else
         ""
     }
 
     SHtml.makeFormsAjax andThen
-      orderSummary &
-        "#left-column" #> SHtml.idMemoize { renderer =>
-          accountRenderer = Full(renderer)
+      orderSummary andThen
+      "#left-column" #> SHtml.idMemoize { renderer =>
+        accountRenderer = Full(renderer)
 
-          {
-            if (currentUser.isEmpty)
-              "#password" #> SHtml.password(password, userPassword => password = userPassword.trim)
-            else {
-              ".password-container" #> ClearNodes &
-                ".facebook-option" #> ClearNodes &
-                "#facebook-id" #> ClearNodes &
-                "#email [disabled]" #> "disabled"
-            }
-          } andThen
-            "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
-              "#facebook-id" #> ajaxText(facebookId, facebookId = _) &
-              "#first-name" #> ajaxText(firstName, firstName = _) &
-              "#last-name" #> ajaxText(lastName, lastName = _) &
-              ".connect-facebook [onClick]" #> SHtml.ajaxInvoke(() => connectFacebook()) &
-              "#street-1" #> text(street1, street1 = _) &
-              "#street-2" #> text(street2, street2 = _) &
-              "#city" #> ajaxText(city, city = _) &
-              "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
-              "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
+        {
+          if (currentUser.isEmpty)
+            "#password" #> SHtml.password(password, userPassword => password = userPassword.trim)
+          else {
+            ".password-container" #> ClearNodes &
+              ".facebook-option" #> ClearNodes &
+              "#facebook-id" #> ClearNodes &
+              "#email [disabled]" #> "disabled"
+          }
         } andThen
+          "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
+            "#facebook-id" #> ajaxText(facebookId, facebookId = _) &
+            "#first-name" #> ajaxText(firstName, firstName = _) &
+            "#last-name" #> ajaxText(lastName, lastName = _) &
+            ".connect-facebook [onClick]" #> SHtml.ajaxInvoke(() => connectFacebook()) &
+            "#street-1" #> text(street1, street1 = _) &
+            "#street-2" #> text(street2, street2 = _) &
+            "#city" #> ajaxText(city, city = _) &
+            "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
+            "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
+      } andThen
       "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
         ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup()) &
         ".promotion-info [class+]" #> successCoupon &

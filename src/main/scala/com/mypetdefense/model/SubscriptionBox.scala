@@ -1,56 +1,66 @@
 package com.mypetdefense.model
 
-import net.liftweb._
-import mapper._
-import com.mypetdefense.util.RandomIdGenerator._
+
 import java.util.Date
 
-import net.liftweb.common.Box
+import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb._
+import mapper._
 
-class SubscriptionBox
-    extends LongKeyedMapper[SubscriptionBox]
-    with IdPK
-    with OneToMany[Long, SubscriptionBox] {
+import java.util.Date
+
+
+class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with OneToMany[Long, SubscriptionBox] {
   def getSingleton: KeyedMetaMapper[Long, SubscriptionBox] = SubscriptionBox
+
   object boxId extends MappedLong(this) {
     override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
   }
-
   object subscription extends MappedLongForeignKey(this, Subscription)
   object pet          extends MappedLongForeignKey(this, Pet)
+  object animalType   extends MappedEnum(this, AnimalType)
+  object boxType      extends MappedEnum(this, BoxType)
   object fleaTick     extends MappedLongForeignKey(this, FleaTick)
-  object subscriptionItems
-      extends MappedOneToMany(SubscriptionItem, SubscriptionItem.subscriptionBox)
+  object subscriptionItems extends MappedOneToMany(SubscriptionItem, SubscriptionItem.subscriptionBox)
   object addOnProducts extends MappedOneToMany(AddOnProduct, AddOnProduct.subscriptionBox)
   object basePrice     extends MappedDouble(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+  object userModified extends MappedBoolean(this) {
+    override def defaultValue: Boolean = false
+  }
 }
 
 object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[SubscriptionBox] {
 
+  def getAllUnmodifiedDogHealthWellness: List[SubscriptionBox] = {
+    SubscriptionBox.findAll(
+      By(SubscriptionBox.userModified, false),
+      By(SubscriptionBox.animalType, AnimalType.Dog),
+      By(SubscriptionBox.boxType, BoxType.healthAndWellness)
+    )
+  }
+
   def possiblePrice(subscriptionBox: SubscriptionBox): Double =
     if (subscriptionBox.subscriptionItems.toList.nonEmpty)
-      subscriptionBox.pet.obj.map(basePrice).openOr(0d)
+      subscriptionBox.pet.obj.map(basePrice(_, false)).openOr(0d)
     else
       0d
 
-  def basePrice(pet: Pet): Double = {
+  def basePrice(pet: Pet, upgradedBox: Boolean): Double = {
     val smallDogs = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
 
-    pet match {
-      case dog if pet.animalType.get == AnimalType.Dog =>
-        if (smallDogs.contains(dog.size.get))
-          24.99
-        else
-          27.99
-      case _ => 12.99
+    (pet.animalType.get, pet.size.get, upgradedBox) match {
+      case (_, _, false) => 12.99
+      case (AnimalType.Cat, _, _) => 12.99
+      case (AnimalType.Dog, dogSize, true) if smallDogs.contains(dogSize) => 24.99
+      case (AnimalType.Dog, _, true) => 27.99
     }
   }
 
-  def createNewBox(subscription: Subscription, pet: Pet): SubscriptionBox = {
+  def createNewBox(subscription: Subscription, pet: Pet, upgradedBox: Boolean = false): SubscriptionBox = {
     val fleaTick = pet.size.get match {
       case AnimalSize.DogSmallZo  => FleaTick.zoGuardSmallDog
       case AnimalSize.DogMediumZo => FleaTick.zoGuardMediumDog
@@ -58,22 +68,23 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       case AnimalSize.DogXLargeZo => FleaTick.zoGuardXLargeDog
     }
 
-    SubscriptionBox.create
+    val newSubscriptionBox = SubscriptionBox.create
       .boxId(generateLongId)
       .subscription(subscription)
       .pet(pet)
+      .animalType(pet.animalType.get)
       .fleaTick(fleaTick)
-      .basePrice(basePrice(pet))
-      .saveMe()
-  }
+      .basePrice(basePrice(pet, upgradedBox))
 
-  def createBasicBox(subscription: Subscription, fleaTick: FleaTick, pet: Pet): SubscriptionBox = {
-    SubscriptionBox.create
-      .boxId(generateLongId)
-      .subscription(subscription)
-      .pet(pet)
-      .fleaTick(fleaTick)
-      .basePrice(basePrice(pet))
-      .saveMe()
+
+    if (upgradedBox)
+      newSubscriptionBox.boxType(BoxType.healthAndWellness).saveMe()
+    else
+      newSubscriptionBox.boxType(BoxType.basic).saveMe()
   }
+}
+
+object BoxType extends Enumeration {
+  val basic: BoxType.Value = Value("Basic") // 0
+  val healthAndWellness: BoxType.Value = Value("Health and Wellness") // 1
 }

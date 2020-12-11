@@ -182,6 +182,7 @@ class Parents extends Loggable {
           animalType = pet,
           size = size,
           product = product,
+          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
           breed = petBreed,
           birthday = petBirthday
         )

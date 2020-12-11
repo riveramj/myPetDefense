@@ -1,14 +1,15 @@
 package com.mypetdefense.util
 
 import java.text.SimpleDateFormat
-import java.time.{LocalDate, LocalDateTime, YearMonth, ZoneId, ZonedDateTime}
 import java.time.format.DateTimeFormatter
+import java.time._
 import java.util.{Date, Locale}
+
 import net.liftweb.util.Helpers.tryo
 
 object DateHelper {
-  val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  val zoneId: ZoneId         = ZoneId.of("America/New_York")
+  val dateFormat     = new SimpleDateFormat("MM/dd/yyyy")
+  val zoneId: ZoneId = ZoneId.of("America/New_York")
 
   def currentDate: LocalDateTime     = LocalDateTime.now()
   def now: LocalDate                 = LocalDate.now(zoneId)
@@ -101,6 +102,9 @@ object DateHelper {
     monthDate.toInstant.atZone(ZoneId.systemDefault()).toLocalDateTime
   }
 
+  def makeDate(year: Int, month: Int, day: Int): Date =
+    Date.from(LocalDate.of(year, month, day).atStartOfDay(zoneId).toInstant)
+
   val monthHeaders: List[String] =
     List(
       "January",
@@ -116,4 +120,15 @@ object DateHelper {
       "November",
       "December"
     )
+
+  implicit class DateOps(val v: Date) extends AnyVal {
+    def toLocalDate: LocalDate = v.toInstant.atZone(zoneId).toLocalDate
+    def isYesterday: Boolean = {
+      val localDate    = toLocalDate
+      val day          = localDate.getDayOfYear
+      val year         = localDate.getYear
+      val yesterdayDay = yesterday
+      day == yesterdayDay.getDayOfYear && year == yesterdayDay.getYear
+    }
+  }
 }
