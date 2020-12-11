@@ -74,10 +74,10 @@ class Subscription
   }
 
   def getStartDateOfSubscription: String =
-    tryo(signupCancelDateFormat.format(this.startDate.get)).openOr("")
+    tryo(dateFormat.format(this.startDate.get)).openOr("")
 
   def getCancelDateOfSubscription: String =
-    tryo(signupCancelDateFormat.format(this.cancellationDate.get)).openOr("")
+    tryo(dateFormat.format(this.cancellationDate.get)).openOr("")
 
   def getCreatedDateOfSubscription: LocalDate =
     this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
@@ -192,10 +192,10 @@ object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] 
     )
   }
 
-  def activeAndPausedSubscriptions: List[Subscription] =
+  def activeSubscriptions: List[Subscription] =
     Subscription.findAll(By(Subscription.status, Status.Active))
 
-  def upgradedActiveAndPausedSubscriptions: List[Subscription] =
+  def upgradedActiveSubscriptions: List[Subscription] =
     Subscription.findAll(
       By(Subscription.status, Status.Active),
       By(Subscription.isUpgraded, true)

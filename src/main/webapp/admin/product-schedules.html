@@ -1,0 +1,81 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+<div data-lift="admin.ProductSchedules.render?eager_eval=true">
+  <div data-lift="embed?what=admin/admin-nav-bar"></div>
+  <div id="item-container">
+    <h2>Product Schedules</h2>
+    <form>
+      <fieldset class="create create-schedules">
+        <legend>Create Schedule</legend>
+        <div>
+          <label class="start-date">
+            <span class="field-label">Start Date</span>
+            <input id="start-date" type="text" placeholder="10/20/2020">
+          </label>
+
+          <label class="choose-first-box">
+            <span class="field-label">First Box</span>
+            <input id="first-box" type="checkbox">
+          </label>
+
+          <div class="choose-supplement">
+            <span class="field-label">Supplement 1</span>
+            <select id="supplement-1">
+              <option value="123456">big pets</option>
+              <option value="099221">pets-r-us</option>
+            </select>
+          </div>
+
+          <div class="choose-supplement">
+            <span class="field-label">Supplement 2</span>
+            <select id="supplement-2">
+              <option value="123456">big pets</option>
+              <option value="099221">pets-r-us</option>
+            </select>
+          </div>
+
+          <div class="choose-supplement">
+            <span class="field-label">Supplement 3</span>
+            <select id="supplement-3">
+              <option value="123456">big pets</option>
+              <option value="099221">pets-r-us</option>
+            </select>
+          </div>
+        </div>
+        <div class="create-item create-schedule">
+          <button type="submit" id="create-item">Create</button>
+        </div>
+      </fieldset>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <td>Start Date</td>
+          <td>First Box</td>
+          <td>Supplement 1</td>
+          <td>Supplement 2</td>
+          <td>Supplement 3</td>
+          <td>Status</td>
+          <td>Actions</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="schedule">
+          <td class="start-date">10/10/2020</td>
+          <td class="first-box"></td>
+          <td class="supplement-name">Multi</td>
+          <td class="status"></td>
+          <td class="actions">
+            <button class="delete">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=admin">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+  </tail>
+</div>
