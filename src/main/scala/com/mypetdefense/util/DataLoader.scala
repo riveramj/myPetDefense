@@ -550,15 +550,15 @@ object DataLoader extends Loggable {
     for {
       box <- SubscriptionBox.findAll(
         NullRef(SubscriptionBox.userModified),
+        By(SubscriptionBox.animalType, AnimalType.Dog),
         By(SubscriptionBox.boxType, BoxType.healthAndWellness)
       )
-      boxItem <- box.subscriptionItems.toList
-      product <- boxItem.product.obj
+      subscriptionItems = box.subscriptionItems.toList
     } yield {
-      if (!products.contains(product))
-        box.userModified(true).save()
-      else
+      if (subscriptionItems.forall(products.contains))
         box.userModified(false).save()
+      else
+        box.userModified(true).save()
     }
   }
 
@@ -568,7 +568,7 @@ object DataLoader extends Loggable {
       pet <- box.pet.obj
       products = box.subscriptionItems.toList
     } yield {
-      if (products.size >= 2)
+      if (products.nonEmpty)
         box
           .animalType(AnimalType.Cat)
           .animalType(pet.animalType.get)
