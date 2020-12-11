@@ -1,10 +1,14 @@
 package com.mypetdefense.model
 
+
+import java.util.Date
+
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb._
 import mapper._
 
 import java.util.Date
+
 
 class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with OneToMany[Long, SubscriptionBox] {
   def getSingleton: KeyedMetaMapper[Long, SubscriptionBox] = SubscriptionBox
