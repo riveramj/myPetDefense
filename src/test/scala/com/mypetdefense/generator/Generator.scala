@@ -1,15 +1,16 @@
 package com.mypetdefense.generator
 
 import java.util.{Collections => JCollections}
+
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfNextMonth, anyDayOfThisMonth}
 import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.helpers.ScalaCheckHelper
 import com.mypetdefense.model.Price._
 import com.mypetdefense.model._
+import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
+import com.stripe.model.{Customer, PaymentSource, PaymentSourceCollection}
 import net.liftweb.common.{Box, Empty, Full}
-import com.stripe.model.{Customer, ExternalAccount, ExternalAccountCollection}
-import net.liftweb.common.{Box, Empty}
 import org.scalacheck._
 
 object Generator extends ScalaCheckHelper {
@@ -140,17 +141,17 @@ object Generator extends ScalaCheckHelper {
       contractLength
     )
 
-  def generateStripeCustomer: Gen[Customer] =
+  def generateStripeCustomer: Gen[Stripe.Customer] =
     for {
       id       <- genNonEmptyAlphaStr
       liveMode <- genBool
       cardList = {
-        val c = new ExternalAccountCollection
-        c.setData(JCollections.emptyList[ExternalAccount])
+        val c = new PaymentSourceCollection
+        c.setData(JCollections.emptyList[PaymentSource])
         c
       }
-      created  <- genPosLong
-      aBalance <- genPosLong
+      created <- genPosLong
+      balance <- genPosLong
       currency = "USD"
       delinquent <- genBool
     } yield {
@@ -159,10 +160,10 @@ object Generator extends ScalaCheckHelper {
       c.setLivemode(liveMode)
       c.setSources(cardList)
       c.setCreated(created)
-      c.setAccountBalance(aBalance)
+      c.setBalance(balance)
       c.setCurrency(currency)
       c.setDelinquent(delinquent)
-      c
+      Stripe.Customer(c)
     }
 
   def generateNewUserAddress: Gen[NewUserAddress] =
@@ -314,7 +315,7 @@ object Generator extends ScalaCheckHelper {
   ): Gen[List[Int]] =
     Gen.listOfN(length, genPosInt)
 
-  def stripeCustomer(seed: Long = 42L): Customer =
+  def stripeCustomer(seed: Long = 42L): Stripe.Customer =
     generateStripeCustomer.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
   def newUserData(seed: Long = 42L): NewUserData =

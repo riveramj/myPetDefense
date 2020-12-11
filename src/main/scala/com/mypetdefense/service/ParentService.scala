@@ -5,19 +5,17 @@ import java.util.Date
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.shipstation.Order
 import com.mypetdefense.snippet.TPPApi
 import com.mypetdefense.util.StripeHelper._
-import com.stripe.model.{Subscription => StripeSubscription, _}
-import net.liftweb.common.BoxLogging._
+import com.stripe.param._
 import net.liftweb.common._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
-import scala.collection.JavaConverters._
-
-object ParentService extends Loggable {
+object ParentService extends LoggableBoxLogging {
   val whelpDateFormat                  = new java.text.SimpleDateFormat("M/d/y")
   val currentPentlandPlan: String      = Props.get("petland.6month.payment") openOr ""
   val petlandMonthlyPlan: Box[String]  = Props.get("petland.1month.payment")
@@ -31,7 +29,9 @@ object ParentService extends Loggable {
         newUser = false
       )
     } else {
-      updateCustomer(customerId, ParamsMap("card" --> stripeToken))
+      val params = CustomerUpdateParams.builder.setSource(stripeToken).build
+      StripeFacade.Customer
+        .update(customerId, params)
         .logFailure("update customer failed. Email sent to log error.")
     }
   }
@@ -39,19 +39,26 @@ object ParentService extends Loggable {
   def updateStripeSubscriptionQuantity(
       subscriptionId: String,
       quantity: Int
-  ): Box[StripeSubscription] = {
-    val params = ParamsMap(
-      "quantity" --> quantity,
-      "prorate" --> false
-    )
+  ): Box[Stripe.Subscription] = {
+    import SubscriptionItemUpdateParams._
 
-    updateSubscription(subscriptionId, params)
+    val params =
+      SubscriptionItemUpdateParams.builder
+        .setQuantity(quantity)
+        .setProrationBehavior(ProrationBehavior.NONE)
+        .build
+
+    StripeFacade.Subscription
+      .updateFirstItem(subscriptionId, params)
       .logFailure("update subscription failed with stripe error")
   }
 
-  def updateCoupon(customerId: String, couponCode: Box[String]): Box[Customer] = {
-    couponCode.toOption.fold { deleteCustomerDiscount(customerId).flatMap[Customer](_ => Empty) } {
-      coupon => updateCustomer(customerId, ParamsMap("coupon" --> coupon))
+  def updateCoupon(customerId: String, couponCode: Box[String]): Box[Stripe.Customer] = {
+    couponCode.toOption.fold {
+      StripeFacade.Customer.deleteDiscount(customerId).flatMap[Stripe.Customer](_ => Empty)
+    } { coupon =>
+      val params = CustomerUpdateParams.builder.setCoupon(coupon).build
+      StripeFacade.Customer.update(customerId, params)
     }
   }
 
@@ -80,7 +87,8 @@ object ParentService extends Loggable {
     cancelOpenOrders(oldUser)
 
     val deletedCustomer =
-      deleteCustomer(stripeCustomerId)
+      StripeFacade.Customer
+        .delete(stripeCustomerId)
         .logFailure("remove customer failed with stripe error")
 
     deletedCustomer match {
@@ -113,40 +121,50 @@ object ParentService extends Loggable {
     }
   }
 
-  def getStripeCustomer(customerId: String): Box[Customer] =
-    Box.tryo { Customer.retrieve(customerId) }
+  def getStripeCustomer(customerId: String): Box[Stripe.Customer] =
+    Stripe.Customer
+      .retrieve(customerId)
       .logFailure("get customer failed with stripe error")
 
-  def getStripeCustomerDiscount(customerId: String): Box[Discount] =
-    getStripeCustomer(customerId).flatMap(c => Option(c.getDiscount))
+  def getStripeCustomerWithSources(customerId: String): Box[StripeFacade.CustomerWithSources] =
+    StripeFacade.Customer
+      .retrieveWithSources(customerId)
+      .logFailure("get customer failed with stripe error")
+
+  def getStripeCustomerDiscount(customerId: String): Box[Stripe.Discount] =
+    getStripeCustomer(customerId).flatMap(_.discount)
 
   def getDiscount(customerId: String): Box[Int] =
     for {
       discount   <- getStripeCustomerDiscount(customerId)
-      coupon     <- Option(discount.getCoupon)
-      percentOff <- Option(coupon.getPercentOff)
+      coupon     <- discount.coupon
+      percentOff <- coupon.percentOff
     } yield percentOff.toInt
 
-  def getUpcomingInvoice(customerId: String): Box[Invoice] =
-    Box.tryo { Invoice.upcoming(ParamsMap("customer" --> customerId)) }
+  def getUpcomingInvoice(customerId: String): Box[Stripe.Invoice] = {
+    val params = InvoiceUpcomingParams.builder.setCustomer(customerId).build
+    Stripe.Invoice
+      .upcoming(params)
       .logFailure("get upcoming invoice failed with stripe error")
+  }
 
-  def getInvoice(invoiceId: String): Box[Invoice] =
-    Box.tryo { Invoice.retrieve(invoiceId) }
+  def getInvoice(invoiceId: String): Box[Stripe.Invoice] =
+    Stripe.Invoice
+      .retrieve(invoiceId)
       .logFailure("get invoice failed with stripe error")
 
-  def getStripeSubscription(subscriptionId: String): Box[StripeSubscription] =
-    Box.tryo { StripeSubscription.retrieve(subscriptionId) }
+  def getStripeSubscription(subscriptionId: String): Box[Stripe.Subscription] =
+    Stripe.Subscription
+      .retrieve(subscriptionId)
       .logFailure("get subscription failed with stripe error")
 
-  def getCustomerCard(customerId: String): Option[Card] =
+  def getCustomerCard(customerId: String): Box[Stripe.Card] =
     for {
-      customer    <- getStripeCustomer(customerId).toOption
-      sources     <- Option(customer.getSources)
-      sourcesData <- Option(sources.getData)
-      source      <- sourcesData.asScala.headOption
-      if source.getObject == "card"
-    } yield source.asInstanceOf[Card]
+      customer <- getStripeCustomerWithSources(customerId)
+      sources  <- customer.value.sources
+      source   <- sources.data.headOption
+      if source.isCard
+    } yield source.asCard
 
   def updateNextShipBillDate(subscription: Subscription, nextDate: Date): Box[Subscription] = {
     val updatedSubscription = changeStripeBillDate(
@@ -165,7 +183,7 @@ object ParentService extends Loggable {
 
     getStripeSubscription(stripeSubscriptionId) match {
       case Full(stripeSubscription) =>
-        val currentPeriodEnd = Option(stripeSubscription.getCurrentPeriodEnd).fold(0L)(_.toLong)
+        val currentPeriodEnd = stripeSubscription.currentPeriodEnd.getOrElse(0L)
         val nextMonthDate    = new Date(currentPeriodEnd * 1000L)
 
         val nextMonthLocalDate =
@@ -184,15 +202,26 @@ object ParentService extends Loggable {
     }
   }
 
-  def changeStripeBillDate(subscriptionId: String, date: Long): Box[StripeSubscription] = {
+  def changeStripeBillDate(subscriptionId: String, date: Long): Box[Stripe.Subscription] = {
+    import SubscriptionUpdateParams._
+
+    val params =
+      SubscriptionUpdateParams.builder
+        .setTrialEnd(date)
+        .setProrationBehavior(ProrationBehavior.NONE)
+        .build
+
     //TODO actually use this result or do something, not just yelling into the void
-    updateSubscription(subscriptionId, ParamsMap("trial_end" --> date, "prorate" --> false))
-      .logFailure("update subscription failed with stripe error")
+    StripeFacade.Subscription
+      .update(subscriptionId, params)
+      .logFailure(
+        s"update subscription [subscriptionId=$subscriptionId, date=$date] failed with stripe error"
+      )
   }
 
   def notTrialSubscription_?(subscriptionId: String): Boolean = {
     val subscription = getStripeSubscription(subscriptionId)
-    val trialStatus  = subscription.flatMap(s => Option(s.getStatus)).getOrElse("")
+    val trialStatus  = subscription.flatMap(_.status).getOrElse("")
 
     trialStatus != "trialing"
   }
@@ -201,15 +230,15 @@ object ParentService extends Loggable {
       amount: Long,
       stripeCustomerId: Option[String],
       description: String
-  ): Box[Charge] =
+  ): Box[Stripe.Charge] =
     createStripeCharge {
-      ParamsMap(
-        "amount" --> amount,
-        "currency" --> "USD",
-        "customer" -?> stripeCustomerId,
-        "description" --> description,
-        "capture" --> true
-      )
+      ChargeCreateParams.builder
+        .setAmount(amount)
+        .setCurrency("USD")
+        .setDescription(description)
+        .setCapture(true)
+        .whenDefined(stripeCustomerId)(_.setCustomer)
+        .build
     }
 
   def chargeStripeCustomerNewCard(
@@ -217,21 +246,22 @@ object ParentService extends Loggable {
       stripeCustomerId: Option[String],
       stripeToken: String,
       internalDescription: String
-  ): Box[Charge] = {
-    val newCard = createCustomerCard(stripeCustomerId.getOrElse(""), stripeToken)
+  ): Box[Stripe.Charge] = {
+    val newCard = StripeFacade.Customer
+      .createCard(stripeCustomerId.getOrElse(""), stripeToken)
       .logFailure("create card failed with stripe error")
 
-    val cardId = newCard.flatMap(c => Option(c.getId))
+    val cardId = newCard.map(_.id)
 
     createStripeCharge {
-      ParamsMap(
-        "amount" --> amount,
-        "currency" --> "USD",
-        "customer" -?> stripeCustomerId,
-        "card" -?> cardId,
-        "description" --> internalDescription,
-        "capture" --> true
-      )
+      ChargeCreateParams.builder
+        .setAmount(amount)
+        .setCurrency("USD")
+        .setDescription(internalDescription)
+        .setCapture(true)
+        .whenDefined(stripeCustomerId)(_.setCustomer)
+        .whenDefined(cardId)(_.setSource)
+        .build
     }
   }
 
@@ -239,19 +269,20 @@ object ParentService extends Loggable {
       amount: Long,
       stripeToken: String,
       internalDescription: String
-  ): Box[Charge] =
+  ): Box[Stripe.Charge] =
     createStripeCharge {
-      ParamsMap(
-        "amount" --> amount,
-        "currency" --> "USD",
-        "card" --> stripeToken,
-        "description" --> internalDescription,
-        "capture" --> true
-      )
+      ChargeCreateParams.builder
+        .setAmount(amount)
+        .setCurrency("USD")
+        .setSource(stripeToken)
+        .setDescription(internalDescription)
+        .setCapture(true)
+        .build
     }
 
-  private def createStripeCharge(params: ParamsMap): Box[Charge] =
-    Box.tryo { Charge.create(params) }
+  private def createStripeCharge(params: ChargeCreateParams): Box[Stripe.Charge] =
+    Stripe.Charge
+      .create(params)
       .logFailure("charge customer failed with stripe error")
 
   def parseWhelpDate(whelpDate: String): Box[Date] = {
@@ -301,7 +332,7 @@ object ParentService extends Loggable {
     }
   }
 
-  def updateStripeSubscriptionTotal(oldUser: User): Box[StripeSubscription] = {
+  def updateStripeSubscriptionTotal(oldUser: User): Box[Stripe.Subscription] = {
     val updatedUser       = oldUser.reload
     val maybeSubscription = updatedUser.subscription.obj
 
@@ -315,24 +346,24 @@ object ParentService extends Loggable {
       }
     }
 
-    val (subscriptionId, priceCode) = (
-      for {
-        subscription <- updatedUser.subscription.obj
-      } yield {
-        (subscription.stripeSubscriptionId.get, subscription.priceCode.get)
+    val update = for {
+      subscription <- updatedUser.subscription.obj
+      subscriptionId = subscription.stripeSubscriptionId.get if !subscriptionId.isBlank
+      priceCode      = subscription.priceCode.get
+
+      prices = products.map { product =>
+        Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0d)
       }
-    ).openOr(("", ""))
+      totalCost = "%.2f".format(prices.foldLeft(0d)(_ + _)).toDouble
 
-    val prices: List[Double] = products.map { product =>
-      Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0d)
-    }
+      updated <- updateStripeSubscriptionQuantity(
+                  subscriptionId,
+                  tryo((totalCost * 100).toInt).openOr(0)
+                )
+    } yield updated
 
-    val totalCost = "%.2f".format(prices.foldLeft(0d)(_ + _)).toDouble
-
-    updateStripeSubscriptionQuantity(
-      subscriptionId,
-      tryo((totalCost * 100).toInt).openOr(0)
-    )
+    update
+      .logEmptyBox("update stripe subscription total failed")
   }
 
   def removePet(oldUser: Box[User], pet: Pet): Box[Pet] = {
@@ -495,36 +526,48 @@ object ParentService extends Loggable {
     }
   }
 
-  def updateTaxRate(subscriptionId: String, taxRate: Double): Box[StripeSubscription] = {
+  def updateTaxRate(subscriptionId: String, taxRate: Double): Box[Stripe.Subscription] = {
     //TODO actually use this result or do something, not just yelling into the void
-    updateSubscription(subscriptionId, ParamsMap("tax_percent" --> taxRate))
+    StripeFacade.Subscription
+      .replaceTaxRate(subscriptionId, taxRate)
       .logFailure("update subscription tax rate failed with stripe error")
   }
 
-  def getStripeProductPlan(planId: String): Box[Plan] =
-    Box.tryo { Plan.retrieve(planId) }
+  def getStripeProductPlan(planId: String): Box[Stripe.Plan] =
+    Stripe.Plan
+      .retrieve(planId)
       .logFailure("get plan failed with stripe error")
 
-  def getCurrentPetlandProductPlan: Box[Plan] =
+  def getCurrentPetlandProductPlan: Box[Stripe.Plan] =
     getStripeProductPlan(currentPentlandPlan)
 
-  def changeToPetlandMonthlyStripePlan(subscriptionId: String): Box[StripeSubscription] = {
-    val updateParams = ParamsMap(
-      "prorate" --> false,
-      "plan" -?> petlandMonthlyPlan,
-      "coupon" -?> petland5MonthCoupon
-    )
+  def changeToPetlandMonthlyStripePlan(subscriptionId: String): Box[Stripe.Subscription] = {
+    import SubscriptionUpdateParams._
 
-    updateSubscription(subscriptionId, updateParams)
+    val params =
+      SubscriptionUpdateParams.builder
+        .setProrationBehavior(ProrationBehavior.NONE)
+        .whenDefined(petland5MonthCoupon)(_.setCoupon)
+        .addItem(
+          SubscriptionUpdateParams.Item.builder
+            .whenDefined(petlandMonthlyPlan)(_.setPlan)
+            .build
+        )
+        .build
+
+    StripeFacade.Subscription
+      .update(subscriptionId, params)
       .logFailure("update subscription failed with stripe error")
   }
 
-  def refundShipment(shipment: Shipment, possibleParent: Box[User] = Empty): Box[Refund] = {
+  def refundShipment(shipment: Shipment, possibleParent: Box[User] = Empty): Box[Stripe.Refund] = {
     val parent =
       if (possibleParent.isEmpty) shipment.subscription.obj.flatMap(_.user.obj)
       else possibleParent
 
-    val refund = Box.tryo { Refund.create(ParamsMap("charge" --> shipment.stripeChargeId.get)) }
+    val params = RefundCreateParams.builder.setCharge(shipment.stripeChargeId.get).build
+    val refund = Stripe.Refund
+      .create(params)
       .logFailure("create refund failed with stripe error")
 
     refund foreach { _ =>

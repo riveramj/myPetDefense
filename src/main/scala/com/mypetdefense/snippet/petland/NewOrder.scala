@@ -7,10 +7,9 @@ import java.util.Date
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.service._
-import com.mypetdefense.util.StripeHelper._
+import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
+import com.mypetdefense.util.DateHelper.tomorrowStart
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
-import com.stripe.model.{Customer, Plan}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -20,7 +19,6 @@ import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
-import scala.collection.JavaConverters._
 import scala.xml.{Elem, NodeSeq}
 
 object petsOrdered extends SessionVar[List[Pet]](Nil)
@@ -95,8 +93,8 @@ class NewOrder extends Loggable {
 
   val birthdayDateFormat = new SimpleDateFormat("MMM yyyy")
 
-  val petlandPlan: Box[Plan] = ParentService.getCurrentPetlandProductPlan
-  val petlandPlanId: String  = petlandPlan.flatMap(p => Option(p.getId)).openOr("")
+  val petlandPlan: Box[Stripe.Plan] = ParentService.getCurrentPetlandProductPlan
+  val petlandPlanId: String         = petlandPlan.map(_.id).openOr("")
 
   def calculateTax(possibleState: String, possibleZip: String): JsCmd = {
     state = possibleState
@@ -128,15 +126,16 @@ class NewOrder extends Loggable {
     ).flatten
 
     if (validateFields.isEmpty) {
-      val params = ParamsMap(
-        "email" --> email,
-        "card" --> stripeToken,
-        "tax_percent" --> taxRate,
-        "plan" --> petlandPlanId,
-        "quantity" --> pets.size
-      )
+      val customer =
+        StripeFacade.Customer.createWithSubscription(
+          email,
+          stripeToken,
+          petlandPlanId,
+          pets.size,
+          taxRate
+        )
 
-      Box.tryo { Customer.create(params) } match {
+      customer match {
         case Full(customer) =>
           val user = newUserSetup(customer)
 
@@ -168,8 +167,8 @@ class NewOrder extends Loggable {
     }
   }
 
-  def newUserSetup(customer: Customer): User = {
-    val stripeId = customer.getId
+  def newUserSetup(customer: StripeFacade.CustomerWithSubscriptions): User = {
+    val stripeId = customer.value.id
 
     val newParent = User.createNewUser(
       firstName = firstName,
@@ -197,16 +196,15 @@ class NewOrder extends Loggable {
     createNewPets(newParent)
 
     val subscriptionId: String = (for {
-      rawSubscriptions <- Option(customer.getSubscriptions)
-      subscription     <- rawSubscriptions.getData.asScala.headOption
-      id               <- Option(subscription.getId)
-    } yield id).getOrElse("")
+      rawSubscriptions <- customer.value.subscriptions
+      subscription     <- rawSubscriptions.data.headOption
+    } yield subscription.id).getOrElse("")
 
     Subscription.createNewSubscription(
       Full(newParent),
       subscriptionId,
       new Date(),
-      new Date(),
+      tomorrowStart,
       Price.currentPetlandMonthlyCode,
       isUpgraded = false,
       6

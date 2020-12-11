@@ -1,13 +1,13 @@
 package com.mypetdefense.snippet
 
-import java.time.{LocalDate, ZoneId}
 import java.util.Date
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import com.mypetdefense.service.{ParentService, TaxJarService}
+import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
+import com.mypetdefense.util.DateHelper.tomorrowStart
 import com.mypetdefense.util.StripeHelper._
-import com.stripe.model.{Customer, Subscription => StripeSubscription}
+import com.stripe.param.CustomerCreateParams
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.rest._
@@ -49,7 +49,7 @@ object TPPApi extends RestHelper with Loggable {
       stripeToken: String,
       pennyCount: Int,
       couponName: Option[String],
-      taxRate: Double
+      taxRate: BigDecimal
   ): Unit = {
     val errorMsg = s"""
       Something went wrong with stripe creation.
@@ -169,50 +169,36 @@ object TPPApi extends RestHelper with Loggable {
       )
     }.getOrElse((0d, 0d))
 
-    val stripeCustomer = Box.tryo {
-      Customer.create(
-        ParamsMap(
-          "email" --> parent.email.get,
-          "card" --> stripeToken,
-          "coupon" -?> couponName
-        )
+    val stripeCustomer =
+      Stripe.Customer.create(
+        CustomerCreateParams.builder
+          .setEmail("email")
+          .setSource(stripeToken)
+          .whenDefined(couponName)(_.setCoupon)
+          .build
       )
-    }
 
     stripeCustomer match {
       case Full(customer) =>
-        val stripeSubscription = Box.tryo {
-          StripeSubscription.create(
-            ParamsMap(
-              "customer" --> customer.getId,
-              "quantity" --> pennyCount,
-              "coupon" --> "tpp",
-              "tax_percent" --> taxRate,
-              "plan" --> "tpp-pennyPlan"
-            )
+        val stripeSubscription =
+          StripeFacade.Subscription.createWithTaxRate(
+            customer,
+            taxRate,
+            plan = "tpp-pennyPlan",
+            pennyCount,
+            coupon = Some("tpp")
           )
-        }
 
         stripeSubscription match {
           case Full(subscription) =>
             val refreshedParent = parent.reload
-            val updatedParent   = refreshedParent.stripeId(customer.getId).saveMe
-
-            val subscriptionId = Option(subscription.getId).getOrElse("")
-
-            val plusOneDayTime = LocalDate
-              .now(ZoneId.of("America/New_York"))
-              .plusDays(1)
-              .atStartOfDay(ZoneId.of("America/New_York"))
-              .toInstant
-
-            val plusOneDayDate = Date.from(plusOneDayTime)
+            val updatedParent   = refreshedParent.stripeId(customer.id).saveMe
 
             val mpdSubscription = Subscription.createNewSubscription(
               Full(updatedParent),
-              subscriptionId,
+              subscription.id,
               new Date(),
-              plusOneDayDate,
+              tomorrowStart,
               Price.currentTppPriceCode
             )
 

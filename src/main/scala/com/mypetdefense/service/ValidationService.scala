@@ -1,6 +1,7 @@
 package com.mypetdefense.service
 
 import java.text.SimpleDateFormat
+import java.util.Date
 
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
@@ -241,6 +242,20 @@ object ValidationService extends Loggable {
   ): Box[ValidationError] = {
     validDate(birthday, dateFormat, errorId)
   }
+
+  def futureDate(
+      date: String,
+      dateFormat: SimpleDateFormat,
+      now: Date,
+      fieldId: String
+  ): Box[ValidationError] = {
+    Box.tryo(dateFormat.parse(date)).map(_.after(now)) match {
+      case Full(true)  => Empty
+      case Full(false) => Full(ValidationError(fieldId, "Not a future date."))
+      case _           => Full(ValidationError(fieldId, "Not a valid date format."))
+    }
+  }
+
 }
 
 case class ValidationError(fieldSelector: String, error: String)

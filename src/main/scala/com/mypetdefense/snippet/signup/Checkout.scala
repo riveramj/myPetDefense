@@ -6,7 +6,6 @@ import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
-import com.stripe.model.Customer
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -70,7 +69,9 @@ class Checkout extends Loggable {
 
   val pennyCount: Int = (subtotal * 100).toInt
 
-  private def handleStripeFailureOnSignUp(stripeFailure: Box[Customer]): Alert = {
+  private def handleStripeFailureOnSignUp(
+      stripeFailure: Box[StripeFacade.CustomerWithSubscriptions]
+  ): Alert = {
     logger.error("create customer failed with: " + stripeFailure)
     Alert(s"""An error has occurred $stripeFailure. Please Try again.""")
   }
@@ -83,7 +84,7 @@ class Checkout extends Loggable {
     PetFlowChoices.freeMonths(coupon.map(_.numberOfMonths.get))
   }
 
-  private def setupNewUserAndRedirect(customer: Customer): Nothing = {
+  private def setupNewUserAndRedirect(customer: StripeFacade.CustomerWithSubscriptions): Nothing = {
     val newUserAddress          = NewUserAddress(street1, street2, city, state, zip)
     val newUserData             = NewUserData(email, firstName, lastName, password, newUserAddress, coupon)
     val petsToCreate            = pets.values.toList
@@ -109,7 +110,14 @@ class Checkout extends Loggable {
     setMultiPetCouponIfPossible()
 
     val stripeCustomer =
-      StripeService.createStripeCustomer(coupon, email, stripeToken, pennyCount, taxRate)
+      StripeFacade.Customer.createWithSubscription(
+        email,
+        stripeToken,
+        plan = "pennyProduct",
+        pennyCount,
+        taxRate,
+        coupon
+      )
 
     stripeCustomer match {
       case Full(customer) => setupNewUserAndRedirect(customer)
