@@ -190,6 +190,7 @@ object Paths {
     agency.LegacyAgencyOverview.menu,
     agency.AgencyOverview.menu,
     agency.AgencyOverview.exportAgencyCustomerMenu,
+    admin.ProductSchedules.menu,
     Login.menu,
     ForgotPassword.menu,
     ResetPassword.menu,

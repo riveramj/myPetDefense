@@ -10,6 +10,8 @@ import com.mypetdefense.shipstation.{
   Shipment => ShipStationShipment,
   _
 }
+import com.mypetdefense.util.CalculationHelper
+import com.mypetdefense.util.ModelSyntax.ListOfShipmentLineItemsSyntax
 import dispatch.Defaults._
 import dispatch._
 import net.liftweb.common.Box.tryo
@@ -208,85 +210,22 @@ trait ShipStationServiceTrait extends Loggable {
   ): Future[Box[Order]] = {
     val billShipTo = createUserBillShipToAddress(user)
 
-    val shipmentLineItems = shipment.reload.shipmentLineItems.toList
-    val someInserts       = shipmentLineItems.flatMap(_.insert.obj).distinct
+    val shipmentLineItems        = shipment.actualShipmentLineItems
+    val shipmentLineItemsInserts = shipmentLineItems.distinctInserts
 
-    val inserts =
-      if (subscription.shipments.toList.size >= 2 && tryo(subscription.freeUpgradeSampleDate) == Full(
-            null
-          )) {
-        val dogs = shipment.reload.shipmentLineItems
-          .flatMap(_.pet.obj)
-          .toList
-          .distinct
-          .filter(_.animalType.get == AnimalType.Dog)
+    val allInserts = insertsToShipStation(subscription, shipment, shipmentLineItemsInserts)
 
-        if (dogs.nonEmpty) {
-          subscription.reload.freeUpgradeSampleDate(new Date).saveMe()
-          dogs.map(pet => ShipmentLineItem.sendFreeUpgradeItems(shipment, pet))
-
-          Insert.tryUpgrade ++ someInserts
-        } else
-          someInserts
-      } else if (shipment.freeUpgradeSample.get)
-        Insert.tryUpgrade ++ someInserts
-      else
-        someInserts
-
-    val refreshedShipment = shipment.reload
-    val shipmentLineItemsByPet = refreshedShipment.shipmentLineItems.toList
-      .groupBy(_.pet.obj)
-      .filter(_._1.isDefined)
+    val refreshedShipment      = shipment.reload
+    val shipmentLineItemsByPet = refreshedShipment.shipmentLineItemsByPets
 
     val fleaTick = shipmentLineItems.flatMap(_.fleaTick.obj)
 
-    val productWeight = fleaTick.map(fleaT => BigDecimal(fleaT.weight.get)).sum
-    val insertWeight  = inserts.map(insert => BigDecimal(insert.weight.get)).sum
+    val normalizedWeight = CalculationHelper.calculateInsertsWeight(fleaTick, allInserts)
 
-    val totalWeight = productWeight + insertWeight
-
-    val normalizedWeight = if (totalWeight < 4.0) BigDecimal(4.0) else totalWeight
-
-    val shipStationItems = inserts.toList.zipWithIndex.map {
-      case (insert, index) =>
-        OrderItem(
-          lineItemKey = Some(s"9 - ${index}"),
-          quantity = 1,
-          sku = insert.itemNumber.get,
-          name = s"0 - ${insert.name.get}"
-        )
+    val shipStationItems = allInserts.toList.zipWithIndex.map {
+      case (insert, index) => insertToOrderItem(insert, index)
     } ++ shipmentLineItemsByPet.zipWithIndex.flatMap {
-      case ((pet, lineItems), index) =>
-        val fleaTick = lineItems.flatMap(_.fleaTick.obj)
-        val products = lineItems.flatMap(_.product.obj)
-
-        val fleaOrderItem = fleaTick.map { ft =>
-          OrderItem(
-            lineItemKey = Some(s"${index + 1} - 9"),
-            quantity = 1,
-            sku = ft.sku.get,
-            name = s"${index + 1} - ${ft.getNameAndSize}"
-          )
-        }
-
-        val productsOrderItems = products.zipWithIndex.map {
-          case (product, productIndex) =>
-            OrderItem(
-              lineItemKey = Some(s"${index + 1} - ${productIndex + 1}"),
-              quantity = 1,
-              sku = product.sku.get,
-              name = s"${index + 1} - ${product.name.get} for Dogs"
-            )
-        }
-
-        List(
-          OrderItem(
-            lineItemKey = Some(s"${index + 1} - 0"),
-            quantity = 1,
-            sku = "pet",
-            name = s"${index + 1} -  ${pet.map(_.name.get).openOr("")}"
-          )
-        ) ++ fleaOrderItem ++ productsOrderItems
+      case ((pet, lineItems), index) => petFleaTickAndProductsToOrderItems(pet, lineItems, index)
     }
 
     Order.create(
@@ -345,6 +284,93 @@ trait ShipStationServiceTrait extends Loggable {
         Empty
     }
   }
+
+  private def insertsToShipStation(
+      subscription: Subscription,
+      shipment: Shipment,
+      shipmentLineItemsInserts: List[Insert]
+  ): Iterable[Insert] = {
+    if (subscription.shipments.toList.size >= 2 &&
+        tryo(subscription.freeUpgradeSampleDate) == Full(null)) {
+      insertsWithFreeUpgrade(subscription, shipment, shipmentLineItemsInserts)
+    } else if (shipment.freeUpgradeSample.get)
+      Insert.tryUpgrade ++ shipmentLineItemsInserts
+    else
+      shipmentLineItemsInserts
+  }
+
+  private def insertsWithFreeUpgrade(
+      subscription: Subscription,
+      shipment: Shipment,
+      shipmentLineItemsInserts: List[Insert]
+  ) = {
+    val dogs = shipment.reload.shipmentLineItems
+      .flatMap(_.pet.obj)
+      .toList
+      .distinct
+      .filter(_.animalType.get == AnimalType.Dog)
+
+    if (dogs.nonEmpty) {
+      subscription.reload.freeUpgradeSampleDate(new Date).saveMe()
+      dogs.map(pet => ShipmentLineItem.sendFreeUpgradeItems(shipment, pet))
+
+      Insert.tryUpgrade ++ shipmentLineItemsInserts
+    } else
+      shipmentLineItemsInserts
+  }
+
+  private def productWithIndexAndProductIndexToOrderItem(
+      product: Product,
+      index: Int,
+      productIndex: Int
+  ): OrderItem =
+    OrderItem(
+      lineItemKey = Some(s"${index + 1} - ${productIndex + 1}"),
+      quantity = 1,
+      sku = product.sku.get,
+      name = s"${index + 1} - ${product.name.get} for Dogs"
+    )
+
+  private def petFleaTickAndProductsToOrderItems(
+      pet: Pet,
+      lineItems: List[ShipmentLineItem],
+      index: Int
+  ) = {
+    val fleaTick = lineItems.flatMap(_.fleaTick.obj)
+    val products = lineItems.flatMap(_.product.obj)
+
+    val fleaOrderItem = fleaTick.map(fleaTickToOrderItem(_, index))
+
+    val productsOrderItems = products.zipWithIndex.map {
+      case (product, productIndex) =>
+        productWithIndexAndProductIndexToOrderItem(product, index, productIndex)
+    }
+
+    List(petToOrderItem(pet, index)) ++ fleaOrderItem ++ productsOrderItems
+  }
+
+  private def fleaTickToOrderItem(input: FleaTick, index: Int) =
+    OrderItem(
+      lineItemKey = Some(s"${index + 1} - 9"),
+      quantity = 1,
+      sku = input.sku.get,
+      name = s"${index + 1} - ${input.getNameAndSize}"
+    )
+
+  private def petToOrderItem(input: Pet, index: Int) = OrderItem(
+    lineItemKey = Some(s"${index + 1} - 0"),
+    quantity = 1,
+    sku = "pet",
+    name = s"${index + 1} -  ${input.name.get}"
+  )
+
+  private def insertToOrderItem(input: Insert, index: Int) = OrderItem(
+    lineItemKey = Some(s"9 - $index"),
+    quantity = 1,
+    sku = input.itemNumber.get,
+    name = s"0 - ${input.name.get}"
+  )
+
 }
 
 object ShipStationService extends ShipStationServiceTrait {

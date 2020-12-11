@@ -1,6 +1,6 @@
 package com.mypetdefense.util
 
-import com.mypetdefense.model.Shipment
+import com.mypetdefense.model.{FleaTick, Insert, Shipment}
 import net.liftweb.util.Helpers.tryo
 
 object CalculationHelper {
@@ -25,6 +25,18 @@ object CalculationHelper {
   def calculatePercentageDiff(startValue: BigDecimal, endValue: BigDecimal): BigDecimal = {
     if (startValue.toInt == 0) 0
     else ((endValue - startValue) / startValue) * 100
+  }
+
+  def calculateInsertsWeight(
+      fleaTick: Iterable[FleaTick],
+      inserts: Iterable[Insert]
+  ): BigDecimal = {
+    val productWeight = fleaTick.map(fleaT => BigDecimal(fleaT.weight.get)).sum
+    val insertWeight  = inserts.map(insert => BigDecimal(insert.weight.get)).sum
+
+    val totalWeight = productWeight + insertWeight
+
+    if (totalWeight < 4.0) BigDecimal(4.0) else totalWeight
   }
 
 }
