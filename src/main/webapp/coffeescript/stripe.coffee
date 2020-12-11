@@ -1,4 +1,4 @@
-stripe = Stripe 'pk_live_hR6ryn2PwyeLHsRVTPX5EEol'
+stripe = Stripe 'pk_test_tlQUPJdasEEdNTcUsbcsHmG7'
 elements = stripe.elements()
 card = elements.create('card',{
   'style': {
