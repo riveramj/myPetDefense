@@ -549,9 +549,9 @@ object DataLoader extends Loggable {
 
     for {
       box <- SubscriptionBox.findAll(
-        NotNullRef(SubscriptionBox.userModified),
-        By(SubscriptionBox.boxType, BoxType.healthAndWellness)
-      )
+              NotNullRef(SubscriptionBox.userModified),
+              By(SubscriptionBox.boxType, BoxType.healthAndWellness)
+            )
       boxItem <- box.subscriptionItems.toList
       product <- boxItem.product.obj
     } yield {

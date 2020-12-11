@@ -1,14 +1,12 @@
 package com.mypetdefense.model
 
 import java.time.{LocalDate, ZoneId}
-
-import net.liftweb._
-import mapper._
 import java.util.Date
 
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
-import net.liftweb.common.{Box, Empty}
+import net.liftweb.common.Box
+import net.liftweb.mapper._
 import net.liftweb.util.Helpers.tryo
 
 import scala.collection.mutable

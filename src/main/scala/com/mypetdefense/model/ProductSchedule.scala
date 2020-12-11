@@ -1,11 +1,11 @@
 package com.mypetdefense.model
 
+import java.util.Date
+
 import com.mypetdefense.util.DateHelper.tomorrowStart
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.Box
 import net.liftweb.mapper._
-
-import java.util.Date
 
 class ProductSchedule
     extends LongKeyedMapper[ProductSchedule]
@@ -21,7 +21,8 @@ class ProductSchedule
   object scheduleStatus extends MappedEnum(this, ProductScheduleStatus) {
     override def defaultValue: ProductScheduleStatus.Value = ProductScheduleStatus.Scheduled
   }
-  object scheduledItems extends MappedOneToMany(ProductScheduleItem, ProductScheduleItem.productSchedule)
+  object scheduledItems
+      extends MappedOneToMany(ProductScheduleItem, ProductScheduleItem.productSchedule)
   object startDate extends MappedDateTime(this)
   object firstBox extends MappedBoolean(this) {
     override def defaultValue: Boolean = false
@@ -30,7 +31,7 @@ class ProductSchedule
     override def defaultValue = new Date()
   }
 
-  def complete: ProductSchedule = this.scheduleStatus(ProductScheduleStatus.Completed).saveMe()
+  def complete: ProductSchedule   = this.scheduleStatus(ProductScheduleStatus.Completed).saveMe()
   def makeActive: ProductSchedule = this.scheduleStatus(ProductScheduleStatus.Active).saveMe()
 }
 
@@ -79,7 +80,9 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
       .find(
         By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
         By(ProductSchedule.firstBox, true)
-      ).toList.flatMap(_.scheduledItems.toList.flatMap(_.product.obj))
+      )
+      .toList
+      .flatMap(_.scheduledItems.toList.flatMap(_.product.obj))
   }
 }
 

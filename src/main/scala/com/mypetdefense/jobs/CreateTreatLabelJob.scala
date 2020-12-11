@@ -2,11 +2,9 @@ package com.mypetdefense.jobs
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ShipStationService
-import net.liftweb._
-import common._
-import dispatch._
-import Defaults._
-import mapper._
+import dispatch.Defaults._
+import net.liftweb.common._
+import net.liftweb.mapper._
 import org.quartz._
 
 import scala.util.{Failure => TryFail, Success => TrySuccess}

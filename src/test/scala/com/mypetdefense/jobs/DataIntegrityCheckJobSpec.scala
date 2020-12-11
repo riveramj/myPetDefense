@@ -3,12 +3,12 @@ package com.mypetdefense.jobs
 import java.util.Date
 
 import com.mypetdefense.generator.Generator._
-import com.mypetdefense.helpers.{DBTest, Random}
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
-import com.mypetdefense.model.{Event, EventType, Pet, Shipment, Subscription, SubscriptionBox, User}
+import com.mypetdefense.helpers.{DBTest, Random}
+import com.mypetdefense.model._
 import net.liftweb.common.Full
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 

@@ -1,11 +1,10 @@
 package com.mypetdefense.model
 
-import net.liftweb._
-import mapper._
+import java.util.Date
+
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Full
-
-import java.util.Date
+import net.liftweb.mapper._
 
 class SubscriptionItem extends LongKeyedMapper[SubscriptionItem] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, SubscriptionItem] = SubscriptionItem
@@ -34,19 +33,19 @@ object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[Subscr
   }
 
   def createFirstBox(subscriptionBox: SubscriptionBox): List[SubscriptionItem] = {
-    val products = ProductSchedule.getFirstBoxProducts
-    val smallSizes = List(AnimalSize.DogSmallZo, AnimalSize.DogSmallShld, AnimalSize.DogSmallAdv)
-    val isSmallDog = subscriptionBox.fleaTick.obj.map(_.size.get).forall(smallSizes.contains)
-    val dentalPowder = Product.dentalPowder
+    val products          = ProductSchedule.getFirstBoxProducts
+    val smallSizes        = List(AnimalSize.DogSmallZo, AnimalSize.DogSmallShld, AnimalSize.DogSmallAdv)
+    val isSmallDog        = subscriptionBox.fleaTick.obj.map(_.size.get).forall(smallSizes.contains)
+    val dentalPowder      = Product.dentalPowder
     val dentalPowderSmall = Product.dentalPowderSmall
     val dentalPowderLarge = Product.dentalPowderLarge
 
     products.flatMap { product =>
       val newItem = SubscriptionItem.create.subscriptionBox(subscriptionBox)
 
-      if(!dentalPowder.contains(product))
+      if (!dentalPowder.contains(product))
         Full(newItem.product(product).saveMe())
-      else if(isSmallDog)
+      else if (isSmallDog)
         dentalPowderSmall.map(newItem.product(_).saveMe())
       else
         dentalPowderLarge.map(newItem.product(_).saveMe())

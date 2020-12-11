@@ -7,7 +7,6 @@ import com.mypetdefense.model.AnimalType
 import com.mypetdefense.model.domain.reports.AmazonOrderReport.dateFormat
 import com.mypetdefense.typeclasses.ToCsvStringConverter
 import com.mypetdefense.util.CSVHelper
-import net.liftweb.http.InMemoryResponse
 
 case class AmazonOrderReport(
     name: String,

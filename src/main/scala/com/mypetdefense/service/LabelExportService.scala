@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.mypetdefense.model._
-import net.liftweb._
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._

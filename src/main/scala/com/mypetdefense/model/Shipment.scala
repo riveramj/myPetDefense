@@ -1,14 +1,12 @@
 package com.mypetdefense.model
 
 import java.time.{LocalDate, ZoneId}
-
-import net.liftweb._
-import common._
-import mapper._
-import com.mypetdefense.util.RandomIdGenerator._
 import java.util.Date
 
 import com.mypetdefense.util.DateHelper.{monthDayOne, nowDate}
+import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.common._
+import net.liftweb.mapper._
 import net.liftweb.util.Helpers.tryo
 
 class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, Shipment] {

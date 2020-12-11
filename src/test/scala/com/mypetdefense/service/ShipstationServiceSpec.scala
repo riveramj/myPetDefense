@@ -2,8 +2,9 @@ package com.mypetdefense.service
 
 import java.text.SimpleDateFormat
 import java.util.Date
-import com.mypetdefense.generator.{AddressGeneratedData, InsertGenData}
+
 import com.mypetdefense.generator.Generator._
+import com.mypetdefense.generator.{AddressGeneratedData, InsertGenData}
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, yesterday}
 import com.mypetdefense.helpers.GeneralDbUtils._
@@ -19,6 +20,7 @@ import net.liftweb.json._
 import org.asynchttpclient.Param
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers._
+
 import scala.collection.JavaConverters._
 
 class ShipstationServiceSpec extends DBTest with RestHelper {

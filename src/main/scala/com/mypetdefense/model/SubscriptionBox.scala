@@ -1,16 +1,14 @@
 package com.mypetdefense.model
 
-
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
-import net.liftweb._
-import mapper._
+import net.liftweb.mapper._
 
-import java.util.Date
-
-
-class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with OneToMany[Long, SubscriptionBox] {
+class SubscriptionBox
+    extends LongKeyedMapper[SubscriptionBox]
+    with IdPK
+    with OneToMany[Long, SubscriptionBox] {
   def getSingleton: KeyedMetaMapper[Long, SubscriptionBox] = SubscriptionBox
 
   object boxId extends MappedLong(this) {
@@ -22,7 +20,8 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
   object animalType   extends MappedEnum(this, AnimalType)
   object boxType      extends MappedEnum(this, BoxType)
   object fleaTick     extends MappedLongForeignKey(this, FleaTick)
-  object subscriptionItems extends MappedOneToMany(SubscriptionItem, SubscriptionItem.subscriptionBox)
+  object subscriptionItems
+      extends MappedOneToMany(SubscriptionItem, SubscriptionItem.subscriptionBox)
   object addOnProducts extends MappedOneToMany(AddOnProduct, AddOnProduct.subscriptionBox)
   object basePrice     extends MappedDouble(this)
   object createdAt extends MappedDateTime(this) {
@@ -53,14 +52,18 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
     val smallDogs = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
 
     (pet.animalType.get, pet.size.get, upgradedBox) match {
-      case (_, _, false) => 12.99
-      case (AnimalType.Cat, _, _) => 12.99
+      case (_, _, false)                                                  => 12.99
+      case (AnimalType.Cat, _, _)                                         => 12.99
       case (AnimalType.Dog, dogSize, true) if smallDogs.contains(dogSize) => 24.99
-      case (AnimalType.Dog, _, true) => 27.99
+      case (AnimalType.Dog, _, true)                                      => 27.99
     }
   }
 
-  def createNewBox(subscription: Subscription, pet: Pet, upgradedBox: Boolean = false): SubscriptionBox = {
+  def createNewBox(
+      subscription: Subscription,
+      pet: Pet,
+      upgradedBox: Boolean = false
+  ): SubscriptionBox = {
     val fleaTick = pet.size.get match {
       case AnimalSize.DogSmallZo  => FleaTick.zoGuardSmallDog
       case AnimalSize.DogMediumZo => FleaTick.zoGuardMediumDog
@@ -76,7 +79,6 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       .fleaTick(fleaTick)
       .basePrice(basePrice(pet, upgradedBox))
 
-
     if (upgradedBox)
       newSubscriptionBox.boxType(BoxType.healthAndWellness).saveMe()
     else
@@ -85,6 +87,6 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
 }
 
 object BoxType extends Enumeration {
-  val basic: BoxType.Value = Value("Basic") // 0
+  val basic: BoxType.Value             = Value("Basic")               // 0
   val healthAndWellness: BoxType.Value = Value("Health and Wellness") // 1
 }

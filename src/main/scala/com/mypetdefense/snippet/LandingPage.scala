@@ -1,28 +1,16 @@
 package com.mypetdefense.snippet
 
-import net.liftweb._
-import http.SHtml._
-import util._
-import util.Helpers._
-import common._
-import util.ClearClearable
-import http._
-import mapper.{By, NullRef}
-import js._
-import JsCmds._
-
-import com.mypetdefense.service._
-import PetFlowChoices._
-
 import com.mypetdefense.model._
-
-import java.util.Date
-import java.text.SimpleDateFormat
+import com.mypetdefense.service._
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
+import net.liftweb.util._
 
 object LandingPage extends Loggable {
   import net.liftweb.sitemap._
   import Loc._
-  import com.mypetdefense.util.Paths._
 
   val landing2Free: Menu.Menuable = Menu.i("2 Months Free!") / "2free" >>
     TemplateBox(() => Templates("landing" :: "landing" :: Nil))
@@ -50,8 +38,6 @@ object LandingPage extends Loggable {
 }
 
 class LandingPage extends Loggable {
-  import PetFlowChoices._
-
   val path: String = S.request.map(_.uri).openOr("").drop(1)
 
   val (modalTitle, modalOffer) = path match {

@@ -1,15 +1,12 @@
 package com.mypetdefense.model
 
-import net.liftweb._
-import mapper._
-import common._
-import util._
-import com.mypetdefense.util.RandomIdGenerator._
-import com.mypetdefense.snippet.NewAddress
-import com.mypetdefense.util.TitleCase
-import org.apache.shiro.crypto.hash.Sha256Hash
-import org.apache.shiro.crypto.SecureRandomNumberGenerator
 import java.util.Date
+
+import com.mypetdefense.snippet.NewAddress
+import com.mypetdefense.util.RandomIdGenerator._
+import com.mypetdefense.util.TitleCase
+import net.liftweb.common._
+import net.liftweb.mapper._
 
 class Address extends LongKeyedMapper[Address] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, Address] = Address
