@@ -1,10 +1,8 @@
 package com.mypetdefense.jobs
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
 import com.mypetdefense.model._
 import com.mypetdefense.service._
+import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import dispatch.Defaults._
 import net.liftweb.common._
 import net.liftweb.mapper._
@@ -17,75 +15,77 @@ trait CreateShipStationOrderJobTrait extends ManagedJob {
   val shipStationService: ShipStationServiceTrait
 
   def createShipStationOrders(): Unit = {
-    def sameDateComparison(date1: Date, date2: Date) = {
-      val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-
-      dateFormat.format(date1) == dateFormat.format(date2)
-    }
-
+    val jobRunId = generateLongId
     val newShipments = Shipment.findAll(
       By(Shipment.shipStationOrderId, 0),
       By(Shipment.shipmentStatus, ShipmentStatus.Paid)
     )
 
-    println(newShipments.size + " shipment size")
-
-    println("======================  begin batch")
+    logger.info(newShipments.size + s" shipment size begin batch [job-run-id:$jobRunId]")
     var count = 0
 
     for {
-      shipment <- newShipments.take(10)
-      _ = println(shipment)
+      shipment     <- newShipments.take(10)
       subscription <- shipment.subscription.obj
-      _ = println(subscription)
-      user <- subscription.user.obj
-      _ = println(user)
+      user         <- subscription.user.obj
     } yield {
       val thisRun = count
-      println("======================  start" + thisRun)
       count = count + 1
+
+      logger.info(
+        s"""start processing
+           [shipment-id:${shipment.id.get}]
+           [subscription-id:${subscription.id.get}]
+           [user-id:${user.id.get}]
+           [run-in-batch:$thisRun]
+           [job-run-id:$jobRunId]"""
+      )
+
       val shipStationOrder =
         shipStationService.createShipStationOrder(shipment, user, subscription, thisRun)
 
       shipStationOrder.onComplete {
         case TrySuccess(Full(order)) =>
-          println("======================  below success" + thisRun)
           shipment.reload
             .shipStationOrderId(order.orderId)
             .shipmentStatus(ShipmentStatus.LabelCreated)
             .saveMe
-        /*
-          if (!sameDateComparison(
-            new Date(),
-            shipment.expectedShipDate.get
-          )) {
-            ShipStationService.holdOrderUntil(
-              order.orderId,
-              shipment.expectedShipDate.get
-            ).onComplete {
-              case TrySuccess(Full(_)) =>
+          logger.info(s"[run-in-batch:$thisRun][job-run-id:$jobRunId] successfully done")
 
-              case TrySuccess(shipStationFailure) =>
-                logger.error(s"hold order failed with shipStation error: ${shipStationFailure}")
+        case TrySuccess(Failure(message, _, _)) =>
+          Event.createEvent(
+            Full(user),
+            Full(subscription),
+            Full(shipment),
+            eventType = EventType.Shipping,
+            title = s"create shipstation order failed with shipStation error at run $thisRun",
+            details = message
+          )
+          logger.error(s"[run-in-batch:$thisRun][job-run-id:$jobRunId] done with error $message")
 
-              case TryFail(throwable: Throwable) =>
-                logger.error(s"hold order failed with other error: ${throwable}")
-                logger.error(s"user email is ${user.email.get}")
-            }
-          }
-         */
-
-        case TrySuccess(shipStationFailure) =>
-          println("======================  below error" + thisRun)
-          logger.error(s"create order failed with shipStation error:")
-          logger.error(shipStationFailure)
-          logger.error(s"user email is ${user.email.get}")
+        case TrySuccess(Empty) =>
+          Event.createEvent(
+            Full(user),
+            Full(subscription),
+            Full(shipment),
+            eventType = EventType.Shipping,
+            title = s"shipstation order creation failed with empty result $thisRun",
+            details = "shipstation service returned nothing"
+          )
+          logger.error(s"[run-in-batch:$thisRun][job-run-id:$jobRunId] done with empty result")
 
         case TryFail(throwable: Throwable) =>
-          println("======================  below fail" + thisRun)
-          logger.error(s"create order failed with other error: ${throwable}")
-          logger.error(s"user email is ${user.email.get}")
-          throwable
+          Event.createEvent(
+            Full(user),
+            Full(subscription),
+            Full(shipment),
+            eventType = EventType.Shipping,
+            title = "create shipstation order failed with other error",
+            details = throwable.getMessage
+          )
+          logger.error(
+            s"[run-in-batch:$thisRun][job-run-id:$jobRunId] done with other error ${throwable.getMessage}"
+          )
       }
     }
   }

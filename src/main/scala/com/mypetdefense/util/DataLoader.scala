@@ -186,7 +186,7 @@ object DataLoader extends Loggable {
 
   def loadAdmin: Any = {
     val mpdAgency = {
-      val possibleMpd = Agency.find(By(Agency.name, "My Pet Defense"))
+      val possibleMpd = Agency.mpdAgency
 
       if (possibleMpd.isEmpty)
         Full(Agency.createNewAgency("My Pet Defense"))
@@ -318,7 +318,7 @@ object DataLoader extends Loggable {
   def createPuppySpot: List[User] = {
     val puppySpot = Agency.createNewAgency("PuppySpot", AgencyType.Store, Empty, "pupspot")
 
-    val tppAgency = Agency.find(By(Agency.name, "TPP"))
+    val tppAgency = Agency.tppAgency
 
     val tppCustomers = tppAgency.map(_.customers.toList).openOr(Nil)
 
@@ -346,12 +346,8 @@ object DataLoader extends Loggable {
         user         <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
         subscription <- Subscription.find(By(Subscription.user, user)).toList
         pet          <- subscription.getPets
-        fleaTick <- FleaTick.find(
-                     By(FleaTick.size, pet.size.get),
-                     By(FleaTick.animalType, pet.animalType.get)
-                   )
       } yield {
-        val box = SubscriptionBox.createBasicBox(subscription, fleaTick, pet)
+        val box = SubscriptionBox.createNewBox(subscription, pet, false)
         pet.box(box).saveMe()
         user.subscription(subscription).saveMe()
       }
@@ -369,7 +365,7 @@ object DataLoader extends Loggable {
 
   def defaultSaleCoupons: Any = {
     if (Coupon.find(By(Coupon.couponCode, "50off")).isEmpty) {
-      val mpdAgency = Agency.find(By(Agency.name, "My Pet Defense"))
+      val mpdAgency = Agency.mpdAgency
       CouponService.createCoupon("50off", mpdAgency, "1", "50", "0")
       CouponService.createCoupon("100off", mpdAgency, "1", "100", "0")
     }
@@ -449,7 +445,7 @@ object DataLoader extends Loggable {
     val startDate     = dateFormatter.parse("7/1/2020")
 
     for {
-      user <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
+      user         <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
       subscription <- Subscription.find(By(Subscription.user, user))
     } {
       user.subscription(subscription).saveMe()
@@ -473,9 +469,9 @@ object DataLoader extends Loggable {
       val dupUsers = User.findAll(By(User.email, badUser.email.get))
 
       if (dupUsers.size > 1) {
-        val possibleBadUserSub = Subscription.find(By(Subscription.user, badUser)).toList
+        val possibleBadUserSub     = Subscription.find(By(Subscription.user, badUser)).toList
         val possibleBadUserAddress = Address.findAll(By(Address.user, badUser))
-        val pets = Pet.findAll(By(Pet.user, badUser))
+        val pets                   = Pet.findAll(By(Pet.user, badUser))
 
         val badUserInfo = List(possibleBadUserSub, possibleBadUserAddress, pets).flatten
 
@@ -487,21 +483,21 @@ object DataLoader extends Loggable {
 
   def createMissingCatBoxes(): Unit = {
     for {
-      cat <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
-      user <- cat.user.obj.toList
+      cat          <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
+      user         <- cat.user.obj.toList
       subscription <- user.subscription.obj.toList
-      catFleaTick <- FleaTick.zoGuardCat.toList
+      catFleaTick  <- FleaTick.zoGuardCat.toList
     } {
       val updatedCat = cat.size(catFleaTick.size.get).saveMe
-      val box = SubscriptionBox.createBasicBox(subscription, catFleaTick, updatedCat)
+      val box        = SubscriptionBox.createNewBox(subscription, updatedCat, false)
       updatedCat.box(box).saveMe()
     }
   }
 
   def createMissingDogBoxes(): Unit =
     for {
-      dog <- Pet.findAll(By(Pet.animalType, AnimalType.Dog), NullRef(Pet.box))
-      user <- dog.user.obj.toList
+      dog          <- Pet.findAll(By(Pet.animalType, AnimalType.Dog), NullRef(Pet.box))
+      user         <- dog.user.obj.toList
       subscription <- user.subscription.obj.toList
     } {
       val box = SubscriptionBox.createNewBox(subscription, dog)
@@ -519,7 +515,7 @@ object DataLoader extends Loggable {
 
     for {
       subscription <- Subscription.findAll(By(Subscription.status, Status.Cancelled))
-      user <- subscription.user.obj.toList
+      user         <- subscription.user.obj.toList
       pets = user.pets.toList
     } {
       if (user.status.get != Status.Cancelled)
@@ -529,7 +525,7 @@ object DataLoader extends Loggable {
     }
 
     for {
-      user <- User.findAll(By(User.status, Status.Cancelled))
+      user         <- User.findAll(By(User.status, Status.Cancelled))
       subscription <- user.subscription.obj.toList
       pets = user.pets.toList
     } {
@@ -537,6 +533,53 @@ object DataLoader extends Loggable {
         subscription.status(Status.Cancelled).saveMe()
 
       cancelPets(pets)
+    }
+  }
+
+  def subscriptionBoxCheck(): Unit = {
+    if (Product.dentalPowderSmall.isEmpty) {
+      Product.createNewProduct("Dental Powder Small", "dentalPowderSmall")
+      Product.createNewProduct("Dental Powder Large", "dentalPowderLarge")
+    }
+
+    val products = List(
+      Product.skinAndCoat,
+      Product.multiVitamin,
+      Product.probiotic,
+      Product.dentalPowder
+    ).flatten
+
+    for {
+      box <- SubscriptionBox.findAll(
+        NotNullRef(SubscriptionBox.userModified),
+        By(SubscriptionBox.boxType, BoxType.healthAndWellness)
+      )
+      boxItem <- box.subscriptionItems.toList
+      product <- boxItem.product.obj
+    } yield {
+      if (!products.contains(product))
+        box.userModified(true).save()
+      else
+        box.userModified(false).save()
+    }
+  }
+
+  def upgradeSubscriptionBoxDetails(): Unit = {
+    for {
+      box <- SubscriptionBox.findAll()
+      pet <- box.pet.obj
+      products = box.subscriptionItems.toList
+    } yield {
+      if (products.size >= 2)
+        box
+          .animalType(pet.animalType.get)
+          .boxType(BoxType.healthAndWellness)
+          .saveMe()
+      else
+        box
+          .animalType(pet.animalType.get)
+          .boxType(BoxType.basic)
+          .saveMe()
     }
   }
 }

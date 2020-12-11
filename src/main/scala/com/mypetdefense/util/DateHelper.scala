@@ -7,8 +7,8 @@ import java.util.{Date, Locale}
 import net.liftweb.util.Helpers.tryo
 
 object DateHelper {
-  val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  val zoneId: ZoneId         = ZoneId.of("America/New_York")
+  val dateFormat     = new SimpleDateFormat("MM/dd/yyyy")
+  val zoneId: ZoneId = ZoneId.of("America/New_York")
 
   def currentDate: LocalDateTime     = LocalDateTime.now()
   def now: LocalDate                 = LocalDate.now(zoneId)
@@ -116,4 +116,15 @@ object DateHelper {
       "November",
       "December"
     )
+
+  implicit class DateOps(val v: Date) extends AnyVal {
+    def toLocalDate: LocalDate = v.toInstant.atZone(zoneId).toLocalDate
+    def isYesterday: Boolean = {
+      val localDate    = toLocalDate
+      val day          = localDate.getDayOfYear
+      val year         = localDate.getYear
+      val yesterdayDay = yesterday
+      day == yesterdayDay.getDayOfYear && year == yesterdayDay.getYear
+    }
+  }
 }
