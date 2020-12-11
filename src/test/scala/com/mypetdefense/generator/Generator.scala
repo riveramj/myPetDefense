@@ -1,8 +1,7 @@
 package com.mypetdefense.generator
 
 import java.util.{Collections => JCollections}
-
-import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisMonth}
+import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfNextMonth, anyDayOfThisMonth}
 import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.model.Price._
 import com.mypetdefense.model._
