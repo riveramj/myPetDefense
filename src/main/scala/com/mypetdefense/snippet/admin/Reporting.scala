@@ -1,18 +1,18 @@
 package com.mypetdefense.snippet
 package admin
 
-import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, ZoneId}
-import java.util.Locale
-
 import com.mypetdefense.model._
 import com.mypetdefense.service.ReportingService
 import com.mypetdefense.util.ModelSyntax._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
-import net.liftweb.mapper._
+import java.util.Locale
+import java.time.{LocalDate, ZoneId}
+import java.time.format.DateTimeFormatter
+
+import com.mypetdefense.util.DateHelper.dateFormat
+import com.mypetdefense.util.ProductNameHelper
 import net.liftweb.util.CssSel
 import net.liftweb.util.Helpers._
 
@@ -28,26 +28,14 @@ object Reporting extends Loggable {
 }
 
 class Reporting extends Loggable {
-  val agencies: List[String] = Agency.findAll().map(_.name.get)
-  val allSubscriptions: List[Subscription] = Subscription.findAll(
-    By(Subscription.status, Status.Active)
-  ) //TODO: make this use the dynamic dates
+  val agencies: List[String]               = Agency.findAll().map(_.name.get)
+  val allSubscriptions: List[Subscription] = Subscription.activeSubscriptions
 
-  val dateFormat                         = new SimpleDateFormat("MM/dd/yyyy")
   val localDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
   val currentDate: LocalDate             = LocalDate.now()
 
   var fromDate: String = currentDate.plusDays(14).format(localDateFormat)
   var toDate: String   = currentDate.plusDays(14).format(localDateFormat)
-
-  def convertToPercentage(percent: Double) = f"${percent * 100}%.1f%%"
-
-  def convertForecastingDates(date: String): LocalDate = {
-
-    val parsedDate = dateFormat.parse(date)
-
-    parsedDate.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
-  }
 
   val forecastingCounts: CssSel = {
     def upcomingSubscriptionProducts: List[String] = {
@@ -137,5 +125,31 @@ class Reporting extends Loggable {
           }
       } &
       forecastingCounts
+  }
+
+  private def convertToPercentage(percent: Double) = f"${percent * 100}%.1f%%"
+
+  private def convertForecastingDates(date: String): LocalDate =
+    dateFormat.parse(date).toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+
+  private def upcomingSubscriptionProducts: List[String] = {
+    val startDate = convertForecastingDates(fromDate)
+    val endDate   = convertForecastingDates(toDate)
+
+    val upcomingSubscriptions = allSubscriptions.filter { subscription =>
+      val nextShipDate = subscription.getNextShipDate
+
+      nextShipDate.isAfter(startDate.minusDays(1)) && nextShipDate.isBefore(endDate.plusDays(1))
+    }
+
+    upcomingSubscriptions
+      .flatMap(_.subscriptionBoxes.toList.flatMap(_.fleaTick.obj))
+      .map(_.getNameAndSize)
+  }
+
+  private[snippet] def getSanitizedSortedNames: ListMap[String, Int] = {
+    val sanitizedNames = ProductNameHelper.sanitizeFleaTickNames(upcomingSubscriptionProducts)
+    val upcomingCounts = sanitizedNames.groupBy(identity).mapValues(_.size).toList
+    ListMap(upcomingCounts.sortBy(_._1): _*)
   }
 }

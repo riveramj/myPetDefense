@@ -289,3 +289,25 @@ td.email {
     cursor: pointer;
   }
 }
+
+.choose-supplement {
+  margin-right: 50px;
+}
+
+.create.create-schedules {
+  display: block;
+
+  label, .choose-supplement {
+    display: inline-block;
+  }
+}
+
+.start-date, .choose-first-box {
+  margin-right: 40px;
+  width: 200px;
+}
+
+.choose-first-box {
+  cursor: pointer;
+  width: auto;
+}

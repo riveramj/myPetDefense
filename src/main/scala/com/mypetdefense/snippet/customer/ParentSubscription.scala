@@ -8,9 +8,8 @@ import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import com.mypetdefense.util.SecurityContext._
-import net.liftweb._
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -283,7 +282,7 @@ class ParentSubscription extends Loggable {
       val newShipDate = dateFormat.parse(nextShipDate)
       val updatedShipDateSubscription = subscription.flatMap { sub =>
         val updatedSubscriptionWithStripe =
-          ParentService.updateNextShipBillDate(sub, user, newShipDate)
+          ParentService.updateNextShipBillDate(sub, newShipDate)
 
         updatedSubscriptionWithStripe.map(_.status(Status.Paused).saveMe)
       }

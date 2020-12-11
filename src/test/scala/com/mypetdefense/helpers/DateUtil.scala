@@ -49,6 +49,8 @@ object DateUtil {
   def invalidDateForGetPastDueShipments: ZonedDateTime      = minusRangeDays(now.plusDays(1), 1, 5)
   def anyDayOfLastYearFromThisDayYearAgo: ZonedDateTime =
     getAnyDayOfYearFrom(now.plusDays(1).minusYears(1))
+  def inReportForecastDefaultRange: ZonedDateTime    = now.plusDays(14).atStartOfDay(zoneId)
+  def notInReportForecastDefaultRange: ZonedDateTime = getAnyDayOfTheYearExceptDay(now.plusDays(14))
 
   def lastYear: ZonedDateTime = {
     val nowDate = now

@@ -1,15 +1,19 @@
 package com.mypetdefense.helpers
 
 import com.mypetdefense.generator._
+import com.mypetdefense.helpers.BootUtil.testDatabase
 import com.mypetdefense.helpers.db.AgencyDbUtils.createAgency
+import com.mypetdefense.helpers.db.PetDbUtils.createPet
 import com.mypetdefense.helpers.db.ShipmentDbUtils.createShipment
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
 import com.mypetdefense.helpers.db.PetDbUtils.createPet
+import com.mypetdefense.helpers.db.ProductDbUtils.createNewProduct
+import com.mypetdefense.helpers.db.ProductScheduleDbUtils
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
 import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
 import net.liftweb.common._
-import net.liftweb.mapper.NotNullRef
+import net.liftweb.mapper.{DB, DefaultConnectionIdentifier}
 
 object GeneralDbUtils {
 
@@ -34,22 +38,38 @@ object GeneralDbUtils {
       pets: List[Pet]
   )
 
+  case class InsertedScheduleAndProduct(
+      schedule: ProductSchedule,
+      products: List[Product]
+  )
+
   val insertUserAndSubTupled
       : ((UserCreateGeneratedData, SubscriptionCreateGeneratedData)) => InsertedUserAndSub =
     (insertUserAndSub _).tupled
 
   def clearTables(): Unit = {
-    Address.findAll().map(_.delete_!)
-    Agency.findAll().map(_.delete_!)
-    Event.findAll().map(_.delete_!)
-    Pet.findAll().map(_.delete_!)
-    Insert.findAll().map(_.delete_!)
-    Subscription.findAll().map(_.delete_!)
-    SubscriptionBox.findAll().map(_.delete_!)
-    SubscriptionItem.findAll().map(_.delete_!)
-    Shipment.findAll().map(_.delete_!)
-    ShipmentLineItem.findAll().map(_.delete_!)
-    User.bulkDelete_!!(NotNullRef(User.userId))
+    val tables = List(
+      Address,
+      Agency,
+      Event,
+      Pet,
+      Insert,
+      Subscription,
+      SubscriptionBox,
+      SubscriptionItem,
+      Shipment,
+      ShipmentLineItem,
+      ProductSchedule,
+      ProductScheduleItem,
+      Product,
+      User
+    )
+
+    val truncateAllQuery = testDatabase.truncateAllQuery(tables.map(_.dbTableName))
+
+    DB.use(DefaultConnectionIdentifier) { conn =>
+      DB.prepareStatement(truncateAllQuery, conn) { _.executeUpdate() }
+    }
   }
 
   def insertUserAndSub(
@@ -81,14 +101,15 @@ object GeneralDbUtils {
 
   def insertPetsAndShipmentChainData(
       in: PetsAndShipmentChainData,
-      inserts: List[Insert] = List.empty[Insert]
+      inserts: List[Insert] = List.empty[Insert],
+      upgraded: Boolean = false,
   ): InsertedPetsUserSubAndShipment = {
     val u           = createUser(in.user)
     val su          = createSubscription(Full(u), in.subscriptionCreateGeneratedData)
     val updatedUser = u.subscription(su).saveMe().reload
     val pets = in.pets.map { pData =>
       val createdPet = createPet(u, pData)
-      SubscriptionBox.createNewBox(su, createdPet)
+      SubscriptionBox.createNewBox(su, createdPet, upgraded)
       createdPet
     }
     val uSubscription = su.reload
@@ -110,10 +131,19 @@ object GeneralDbUtils {
       subUpgraded: Boolean,
       inserts: List[Insert] = List.empty[Insert]
   ): InsertedPetsUserSubAndShipment = {
-    val inserted    = insertPetsAndShipmentChainData(data, inserts)
+    val inserted    = insertPetsAndShipmentChainData(data, inserts, subUpgraded)
     val updatedUser = inserted.user.referer(agency).saveMe()
     val updatedSub  = inserted.subscription.isUpgraded(subUpgraded).saveMe()
     inserted.copy(user = updatedUser, subscription = updatedSub)
+  }
+
+  def insertProductScheduleGeneratedData(
+      in: ProductScheduleGeneratedChainData
+  ): InsertedScheduleAndProduct = {
+    val insertedProducts = in.productData.map(createNewProduct)
+    val schedule =
+      ProductScheduleDbUtils.createProductSchedule(in.scheduleStartData, insertedProducts)
+    InsertedScheduleAndProduct(schedule, insertedProducts)
   }
 
   def createPetlandAndMPDAgencies(): PetlandAndMPDAgencies = {
@@ -121,5 +151,9 @@ object GeneralDbUtils {
     val petlandAgency      = createAgency(petLandAgencyName)
     PetlandAndMPDAgencies(petlandAgency, myPetDefenseAgency)
   }
+
+  def insertProductToToSubBoxes(subscription: Subscription, product: Product): Unit =
+    subscription.subscriptionBoxes.toList
+      .foreach(SubscriptionItem.createSubscriptionItem(product, _))
 
 }

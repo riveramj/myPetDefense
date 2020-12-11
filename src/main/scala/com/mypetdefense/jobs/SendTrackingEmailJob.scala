@@ -5,11 +5,10 @@ import java.util.Date
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.{InventoryService, ParentService, ShipStationService}
-import net.liftweb._
-import common._
-import mapper._
+import net.liftweb.common._
+import net.liftweb.mapper._
+import net.liftweb.util.Helpers._
 import org.quartz._
-import util.Helpers._
 
 class SendTrackingEmailJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
@@ -42,7 +41,7 @@ class SendTrackingEmailJob extends ManagedJob {
           .trackingNumber(label.trackingNumber)
           .saveMe
 
-        ParentService.updateNextShipDate(subscription, Full(user))
+        ParentService.updateNextShipDate(subscription)
         InventoryService.deductShipmentItems(shipment)
 
         EmailActor ! SendInvoicePaymentSucceededEmail(
