@@ -8,8 +8,7 @@ import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.Paths._
 import com.mypetdefense.util.SecurityContext._
-import me.frmr.stripe.Card
-import net.liftweb._
+import com.stripe.model.Card
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -50,7 +49,7 @@ class ShippingBilling extends Loggable {
 
   val customerCard: Option[Card] = ParentService.getCustomerCard(stripeCustomerId)
 
-  cardNumberLastFour = customerCard.map(card => card.last4.toString).getOrElse("Not Found")
+  cardNumberLastFour = customerCard.map(_.getLast4).getOrElse("Not Found")
 
   def updateCard(parent: User): Unit = {
     ParentService.updateStripeCustomerCard(

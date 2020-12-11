@@ -3,23 +3,18 @@ package com.mypetdefense.snippet
 import java.time.{LocalDate, ZoneId}
 import java.util.Date
 
-import net.liftweb._
-import common._
-import http._
-import mapper._
-import rest._
-import util._
-import Helpers._
-import json._
-import JsonDSL._
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.{ParentService, TaxJarService}
-import dispatch.Defaults._
-import me.frmr.stripe.{Customer, StripeExecutor, Subscription => StripeSubscription}
-
-import scala.concurrent.Future
-import scala.util.{Failure => TryFail, Success => TrySuccess, _}
+import com.mypetdefense.util.StripeHelper._
+import com.stripe.model.{Customer, Subscription => StripeSubscription}
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.http.rest._
+import net.liftweb.json.JsonDSL._
+import net.liftweb.json._
+import net.liftweb.mapper._
+import net.liftweb.util.Helpers._
 
 case class NewAddress(
     street1: String,
@@ -45,9 +40,7 @@ case class NewParent(
 )
 
 object TPPApi extends RestHelper with Loggable {
-  val stripeSecretKey: String    = Props.get("secret.key") openOr ""
-  implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
-  val tppAgency: Box[Agency]     = Agency.tppAgency
+  val tppAgency: Box[Agency] = Agency.find(By(Agency.name, "TPP"))
 
   def createEventForStripeError(
       failedStepMessage: String,
@@ -61,32 +54,32 @@ object TPPApi extends RestHelper with Loggable {
     val errorMsg = s"""
       Something went wrong with stripe creation.
 
-      ${failedStepMessage}
+      $failedStepMessage
 
       Error given was:
       ===============
-      ${stripeFailure}
+      $stripeFailure
       ===============
 
       stripe Info:
       ===============
       parent:
-      ${parent}
+      $parent
 
       token:
-      ${stripeToken}
+      $stripeToken
 
       plan:
       tpp-pennyPlan
 
       quantity:
-      ${pennyCount}
+      $pennyCount
 
       coupon:
-      ${couponName}
+      $couponName
 
       taxPercent:
-      ${taxRate}
+      $taxRate
       ===============
     """
 
@@ -137,21 +130,21 @@ object TPPApi extends RestHelper with Loggable {
         Price Info:
         ===============
         parent:
-        ${parent}
+        $parent
 
         plan:
         tpp-pennyPlan
         
         pennyCount:
-        ${pennyCount}
+        $pennyCount
         
         rawPennyCount:
-        ${rawPennyCount}
+        $rawPennyCount
         ===============
 
         Pets:
         ==============
-        ${pets}
+        $pets
         ==============
 
         Prices
@@ -167,8 +160,8 @@ object TPPApi extends RestHelper with Loggable {
       )
     }
 
-    val (taxDue, taxRate) = address.map { address =>
-      TaxJarService.findTaxAmoutAndRate(
+    val (_, taxRate) = address.map { address =>
+      TaxJarService.findTaxAmountAndRate(
         address.city.get,
         address.state.get,
         address.zip.get,
@@ -176,34 +169,42 @@ object TPPApi extends RestHelper with Loggable {
       )
     }.getOrElse((0d, 0d))
 
-    val stripeCustomer: Future[Box[Customer]] = Customer.create(
-      email = Option(parent.email.get),
-      card = Some(stripeToken),
-      coupon = couponName
-    )
-
-    stripeCustomer onComplete {
-      case TrySuccess(Full(customer)) =>
-        val stripeSubscription: Future[Box[StripeSubscription]] = StripeSubscription.create(
-          customerId = customer.id,
-          quantity = Some(pennyCount),
-          coupon = Some("tpp"),
-          taxPercent = Some(taxRate),
-          plan = "tpp-pennyPlan"
+    val stripeCustomer = Box.tryo {
+      Customer.create(
+        ParamsMap(
+          "email" --> parent.email.get,
+          "card" --> stripeToken,
+          "coupon" -?> couponName
         )
+      )
+    }
 
-        stripeSubscription onComplete {
-          case TrySuccess(Full(subscription)) =>
+    stripeCustomer match {
+      case Full(customer) =>
+        val stripeSubscription = Box.tryo {
+          StripeSubscription.create(
+            ParamsMap(
+              "customer" --> customer.getId,
+              "quantity" --> pennyCount,
+              "coupon" --> "tpp",
+              "tax_percent" --> taxRate,
+              "plan" --> "tpp-pennyPlan"
+            )
+          )
+        }
+
+        stripeSubscription match {
+          case Full(subscription) =>
             val refreshedParent = parent.reload
-            val updatedParent   = refreshedParent.stripeId(customer.id).saveMe
+            val updatedParent   = refreshedParent.stripeId(customer.getId).saveMe
 
-            val subscriptionId = subscription.id.getOrElse("")
+            val subscriptionId = Option(subscription.getId).getOrElse("")
 
             val plusOneDayTime = LocalDate
               .now(ZoneId.of("America/New_York"))
               .plusDays(1)
               .atStartOfDay(ZoneId.of("America/New_York"))
-              .toInstant()
+              .toInstant
 
             val plusOneDayDate = Date.from(plusOneDayTime)
 
@@ -233,9 +234,9 @@ object TPPApi extends RestHelper with Loggable {
 
             if (newUser) EmailActor ! SendNewUserEmail(updatedUser)
 
-          case TrySuccess(stripeFailure) =>
+          case stripeFailure =>
             logger.error(
-              "create customer failed with: " + stripeFailure + ". Email sent to log error."
+              s"create customer failed with: $stripeFailure. Email sent to log error."
             )
 
             createEventForStripeError(
@@ -247,57 +248,25 @@ object TPPApi extends RestHelper with Loggable {
               couponName,
               taxRate
             )
-
-            stripeFailure
-          case TryFail(throwable: Throwable) =>
-            logger.error("create customer failed with: " + throwable + ". Email sent to log error.")
-
-            createEventForStripeError(
-              "We did not create a Stripe subscription or an internal subscription.",
-              throwable,
-              Full(parent),
-              stripeToken,
-              pennyCount,
-              couponName,
-              taxRate
-            )
-
-            throwable
         }
 
-      case TrySuccess(stripeFailure) =>
-        logger.error("create customer failed with: " + stripeFailure + ". Email sent to log error.")
+      case stripeFailure =>
+        logger.error(s"create customer failed with: $stripeFailure. Email sent to log error.")
 
         createEventForStripeError(
           "We did not create a Stripe subscription or an internal subscription.",
-          Left(stripeFailure),
+          stripeFailure,
           Full(parent),
           stripeToken,
           pennyCount,
           couponName,
           taxRate
         )
-
-        stripeFailure
-      case TryFail(throwable: Throwable) =>
-        logger.error("create customer failed with: " + throwable + ". Email sent to log error.")
-
-        createEventForStripeError(
-          "We did not create a Stripe subscription or an internal subscription.",
-          Right(throwable),
-          Full(parent),
-          stripeToken,
-          pennyCount,
-          couponName,
-          taxRate
-        )
-
-        throwable
     }
   }
 
   def createPets(pets: List[NewPet], parent: User): List[Box[Pet]] = {
-    (pets.map { pet =>
+    pets.map { pet =>
       val sanitizedProductName = pet.product.toLowerCase match {
         case possibleProduct
             if possibleProduct.contains("zoguard") && possibleProduct.toLowerCase.contains("dog") =>
@@ -329,7 +298,7 @@ object TPPApi extends RestHelper with Loggable {
         logger.error(errorMsgTitle)
         val errorMsg = s"""
         Something went wrong with product matching.
-          
+
         We could not match the product name given. This will lead to no pets being created. And other failures.
 
         Error given was:
@@ -340,14 +309,14 @@ object TPPApi extends RestHelper with Loggable {
         Product Info:
         ===============
         parent:
-        ${parent}
+        $parent
 
         pet:
-        ${pet}
-        
+        $pet
+
         rawProductName:
         ${pet.product.toLowerCase}
-        
+
         rawPetSize:
         ${pet.currentSize.toLowerCase}
         ===============
@@ -371,13 +340,13 @@ object TPPApi extends RestHelper with Loggable {
           ParentService.parseWhelpDate(possibleWhelpDate)
         )
       )
-    }).filter(_ != Empty)
+    }.filter(_ != Empty)
   }
 
   serve {
-    case req @ Req("api" :: "v1" :: "customer" :: Nil, _, PostRequest) => {
+    case req @ Req("api" :: "v1" :: "customer" :: Nil, _, PostRequest) =>
       for {
-        requestBody    <- (req.body ?~ "No request body." ~> 400)
+        requestBody    <- req.body ?~ "No request body." ~> 400
         requestJson    <- tryo(Serialization.read[JValue](new String(requestBody))) ?~! "Invalid JSON." ~> 400
         parentJson     <- Full(requestJson \ "parent")
         possibleParent <- tryo(parentJson.extract[NewParent]) ?~ "Error in customer json." ~> 400
@@ -404,7 +373,7 @@ object TPPApi extends RestHelper with Loggable {
           User.find(By(User.email, possibleParent.email), By(User.userType, UserType.Parent))
 
         existingUser match {
-          case Empty => {
+          case Empty =>
             val currentParent = User.createNewPendingUser(
               possibleParent,
               salesAgency,
@@ -413,8 +382,7 @@ object TPPApi extends RestHelper with Loggable {
 
             ApiRequestBackup.updateUser(backup, currentParent)
 
-            val parentAddress =
-              Address.createNewAddress(possibleParent.address, Full(currentParent))
+            Address.createNewAddress(possibleParent.address, Full(currentParent))
 
             val createdPets = createPets(pets, currentParent)
 
@@ -435,13 +403,13 @@ object TPPApi extends RestHelper with Loggable {
                   Pet Info:
                   ===============
                   parent:
-                  ${currentParent}
-                  
+                  $currentParent
+
                   pets:
-                  ${pets}
+                  $pets
 
                   createdPets:
-                  ${createdPets}
+                  $createdPets
                   ===============
                 """
 
@@ -461,15 +429,14 @@ object TPPApi extends RestHelper with Loggable {
               Nil,
               201
             )
-          }
 
-          case _ => {
+          case _ =>
             val errorMsgTitle = "Conflict on user creation."
             logger.error(errorMsgTitle)
 
             val errorMsg = s"""
                 Something went wrong with user creation.
-        
+
                 We couldnt create a new user in our system. Nothing else will happen due to this failure.
 
                 Error given was:
@@ -480,16 +447,16 @@ object TPPApi extends RestHelper with Loggable {
                 api Info:
                 ===============
                 rawUser:
-                ${possibleParent}
-                
+                $possibleParent
+
                 existing user matched:
-                ${existingUser}
-                
+                $existingUser
+
                 pets:
-                ${pets}
-                
+                $pets
+
                 agentId:
-                ${agentId}
+                $agentId
                 ===============
               """
 
@@ -501,26 +468,23 @@ object TPPApi extends RestHelper with Loggable {
             )
 
             JsonResponse(
-              ("message" -> "possible duplicate parent found. data logged"),
+              "message" -> "possible duplicate parent found. data logged",
               Nil,
               Nil,
               200
             )
-          }
         }
       }
-    }
 
-    case req @ Req("api" :: "v1" :: "customer" :: email :: Nil, _, DeleteRequest) => {
+    case Req("api" :: "v1" :: "customer" :: email :: Nil, _, DeleteRequest) =>
       for {
         sanitizedEmail <- Full(email.filterNot("\"".toSet))
         user <- (User.find(By(User.email, sanitizedEmail), By(User.userType, UserType.Parent)): Box[
                  User
                ]) ?~! s"User not found: $sanitizedEmail." ~> 404
       } yield {
-        ParentService.removeParent(user, true)
+        ParentService.removeParent(user, fullDelete = true)
         OkResponse()
       }
-    }
   }
 }

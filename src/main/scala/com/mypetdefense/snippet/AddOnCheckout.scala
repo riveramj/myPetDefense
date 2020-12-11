@@ -1,44 +1,26 @@
 package com.mypetdefense.snippet
 
-import net.liftweb._
-import http.SHtml._
-import util._
-import Helpers._
-import http._
-import common._
-import sitemap.Menu
-import js._
-import JsCmds._
-import com.mypetdefense.service._
-import ValidationService._
-import PetFlowChoices._
-import com.mypetdefense._
-import model._
-import snippet.admin.ShipmentDashboard
-import snippet.agency.AgencyOverview
-import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import com.mypetdefense.actor._
+import com.mypetdefense.model._
+import com.mypetdefense.service._
 import com.mypetdefense.snippet.signup.Success
-import me.frmr.stripe.{
-  Customer,
-  StripeExecutor,
-  Coupon => StripeCoupon,
-  Subscription => StripeSubscription
-}
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js._
+import net.liftweb.util.Helpers._
 
 import scala.xml.NodeSeq
 
 object AddOnCheckout extends Loggable {
   import net.liftweb.sitemap._
-  import Loc._
-  import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Add-on Checkout") / "add-on-checkout"
 }
 
 class AddOnCheckout extends Loggable {
-  import com.mypetdefense.snippet.shop.TreatCheckout._
-
   var cartRenderer: Box[IdMemoizeTransform] = Empty
 
   val user: Box[User]                 = SecurityContext.currentUser
@@ -70,7 +52,7 @@ class AddOnCheckout extends Loggable {
       val taxPercent = possibleTaxRate.openOr(0d)
       (findNewMonthlySubtotal * taxPercent, taxPercent)
     } else {
-      TaxJarService.findTaxAmoutAndRate(
+      TaxJarService.findTaxAmountAndRate(
         address.map(_.city.get).openOr(""),
         address.map(_.state.get).openOr(""),
         address.map(_.zip.get).openOr(""),

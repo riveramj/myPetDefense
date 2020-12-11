@@ -26,7 +26,7 @@ object DbSetup extends Loggable {
   }
 
   def migrateTables: List[String] = Schemifier.schemify(
-    true,
+    performWrite = true,
     Schemifier.infoF _,
     User,
     CancelledUser,
