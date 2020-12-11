@@ -1,21 +1,22 @@
 package com.mypetdefense.service
 
-import net.liftweb._
-import common._
-import util.Helpers.tryo
-import json._
-import util.Props
+import java.util.Date
 
-import dispatch._, Defaults._
+import dispatch.Defaults._
+import dispatch._
+import net.liftweb.common._
+import net.liftweb.json._
+import net.liftweb.util.Helpers.tryo
+import net.liftweb.util.Props
+import org.asynchttpclient.Response
+
+import scala.annotation.tailrec
+import scala.collection.JavaConverters._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
-
-import scala.collection.concurrent.TrieMap
-import scala.util.{Failure => TryFail, _}
 import scala.math.BigDecimal
-
-import java.util.Date
+import scala.util.{Failure => TryFail, _}
 
 object TaxJarService extends Loggable {
   val calculateTaxUrl: Req   = url("https://api.taxjar.com/v2/taxes").secure
@@ -26,15 +27,15 @@ object TaxJarService extends Loggable {
   val retryAttempts = 10
 
   def calculateTaxRate(city: String, state: String, zip: String): Double = {
-    findTaxAmoutAndRate(city, state, zip, 0d)._2
+    findTaxAmountAndRate(city, state, zip, 0d)._2
   }
-  def findTaxAmoutAndRate(
+  def findTaxAmountAndRate(
       city: String,
       state: String,
       zip: String,
       amount: BigDecimal
   ): (Double, Double) = {
-    def taxResponse = {
+    def taxResponse: Future[Box[String]] =
       Http
         .default(
           calculateTaxUrl << Map(
@@ -44,19 +45,22 @@ object TaxJarService extends Loggable {
             "to_city"               -> city,
             "amount"                -> amount.toString,
             "shipping"              -> "0"
-          ) <:< Map("Authorization" -> s"Bearer ${authKey}") OK as.String
+          ) <:< Map("Authorization" -> s"Bearer $authKey") > successAsStringOrThrowError
         )
         .either
         .map {
+          case Left(e: UnexpectedResponseException) =>
+            logger.error(s"[findTaxAmountAndRate > taxResponse] ${e.prettyPrint}", e)
+            Failure("Unexpected response while talking to taxJar.", Full(e), Empty)
           case Left(throwable) =>
-            logger.error(s"taxjar error: ${throwable}")
-            Failure("Error occured while talking to taxJar.", Full(throwable), Empty)
+            logger.error(s"[findTaxAmountAndRate > taxResponse] taxjar error", throwable)
+            Failure("Error occurred while talking to taxJar.", Full(throwable), Empty)
           case Right(possibleTaxResponse) =>
             Full(possibleTaxResponse)
         }
-    }
 
-    def rawTax(attemptsLeft: Int): Box[String] = {
+    @tailrec
+    def rawTax(attemptsLeft: Int): Box[String] =
       Try(Await.result(taxResponse, 1 seconds)) match {
         case Success(taxResponse) =>
           taxResponse
@@ -64,16 +68,18 @@ object TaxJarService extends Loggable {
           if (attemptsLeft > 0)
             rawTax(attemptsLeft - 1)
           else {
-            logger.error(s"Timeout occured while talking to taxJar for taxt calc with ${throwable}")
+            logger.error(
+              s"[findTaxAmountAndRate > rawTax] Timeout occurred while talking to taxJar for tax calc.",
+              throwable
+            )
             Failure(
-              "Timeout occured while talking to taxJar for taxt calc.",
+              "Timeout occurred while talking to taxJar for tax calc.",
               Full(throwable),
               Empty
             )
           }
 
       }
-    }
 
     val parsedTax = parse(rawTax(retryAttempts).openOr(""))
 
@@ -122,7 +128,7 @@ object TaxJarService extends Loggable {
       tax: String,
       date: String
   ): Box[String] = {
-    def orderResponse = {
+    def orderResponse: Future[Box[String]] =
       Http
         .default(
           createOrderTaxUrl << Map(
@@ -135,19 +141,22 @@ object TaxJarService extends Loggable {
             "amount"                -> amount,
             "shipping"              -> "0",
             "sales_tax"             -> tax
-          ) <:< Map("Authorization" -> s"Bearer ${authKey}") OK as.String
+          ) <:< Map("Authorization" -> s"Bearer $authKey") > successAsStringOrThrowError
         )
         .either
         .map {
+          case Left(e: UnexpectedResponseException) =>
+            logger.error(s"[createTaxOrder > orderResponse] ${e.prettyPrint}", e)
+            Failure("Unexpected response while talking to taxJar.", Full(e), Empty)
           case Left(throwable) =>
-            logger.error(s"taxjar error: ${throwable}")
-            Failure("Error occured while talking to taxJar.", Full(throwable), Empty)
+            logger.error(s"[createTaxOrder > orderResponse] taxjar error.", throwable)
+            Failure("Error occurred while talking to taxJar.", Full(throwable), Empty)
           case Right(possibleOrderResponse) =>
             Full(possibleOrderResponse)
         }
-    }
 
-    def rawOrder(attemptsLeft: Int): Box[String] = {
+    @tailrec
+    def rawOrder(attemptsLeft: Int): Box[String] =
       Try(Await.result(orderResponse, 1 seconds)) match {
         case Success(response) =>
           response
@@ -156,19 +165,40 @@ object TaxJarService extends Loggable {
             rawOrder(attemptsLeft - 1)
           else {
             logger.error(
-              s"Timeout occured while talking to taxJar for orderCreate with ${throwable}"
+              s"[createTaxOrder > raw order] Timeout occurred while talking to taxJar for orderCreate.",
+              throwable
             )
             Failure(
-              "Timeout occured while talking to taxJar for orderCreate.",
+              "Timeout occurred while talking to taxJar for orderCreate.",
               Full(throwable),
               Empty
             )
           }
       }
-    }
 
     val order = rawOrder(retryAttempts)
 
     order
+  }
+
+  private val successAsStringOrThrowError: Response => String =
+    resp =>
+      if (resp.getStatusCode / 100 == 2) as.String(resp)
+      else throw UnexpectedResponseException(resp)
+
+  private final case class UnexpectedResponseException(resp: Response)
+      extends RuntimeException(s"Unexpected response: ${resp.getStatusCode}") {
+
+    def prettyPrint: String =
+      s"""Unexpected response:
+         |  * status code: ${resp.getStatusCode}
+         |  * headers: $formatHeaders
+         |  * body: ${resp.getResponseBody}
+         |""".stripMargin
+
+    private def formatHeaders: String =
+      resp.getHeaders.iteratorAsString.asScala
+        .map(entry => s"    * ${entry.getKey}: ${entry.getValue}")
+        .mkString("\n", "\n", "")
   }
 }

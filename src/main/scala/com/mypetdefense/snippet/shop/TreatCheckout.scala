@@ -70,7 +70,7 @@ class TreatCheckout extends Loggable {
     state = possibleState
     zip = possibleZip
 
-    val taxInfo = TaxJarService.findTaxAmoutAndRate(
+    val taxInfo = TaxJarService.findTaxAmountAndRate(
       city,
       state,
       zip,
@@ -114,7 +114,7 @@ class TreatCheckout extends Loggable {
 
     val dollarOff = findSubtotal * percentOff
 
-    if (!validateFields.isEmpty) {
+    if (validateFields.nonEmpty) {
       validateFields.foldLeft(Noop)(_ & _)
     } else {
       val stripeId   = user.map(_.stripeId.get).openOr("")
@@ -129,7 +129,7 @@ class TreatCheckout extends Loggable {
 
           ParentService.chargeStripeCustomer(
             stripeAmount,
-            stripeCustomer.map(_.id),
+            stripeCustomer.flatMap(c => Option(c.getId)),
             internalSaleDescription
           )
         } else if (existingUser_?) {
@@ -137,7 +137,7 @@ class TreatCheckout extends Loggable {
 
           ParentService.chargeStripeCustomerNewCard(
             stripeAmount,
-            stripeCustomer.map(_.id),
+            stripeCustomer.flatMap(c => Option(c.getId)),
             stripeToken,
             internalSaleDescription
           )
@@ -175,7 +175,7 @@ class TreatCheckout extends Loggable {
           lastName,
           realEmail,
           address,
-          charge.id.getOrElse(""),
+          charge.getId,
           amountPaid,
           taxDue,
           cart.toList
@@ -226,7 +226,7 @@ class TreatCheckout extends Loggable {
   }
 
   def login: JsCmd = {
-    val loginResult = LoginService.login(email, password, "", true)
+    val loginResult = LoginService.login(email, password, "", boxLogin = true)
 
     if (loginResult == Noop) {
       (

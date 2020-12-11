@@ -1,7 +1,7 @@
-import sbt._
-import Keys._
 import com.earldouglas.xsbtwebplugin._
 import com.openstudy.sbt.ResourceManagementPlugin._
+import sbt.Keys._
+import sbt._
 
 name := "My Pet Defense"
 
@@ -56,6 +56,7 @@ libraryDependencies ++= {
     "ch.qos.logback"               % "logback-classic"     % "1.2.3",
     "net.sf.opencsv"               % "opencsv"             % "2.3",
     "org.postgresql"               % "postgresql"          % "42.2.5",
+    "com.stripe"                   % "stripe-java"         % "5.33.2",
     "org.quartz-scheduler"         % "quartz"              % "2.3.0",
     "org.eclipse.jetty"            % "jetty-webapp"        % "9.4.12.v20180830" % "container; compile->default",
     "org.mockito"                  % "mockito-core"        % "3.5.13" % "test",
@@ -67,7 +68,6 @@ libraryDependencies ++= {
     "net.liftweb"                  %% "lift-testkit"       % liftVersion % "test",
     "net.liftweb"                  %% "lift-mapper"        % liftVersion % "compile",
     "org.scalatest"                %% "scalatest"          % "3.2.0" % "test",
-    "me.frmr.stripe"               %% "streifen"           % "0.1.3-SNAPSHOT",
     "org.dispatchhttp"             %% "dispatch-core"      % "0.14.0",
     "org.dispatchhttp"             %% "dispatch-lift-json" % "0.14.0",
     "com.mypetdefense.shipstation" %% "shipstation-scala"  % "0.0.1-SNAPSHOT"

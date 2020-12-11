@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat
 
 import com.mypetdefense.model._
 import com.mypetdefense.service._
-import me.frmr.stripe.{Subscription => _}
 import net.liftweb.common._
 import net.liftweb.mapper._
 
@@ -223,7 +222,7 @@ object DataLoader extends Loggable {
       subscription <- upcomingSubscriptions
       user         <- subscription.user.obj
     } yield {
-      ParentService.updateNextShipDate(subscription, Full(user))
+      ParentService.updateNextShipDate(subscription)
     }
   }
 
