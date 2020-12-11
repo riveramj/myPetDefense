@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.LiftTest
 import com.mypetdefense.model.{Coupon, Subscription, User, UserType}
-import com.mypetdefense.util.DateHelper.mkDate
+import com.mypetdefense.util.DateHelper.makeDate
 import net.liftweb.common.{Empty, Full}
 
 class ValidationServiceSpec extends LiftTest {
@@ -304,8 +304,8 @@ object ValidationServiceSpec {
     val sub = Subscription.createNewSubscription(
       Full(user),
       stripeSubscriptionId = "sub_1234",
-      startDate = mkDate(2020, 1, 1),
-      nextShipDate = mkDate(2020, 2, 1)
+      startDate = makeDate(2020, 1, 1),
+      nextShipDate = makeDate(2020, 2, 1)
     )
 
     user.subscription(sub).saveMe()

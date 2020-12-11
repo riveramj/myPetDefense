@@ -102,8 +102,8 @@ object DateHelper {
     monthDate.toInstant.atZone(ZoneId.systemDefault()).toLocalDateTime
   }
 
-  def mkDate(y: Int, m: Int, d: Int): Date =
-    Date.from(LocalDate.of(y, m, d).atStartOfDay(zoneId).toInstant)
+  def makeDate(year: Int, month: Int, day: Int): Date =
+    Date.from(LocalDate.of(year, month, day).atStartOfDay(zoneId).toInstant)
 
   val monthHeaders: List[String] =
     List(

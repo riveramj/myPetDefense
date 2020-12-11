@@ -11,6 +11,8 @@ import org.scalatest.matchers.must
 import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach, Outcome}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
+import java.util.{Locale, TimeZone}
+
 sealed trait AnyTest extends AnyFlatSpec with must.Matchers with ScalaCheckPropertyChecks
 
 trait UnitTest extends AnyTest {
@@ -31,6 +33,8 @@ trait DBTest extends IntegrationTest with BeforeAndAfterEach with BeforeAndAfter
   override def beforeAll(): Unit = {
     BootUtil.bootOnceForTests
     DataLoader.loadProducts
+    TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
+    Locale.setDefault(Locale.US)
   }
 
   override def beforeEach(): Unit = {
