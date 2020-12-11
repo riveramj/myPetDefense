@@ -90,7 +90,7 @@ object DailySubscriptionBoxProductsUpdateJob extends TriggeredJob {
     .newTrigger()
     .withIdentity("DailySubscriptionBoxProductsUpdateJobTrigger")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 55 0 ? * * *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 ? * * *"))
     .build()
 }
 
