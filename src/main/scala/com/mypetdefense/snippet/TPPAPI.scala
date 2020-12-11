@@ -219,7 +219,7 @@ object TPPApi extends RestHelper with Loggable {
             val refreshUser = updatedParent.subscription(mpdSubscription).saveMe()
 
             refreshUser.pets.toList.map { pet =>
-              val box = SubscriptionBox.createNewBox(mpdSubscription, pet)
+              val box = SubscriptionBox.createNewBox(mpdSubscription, pet, false)
 
               pet.box(box).saveMe()
             }

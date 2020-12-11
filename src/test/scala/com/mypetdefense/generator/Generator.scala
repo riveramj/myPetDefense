@@ -218,6 +218,20 @@ object Generator {
       pets
     )
 
+  def genProduct: Gen[ProductGeneratedData] =
+    for {
+      productName <- genAlphaStr
+      sku         <- genAlphaStr
+    } yield ProductGeneratedData(productName, sku)
+
+  def genProductsSchedule(
+      productsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[ProductScheduleGeneratedChainData] =
+    for {
+      products <- Gen.listOfN(productsSize, genProduct)
+      startDate = anyDayOfNextMonth.toDate
+    } yield ProductScheduleGeneratedChainData(products, startDate)
+
   def genStatusLabelCreatedOrPaid: Gen[ShipmentStatus.Value] =
     Gen.oneOf(ShipmentStatus.LabelCreated, ShipmentStatus.Paid)
 
@@ -289,6 +303,17 @@ object Generator {
       listSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): List[InsertGenData] =
     listOfNInsertDataGen(listSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def productUpdateSchedule(
+      seed: Long = 42L,
+      productsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): ProductScheduleGeneratedChainData =
+    genProductsSchedule(productsSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
+
+  def product(
+      seed: Long = 42L
+  ): ProductGeneratedData =
+    genProduct.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
   def listOfNShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES

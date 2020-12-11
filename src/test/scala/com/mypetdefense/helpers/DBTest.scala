@@ -19,16 +19,11 @@ trait DBTest
   override def beforeAll() {
     BootUtil.bootForTests()
     DataLoader.loadProducts
-
     TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
     Locale.setDefault(Locale.US)
   }
 
-  override def afterAll(): Unit = {
-    clearTables()
-  }
-
-  override def afterEach(): Unit = {
+  override def beforeEach(): Unit = {
     clearTables()
   }
 

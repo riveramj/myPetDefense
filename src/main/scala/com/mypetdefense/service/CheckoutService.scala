@@ -107,7 +107,7 @@ object CheckoutService {
   }
 
   private def createNewBox(mpdSubscription: Subscription, pet: Pet) = {
-    val box = SubscriptionBox.createNewBox(mpdSubscription, pet)
+    val box = SubscriptionBox.createNewBox(mpdSubscription, pet, true)
     pet.box(box).saveMe()
 
     box
