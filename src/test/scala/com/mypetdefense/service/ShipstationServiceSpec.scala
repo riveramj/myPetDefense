@@ -125,7 +125,7 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
   private def compareItems(in: JValue, inserts: List[InsertGenData], pets: List[Pet]): Assertion = {
     val itemsList  = in.extract[List[JValue]]
     val itemsNames = itemsList.map(_ \ "name").map(_.extract[String])
-    itemsNames.size shouldBe ((pets.size * 2) + inserts.size) // x 2 because of flea tick
+    itemsNames.size shouldBe ((pets.size * 2) + inserts.size) // x 2 because of products and pet name
     inserts.forall(insert => itemsNames.exists(_.contains(insert.name))) shouldBe true
     pets.forall(pet => itemsNames.exists(_.contains(pet.name.get))) shouldBe true
   }

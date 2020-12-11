@@ -47,7 +47,7 @@ case class NewParent(
 object TPPApi extends RestHelper with Loggable {
   val stripeSecretKey: String    = Props.get("secret.key") openOr ""
   implicit val e: StripeExecutor = new StripeExecutor(stripeSecretKey)
-  val tppAgency: Box[Agency]     = Agency.find(By(Agency.name, "TPP"))
+  val tppAgency: Box[Agency]     = Agency.tppAgency
 
   def createEventForStripeError(
       failedStepMessage: String,
@@ -218,7 +218,7 @@ object TPPApi extends RestHelper with Loggable {
             val refreshUser = updatedParent.subscription(mpdSubscription).saveMe()
 
             refreshUser.pets.toList.map { pet =>
-              val box = SubscriptionBox.createNewBox(mpdSubscription, pet)
+              val box = SubscriptionBox.createNewBox(mpdSubscription, pet, false)
 
               pet.box(box).saveMe()
             }

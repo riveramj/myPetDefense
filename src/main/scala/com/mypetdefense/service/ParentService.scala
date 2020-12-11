@@ -449,8 +449,9 @@ object ParentService extends Loggable {
       animalType: AnimalType.Value,
       size: AnimalSize.Value,
       product: FleaTick,
+      isUpgraded: Boolean,
       breed: String = "",
-      birthday: String = ""
+      birthday: String = "",
   ): Box[Pet] = {
 
     val possibleBirthday = parseWhelpDate(birthday)
@@ -465,7 +466,7 @@ object ParentService extends Loggable {
     )
 
     oldUser.subscription.obj.map { subscription =>
-      val box = SubscriptionBox.createBasicBox(subscription, product, newPet)
+      val box = SubscriptionBox.createNewBox(subscription, newPet, isUpgraded)
 
       newPet.box(box).saveMe()
     }
