@@ -1,13 +1,14 @@
 package com.mypetdefense.helpers
 
-import java.util.{Locale, TimeZone}
-
 import com.mypetdefense.helpers.GeneralDbUtils.clearTables
 import com.mypetdefense.util.DataLoader
+import org.scalactic.anyvals.PosInt
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+
+import java.util.{Locale, TimeZone}
 
 trait DBTest
     extends AnyFlatSpec
@@ -16,8 +17,14 @@ trait DBTest
     with BeforeAndAfterAll
     with ScalaCheckPropertyChecks {
 
-  override def beforeAll() {
-    BootUtil.bootForTests()
+  override implicit val generatorDrivenConfig: PropertyCheckConfiguration =
+    PropertyCheckConfiguration(
+      minSuccessful = PosInt(3)
+    )
+
+  override def beforeAll(): Unit = {
+    BootUtil.bootOnceForTests
+    DataLoader.loadProducts
     DataLoader.loadProducts
     TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
     Locale.setDefault(Locale.US)

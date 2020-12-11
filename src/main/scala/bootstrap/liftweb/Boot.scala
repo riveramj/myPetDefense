@@ -1,6 +1,5 @@
 package bootstrap.liftweb
 
-import java.util.{Locale, TimeZone}
 import com.mypetdefense.jobs.JobManager
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
