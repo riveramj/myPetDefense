@@ -90,7 +90,8 @@ class PetsAndProducts extends Loggable {
           name = newPetName,
           animalType = pet,
           size = size,
-          product = product
+          product = product,
+          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false)
         )
       }).flatMap(identity) match {
         case Full(pet) =>

@@ -2,11 +2,11 @@ package com.mypetdefense.jobs
 
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
+import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayExceptYesterday, yesterday}
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.db.ProductDbUtils.createNewProduct
 import com.mypetdefense.model._
-import cats.syntax.option._
-import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayExceptYesterday, yesterday}
+import net.liftweb.common.{Empty, Full}
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
@@ -27,13 +27,13 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
       insertPetAndShipmentsChainAtAgency(
         userAndPetShouldBeAffected,
         mpdAndPld.mpd,
-        subUpgraded = false
+        subUpgraded = true
       )
     val shouldNotBeAffectedData =
       insertPetAndShipmentsChainAtAgency(
         userAndPetShouldNotBeAffected,
         mpdAndPld.mpd,
-        subUpgraded = false
+        subUpgraded = true
       )
 
     shouldNotBeAffectedData.subscription.subscriptionBoxes.toList
@@ -42,8 +42,8 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
 
     val job = new SubscriptionBoxProductsUpdateJob
     job.executeNextOrActiveRegularSchedule(
-      insertedProductsUpdateSchedule.schedule.some,
-      insertedPreviousSchedule.some
+      Full(insertedProductsUpdateSchedule.schedule),
+      Full(insertedPreviousSchedule)
     )
     val productsInSubsBoxesUpdateIds = insertedProductsUpdateSchedule.products.map(_.id.get)
 
@@ -73,8 +73,8 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
 
     val job = new SubscriptionBoxProductsUpdateJob
     job.executeFirstBoxSchedule(
-      insertedProductsUpdateSchedule.schedule.some,
-      insertedPreviousSchedule.some
+      Full(insertedProductsUpdateSchedule.schedule),
+      Full(insertedPreviousSchedule)
     )
 
     val firstBoxProductsIds = ProductSchedule.getFirstBoxProducts.map(_.id.get)
@@ -89,17 +89,21 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
     val insertedProductsUpdateSchedule = insertProductScheduleGeneratedData(scheduleGeneratedData)
     val userAndPetShouldBeAffected     = petsAndShipmentChainDataGen()
     val userAndPetShouldNotBeAffected  = petsAndShipmentChainDataGen()
+    val insertedPreviousSchedule =
+      insertedProductsUpdateSchedule.schedule
+        .scheduleStatus(ProductScheduleStatus.Active)
+        .saveMe()
     val shouldBeAffectedData =
       insertPetAndShipmentsChainAtAgency(
         userAndPetShouldBeAffected,
         mpdAndPld.mpd,
-        subUpgraded = false
+        subUpgraded = true
       )
     val shouldNotBeAffectedData =
       insertPetAndShipmentsChainAtAgency(
         userAndPetShouldNotBeAffected,
         mpdAndPld.mpd,
-        subUpgraded = false
+        subUpgraded = true
       )
     shouldBeAffectedData.subscription.createdAt(yesterday.toDate).saveMe()
     shouldNotBeAffectedData.subscription.createdAt(anyDayExceptYesterday.toDate).saveMe()
@@ -108,8 +112,8 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
 
     val job = new SubscriptionBoxProductsUpdateJob
     job.executeNextOrActiveRegularSchedule(
-      none,
-      insertedProductsUpdateSchedule.schedule.some
+      Empty,
+      Full(insertedPreviousSchedule)
     )
 
     val allSubsItems                 = SubscriptionItem.findAll
