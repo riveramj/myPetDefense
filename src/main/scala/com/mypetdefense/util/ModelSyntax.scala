@@ -11,8 +11,11 @@ object ModelSyntax {
     def getAllActivePets: List[Pet] = v.flatMap(_.getPets)
   }
 
+  implicit class ListOfShipmentLineItemsSyntax(val v: List[ShipmentLineItem]) extends AnyVal {
+    def distinctInserts: List[Insert] = v.flatMap(_.insert.obj).distinct
+  }
+
   implicit class ListOfShipmentsSyntax(val v: List[Shipment]) extends AnyVal {
     def sumAmountPaid: BigDecimal = v.map(_.amountPaid.get).map(amount => BigDecimal(amount)).sum
   }
-
 }

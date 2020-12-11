@@ -788,8 +788,8 @@ object ReportingService extends Loggable {
   }
 
   private[service] def executiveSnapshotReport: ExecutiveSnapshotReport = {
-    val allActiveSubs         = Subscription.activeAndPausedSubscriptions
-    val allActiveUpgradedSubs = Subscription.upgradedActiveAndPausedSubscriptions
+    val allActiveSubs         = Subscription.activeSubscriptions
+    val allActiveUpgradedSubs = Subscription.upgradedActiveSubscriptions
     val upgradedCancelledSubs = Subscription.upgradedAndCancelledSubscriptions
     val allActivePets         = allActiveSubs.getAllActivePets
     val allActiveUpgradedPets = allActiveUpgradedSubs.getAllActivePets

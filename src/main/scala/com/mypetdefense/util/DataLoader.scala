@@ -346,12 +346,8 @@ object DataLoader extends Loggable {
         user         <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
         subscription <- Subscription.find(By(Subscription.user, user)).toList
         pet          <- subscription.getPets
-        fleaTick <- FleaTick.find(
-                     By(FleaTick.size, pet.size.get),
-                     By(FleaTick.animalType, pet.animalType.get)
-                   )
       } yield {
-        val box = SubscriptionBox.createBasicBox(subscription, fleaTick, pet)
+        val box = SubscriptionBox.createNewBox(subscription, pet, false)
         pet.box(box).saveMe()
         user.subscription(subscription).saveMe()
       }
@@ -493,7 +489,7 @@ object DataLoader extends Loggable {
       catFleaTick  <- FleaTick.zoGuardCat.toList
     } {
       val updatedCat = cat.size(catFleaTick.size.get).saveMe
-      val box        = SubscriptionBox.createBasicBox(subscription, catFleaTick, updatedCat)
+      val box        = SubscriptionBox.createNewBox(subscription, updatedCat, false)
       updatedCat.box(box).saveMe()
     }
 
@@ -536,6 +532,53 @@ object DataLoader extends Loggable {
         subscription.status(Status.Cancelled).saveMe()
 
       cancelPets(pets)
+    }
+  }
+
+  def subscriptionBoxCheck(): Unit = {
+    if (Product.dentalPowderSmall.isEmpty) {
+      Product.createNewProduct("Dental Powder Small", "dentalPowderSmall")
+      Product.createNewProduct("Dental Powder Large", "dentalPowderLarge")
+    }
+
+    val products = List(
+      Product.skinAndCoat,
+      Product.multiVitamin,
+      Product.probiotic,
+      Product.dentalPowder
+    ).flatten
+
+    for {
+      box <- SubscriptionBox.findAll(
+        NotNullRef(SubscriptionBox.userModified),
+        By(SubscriptionBox.boxType, BoxType.healthAndWellness)
+      )
+      boxItem <- box.subscriptionItems.toList
+      product <- boxItem.product.obj
+    } yield {
+      if (!products.contains(product))
+        box.userModified(true).save()
+      else
+        box.userModified(false).save()
+    }
+  }
+
+  def upgradeSubscriptionBoxDetails(): Unit = {
+    for {
+      box <- SubscriptionBox.findAll()
+      pet <- box.pet.obj
+      products = box.subscriptionItems.toList
+    } yield {
+      if (products.size >= 2)
+        box
+          .animalType(pet.animalType.get)
+          .boxType(BoxType.healthAndWellness)
+          .saveMe()
+      else
+        box
+          .animalType(pet.animalType.get)
+          .boxType(BoxType.basic)
+          .saveMe()
     }
   }
 }

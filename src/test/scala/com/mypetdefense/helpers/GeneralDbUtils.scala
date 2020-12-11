@@ -5,6 +5,8 @@ import com.mypetdefense.helpers.db.AgencyDbUtils.createAgency
 import com.mypetdefense.helpers.db.ShipmentDbUtils.createShipment
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
 import com.mypetdefense.helpers.db.PetDbUtils.createPet
+import com.mypetdefense.helpers.db.ProductDbUtils.createNewProduct
+import com.mypetdefense.helpers.db.ProductScheduleDbUtils
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
 import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
 import com.mypetdefense.model._
@@ -34,6 +36,11 @@ object GeneralDbUtils {
       pets: List[Pet]
   )
 
+  case class InsertedScheduleAndProduct(
+      schedule: ProductSchedule,
+      products: List[Product]
+  )
+
   val insertUserAndSubTupled
       : ((UserCreateGeneratedData, SubscriptionCreateGeneratedData)) => InsertedUserAndSub =
     (insertUserAndSub _).tupled
@@ -49,6 +56,9 @@ object GeneralDbUtils {
     SubscriptionItem.findAll().map(_.delete_!)
     Shipment.findAll().map(_.delete_!)
     ShipmentLineItem.findAll().map(_.delete_!)
+    ProductScheduleItem.findAll().map(_.delete_!)
+    ProductSchedule.findAll().map(_.delete_!)
+    Product.findAll().map(_.delete_!)
     User.bulkDelete_!!(NotNullRef(User.userId))
   }
 
@@ -81,14 +91,15 @@ object GeneralDbUtils {
 
   def insertPetsAndShipmentChainData(
       in: PetsAndShipmentChainData,
-      inserts: List[Insert] = List.empty[Insert]
+      inserts: List[Insert] = List.empty[Insert],
+      upgraded: Boolean = false,
   ): InsertedPetsUserSubAndShipment = {
     val u           = createUser(in.user)
     val su          = createSubscription(Full(u), in.subscriptionCreateGeneratedData)
     val updatedUser = u.subscription(su).saveMe().reload
     val pets = in.pets.map { pData =>
       val createdPet = createPet(u, pData)
-      SubscriptionBox.createNewBox(su, createdPet)
+      SubscriptionBox.createNewBox(su, createdPet, upgraded)
       createdPet
     }
     val uSubscription = su.reload
@@ -110,10 +121,19 @@ object GeneralDbUtils {
       subUpgraded: Boolean,
       inserts: List[Insert] = List.empty[Insert]
   ): InsertedPetsUserSubAndShipment = {
-    val inserted    = insertPetsAndShipmentChainData(data, inserts)
+    val inserted    = insertPetsAndShipmentChainData(data, inserts, subUpgraded)
     val updatedUser = inserted.user.referer(agency).saveMe()
     val updatedSub  = inserted.subscription.isUpgraded(subUpgraded).saveMe()
     inserted.copy(user = updatedUser, subscription = updatedSub)
+  }
+
+  def insertProductScheduleGeneratedData(
+      in: ProductScheduleGeneratedChainData
+  ): InsertedScheduleAndProduct = {
+    val insertedProducts = in.productData.map(createNewProduct)
+    val schedule =
+      ProductScheduleDbUtils.createProductSchedule(in.scheduleStartData, insertedProducts)
+    InsertedScheduleAndProduct(schedule, insertedProducts)
   }
 
   def createPetlandAndMPDAgencies(): PetlandAndMPDAgencies = {
@@ -121,5 +141,9 @@ object GeneralDbUtils {
     val petlandAgency      = createAgency(petLandAgencyName)
     PetlandAndMPDAgencies(petlandAgency, myPetDefenseAgency)
   }
+
+  def insertProductToToSubBoxes(subscription: Subscription, product: Product): Unit =
+    subscription.subscriptionBoxes.toList
+      .foreach(SubscriptionItem.createSubscriptionItem(product, _))
 
 }
