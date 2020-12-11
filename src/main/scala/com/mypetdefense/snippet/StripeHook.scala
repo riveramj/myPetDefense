@@ -37,7 +37,7 @@ trait StripeHook extends RestHelper with Loggable {
     } yield {
       val charge = tryo((objectJson \ "charge").extract[String])
 
-      val notTrial_?   = ParentService.notTrialSubscription_?(stripeCustomerId, stripeSubscriptionId)
+      val notTrial_?   = ParentService.notTrialSubscription_?(stripeSubscriptionId)
       val city         = shippingAddress.city.get
       val state        = shippingAddress.state.get
       val zip          = shippingAddress.zip.get
@@ -57,7 +57,7 @@ trait StripeHook extends RestHelper with Loggable {
 
         if (subscription.contractLength.get > 0) {
           if (subscription.shipments.toList.size < 2) {
-            ParentService.changeToPetlandMonthlyStripePlan(stripeCustomerId, stripeSubscriptionId)
+            ParentService.changeToPetlandMonthlyStripePlan(stripeSubscriptionId)
           }
         }
 
@@ -105,7 +105,7 @@ trait StripeHook extends RestHelper with Loggable {
       val amount = totalAmountInCents / 100d
 
       if (nextPaymentAttempt.isEmpty)
-        ParentService.updateNextShipDate(subscription, Full(user))
+        ParentService.updateNextShipDate(subscription)
 
       emailActor ! SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt)
 
