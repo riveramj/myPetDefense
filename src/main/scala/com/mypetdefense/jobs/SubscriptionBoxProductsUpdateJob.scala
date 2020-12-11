@@ -46,11 +46,11 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
       schedule: ProductSchedule,
       onlyForYesterdayUsers: Boolean
   ): ProductSchedule = {
-    val scheduleItems   = schedule.scheduledItems.toList
-    val newProducts     = scheduleItems.flatMap(_.product.toList)
-    val unmodifiedBoxes = SubscriptionBox.getAllUnmodifiedDogHealthWellness
-    val dentalPowder = Product.dentalPowder
-    val smallSizes = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
+    val scheduleItems     = schedule.scheduledItems.toList
+    val newProducts       = scheduleItems.flatMap(_.product.toList)
+    val unmodifiedBoxes   = SubscriptionBox.getAllUnmodifiedDogHealthWellness
+    val dentalPowder      = Product.dentalPowder
+    val smallSizes        = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
     val dentalPowderSmall = Product.dentalPowderSmall
     val dentalPowderLarge = Product.dentalPowderLarge
 
@@ -64,7 +64,7 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
       box.subscriptionItems.toList.foreach(_.delete_!)
 
       newProducts.map { product =>
-        if(!dentalPowder.contains(product))
+        if (!dentalPowder.contains(product))
           SubscriptionItem.createSubscriptionItem(product, box)
         else {
           if (box.fleaTick.obj.map(_.size.get).forall(smallSizes.contains))

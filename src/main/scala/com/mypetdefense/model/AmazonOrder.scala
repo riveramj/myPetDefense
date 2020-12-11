@@ -1,11 +1,10 @@
 package com.mypetdefense.model
 
-import net.liftweb._
-import mapper._
 import java.util.Date
 
 import com.mypetdefense.model.domain.reports.AmazonOrderReport
 import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.mapper._
 
 class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, AmazonOrder] = AmazonOrder

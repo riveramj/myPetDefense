@@ -17,7 +17,7 @@ import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
-import net.liftweb.util.{ClearNodes, Props, _}
+import net.liftweb.util._
 
 import scala.xml.{Elem, NodeSeq}
 

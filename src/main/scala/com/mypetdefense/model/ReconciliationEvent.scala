@@ -3,7 +3,6 @@ package com.mypetdefense.model
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
-import net.liftweb._
 import net.liftweb.mapper._
 
 class ReconciliationEvent

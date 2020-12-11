@@ -1,10 +1,9 @@
 package bootstrap.liftweb
 
-import net.liftweb.util.Props
+import javax.mail.internet.{MimeMessage, MimeMultipart}
+import javax.mail.{Authenticator, PasswordAuthentication}
 import net.liftweb.common._
 import net.liftweb.util._
-import javax.mail.{Authenticator, PasswordAuthentication}
-import javax.mail.internet.{MimeMessage, MimeMultipart}
 
 object MailConfig extends Loggable {
 

@@ -9,7 +9,7 @@ import com.mypetdefense.snippet.login._
 import com.mypetdefense.snippet.shop.{TreatCheckout, TreatList}
 import com.mypetdefense.snippet.signup._
 import net.liftweb.common._
-import net.liftweb.http.{RedirectResponse, _}
+import net.liftweb.http._
 import net.liftweb.mapper.By
 import net.liftweb.sitemap.Loc._
 import net.liftweb.sitemap._

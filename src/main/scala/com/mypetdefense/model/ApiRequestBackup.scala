@@ -3,11 +3,10 @@ package com.mypetdefense.model
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
-import net.liftweb._
+import net.liftweb.common._
 import net.liftweb.json.JsonAST.JValue
-import mapper._
-import common._
-import json._
+import net.liftweb.json._
+import net.liftweb.mapper._
 
 class ApiRequestBackup extends LongKeyedMapper[ApiRequestBackup] with IdPK {
   override def getSingleton: KeyedMetaMapper[Long, ApiRequestBackup] = ApiRequestBackup

@@ -1,33 +1,24 @@
 package com.mypetdefense.snippet
 package admin
 
-import net.liftweb._
-import sitemap.Menu
-import http.SHtml._
-import http._
-import js.JsCmds._
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.util.ClearClearable
-import net.liftweb.mapper.By
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.time.{LocalDate, ZoneId}
+import java.time.LocalDate
 
 import com.mypetdefense.model._
-import com.mypetdefense.util.ClearNodesIf
-import com.mypetdefense.service._
-import ValidationService._
-import com.mypetdefense.actor._
+import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
 import net.liftweb.http.js.JsCmd
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
 
 import scala.xml.{Elem, NodeSeq}
 
 object Prices extends Loggable {
-  import net.liftweb.sitemap._
-  import Loc._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu: Menu.Menuable = Menu.i("Prices") / "admin" / "prices" >>
     mpdAdmin >>

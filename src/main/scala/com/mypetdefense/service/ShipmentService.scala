@@ -4,7 +4,7 @@ import java.util.Date
 
 import com.mypetdefense.model._
 import net.liftweb.common.Box.tryo
-import net.liftweb.common.{Full, _}
+import net.liftweb.common._
 import net.liftweb.mapper._
 
 object ShipmentService extends Loggable {

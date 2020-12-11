@@ -1,11 +1,8 @@
 package com.mypetdefense.service
 
-import net.liftweb.util.Helpers._
+import com.mypetdefense.model._
 import net.liftweb.common._
 import net.liftweb.http._
-
-import com.mypetdefense.model._
-import com.mypetdefense.snippet._
 
 import scala.collection.mutable.LinkedHashMap
 

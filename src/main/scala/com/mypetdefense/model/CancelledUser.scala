@@ -1,18 +1,9 @@
 package com.mypetdefense.model
 
-import net.liftweb._
-import mapper._
-import common._
-import util._
+import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
-import com.mypetdefense.service.KeyService._
-import com.mypetdefense.snippet.NewParent
-
-import org.apache.shiro.crypto.hash.Sha256Hash
-import org.apache.shiro.crypto.SecureRandomNumberGenerator
-
-import java.util.Date
+import net.liftweb.mapper._
 
 class CancelledUser
     extends LongKeyedMapper[CancelledUser]
