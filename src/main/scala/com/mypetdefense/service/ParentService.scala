@@ -17,8 +17,8 @@ import net.liftweb.util._
 
 object ParentService extends LoggableBoxLogging {
   val whelpDateFormat                  = new java.text.SimpleDateFormat("M/d/y")
-  val currentPentlandPlan: String      = Props.get("petland.6month.payment") openOr ""
-  val petlandMonthlyPlan: Box[String]  = Props.get("petland.1month.payment")
+  val currentPetlandPrice: String      = Props.get("petland.6month.payment") openOr ""
+  val petlandMonthlyPrice: Box[String] = Props.get("petland.1month.payment")
   val petland5MonthCoupon: Box[String] = Props.get("petland.5month.coupon")
 
   def updateStripeCustomerCard(customerId: String, stripeToken: String, user: User): Unit = {
@@ -304,7 +304,7 @@ object ParentService extends LoggableBoxLogging {
       product: FleaTick,
       isUpgraded: Boolean,
       breed: String = "",
-      birthday: String = "",
+      birthday: String = ""
   ): Box[Pet] = {
 
     val possibleBirthday = parseWhelpDate(birthday)
@@ -533,30 +533,41 @@ object ParentService extends LoggableBoxLogging {
       .logFailure("update subscription tax rate failed with stripe error")
   }
 
-  def getStripeProductPlan(planId: String): Box[Stripe.Plan] =
-    Stripe.Plan
-      .retrieve(planId)
-      .logFailure("get plan failed with stripe error")
+  def getStripeProductPrice(priceId: String): Box[Stripe.Price] =
+    Stripe.Price
+      .retrieve(priceId)
+      .logFailure("get price failed with stripe error")
 
-  def getCurrentPetlandProductPlan: Box[Stripe.Plan] =
-    getStripeProductPlan(currentPentlandPlan)
+  def getCurrentPetlandProductPrice: Box[Stripe.Price] =
+    getStripeProductPrice(currentPetlandPrice)
 
-  def changeToPetlandMonthlyStripePlan(subscriptionId: String): Box[Stripe.Subscription] = {
-    import SubscriptionUpdateParams._
+  def changeToPetlandMonthlyStripePrice(subscriptionId: String): Box[Stripe.Subscription] = {
+    def subscriptionUpdate: Box[Stripe.Subscription] = {
+      import SubscriptionUpdateParams._
 
-    val params =
-      SubscriptionUpdateParams.builder
-        .setProrationBehavior(ProrationBehavior.NONE)
-        .whenDefined(petland5MonthCoupon)(_.setCoupon)
-        .addItem(
-          SubscriptionUpdateParams.Item.builder
-            .whenDefined(petlandMonthlyPlan)(_.setPlan)
-            .build
-        )
-        .build
+      val params =
+        SubscriptionUpdateParams.builder
+          .setProrationBehavior(ProrationBehavior.NONE)
+          .whenDefined(petland5MonthCoupon)(_.setCoupon)
+          .build
 
-    StripeFacade.Subscription
-      .update(subscriptionId, params)
+      StripeFacade.Subscription.update(subscriptionId, params)
+    }
+
+    def subscriptionItemUpdate(subscription: Stripe.Subscription): Box[Stripe.Subscription] = {
+      import SubscriptionItemUpdateParams._
+
+      val params =
+        SubscriptionItemUpdateParams.builder
+          .setProrationBehavior(ProrationBehavior.NONE)
+          .whenDefined(petlandMonthlyPrice)(_.setPrice)
+          .build
+
+      StripeFacade.Subscription.updateFirstItem(subscription, params)
+    }
+
+    subscriptionUpdate
+      .flatMap(subscriptionItemUpdate)
       .logFailure("update subscription failed with stripe error")
   }
 

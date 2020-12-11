@@ -103,13 +103,13 @@ object StripeBoxAdapter {
       Box.tryo { underlying.create(params) }.map(PaymentSource)
   }
 
-  final case class Plan(underlying: StripeModel.Plan) {
+  final case class Price(underlying: StripeModel.Price) {
     def id: String = underlying.getId
   }
 
-  object Plan {
-    def retrieve(plan: String): Box[Plan] =
-      Box.tryo { StripeModel.Plan.retrieve(plan) }.map(Plan(_))
+  object Price {
+    def retrieve(price: String): Box[Price] =
+      Box.tryo { StripeModel.Price.retrieve(price) }.map(Price(_))
   }
 
   final case class Refund(underlying: StripeModel.Refund)

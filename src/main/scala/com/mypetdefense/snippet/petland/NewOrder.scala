@@ -93,8 +93,8 @@ class NewOrder extends Loggable {
 
   val birthdayDateFormat = new SimpleDateFormat("MMM yyyy")
 
-  val petlandPlan: Box[Stripe.Plan] = ParentService.getCurrentPetlandProductPlan
-  val petlandPlanId: String         = petlandPlan.map(_.id).openOr("")
+  val petlandPrice: Box[Stripe.Price] = ParentService.getCurrentPetlandProductPrice
+  val petlandPriceId: String          = petlandPrice.map(_.id).openOr("")
 
   def calculateTax(possibleState: String, possibleZip: String): JsCmd = {
     state = possibleState
@@ -130,7 +130,7 @@ class NewOrder extends Loggable {
         StripeFacade.Customer.createWithSubscription(
           email,
           stripeToken,
-          petlandPlanId,
+          petlandPriceId,
           pets.size,
           taxRate
         )
