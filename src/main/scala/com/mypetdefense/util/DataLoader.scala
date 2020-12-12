@@ -571,13 +571,17 @@ object DataLoader extends Loggable {
     } yield {
       if (products.nonEmpty)
         box
+          .animalType(AnimalType.Cat)
           .animalType(pet.animalType.get)
           .boxType(BoxType.healthAndWellness)
           .saveMe()
       else
         box
+          .animalType(AnimalType.Cat)
           .animalType(pet.animalType.get)
+          .boxType(BoxType.healthAndWellness)
           .boxType(BoxType.basic)
+          .userModified(false)
           .saveMe()
     }
   }
