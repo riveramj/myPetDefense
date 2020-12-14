@@ -41,7 +41,7 @@ class Boot {
     //ReportingService.getPetlandCustomersWithStats
 
     //DataLoader.upgradeSubscriptionBoxDetails()
-    DataLoader.subscriptionBoxCheck()
+    //DataLoader.subscriptionBoxCheck()
 
     //DataLoader.connectCancelledUsersToSubscription()
 
