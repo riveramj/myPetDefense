@@ -40,7 +40,7 @@ class Boot {
     //DataLoader.createMissingDogBoxes()
     //ReportingService.getPetlandCustomersWithStats
 
-    DataLoader.upgradeSubscriptionBoxDetails()
+    //DataLoader.upgradeSubscriptionBoxDetails()
     DataLoader.subscriptionBoxCheck()
 
     //DataLoader.connectCancelledUsersToSubscription()

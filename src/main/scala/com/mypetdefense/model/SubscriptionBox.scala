@@ -1,8 +1,6 @@
 package com.mypetdefense.model
 
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb._
 import mapper._
@@ -25,6 +23,9 @@ class SubscriptionBox extends LongKeyedMapper[SubscriptionBox] with IdPK with On
   object subscriptionItems extends MappedOneToMany(SubscriptionItem, SubscriptionItem.subscriptionBox)
   object addOnProducts extends MappedOneToMany(AddOnProduct, AddOnProduct.subscriptionBox)
   object basePrice     extends MappedDouble(this)
+  object status extends MappedEnum(this, Status) {
+    override def defaultValue: Status.Value = Status.Active
+  }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
