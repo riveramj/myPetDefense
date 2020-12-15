@@ -11,6 +11,41 @@ import com.stripe.model.{Subscription => StripeSubscription}
 class StripeQuantityUpdateJob extends ManagedJob {
   override def execute(context: JobExecutionContext): Unit = {
     println("Starting Job")
+    shipmentsPriceCheck()
+    println("End Job")
+  }
+
+  private def shipmentsPriceCheck() ={
+    val totalRevenue = (for {
+      subscription <- Subscription.findAll(
+        By(Subscription.status, Status.Active),
+        By(Subscription.isUpgraded, true)
+      )
+      user <- subscription.user.obj.toList
+      shipments = subscription.shipments.toList
+    } yield {
+
+      val zeroPayments = shipments.filter(_.amountPaid.get == "0")
+
+      if (zeroPayments.size > 1) {
+        val stripeSubscription = Box.tryo(StripeSubscription.retrieve(subscription.stripeSubscriptionId.get))
+        val subscriptionCost = stripeSubscription.map(_.getQuantity).map(_ / 100D).openOr(0.0)
+
+        println("$0 Shipment Info")
+        println(s"Email: ${user.email.get}")
+        println(s"Shipments $$0 count: ${zeroPayments.size}")
+        println(s"Subscription monthly value: $subscriptionCost")
+        println(s"Missing Revenue: ${subscriptionCost * (zeroPayments.size - 1)}")
+        println("=====================")
+        subscriptionCost * (zeroPayments.size - 1)
+      } else 0D
+    }).sum
+
+    println("missing revenue: " + totalRevenue)
+  }
+
+
+  private def stripeSubscriptionCheck() = {
     val totalMissingRevenue = (for {
       subscription <- Subscription.findAll(
         By(Subscription.status, Status.Active),
@@ -58,9 +93,10 @@ class StripeQuantityUpdateJob extends ManagedJob {
     }).sum
 
     println("missing revenue: " + totalMissingRevenue)
-    println("End Job")
   }
 }
+
+
 
 object OnDemandStripeQuantityUpdateJob extends TriggeredJob {
   override def detail: JobDetail =
@@ -74,6 +110,6 @@ object OnDemandStripeQuantityUpdateJob extends TriggeredJob {
       .newTrigger()
       .withIdentity("OnDemandStripeQuantityUpdateJob")
       .startNow()
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 47 15 ? * * *")) // At 03:00:00am every day
+      .withSchedule(CronScheduleBuilder.cronSchedule("0 56 17 ? * * *")) // At 03:00:00am every day
       .build()
 }
