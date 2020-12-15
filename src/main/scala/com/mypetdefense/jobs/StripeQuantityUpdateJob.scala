@@ -74,6 +74,6 @@ object OnDemandStripeQuantityUpdateJob extends TriggeredJob {
       .newTrigger()
       .withIdentity("OnDemandStripeQuantityUpdateJob")
       .startNow()
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 44 15 ? * * *")) // At 03:00:00am every day
+      .withSchedule(CronScheduleBuilder.cronSchedule("0 47 15 ? * * *")) // At 03:00:00am every day
       .build()
 }
