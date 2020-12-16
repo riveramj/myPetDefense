@@ -1,6 +1,7 @@
 package com.mypetdefense.jobs
 
 import com.mypetdefense.model._
+import com.mypetdefense.util.StripeHelper
 import com.mypetdefense.util.StripeHelper.{ParamsMap, StripeParamOps}
 import com.stripe.model.{Customer, Subscription => StripeSubscription}
 import net.liftweb.common.Box
@@ -14,7 +15,6 @@ class StripeQuantityUpdateJob extends ManagedJob {
   override def execute(context: JobExecutionContext): Unit = {
     println("Starting Job")
     stripeSubscriptionCheck()
-    checkStripeDiscounts()
     println("End Job")
   }
 
@@ -117,7 +117,7 @@ class StripeQuantityUpdateJob extends ManagedJob {
         "prorate" --> false
       )
 
-      //StripeHelper.updateSubscription(subscription.stripeSubscriptionId.get, params)
+      StripeHelper.updateSubscription(subscription.stripeSubscriptionId.get, params)
       missingRevenue
     }).sum
 
@@ -139,6 +139,6 @@ object OnDemandStripeQuantityUpdateJob extends TriggeredJob {
       .newTrigger()
       .withIdentity("OnDemandStripeQuantityUpdateJob")
       .startNow()
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 09 0 ? * * *")) // At 03:00:00am every day
+      .withSchedule(CronScheduleBuilder.cronSchedule("0 37 0 ? * * *")) // At 03:00:00am every day
       .build()
 }
