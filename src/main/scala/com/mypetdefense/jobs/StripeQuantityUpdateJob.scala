@@ -1,18 +1,44 @@
 package com.mypetdefense.jobs
 
-import com.mypetdefense.model.{BoxType, Status, Subscription, SubscriptionBox}
+import com.mypetdefense.model._
 import com.mypetdefense.util.StripeHelper.{ParamsMap, StripeParamOps}
+import com.stripe.model.{Customer, Subscription => StripeSubscription}
 import net.liftweb.common.Box
 import net.liftweb.common.Box.tryo
-import net.liftweb.mapper.By
+import net.liftweb.mapper.{By, By_>=}
 import org.quartz._
-import com.stripe.model.{Subscription => StripeSubscription}
+
+import java.text.SimpleDateFormat
 
 class StripeQuantityUpdateJob extends ManagedJob {
   override def execute(context: JobExecutionContext): Unit = {
     println("Starting Job")
-    shipmentsPriceCheck()
+    stripeSubscriptionCheck()
+    checkStripeDiscounts()
     println("End Job")
+  }
+
+  private def checkStripeDiscounts() ={
+    val dateFormatter = new SimpleDateFormat("M/d/y")
+    val begingingStartDate     = dateFormatter.parse("11/01/2020")
+
+    for {
+      subscription <- Subscription.findAll(
+        By(Subscription.status, Status.Active),
+        By(Subscription.isUpgraded, true),
+        By_>=(Subscription.startDate, begingingStartDate)
+      )
+      user <- subscription.user.obj
+      stripeSubscription <- Box.tryo(StripeSubscription.retrieve(subscription.stripeSubscriptionId.get))
+      stripeCustomer <- Box.tryo(Customer.retrieve(stripeSubscription.getCustomer))
+      stripeCoupon <- Box.tryo(stripeCustomer.getDiscount.getCoupon)
+      if stripeCoupon.getId == "100off"
+    } yield {
+      println("Check user")
+      println(user.email.get)
+      Box.tryo(stripeCustomer.deleteDiscount())
+      println("==========")
+    }
   }
 
   private def shipmentsPriceCheck() ={
@@ -60,6 +86,7 @@ class StripeQuantityUpdateJob extends ManagedJob {
       val basePrice = (for {
         box <- boxes
         pet <- box.pet.obj
+        if pet.status.get == Status.Active
       } yield {
         SubscriptionBox.basePrice(pet, box.boxType.get == BoxType.healthAndWellness)
       }).sum
@@ -78,9 +105,11 @@ class StripeQuantityUpdateJob extends ManagedJob {
       println(user.email.get)
       println(subscription.stripeSubscriptionId.get)
       println("$" + pennyCount.openOr(-1) + "subscription value")
+      println("subscription start date: " + subscription.startDate.get)
       println("number of non free boxes: " + nonFreeBoxes)
       println("prices paid for shipments: " + shipmentPricesPaid)
       println("missing revenue: " + missingRevenue)
+      println("nextShipDate: " + subscription.nextShipDate.get)
       println("=====================")
 
       val params = ParamsMap(
@@ -110,6 +139,6 @@ object OnDemandStripeQuantityUpdateJob extends TriggeredJob {
       .newTrigger()
       .withIdentity("OnDemandStripeQuantityUpdateJob")
       .startNow()
-      .withSchedule(CronScheduleBuilder.cronSchedule("0 56 17 ? * * *")) // At 03:00:00am every day
+      .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 ? * * *")) // At 03:00:00am every day
       .build()
 }
