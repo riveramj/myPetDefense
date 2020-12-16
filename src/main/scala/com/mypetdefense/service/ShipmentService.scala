@@ -52,12 +52,8 @@ object ShipmentService extends Loggable {
       pets          = subscription.getPets
       dogs          = pets.filter(_.animalType.get == AnimalType.Dog)
     } yield {
-      val sendFreeUpgradeShipment = {
-        if (shipmentCount >= 1 && tryo(subscription.freeUpgradeSampleDate) == Full(null) && dogs.nonEmpty)
-          true
-        else
-          false
-      }
+      val sendFreeUpgradeShipment =
+        shouldSendFreeUpgradeShipment(subscription, shipmentCount, dogs)
 
       if (sendFreeUpgradeShipment)
         subscription.freeUpgradeSampleDate(new Date).saveMe()
@@ -81,5 +77,18 @@ object ShipmentService extends Loggable {
         sendFreeUpgradeShipment
       )
     }
+  }
+
+  private[service] def shouldSendFreeUpgradeShipment(
+      subscription: Subscription,
+      shipmentCount: Int,
+      dogs: Seq[Pet]
+  ): Boolean = {
+    val isSecondShipment = shipmentCount == 1
+    val isTppCustomer =
+      !subscription.isUpgraded.get && subscription.subscriptionBoxes.forall(_ == BoxType.basic)
+
+    isSecondShipment && isTppCustomer &&
+    tryo(subscription.freeUpgradeSampleDate) == Full(null) && dogs.nonEmpty
   }
 }

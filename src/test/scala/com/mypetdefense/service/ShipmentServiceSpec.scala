@@ -13,6 +13,7 @@ import net.liftweb.common.Full
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class ShipmentServiceSpec extends DBTest {
+  import ShipmentServiceSpec._
 
   it should "create new shipment" in {
     forAll(userAndSubscriptionGen) {
@@ -130,6 +131,82 @@ class ShipmentServiceSpec extends DBTest {
     actualDataIds should contain theSameElementsAs insertedExpectedIds
   }
 
+  "shouldSendFreeUpgradeShipment" should "send upgrade on second shipment" in {
+    forAllNoShrink(listOfNSimplePetsGen()) { pets =>
+      val dogs = pets.filter(_.animalType.get == AnimalType.Dog)
+      whenever(dogs.nonEmpty) {
+        val sub = subscriptionWithFreeUpgrade.saveMe()
+        subscriptionBoxWithFreeUpgrade(sub).saveMe()
+
+        ShipmentService.shouldSendFreeUpgradeShipment(sub, shipmentCount = 1, dogs) mustBe true
+
+        clearTables()
+      }
+    }
+  }
+
+  it should "not send any upgrades on first shipment" in {
+    forAllNoShrink(listOfNSimplePetsGen()) { pets =>
+      val dogs = pets.filter(_.animalType.get == AnimalType.Dog)
+      whenever(dogs.nonEmpty) {
+        val sub = subscriptionWithFreeUpgrade.saveMe()
+        subscriptionBoxWithFreeUpgrade(sub).saveMe()
+
+        ShipmentService.shouldSendFreeUpgradeShipment(sub, shipmentCount = 0, dogs) mustBe false
+
+        clearTables()
+      }
+    }
+  }
+
+  it should "not send any upgrades on third shipment" in {
+    forAllNoShrink(listOfNSimplePetsGen()) { pets =>
+      val dogs = pets.filter(_.animalType.get == AnimalType.Dog)
+      whenever(dogs.nonEmpty) {
+        val sub = subscriptionWithFreeUpgrade.saveMe()
+        subscriptionBoxWithFreeUpgrade(sub).saveMe()
+
+        ShipmentService.shouldSendFreeUpgradeShipment(sub, shipmentCount = 2, dogs) mustBe false
+
+        clearTables()
+      }
+    }
+  }
+
+  it should "not send any upgrades on other shipments" in {
+    forAllNoShrink(genPosInt, listOfNSimplePetsGen()) { (shipmentCount, pets) =>
+      val dogs = pets.filter(_.animalType.get == AnimalType.Dog)
+      whenever(shipmentCount > 2 && dogs.nonEmpty) {
+        val sub = subscriptionWithFreeUpgrade.saveMe()
+        subscriptionBoxWithFreeUpgrade(sub).saveMe()
+
+        ShipmentService.shouldSendFreeUpgradeShipment(sub, shipmentCount, dogs) mustBe false
+
+        clearTables()
+      }
+    }
+  }
+
+  it should "not send any upgrades when there are no dogs" in {
+    val sub = subscriptionWithFreeUpgrade.saveMe()
+    subscriptionBoxWithFreeUpgrade(sub).saveMe()
+
+    ShipmentService.shouldSendFreeUpgradeShipment(sub, shipmentCount = 1, dogs = Nil) mustBe false
+  }
+
+  it should "not send any upgrades when customer is ineligible for them" in {
+    forAllNoShrink(listOfNSimplePetsGen()) { pets =>
+      val dogs = pets.filter(_.animalType.get == AnimalType.Dog)
+      whenever(dogs.nonEmpty) {
+        val sub = subscriptionWithoutFreeUpgrade.saveMe()
+
+        ShipmentService.shouldSendFreeUpgradeShipment(sub, shipmentCount = 1, dogs) mustBe false
+
+        clearTables()
+      }
+    }
+  }
+
   private def setExpShipDateStatusAndShipmentStatus(
       in: InsertedUserSubAndShipment,
       expectedShipData: Date,
@@ -150,4 +227,19 @@ class ShipmentServiceSpec extends DBTest {
   ): Subscription =
     in.subscription.nextShipDate(nextShipDate).status(status).saveMe()
 
+}
+
+object ShipmentServiceSpec {
+  val subscriptionWithFreeUpgrade: Subscription =
+    Subscription.create
+      .isUpgraded(false)
+
+  val subscriptionWithoutFreeUpgrade: Subscription =
+    Subscription.create
+      .isUpgraded(true)
+
+  def subscriptionBoxWithFreeUpgrade(sub: Subscription): SubscriptionBox =
+    SubscriptionBox.create
+      .boxType(BoxType.basic)
+      .subscription(sub)
 }
