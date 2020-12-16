@@ -28,6 +28,7 @@ object TaxJarService extends Loggable {
   def calculateTaxRate(city: String, state: String, zip: String): Double = {
     findTaxAmountAndRate(city, state, zip, 0d)._2
   }
+
   def findTaxAmountAndRate(
       city: String,
       state: String,
@@ -105,7 +106,16 @@ object TaxJarService extends Loggable {
       subtotal: String,
       tax: String
   ): Any = {
+    println("in taxes charged")
+    println(s"tax collected is ${tax}")
+    println(s"orderIdentifier is ${orderIdentifier}")
+    println(s"city is ${city}")
+    println(s"state is ${state}")
+    println(s"zip is ${zip}")
+    println(s"subtotal is ${subtotal}")
+    println("===================")
     if (tax != "0") {
+      println("in if")
       createTaxOrder(
         orderIdentifier,
         city,
@@ -175,7 +185,9 @@ object TaxJarService extends Loggable {
           }
       }
 
+    println("before raw order")
     val order = rawOrder(retryAttempts)
+    println("after raw order")
 
     order
   }

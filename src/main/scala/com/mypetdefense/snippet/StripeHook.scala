@@ -53,14 +53,6 @@ trait StripeHook extends RestHelper with Loggable {
       }
 
       if (notTrial_? && activePets_?) {
-        subscription.status(Status.Active).saveMe
-
-        if (subscription.contractLength.get > 0) {
-          if (subscription.shipments.toList.size < 2) {
-            ParentService.changeToPetlandMonthlyStripePrice(stripeSubscriptionId)
-          }
-        }
-
         if (activePets_?) {
           TaxJarService.processTaxesCharged(
             invoicePaymentId,
