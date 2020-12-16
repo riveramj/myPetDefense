@@ -6,7 +6,6 @@ import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
-import com.stripe.model.Customer
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -49,7 +48,7 @@ class Checkout extends Loggable {
 
   var stripeToken         = ""
   var coupon: Box[Coupon] = PetFlowChoices.coupon.is
-  var couponCode: String = coupon.map(_.couponCode.get.toLowerCase()).openOr("")
+  var couponCode: String  = coupon.map(_.couponCode.get.toLowerCase()).openOr("")
 
   val pets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
   val petCount: Int                          = pets.size
@@ -65,12 +64,14 @@ class Checkout extends Loggable {
     case 0 | 1 => BigDecimal(0)
     case _     => subtotal * 0.1
   }
-  var promotionAmount: BigDecimal      = (coupon.map(_.percentOff.get).openOr(0) / 100D) * subtotal
+  var promotionAmount: BigDecimal      = (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
   val subtotalWithDiscount: BigDecimal = subtotal - discount
 
   val pennyCount: Int = (subtotal * 100).toInt
 
-  private def handleStripeFailureOnSignUp(stripeFailure: Box[Customer]): Alert = {
+  private def handleStripeFailureOnSignUp(
+      stripeFailure: Box[StripeFacade.CustomerWithSubscriptions]
+  ): Alert = {
     logger.error("create customer failed with: " + stripeFailure)
     Alert(s"""An error has occurred $stripeFailure. Please Try again.""")
   }
@@ -83,7 +84,7 @@ class Checkout extends Loggable {
     PetFlowChoices.freeMonths(coupon.map(_.numberOfMonths.get))
   }
 
-  private def setupNewUserAndRedirect(customer: Customer): Nothing = {
+  private def setupNewUserAndRedirect(customer: StripeFacade.CustomerWithSubscriptions): Nothing = {
     val newUserAddress          = NewUserAddress(street1, street2, city, state, zip)
     val newUserData             = NewUserData(email, firstName, lastName, password, newUserAddress, coupon)
     val petsToCreate            = pets.values.toList
@@ -109,7 +110,14 @@ class Checkout extends Loggable {
     setMultiPetCouponIfPossible()
 
     val stripeCustomer =
-      StripeService.createStripeCustomer(coupon, email, stripeToken, pennyCount, taxRate)
+      StripeFacade.Customer.createWithSubscription(
+        email,
+        stripeToken,
+        priceId = "pennyProduct",
+        pennyCount,
+        taxRate,
+        coupon
+      )
 
     stripeCustomer match {
       case Full(customer) => setupNewUserAndRedirect(customer)
@@ -157,7 +165,7 @@ class Checkout extends Loggable {
       PetFlowChoices.coupon(coupon)
 
       PromoCodeMessage("success") &
-      priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
+        priceAdditionsRenderer.map(_.setHtml).openOr(Noop)
     }
   }
 
@@ -205,7 +213,7 @@ class Checkout extends Loggable {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
 
-        promotionAmount = (coupon.map(_.percentOff.get).openOr(0) / 100D) * subtotal
+        promotionAmount = (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
 
         val monthlyTotal = subtotalWithDiscount + taxDue
         val todayTotal   = subtotalWithDiscount + taxDue - promotionAmount
@@ -244,35 +252,35 @@ class Checkout extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
-    orderSummary andThen
-    "#left-column" #> SHtml.idMemoize { renderer =>
-      accountRenderer = Full(renderer)
+      orderSummary andThen
+      "#left-column" #> SHtml.idMemoize { renderer =>
+        accountRenderer = Full(renderer)
 
-      {
-        if (currentUser.isEmpty)
-          "#password" #> SHtml.password(password, userPassword => password = userPassword.trim)
-        else {
-          ".password-container" #> ClearNodes &
-            ".facebook-option" #> ClearNodes &
-            "#facebook-id" #> ClearNodes &
-            "#email [disabled]" #> "disabled"
-        }
+        {
+          if (currentUser.isEmpty)
+            "#password" #> SHtml.password(password, userPassword => password = userPassword.trim)
+          else {
+            ".password-container" #> ClearNodes &
+              ".facebook-option" #> ClearNodes &
+              "#facebook-id" #> ClearNodes &
+              "#email [disabled]" #> "disabled"
+          }
+        } andThen
+          "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
+            "#facebook-id" #> ajaxText(facebookId, facebookId = _) &
+            "#first-name" #> ajaxText(firstName, firstName = _) &
+            "#last-name" #> ajaxText(lastName, lastName = _) &
+            ".connect-facebook [onClick]" #> SHtml.ajaxInvoke(() => connectFacebook()) &
+            "#street-1" #> text(street1, street1 = _) &
+            "#street-2" #> text(street2, street2 = _) &
+            "#city" #> ajaxText(city, city = _) &
+            "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
+            "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
       } andThen
-        "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
-          "#facebook-id" #> ajaxText(facebookId, facebookId = _) &
-          "#first-name" #> ajaxText(firstName, firstName = _) &
-          "#last-name" #> ajaxText(lastName, lastName = _) &
-          ".connect-facebook [onClick]" #> SHtml.ajaxInvoke(() => connectFacebook()) &
-          "#street-1" #> text(street1, street1 = _) &
-          "#street-2" #> text(street2, street2 = _) &
-          "#city" #> ajaxText(city, city = _) &
-          "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
-          "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
-    } andThen
-    "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-    ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup()) &
-    ".promotion-info [class+]" #> successCoupon &
-    "#promo-code" #> ajaxText(couponCode, couponCode = _) &
-    ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
+      "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
+        ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup()) &
+        ".promotion-info [class+]" #> successCoupon &
+        "#promo-code" #> ajaxText(couponCode, couponCode = _) &
+        ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
   }
 }

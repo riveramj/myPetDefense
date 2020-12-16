@@ -1,56 +1,27 @@
 package com.mypetdefense.util
 
-import java.util.{Map => JMap}
+import com.mypetdefense.typeclasses.MaybeLike
+import com.mypetdefense.typeclasses.MaybeLike.Syntax
 
-import com.stripe.model._
-import net.liftweb.common.Box
-
-import scala.collection.JavaConverters._
+import scala.language.higherKinds
 
 object StripeHelper {
 
-  type Param = (String, AnyRef)
+  implicit class ApiRequestParamsBuilderOps[B](val builder: B) extends AnyVal {
+    def whenDefined[F[_]: MaybeLike, T](maybeValue: F[T])(setValue: B => T => B): B = {
+      maybeValue foreach setValue(builder)
+      builder
+    }
 
-  type ParamsMap = JMap[String, AnyRef]
-  def ParamsMap(kvs: Option[Param]*): ParamsMap = kvs.flatten.toMap.asJava
+    def whenDefinedC[F[_]: MaybeLike, T, R](
+        maybeValue: F[T]
+    )(setValue: B => R => B)(implicit ev: T => R): B =
+      whenDefined(maybeValue.map(ev))(setValue)
 
-  implicit class StripeParamOps(key: String) {
-    def -->(value: Any): Option[Param] =
-      Some((key, value.toString))
-
-    def -?>(value: Option[Any]): Option[Param] =
-      value.map(v => (key, v.toString))
+    def when(cond: Boolean)(thenPart: B => Unit)(elsePart: B => Unit): B = {
+      if (cond) thenPart(builder) else elsePart(builder)
+      builder
+    }
   }
-
-  def deleteCoupon(couponId: String): Box[DeletedCoupon] =
-    doOnApiResource { Coupon.retrieve(couponId) } { _.delete() }
-
-  def updateCustomer(customerId: String, params: ParamsMap): Box[Customer] =
-    doOnApiResource { Customer.retrieve(customerId) } { _.update(params) }
-
-  def deleteCustomer(customerId: String): Box[DeletedCustomer] =
-    doOnApiResource { Customer.retrieve(customerId) } { _.delete() }
-
-  def createCustomerCard(customerId: String, stripeToken: String): Box[Card] = {
-    val rawSource = doOnApiResource {
-      Customer.retrieve(customerId, ParamsMap("expand" --> List("sources").asJava), null)
-    } { _.getSources.create(ParamsMap("source" --> stripeToken)) }
-
-    rawSource
-      .filter(_.getObject == "card")
-      .map(_.asInstanceOf[Card])
-  }
-
-  def deleteCustomerDiscount(customerId: String): Box[Unit] =
-    doOnApiResource { Customer.retrieve(customerId) } { _.deleteDiscount() }
-
-  def updateSubscription(subscriptionId: String, params: ParamsMap): Box[Subscription] =
-    doOnApiResource { Subscription.retrieve(subscriptionId) } { _.update(params) }
-
-  @inline private def doOnApiResource[R, T](retrieveRes: => R)(doOnRes: R => T): Box[T] =
-    for {
-      resource <- Box.tryo(retrieveRes)
-      result   <- Box.tryo(doOnRes(resource))
-    } yield result
 
 }

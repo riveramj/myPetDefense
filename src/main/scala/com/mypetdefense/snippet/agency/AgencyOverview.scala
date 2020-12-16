@@ -1,25 +1,21 @@
 package com.mypetdefense.snippet
 package agency
 
-import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml._
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.util.{ClearClearable, CssSel}
-import net.liftweb.http._
-import js.JsCmds._
-import net.liftweb.mapper.By
-import com.mypetdefense.model.{Status, _}
-import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.service.{CouponService, ReportingService}
-import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
 import java.time.{LocalDate, LocalDateTime, ZoneId}
-import java.time.format.DateTimeFormatter
 
+import com.mypetdefense.model._
+import com.mypetdefense.service.ReportingService
 import com.mypetdefense.snippet.admin.UpdateChartData
+import com.mypetdefense.util.SecurityContext
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
 import net.liftweb.http.js.JsCmd
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.mapper.By
+import net.liftweb.util.CssSel
+import net.liftweb.util.Helpers._
 
 import scala.collection.immutable.ListMap
 import scala.xml.Elem

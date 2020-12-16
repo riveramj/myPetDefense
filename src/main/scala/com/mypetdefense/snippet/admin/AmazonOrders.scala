@@ -1,21 +1,18 @@
 package com.mypetdefense.snippet
 package admin
 
-import net.liftweb._
-import http._
+import java.text.SimpleDateFormat
+
+import com.mypetdefense.model._
+import com.mypetdefense.service._
+import com.mypetdefense.util.RandomIdGenerator._
+import com.mypetdefense.util._
+import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.js.JsCmd._
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js._
 import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.mapper.By
-import java.text.SimpleDateFormat
-
-import com.mypetdefense.model._
-import com.mypetdefense.util._
-import com.mypetdefense.service._
-import com.mypetdefense.util.RandomIdGenerator._
 
 import scala.xml.NodeSeq
 

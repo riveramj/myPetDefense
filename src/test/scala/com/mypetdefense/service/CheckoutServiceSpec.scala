@@ -1,10 +1,10 @@
 package com.mypetdefense.service
 
+import cats.syntax.option._
 import com.mypetdefense.generator.Generator
 import com.mypetdefense.helpers.DBTest
-import com.mypetdefense.model.{Address, Pet, Price, Status, Subscription, User}
+import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.NewUserAddress
-import cats.syntax.option._
 import net.liftweb.common.{Box, Empty}
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
@@ -33,7 +33,7 @@ class CheckoutServiceSpec extends DBTest {
       petsToCreate,
       Price.defaultPriceCode,
       generatedUserData,
-      stripeCustomer
+      StripeFacade.CustomerWithSubscriptions(stripeCustomer)
     )
     maybeCreatedUser.isDefined shouldBe true
     val createdUser  = maybeCreatedUser.toOption.get

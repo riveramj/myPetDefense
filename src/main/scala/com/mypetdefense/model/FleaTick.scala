@@ -1,10 +1,10 @@
 package com.mypetdefense.model
 
-import net.liftweb.mapper._
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Box
+import net.liftweb.mapper._
 
 class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, FleaTick] {
   def getSingleton: KeyedMetaMapper[Long, FleaTick] = FleaTick

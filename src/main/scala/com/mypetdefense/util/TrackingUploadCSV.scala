@@ -11,7 +11,7 @@ import net.liftweb.http.S
 import scala.collection.JavaConverters._
 import scala.language.{implicitConversions, postfixOps}
 import scala.util.matching.Regex
-import xml.Text
+import scala.xml.Text
 
 case class TrackingInfo(recipient: String, trackingNumber: String)
 

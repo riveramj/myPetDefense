@@ -1,11 +1,9 @@
 package com.mypetdefense.model
 
-import net.liftweb.mapper._
-import net.liftweb.common.Box
 import java.util.Date
-import net.liftweb.util.Props
 
 import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.mapper._
 
 class GrowthRate extends LongKeyedMapper[GrowthRate] with IdPK with OneToMany[Long, GrowthRate] {
   def getSingleton: KeyedMetaMapper[Long, GrowthRate] = GrowthRate

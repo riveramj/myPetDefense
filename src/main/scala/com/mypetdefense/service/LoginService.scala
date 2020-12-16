@@ -1,20 +1,12 @@
 package com.mypetdefense.service
 
-import net.liftweb._
-import util.Helpers._
-import http._
-import common._
-import sitemap.Menu
-import js._
-import JsCmds._
-
-import com.mypetdefense.service._
-import ValidationService._
-
-import com.mypetdefense._
-import model.{User, UserType, Status}
-import snippet.admin.ShipmentDashboard
+import com.mypetdefense.model.{Status, User}
+import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.util.SecurityContext
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js._
 
 object LoginService extends Loggable {
   def userCanLogIn_?(user: User, password: String, facebookId: String): Box[Boolean] = {

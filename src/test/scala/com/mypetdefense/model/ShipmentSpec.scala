@@ -4,11 +4,7 @@ import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers._
-import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
-import org.scalatest.flatspec.AnyFlatSpec
-import org.scalatest.matchers.must.Matchers
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class ShipmentSpec extends DBTest {
 

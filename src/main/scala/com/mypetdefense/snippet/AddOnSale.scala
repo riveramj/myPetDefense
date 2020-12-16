@@ -1,26 +1,21 @@
 package com.mypetdefense.snippet
 
-import net.liftweb._
-import http.SHtml._
-import util._
-import Helpers._
-import http._
-import mapper.By
-import common._
-import sitemap.Menu
-import js._
-import JsCmds._
+import com.mypetdefense.model._
 import com.mypetdefense.service._
-import com.mypetdefense._
-import model._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.http.js._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
 
 import scala.xml.NodeSeq
 
 object AddOnSale extends Loggable {
   import net.liftweb.sitemap._
   import Loc._
-  import com.mypetdefense.util.Paths._
 
   val menu: Menu.Menuable with Menu.WithSlash = Menu.i("Add-on Sale") / "add-on"
 
@@ -35,8 +30,6 @@ object AddOnSale extends Loggable {
 }
 
 class AddOnSale extends Loggable {
-  import AddOnSale._
-
   var user: Box[User] = AddOnSale.addOnSaleMenu.currentValue
 
   val duckTreats: Box[Product] =

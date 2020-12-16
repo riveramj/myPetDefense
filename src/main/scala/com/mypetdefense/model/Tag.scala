@@ -3,9 +3,8 @@ package com.mypetdefense.model
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
-import net.liftweb._
-import common._
-import mapper._
+import net.liftweb.common._
+import net.liftweb.mapper._
 
 class Tag extends LongKeyedMapper[Tag] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, Tag] = Tag

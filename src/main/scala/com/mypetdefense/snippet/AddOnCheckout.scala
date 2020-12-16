@@ -31,8 +31,9 @@ class AddOnCheckout extends Loggable {
   var discountCode = ""
   var discount_?   = false
 
-  var taxDue                                          = 0d
-  var taxRate                                         = 0d
+  var taxDue  = BigDecimal(0)
+  var taxRate = BigDecimal(0)
+
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
   var checkoutRenderer: Box[IdMemoizeTransform]       = None
 

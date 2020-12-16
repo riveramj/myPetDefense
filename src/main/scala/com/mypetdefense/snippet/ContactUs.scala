@@ -1,15 +1,11 @@
 package com.mypetdefense.snippet
 
-import net.liftweb._
-import http.SHtml._
-import util._
-import util.Helpers._
-import common._
-import http._
-import js._
-import JsCmds._
 import com.mypetdefense.actor._
 import com.mypetdefense.util.Paths
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
+import net.liftweb.util.Helpers._
 
 import scala.xml.NodeSeq
 

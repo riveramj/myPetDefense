@@ -5,10 +5,9 @@ import java.text.SimpleDateFormat
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.service._
+import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
 import com.mypetdefense.util.Paths._
 import com.mypetdefense.util.SecurityContext._
-import com.stripe.model.Card
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -47,9 +46,9 @@ class ShippingBilling extends Loggable {
   var stripeToken        = ""
   var promoCode          = ""
 
-  val customerCard: Option[Card] = ParentService.getCustomerCard(stripeCustomerId)
+  val customerCard: Option[Stripe.Card] = ParentService.getCustomerCard(stripeCustomerId)
 
-  cardNumberLastFour = customerCard.map(_.getLast4).getOrElse("Not Found")
+  cardNumberLastFour = customerCard.map(_.last4).getOrElse("Not Found")
 
   def updateCard(parent: User): Unit = {
     ParentService.updateStripeCustomerCard(

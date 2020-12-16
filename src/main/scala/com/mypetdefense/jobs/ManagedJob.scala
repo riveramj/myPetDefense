@@ -2,8 +2,7 @@ package com.mypetdefense.jobs
 
 import java.io.{PrintWriter, StringWriter}
 
-import net.liftweb._
-import common._
+import net.liftweb.common._
 import org.quartz._
 
 /**

@@ -1,18 +1,18 @@
 package com.mypetdefense.snippet
 package admin
 
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, ZoneId}
+import java.util.Locale
+
 import com.mypetdefense.model._
 import com.mypetdefense.service.ReportingService
+import com.mypetdefense.util.DateHelper.dateFormat
 import com.mypetdefense.util.ModelSyntax._
+import com.mypetdefense.util.ProductNameHelper
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
-import java.util.Locale
-import java.time.{LocalDate, ZoneId}
-import java.time.format.DateTimeFormatter
-
-import com.mypetdefense.util.DateHelper.dateFormat
-import com.mypetdefense.util.ProductNameHelper
 import net.liftweb.util.CssSel
 import net.liftweb.util.Helpers._
 

@@ -1,5 +1,7 @@
 package com.mypetdefense.helpers
 
+import java.util.{Locale, TimeZone}
+
 import com.mypetdefense.helpers.GeneralDbUtils.clearTables
 import com.mypetdefense.util.DataLoader
 import net.liftweb.common.Empty
@@ -10,8 +12,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.must
 import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach, Outcome}
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-
-import java.util.{Locale, TimeZone}
 
 sealed trait AnyTest extends AnyFlatSpec with must.Matchers with ScalaCheckPropertyChecks
 

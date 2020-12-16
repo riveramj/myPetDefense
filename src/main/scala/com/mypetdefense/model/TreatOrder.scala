@@ -1,11 +1,11 @@
 package com.mypetdefense.model
 
-import net.liftweb.mapper._
-import net.liftweb.common._
+import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
-import java.util.Date
+import net.liftweb.common._
+import net.liftweb.mapper._
 
 class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Long, TreatOrder] {
   def getSingleton: KeyedMetaMapper[Long, TreatOrder] = TreatOrder

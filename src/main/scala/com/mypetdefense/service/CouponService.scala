@@ -1,8 +1,9 @@
 package com.mypetdefense.service
 
 import com.mypetdefense.model._
-import com.mypetdefense.util.StripeHelper.{deleteCoupon => deleteStripeCoupon, _}
-import com.stripe.model.{Coupon => StripeCoupon}
+import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
+import com.mypetdefense.util.StripeHelper._
+import com.stripe.param.CouponCreateParams
 import net.liftweb.common._
 import net.liftweb.util.Helpers.tryo
 
@@ -14,38 +15,35 @@ object CouponService extends Loggable {
 
   def createStripeCoupon(
       couponCode: String,
-      freeMonths: Int,
-      percentOff: Int,
+      freeMonths: Long,
+      percentOff: BigDecimal,
       dollarOff: Int
-  ): Box[StripeCoupon] = {
+  ): Box[Stripe.Coupon] = {
 
     val (durationType, durationMonths) = {
-      if (freeMonths == 0)
-        ("forever", None)
-      else  if (freeMonths == 1)
-        ("once", None)
+      import CouponCreateParams.Duration._
+      if (freeMonths == 0L)
+        (FOREVER, None)
+      else if (freeMonths == 1L)
+        (ONCE, None)
       else
-        ("repeating", Some(freeMonths))
+        (REPEATING, Some(freeMonths))
     }
 
     val params =
-      if (dollarOff > 0)
-        ParamsMap(
-          "id" --> couponCode,
-          "duration" --> durationType,
-          "amount_off" --> dollarOff * 100,
-          "currency" --> "USD",
-          "duration_in_months" -?> durationMonths
-        )
-      else
-        ParamsMap(
-          "id" --> couponCode,
-          "duration" --> durationType,
-          "percent_off" --> percentOff,
-          "duration_in_months" -?> durationMonths
-        )
+      CouponCreateParams.builder
+        .setId(couponCode)
+        .setDuration(durationType)
+        .whenDefinedC(durationMonths)(_.setDurationInMonths)
+        .when(dollarOff > 0) { b =>
+          b.setAmountOff(dollarOff * 100)
+          b.setCurrency("USD")
+        } {
+          _.setPercentOff(percentOff.bigDecimal)
+        }
+        .build
 
-    Box.tryo { StripeCoupon.create(params) }
+    Stripe.Coupon.create(params)
   }
 
   def createCoupon(
@@ -86,7 +84,7 @@ object CouponService extends Loggable {
   }
 
   def deleteCoupon(coupon: Coupon): Box[Coupon] = {
-    deleteStripeCoupon(coupon.couponCode.get) match {
+    StripeFacade.Coupon.delete(coupon.couponCode.get) match {
       case Full(_) =>
         coupon.delete_!
         Full(coupon)
