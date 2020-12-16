@@ -1,7 +1,6 @@
 package com.mypetdefense.snippet.login
 
 import com.mypetdefense.service._
-import net.liftweb._
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.util.Helpers._

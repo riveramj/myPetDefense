@@ -1,8 +1,6 @@
 package com.mypetdefense.snippet.login
 
-import com.mypetdefense._
 import com.mypetdefense.model.User
-import net.liftweb._
 import net.liftweb.common._
 import net.liftweb.mapper.By
 import net.liftweb.util.CssSel

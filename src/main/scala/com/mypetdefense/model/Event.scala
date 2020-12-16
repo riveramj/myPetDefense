@@ -1,12 +1,10 @@
 package com.mypetdefense.model
 
-import net.liftweb._
-import mapper._
-import common._
-
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.common._
+import net.liftweb.mapper._
 
 class Event extends LongKeyedMapper[Event] with IdPK with OneToMany[Long, Event] {
   def getSingleton: KeyedMetaMapper[Long, Event] = Event

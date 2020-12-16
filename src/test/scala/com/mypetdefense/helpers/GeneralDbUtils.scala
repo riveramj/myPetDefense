@@ -103,7 +103,7 @@ object GeneralDbUtils {
   def insertPetsAndShipmentChainData(
       in: PetsAndShipmentChainData,
       inserts: List[Insert] = List.empty[Insert],
-      upgraded: Boolean = false,
+      upgraded: Boolean = false
   ): InsertedPetsUserSubAndShipment = {
     val u           = createUser(in.user)
     val su          = createSubscription(Full(u), in.subscriptionCreateGeneratedData)

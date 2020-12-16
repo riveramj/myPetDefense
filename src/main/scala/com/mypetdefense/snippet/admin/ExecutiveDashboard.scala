@@ -4,7 +4,6 @@ package admin
 import java.text.NumberFormat
 
 import com.mypetdefense.model.Agency._
-import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.service._
 import net.liftweb.common._

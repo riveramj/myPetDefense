@@ -5,11 +5,9 @@ import java.util.Date
 import com.mypetdefense.actor.{EmailActor, NewSaleEmail, SendWelcomeEmail}
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
-import com.stripe.model.Customer
+import com.mypetdefense.util.DateHelper.tomorrowStart
 import net.liftweb.common.{Box, Full}
 import net.liftweb.util.Props
-
-import scala.collection.JavaConverters._
 
 object CheckoutService {
 
@@ -68,12 +66,11 @@ object CheckoutService {
       }
     }
 
-  private def findSubscriptionId(customer: Customer): Option[String] =
+  private def findSubscriptionId(customer: StripeFacade.CustomerWithSubscriptions): Option[String] =
     for {
-      rawSubscriptions <- Option(customer.getSubscriptions)
-      subscription     <- rawSubscriptions.getData.asScala.headOption
-      result           <- Option(subscription.getId)
-    } yield result
+      rawSubscriptions <- customer.value.subscriptions
+      subscription     <- rawSubscriptions.data.headOption
+    } yield subscription.id
 
   private def createNewSubscription(
       user: Box[User],
@@ -84,7 +81,7 @@ object CheckoutService {
       user,
       subscriptionId,
       new Date(),
-      new Date(),
+      tomorrowStart,
       priceCode,
       isUpgraded = true
     )
@@ -118,9 +115,9 @@ object CheckoutService {
       petsToCreate: List[Pet],
       priceCode: String,
       newUserData: NewUserData,
-      customer: Customer
+      customer: StripeFacade.CustomerWithSubscriptions
   ): Box[User] = {
-    val stripeId = customer.getId
+    val stripeId = customer.value.id
     val coupon   = newUserData.coupon
     val petCount = petsToCreate.size
     val user     = createUserOrUpdate(maybeCurrentUser, newUserData, stripeId, coupon)

@@ -2,7 +2,7 @@ package com.mypetdefense.snippet.signup
 
 import java.text.SimpleDateFormat
 
-import com.mypetdefense.model.{AnimalSize, _}
+import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._

@@ -32,10 +32,10 @@ object Product extends Product with LongKeyedMetaMapper[Product] {
   def hipAndJoint: Box[Product]  = Product.find(By(Product.name, "Hip & Joint Chews"))
   def calming: Box[Product]      = Product.find(By(Product.name, "Calming Chews"))
   def multiVitamin: Box[Product] = Product.find(By(Product.name, "Multi-Vitamin Chews"))
-  def skinAndCoat: Box[Product] = Product.find(By(Product.name, "Skin and Coat Chews"))
-  def probiotic: Box[Product]   = Product.find(By(Product.name, "Probiotic Chews"))
+  def skinAndCoat: Box[Product]  = Product.find(By(Product.name, "Skin and Coat Chews"))
+  def probiotic: Box[Product]    = Product.find(By(Product.name, "Probiotic Chews"))
 
-  def dentalPowder: Box[Product] = Product.find(By(Product.name, "Dental Powder"))
+  def dentalPowder: Box[Product]      = Product.find(By(Product.name, "Dental Powder"))
   def dentalPowderSmall: Box[Product] = Product.find(By(Product.name, "Dental Powder Small"))
   def dentalPowderLarge: Box[Product] = Product.find(By(Product.name, "Dental Powder Large"))
 

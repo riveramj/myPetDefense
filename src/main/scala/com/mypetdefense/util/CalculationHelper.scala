@@ -1,6 +1,6 @@
 package com.mypetdefense.util
 
-import com.mypetdefense.model.{FleaTick, Insert, Shipment}
+import com.mypetdefense.model._
 import net.liftweb.util.Helpers.tryo
 
 object CalculationHelper {
@@ -39,4 +39,18 @@ object CalculationHelper {
     if (totalWeight < 4.0) BigDecimal(4.0) else totalWeight
   }
 
+  def calculateOrderWeight(
+                            subscriptionBoxes: List[SubscriptionBox]
+                          ): BigDecimal = {
+    val smallDogs = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
+    val groupedBoxes = subscriptionBoxes.groupBy(_.boxType.get)
+
+    val boxWeights = groupedBoxes map {
+      case (BoxType.basic, boxes) => boxes.size * 4.0
+      case (BoxType.healthAndWellness, boxes) => boxes.size * 13.0
+      case (_,_) => 0.0
+    }
+
+    boxWeights.sum
+  }
 }

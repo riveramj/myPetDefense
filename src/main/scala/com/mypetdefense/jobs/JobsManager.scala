@@ -1,10 +1,9 @@
 package com.mypetdefense.jobs
 
-import net.liftweb._
-import common._
+import net.liftweb.common._
+import net.liftweb.util._
 import org.quartz.Scheduler
 import org.quartz.impl.StdSchedulerFactory
-import util._
 
 object JobManager extends SimpleInjector with Loggable {
 

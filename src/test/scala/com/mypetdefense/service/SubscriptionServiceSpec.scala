@@ -1,11 +1,12 @@
 package com.mypetdefense.service
 
 import java.time.ZoneId
+
 import com.mypetdefense.generator.Generator.{genShipmentChainData, listOfNShipmentChainDataGen}
+import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisYear}
 import com.mypetdefense.helpers.GeneralDbUtils.insertUserSubAndShipment
 import com.mypetdefense.model.Subscription
-import com.mypetdefense.helpers.DBTest
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class SubscriptionServiceSpec extends DBTest {

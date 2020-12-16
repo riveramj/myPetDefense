@@ -1,7 +1,7 @@
 package com.mypetdefense.util
 
-import com.mypetdefense.typeclasses.ToCsvStringConverter._
 import com.mypetdefense.typeclasses.ToCsvStringConverter
+import com.mypetdefense.typeclasses.ToCsvStringConverter._
 import net.liftweb.common.{Box, Full}
 import net.liftweb.http.InMemoryResponse
 

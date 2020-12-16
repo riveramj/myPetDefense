@@ -1,21 +1,18 @@
 package com.mypetdefense.model
 
 import java.time.{LocalDate, ZoneId}
-
-import net.liftweb._
-import mapper._
-import common._
-import util._
-import Helpers.tryo
-import com.mypetdefense.util.RandomIdGenerator._
-import com.mypetdefense.service.TaxJarService
-import com.mypetdefense.service.KeyService._
-import com.mypetdefense.snippet.NewParent
-import com.mypetdefense.util.TitleCase
-import org.apache.shiro.crypto.hash.Sha256Hash
 import java.util.Date
 
+import com.mypetdefense.service.KeyService._
+import com.mypetdefense.service.TaxJarService
+import com.mypetdefense.snippet.NewParent
 import com.mypetdefense.util.DateHelper.{yesterdayEnd, yesterdayStart}
+import com.mypetdefense.util.RandomIdGenerator._
+import com.mypetdefense.util.TitleCase
+import net.liftweb.common._
+import net.liftweb.mapper._
+import net.liftweb.util.Helpers.tryo
+import org.apache.shiro.crypto.hash.Sha256Hash
 
 import scala.collection.mutable
 

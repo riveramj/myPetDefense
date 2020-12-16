@@ -1,24 +1,18 @@
 package com.mypetdefense.snippet
 package admin
 
-import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml._
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.util.{ClearClearable, CssSel}
-import net.liftweb.http._
-import js.JsCmds._
-import net.liftweb.mapper.By
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service.{CouponService, ReportingService}
 import com.mypetdefense.util.ClearNodesIf
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, LocalDateTime, ZoneId}
-import java.time.format.DateTimeFormatter
-
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
 import net.liftweb.http.js.JsCmd
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.mapper.By
+import net.liftweb.util.CssSel
+import net.liftweb.util.Helpers._
 
 import scala.xml.{Elem, NodeSeq}
 
@@ -123,7 +117,8 @@ object Agencies extends Loggable {
 }
 
 class Agencies extends Loggable {
-  var name                      = ""
+  var name = ""
+
   var parentAgency: Box[Agency] = Empty
 
   val agencies: List[Agency] = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))

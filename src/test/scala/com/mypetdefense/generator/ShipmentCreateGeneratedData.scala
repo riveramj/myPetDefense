@@ -1,6 +1,6 @@
 package com.mypetdefense.generator
 
-import com.mypetdefense.model.{Insert, ShipmentStatus}
+import com.mypetdefense.model.ShipmentStatus
 import net.liftweb.common.Box
 
 case class ShipmentCreateGeneratedData(

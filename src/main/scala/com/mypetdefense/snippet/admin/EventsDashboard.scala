@@ -1,34 +1,21 @@
 package com.mypetdefense.snippet
 package admin
 
-import net.liftweb.sitemap.Menu
-import net.liftweb.http.SHtml
-import net.liftweb.util._
-import net.liftweb.util.Helpers._
-import net.liftweb.http.js.JE._
-import net.liftweb.http.js.JsCmd._
-import net.liftweb.http.js.JsCmds._
-import net.liftweb.http.js._
-import net.liftweb.common._
-import net.liftweb.http._
-import js.JsCmds._
-import net.liftweb.mapper.{By, NullRef}
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.time.{LocalDate, ZoneId}
 
 import com.mypetdefense.model._
-import com.mypetdefense.util.Paths._
-import com.mypetdefense.util._
-import com.mypetdefense.actor._
-import com.mypetdefense.service._
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.http.js._
+import net.liftweb.mapper.By
+import net.liftweb.util.Helpers._
 
 import scala.xml.NodeSeq
 
 object EventsDashboard extends Loggable {
-  import net.liftweb.sitemap._
-  import Loc._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu: Menu.Menuable = Menu.i("Events Dashboard") / "admin" / "events-dashboard" >>
     mpdAdmin >>

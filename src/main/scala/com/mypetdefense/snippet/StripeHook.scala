@@ -57,7 +57,7 @@ trait StripeHook extends RestHelper with Loggable {
 
         if (subscription.contractLength.get > 0) {
           if (subscription.shipments.toList.size < 2) {
-            ParentService.changeToPetlandMonthlyStripePlan(stripeSubscriptionId)
+            ParentService.changeToPetlandMonthlyStripePrice(stripeSubscriptionId)
           }
         }
 
