@@ -22,6 +22,8 @@ object CouponService extends Loggable {
     val (durationType, durationMonths) = {
       if (freeMonths == 0)
         ("forever", None)
+      else  if (freeMonths == 1)
+        ("once", None)
       else
         ("repeating", Some(freeMonths))
     }

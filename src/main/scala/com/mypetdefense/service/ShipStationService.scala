@@ -220,7 +220,7 @@ trait ShipStationServiceTrait extends Loggable {
 
     val fleaTick = shipmentLineItems.flatMap(_.fleaTick.obj)
 
-    val normalizedWeight = CalculationHelper.calculateInsertsWeight(fleaTick, allInserts)
+    val normalizedWeight = CalculationHelper.calculateOrderWeight(subscription.subscriptionBoxes.toList)
 
     val shipStationItems = allInserts.toList.zipWithIndex.map {
       case (insert, index) => insertToOrderItem(insert, index)
