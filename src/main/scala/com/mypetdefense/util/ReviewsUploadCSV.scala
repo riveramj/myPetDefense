@@ -15,7 +15,7 @@ import net.liftweb.util.Helpers._
 import scala.collection.JavaConverters._
 import scala.language.{implicitConversions, postfixOps}
 import scala.util.matching.Regex
-import xml.Text
+import scala.xml.Text
 
 case class ReviewsList(list: List[Review])
 

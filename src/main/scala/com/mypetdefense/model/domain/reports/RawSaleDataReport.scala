@@ -5,7 +5,6 @@ import java.time.{LocalDate, Month}
 import com.mypetdefense.model.Status
 import com.mypetdefense.typeclasses.ToCsvStringConverter
 import com.mypetdefense.util.CSVHelper
-import net.liftweb.http.InMemoryResponse
 
 case class RawSaleDataReport(
     year: Int,

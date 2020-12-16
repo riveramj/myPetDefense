@@ -1,12 +1,10 @@
 package com.mypetdefense.model
 
-import net.liftweb._
-import mapper._
-import common.Box
-
 import java.util.Date
 
 import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.common.Box
+import net.liftweb.mapper._
 
 class Review extends LongKeyedMapper[Review] with IdPK with OneToMany[Long, Review] {
   def getSingleton: KeyedMetaMapper[Long, Review] = Review

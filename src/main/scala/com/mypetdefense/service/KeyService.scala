@@ -1,19 +1,14 @@
 package com.mypetdefense.service
 
-import scala.util.Random
-
 import java.security.SecureRandom
 
-import net.liftweb._
-import common._
-import mapper._
-
-import net.liftweb.util.SecurityHelpers._
-
+import com.mypetdefense.model.User
+import net.liftweb.common._
+import net.liftweb.mapper._
+import net.liftweb.util.StringHelpers
 import org.joda.time.DateTime
 
-import com.mypetdefense.model.User
-import net.liftweb.util.StringHelpers
+import scala.util.Random
 
 object KeyService extends Loggable {
   private val rng = new Random(new SecureRandom)

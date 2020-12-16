@@ -1,24 +1,22 @@
 package com.mypetdefense.snippet
 package admin
 
-import net.liftweb.http.SHtml._
-import net.liftweb.util._
-import Helpers._
-import net.liftweb.common._
-import net.liftweb.http._
-import js.JsCmds._
-
 import com.mypetdefense.model._
-import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service.CouponService
+import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.util.ClearNodesIf
+import net.liftweb.common._
+import net.liftweb.http.SHtml._
+import net.liftweb.http._
 import net.liftweb.http.js.JsCmd
+import net.liftweb.http.js.JsCmds._
+import net.liftweb.util.Helpers._
 
 import scala.xml.{Elem, NodeSeq}
 
 object Coupons extends Loggable {
-  import net.liftweb.sitemap._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu: Menu.Menuable = Menu.i("Coupons") / "admin" / "coupons" >>
     mpdAdmin >>

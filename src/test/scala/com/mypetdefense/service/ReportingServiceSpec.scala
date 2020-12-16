@@ -121,9 +121,10 @@ class ReportingServiceSpec extends DBTest {
 
   it should "find new customers for month" in {
     forAll(listOfNUsersGen(), listOfNUsersGen()) { (registeredThisMonth, registeredLongTimeAgo) =>
-
-      val expectedUsersIds = registeredThisMonth.map(createUser(_).createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
-      val oldIds = registeredLongTimeAgo.map(createUser(_).createdAt(anyDayOfLastMonth.toDate).saveMe().id.get)
+      val expectedUsersIds =
+        registeredThisMonth.map(createUser(_).createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
+      val oldIds =
+        registeredLongTimeAgo.map(createUser(_).createdAt(anyDayOfLastMonth.toDate).saveMe().id.get)
 
       val users = User.findAll()
 

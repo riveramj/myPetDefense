@@ -1,30 +1,16 @@
 package com.mypetdefense.snippet
 package inventory
 
-import net.liftweb._
-import sitemap.Menu
-import http.SHtml._
-import http._
-import js.JsCmds._
-import net.liftweb.util.Helpers._
-import net.liftweb.common._
-import net.liftweb.util.ClearNodes
-import net.liftweb.mapper.By
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.time.{LocalDate, ZoneId}
-
 import com.mypetdefense.model._
-import com.mypetdefense.util.ClearNodesIf
-import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.actor._
+import net.liftweb.common._
+import net.liftweb.http._
+import net.liftweb.util.Helpers._
 
 import scala.xml.NodeSeq
 
 object InventoryChangeAudits extends Loggable {
-  import net.liftweb.sitemap._
-  import Loc._
   import com.mypetdefense.util.Paths._
+  import net.liftweb.sitemap._
 
   val menu: Menu.Menuable = Menu.i("Inventory Audit") / "inventory" / "audit" >>
     mpdAdmin >>

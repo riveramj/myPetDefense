@@ -1,10 +1,8 @@
 package com.mypetdefense.snippet.shop
 
-import com.mypetdefense._
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
-import net.liftweb._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -12,7 +10,6 @@ import net.liftweb.http.js.JsCmds._
 import net.liftweb.http.js._
 import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
-import net.liftweb.util._
 
 import scala.xml.NodeSeq
 

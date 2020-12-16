@@ -1,11 +1,10 @@
 package com.mypetdefense.model
 
-import net.liftweb.mapper._
-import net.liftweb.common.Box
 import java.util.Date
-import net.liftweb.util.Props
 
-import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.common.Box
+import net.liftweb.mapper._
+import net.liftweb.util.Props
 
 class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price] {
   def getSingleton: KeyedMetaMapper[Long, Price] = Price

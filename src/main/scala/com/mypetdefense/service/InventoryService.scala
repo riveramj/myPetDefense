@@ -1,18 +1,8 @@
 package com.mypetdefense.service
 
-import net.liftweb._
-import common._
-import mapper._
-import util._
-import util.Helpers._
-
 import com.mypetdefense.model._
-
-import java.util.Date
-import java.text.SimpleDateFormat
-import java.util.{Date, Locale}
-import java.time.{LocalDate, ZoneId, LocalDateTime, Period}
-import java.time.format.DateTimeFormatter
+import net.liftweb.common._
+import net.liftweb.mapper._
 
 object InventoryService extends Loggable {
   def updateItemCount(item: InventoryItem, oldCount: Int, newCount: Int): InventoryItem = {

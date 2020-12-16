@@ -15,8 +15,7 @@ import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
-import scala.xml.Elem
-import scala.xml.NodeSeq
+import scala.xml.{Elem, NodeSeq}
 
 object PetsAndProducts extends Loggable {
   import com.mypetdefense.util.Paths._

@@ -1,7 +1,5 @@
 package com.mypetdefense.model.domain.reports
 
-import java.time.LocalDate
-
 import com.mypetdefense.typeclasses.ToCsvStringConverter
 import com.mypetdefense.util.CSVHelper.spacerRow
 

@@ -1,14 +1,14 @@
 package com.mypetdefense.snippet
 
-import scala.xml._
-
 import java.io.InputStreamReader
 
 import net.liftweb.common._
+import net.liftweb.http.LiftRules._
 import net.liftweb.http._
-import LiftRules._
+import net.liftweb.util.Helpers._
 import net.liftweb.util._
-import Helpers._
+
+import scala.xml._
 
 case class BundleInfo(
     name: String,

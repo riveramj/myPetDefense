@@ -14,7 +14,7 @@ import net.liftweb.http._
 import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 import net.liftweb.util.Mailer._
-import net.liftweb.util.{Mailer, _}
+import net.liftweb.util._
 import org.joda.time._
 
 import scala.xml.NodeSeq

@@ -129,7 +129,7 @@ class TreatCheckout extends Loggable {
 
           ParentService.chargeStripeCustomer(
             stripeAmount,
-            stripeCustomer.flatMap(c => Option(c.getId)),
+            stripeCustomer.map(_.id),
             internalSaleDescription
           )
         } else if (existingUser_?) {
@@ -137,7 +137,7 @@ class TreatCheckout extends Loggable {
 
           ParentService.chargeStripeCustomerNewCard(
             stripeAmount,
-            stripeCustomer.flatMap(c => Option(c.getId)),
+            stripeCustomer.map(_.id),
             stripeToken,
             internalSaleDescription
           )
@@ -175,7 +175,7 @@ class TreatCheckout extends Loggable {
           lastName,
           realEmail,
           address,
-          charge.getId,
+          charge.id,
           amountPaid,
           taxDue,
           cart.toList

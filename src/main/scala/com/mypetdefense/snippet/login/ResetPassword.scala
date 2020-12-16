@@ -1,11 +1,9 @@
 package com.mypetdefense.snippet.login
 
-import com.mypetdefense._
 import com.mypetdefense.actor._
 import com.mypetdefense.model.User
 import com.mypetdefense.service._
 import com.mypetdefense.util.SecurityContext
-import net.liftweb._
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.util.Helpers._
