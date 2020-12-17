@@ -16,6 +16,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: SBT Action
+      id: sbt
       uses: lokkju/github-action-sbt@v8-0.13.17-2.13.0
-      commands: compile test
+      with:
+        commands: compile test
 
