@@ -3,7 +3,7 @@ package com.mypetdefense.snippet.signup
 import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.service._
+import com.mypetdefense.service.{StripeFacade, _}
 import com.mypetdefense.snippet.MyPetDefenseEvent
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
@@ -13,6 +13,7 @@ import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
+import com.mypetdefense.constants.StripePrices
 import net.liftweb.util._
 
 import scala.collection.mutable
@@ -67,8 +68,6 @@ class Checkout extends Loggable {
   var promotionAmount: BigDecimal      = (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
   val subtotalWithDiscount: BigDecimal = subtotal - discount
 
-  val pennyCount: Int = (subtotal * 100).toInt
-
   private def handleStripeFailureOnSignUp(
       stripeFailure: Box[StripeFacade.CustomerWithSubscriptions]
   ): Alert = {
@@ -109,15 +108,19 @@ class Checkout extends Loggable {
   private def tryToCreateUser = {
     setMultiPetCouponIfPossible()
 
-    val stripeCustomer =
-      StripeFacade.Customer.createWithSubscription(
+    val stripeCustomer = {
+      import StripeFacade._
+      import StripePrices._
+
+      Customer.createWithSubscription(
         email,
         stripeToken,
-        priceId = "pennyProduct",
-        pennyCount,
         taxRate,
-        coupon
+        coupon,
+        Subscription.Item(SmallDogHealthAndWellnessBoxPriceId, smMedPets),
+        Subscription.Item(MedXLDogHealthAndWellnessBoxPriceId, lgXlPets)
       )
+    }
 
     stripeCustomer match {
       case Full(customer) => setupNewUserAndRedirect(customer)

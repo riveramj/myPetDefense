@@ -130,9 +130,9 @@ class NewOrder extends Loggable {
         StripeFacade.Customer.createWithSubscription(
           email,
           stripeToken,
-          petlandPriceId,
-          pets.size,
-          taxRate
+          taxRate,
+          Empty,
+          StripeFacade.Subscription.Item(petlandPriceId, pets.size)
         )
 
       customer match {

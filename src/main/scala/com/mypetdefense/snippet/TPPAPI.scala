@@ -3,6 +3,7 @@ package com.mypetdefense.snippet
 import java.util.Date
 
 import com.mypetdefense.actor._
+import com.mypetdefense.constants.StripePrices
 import com.mypetdefense.model._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
 import com.mypetdefense.util.DateHelper.tomorrowStart
@@ -40,14 +41,12 @@ case class NewParent(
 )
 
 object TPPApi extends RestHelper with Loggable {
-  val tppAgency: Box[Agency] = Agency.find(By(Agency.name, "TPP"))
-
   def createEventForStripeError(
       failedStepMessage: String,
       stripeFailure: Any,
       parent: Box[User],
       stripeToken: String,
-      pennyCount: Int,
+      items: Seq[StripeFacade.Subscription.Item],
       couponName: Option[String],
       taxRate: BigDecimal
   ): Unit = {
@@ -69,11 +68,8 @@ object TPPApi extends RestHelper with Loggable {
       token:
       $stripeToken
 
-      price:
-      tpp-pennyPlan
-
-      quantity:
-      $pennyCount
+      items:
+      $items
 
       coupon:
       $couponName
@@ -96,11 +92,14 @@ object TPPApi extends RestHelper with Loggable {
       stripeToken: String,
       newUser: Boolean = true
   ): Unit = {
-    val parent                = oldParent.reload
-    val pets                  = parent.pets.toList
-    val rawPennyCount: Double = pets.size * 12.99
+    val parent = oldParent.reload
+    val pets   = parent.pets.toList
 
-    val pennyCount = tryo((rawPennyCount * 100).toInt).openOr(0)
+    val catsCount = pets.count(_.animalType == AnimalType.Cat)
+    val dogsCount = pets.count(_.animalType == AnimalType.Dog)
+
+    val rawPennyCount: Double = pets.size * 12.99
+    val pennyCount            = tryo((rawPennyCount * 100).toInt).openOr(0)
 
     val couponName = {
       if (pets.size > 1)
@@ -169,6 +168,16 @@ object TPPApi extends RestHelper with Loggable {
       )
     }.getOrElse((0d, 0d))
 
+    val subscriptionItems = {
+      import StripeFacade._
+      import StripePrices._
+
+      List(
+        Subscription.Item(CatBasicBoxPriceId, catsCount),
+        Subscription.Item(DogBasicBoxPriceId, dogsCount)
+      )
+    }
+
     val stripeCustomer =
       Stripe.Customer.create(
         CustomerCreateParams.builder
@@ -184,9 +193,9 @@ object TPPApi extends RestHelper with Loggable {
           StripeFacade.Subscription.createWithTaxRate(
             customer,
             taxRate,
-            priceId = "tpp-pennyPlan",
-            pennyCount,
-            coupon = Some("tpp")
+            coupon = Some("tpp"),
+            subscriptionItems.head,
+            subscriptionItems.tail: _*
           )
 
         stripeSubscription match {
@@ -230,7 +239,7 @@ object TPPApi extends RestHelper with Loggable {
               stripeFailure,
               Full(parent),
               stripeToken,
-              pennyCount,
+              subscriptionItems,
               couponName,
               taxRate
             )
@@ -244,7 +253,7 @@ object TPPApi extends RestHelper with Loggable {
           stripeFailure,
           Full(parent),
           stripeToken,
-          pennyCount,
+          subscriptionItems,
           couponName,
           taxRate
         )
@@ -348,7 +357,7 @@ object TPPApi extends RestHelper with Loggable {
           if (storeCode.toLowerCase == "pupspot2")
             Agency.find(By(Agency.name, "PuppySpot"))
           else if (possibleAgency.isEmpty)
-            tppAgency
+            Agency.tppAgency
           else
             possibleAgency
         }
