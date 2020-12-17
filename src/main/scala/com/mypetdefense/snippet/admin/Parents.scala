@@ -71,9 +71,11 @@ class Parents extends Loggable {
           By(Address.zip, zipCode)
         )
         activeParents = addresses.flatMap(_.user.obj)
-        cancelledParents = Nil
+        cancelledParents = CancelledUser.findAll(Like(CancelledUser.address, s"%${zipCode}%"))
 
-        parents = activeParents
+        val cancelledUsers = cancelledParents.flatMap(getOldUserWithInfo)
+
+        parents = activeParents ++ cancelledUsers
 
         currentParent = Empty
         parentsRenderer.map(_.setHtml).openOr(Noop)
