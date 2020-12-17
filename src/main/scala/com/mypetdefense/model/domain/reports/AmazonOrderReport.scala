@@ -6,7 +6,7 @@ import java.util.Date
 import com.mypetdefense.model.AnimalType
 import com.mypetdefense.model.domain.reports.AmazonOrderReport.dateFormat
 import com.mypetdefense.typeclasses.ToCsvStringConverter
-import com.mypetdefense.util.CSVHelper
+import com.mypetdefense.util.csv.CSVHelper
 
 case class AmazonOrderReport(
     name: String,

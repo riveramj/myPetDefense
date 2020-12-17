@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import com.mypetdefense.util.RandomIdGenerator._
-import com.mypetdefense.util._
+import com.mypetdefense.util.csv.AmazonOrderUploadCsv
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.js.JsCmd._
@@ -91,7 +91,7 @@ class AmazonOrders extends Loggable {
         "Received: %s [size=%d, type=%s]" format (file.fileName, file.length, file.mimeType)
       )
       val parsedFile = AmazonOrderUploadCsv.parse(file.file)
-      newOrders = parsedFile.map(_.list).openOr(Nil)
+      newOrders = parsedFile.openOr(Nil)
       newOrdersRenderer.map(_.setHtml).openOr(Noop)
     }
 
