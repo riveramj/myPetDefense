@@ -43,10 +43,8 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
       insertPetAndShipmentsChainAtAgency(userAndPet, mpdAndPld.mpd, subUpgraded = false, inserts)
     val insertedUser = inserted.user
     createAddress(userAddress, insertedUser)
-    val insertsTotalWeight =
-      insertGenData.foldLeft(BigDecimal(0d))((acc, elem) => acc + BigDecimal(elem.weight))
-    val expectedWeight = if (insertsTotalWeight < 4.0) BigDecimal(4.0) else insertsTotalWeight
     val shipment       = inserted.shipments.head.reload
+    val expectedWeight = insertGenData.foldLeft(0D)((acc, elem) => acc + 4.0)
 
     def jsonAssertFun(maybeIn: Option[JValue]): Unit = {
       maybeIn.fold(fail("json is empty")) { in =>
