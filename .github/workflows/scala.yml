@@ -16,8 +16,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Get Shipstation API
-      uses: riveramj/setup-scala@v10
-    - name: Publish Local
+      uses: riveramj/shipstation-scala
+    - name: publishLocal
       run: sbt publishLocal
     - name: Setup Scala
       uses: olafurpg/setup-scala@v10
