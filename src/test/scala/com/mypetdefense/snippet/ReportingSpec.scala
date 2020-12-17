@@ -4,6 +4,7 @@ import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
+import com.mypetdefense.helpers.TestTags.PostgresOnlyTest
 import com.mypetdefense.model.Subscription
 import com.mypetdefense.snippet.admin.Reporting
 import com.mypetdefense.util.ProductNameHelper
@@ -11,7 +12,7 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class ReportingSpec extends DBTest {
 
-  it should "do proper forecasting counts" in {
+  it should "do proper forecasting counts" taggedAs PostgresOnlyTest in {
     val petlandAndTpp    = createPetlandAndMPDAgencies()
     val upcomingStuff    = petsAndShipmentChainDataGen()
     val notUpcomingStuff = petsAndShipmentChainDataGen()
