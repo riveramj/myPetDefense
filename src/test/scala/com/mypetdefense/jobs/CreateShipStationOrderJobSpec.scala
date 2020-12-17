@@ -3,7 +3,6 @@ package com.mypetdefense.jobs
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.GeneralDbUtils.insertUserSubAndShipment
-import com.mypetdefense.helpers.TestTags.PostgresOnlyTest
 import com.mypetdefense.model.{Shipment, ShipmentStatus, Subscription, User}
 import com.mypetdefense.service.ShipStationServiceTrait
 import com.mypetdefense.shipstation._
@@ -18,7 +17,7 @@ class CreateShipStationOrderJobSpec extends DBTest {
 
   private val someAddress = Address(street1 = "", city = "", state = "", postalCode = "")
 
-  it should "create ship station orders in job" taggedAs PostgresOnlyTest in {
+  it should "create ship station orders in job" in {
     val data2insert  = shipmentChainData()
     val insertedData = insertUserSubAndShipment(data2insert)
     val insertedShipments = insertedData.shipments
