@@ -6,5 +6,4 @@ object SubscriptionBoxDbUtils {
 
   def createBox(subscription: Subscription, pet: Pet): SubscriptionBox =
     SubscriptionBox.createNewBox(subscription, pet)
-
 }

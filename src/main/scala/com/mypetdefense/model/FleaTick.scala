@@ -36,6 +36,16 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
   def zoGuardLargeDog: Box[FleaTick]  = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeZo))
   def zoGuardXLargeDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogXLargeZo))
 
+  def adventureSmallDog: Box[FleaTick]  = FleaTick.find(By(FleaTick.size, AnimalSize.DogSmallAdv))
+  def adventureMediumDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogMediumAdv))
+  def adventureLargeDog: Box[FleaTick]  = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeAdv))
+  def adventureXLargeDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogXLargeAdv))
+
+  def shieldTecSmallDog: Box[FleaTick]  = FleaTick.find(By(FleaTick.size, AnimalSize.DogSmallShld))
+  def shieldTecMediumDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogMediumShld))
+  def shieldTecLargeDog: Box[FleaTick]  = FleaTick.find(By(FleaTick.size, AnimalSize.DogLargeShld))
+  def shieldTecXLargeDog: Box[FleaTick] = FleaTick.find(By(FleaTick.size, AnimalSize.DogXLargeShld))
+
   def isZoGuard_? : Boolean = this.name.get.toLowerCase.contains("zoguard")
 }
 

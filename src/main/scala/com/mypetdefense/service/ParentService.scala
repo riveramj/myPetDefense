@@ -348,7 +348,7 @@ object ParentService extends LoggableBoxLogging {
 
     val update = for {
       subscription <- updatedUser.subscription.obj
-      subscriptionId = subscription.stripeSubscriptionId.get if !subscriptionId.isBlank
+      subscriptionId = subscription.stripeSubscriptionId.get if subscriptionId.nonEmpty
       priceCode      = subscription.priceCode.get
 
       prices = products.map { product =>

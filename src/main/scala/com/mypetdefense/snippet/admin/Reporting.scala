@@ -29,7 +29,7 @@ object Reporting extends Loggable {
 
 class Reporting extends Loggable {
   val agencies: List[String]               = Agency.findAll().map(_.name.get)
-  val allSubscriptions: List[Subscription] = Subscription.activeSubscriptions
+  val allSubscriptions: List[Subscription] = Subscription.upgradedActiveSubscriptions
 
   val localDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
   val currentDate: LocalDate             = LocalDate.now()
