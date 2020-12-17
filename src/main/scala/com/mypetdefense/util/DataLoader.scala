@@ -209,7 +209,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def resetUpcomingBillingCylces: List[Serializable] = {
+  def resetUpcomingBillingCycles: List[Serializable] = {
     val upcomingSubscriptions = Subscription.findAll(
       BySql(
         "nextShipDate > CURRENT_DATE + interval '1 day' and nextShipDate < CURRENT_DATE + interval '3 day'",
@@ -220,7 +220,7 @@ object DataLoader extends Loggable {
 
     for {
       subscription <- upcomingSubscriptions
-      user         <- subscription.user.obj
+      _            <- subscription.user.obj
     } yield {
       ParentService.updateNextShipDate(subscription)
     }
@@ -346,7 +346,7 @@ object DataLoader extends Loggable {
         subscription <- Subscription.find(By(Subscription.user, user)).toList
         pet          <- subscription.getPets
       } yield {
-        val box = SubscriptionBox.createNewBox(subscription, pet, false)
+        val box = SubscriptionBox.createNewBox(subscription, pet)
         pet.box(box).saveMe()
         user.subscription(subscription).saveMe()
       }
@@ -488,7 +488,7 @@ object DataLoader extends Loggable {
       catFleaTick  <- FleaTick.zoGuardCat.toList
     } {
       val updatedCat = cat.size(catFleaTick.size.get).saveMe
-      val box        = SubscriptionBox.createNewBox(subscription, updatedCat, false)
+      val box        = SubscriptionBox.createNewBox(subscription, updatedCat)
       updatedCat.box(box).saveMe()
     }
 
@@ -578,6 +578,48 @@ object DataLoader extends Loggable {
           .animalType(pet.animalType.get)
           .boxType(BoxType.basic)
           .saveMe()
+    }
+  }
+
+  def rebuildSubscriptionUpgrades(): Unit = {
+    val upgradedSubscriptions =
+      Subscription.findAllByInsecureSql(
+        "SELECT s.nextshipdate, s.stripesubscriptionid, s.pricecode, s.isupgraded, s.contractlength, " +
+          "s.subscriptionid, s.promptedupgrade, s.freeupgradesampledate, s.renewaldate, s.cancellationdate, " +
+          "s.cancellationreason, s.cancellationcomment, s.createdat, s.id, s.status, s.user_c, s.startdate " +
+          "FROM subscription AS s " +
+          "JOIN shipment AS sh ON s.id = sh.subscription " +
+          "JOIN shipmentlineitem AS i ON sh.id = i.shipment " +
+          "WHERE i.product IS NOT NULL;",
+        IHaveValidatedThisSQL("Arek", "2020-12-17")
+      )
+
+    val alreadyIncluded =
+      SubscriptionUpgrade.findAll().map(_.subscription.get).toSet
+
+    val subsToProcess =
+      upgradedSubscriptions.filterNot(s => alreadyIncluded(s.id.get))
+
+    subsToProcess foreach { sub =>
+      val (upgradedShipment, shipmentNumber) =
+        sub.shipments
+          .sortBy(_.createdAt.get)
+          .zipWithIndex
+          .find(_._1.shipmentLineItems.exists(!_.product.isEmpty))
+          .get
+
+      val shipmentCount = shipmentNumber + 1
+      val upgradeDate   = upgradedShipment.dateProcessed.get
+
+      sub.subscriptionBoxes foreach { subBox =>
+        SubscriptionUpgrade.create
+          .subscription(sub)
+          .subscriptionBox(subBox)
+          .user(sub.user.get)
+          .shipmentCountAtUpgrade(shipmentCount)
+          .upgradeDate(upgradeDate)
+          .saveMe
+      }
     }
   }
 }

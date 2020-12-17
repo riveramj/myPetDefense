@@ -531,6 +531,21 @@ object ReportingService extends Loggable {
     )
   }
 
+  def basicUsersUpgradeReport: BasicUsersUpgradeReport = {
+    val userReports =
+      SubscriptionUpgrade
+        .findAll()
+        .map(u =>
+          BasicUserUpgradeReport(
+            u.subscription.get,
+            u.shipmentCountAtUpgrade.get,
+            u.upgradeDate.get
+          )
+        )
+
+    BasicUsersUpgradeReport(userReports)
+  }
+
   private[service] def rawSalesReport(agencyName: String): List[RawSaleDataReport] = {
     for {
       agency       <- Agency.find(By(Agency.name, agencyName)).toList
