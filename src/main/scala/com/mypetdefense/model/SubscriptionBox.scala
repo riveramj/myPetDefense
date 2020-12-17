@@ -24,6 +24,9 @@ class SubscriptionBox
       extends MappedOneToMany(SubscriptionItem, SubscriptionItem.subscriptionBox)
   object addOnProducts extends MappedOneToMany(AddOnProduct, AddOnProduct.subscriptionBox)
   object basePrice     extends MappedDouble(this)
+  object status extends MappedEnum(this, Status) {
+    override def defaultValue: Status.Value = Status.Active
+  }
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }

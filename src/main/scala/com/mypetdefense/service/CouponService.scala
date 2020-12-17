@@ -24,6 +24,8 @@ object CouponService extends Loggable {
       import CouponCreateParams.Duration._
       if (freeMonths == 0L)
         (FOREVER, None)
+      else if (freeMonths == 1L)
+        (ONCE, None)
       else
         (REPEATING, Some(freeMonths))
     }
