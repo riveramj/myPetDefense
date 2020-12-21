@@ -16,7 +16,7 @@ class ReportingSpec extends DBTest {
     val upcomingStuff    = petsAndShipmentChainDataGen()
     val notUpcomingStuff = petsAndShipmentChainDataGen()
     val insertedExpected =
-      insertPetAndShipmentsChainAtAgency(upcomingStuff, petlandAndTpp.mpd, subUpgraded = false)
+      insertPetAndShipmentsChainAtAgency(upcomingStuff, petlandAndTpp.mpd, subUpgraded = true)
 
     insertedExpected.subscription
       .nextShipDate(inReportForecastDefaultRange.toDate)
@@ -24,7 +24,7 @@ class ReportingSpec extends DBTest {
     insertPetAndShipmentsChainAtAgency(
       notUpcomingStuff,
       petlandAndTpp.mpd,
-      subUpgraded = false
+      subUpgraded = true
     ).subscription
       .nextShipDate(notInReportForecastDefaultRange.toDate)
       .saveMe()

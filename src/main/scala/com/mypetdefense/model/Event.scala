@@ -11,9 +11,9 @@ class Event extends LongKeyedMapper[Event] with IdPK with OneToMany[Long, Event]
   object eventId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-  object title          extends MappedString(this, 200)
-  object details        extends MappedString(this, 1000)
-  object notes          extends MappedString(this, 1000)
+  object title          extends MappedString(this, 20000)
+  object details        extends MappedString(this, 20000)
+  object notes          extends MappedString(this, 20000)
   object resolutionDate extends MappedDateTime(this)
   object eventDate      extends MappedDateTime(this)
   object eventType      extends MappedEnum(this, EventType)
