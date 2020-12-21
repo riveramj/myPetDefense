@@ -11,12 +11,13 @@ import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.Random.randomPosInt
 import com.mypetdefense.helpers.db.AddressDbUtil._
 import com.mypetdefense.helpers.db.InsertsDbHelper._
-import com.mypetdefense.model.Pet
+import com.mypetdefense.model.{BoxType, Pet, Subscription}
 import com.mypetdefense.shipstation._
 import dispatch.{Future, Req}
 import net.liftweb.common._
 import net.liftweb.http.rest._
 import net.liftweb.json._
+import net.liftweb.mapper.By
 import org.asynchttpclient.Param
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers._
@@ -43,8 +44,22 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
       insertPetAndShipmentsChainAtAgency(userAndPet, mpdAndPld.mpd, subUpgraded = false, inserts)
     val insertedUser = inserted.user
     createAddress(userAddress, insertedUser)
-    val shipment       = inserted.shipments.head.reload
-    val expectedWeight = insertGenData.foldLeft(0D)((acc, elem) => acc + 4.0)
+
+    val insertedSub = Subscription
+      .find(By(Subscription.id, insertedUser.subscription.get))
+      .openOrThrowException("oops")
+
+    val expectedWeight = insertedSub.subscriptionBoxes
+      .map(b =>
+        b.boxType.get match {
+          case BoxType.basic             => BigDecimal(4)
+          case BoxType.healthAndWellness => BigDecimal(13)
+          case _                         => BigDecimal(0)
+        }
+      )
+      .sum
+
+    val shipment = inserted.shipments.head.reload
 
     def jsonAssertFun(maybeIn: Option[JValue]): Unit = {
       maybeIn.fold(fail("json is empty")) { in =>
