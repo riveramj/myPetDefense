@@ -172,7 +172,7 @@ object TPPApi extends RestHelper with Loggable {
     val stripeCustomer =
       Stripe.Customer.create(
         CustomerCreateParams.builder
-          .setEmail("email")
+          .setEmail(oldParent.email.get)
           .setSource(stripeToken)
           .whenDefined(couponName)(_.setCoupon)
           .build

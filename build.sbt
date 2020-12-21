@@ -11,38 +11,39 @@ organization := "com.mypetdefense"
 
 scalaVersion := "2.12.10"
 
-seq(webSettings: _*)
-seq(resourceManagementSettings: _*)
+Seq(webSettings: _*)
+Seq(resourceManagementSettings: _*)
 
 scalacOptions += "-deprecation"
 
 parallelExecution in Test := false
 
-seq(
-  targetJavaScriptDirectory in ResourceCompile <<= (PluginKeys.webappResources in Compile) apply {
-    resources => (resources / "static" / "js").get(0)
-  },
-  scriptDirectories in ResourceCompile <<= (PluginKeys.webappResources in Compile) map {
-    resources => (resources / "javascript").get
-  },
-  styleDirectories in ResourceCompile <<= (PluginKeys.webappResources in Compile) map { resources =>
-    (resources / "static" / "css").get
-  },
-  // This is the same as the target above. Currently in production, we don't
-  // deploy compressed scripts to S3, so we need them to live in the
-  // same static files directory as we put dev JS files in during
-  // development.
-  compressedTarget in ResourceCompile <<= (PluginKeys.webappResources in Compile) apply {
-    resources => (resources / "static").get(0)
-  }
-)
+targetJavaScriptDirectory in ResourceCompile := ((PluginKeys.webappResources in Compile) apply {
+  resources => (resources / "static" / "js").get(0)
+}).value
 
-seq(
-  PluginKeys.start in WebPlugin.container.Configuration <<=
-    (compileSass in ResourceCompile)
-      .dependsOn(copyScripts in ResourceCompile)
-      .dependsOn(PluginKeys.start in WebPlugin.container.Configuration)
-)
+scriptDirectories in ResourceCompile := ((PluginKeys.webappResources in Compile) map {
+  resources => (resources / "javascript").get
+}).value
+
+styleDirectories in ResourceCompile := ((PluginKeys.webappResources in Compile) map { resources =>
+  (resources / "static" / "css").get
+}).value
+
+// This is the same as the target above. Currently in production, we don't
+// deploy compressed scripts to S3, so we need them to live in the
+// same static files directory as we put dev JS files in during
+// development.
+compressedTarget in ResourceCompile := ((PluginKeys.webappResources in Compile) apply {
+  resources => (resources / "static").get(0)
+}).value
+
+
+PluginKeys.start in WebPlugin.container.Configuration :=
+  (compileSass in ResourceCompile)
+    .dependsOn(copyScripts in ResourceCompile)
+    .dependsOn(PluginKeys.start in WebPlugin.container.Configuration)
+    .value
 
 resolvers ++= Seq(
   "snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
