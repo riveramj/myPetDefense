@@ -3,6 +3,8 @@ package com.mypetdefense.util
 import com.mypetdefense.model._
 import net.liftweb.util.Helpers.tryo
 
+import scala.collection.GenTraversableOnce
+
 object CalculationHelper {
 
   def getShipmentAmountPaid(shipment: Shipment): BigDecimal = {
@@ -11,13 +13,17 @@ object CalculationHelper {
     amountPaid - taxesPaid
   }
 
-  def calculateOccurrences[K, I](input: List[I], toKeyFun: I => K): Map[K, Int] = {
+  def countOccurrences[I](input: GenTraversableOnce[I]): Map[I, Int] =
+    countOccurrencesByKey(input)(identity)
+
+  def countOccurrencesByKey[K, I](input: GenTraversableOnce[I])(toKeyFun: I => K): Map[K, Int] = {
     input
       .foldLeft(Map.empty[K, Int]) { (map, inputElement) =>
         val key   = toKeyFun(inputElement)
         val count = map.get(key).fold(1)(_ + 1)
         map.updated(key, count)
       }
+      .withDefaultValue(0)
   }
   /*
     used formula -> https://www.percentage-change-calculator.com/index.html
@@ -40,15 +46,15 @@ object CalculationHelper {
   }
 
   def calculateOrderWeight(
-                            subscriptionBoxes: List[SubscriptionBox]
-                          ): BigDecimal = {
-    val smallDogs = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
+      subscriptionBoxes: List[SubscriptionBox]
+  ): BigDecimal = {
+    val smallDogs    = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
     val groupedBoxes = subscriptionBoxes.groupBy(_.boxType.get)
 
     val boxWeights = groupedBoxes map {
-      case (BoxType.basic, boxes) => boxes.size * 4.0
+      case (BoxType.basic, boxes)             => boxes.size * 4.0
       case (BoxType.healthAndWellness, boxes) => boxes.size * 13.0
-      case (_,_) => 0.0
+      case (_, _)                             => 0.0
     }
 
     boxWeights.sum

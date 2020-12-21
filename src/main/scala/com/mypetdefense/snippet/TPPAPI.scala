@@ -173,8 +173,8 @@ object TPPApi extends RestHelper with Loggable {
       import StripePrices._
 
       List(
-        Subscription.Item(CatBasicBoxPriceId, catsCount),
-        Subscription.Item(DogBasicBoxPriceId, dogsCount)
+        Subscription.Item(Cat.BasicBox.priceId, catsCount),
+        Subscription.Item(Dog.BasicBox.priceId, dogsCount)
       )
     }
 
@@ -194,8 +194,7 @@ object TPPApi extends RestHelper with Loggable {
             customer,
             taxRate,
             coupon = Some("tpp"),
-            subscriptionItems.head,
-            subscriptionItems.tail: _*
+            subscriptionItems
           )
 
         stripeSubscription match {

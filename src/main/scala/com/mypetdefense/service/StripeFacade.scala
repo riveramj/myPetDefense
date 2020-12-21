@@ -50,12 +50,11 @@ object StripeFacade {
         stripeToken: String,
         taxRate: BigDecimal,
         coupon: Box[Coupon],
-        firstItem: Subscription.Item,
-        otherItems: Subscription.Item*
+        items: List[Subscription.Item]
     ): Box[CustomerWithSubscriptions] =
       for {
         customer <- Customer.create(email, stripeToken, coupon)
-        _        <- Subscription.createWithTaxRate(customer, taxRate, Empty, firstItem, otherItems: _*)
+        _        <- Subscription.createWithTaxRate(customer, taxRate, Empty, items)
         updated  <- Customer.retrieveWithSubscriptions(customer.id)
       } yield updated
 
@@ -88,11 +87,10 @@ object StripeFacade {
         customer: Stripe.Customer,
         taxRate: Stripe.TaxRate,
         coupon: Box[String],
-        firstItem: Item,
-        otherItems: Item*
+        items: List[Item]
     ): Box[Stripe.Subscription] = {
-      val items =
-        (firstItem +: otherItems).map {
+      val stripeItems =
+        items.map {
           case Item(priceId, quantity) =>
             SubscriptionCreateParams.Item.builder
               .setPrice(priceId)
@@ -105,7 +103,7 @@ object StripeFacade {
           .setCustomer(customer.id)
           .whenDefined(coupon)(_.setCoupon)
           .addDefaultTaxRate(taxRate.id)
-          .addAllItem(items)
+          .addAllItem(stripeItems)
           .build
       )
     }
@@ -114,12 +112,11 @@ object StripeFacade {
         customer: Stripe.Customer,
         taxRate: BigDecimal,
         coupon: Box[String],
-        firstItem: Item,
-        otherItems: Item*
+        items: List[Item]
     ): Box[Stripe.Subscription] =
       for {
         txr <- TaxRate.retrieveOrCreate(taxRate)
-        sub <- Subscription.create(customer, txr, coupon, firstItem, otherItems: _*)
+        sub <- Subscription.create(customer, txr, coupon, items)
       } yield sub
 
     def update(subscriptionId: String, params: SubscriptionUpdateParams): Box[Stripe.Subscription] =

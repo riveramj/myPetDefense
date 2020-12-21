@@ -23,6 +23,10 @@ tpp.price.code=tpp-apr-01-2018
 petland.6month.payment=petland-6month-prepay-12-01-2018
 petland.5month.coupon=petland-5month-prepaid
 petland.1month.payment=petland-monthly-12-01-2018
+stripe.prices.boxes.cat.basic.id=price_1Hysyb2r9wsOBpY0ORw2vJo3
+stripe.prices.boxes.dog.basic.id=price_1HysuJ2r9wsOBpY0oq9I5pPq
+stripe.prices.boxes.dog.hwsmall.id=price_1Hyswx2r9wsOBpY0JjlXVyWP
+stripe.prices.boxes.dog.hwmedxl.id=price_1Hyswx2r9wsOBpY0t0v7VxwK
 
 [ShipStation]
 shipstation.url=http://ssapi.shipstation.com
