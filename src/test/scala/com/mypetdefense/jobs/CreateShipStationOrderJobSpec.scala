@@ -41,6 +41,7 @@ class CreateShipStationOrderJobSpec extends DBTest {
     }
 
     testJob.createShipStationOrders()
+    waitUntilJobEnds()
     val updatedShipments = insertedShipments.map(_.reload)
 
     calledShipmentsIds should contain theSameElementsAs updatedShipments.map(_.id.get)
@@ -68,5 +69,12 @@ class CreateShipStationOrderJobSpec extends DBTest {
       override implicit val shipStationExecutor: ShipStationExecutor =
         new ShipStationExecutor("", "")
     }
+
+  // job doesn't signal when async work ends, no way around explicit waiting
+  private def waitUntilJobEnds(): Unit = {
+    while (Shipment.findAll().count(_.shipStationOrderId.get == 0) > 1) {
+      Thread.sleep(100)
+    }
+  }
 
 }

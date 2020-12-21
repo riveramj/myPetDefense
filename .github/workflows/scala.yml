@@ -1,0 +1,41 @@
+name: Scala CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+       fail-fast: false
+
+    steps:
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: "adopt@1.8"
+      - name: Checkout shipstation
+        uses: actions/checkout@v2
+        with:
+          repository: riveramj/shipstation-scala
+      - name: publishLocal
+        run: sbt publishLocal
+      - name: Checkout MPD
+        uses: actions/checkout@v2
+      - name: Compile
+        run: sbt compile
+      - name: Run tests
+        run: sbt coverage test
+      - name: Coverage Report
+        run: sbt coverageReport
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: d0f97166-4249-470b-bcd9-639d149e0f82
+          fail_ci_if_error: true
+      - uses: actions/checkout@v2
+      - uses: coursier/cache-action@v3
