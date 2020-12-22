@@ -35,6 +35,6 @@ object DailyStripeCouponJob extends TriggeredJob {
     .newTrigger()
     .withIdentity("DailyStripeCouponJob")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 52 23 ? * * *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 56 23 ? * * *"))
     .build()
 }
