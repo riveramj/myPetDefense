@@ -39,11 +39,11 @@ compressedTarget in ResourceCompile := ((PluginKeys.webappResources in Compile) 
 }).value
 
 
-
 PluginKeys.start in WebPlugin.container.Configuration :=
   (compileSass in ResourceCompile)
     .dependsOn(copyScripts in ResourceCompile)
     .dependsOn(PluginKeys.start in WebPlugin.container.Configuration)
+    .value
 
 resolvers ++= Seq(
   "snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
