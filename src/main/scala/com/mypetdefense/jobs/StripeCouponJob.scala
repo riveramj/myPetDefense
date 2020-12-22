@@ -1,9 +1,10 @@
 package com.mypetdefense.jobs
 
 import com.mypetdefense.model._
-import com.mypetdefense.service.StripeFacade.Customer
 import net.liftweb.mapper._
 import org.quartz._
+import com.stripe.{model => StripeModel}
+import net.liftweb.common.Box
 
 import java.text.SimpleDateFormat
 
@@ -13,12 +14,13 @@ class StripeCouponJob extends ManagedJob {
     val startFree     = dateFormatter.parse("8/1/2020")
 
     for {
-      user <- User.findAll(
-        By_>(User.createdAt, startFree),
-        By(User.referer, Agency.mpdAgency)
+      subscription <- Subscription.findAll(
+        By_<(Subscription.startDate, startFree),
+        By(Subscription.isUpgraded, true)
       )
+      stripeSubscription <- Box.tryo(StripeModel.Subscription.retrieve(subscription.stripeSubscriptionId.get))
     } yield {
-      Customer.deleteDiscount(user.stripeId.get)
+      Box.tryo(stripeSubscription.deleteDiscount())
     }
   }
 }
@@ -33,6 +35,6 @@ object DailyStripeCouponJob extends TriggeredJob {
     .newTrigger()
     .withIdentity("DailyStripeCouponJob")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 47 23 ? * * *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 52 23 ? * * *"))
     .build()
 }
