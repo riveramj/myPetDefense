@@ -14,7 +14,7 @@ class StripeCouponJob extends ManagedJob {
 
     for {
       user <- User.findAll(
-        By_<(User.createdAt, startFree),
+        By_>(User.createdAt, startFree),
         By(User.referer, Agency.mpdAgency)
       )
     } yield {
