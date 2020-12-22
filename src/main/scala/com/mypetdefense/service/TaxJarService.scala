@@ -1,7 +1,6 @@
 package com.mypetdefense.service
 
 import java.util.Date
-
 import dispatch.Defaults._
 import dispatch._
 import net.liftweb.common._
@@ -10,6 +9,7 @@ import net.liftweb.util.Helpers.tryo
 import net.liftweb.util.Props
 import org.asynchttpclient.Response
 
+import java.text.SimpleDateFormat
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -20,6 +20,8 @@ import scala.util.{Failure => TryFail, _}
 object TaxJarService extends Loggable {
   val calculateTaxUrl: Req   = url("https://api.taxjar.com/v2/taxes").secure
   val createOrderTaxUrl: Req = url("https://api.taxjar.com/v2/transactions/orders").secure
+
+  val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
 
   val authKey: String = Props.get("taxjar.api.key") openOr ""
 
@@ -105,6 +107,17 @@ object TaxJarService extends Loggable {
       subtotal: String,
       tax: String
   ): Any = {
+    val transactionDate = dateFormat.format(new Date())
+    println("===================")
+    println("in taxes charged")
+    println(s"tax collected is ${tax}")
+    println(s"orderIdentifier is ${orderIdentifier}")
+    println(s"city is ${city}")
+    println(s"state is ${state}")
+    println(s"zip is ${zip}")
+    println(s"subtotal is ${subtotal}")
+    println(s"date is $transactionDate")
+    println("===================")
     if (tax != "0") {
       createTaxOrder(
         orderIdentifier,
@@ -113,7 +126,7 @@ object TaxJarService extends Loggable {
         zip,
         subtotal,
         tax,
-        new Date().toString
+        transactionDate
       )
     }
   }

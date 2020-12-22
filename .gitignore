@@ -5,6 +5,7 @@ project/project
 project/target
 *.swo
 *.scssc
+src/main/webapp/static/js/*
 src/main/webapp/static/css/*
 src/main/webapp/static/stylesheets/*
 blog/
