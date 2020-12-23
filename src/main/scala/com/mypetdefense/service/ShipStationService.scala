@@ -218,8 +218,6 @@ trait ShipStationServiceTrait extends Loggable {
     val refreshedShipment      = shipment.reload
     val shipmentLineItemsByPet = refreshedShipment.shipmentLineItemsByPets
 
-    val fleaTick = shipmentLineItems.flatMap(_.fleaTick.obj)
-
     val normalizedWeight = CalculationHelper.calculateOrderWeight(subscription.subscriptionBoxes.toList)
 
     val shipStationItems = allInserts.toList.zipWithIndex.map {
@@ -291,7 +289,7 @@ trait ShipStationServiceTrait extends Loggable {
       shipmentLineItemsInserts: List[Insert]
   ): Iterable[Insert] = {
     if (subscription.shipments.toList.size >= 2 &&
-        tryo(subscription.freeUpgradeSampleDate) == Full(null)) {
+        tryo(subscription.freeUpgradeSampleDate.get) == Full(null)) {
       insertsWithFreeUpgrade(subscription, shipment, shipmentLineItemsInserts)
     } else if (shipment.freeUpgradeSample.get)
       Insert.tryUpgrade ++ shipmentLineItemsInserts
