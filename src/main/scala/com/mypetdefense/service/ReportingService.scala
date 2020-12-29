@@ -531,6 +531,55 @@ object ReportingService extends Loggable {
     )
   }
 
+  def subscriptionRetentionCsv(
+      lastPeriod: RetentionPeriod = RetentionPeriod.current(),
+      periodsCount: Int = 12
+  ): Box[InMemoryResponse] = {
+    val data     = subscriptionRetentionReport(lastPeriod, periodsCount)
+    val fileName = s"subscription-retention-${LocalDate.now()}.csv"
+    CSVHelper.inMemoryCsv(fileName, data)
+  }
+
+  def subscriptionRetentionReport(
+      lastPeriod: RetentionPeriod = RetentionPeriod.current(),
+      periodsCount: Int = 12
+  ): SubscriptionRetentionReport = {
+    val firstPeriod     = lastPeriod - (periodsCount - 1)
+    val afterLastPeriod = lastPeriod.next
+
+    val subs = Subscription.findAll(
+      By_>=(Subscription.createdAt, firstPeriod.startDate),
+      By_<(Subscription.createdAt, afterLastPeriod.startDate)
+    )
+
+    val periods        = (0 until periodsCount).reverse.map(lastPeriod - _).toList
+    val shipmentCounts = (1 to periodsCount).reverse
+    val retentions =
+      (periods zip shipmentCounts).map {
+        case (p, c) => SubscriptionRetentionForPeriod(p, shipmentCountsForPeriod(subs, p, c))
+      }
+
+    SubscriptionRetentionReport(retentions)
+  }
+
+  private[service] def shipmentCountsForPeriod(
+      subs: List[Subscription],
+      period: RetentionPeriod,
+      shipmentsCount: Int
+  ): List[Int] = {
+    val shipmentCountsByPeriod =
+      subs
+        .filter(s => RetentionPeriod.fromDate(s.startDate.get) == period)
+        .flatMap(_.shipments)
+        .groupBy(s => period - RetentionPeriod.fromDate(s.dateProcessed.get))
+        .mapValues(_.length)
+        .withDefaultValue(0)
+
+    (0 until shipmentsCount)
+      .map(shipmentCountsByPeriod)
+      .toList
+  }
+
   private[service] def rawSalesReport(agencyName: String): List[RawSaleDataReport] = {
     for {
       agency       <- Agency.find(By(Agency.name, agencyName)).toList

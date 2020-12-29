@@ -5,6 +5,8 @@ trait ToCsvStringConverter[T] {
 }
 
 object ToCsvStringConverter {
+  def fromFunction[T](f: T => String): ToCsvStringConverter[T] = (input: T) => f(input)
+
   implicit class ToReportCsvConverterOps[T](val v: T) extends AnyVal {
     def toCsvString(implicit converter: ToCsvStringConverter[T]): String = converter.toCsvString(v)
   }
