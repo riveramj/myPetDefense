@@ -7,6 +7,8 @@ import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.helpers.ScalaCheckHelper
 import com.mypetdefense.model.Price._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerRemovedPet}
+import com.mypetdefense.model.domain.action.{CustomerAction, CustomerActionSubtype}
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
 import com.stripe.model.{Customer, PaymentSource, PaymentSourceCollection}
@@ -283,6 +285,16 @@ object Generator extends ScalaCheckHelper {
   def genStatusLabelCreatedOrPaid: Gen[ShipmentStatus.Value] =
     Gen.oneOf(ShipmentStatus.LabelCreated, ShipmentStatus.Paid)
 
+  def genCustomerAction: Gen[CustomerAction] =
+    for {
+      subtype <- Gen.oneOf(CustomerActionSubtype.values)
+      userId  <- genPosLong
+      petId   <- genPosLong
+    } yield subtype match {
+      case CustomerActionSubtype.CustomerAddedPet   => CustomerAddedPet(userId, petId)
+      case CustomerActionSubtype.CustomerRemovedPet => CustomerRemovedPet(userId, petId)
+    }
+
   def mapWithNOfUserNSubscriptionGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData]] =
@@ -382,6 +394,11 @@ object Generator extends ScalaCheckHelper {
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[PetsAndShipmentChainData]] =
     Gen.listOfN(length, genPetAndShipmentChainData())
+
+  def listOfNCustomerActions(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[CustomerAction]] =
+    Gen.listOfN(length, genCustomerAction)
 
   def listOfSubscriptionToCreateGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES

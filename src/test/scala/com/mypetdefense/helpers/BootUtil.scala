@@ -75,7 +75,9 @@ object BootUtil {
     AmazonOrder,
     ApiRequestBackup,
     ProductSchedule,
-    ProductScheduleItem
+    ProductScheduleItem,
+    ActionLog,
+    ActionLogDetails
   )
 
 }
