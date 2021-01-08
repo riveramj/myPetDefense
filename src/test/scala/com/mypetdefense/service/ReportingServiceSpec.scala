@@ -233,14 +233,17 @@ class ReportingServiceSpec extends DBTest {
   it should "find current year paying cancelled subscriptions" in {
     forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (cancelledInCurrentYear, cancelledYearAgo) =>
-        val cancelledIds = cancelledInCurrentYear.map {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription.cancel
-              .cancellationDate(anyDayUntilThisMonth.toDate)
-              .saveMe()
-              .id
-              .get
-        }
+        val cancelledIds =
+          anyDayOfThisYearUntilThisMonth.fold(Iterable.empty[Long]) { anyDayUntilThisMonth =>
+            cancelledInCurrentYear.map {
+              case (uData, sData) =>
+                insertUserAndSub(uData, sData).subscription.cancel
+                  .cancellationDate(anyDayUntilThisMonth.toDate)
+                  .saveMe()
+                  .id
+                  .get
+            }
+          }
         cancelledYearAgo.foreach {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription.cancel

@@ -1,6 +1,8 @@
 package com.mypetdefense.model
 
-import com.mypetdefense.generator.Generator.mapWithNOfUserNSubscriptionGen
+import java.time.ZonedDateTime
+
+import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator.{SubscriptionCreateGeneratedData, UserCreateGeneratedData}
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.DateUtil._
@@ -27,6 +29,32 @@ class SubscriptionSpec extends DBTest {
     }
   }
 
+  private def insertSubscriptionsForTests(
+      dataToReturn: Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData],
+      dataToIgnore: Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData],
+      dataToReturnDate: Option[ZonedDateTime],
+      dataToIgnoreDate: Option[ZonedDateTime],
+      dataToReturnFun: ZonedDateTime => Subscription => Subscription,
+      dataToIgnoreFun: ZonedDateTime => Subscription => Subscription
+  ): immutable.Iterable[Subscription] = {
+    type DataAndFun =
+      (Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData], Subscription => Subscription)
+
+    def makeDataAndFun(
+        data: Map[UserCreateGeneratedData, SubscriptionCreateGeneratedData],
+        date: Option[ZonedDateTime],
+        fun: ZonedDateTime => Subscription => Subscription
+    ) =
+      date.fold[DataAndFun]((Map.empty, identity))(day => (data, fun(day)))
+
+    val (theReturnData, theReturnFun) =
+      makeDataAndFun(dataToReturn, dataToReturnDate, dataToReturnFun)
+    val (theIgnoreData, theIgnoreFun) =
+      makeDataAndFun(dataToIgnore, dataToIgnoreDate, dataToIgnoreFun)
+
+    insertSubscriptionsForTests(theReturnData, theIgnoreData, theReturnFun, theIgnoreFun)
+  }
+
   it should "find yesterday cancels" in {
     forAll(mapWithNOfUserNSubscriptionGen()) { usersAndYesterdayCanceledSubs =>
       val expectedIds = usersAndYesterdayCanceledSubs.map {
@@ -51,8 +79,10 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           fromTomorrowData,
           nextMonthData,
-          _.nextShipDate(anyDayOfThisMonthFromTomorrow.toDate).saveMe(),
-          _.nextShipDate(anyDayOfNextMonth.toDate).saveMe()
+          anyDayOfThisMonthFromTomorrow,
+          Some(anyDayOfNextMonth),
+          day => sub => sub.nextShipDate(day.toDate).saveMe(),
+          day => sub => sub.nextShipDate(day.toDate).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findCurrentMonthUpcomingSubscriptions.map(_.id.get)
@@ -170,8 +200,10 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           thisYearDataUntilMonthAgo,
           anyDayFromMonthAgoData,
-          _.createdAt(anyDayOfThisYearUntilMonthAgo.toDate).saveMe(),
-          _.createdAt(anyDayOfThisYearFromMonthAgo.toDate).saveMe()
+          anyDayOfThisYearUntilMonthAgo,
+          anyDayOfThisYearFromMonthAgo,
+          day => sub => sub.createdAt(day.toDate).saveMe(),
+          day => sub => sub.createdAt(day.toDate).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findNewYTDSubscriptionsLastMonth.map(_.id.get)
@@ -187,8 +219,10 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           thisDayYearAgoData,
           anyDayExceptThisDayYearAgoData,
-          _.createdAt(anyDayOfLastYearThisDay.toDate).saveMe(),
-          _.createdAt(anyDayOfLastYearFromThisDayYearAgo.toDate).saveMe()
+          Some(anyDayOfLastYearThisDay),
+          anyDayOfLastYearFromThisDayYearAgo,
+          day => sub => sub.createdAt(day.toDate).saveMe(),
+          day => sub => sub.createdAt(day.toDate).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findNewYTDSubscriptionsLastYear.map(_.id.get)
