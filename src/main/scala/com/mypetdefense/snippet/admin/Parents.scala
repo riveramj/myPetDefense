@@ -2,9 +2,10 @@ package com.mypetdefense.snippet
 package admin
 
 import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
+import java.time.LocalDate
 import java.util.Date
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
@@ -277,8 +278,8 @@ class Parents extends Loggable {
       if (status == Status.Active) {
         val tomorrow = Date.from(
           LocalDate
-            .now(ZoneId.of("America/New_York"))
-            .atStartOfDay(ZoneId.of("America/New_York"))
+            .now(DefaultTimezone)
+            .atStartOfDay(DefaultTimezone)
             .plusDays(1)
             .toInstant
         )

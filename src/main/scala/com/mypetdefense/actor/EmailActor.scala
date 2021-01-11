@@ -3,8 +3,9 @@ package com.mypetdefense.actor
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.{Date, Locale}
+import java.util.Date
 
+import com.mypetdefense.AppConstants.DefaultLocale
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.customer.ShippingBilling
 import com.mypetdefense.snippet.login.{ResetPassword, Signup}
@@ -624,10 +625,10 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
 
       val yesterdayDate = LocalDateTime.now().minusDays(1)
 
-      val subjectDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH))
+      val subjectDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMM d", DefaultLocale))
       val headerDate =
-        yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH))
-      val monthYear = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+        yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", DefaultLocale))
+      val monthYear = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", DefaultLocale))
 
       val subject = s"[$subjectDate] Daily My Pet Defense Sales Report"
       val hostUrl = Paths.serverUrl
@@ -681,10 +682,10 @@ trait InternalDailyEmailHandling extends EmailHandlerChain {
 
       val yesterdayDate = LocalDateTime.now().minusDays(1)
 
-      val subjectDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH))
+      val subjectDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMM d", DefaultLocale))
       val headerDate =
-        yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH))
-      val monthYear = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+        yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", DefaultLocale))
+      val monthYear = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", DefaultLocale))
 
       val subject = s"[$subjectDate] MPD Sales Report"
       val hostUrl = Paths.serverUrl

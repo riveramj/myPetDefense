@@ -1,9 +1,10 @@
 package com.mypetdefense.snippet.customer
 
 import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
+import java.time.LocalDate
 import java.util.Date
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
@@ -245,8 +246,8 @@ class ParentSubscription extends Loggable {
   def resumeSubscription: NodeSeq => NodeSeq = {
     val nextShipDate = Date.from(
       LocalDate
-        .now(ZoneId.of("America/New_York"))
-        .atStartOfDay(ZoneId.of("America/New_York"))
+        .now(DefaultTimezone)
+        .atStartOfDay(DefaultTimezone)
         .plusDays(1)
         .toInstant
     )

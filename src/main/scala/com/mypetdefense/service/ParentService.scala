@@ -1,8 +1,9 @@
 package com.mypetdefense.service
 
-import java.time.{LocalDate, Period, ZoneId}
+import java.time.{LocalDate, Period}
 import java.util.Date
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
@@ -187,10 +188,10 @@ object ParentService extends LoggableBoxLogging {
         val nextMonthDate    = new Date(currentPeriodEnd * 1000L)
 
         val nextMonthLocalDate =
-          nextMonthDate.toInstant.atZone(ZoneId.of("America/New_York")).toLocalDate
+          nextMonthDate.toInstant.atZone(DefaultTimezone).toLocalDate
 
         val startOfDayDate = nextMonthLocalDate
-          .atStartOfDay(ZoneId.of("America/New_York"))
+          .atStartOfDay(DefaultTimezone)
           .toInstant
           .getEpochSecond
 
@@ -414,7 +415,7 @@ object ParentService extends LoggableBoxLogging {
   def findGrowthMonth(pet: Pet): Int = {
     val currentDate = LocalDate.now()
 
-    val birthday = tryo(pet.birthday.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+    val birthday = tryo(pet.birthday.get.toInstant.atZone(DefaultTimezone).toLocalDate)
 
     val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
 

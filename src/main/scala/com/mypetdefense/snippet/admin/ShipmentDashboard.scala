@@ -2,10 +2,11 @@ package com.mypetdefense.snippet
 package admin
 
 import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDate, ZoneId}
-import java.util.{Date, Locale}
+import java.util.Date
 
+import com.mypetdefense.AppConstants.{DefaultLocale, DefaultTimezone}
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service._
@@ -66,7 +67,7 @@ class ShipmentDashboard extends Loggable {
   var future                                    = false
 
   val dateFormat                         = new SimpleDateFormat("MM/dd/yyyy")
-  val localDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.ENGLISH)
+  val localDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", DefaultLocale)
 
   val currentDate: LocalDate = LocalDate.now()
 
@@ -181,10 +182,8 @@ class ShipmentDashboard extends Loggable {
   }
 
   def convertForecastingDates(date: String): LocalDate = {
-
     val parsedDate = dateFormat.parse(date)
-
-    parsedDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+    parsedDate.toInstant.atZone(DefaultTimezone).toLocalDate
   }
 
   def render: NodeSeq => NodeSeq = {

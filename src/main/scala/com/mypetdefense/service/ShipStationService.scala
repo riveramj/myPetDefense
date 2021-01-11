@@ -1,9 +1,10 @@
 package com.mypetdefense.service
 
 import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
+import java.time.LocalDate
 import java.util.Date
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.shipstation.{
   Address => ShipStationAddress,
@@ -218,7 +219,8 @@ trait ShipStationServiceTrait extends Loggable {
     val refreshedShipment      = shipment.reload
     val shipmentLineItemsByPet = refreshedShipment.shipmentLineItemsByPets
 
-    val normalizedWeight = CalculationHelper.calculateOrderWeight(subscription.subscriptionBoxes.toList)
+    val normalizedWeight =
+      CalculationHelper.calculateOrderWeight(subscription.subscriptionBoxes.toList)
 
     val shipStationItems = allInserts.toList.zipWithIndex.map {
       case (insert, index) => insertToOrderItem(insert, index)
@@ -251,10 +253,10 @@ trait ShipStationServiceTrait extends Loggable {
     val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
     val yesterdayDate = Date.from(
       LocalDate
-        .now(ZoneId.of("America/New_York"))
-        .atStartOfDay(ZoneId.of("America/New_York"))
+        .now(DefaultTimezone)
+        .atStartOfDay(DefaultTimezone)
         .minusDays(1)
-        .toInstant()
+        .toInstant
     )
     val shipDate = dateFormat.format(yesterdayDate)
 

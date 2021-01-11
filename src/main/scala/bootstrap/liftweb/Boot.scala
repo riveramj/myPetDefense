@@ -2,6 +2,7 @@ package bootstrap.liftweb
 
 import java.util.{Locale, TimeZone}
 
+import com.mypetdefense.AppConstants.{DefaultLocale, DefaultTimezone}
 import com.mypetdefense.jobs.JobManager
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
@@ -106,8 +107,8 @@ class Boot {
     )
   )
 
-  TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
-  Locale.setDefault(Locale.US)
+  TimeZone.setDefault(TimeZone.getTimeZone(DefaultTimezone))
+  Locale.setDefault(DefaultLocale)
 
   // Initialize Stripe SDK
   Stripe.apiKey = Props.get("secret.key") openOr ""

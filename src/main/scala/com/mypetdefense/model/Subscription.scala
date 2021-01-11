@@ -1,8 +1,9 @@
 package com.mypetdefense.model
 
-import java.time.{LocalDate, ZoneId}
+import java.time.LocalDate
 import java.util.Date
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Box
@@ -78,13 +79,13 @@ class Subscription
     tryo(dateFormat.format(this.cancellationDate.get)).openOr("")
 
   def getCreatedDateOfSubscription: LocalDate =
-    this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+    this.createdAt.get.toInstant.atZone(DefaultTimezone).toLocalDate
 
   def getCancelledDateOfSubscription: Box[LocalDate] =
-    tryo(this.cancellationDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+    tryo(this.cancellationDate.get.toInstant.atZone(DefaultTimezone).toLocalDate)
 
   def getNextShipDate: LocalDate =
-    this.nextShipDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+    this.nextShipDate.get.toInstant.atZone(DefaultTimezone).toLocalDate
 
 }
 

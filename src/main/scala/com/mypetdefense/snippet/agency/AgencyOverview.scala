@@ -2,8 +2,9 @@ package com.mypetdefense.snippet
 package agency
 
 import java.text.SimpleDateFormat
-import java.time.{LocalDate, LocalDateTime, ZoneId}
+import java.time.{LocalDate, LocalDateTime}
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.service.ReportingService
 import com.mypetdefense.snippet.admin.UpdateChartData
@@ -206,7 +207,7 @@ class AgencyOverview extends Loggable {
   }
 
   def getProcessDateOfShipment(shipment: Shipment): LocalDate = {
-    shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+    shipment.dateProcessed.get.toInstant.atZone(DefaultTimezone).toLocalDate
   }
 
   def findCurrentMonthShipment(shipment: Shipment, month: String = ""): Boolean = {
@@ -222,14 +223,14 @@ class AgencyOverview extends Loggable {
 
   def findCurrentYearSubscriptionSignup(subscription: Subscription): Boolean = {
     val signupDate =
-      subscription.startDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+      subscription.startDate.get.toInstant.atZone(DefaultTimezone).toLocalDate
 
     signupDate.getYear == currentDate.getYear
   }
 
   def findCurrentMonthSubscriptionSignup(subscription: Subscription): Boolean = {
     val signupDate =
-      subscription.startDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+      subscription.startDate.get.toInstant.atZone(DefaultTimezone).toLocalDate
 
     signupDate.getMonth == currentDate.getMonth
   }
@@ -238,7 +239,7 @@ class AgencyOverview extends Loggable {
     val dateFormat = new SimpleDateFormat("MMMM yyyy")
     val monthDate  = dateFormat.parse(s"$month 2018") //TODO: dynanmic year
 
-    monthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+    monthDate.toInstant.atZone(DefaultTimezone).toLocalDateTime
   }
 
   def updateCharts: JsCmd = {

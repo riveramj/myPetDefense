@@ -1,7 +1,6 @@
 package com.mypetdefense.service
 
-import java.time.ZoneId
-
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.generator.Generator.{genShipmentChainData, listOfNShipmentChainDataGen}
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisYear}
@@ -27,7 +26,7 @@ class SubscriptionServiceSpec extends DBTest {
             inserted.subscription.cancel
             inserted.subscription.createdAt(anyDayOfThisYear.toDate).saveMe()
           }
-          .groupBy(_.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate.getMonth)
+          .groupBy(_.createdAt.get.toInstant.atZone(DefaultTimezone).toLocalDate.getMonth)
           .mapValues(_.size)
 
         val subs = Subscription.findAll()

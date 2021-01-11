@@ -1,8 +1,9 @@
 package com.mypetdefense.model
 
-import java.time.{LocalDate, ZoneId}
+import java.time.LocalDate
 import java.util.Date
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.service.KeyService._
 import com.mypetdefense.service.TaxJarService
 import com.mypetdefense.snippet.NewParent
@@ -121,7 +122,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   }
 
   def getCreatedDateOfUser: LocalDate =
-    this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+    this.createdAt.get.toInstant.atZone(DefaultTimezone).toLocalDate
 }
 
 object User extends User with LongKeyedMetaMapper[User] {

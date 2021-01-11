@@ -1,9 +1,10 @@
 package com.mypetdefense.jobs
 
 import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
+import java.time.LocalDate
 import java.util.Date
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model.ShipmentStatus._
 import com.mypetdefense.model._
 import dispatch.Defaults._
@@ -33,8 +34,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
     val retryAttempts = 10
 
     def convertDateFormat(date: Date) = {
-
-      date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+      date.toInstant.atZone(DefaultTimezone).toLocalDate
     }
 
     def generateTrackingXml(trackingNumber: String) = {

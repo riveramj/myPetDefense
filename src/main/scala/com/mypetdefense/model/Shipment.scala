@@ -1,8 +1,9 @@
 package com.mypetdefense.model
 
-import java.time.{LocalDate, ZoneId}
+import java.time.LocalDate
 import java.util.Date
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.util.DateHelper.{monthDayOne, nowDate}
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
@@ -42,10 +43,10 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   }
 
   def getProcessDateOfShipment: LocalDate =
-    this.dateProcessed.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+    this.dateProcessed.get.toInstant.atZone(DefaultTimezone).toLocalDate
 
   def getMailedDateOfShipment: Box[LocalDate] =
-    tryo(this.dateShipped.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+    tryo(this.dateShipped.get.toInstant.atZone(DefaultTimezone).toLocalDate)
 
   def actualShipmentLineItems: List[ShipmentLineItem] =
     this.reload.shipmentLineItems.toList
