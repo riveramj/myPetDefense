@@ -2,8 +2,9 @@ package com.mypetdefense.snippet
 package admin
 
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.ZonedDateTime
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service._
@@ -62,7 +63,7 @@ class Surveys extends Loggable {
 
                 def applyCoupon() = {
                   ParentService.updateCoupon(parent.stripeId.get, Full("feedbacksurvey"))
-                  survey.couponApplied(new Date()).saveMe
+                  survey.couponApplied(ZonedDateTime.now(DefaultTimezone)).saveMe
                   renderer.setHtml
                 }
 

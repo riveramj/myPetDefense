@@ -1,13 +1,16 @@
 package com.mypetdefense.model
 
+import java.time.ZonedDateTime
 import java.util.Date
 
 import com.mypetdefense.model.domain.reports.AmazonOrderReport
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.mapper._
 
 class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, AmazonOrder] = AmazonOrder
+
   object orderId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -27,11 +30,9 @@ class AmazonOrder extends LongKeyedMapper[AmazonOrder] with IdPK {
   object city              extends MappedString(this, 100)
   object state             extends MappedString(this, 100)
   object zip               extends MappedString(this, 100)
-  object purchaseDate      extends MappedDateTime(this)
+  object purchaseDate      extends MappedZonedDateTime(this)
   object animalType        extends MappedEnum(this, AnimalType)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt         extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder] {
@@ -52,7 +53,7 @@ object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder] {
       city: String,
       state: String,
       zip: String,
-      purchaseDate: Date
+      purchaseDate: ZonedDateTime
   ): AmazonOrder = {
     AmazonOrder.create
       .amazonOrderId(amazonOrderId)
@@ -77,8 +78,8 @@ object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder] {
   }
 
   def findOrdersBetween(
-      startDate: Date,
-      endDate: Date,
+      startDate: ZonedDateTime,
+      endDate: ZonedDateTime,
       animalType: AnimalType.Value
   ): List[AmazonOrder] = {
     AmazonOrder.findAll(
@@ -89,8 +90,8 @@ object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder] {
   }
 
   def findOrdersToReport(
-      startDate: Date,
-      endDate: Date,
+      startDate: ZonedDateTime,
+      endDate: ZonedDateTime,
       animalType: AnimalType.Value
   ): List[AmazonOrderReport] = {
     findOrdersBetween(startDate, endDate, animalType).map { order =>
@@ -103,10 +104,17 @@ object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder] {
         order.state.get,
         order.zip.get,
         order.animalType.get,
-        order.purchaseDate.get,
+        order.purchaseDate.get.toDate,
         order.productName.get
       )
     }
   }
 
+  @deprecated("Migrate to ZonedDateTime-based version", since = "0.1-SNAPSHOT")
+  def findOrdersToReport(
+      startDate: Date,
+      endDate: Date,
+      animalType: AnimalType.Value
+  ): List[AmazonOrderReport] =
+    findOrdersToReport(startDate.toZonedDateTime, endDate.toZonedDateTime, animalType)
 }

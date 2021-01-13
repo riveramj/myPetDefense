@@ -2,13 +2,14 @@ package com.mypetdefense.snippet
 package petland
 
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.ZonedDateTime
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
-import com.mypetdefense.util.DateHelper.tomorrowStart
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -203,11 +204,10 @@ class NewOrder extends Loggable {
     Subscription.createNewSubscription(
       Full(newParent),
       subscriptionId,
-      new Date(),
+      ZonedDateTime.now(DefaultTimezone),
       tomorrowStart,
       Price.currentPetlandMonthlyCode,
-      isUpgraded = false,
-      6
+      contractLength = 6
     )
 
     /*
@@ -290,7 +290,8 @@ class NewOrder extends Loggable {
       }
     }.headOption
 
-    val birthday = tryo(birthdayDateFormat.parse(s"$birthdayMonth $birthdayYear"))
+    val birthday =
+      tryo(birthdayDateFormat.parse(s"$birthdayMonth $birthdayYear")).map(_.toZonedDateTime)
 
     val newPet = {
       for {

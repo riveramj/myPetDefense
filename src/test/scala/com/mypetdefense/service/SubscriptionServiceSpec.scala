@@ -1,9 +1,8 @@
 package com.mypetdefense.service
 
-import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.generator.Generator.{genShipmentChainData, listOfNShipmentChainDataGen}
 import com.mypetdefense.helpers.DBTest
-import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfThisYear}
+import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils.insertUserSubAndShipment
 import com.mypetdefense.model.Subscription
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
@@ -17,16 +16,16 @@ class SubscriptionServiceSpec extends DBTest {
         val shouldBeCanceledAndHaveShipping = insertUserSubAndShipment(canceledAndShippedData)
         shouldBeCanceledAndHaveShipping.subscription.cancel
         shouldBeCanceledAndHaveShipping.shipments.map(
-          _.dateShipped(anyDayOfThisYear.toDate).saveMe()
+          _.dateShipped(anyDayOfThisYear).saveMe()
         )
 
         val expectedData = shouldBeInStatisticData
           .map(insertUserSubAndShipment)
           .map { inserted =>
             inserted.subscription.cancel
-            inserted.subscription.createdAt(anyDayOfThisYear.toDate).saveMe()
+            inserted.subscription.createdAt(anyDayOfThisYear).saveMe()
           }
-          .groupBy(_.createdAt.get.toInstant.atZone(DefaultTimezone).toLocalDate.getMonth)
+          .groupBy(_.createdAt.get.toLocalDate.getMonth)
           .mapValues(_.size)
 
         val subs = Subscription.findAll()

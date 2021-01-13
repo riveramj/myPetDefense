@@ -1,13 +1,12 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import net.liftweb.common.Box
 import net.liftweb.mapper._
 import net.liftweb.util.Props
 
 class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price] {
   def getSingleton: KeyedMetaMapper[Long, Price] = Price
+
   object priceId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -16,9 +15,7 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
   object fleaTick   extends MappedLongForeignKey(this, FleaTick)
   object active     extends MappedBoolean(this)
   object stripeName extends MappedString(this, 200)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt  extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object Price extends Price with LongKeyedMetaMapper[Price] {

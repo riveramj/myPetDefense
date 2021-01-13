@@ -3,6 +3,7 @@ package admin
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.SHtml.{ajaxInvoke, text}
 import net.liftweb.http._
@@ -25,9 +26,10 @@ class ProductSchedules extends Loggable {
   val coupons: List[Coupon] = Coupon.findAll()
   val dentalProducts =
     List(Product.dentalPowder, Product.dentalPowderSmall, Product.dentalPowderLarge).flatten
-  val supplements: List[Product]              = Product.supplements.filter(!dentalProducts.contains(_))
-  val productSchedules: List[ProductSchedule] = ProductSchedule.findAll().sortBy(_.startDate.get)
-  val startDateFormat                         = new java.text.SimpleDateFormat("M/d/y")
+  val supplements: List[Product] = Product.supplements.filter(!dentalProducts.contains(_))
+  val productSchedules: List[ProductSchedule] =
+    ProductSchedule.findAll().sortBy(_.startDate.get.toInstant.toEpochMilli)
+  val startDateFormat = new java.text.SimpleDateFormat("M/d/y")
 
   var startDate = ""
   var firstBox  = false
@@ -70,7 +72,11 @@ class ProductSchedules extends Loggable {
       List(chosenSupplement1, chosenSupplement2, chosenSupplement3, Product.dentalPowder).flatten
 
     if (validateFields.isEmpty) {
-      ProductSchedule.createNew(startDateFormat.parse(startDate), selectedSupplements, firstBox)
+      ProductSchedule.createNew(
+        startDateFormat.parse(startDate).toZonedDateTime,
+        selectedSupplements,
+        firstBox
+      )
 
       S.redirectTo(ProductSchedules.menu.loc.calcDefaultHref)
     } else {

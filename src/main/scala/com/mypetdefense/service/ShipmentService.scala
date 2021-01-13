@@ -1,7 +1,8 @@
 package com.mypetdefense.service
 
-import java.util.Date
+import java.time.ZonedDateTime
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import net.liftweb.common.Box.tryo
 import net.liftweb.common._
@@ -56,7 +57,7 @@ object ShipmentService extends Loggable {
         shouldSendFreeUpgradeShipment(subscription, shipmentCount, dogs)
 
       if (sendFreeUpgradeShipment)
-        subscription.freeUpgradeSampleDate(new Date).saveMe()
+        subscription.freeUpgradeSampleDate(ZonedDateTime.now(DefaultTimezone)).saveMe()
 
       val inserts = Insert.productBrochure.toList ++ {
         if (sendFreeUpgradeShipment)

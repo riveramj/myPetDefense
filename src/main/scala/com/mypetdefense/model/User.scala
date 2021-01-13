@@ -1,13 +1,11 @@
 package com.mypetdefense.model
 
 import java.time.LocalDate
-import java.util.Date
 
-import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.service.KeyService._
 import com.mypetdefense.service.TaxJarService
 import com.mypetdefense.snippet.NewParent
-import com.mypetdefense.util.DateHelper.{yesterdayEnd, yesterdayStart}
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
 import net.liftweb.common._
@@ -19,10 +17,10 @@ import scala.collection.mutable
 
 class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   def getSingleton: KeyedMetaMapper[Long, User] = User
+
   object userId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-
   object firstName  extends MappedString(this, 100)
   object lastName   extends MappedString(this, 100)
   object stripeId   extends MappedString(this, 100)
@@ -52,9 +50,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
     override def defaultValue: Status.Value = Status.Active
     override def dbIndexed_?                = true
   }
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt extends MappedZonedDateTime(this, useNowAsDefault = true)
 
   def name = s"${firstName} ${lastName}"
 
@@ -122,7 +118,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   }
 
   def getCreatedDateOfUser: LocalDate =
-    this.createdAt.get.toInstant.atZone(DefaultTimezone).toLocalDate
+    this.createdAt.get.toLocalDate
 }
 
 object User extends User with LongKeyedMetaMapper[User] {

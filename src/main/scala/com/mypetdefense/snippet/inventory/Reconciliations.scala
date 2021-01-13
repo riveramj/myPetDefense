@@ -3,6 +3,7 @@ package inventory
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -42,7 +43,7 @@ class Reconciliations extends Loggable {
     ).flatten
 
     if (validateFields.isEmpty) {
-      val realDate = reconciliationDateFormat.parse(newDate)
+      val realDate = reconciliationDateFormat.parse(newDate).toZonedDateTime
 
       ReconciliationEvent.createNewReconciliationEvent(realDate)
 
@@ -131,8 +132,9 @@ class Reconciliations extends Loggable {
               () => createReconciliationEvent
             )
         } &
-        "tbody" #> reconciliations.sortWith(_.eventDate.get.getTime > _.eventDate.get.getTime).map {
-          reconciliation =>
+        "tbody" #> reconciliations
+          .sortWith(_.eventDate.get.toInstant.toEpochMilli > _.eventDate.get.toInstant.toEpochMilli)
+          .map { reconciliation =>
             idMemoize { detailsRenderer =>
               ".reconciliation-entry" #> {
                 ".date *" #> reconciliationDateFormat.format(reconciliation.eventDate.get) &
@@ -156,6 +158,6 @@ class Reconciliations extends Loggable {
                   }
                 }
             }
-        }
+          }
   }
 }

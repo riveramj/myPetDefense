@@ -1,6 +1,6 @@
 package com.mypetdefense.service
 
-import java.time.{LocalDate, Period}
+import java.time.{LocalDate, Period, ZonedDateTime}
 import java.util.Date
 
 import com.mypetdefense.AppConstants.DefaultTimezone
@@ -9,6 +9,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.shipstation.Order
 import com.mypetdefense.snippet.TPPApi
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.StripeHelper._
 import com.stripe.param._
 import net.liftweb.common._
@@ -174,7 +175,7 @@ object ParentService extends LoggableBoxLogging {
     )
 
     updatedSubscription match {
-      case Full(_) => Full(subscription.nextShipDate(nextDate).saveMe)
+      case Full(_) => Full(subscription.nextShipDate(nextDate.toZonedDateTime).saveMe)
       case _       => Empty
     }
   }
@@ -185,7 +186,7 @@ object ParentService extends LoggableBoxLogging {
     getStripeSubscription(stripeSubscriptionId) match {
       case Full(stripeSubscription) =>
         val currentPeriodEnd = stripeSubscription.currentPeriodEnd.getOrElse(0L)
-        val nextMonthDate    = new Date(currentPeriodEnd * 1000L)
+        val nextMonthDate    = new Date(currentPeriodEnd * 1000L) // TODO: migrate to ZonedDateTime
 
         val nextMonthLocalDate =
           nextMonthDate.toInstant.atZone(DefaultTimezone).toLocalDate
@@ -197,7 +198,7 @@ object ParentService extends LoggableBoxLogging {
 
         changeStripeBillDate(subscription.stripeSubscriptionId.get, startOfDayDate)
 
-        subscription.nextShipDate(nextMonthDate).saveMe
+        subscription.nextShipDate(nextMonthDate.toZonedDateTime).saveMe
 
       case _ => Empty
     }
@@ -415,7 +416,7 @@ object ParentService extends LoggableBoxLogging {
   def findGrowthMonth(pet: Pet): Int = {
     val currentDate = LocalDate.now()
 
-    val birthday = tryo(pet.birthday.get.toInstant.atZone(DefaultTimezone).toLocalDate)
+    val birthday = tryo(pet.birthday.get.toLocalDate)
 
     val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
 
@@ -583,7 +584,7 @@ object ParentService extends LoggableBoxLogging {
       .logFailure("create refund failed with stripe error")
 
     refund foreach { _ =>
-      shipment.dateRefunded(new Date()).saveMe
+      shipment.dateRefunded(ZonedDateTime.now(DefaultTimezone)).saveMe
       EmailActor ! SendShipmentRefundedEmail(parent, shipment)
       ShipStationService.cancelShipstationOrder(shipment)
     }

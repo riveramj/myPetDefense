@@ -1,7 +1,8 @@
 package com.mypetdefense.model
 
-import java.util.Date
+import java.time.ZonedDateTime
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
 import net.liftweb.common._
@@ -9,6 +10,7 @@ import net.liftweb.mapper._
 
 class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Long, TreatOrder] {
   def getSingleton: KeyedMetaMapper[Long, TreatOrder] = TreatOrder
+
   object treatOrderId extends MappedLong(this) {
     override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
@@ -25,18 +27,16 @@ class TreatOrder extends LongKeyedMapper[TreatOrder] with IdPK with OneToMany[Lo
   object shipStationOrderId extends MappedInt(this)
   object stripeChargeId     extends MappedString(this, 100)
   object trackingNumber     extends MappedString(this, 100)
-  object dateProcessed      extends MappedDateTime(this)
-  object expectedShipDate   extends MappedDateTime(this)
-  object dateShipped        extends MappedDateTime(this)
-  object dateReceived       extends MappedDateTime(this)
+  object dateProcessed      extends MappedZonedDateTime(this)
+  object expectedShipDate   extends MappedZonedDateTime(this)
+  object dateShipped        extends MappedZonedDateTime(this)
+  object dateReceived       extends MappedZonedDateTime(this)
   object taxPaid            extends MappedDouble(this)
   object amountPaid         extends MappedDouble(this)
   object treatsOrdered      extends MappedOneToMany(TreatOrderLineItem, TreatOrderLineItem.order)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
-  object shipmentStatus extends MappedEnum(this, ShipmentStatus)
-  object deliveryNotes  extends MappedString(this, 100)
+  object createdAt          extends MappedZonedDateTime(this, useNowAsDefault = true)
+  object shipmentStatus     extends MappedEnum(this, ShipmentStatus)
+  object deliveryNotes      extends MappedString(this, 100)
 
   def name: String = this.firstName.get + " " + this.lastName.get
 }
@@ -53,7 +53,7 @@ object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
       taxPaid: Double,
       treats: List[(Product, Int)]
   ): TreatOrder = {
-    val dateProcessed = new Date()
+    val dateProcessed = ZonedDateTime.now(DefaultTimezone)
 
     val newTreatOrder = TreatOrder.create
       .treatOrderId(generateLongId)
@@ -81,18 +81,16 @@ object TreatOrder extends TreatOrder with LongKeyedMetaMapper[TreatOrder] {
 
 class TreatOrderLineItem extends LongKeyedMapper[TreatOrderLineItem] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, TreatOrderLineItem] = TreatOrderLineItem
+
   object orderLineItemId extends MappedLong(this) {
     override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
   }
-
-  object order    extends MappedLongForeignKey(this, TreatOrder)
-  object product  extends MappedLongForeignKey(this, Product)
-  object quantity extends MappedInt(this)
-  object insert   extends MappedLongForeignKey(this, Insert)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object order     extends MappedLongForeignKey(this, TreatOrder)
+  object product   extends MappedLongForeignKey(this, Product)
+  object quantity  extends MappedInt(this)
+  object insert    extends MappedLongForeignKey(this, Insert)
+  object createdAt extends MappedZonedDateTime(this, useNowAsDefault = true)
 
   def createTreatOrderLineItems(
       treats: List[(Product, Int)],

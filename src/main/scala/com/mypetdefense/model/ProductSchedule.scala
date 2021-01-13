@@ -1,8 +1,8 @@
 package com.mypetdefense.model
 
-import java.util.Date
+import java.time.ZonedDateTime
 
-import com.mypetdefense.util.DateHelper.tomorrowStart
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.Box
 import net.liftweb.mapper._
@@ -23,13 +23,11 @@ class ProductSchedule
   }
   object scheduledItems
       extends MappedOneToMany(ProductScheduleItem, ProductScheduleItem.productSchedule)
-  object startDate extends MappedDateTime(this)
+  object startDate extends MappedZonedDateTime(this)
   object firstBox extends MappedBoolean(this) {
     override def defaultValue: Boolean = false
   }
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt extends MappedZonedDateTime(this, useNowAsDefault = true)
 
   def complete: ProductSchedule   = this.scheduleStatus(ProductScheduleStatus.Completed).saveMe()
   def makeActive: ProductSchedule = this.scheduleStatus(ProductScheduleStatus.Active).saveMe()
@@ -66,7 +64,7 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
       )
 
   def createNew(
-      startDate: Date,
+      startDate: ZonedDateTime,
       products: List[Product],
       firstBox: Boolean = false
   ): ProductSchedule = {

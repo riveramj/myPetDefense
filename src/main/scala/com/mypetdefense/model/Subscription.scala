@@ -1,7 +1,6 @@
 package com.mypetdefense.model
 
-import java.time.LocalDate
-import java.util.Date
+import java.time.{LocalDate, ZonedDateTime}
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.util.DateHelper._
@@ -16,18 +15,20 @@ class Subscription
     extends LongKeyedMapper[Subscription]
     with IdPK
     with OneToMany[Long, Subscription] {
+
   def getSingleton: KeyedMetaMapper[Long, Subscription] = Subscription
+
   object subscriptionId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
   object user                  extends MappedLongForeignKey(this, User)
   object promptedUpgrade       extends MappedBoolean(this)
   object isUpgraded            extends MappedBoolean(this)
-  object freeUpgradeSampleDate extends MappedDateTime(this)
+  object freeUpgradeSampleDate extends MappedZonedDateTime(this)
   object stripeSubscriptionId  extends MappedString(this, 100)
-  object startDate             extends MappedDateTime(this)
-  object renewalDate           extends MappedDateTime(this)
-  object nextShipDate          extends MappedDateTime(this)
+  object startDate             extends MappedZonedDateTime(this)
+  object renewalDate           extends MappedZonedDateTime(this)
+  object nextShipDate          extends MappedZonedDateTime(this)
   object priceCode             extends MappedString(this, 100)
   object contractLength extends MappedInt(this) {
     override def defaultValue = 0
@@ -36,10 +37,8 @@ class Subscription
   object status extends MappedEnum(this, Status) {
     override def defaultValue: Status.Value = Status.Active
   }
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
-  object cancellationDate    extends MappedDateTime(this)
+  object createdAt           extends MappedZonedDateTime(this, useNowAsDefault = true)
+  object cancellationDate    extends MappedZonedDateTime(this)
   object cancellationReason  extends MappedString(this, 100)
   object cancellationComment extends MappedText(this)
   object subscriptionBoxes   extends MappedOneToMany(SubscriptionBox, SubscriptionBox.subscription)
@@ -50,7 +49,7 @@ class Subscription
   def cancel: Subscription = {
     this
       .status(Status.Cancelled)
-      .cancellationDate(new Date())
+      .cancellationDate(ZonedDateTime.now(DefaultTimezone))
       .saveMe
   }
 
@@ -79,13 +78,13 @@ class Subscription
     tryo(dateFormat.format(this.cancellationDate.get)).openOr("")
 
   def getCreatedDateOfSubscription: LocalDate =
-    this.createdAt.get.toInstant.atZone(DefaultTimezone).toLocalDate
+    this.createdAt.get.toLocalDate
 
   def getCancelledDateOfSubscription: Box[LocalDate] =
-    tryo(this.cancellationDate.get.toInstant.atZone(DefaultTimezone).toLocalDate)
+    tryo(this.cancellationDate.get.toLocalDate)
 
   def getNextShipDate: LocalDate =
-    this.nextShipDate.get.toInstant.atZone(DefaultTimezone).toLocalDate
+    this.nextShipDate.get.toLocalDate
 
 }
 
@@ -93,8 +92,8 @@ object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] 
   def createNewSubscription(
       user: Box[User],
       stripeSubscriptionId: String,
-      startDate: Date,
-      nextShipDate: Date,
+      startDate: ZonedDateTime,
+      nextShipDate: ZonedDateTime,
       priceCode: String = Price.defaultPriceCode,
       isUpgraded: Boolean = false,
       contractLength: Int = 0
@@ -173,14 +172,14 @@ object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] 
 
   def findNewTodaySubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>=(Subscription.createdAt, nowDate)
+      By_>=(Subscription.createdAt, nowAtStartOfDay)
     )
   }
 
   def findCurrentMonthUpcomingSubscriptions: List[Subscription] = {
     Subscription.findAll(
       By_>=(Subscription.nextShipDate, tomorrowStart),
-      By_<(Subscription.nextShipDate, beginngNextMonth)
+      By_<(Subscription.nextShipDate, beginningNextMonth)
     )
   }
 

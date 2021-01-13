@@ -1,8 +1,8 @@
 package com.mypetdefense.generator
 
-import java.util.Date
+import java.time.ZonedDateTime
 
 case class ProductScheduleGeneratedChainData(
     productData: List[ProductGeneratedData],
-    scheduleStartData: Date
+    scheduleStartData: ZonedDateTime
 )

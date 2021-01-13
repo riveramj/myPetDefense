@@ -1,7 +1,5 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.snippet.NewAddress
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
@@ -23,9 +21,7 @@ class Address extends LongKeyedMapper[Address] with IdPK {
   object status extends MappedEnum(this, Status) {
     override def defaultValue: Status.Value = Status.Active
   }
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt extends MappedZonedDateTime(this, useNowAsDefault = true)
 
   def cancel: Address = {
     this

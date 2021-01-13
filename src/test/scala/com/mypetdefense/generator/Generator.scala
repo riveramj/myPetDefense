@@ -2,7 +2,7 @@ package com.mypetdefense.generator
 
 import java.util.{Collections => JCollections}
 
-import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfNextMonth, anyDayOfThisMonth}
+import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.helpers.ScalaCheckHelper
 import com.mypetdefense.model.Price._
@@ -129,8 +129,8 @@ object Generator extends ScalaCheckHelper {
     for {
       stripeSubscriptionId <- genNonEmptyAlphaStr
       date         = anyDayOfThisMonth
-      startDate    = date.toDate
-      nextShipDate = date.plusDays(3).toDate
+      startDate    = date
+      nextShipDate = date.plusDays(3)
       priceCode      <- Gen.oneOf(defaultPriceCode, currentTppPriceCode)
       contractLength <- Gen.posNum[Int]
     } yield SubscriptionCreateGeneratedData(
@@ -277,7 +277,7 @@ object Generator extends ScalaCheckHelper {
   ): Gen[ProductScheduleGeneratedChainData] =
     for {
       products <- Gen.listOfN(productsSize, genProduct)
-      startDate = anyDayOfNextMonth.toDate
+      startDate = anyDayOfNextMonth
     } yield ProductScheduleGeneratedChainData(products, startDate)
 
   def genStatusLabelCreatedOrPaid: Gen[ShipmentStatus.Value] =

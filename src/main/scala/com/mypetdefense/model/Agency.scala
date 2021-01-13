@@ -1,7 +1,5 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.service.ReportingService.petlandName
 import com.mypetdefense.util.DateHelper.currentDate
 import com.mypetdefense.util.RandomIdGenerator._
@@ -24,9 +22,7 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
   object petlandStore extends MappedBoolean(this) {
     override def defaultValue = false
   }
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt extends MappedZonedDateTime(this, useNowAsDefault = true)
 
   def currentMonthShipments: List[Shipment] = this.findAllShipments.filter { shipment =>
     val mailedDate = shipment.getMailedDateOfShipment
@@ -38,7 +34,7 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
     for {
       customer     <- this.customers.toList
       subscription <- customer.subscription.toList
-      shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+      shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.toInstant.toEpochMilli)
     } yield {
       shipment
     }

@@ -1,7 +1,6 @@
 package com.mypetdefense.helpers
 
 import java.time._
-import java.util.Date
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.helpers.Random.generateIntBetween
@@ -13,8 +12,7 @@ object DateUtil {
   def threeDaysAgo: ZonedDateTime                      = now.atStartOfDay(DefaultTimezone).minusDays(3)
   def yesterday: ZonedDateTime                         = now.atStartOfDay(DefaultTimezone).minusDays(1)
   def now: LocalDate                                   = LocalDate.now(DefaultTimezone)
-  def today: Date                                      = now.atStartOfDay(DefaultTimezone).toDate
-  def tomorrow: Date                                   = now.atStartOfDay(DefaultTimezone).plusDays(1).toDate
+  def today: ZonedDateTime                             = now.atStartOfDay(DefaultTimezone)
   def thisYear: Int                                    = now.getYear
   def anyHourOfYesterday: ZonedDateTime                = anyHourOf(yesterday.toLocalDate)
   def anyHourOfToday: ZonedDateTime                    = anyHourOf(now)
@@ -30,7 +28,6 @@ object DateUtil {
   def anyDayUntilThisMonth: ZonedDateTime              = getAnyDayOfTheYearUntil(now.minusMonths(1))
   def anyDayUntilToday: ZonedDateTime                  = getAnyDayOfTheYearUntil(now.minusDays(1))
   def anyDayOfThisMonthFromTomorrow: ZonedDateTime     = getAnyDayOfMonthFrom(now.plusDays(1))
-  def anyDayExceptToday: ZonedDateTime                 = getAnyDayOfTheYearExceptDay(now)
   def anyDayExceptYesterday: ZonedDateTime             = getAnyDayOfTheYearExceptDay(now.minusDays(1))
   def anyDayExceptThisDayMonthAgo: ZonedDateTime       = getAnyDayOfTheYearExceptDay(now.minusMonths(1))
   def anyDayExceptThisDayYearAgo: ZonedDateTime        = getAnyDayOfTheYearExceptDay(now.minusYears(1))
@@ -134,9 +131,4 @@ object DateUtil {
     val day     = generateIntBetween(1, maxDays)
     localDate.withDayOfMonth(day).atStartOfDay(DefaultTimezone)
   }
-
-  implicit class ZonedDateTimeSyntax(val i: ZonedDateTime) extends AnyVal {
-    def toDate: Date = Date.from(i.toInstant)
-  }
-
 }

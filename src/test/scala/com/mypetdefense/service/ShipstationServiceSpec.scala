@@ -6,13 +6,14 @@ import java.util.Date
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator.{AddressGeneratedData, InsertGenData}
 import com.mypetdefense.helpers.DBTest
-import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, yesterday}
+import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.Random.randomPosInt
 import com.mypetdefense.helpers.db.AddressDbUtil._
 import com.mypetdefense.helpers.db.InsertsDbHelper._
 import com.mypetdefense.model.{BoxType, Pet, Subscription}
 import com.mypetdefense.shipstation._
+import com.mypetdefense.util.DateHelper.ZonedDateTimeOps
 import dispatch.{Future, Req}
 import net.liftweb.common._
 import net.liftweb.http.rest._

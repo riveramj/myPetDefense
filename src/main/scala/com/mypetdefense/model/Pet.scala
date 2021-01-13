@@ -1,7 +1,9 @@
 package com.mypetdefense.model
 
+import java.time.ZonedDateTime
 import java.util.Date
 
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
 import net.liftweb.common._
@@ -21,21 +23,15 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   object animalType      extends MappedEnum(this, AnimalType)
   object size            extends MappedEnum(this, AnimalSize)
   object adultSize       extends MappedEnum(this, AnimalSize)
-  object birthday        extends MappedDateTime(this)
+  object birthday        extends MappedZonedDateTime(this) // TODO: maybe should be date only
   object nextGrowthDelay extends MappedInt(this)
-
   object sentDogTag extends MappedBoolean(this) {
     override def defaultValue = false
   }
-
   object status extends MappedEnum(this, Status) {
     override def defaultValue: Status.Value = Status.Active
   }
-
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
-
+  object createdAt extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object Pet extends Pet with LongKeyedMetaMapper[Pet] {
@@ -44,26 +40,39 @@ object Pet extends Pet with LongKeyedMetaMapper[Pet] {
       name: String,
       product: FleaTick,
       breed: String,
-      whelpDate: Box[Date]
-  ): Pet = {
+      whelpDate: Box[ZonedDateTime],
+      dummy: Boolean // TODO: remove after deleting deprecated version
+  ): Pet =
     createNewPet(
       user,
       name,
       product.animalType.get,
       product.size.get,
       whelpDate,
-      breed
+      breed,
+      dummy
     )
-  }
 
+  @deprecated("Migrate to ZonedDateTime-based version", since = "0.1-SNAPSHOT")
+  def createNewPet(
+      user: User,
+      name: String,
+      product: FleaTick,
+      breed: String,
+      whelpDate: Box[Date]
+  ): Pet =
+    createNewPet(user, name, product, breed, whelpDate.map(_.toZonedDateTime), dummy = false)
+
+  // TODO: copy default arguments after deleting deprecated version
   def createNewPet(
       user: User,
       name: String,
       animalType: AnimalType.Value,
       size: AnimalSize.Value,
-      whelpDate: Box[Date] = Empty,
-      breed: String = ""
-  ): Pet = {
+      whelpDate: Box[ZonedDateTime],
+      breed: String,
+      dummy: Boolean // TODO: remove after deleting deprecated version
+  ): Pet =
     Pet.create
       .petId(generateLongId)
       .user(user)
@@ -73,11 +82,29 @@ object Pet extends Pet with LongKeyedMetaMapper[Pet] {
       .breed(breed)
       .birthday(whelpDate.openOr(null))
       .saveMe
-  }
 
-  def createNewPet(pet: Pet, user: User): Pet = {
+  @deprecated("Migrate to ZonedDateTime-based version", since = "0.1-SNAPSHOT")
+  def createNewPet(
+      user: User,
+      name: String,
+      animalType: AnimalType.Value,
+      size: AnimalSize.Value,
+      whelpDate: Box[Date] = Empty,
+      breed: String = ""
+  ): Pet =
+    createNewPet(
+      user,
+      name,
+      animalType,
+      size,
+      whelpDate.map(_.toZonedDateTime),
+      breed,
+      dummy = false
+    )
+
+  def createNewPet(pet: Pet, user: User): Pet =
     pet.user(user).saveMe
-  }
+
   def notCancelledWithoutBox: List[Pet] =
     Pet.findAll(NotBy(Pet.status, Status.Cancelled), NullRef(Pet.box))
 }

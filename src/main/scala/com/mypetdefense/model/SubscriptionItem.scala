@@ -1,24 +1,19 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Full
 import net.liftweb.mapper._
 
 class SubscriptionItem extends LongKeyedMapper[SubscriptionItem] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, SubscriptionItem] = SubscriptionItem
+
   object subscriptionItemId extends MappedLong(this) {
     override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
   }
-
   object product         extends MappedLongForeignKey(this, Product)
   object subscriptionBox extends MappedLongForeignKey(this, SubscriptionBox)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
-
+  object createdAt       extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[SubscriptionItem] {

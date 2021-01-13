@@ -1,11 +1,11 @@
 package com.mypetdefense.generator
 
-import java.util.Date
+import java.time.ZonedDateTime
 
 case class SubscriptionCreateGeneratedData(
     stripeSubscriptionId: String,
-    startDate: Date,
-    nextShipDate: Date,
+    startDate: ZonedDateTime,
+    nextShipDate: ZonedDateTime,
     priceCode: String,
     contractLength: Int
 )

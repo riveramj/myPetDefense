@@ -19,14 +19,14 @@ class ReportingSpec extends DBTest {
       insertPetAndShipmentsChainAtAgency(upcomingStuff, petlandAndTpp.mpd, subUpgraded = true)
 
     insertedExpected.subscription
-      .nextShipDate(inReportForecastDefaultRange.toDate)
+      .nextShipDate(inReportForecastDefaultRange)
       .saveMe()
     insertPetAndShipmentsChainAtAgency(
       notUpcomingStuff,
       petlandAndTpp.mpd,
       subUpgraded = true
     ).subscription
-      .nextShipDate(notInReportForecastDefaultRange.toDate)
+      .nextShipDate(notInReportForecastDefaultRange)
       .saveMe()
 
     val expectedResult = calculateExpectedResult(insertedExpected.subscription)

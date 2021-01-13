@@ -9,6 +9,7 @@ import java.util.regex.Pattern
 
 import au.com.bytecode.opencsv.{CSVParser, CSVReader}
 import com.mypetdefense.model._
+import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.S
 import net.liftweb.util.Helpers._
@@ -154,7 +155,7 @@ object AmazonOrderUploadCsv extends Loggable {
 
     val timeFormatter = DateTimeFormatter.ISO_DATE_TIME
     val offsetDate    = OffsetDateTime.parse(rawPurchaseDate, timeFormatter)
-    val purchaseDate  = Date.from(Instant.from(offsetDate))
+    val purchaseDate  = Date.from(Instant.from(offsetDate)).toZonedDateTime // FIXME: more direct conversion
 
     val animalType = {
       if (productName.toLowerCase().contains("dogs"))

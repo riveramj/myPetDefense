@@ -1,7 +1,5 @@
 package com.mypetdefense.jobs
 
-import java.util.Date
-
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
@@ -13,9 +11,6 @@ import net.liftweb.common.Full
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class DataIntegrityCheckJobSpec extends DBTest {
-
-  private val threeDaysAgoDate: Date = threeDaysAgo.toDate
-  private val sixtyDaysAgo: Date     = anyDayOfThisYearUntilSixtyDaysAgo.toDate
 
   it should "properly check data integrity and don't make duplicates" in {
     forAll(
@@ -136,10 +131,10 @@ class DataIntegrityCheckJobSpec extends DBTest {
       .flatten
 
   private def setProcessedDateToMoreThanThreeDaysAgo(in: Shipment): Shipment =
-    in.dateProcessed(threeDaysAgoDate).saveMe()
+    in.dateProcessed(threeDaysAgo).saveMe()
 
   private def setProcessedDateToMoreThanSixtyDaysAgo(in: Shipment): Shipment =
-    in.dateProcessed(sixtyDaysAgo).saveMe()
+    in.dateProcessed(anyDayOfThisYearUntilSixtyDaysAgo).saveMe()
 
   private def setStatusLabelCreatedOrPaid(in: Shipment): Shipment =
     in.shipmentStatus(statusLabelCreatedOrPaid()).saveMe()

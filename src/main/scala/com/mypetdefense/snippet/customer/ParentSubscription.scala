@@ -9,7 +9,7 @@ import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.DateHelper.nowDate
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.SecurityContext._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
@@ -186,7 +186,13 @@ class ParentSubscription extends Loggable {
     def validateFields: List[ValidationError] = {
       val checkPause =
         if (!pauseAccount) Empty
-        else futureDate(nextShipDate, dateFormat, nowDate, "#pause-account .next-shipment")
+        else
+          futureDate(
+            nextShipDate,
+            dateFormat,
+            nowAtStartOfDay.toDate,
+            "#pause-account .next-shipment"
+          )
 
       checkPause.toList
     }
@@ -256,7 +262,7 @@ class ParentSubscription extends Loggable {
       val subscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
 
       val updatedShipDateSubscription =
-        subscription.map(_.nextShipDate(nextShipDate).status(Status.Active).saveMe)
+        subscription.map(_.nextShipDate(nextShipDate.toZonedDateTime).status(Status.Active).saveMe)
       ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
 
       for {

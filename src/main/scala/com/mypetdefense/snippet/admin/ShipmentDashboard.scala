@@ -2,9 +2,8 @@ package com.mypetdefense.snippet
 package admin
 
 import java.text.SimpleDateFormat
-import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Date
+import java.time.{LocalDate, ZonedDateTime}
 
 import com.mypetdefense.AppConstants.{DefaultLocale, DefaultTimezone}
 import com.mypetdefense.actor._
@@ -103,7 +102,7 @@ class ShipmentDashboard extends Loggable {
   )(): JsCmd = {
     subscription.map { subscription => ParentService.updateNextShipDate(subscription) }
 
-    shipment.dateShipped(new Date()).address(address).saveMe
+    shipment.dateShipped(ZonedDateTime.now(DefaultTimezone)).address(address).saveMe
 
     InventoryService.deductShipmentItems(shipment)
 
@@ -199,65 +198,67 @@ class ShipmentDashboard extends Loggable {
 
           def currentShipmentBindings = {
             ".forecast-dates" #> ClearNodes &
-              ".shipment" #> paidShipments.sortBy(_.expectedShipDate.get.getTime).map { shipment =>
-                val subscription = shipment.subscription.obj
-                val user         = subscription.flatMap(_.user.obj)
-                val agencyName = {
-                  for {
-                    parent <- user
-                    agency <- parent.referer
-                  } yield {
-                    agency.name.get
-                  }
-                }.openOr("")
+              ".shipment" #> paidShipments
+                .sortBy(_.expectedShipDate.get.toInstant.toEpochMilli)
+                .map { shipment =>
+                  val subscription = shipment.subscription.obj
+                  val user         = subscription.flatMap(_.user.obj)
+                  val agencyName = {
+                    for {
+                      parent <- user
+                      agency <- parent.referer
+                    } yield {
+                      agency.name.get
+                    }
+                  }.openOr("")
 
-                var trackingNumber = shipment.trackingNumber.get
+                  var trackingNumber = shipment.trackingNumber.get
 
-                val allShipments = subscription.map(_.shipments.toList).openOr(Nil)
+                  val allShipments = subscription.map(_.shipments.toList).openOr(Nil)
 
-                val petsAndProducts = subscription.map(_.getPetAndProducts).openOr(Nil)
-                val dateFormat      = new SimpleDateFormat("MMM dd")
+                  val petsAndProducts = subscription.map(_.getPetAndProducts).openOr(Nil)
+                  val dateFormat      = new SimpleDateFormat("MMM dd")
 
-                val shipAddressRaw = Address
-                  .find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
+                  val shipAddressRaw = Address
+                    .find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
 
-                val nameAddress = shipAddressRaw.map { ship =>
-                  s"""${user.map(_.name).getOrElse("")}
+                  val nameAddress = shipAddressRaw.map { ship =>
+                    s"""${user.map(_.name).getOrElse("")}
             |${ship.street1}
             |${ship.street2}
             |${ship.city}, ${ship.state} ${ship.zip}""".stripMargin.replaceAll("\n\n", "\n")
-                }
-
-                ".name-address *" #> nameAddress &
-                  ".product" #> petsAndProducts.map {
-                    case (pet, product) =>
-                      ".pet-name *" #> pet.map(_.name.get) &
-                        ".product-name *" #> product.map(_.name.get) &
-                        ".product-size *" #> product.map(_.size.get.toString)
-                  } &
-                  ".insert *" #> shipment.insert.get &
-                  ".tracking" #> SHtml.ajaxText(
-                    trackingNumber,
-                    possibleTracking => updateTrackingNumber(possibleTracking, shipment)
-                  ) &
-                  ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
-                    if (shipmentHasShipped_?(shipment)) {
-                      ".ship [class+]" #> "shipped" &
-                        ".ship *" #> "Shipped" &
-                        ".ship [disabled]" #> "disabled"
-                    } else {
-                      ".ship [onclick]" #> SHtml.ajaxInvoke(
-                        shipProduct(
-                          subscription,
-                          user,
-                          shipment,
-                          nameAddress.openOr(""),
-                          shipButtonRenderer
-                        ) _
-                      )
-                    }
                   }
-              }
+
+                  ".name-address *" #> nameAddress &
+                    ".product" #> petsAndProducts.map {
+                      case (pet, product) =>
+                        ".pet-name *" #> pet.map(_.name.get) &
+                          ".product-name *" #> product.map(_.name.get) &
+                          ".product-size *" #> product.map(_.size.get.toString)
+                    } &
+                    ".insert *" #> shipment.insert.get &
+                    ".tracking" #> SHtml.ajaxText(
+                      trackingNumber,
+                      possibleTracking => updateTrackingNumber(possibleTracking, shipment)
+                    ) &
+                    ".ship-it" #> SHtml.idMemoize { shipButtonRenderer =>
+                      if (shipmentHasShipped_?(shipment)) {
+                        ".ship [class+]" #> "shipped" &
+                          ".ship *" #> "Shipped" &
+                          ".ship [disabled]" #> "disabled"
+                      } else {
+                        ".ship [onclick]" #> SHtml.ajaxInvoke(
+                          shipProduct(
+                            subscription,
+                            user,
+                            shipment,
+                            nameAddress.openOr(""),
+                            shipButtonRenderer
+                          ) _
+                        )
+                      }
+                    }
+                }
           }
 
           def futureShipmentBindings = {
@@ -281,8 +282,9 @@ class ShipmentDashboard extends Loggable {
               }) &
               ".tracking-header" #> ClearNodes &
               ".ship-header" #> ClearNodes &
-              ".shipment" #> selectedFutureSubscriptions.sortBy(_.nextShipDate.get.getTime).map {
-                subscription =>
+              ".shipment" #> selectedFutureSubscriptions
+                .sortBy(_.nextShipDate.get.toInstant.toEpochMilli)
+                .map { subscription =>
                   val user = subscription.user.obj
 
                   val petsAndProducts = subscription.getPetAndProducts
@@ -307,7 +309,7 @@ class ShipmentDashboard extends Loggable {
                     } &
                     ".tracking-number" #> ClearNodes &
                     ".ship-it" #> ClearNodes
-              }
+                }
           }
 
           if (future) {

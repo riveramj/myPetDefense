@@ -1,7 +1,5 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.mapper._
 
@@ -19,13 +17,9 @@ class AddOnProduct extends LongKeyedMapper[AddOnProduct] with IdPK {
   object frequency extends MappedEnum(this, AddOnFrequency) {
     override def defaultValue: AddOnFrequency.Value = AddOnFrequency.Monthly
   }
-  object addDate extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
-  object removedDate extends MappedDateTime(this)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object addDate     extends MappedZonedDateTime(this, useNowAsDefault = true)
+  object removedDate extends MappedZonedDateTime(this)
+  object createdAt   extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object AddOnProduct extends AddOnProduct with LongKeyedMetaMapper[AddOnProduct] {

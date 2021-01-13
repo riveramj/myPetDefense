@@ -11,6 +11,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
+import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -475,7 +476,7 @@ class Parents extends Loggable {
         case "name"  => pet.map(_.name(newInfo).saveMe)
         case "breed" => pet.map(_.breed(newInfo).saveMe)
         case "birthday" =>
-          val possibleBirthday = ParentService.parseWhelpDate(newInfo)
+          val possibleBirthday = ParentService.parseWhelpDate(newInfo).map(_.toZonedDateTime)
           pet.map(_.birthday(possibleBirthday.openOr(null)).saveMe)
         case "product" => product.map { prod => subscriptionBox.map(_.fleaTick(prod).saveMe()) }
         case _         => pet
@@ -578,7 +579,7 @@ class Parents extends Loggable {
 
       subscription.map { oldSubscription =>
         ParentService.updateNextShipBillDate(oldSubscription, updatedDate)
-        oldSubscription.nextShipDate(updatedDate).saveMe
+        oldSubscription.nextShipDate(updatedDate.toZonedDateTime).saveMe
       }
 
       detailsRenderer.setHtml
@@ -596,7 +597,9 @@ class Parents extends Loggable {
       ".next-ship-date" #> ajaxText(updateNextShipDate, updateNextShipDate = _) &
         ".change-date [onClick]" #> SHtml.ajaxInvoke(() => updateShipDate) &
         ".shipment" #> shipments
-          .sortWith(_.dateProcessed.get.getTime > _.dateProcessed.get.getTime)
+          .sortWith(
+            _.dateProcessed.get.toInstant.toEpochMilli > _.dateProcessed.get.toInstant.toEpochMilli
+          )
           .map { shipment =>
             val itemsShipped = shipment.shipmentLineItems.toList.map(_.getPetNameProductName)
 

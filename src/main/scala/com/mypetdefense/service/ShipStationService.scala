@@ -1,7 +1,7 @@
 package com.mypetdefense.service
 
 import java.text.SimpleDateFormat
-import java.time.LocalDate
+import java.time.{LocalDate, ZonedDateTime}
 import java.util.Date
 
 import com.mypetdefense.AppConstants.DefaultTimezone
@@ -311,7 +311,7 @@ trait ShipStationServiceTrait extends Loggable {
       .filter(_.animalType.get == AnimalType.Dog)
 
     if (dogs.nonEmpty) {
-      subscription.reload.freeUpgradeSampleDate(new Date).saveMe()
+      subscription.reload.freeUpgradeSampleDate(ZonedDateTime.now(DefaultTimezone)).saveMe()
       dogs.map(pet => ShipmentLineItem.sendFreeUpgradeItems(shipment, pet))
 
       Insert.tryUpgrade ++ shipmentLineItemsInserts

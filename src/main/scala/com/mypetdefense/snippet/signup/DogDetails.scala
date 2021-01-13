@@ -6,6 +6,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -69,7 +70,7 @@ class DogDetails extends Loggable {
         newPetId   <- PetFlowChoices.petId.is
         animalType <- PetFlowChoices.petChoice.is
       } yield {
-        val birthday = yearMonthFormatter.parse(s"$petMonth-$petYear")
+        val birthday = yearMonthFormatter.parse(s"$petMonth-$petYear").toZonedDateTime
 
         val newPet = Pet.create
           .petId(newPetId)

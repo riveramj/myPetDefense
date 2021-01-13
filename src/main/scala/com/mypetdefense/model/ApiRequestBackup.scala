@@ -1,7 +1,5 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common._
 import net.liftweb.json.JsonAST.JValue
@@ -14,17 +12,10 @@ class ApiRequestBackup extends LongKeyedMapper[ApiRequestBackup] with IdPK {
   object apiRequestId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-
   object rawJson extends MappedString(this, 2000)
-
-  object agency extends MappedLongForeignKey(this, Agency)
-
-  object user extends MappedLongForeignKey(this, User)
-
-  object created extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
-
+  object agency  extends MappedLongForeignKey(this, Agency)
+  object user    extends MappedLongForeignKey(this, User)
+  object created extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object ApiRequestBackup extends ApiRequestBackup with LongKeyedMetaMapper[ApiRequestBackup] {

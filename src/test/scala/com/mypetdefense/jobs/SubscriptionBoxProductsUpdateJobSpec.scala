@@ -2,7 +2,7 @@ package com.mypetdefense.jobs
 
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
-import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayExceptYesterday, yesterday}
+import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.db.ProductDbUtils.createNewProduct
 import com.mypetdefense.model._
@@ -105,8 +105,8 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
         mpdAndPld.mpd,
         subUpgraded = true
       )
-    shouldBeAffectedData.subscription.createdAt(yesterday.toDate).saveMe()
-    shouldNotBeAffectedData.subscription.createdAt(anyDayExceptYesterday.toDate).saveMe()
+    shouldBeAffectedData.subscription.createdAt(yesterday).saveMe()
+    shouldNotBeAffectedData.subscription.createdAt(anyDayExceptYesterday).saveMe()
     insertProductToToSubBoxes(shouldBeAffectedData.subscription, someOldInsertedProduct)
     insertProductToToSubBoxes(shouldNotBeAffectedData.subscription, someOldInsertedProduct)
 

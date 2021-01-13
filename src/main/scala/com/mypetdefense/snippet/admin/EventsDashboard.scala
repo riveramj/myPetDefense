@@ -2,8 +2,9 @@ package com.mypetdefense.snippet
 package admin
 
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.ZonedDateTime
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import net.liftweb.common._
 import net.liftweb.http._
@@ -37,7 +38,7 @@ class EventsDashboard extends Loggable {
     val updatedEvent = event.notes(eventNotes).eventStatus(eventStatus)
 
     if (eventStatus == EventStatus.Resolved)
-      updatedEvent.resolutionDate(new Date()).saveMe
+      updatedEvent.resolutionDate(ZonedDateTime.now(DefaultTimezone)).saveMe
     else
       updatedEvent.saveMe
 
@@ -62,7 +63,7 @@ class EventsDashboard extends Loggable {
     SHtml.makeFormsAjax andThen
       ".event-dashboard [class+]" #> "current" &
         ".event-details" #> SHtml.idMemoize { eventActionRenderer =>
-          ".event" #> unresolvedEvents.sortBy(_.eventDate.get.getTime).map { event =>
+          ".event" #> unresolvedEvents.sortBy(_.eventDate.get.toInstant.toEpochMilli).map { event =>
             var notes          = event.notes.get
             val trackingNumber = event.shipment.obj.map(_.trackingNumber.get)
 

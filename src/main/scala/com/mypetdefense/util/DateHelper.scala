@@ -11,73 +11,39 @@ import net.liftweb.util.Helpers.tryo
 object DateHelper {
   val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
 
-  def currentDate: LocalDateTime     = LocalDateTime.now()
-  def now: LocalDate                 = LocalDate.now(DefaultTimezone)
+  def currentDate: LocalDateTime = LocalDateTime.now()
+  def now: LocalDate             = LocalDate.now(DefaultTimezone)
+
   def nowAtStartOfDay: ZonedDateTime = now.atStartOfDay(DefaultTimezone)
-
-  def nowDate: Date = Date.from(nowAtStartOfDay.toInstant)
-
-  def yesterday: ZonedDateTime = nowAtStartOfDay.minusDays(1)
-
-  def yesterdayStart: Date = Date.from(nowAtStartOfDay.minusDays(1).toInstant)
-
-  def yesterdayEnd: Date = Date.from(nowAtStartOfDay.toInstant)
-
-  def yesterdayMonthStart: Date =
-    Date.from(yesterday.withDayOfMonth(1).toInstant)
-
-  def yesterdayMonthEnd: Date =
-    Date.from(lastDayOfTheMonth(yesterday).plusDays(1).toInstant)
-
-  def threeDaysAgo: Date = Date.from(now.minusDays(3).atStartOfDay(DefaultTimezone).toInstant)
-
-  def sixtyDaysAgo: Date = Date.from(now.minusDays(60).atStartOfDay(DefaultTimezone).toInstant)
-
-  def monthDayOne: Date = Date.from(now.withDayOfMonth(1).atStartOfDay(DefaultTimezone).toInstant)
-
-  def monthDayOneLastMonth: Date =
-    Date.from(now.withDayOfMonth(1).atStartOfDay(DefaultTimezone).minusMonths(1).toInstant)
-
-  def currentDayLastMonthEnd: Date = Date.from(nowAtStartOfDay.withDayOfMonth(1).toInstant)
-
-  def monthDayOneLastYear: Date =
-    Date.from(now.withDayOfMonth(1).atStartOfDay(DefaultTimezone).minusYears(1).toInstant)
-
-  def currentDayLastYearEnd: Date = Date.from(nowAtStartOfDay.plusDays(1).minusYears(1).toInstant)
-
-  def tomorrowStart: Date = Date.from(nowAtStartOfDay.plusDays(1).toInstant)
-
-  def beginngNextMonth: Date =
-    Date.from(YearMonth.now().atEndOfMonth().atStartOfDay(DefaultTimezone).plusDays(1).toInstant)
-
-  def yearDayOne: Date = Date.from(now.withDayOfYear(1).atStartOfDay(DefaultTimezone).toInstant)
-
-  def yearDayOneLastYear: Date =
-    Date.from(now.withDayOfYear(1).atStartOfDay(DefaultTimezone).minusYears(1).toInstant)
-
-  def todayLastMonth: Date = Date.from(nowAtStartOfDay.minusMonths(1).toInstant)
-
-  def todayLastYear: Date = Date.from(nowAtStartOfDay.minusYears(1).toInstant)
-
-  def todayLastYearEnd: Date = Date.from(nowAtStartOfDay.minusYears(1).plusDays(1).toInstant)
-
-  def todayLastMonthEnd: Date = Date.from(nowAtStartOfDay.minusMonths(1).plusDays(1).toInstant)
-
-  def yearMonth: String =
-    currentDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", DefaultLocale))
+  def yesterday: ZonedDateTime       = nowAtStartOfDay.minusDays(1)
+  def yesterdayStart: ZonedDateTime  = nowAtStartOfDay.minusDays(1)
+  def yesterdayEnd: ZonedDateTime    = nowAtStartOfDay
+  def threeDaysAgo: ZonedDateTime    = now.minusDays(3).atStartOfDay(DefaultTimezone)
+  def sixtyDaysAgo: ZonedDateTime    = now.minusDays(60).atStartOfDay(DefaultTimezone)
+  def monthDayOne: ZonedDateTime     = now.withDayOfMonth(1).atStartOfDay(DefaultTimezone)
+  def monthDayOneLastMonth: ZonedDateTime =
+    now.withDayOfMonth(1).atStartOfDay(DefaultTimezone).minusMonths(1)
+  def currentDayLastMonthEnd: ZonedDateTime = nowAtStartOfDay.withDayOfMonth(1)
+  def monthDayOneLastYear: ZonedDateTime =
+    now.withDayOfMonth(1).atStartOfDay(DefaultTimezone).minusYears(1)
+  def currentDayLastYearEnd: ZonedDateTime = nowAtStartOfDay.plusDays(1).minusYears(1)
+  def tomorrowStart: ZonedDateTime         = nowAtStartOfDay.plusDays(1)
+  def beginningNextMonth: ZonedDateTime =
+    YearMonth.now().atEndOfMonth().atStartOfDay(DefaultTimezone).plusDays(1)
+  def yearDayOne: ZonedDateTime = now.withDayOfYear(1).atStartOfDay(DefaultTimezone)
+  def yearDayOneLastYear: ZonedDateTime =
+    now.withDayOfYear(1).atStartOfDay(DefaultTimezone).minusYears(1)
+  def todayLastMonth: ZonedDateTime    = nowAtStartOfDay.minusMonths(1)
+  def todayLastYear: ZonedDateTime     = nowAtStartOfDay.minusYears(1)
+  def todayLastYearEnd: ZonedDateTime  = nowAtStartOfDay.minusYears(1).plusDays(1)
+  def todayLastMonthEnd: ZonedDateTime = nowAtStartOfDay.minusMonths(1).plusDays(1)
 
   def fileNameYearMonth: String =
     currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", DefaultLocale))
-
   def fileNameMonthDayYear: String =
     currentDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy", DefaultLocale))
 
   def thisYear: String = currentDate.format(DateTimeFormatter.ofPattern("yyyy", DefaultLocale))
-
-  def lastDayOfTheMonth(time: ZonedDateTime): ZonedDateTime = {
-    val maxDay = time.getMonth.maxLength()
-    time.withDayOfMonth(maxDay)
-  }
 
   def getDateRange(month: String, year: Int = 2019): LocalDateTime = {
     if (month == "") {
@@ -102,9 +68,6 @@ object DateHelper {
     monthDate.toInstant.atZone(DefaultTimezone).toLocalDateTime
   }
 
-  def makeDate(year: Int, month: Int, day: Int): Date =
-    Date.from(LocalDate.of(year, month, day).atStartOfDay(DefaultTimezone).toInstant)
-
   val monthHeaders: List[String] =
     List(
       "January",
@@ -121,10 +84,14 @@ object DateHelper {
       "December"
     )
 
-  implicit class DateOps(val v: Date) extends AnyVal {
-    def toLocalDate: LocalDate = v.toInstant.atZone(DefaultTimezone).toLocalDate
+  implicit class DateOps(val self: Date) extends AnyVal {
+    def toZonedDateTime: ZonedDateTime = self.toInstant.atZone(DefaultTimezone)
+  }
+
+  implicit class ZonedDateTimeOps(val self: ZonedDateTime) extends AnyVal {
+    def toDate: Date = Date.from(self.toInstant)
     def isYesterday: Boolean = {
-      val localDate    = toLocalDate
+      val localDate    = self.toLocalDate
       val day          = localDate.getDayOfYear
       val year         = localDate.getYear
       val yesterdayDay = yesterday

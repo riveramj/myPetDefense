@@ -2,9 +2,7 @@ package com.mypetdefense.jobs
 
 import java.text.SimpleDateFormat
 import java.time.LocalDate
-import java.util.Date
 
-import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model.ShipmentStatus._
 import com.mypetdefense.model._
 import dispatch.Defaults._
@@ -32,10 +30,6 @@ class TrackShipmentDeliveryJob extends ManagedJob {
     val uspsApiUrl        = url("https://secure.shippingapis.com/ShippingAPI.dll").secure
 
     val retryAttempts = 10
-
-    def convertDateFormat(date: Date) = {
-      date.toInstant.atZone(DefaultTimezone).toLocalDate
-    }
 
     def generateTrackingXml(trackingNumber: String) = {
       s"<TrackFieldRequest USERID='840MYPET0182'><Revision>1</Revision><ClientIp>174.49.109.237</ClientIp><SourceId>My Pet Defense</SourceId><TrackID ID='${trackingNumber}'></TrackID></TrackFieldRequest>"
@@ -213,7 +207,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
 
       shipmentStatus match {
         case InTransit => {
-          val dateShipped = convertDateFormat(shipment.dateShipped.get)
+          val dateShipped = shipment.dateShipped.get.toLocalDate
 
           if (dateShipped.isBefore(currentDate.minusDays(7))) {
             createShipmentEvent(
@@ -225,7 +219,7 @@ class TrackShipmentDeliveryJob extends ManagedJob {
         }
 
         case LabelCreated => {
-          val dateShipped = convertDateFormat(shipment.dateShipped.get)
+          val dateShipped = shipment.dateShipped.get.toLocalDate
 
           if (dateShipped.isBefore(currentDate.minusDays(20))) {
             val oldShipment = shipment.shipmentStatus(Other).deliveryNotes("Old label.").saveMe

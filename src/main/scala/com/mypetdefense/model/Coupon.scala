@@ -1,26 +1,22 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.mapper._
 
 class Coupon extends LongKeyedMapper[Coupon] with IdPK with OneToMany[Long, Coupon] {
   def getSingleton: KeyedMetaMapper[Long, Coupon] = Coupon
+
   object couponId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
-
   object couponCode     extends MappedString(this, 100)
   object numberOfMonths extends MappedInt(this)
   object percentOff     extends MappedInt(this)
   object dollarOff      extends MappedInt(this)
   object users          extends MappedOneToMany(User, User.coupon)
   object agency         extends MappedLongForeignKey(this, Agency)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt      extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object Coupon extends Coupon with LongKeyedMetaMapper[Coupon] {

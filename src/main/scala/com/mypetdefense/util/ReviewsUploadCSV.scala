@@ -7,6 +7,7 @@ import java.util.regex.Pattern
 
 import au.com.bytecode.opencsv.{CSVParser, CSVReader}
 import com.mypetdefense.model._
+import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.S
 import net.liftweb.mapper.By
@@ -152,7 +153,7 @@ object ReviewsUploadCSV extends Loggable {
 
     val dateRaw    = Columns.cellValue(Columns.Date, headerIndex, fieldList).openOr("")
     val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
-    val date       = dateFormat.parse(dateRaw)
+    val date       = dateFormat.parse(dateRaw).toZonedDateTime
 
     product.map { prod =>
       Review.create

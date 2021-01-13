@@ -2,7 +2,6 @@ package com.mypetdefense.jobs
 
 import java.time.LocalDateTime
 
-import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ParentService
@@ -21,7 +20,7 @@ class GrowthNotifyJob extends ManagedJob {
 
     val upcomingSubscription = allActiveSubscriptions.filter { subscription =>
       val nextShipDate =
-        tryo(subscription.nextShipDate.get.toInstant.atZone(DefaultTimezone).toLocalDate)
+        tryo(subscription.nextShipDate.get.toLocalDate)
 
       val nextShipDateDayOfYear = nextShipDate.map(_.getDayOfYear).openOr(0)
 

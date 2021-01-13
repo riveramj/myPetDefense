@@ -207,7 +207,7 @@ class AgencyOverview extends Loggable {
   }
 
   def getProcessDateOfShipment(shipment: Shipment): LocalDate = {
-    shipment.dateProcessed.get.toInstant.atZone(DefaultTimezone).toLocalDate
+    shipment.dateProcessed.get.toLocalDate
   }
 
   def findCurrentMonthShipment(shipment: Shipment, month: String = ""): Boolean = {
@@ -222,16 +222,12 @@ class AgencyOverview extends Loggable {
   }
 
   def findCurrentYearSubscriptionSignup(subscription: Subscription): Boolean = {
-    val signupDate =
-      subscription.startDate.get.toInstant.atZone(DefaultTimezone).toLocalDate
-
+    val signupDate = subscription.startDate.get.toLocalDate
     signupDate.getYear == currentDate.getYear
   }
 
   def findCurrentMonthSubscriptionSignup(subscription: Subscription): Boolean = {
-    val signupDate =
-      subscription.startDate.get.toInstant.atZone(DefaultTimezone).toLocalDate
-
+    val signupDate = subscription.startDate.get.toLocalDate
     signupDate.getMonth == currentDate.getMonth
   }
 

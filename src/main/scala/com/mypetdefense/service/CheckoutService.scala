@@ -1,11 +1,12 @@
 package com.mypetdefense.service
 
-import java.util.Date
+import java.time.ZonedDateTime
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor.{EmailActor, NewSaleEmail, SendWelcomeEmail}
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
-import com.mypetdefense.util.DateHelper.tomorrowStart
+import com.mypetdefense.util.DateHelper._
 import net.liftweb.common.{Box, Full}
 import net.liftweb.util.Props
 
@@ -80,7 +81,7 @@ object CheckoutService {
     Subscription.createNewSubscription(
       user,
       subscriptionId,
-      new Date(),
+      ZonedDateTime.now(DefaultTimezone),
       tomorrowStart,
       priceCode,
       isUpgraded = true
