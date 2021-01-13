@@ -1,25 +1,29 @@
 <div id="main" data-lift="surround?with=default-template;at=content">
   <div data-lift="agency.CustomerUpload.render?eager_eval=true">
-    <h3>Customer Upload</h3>
-    <form>
-      <fieldset class="create">
-        <legend>Create Promotion</legend>
-        <label class="tiny-field promo">
-          <span class="field-label">Email</span>
-          <input id="customer-email" type="text">
-        </label>
-        <label>
-          <span class="field-label">Billing Info</span>
-          <div id="card-element">
-            <!-- a Stripe Element will be inserted here. -->
+    <div data-lift="embed?what=agency/agency-nav-bar"></div>
+    <div id="item-container">
+      <h3>Customer Upload</h3>
+      <form>
+        <fieldset class="create">
+          <div class="customer-info">
+            <label class="email">
+              <span class="field-label">Email</span>
+              <input id="customer-email" type="text">
+            </label>
+            <label class="billing">
+              <span class="field-label">Billing Info</span>
+              <div id="card-element">
+                <!-- a Stripe Element will be inserted here. -->
+              </div>
+            </label>
           </div>
-        </label>
-        <div class="create-item tiny-field">
-          <input type="hidden" id="stripe-token">
-          <button type="submit" id="create-customer">Create</button>
-        </div>
-      </fieldset>
-    </form>
+          <div class="create-item tiny-field">
+            <input type="hidden" id="stripe-token">
+            <button type="submit" id="create-customer">Create</button>
+          </div>
+        </fieldset>
+      </form>
+    </div>
 
     <tail>
       <script type="text/javascript" src="https://js.stripe.com/v3/"></script>
@@ -27,7 +31,7 @@
     </tail>
 
     <head_merge>
-      <link rel="stylesheet" data-lift="style-bundle?name=customer-upload">
+      <link rel="stylesheet" data-lift="style-bundle?name=agency-customer-upload">
     </head_merge>
   </div>
 </div>
