@@ -1,10 +1,13 @@
 package com.mypetdefense.snippet.signup
 
+import com.mypetdefense.constants.StripePrices
 import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
+import com.mypetdefense.util.AggregationHelper.combineSimilarItems
+import com.mypetdefense.util.CalculationHelper.countOccurrencesByKey
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -52,22 +55,20 @@ class Checkout extends Loggable {
 
   val pets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
   val petCount: Int                          = pets.size
+  val petSizes: Map[AnimalSize.Value, Int]   = countOccurrencesByKey(pets.values)(_.size.get)
 
-  val smMedPets: Int = pets.values.count { pet =>
-    pet.size.get != AnimalSize.DogLargeZo && pet.size.get != AnimalSize.DogXLargeZo
-  }
+  val subtotal: BigDecimal =
+    (petSizes(AnimalSize.DogSmallZo) * StripePrices.Dog.HealthAndWellnessBox.Small.monthlyCharge
+      + petSizes(AnimalSize.DogMediumZo) * StripePrices.Dog.HealthAndWellnessBox.Medium.monthlyCharge
+      + petSizes(AnimalSize.DogLargeZo) * StripePrices.Dog.HealthAndWellnessBox.Large.monthlyCharge
+      + petSizes(AnimalSize.DogXLargeZo) * StripePrices.Dog.HealthAndWellnessBox.XLarge.monthlyCharge)
 
-  val lgXlPets: Int = petCount - smMedPets
-
-  val subtotal: BigDecimal = (smMedPets * BigDecimal(24.99)) + (lgXlPets * BigDecimal(27.99))
   val discount: BigDecimal = petCount match {
     case 0 | 1 => BigDecimal(0)
     case _     => subtotal * 0.1
   }
   var promotionAmount: BigDecimal      = (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
   val subtotalWithDiscount: BigDecimal = subtotal - discount
-
-  val pennyCount: Int = (subtotal * 100).toInt
 
   private def handleStripeFailureOnSignUp(
       stripeFailure: Box[StripeFacade.CustomerWithSubscriptions]
@@ -109,15 +110,29 @@ class Checkout extends Loggable {
   private def tryToCreateUser = {
     setMultiPetCouponIfPossible()
 
-    val stripeCustomer =
-      StripeFacade.Customer.createWithSubscription(
+    val stripeCustomer = {
+      import StripeFacade._
+      import StripePrices._
+      import Dog.HealthAndWellnessBox._
+
+      Customer.createWithSubscription(
         email,
         stripeToken,
-        priceId = "pennyProduct",
-        pennyCount,
         taxRate,
-        coupon
+        coupon,
+        combineSimilarItems(
+          List(
+            Subscription.Item(Small.priceId, petSizes(AnimalSize.DogSmallZo)),
+            Subscription.Item(Medium.priceId, petSizes(AnimalSize.DogMediumZo)),
+            Subscription.Item(Large.priceId, petSizes(AnimalSize.DogLargeZo)),
+            Subscription.Item(XLarge.priceId, petSizes(AnimalSize.DogXLargeZo))
+          )
+        )(
+          similarity = _.priceId,
+          combine = (i1, i2) => Subscription.Item(i1.priceId, i1.quantity + i2.quantity)
+        )
       )
+    }
 
     stripeCustomer match {
       case Full(customer) => setupNewUserAndRedirect(customer)
