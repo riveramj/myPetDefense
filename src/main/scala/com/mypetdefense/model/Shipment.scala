@@ -173,7 +173,9 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
     for {
       subscription <- user.subscription.toList
       box          <- subscription.subscriptionBoxes
+      if box.status.get == Status.Active
       pet          <- box.pet.obj
+      if pet.status.get == Status.Active
       fleaTick          = box.fleaTick.obj
       subscriptionItems = box.subscriptionItems
     } yield {

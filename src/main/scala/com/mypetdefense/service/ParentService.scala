@@ -384,6 +384,13 @@ object ParentService extends LoggableBoxLogging {
     val refreshedPet = Pet.find(By(Pet.petId, oldPet.petId.get))
     val updatedPet   = refreshedPet.map(_.status(Status.Cancelled).saveMe)
 
+    for {
+      pet <- updatedPet
+      box <- pet.box
+    } {
+      box.status(Status.Cancelled).saveMe
+    }
+
     val updatedSubscription = updateStripeSubscriptionTotal(oldUser)
 
     val updatedUser = oldUser.reload

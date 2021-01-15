@@ -579,4 +579,13 @@ object DataLoader extends Loggable {
           .saveMe()
     }
   }
+
+  def cancelBoxesForCancelledPets() = {
+    for {
+      pet <- Pet.findAll(By(Pet.status, Status.Cancelled))
+      box <- pet.box.obj
+    } yield {
+      box.status(Status.Cancelled).saveMe()
+    }
+  }
 }
