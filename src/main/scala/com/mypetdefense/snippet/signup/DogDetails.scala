@@ -1,11 +1,13 @@
 package com.mypetdefense.snippet.signup
 
+import java.time.YearMonth
+
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.DateFormatters._
-import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -31,7 +33,7 @@ class DogDetails extends Loggable {
     petId(Full(generateLongId))
 
   val formatter          = `01/21`
-  val yearMonthFormatter = `Jan-2021`
+  val yearMonthFormatter = `January-2021`
 
   var currentPets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
   var petName                                       = ""
@@ -69,7 +71,11 @@ class DogDetails extends Loggable {
         newPetId   <- PetFlowChoices.petId.is
         animalType <- PetFlowChoices.petChoice.is
       } yield {
-        val birthday = yearMonthFormatter._1.parse(s"$petMonth-$petYear").toZonedDateTime
+        val birthday =
+          YearMonth
+            .parse(s"$petMonth-$petYear", yearMonthFormatter)
+            .atDay(1)
+            .atStartOfDay(DefaultTimezone)
 
         val newPet = Pet.create
           .petId(newPetId)

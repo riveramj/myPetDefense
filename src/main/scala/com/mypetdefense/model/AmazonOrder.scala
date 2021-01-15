@@ -1,10 +1,9 @@
 package com.mypetdefense.model
 
-import java.time.ZonedDateTime
-import java.util.Date
+import java.time.{LocalDate, ZonedDateTime}
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model.domain.reports.AmazonOrderReport
-import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.mapper._
 
@@ -104,17 +103,20 @@ object AmazonOrder extends AmazonOrder with LongKeyedMetaMapper[AmazonOrder] {
         order.state.get,
         order.zip.get,
         order.animalType.get,
-        order.purchaseDate.get.toDate,
+        order.purchaseDate.get,
         order.productName.get
       )
     }
   }
 
-  @deprecated("Migrate to ZonedDateTime-based version", since = "0.1-SNAPSHOT")
   def findOrdersToReport(
-      startDate: Date,
-      endDate: Date,
+      startDate: LocalDate,
+      endDate: LocalDate,
       animalType: AnimalType.Value
   ): List[AmazonOrderReport] =
-    findOrdersToReport(startDate.toZonedDateTime, endDate.toZonedDateTime, animalType)
+    findOrdersToReport(
+      startDate.atStartOfDay(DefaultTimezone),
+      endDate.atStartOfDay(DefaultTimezone),
+      animalType
+    )
 }

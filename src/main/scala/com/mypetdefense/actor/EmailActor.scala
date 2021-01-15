@@ -1,7 +1,6 @@
 package com.mypetdefense.actor
 
 import java.time.{LocalDateTime, ZonedDateTime}
-import java.util.Date
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
@@ -387,14 +386,14 @@ trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
 
       val transform = {
         "#card-problem [src]" #> (Paths.serverUrl + "/images/credit-card-problem@2x.png") &
-          ".attempted-date *" #> dateFormatter.format(new Date()) &
+          ".attempted-date *" #> ZonedDateTime.now(DefaultTimezone).format(dateFormatter) &
           ".first-name" #> user.firstName.get &
           ".billing-url [href]" #> (Paths.serverUrl + ShippingBilling.menu.loc.calcDefaultHref) &
           ".will-bill-again" #> (nextPaymentAttempt.isDefined ? PassThru | ClearNodes) andThen
           ".will-not-bill-again" #> (nextPaymentAttempt.isDefined ? ClearNodes | PassThru) andThen
           ".bill-amount" #> ("$" + ("%1.2f" format amount)) &
             ".next-payment-attempt" #> nextPaymentAttempt.map { paymentAttemptDate =>
-              dateFormatter.format(paymentAttemptDate.toDate)
+              paymentAttemptDate.toDate.toInstant.atZone(DefaultTimezone).format(dateFormatter)
             }
       }
 
@@ -751,7 +750,7 @@ trait AddOnReceiptEmailHandling extends EmailHandlerChain {
       val subject = "My Pet Defense Items Added"
       val email   = parent.map(_.email.get).openOr("")
       val nextShipDate = subscription.map { possibleSubscription =>
-        dateFormatter.format(possibleSubscription.nextShipDate.get)
+        possibleSubscription.nextShipDate.get.format(`2021/01/01`)
       }.openOr("")
 
       val transform = {
@@ -787,7 +786,7 @@ trait TreatShippedEmailHandling extends EmailHandlerChain {
       val subtotal = (order.amountPaid.get - order.taxPaid.get)
 
       val transform = {
-        "#ship-date" #> dateFormatter.format(new Date()) &
+        "#ship-date" #> ZonedDateTime.now(DefaultTimezone).format(`2021/01/01`) &
           ".tracking-link [href]" #> trackingLink &
           ".tracking-number *" #> trackingNumber &
           "#parent-name" #> order.firstName &

@@ -178,10 +178,8 @@ class ShipmentDashboard extends Loggable {
     Noop
   }
 
-  def convertForecastingDates(date: String): LocalDate = {
-    val parsedDate = dateFormat._1.parse(date)
-    parsedDate.toInstant.atZone(DefaultTimezone).toLocalDate
-  }
+  def convertForecastingDates(date: String): LocalDate =
+    LocalDate.parse(date, dateFormat)
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen

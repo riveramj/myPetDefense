@@ -324,7 +324,7 @@ object TPPApi extends RestHelper with Loggable {
           pet.name,
           _,
           pet.breed,
-          ParentService.parseWhelpDate(possibleWhelpDate)
+          ParentService.parseWhelpDate(possibleWhelpDate).map(_.atStartOfDay(DefaultTimezone))
         )
       )
     }.filter(_ != Empty)

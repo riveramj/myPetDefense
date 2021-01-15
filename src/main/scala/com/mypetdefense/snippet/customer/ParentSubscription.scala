@@ -1,7 +1,6 @@
 package com.mypetdefense.snippet.customer
 
 import java.time.LocalDate
-import java.util.Date
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
@@ -9,7 +8,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.DateFormatters._
-import com.mypetdefense.util.DateHelper._
+import com.mypetdefense.util.DateHelper.now
 import com.mypetdefense.util.SecurityContext._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
@@ -190,7 +189,7 @@ class ParentSubscription extends Loggable {
           futureDate(
             nextShipDate,
             dateFormat,
-            nowAtStartOfDay.toDate,
+            now,
             "#pause-account .next-shipment"
           )
 
@@ -250,19 +249,17 @@ class ParentSubscription extends Loggable {
   }
 
   def resumeSubscription: NodeSeq => NodeSeq = {
-    val nextShipDate = Date.from(
+    val nextShipDate =
       LocalDate
         .now(DefaultTimezone)
         .atStartOfDay(DefaultTimezone)
         .plusDays(1)
-        .toInstant
-    )
 
     def confirmResume() = {
       val subscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
 
       val updatedShipDateSubscription =
-        subscription.map(_.nextShipDate(nextShipDate.toZonedDateTime).status(Status.Active).saveMe)
+        subscription.map(_.nextShipDate(nextShipDate).status(Status.Active).saveMe)
       ParentSubscription.currentUserSubscription(updatedShipDateSubscription)
 
       for {
@@ -278,7 +275,7 @@ class ParentSubscription extends Loggable {
     SHtml.makeFormsAjax andThen
       "#user-email *" #> email &
         ".subscription a [class+]" #> "current" &
-        ".next-shipment *" #> dateFormat.format(nextShipDate) &
+        ".next-shipment *" #> nextShipDate.format(dateFormat) &
         ".confirm-resume" #> SHtml.ajaxSubmit("Resume Subscription", confirmResume _)
   }
 
@@ -300,7 +297,9 @@ class ParentSubscription extends Loggable {
     def confirmPause(): Nothing = {
       val subscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
 
-      val newShipDate = dateFormat._1.parse(nextShipDate)
+      val newShipDate =
+        LocalDate.parse(nextShipDate, dateFormat).atStartOfDay(DefaultTimezone)
+
       val updatedShipDateSubscription = subscription.flatMap { sub =>
         val updatedSubscriptionWithStripe =
           ParentService.updateNextShipBillDate(sub, newShipDate)

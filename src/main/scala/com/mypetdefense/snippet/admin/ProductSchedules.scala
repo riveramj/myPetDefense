@@ -1,10 +1,12 @@
 package com.mypetdefense.snippet
 package admin
 
+import java.time.LocalDate
+
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.util.DateFormatters._
-import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.SHtml.{ajaxInvoke, text}
 import net.liftweb.http._
@@ -74,7 +76,7 @@ class ProductSchedules extends Loggable {
 
     if (validateFields.isEmpty) {
       ProductSchedule.createNew(
-        startDateFormat._1.parse(startDate).toZonedDateTime,
+        LocalDate.parse(startDate, startDateFormat).atStartOfDay(DefaultTimezone),
         selectedSupplements,
         firstBox
       )

@@ -1,7 +1,7 @@
 package com.mypetdefense.snippet
 package petland
 
-import java.time.ZonedDateTime
+import java.time.{YearMonth, ZonedDateTime}
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
@@ -290,8 +290,12 @@ class NewOrder extends Loggable {
       }
     }.headOption
 
-    val birthday =
-      tryo(birthdayDateFormat._1.parse(s"$birthdayMonth $birthdayYear")).map(_.toZonedDateTime)
+    val birthday = tryo {
+      YearMonth
+        .parse(s"$birthdayMonth $birthdayYear", birthdayDateFormat)
+        .atDay(1)
+        .atStartOfDay(DefaultTimezone)
+    }
 
     val newPet = {
       for {

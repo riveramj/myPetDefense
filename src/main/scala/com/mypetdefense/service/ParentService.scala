@@ -1,7 +1,6 @@
 package com.mypetdefense.service
 
-import java.time.{LocalDate, Period, ZonedDateTime}
-import java.util.Date
+import java.time.{Instant, LocalDate, Period, ZonedDateTime}
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
@@ -10,7 +9,6 @@ import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.shipstation.Order
 import com.mypetdefense.snippet.TPPApi
 import com.mypetdefense.util.DateFormatters._
-import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.StripeHelper._
 import com.stripe.param._
 import net.liftweb.common._
@@ -170,14 +168,17 @@ object ParentService extends LoggableBoxLogging {
       if source.isCard
     } yield source.asCard
 
-  def updateNextShipBillDate(subscription: Subscription, nextDate: Date): Box[Subscription] = {
+  def updateNextShipBillDate(
+      subscription: Subscription,
+      nextDate: ZonedDateTime
+  ): Box[Subscription] = {
     val updatedSubscription = changeStripeBillDate(
       subscription.stripeSubscriptionId.get,
-      nextDate.getTime / 1000
+      nextDate.toEpochSecond
     )
 
     updatedSubscription match {
-      case Full(_) => Full(subscription.nextShipDate(nextDate.toZonedDateTime).saveMe)
+      case Full(_) => Full(subscription.nextShipDate(nextDate).saveMe)
       case _       => Empty
     }
   }
@@ -188,10 +189,9 @@ object ParentService extends LoggableBoxLogging {
     getStripeSubscription(stripeSubscriptionId) match {
       case Full(stripeSubscription) =>
         val currentPeriodEnd = stripeSubscription.currentPeriodEnd.getOrElse(0L)
-        val nextMonthDate    = new Date(currentPeriodEnd * 1000L) // TODO: migrate to ZonedDateTime
+        val nextMonthDate    = Instant.ofEpochSecond(currentPeriodEnd).atZone(DefaultTimezone)
 
-        val nextMonthLocalDate =
-          nextMonthDate.toInstant.atZone(DefaultTimezone).toLocalDate
+        val nextMonthLocalDate = nextMonthDate.toLocalDate
 
         val startOfDayDate = nextMonthLocalDate
           .atStartOfDay(DefaultTimezone)
@@ -200,7 +200,7 @@ object ParentService extends LoggableBoxLogging {
 
         changeStripeBillDate(subscription.stripeSubscriptionId.get, startOfDayDate)
 
-        subscription.nextShipDate(nextMonthDate.toZonedDateTime).saveMe
+        subscription.nextShipDate(nextMonthDate).saveMe
 
       case _ => Empty
     }
@@ -289,13 +289,13 @@ object ParentService extends LoggableBoxLogging {
       .create(params)
       .logFailure("charge customer failed with stripe error")
 
-  def parseWhelpDate(whelpDate: String): Box[Date] = {
+  def parseWhelpDate(whelpDate: String): Box[LocalDate] = {
     val whelpDateFormats = List(
       `1/1/2021`,
       `2021-1-1`
     )
 
-    whelpDateFormats.map { dateFormat => tryo(dateFormat._1.parse(whelpDate)) }
+    whelpDateFormats.map { dateFormat => tryo(LocalDate.parse(whelpDate, dateFormat)) }
       .find(_.isDefined)
       .getOrElse(Empty)
   }
@@ -318,7 +318,7 @@ object ParentService extends LoggableBoxLogging {
       name = name,
       animalType = animalType,
       size = size,
-      whelpDate = possibleBirthday,
+      whelpDate = possibleBirthday.map(_.atStartOfDay(DefaultTimezone)),
       breed = breed
     )
 

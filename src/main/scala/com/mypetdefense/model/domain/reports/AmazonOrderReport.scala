@@ -1,6 +1,6 @@
 package com.mypetdefense.model.domain.reports
 
-import java.util.Date
+import java.time.ZonedDateTime
 
 import com.mypetdefense.model.AnimalType
 import com.mypetdefense.model.domain.reports.AmazonOrderReport.dateFormat
@@ -17,7 +17,7 @@ case class AmazonOrderReport(
     state: String,
     zip: String,
     animalType: AnimalType.Value,
-    purchaseDate: Date,
+    purchaseDate: ZonedDateTime,
     productName: String
 ) {
   def toCsvRow: List[String] = {
@@ -27,7 +27,7 @@ case class AmazonOrderReport(
       name,
       address,
       animalType.toString,
-      dateFormat.format(purchaseDate),
+      purchaseDate.format(dateFormat),
       productName.replace(",", "")
     )
   }

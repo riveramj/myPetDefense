@@ -1,10 +1,12 @@
 package com.mypetdefense.snippet
 package inventory
 
+import java.time.LocalDate
+
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.util.DateFormatters._
-import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -44,7 +46,8 @@ class Reconciliations extends Loggable {
     ).flatten
 
     if (validateFields.isEmpty) {
-      val realDate = reconciliationDateFormat._1.parse(newDate).toZonedDateTime
+      val realDate =
+        LocalDate.parse(newDate, reconciliationDateFormat).atStartOfDay(DefaultTimezone)
 
       ReconciliationEvent.createNewReconciliationEvent(realDate)
 

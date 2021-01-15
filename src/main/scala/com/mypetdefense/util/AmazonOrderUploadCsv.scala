@@ -2,14 +2,13 @@ package com.mypetdefense.util
 
 import java.io.StringReader
 import java.nio.charset.StandardCharsets
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
-import java.time.{Instant, OffsetDateTime}
-import java.util.Date
 import java.util.regex.Pattern
 
 import au.com.bytecode.opencsv.{CSVParser, CSVReader}
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
-import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.S
 import net.liftweb.util.Helpers._
@@ -155,7 +154,7 @@ object AmazonOrderUploadCsv extends Loggable {
 
     val timeFormatter = DateTimeFormatter.ISO_DATE_TIME
     val offsetDate    = OffsetDateTime.parse(rawPurchaseDate, timeFormatter)
-    val purchaseDate  = Date.from(Instant.from(offsetDate)).toZonedDateTime // FIXME: more direct conversion
+    val purchaseDate  = offsetDate.atZoneSameInstant(DefaultTimezone)
 
     val animalType = {
       if (productName.toLowerCase().contains("dogs"))

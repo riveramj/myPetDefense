@@ -1,7 +1,9 @@
 package com.mypetdefense.service
 
 import java.time.ZonedDateTime
+import java.time.format.TextStyle
 
+import com.mypetdefense.AppConstants.DefaultLocale
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator._
 import com.mypetdefense.helpers.DateUtil._
@@ -130,7 +132,11 @@ class ReportingServiceSpec extends DBTest {
 
       val usersIdsRegisteredInThisMonth =
         ReportingService
-          .findNewCustomersMonth(users, now.getMonth.toString, now.getYear)
+          .findNewCustomersMonth(
+            users,
+            now.getMonth.getDisplayName(TextStyle.FULL, DefaultLocale),
+            now.getYear
+          )
           .map(_.id.get)
 
       usersIdsRegisteredInThisMonth should contain theSameElementsAs expectedUsersIds

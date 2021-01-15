@@ -1,7 +1,6 @@
 package com.mypetdefense.util
 
 import java.time._
-import java.util.Date
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.util.DateFormatters._
@@ -55,12 +54,8 @@ object DateHelper {
     }
   }
 
-  def convertMonthToDate(month: String, year: Int): LocalDateTime = {
-    val dateFormat = `January 2021`._1
-    val monthDate  = dateFormat.parse(s"$month $year")
-
-    monthDate.toInstant.atZone(DefaultTimezone).toLocalDateTime
-  }
+  def convertMonthToDate(month: String, year: Int): LocalDateTime =
+    YearMonth.parse(s"$month $year", `January 2021`).atDay(1).atStartOfDay()
 
   val monthHeaders: List[String] =
     List(
@@ -78,12 +73,7 @@ object DateHelper {
       "December"
     )
 
-  implicit class DateOps(val self: Date) extends AnyVal {
-    def toZonedDateTime: ZonedDateTime = self.toInstant.atZone(DefaultTimezone)
-  }
-
   implicit class ZonedDateTimeOps(val self: ZonedDateTime) extends AnyVal {
-    def toDate: Date = Date.from(self.toInstant)
     def isYesterday: Boolean = {
       val localDate    = self.toLocalDate
       val day          = localDate.getDayOfYear

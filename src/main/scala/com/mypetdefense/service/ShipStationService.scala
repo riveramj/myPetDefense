@@ -1,7 +1,6 @@
 package com.mypetdefense.service
 
 import java.time.{LocalDate, ZonedDateTime}
-import java.util.Date
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
@@ -244,8 +243,8 @@ trait ShipStationServiceTrait extends Loggable {
     )
   }
 
-  def holdOrderUntil(orderId: Int, date: Date): Future[Box[HoldOrderResults]] = {
-    val holdDate = dateFormat.format(date)
+  def holdOrderUntil(orderId: Int, date: ZonedDateTime): Future[Box[HoldOrderResults]] = {
+    val holdDate = date.format(dateFormat)
 
     Order.holdUntil(orderId, holdDate)
   }

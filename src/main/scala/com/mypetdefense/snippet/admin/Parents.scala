@@ -2,7 +2,6 @@ package com.mypetdefense.snippet
 package admin
 
 import java.time.LocalDate
-import java.util.Date
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
@@ -11,7 +10,6 @@ import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.DateFormatters._
-import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -277,13 +275,12 @@ class Parents extends Loggable {
       val updatedSubscription = subscription.map(_.status(status).saveMe())
 
       if (status == Status.Active) {
-        val tomorrow = Date.from(
+        val tomorrow =
           LocalDate
             .now(DefaultTimezone)
             .atStartOfDay(DefaultTimezone)
             .plusDays(1)
-            .toInstant
-        )
+
         updatedSubscription.map { subscriptionToUpdate =>
           ParentService.updateNextShipBillDate(subscriptionToUpdate, tomorrow)
         }
@@ -293,7 +290,7 @@ class Parents extends Loggable {
       } else {
         val nextShipDate = LocalDate.of(2022, 8, 1).atStartOfDay(DefaultTimezone)
         updatedSubscription.map { subscriptionToUpdate =>
-          ParentService.updateNextShipBillDate(subscriptionToUpdate, nextShipDate.toDate)
+          ParentService.updateNextShipBillDate(subscriptionToUpdate, nextShipDate)
         }
 
         Alert("Subscription Paused.") &
@@ -476,7 +473,8 @@ class Parents extends Loggable {
         case "name"  => pet.map(_.name(newInfo).saveMe)
         case "breed" => pet.map(_.breed(newInfo).saveMe)
         case "birthday" =>
-          val possibleBirthday = ParentService.parseWhelpDate(newInfo).map(_.toZonedDateTime)
+          val possibleBirthday =
+            ParentService.parseWhelpDate(newInfo).map(_.atStartOfDay(DefaultTimezone))
           pet.map(_.birthday(possibleBirthday.openOr(null)).saveMe)
         case "product" => product.map { prod => subscriptionBox.map(_.fleaTick(prod).saveMe()) }
         case _         => pet
@@ -575,11 +573,12 @@ class Parents extends Loggable {
       nextShipDate.map(_.format(nextShipDateFormat)).getOrElse("")
 
     def updateShipDate() = {
-      val updatedDate = nextShipDateFormat._1.parse(updateNextShipDate)
+      val updatedDate =
+        LocalDate.parse(updateNextShipDate, nextShipDateFormat).atStartOfDay(DefaultTimezone)
 
       subscription.map { oldSubscription =>
         ParentService.updateNextShipBillDate(oldSubscription, updatedDate)
-        oldSubscription.nextShipDate(updatedDate.toZonedDateTime).saveMe
+        oldSubscription.nextShipDate(updatedDate).saveMe
       }
 
       detailsRenderer.setHtml

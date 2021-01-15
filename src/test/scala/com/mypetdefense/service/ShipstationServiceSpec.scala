@@ -14,7 +14,6 @@ import com.mypetdefense.helpers.db.InsertsDbHelper._
 import com.mypetdefense.model.{BoxType, Pet, Subscription}
 import com.mypetdefense.shipstation._
 import com.mypetdefense.util.DateFormatters._
-import com.mypetdefense.util.DateHelper.ZonedDateTimeOps
 import dispatch.{Future, Req}
 import net.liftweb.common._
 import net.liftweb.http.rest._
@@ -122,7 +121,7 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
     var evidenceStart = false
     var evidenceEnd   = false
     def queryParamsAssertFun(maybeIn: List[Param]): Unit = {
-      val yesterdayFormatted = expDateFormat.format(yesterday.toDate).replaceAll("/", "%2F")
+      val yesterdayFormatted = yesterday.format(expDateFormat).replaceAll("/", "%2F")
       evidenceSize = maybeIn.find(_.getName == "pageSize").exists(_.getValue == "300")
       evidenceStart =
         maybeIn.find(_.getName == "shipDateStart").exists(_.getValue == yesterdayFormatted)

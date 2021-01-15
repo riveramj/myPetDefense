@@ -1,12 +1,12 @@
 package com.mypetdefense.snippet.customer
 
-import java.util.Date
+import java.time.{Instant, ZonedDateTime}
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.service.{ParentService, StripeBoxAdapter => Stripe}
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.DateFormatters._
-import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.SecurityContext._
 import net.liftweb.common._
 import net.liftweb.mapper.By
@@ -73,7 +73,9 @@ class AccountOverview extends Loggable {
   val nextBillDateRaw: Box[Long] =
     upcomingInvoice.flatMap(_.created)
 
-  val nextBillDate: Box[Date] = nextBillDateRaw.map { date => new Date(date * 1000) }
+  val nextBillDate: Box[ZonedDateTime] = nextBillDateRaw.map { date =>
+    Instant.ofEpochSecond(date).atZone(DefaultTimezone)
+  }
 
   def render: CssSel = {
     "#page-body-container" #> {
@@ -103,7 +105,7 @@ class AccountOverview extends Loggable {
           "#user-email *" #> parent.email &
           ".next-ship-date *" #> nextShipDate.map(_.format(dateFormat)) &
           ".status *" #> subscription.map(_.status.get.toString) &
-          ".next-bill-date *" #> nextBillDate.map(_.toZonedDateTime.format(dateFormat)) &
+          ".next-bill-date *" #> nextBillDate.map(_.format(dateFormat)) &
           "#user-address" #> shippingAddress.map { address =>
             "#name *" #> parent.name &
               "#address-one *" #> address.street1.get &

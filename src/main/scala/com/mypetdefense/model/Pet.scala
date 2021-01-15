@@ -1,9 +1,7 @@
 package com.mypetdefense.model
 
 import java.time.ZonedDateTime
-import java.util.Date
 
-import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
 import net.liftweb.common._
@@ -40,8 +38,7 @@ object Pet extends Pet with LongKeyedMetaMapper[Pet] {
       name: String,
       product: FleaTick,
       breed: String,
-      whelpDate: Box[ZonedDateTime],
-      dummy: Boolean // TODO: remove after deleting deprecated version
+      whelpDate: Box[ZonedDateTime]
   ): Pet =
     createNewPet(
       user,
@@ -49,29 +46,16 @@ object Pet extends Pet with LongKeyedMetaMapper[Pet] {
       product.animalType.get,
       product.size.get,
       whelpDate,
-      breed,
-      dummy
+      breed
     )
 
-  @deprecated("Migrate to ZonedDateTime-based version", since = "0.1-SNAPSHOT")
-  def createNewPet(
-      user: User,
-      name: String,
-      product: FleaTick,
-      breed: String,
-      whelpDate: Box[Date]
-  ): Pet =
-    createNewPet(user, name, product, breed, whelpDate.map(_.toZonedDateTime), dummy = false)
-
-  // TODO: copy default arguments after deleting deprecated version
   def createNewPet(
       user: User,
       name: String,
       animalType: AnimalType.Value,
       size: AnimalSize.Value,
-      whelpDate: Box[ZonedDateTime],
-      breed: String,
-      dummy: Boolean // TODO: remove after deleting deprecated version
+      whelpDate: Box[ZonedDateTime] = Empty,
+      breed: String = ""
   ): Pet =
     Pet.create
       .petId(generateLongId)
@@ -82,25 +66,6 @@ object Pet extends Pet with LongKeyedMetaMapper[Pet] {
       .breed(breed)
       .birthday(whelpDate.openOr(null))
       .saveMe
-
-  @deprecated("Migrate to ZonedDateTime-based version", since = "0.1-SNAPSHOT")
-  def createNewPet(
-      user: User,
-      name: String,
-      animalType: AnimalType.Value,
-      size: AnimalSize.Value,
-      whelpDate: Box[Date] = Empty,
-      breed: String = ""
-  ): Pet =
-    createNewPet(
-      user,
-      name,
-      animalType,
-      size,
-      whelpDate.map(_.toZonedDateTime),
-      breed,
-      dummy = false
-    )
 
   def createNewPet(pet: Pet, user: User): Pet =
     pet.user(user).saveMe

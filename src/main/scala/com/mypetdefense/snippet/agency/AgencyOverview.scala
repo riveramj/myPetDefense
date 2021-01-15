@@ -1,8 +1,10 @@
 package com.mypetdefense.snippet
 package agency
 
-import java.time.{LocalDate, LocalDateTime}
+import java.time.format.TextStyle
+import java.time.{LocalDate, LocalDateTime, Month}
 
+import com.mypetdefense.AppConstants.DefaultLocale
 import com.mypetdefense.model._
 import com.mypetdefense.service.ReportingService
 import com.mypetdefense.snippet.admin.UpdateChartData
@@ -50,7 +52,6 @@ class AgencyOverview extends Loggable {
   val currentUser: Box[User] = SecurityContext.currentUser
   val signupCancelDateFormat = `01/01/2021`
   val chartDateFormat        = `01`
-  val chartDateFormatName    = `Jan`
 
   val allUsers: List[User] = User.findAll(
     By(User.userType, UserType.Parent)
@@ -116,9 +117,7 @@ class AgencyOverview extends Loggable {
   def shipmentsByMonthSorted: ListMap[Int, Int] =
     ListMap(adjustedShipmentsByMonth.toSeq.sortBy(_._1): _*)
 
-  def allShipmentsByMonthLabel: Array[String] = shipmentsByMonthSorted.keys.toArray.map { month =>
-    chartDateFormatName.format(chartDateFormat._1.parse(month.toString))
-  }
+  def allShipmentsByMonthLabel: Array[String] = shipmentsByMonthSorted.keys.toArray.map(asMMMString)
 
   var monthDateFilter       = "All Months"
   var storeIdFilter: String = chosenAgency.map(_.agencyId.get).openOr(-1L).toString
@@ -214,10 +213,8 @@ class AgencyOverview extends Loggable {
 
     val processedDate = getProcessDateOfShipment(shipment)
 
-    (
-      (processedDate.getYear == date.getYear) &&
-      (processedDate.getMonth == date.getMonth)
-    )
+    (processedDate.getYear == date.getYear) &&
+    (processedDate.getMonth == date.getMonth)
   }
 
   def findCurrentYearSubscriptionSignup(subscription: Subscription): Boolean = {
@@ -244,9 +241,7 @@ class AgencyOverview extends Loggable {
 
     val activeUsersSignupByMonthSorted = ListMap(activeUsersSignupByMonth.toSeq.sortBy(_._1): _*)
 
-    val activeUsersSignupByMonthLabel = activeUsersSignupByMonthSorted.keys.toArray.map { month =>
-      chartDateFormatName.format(chartDateFormat._1.parse(month.toString))
-    }
+    val activeUsersSignupByMonthLabel = activeUsersSignupByMonthSorted.keys.toArray.map(asMMMString)
 
     val activeUsersSignupByMonthValue = activeUsersSignupByMonthSorted.values.toArray
 
@@ -310,12 +305,13 @@ class AgencyOverview extends Loggable {
       }
     }
 
-    (
-      UpdateChartData("activeInactive", Array(activeUserCount, inactiveUserCount)) &
-        UpdateChartData("totalActive", totalActiveChartValues, totalActiveChartLabels) &
-        UpdateChartData("signup", activeUsersSignupByMonthValues, activeUsersSignupByMonthLabels)
-    )
+    UpdateChartData("activeInactive", Array(activeUserCount, inactiveUserCount)) &
+      UpdateChartData("totalActive", totalActiveChartValues, totalActiveChartLabels) &
+      UpdateChartData("signup", activeUsersSignupByMonthValues, activeUsersSignupByMonthLabels)
   }
+
+  private def asMMMString(month: Int): String =
+    Month.of(month).getDisplayName(TextStyle.SHORT, DefaultLocale)
 
   def snapShotBindings: CssSel = {
     val currentMonthSubscriptionShipments = {
