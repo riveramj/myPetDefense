@@ -1,16 +1,13 @@
 package com.mypetdefense.util
 
-import java.text.SimpleDateFormat
 import java.time._
-import java.time.format.DateTimeFormatter
 import java.util.Date
 
-import com.mypetdefense.AppConstants.{DefaultLocale, DefaultTimezone}
+import com.mypetdefense.AppConstants.DefaultTimezone
+import com.mypetdefense.util.DateFormatters._
 import net.liftweb.util.Helpers.tryo
 
 object DateHelper {
-  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-
   def currentDate: LocalDateTime = LocalDateTime.now()
   def now: LocalDate             = LocalDate.now(DefaultTimezone)
 
@@ -38,12 +35,9 @@ object DateHelper {
   def todayLastYearEnd: ZonedDateTime  = nowAtStartOfDay.minusYears(1).plusDays(1)
   def todayLastMonthEnd: ZonedDateTime = nowAtStartOfDay.minusMonths(1).plusDays(1)
 
-  def fileNameYearMonth: String =
-    currentDate.format(DateTimeFormatter.ofPattern("MMMyyyy", DefaultLocale))
-  def fileNameMonthDayYear: String =
-    currentDate.format(DateTimeFormatter.ofPattern("MM-dd-yyyy", DefaultLocale))
-
-  def thisYear: String = currentDate.format(DateTimeFormatter.ofPattern("yyyy", DefaultLocale))
+  def fileNameYearMonth: String    = currentDate.format(`Jan2021`)
+  def fileNameMonthDayYear: String = currentDate.format(`01-01-2021`)
+  def thisYear: String             = currentDate.format(`2021`)
 
   def getDateRange(month: String, year: Int = 2019): LocalDateTime = {
     if (month == "") {
@@ -62,7 +56,7 @@ object DateHelper {
   }
 
   def convertMonthToDate(month: String, year: Int): LocalDateTime = {
-    val dateFormat = new SimpleDateFormat("MMMM yyyy")
+    val dateFormat = `January 2021`._1
     val monthDate  = dateFormat.parse(s"$month $year")
 
     monthDate.toInstant.atZone(DefaultTimezone).toLocalDateTime

@@ -9,6 +9,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.shipstation.Order
 import com.mypetdefense.snippet.TPPApi
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.StripeHelper._
 import com.stripe.param._
@@ -18,7 +19,8 @@ import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
 object ParentService extends LoggableBoxLogging {
-  val whelpDateFormat                  = new java.text.SimpleDateFormat("M/d/y")
+  val whelpDateFormat = `1/1/2021`
+
   val currentPetlandPrice: String      = Props.get("petland.6month.payment") openOr ""
   val petlandMonthlyPrice: Box[String] = Props.get("petland.1month.payment")
   val petland5MonthCoupon: Box[String] = Props.get("petland.5month.coupon")
@@ -289,11 +291,11 @@ object ParentService extends LoggableBoxLogging {
 
   def parseWhelpDate(whelpDate: String): Box[Date] = {
     val whelpDateFormats = List(
-      new java.text.SimpleDateFormat("M/d/y"),
-      new java.text.SimpleDateFormat("y-M-d")
+      `1/1/2021`,
+      `2021-1-1`
     )
 
-    whelpDateFormats.map { dateFormat => tryo(dateFormat.parse(whelpDate)) }
+    whelpDateFormats.map { dateFormat => tryo(dateFormat._1.parse(whelpDate)) }
       .find(_.isDefined)
       .getOrElse(Empty)
   }

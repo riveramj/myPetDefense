@@ -1,14 +1,13 @@
 package com.mypetdefense.snippet
 package agency
 
-import java.text.SimpleDateFormat
 import java.time.{LocalDate, LocalDateTime}
 
-import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.service.ReportingService
 import com.mypetdefense.snippet.admin.UpdateChartData
-import com.mypetdefense.util.SecurityContext
+import com.mypetdefense.util.DateFormatters._
+import com.mypetdefense.util.{DateHelper, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -49,9 +48,9 @@ object AgencyOverview extends Loggable {
 
 class AgencyOverview extends Loggable {
   val currentUser: Box[User] = SecurityContext.currentUser
-  val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  val chartDateFormat        = new SimpleDateFormat("MM")
-  val chartDateFormatName    = new SimpleDateFormat("MMM")
+  val signupCancelDateFormat = `01/01/2021`
+  val chartDateFormat        = `01`
+  val chartDateFormatName    = `Jan`
 
   val allUsers: List[User] = User.findAll(
     By(User.userType, UserType.Parent)
@@ -107,7 +106,7 @@ class AgencyOverview extends Loggable {
   def shipmentsByMonth: Map[Int, Int] =
     allShipments
       .map(_.dateProcessed.get)
-      .map(chartDateFormat.format)
+      .map(_.format(chartDateFormat))
       .map(toInt)
       .groupBy(identity)
       .mapValues(_.size)
@@ -118,7 +117,7 @@ class AgencyOverview extends Loggable {
     ListMap(adjustedShipmentsByMonth.toSeq.sortBy(_._1): _*)
 
   def allShipmentsByMonthLabel: Array[String] = shipmentsByMonthSorted.keys.toArray.map { month =>
-    chartDateFormatName.format(chartDateFormat.parse(month.toString))
+    chartDateFormatName.format(chartDateFormat._1.parse(month.toString))
   }
 
   var monthDateFilter       = "All Months"
@@ -231,18 +230,14 @@ class AgencyOverview extends Loggable {
     signupDate.getMonth == currentDate.getMonth
   }
 
-  def convertMonthToDate(month: String): LocalDateTime = {
-    val dateFormat = new SimpleDateFormat("MMMM yyyy")
-    val monthDate  = dateFormat.parse(s"$month 2018") //TODO: dynanmic year
-
-    monthDate.toInstant.atZone(DefaultTimezone).toLocalDateTime
-  }
+  def convertMonthToDate(month: String): LocalDateTime =
+    DateHelper.convertMonthToDate(month, 2018) // TODO: dynamic year
 
   def updateCharts: JsCmd = {
     val activeUserSignupDates = activeUserSubscription.map(_.startDate.get)
 
     val activeUsersSignupByMonth = activeUserSignupDates
-      .map(chartDateFormat.format)
+      .map(_.format(chartDateFormat))
       .map(toInt)
       .groupBy(identity)
       .mapValues(_.size)
@@ -250,7 +245,7 @@ class AgencyOverview extends Loggable {
     val activeUsersSignupByMonthSorted = ListMap(activeUsersSignupByMonth.toSeq.sortBy(_._1): _*)
 
     val activeUsersSignupByMonthLabel = activeUsersSignupByMonthSorted.keys.toArray.map { month =>
-      chartDateFormatName.format(chartDateFormat.parse(month.toString))
+      chartDateFormatName.format(chartDateFormat._1.parse(month.toString))
     }
 
     val activeUsersSignupByMonthValue = activeUsersSignupByMonthSorted.values.toArray
@@ -396,14 +391,14 @@ class AgencyOverview extends Loggable {
                     val subscription = parent.subscription.obj
 
                     val signupDate = subscription.map { sub =>
-                      signupCancelDateFormat.format(sub.startDate.get)
+                      sub.startDate.get.format(signupCancelDateFormat)
                     }.getOrElse("")
 
                     val cancellationDate = {
                       if (parent.status.get == Status.Cancelled) {
                         val possibleCancelDate = subscription.map(_.cancellationDate.get)
                         possibleCancelDate.flatMap { date =>
-                          tryo(signupCancelDateFormat.format(date))
+                          tryo(date.format(signupCancelDateFormat))
                         }.getOrElse("")
                       } else {
                         "-"

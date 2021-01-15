@@ -1,6 +1,5 @@
 package com.mypetdefense.snippet.customer
 
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Date
 
@@ -9,6 +8,7 @@ import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.SecurityContext._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
@@ -76,7 +76,7 @@ object ParentSubscription extends Loggable {
 }
 
 class ParentSubscription extends Loggable {
-  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val dateFormat = `01/01/2021`
 
   val user: Box[User]          = currentUser
   val stripeCustomerId: String = user.map(_.stripeId.get).openOr("")
@@ -181,7 +181,7 @@ class ParentSubscription extends Loggable {
 
     val currentNextShipDate = userSubscription.map(_.nextShipDate.get)
 
-    var nextShipDate = currentNextShipDate.map(dateFormat.format).getOrElse("")
+    var nextShipDate = currentNextShipDate.map(_.format(dateFormat)).getOrElse("")
 
     def validateFields: List[ValidationError] = {
       val checkPause =
@@ -286,7 +286,7 @@ class ParentSubscription extends Loggable {
     val subscription        = ParentSubscription.currentUserSubscription.is.map(_.reload)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
-    val nextShipDate = currentNextShipDate.map(dateFormat.format).getOrElse("")
+    val nextShipDate = currentNextShipDate.map(_.format(dateFormat)).getOrElse("")
 
     "#user-email *" #> email &
       ".subscription a [class+]" #> "current" &
@@ -300,7 +300,7 @@ class ParentSubscription extends Loggable {
     def confirmPause(): Nothing = {
       val subscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
 
-      val newShipDate = dateFormat.parse(nextShipDate)
+      val newShipDate = dateFormat._1.parse(nextShipDate)
       val updatedShipDateSubscription = subscription.flatMap { sub =>
         val updatedSubscriptionWithStripe =
           ParentService.updateNextShipBillDate(sub, newShipDate)
@@ -331,7 +331,7 @@ class ParentSubscription extends Loggable {
     val subscription        = ParentSubscription.currentUserSubscription.is.map(_.reload)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
-    val nextShipDate = currentNextShipDate.map(dateFormat.format).getOrElse("")
+    val nextShipDate = currentNextShipDate.map(_.format(dateFormat)).getOrElse("")
 
     "#user-email *" #> email &
       ".subscription a [class+]" #> "current" &

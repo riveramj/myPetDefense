@@ -1,14 +1,13 @@
 package com.mypetdefense.snippet
 package admin
 
-import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 import java.time.{LocalDate, ZonedDateTime}
 
-import com.mypetdefense.AppConstants.{DefaultLocale, DefaultTimezone}
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service._
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util._
 import net.liftweb.common._
 import net.liftweb.http._
@@ -65,13 +64,12 @@ class ShipmentDashboard extends Loggable {
   var shipmentRenderer: Box[IdMemoizeTransform] = Empty
   var future                                    = false
 
-  val dateFormat                         = new SimpleDateFormat("MM/dd/yyyy")
-  val localDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", DefaultLocale)
+  val dateFormat = `01/01/2021`
 
   val currentDate: LocalDate = LocalDate.now()
 
-  var fromDate: String = currentDate.format(localDateFormat)
-  var toDate: String   = currentDate.plusDays(3).format(localDateFormat)
+  var fromDate: String = currentDate.format(dateFormat)
+  var toDate: String   = currentDate.plusDays(3).format(dateFormat)
 
   def paidShipments: List[Shipment]           = ShipmentService.getCurrentPastDueShipments
   def futureSubscriptions: List[Subscription] = ShipmentService.getUpcomingSubscriptions
@@ -181,7 +179,7 @@ class ShipmentDashboard extends Loggable {
   }
 
   def convertForecastingDates(date: String): LocalDate = {
-    val parsedDate = dateFormat.parse(date)
+    val parsedDate = dateFormat._1.parse(date)
     parsedDate.toInstant.atZone(DefaultTimezone).toLocalDate
   }
 
@@ -217,7 +215,6 @@ class ShipmentDashboard extends Loggable {
                   val allShipments = subscription.map(_.shipments.toList).openOr(Nil)
 
                   val petsAndProducts = subscription.map(_.getPetAndProducts).openOr(Nil)
-                  val dateFormat      = new SimpleDateFormat("MMM dd")
 
                   val shipAddressRaw = Address
                     .find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
@@ -288,7 +285,6 @@ class ShipmentDashboard extends Loggable {
                   val user = subscription.user.obj
 
                   val petsAndProducts = subscription.getPetAndProducts
-                  val dateFormat      = new SimpleDateFormat("MMM dd")
 
                   val shipAddressRaw = Address
                     .find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))

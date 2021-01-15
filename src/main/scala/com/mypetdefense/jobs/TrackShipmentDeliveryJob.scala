@@ -1,6 +1,5 @@
 package com.mypetdefense.jobs
 
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 
 import com.mypetdefense.model.ShipmentStatus._
@@ -23,11 +22,8 @@ class TrackShipmentDeliveryJob extends ManagedJob {
   implicit val formats: DefaultFormats.type = DefaultFormats
 
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
-    val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-
-    val currentDate       = LocalDate.now()
-    val alertDeliveryDate = currentDate.plusDays(7)
-    val uspsApiUrl        = url("https://secure.shippingapis.com/ShippingAPI.dll").secure
+    val currentDate = LocalDate.now()
+    val uspsApiUrl  = url("https://secure.shippingapis.com/ShippingAPI.dll").secure
 
     val retryAttempts = 10
 

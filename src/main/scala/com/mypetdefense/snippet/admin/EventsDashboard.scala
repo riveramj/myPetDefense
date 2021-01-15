@@ -1,11 +1,11 @@
 package com.mypetdefense.snippet
 package admin
 
-import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
+import com.mypetdefense.util.DateFormatters._
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.js._
@@ -24,7 +24,7 @@ object EventsDashboard extends Loggable {
 }
 
 class EventsDashboard extends Loggable {
-  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val dateFormat = `01/01/2021`
 
   var eventActionRenderer: Box[IdMemoizeTransform] = Empty
   var unresolvedEvents: List[Event]                = Event.unresolvedEvents
@@ -67,7 +67,7 @@ class EventsDashboard extends Loggable {
             var notes          = event.notes.get
             val trackingNumber = event.shipment.obj.map(_.trackingNumber.get)
 
-            ".event-date *" #> dateFormat.format(event.eventDate.get) &
+            ".event-date *" #> event.eventDate.get.format(dateFormat) &
               ".title *" #> event.title.get &
               ".details *" #> event.details.get &
               ".account-email *" #> getEmail(event) &

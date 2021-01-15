@@ -2,11 +2,11 @@ package com.mypetdefense.util
 
 import java.io.StringReader
 import java.nio.charset.StandardCharsets
-import java.text.SimpleDateFormat
 import java.util.regex.Pattern
 
 import au.com.bytecode.opencsv.{CSVParser, CSVReader}
 import com.mypetdefense.model._
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.S
@@ -152,7 +152,7 @@ object ReviewsUploadCSV extends Loggable {
     val rating = tryo(ratingRaw.toDouble).openOr(0d)
 
     val dateRaw    = Columns.cellValue(Columns.Date, headerIndex, fieldList).openOr("")
-    val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
+    val dateFormat = `Jan 01, 2021`._1
     val date       = dateFormat.parse(dateRaw).toZonedDateTime
 
     product.map { prod =>

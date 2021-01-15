@@ -1,7 +1,6 @@
 package com.mypetdefense.snippet
 package petland
 
-import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 
 import com.mypetdefense.AppConstants.DefaultTimezone
@@ -9,6 +8,7 @@ import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
@@ -92,7 +92,7 @@ class NewOrder extends Loggable {
   var orderDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var totalsRenderer: Box[IdMemoizeTransform]       = Empty
 
-  val birthdayDateFormat = new SimpleDateFormat("MMM yyyy")
+  val birthdayDateFormat = `Jan 2021`
 
   val petlandPrice: Box[Stripe.Price] = ParentService.getCurrentPetlandProductPrice
   val petlandPriceId: String          = petlandPrice.map(_.id).openOr("")
@@ -291,7 +291,7 @@ class NewOrder extends Loggable {
     }.headOption
 
     val birthday =
-      tryo(birthdayDateFormat.parse(s"$birthdayMonth $birthdayYear")).map(_.toZonedDateTime)
+      tryo(birthdayDateFormat._1.parse(s"$birthdayMonth $birthdayYear")).map(_.toZonedDateTime)
 
     val newPet = {
       for {
@@ -369,7 +369,7 @@ class NewOrder extends Loggable {
     ".subscription-details" #> idMemoize { renderer =>
       orderDetailsRenderer = Full(renderer)
       ".pet-entry" #> pets.map { pet =>
-        val birthday = tryo(birthdayDateFormat.format(pet.birthday.get))
+        val birthday = tryo(pet.birthday.get.format(birthdayDateFormat))
 
         ".pet-name *" #> pet.name.get &
           ".pet-birthday *" #> birthday &

@@ -2,12 +2,10 @@ package com.mypetdefense.snippet
 package admin
 
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
-import com.mypetdefense.AppConstants.{DefaultLocale, DefaultTimezone}
 import com.mypetdefense.model._
 import com.mypetdefense.service.ReportingService
-import com.mypetdefense.util.DateHelper.dateFormat
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.ModelSyntax._
 import com.mypetdefense.util.ProductNameHelper
 import net.liftweb.common._
@@ -31,8 +29,8 @@ class Reporting extends Loggable {
   val agencies: List[String]               = Agency.findAll().map(_.name.get)
   val allSubscriptions: List[Subscription] = Subscription.upgradedActiveSubscriptions
 
-  val localDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", DefaultLocale)
-  val currentDate: LocalDate             = LocalDate.now()
+  val localDateFormat        = `01/01/2021`
+  val currentDate: LocalDate = LocalDate.now()
 
   var fromDate: String = currentDate.plusDays(14).format(localDateFormat)
   var toDate: String   = currentDate.plusDays(14).format(localDateFormat)
@@ -130,7 +128,7 @@ class Reporting extends Loggable {
   private def convertToPercentage(percent: Double) = f"${percent * 100}%.1f%%"
 
   private def convertForecastingDates(date: String): LocalDate =
-    dateFormat.parse(date).toInstant.atZone(DefaultTimezone).toLocalDate
+    LocalDate.parse(date, localDateFormat)
 
   private def upcomingSubscriptionProducts: List[String] = {
     val startDate = convertForecastingDates(fromDate)

@@ -3,6 +3,7 @@ package admin
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.SHtml.{ajaxInvoke, text}
@@ -29,7 +30,7 @@ class ProductSchedules extends Loggable {
   val supplements: List[Product] = Product.supplements.filter(!dentalProducts.contains(_))
   val productSchedules: List[ProductSchedule] =
     ProductSchedule.findAll().sortBy(_.startDate.get.toInstant.toEpochMilli)
-  val startDateFormat = new java.text.SimpleDateFormat("M/d/y")
+  val startDateFormat = `1/1/2021`
 
   var startDate = ""
   var firstBox  = false
@@ -73,7 +74,7 @@ class ProductSchedules extends Loggable {
 
     if (validateFields.isEmpty) {
       ProductSchedule.createNew(
-        startDateFormat.parse(startDate).toZonedDateTime,
+        startDateFormat._1.parse(startDate).toZonedDateTime,
         selectedSupplements,
         firstBox
       )
@@ -104,7 +105,7 @@ class ProductSchedules extends Loggable {
           val supplements = schedule.scheduledItems.toList
             .flatMap(_.product.obj)
             .filter(!dentalProducts.contains(_))
-          ".start-date *" #> startDateFormat.format(schedule.startDate.get) &
+          ".start-date *" #> schedule.startDate.get.format(startDateFormat) &
             ".first-box *" #> {
               if (schedule.firstBox.get)
                 "Yes"

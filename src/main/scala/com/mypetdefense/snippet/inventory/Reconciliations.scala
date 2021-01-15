@@ -3,6 +3,7 @@ package inventory
 
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -25,7 +26,7 @@ object Reconciliations extends Loggable {
 }
 
 class Reconciliations extends Loggable {
-  val reconciliationDateFormat = new java.text.SimpleDateFormat("M/d/y")
+  val reconciliationDateFormat = `1/1/2021`
 
   val reconciliations: List[ReconciliationEvent] = ReconciliationEvent.findAll()
 
@@ -43,7 +44,7 @@ class Reconciliations extends Loggable {
     ).flatten
 
     if (validateFields.isEmpty) {
-      val realDate = reconciliationDateFormat.parse(newDate).toZonedDateTime
+      val realDate = reconciliationDateFormat._1.parse(newDate).toZonedDateTime
 
       ReconciliationEvent.createNewReconciliationEvent(realDate)
 
@@ -137,7 +138,7 @@ class Reconciliations extends Loggable {
           .map { reconciliation =>
             idMemoize { detailsRenderer =>
               ".reconciliation-entry" #> {
-                ".date *" #> reconciliationDateFormat.format(reconciliation.eventDate.get) &
+                ".date *" #> reconciliation.eventDate.get.format(reconciliationDateFormat) &
                   "^ [onclick]" #> ajaxInvoke(() => {
                     if (currentReconciliation.isEmpty) {
                       currentReconciliation = Full(reconciliation)

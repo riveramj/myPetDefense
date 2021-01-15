@@ -3,6 +3,7 @@ package com.mypetdefense.model
 import java.time.{LocalDate, ZonedDateTime}
 
 import com.mypetdefense.AppConstants.DefaultTimezone
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Box
@@ -72,10 +73,10 @@ class Subscription
   }
 
   def getStartDateOfSubscription: String =
-    tryo(dateFormat.format(this.startDate.get)).openOr("")
+    tryo(this.startDate.get.format(`01/01/2021`)).openOr("")
 
   def getCancelDateOfSubscription: String =
-    tryo(dateFormat.format(this.cancellationDate.get)).openOr("")
+    tryo(this.cancellationDate.get.format(`01/01/2021`)).openOr("")
 
   def getCreatedDateOfSubscription: LocalDate =
     this.createdAt.get.toLocalDate

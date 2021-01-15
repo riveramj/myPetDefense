@@ -1,7 +1,6 @@
 package com.mypetdefense.snippet
 package admin
 
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.util.Date
 
@@ -11,6 +10,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.DateHelper._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -58,9 +58,9 @@ class Parents extends Loggable {
   val stripeInvoiceBaseURL      = s"${stripeBaseUrl}/invoices"
   val stripeSubscriptionBaseURL = s"${stripeBaseUrl}/subscriptions"
 
-  val nextShipDateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  val birthdayFormat     = new SimpleDateFormat("MM/dd/yyyy")
-  val dateFormat         = new SimpleDateFormat("MMM dd, yyyy")
+  val nextShipDateFormat = `01/01/2021`
+  val birthdayFormat     = `01/01/2021`
+  val dateFormat         = `Jan 01, 2021`
 
   var parentDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var currentParent: Box[User]                       = Empty
@@ -291,9 +291,9 @@ class Parents extends Loggable {
         Alert("Subscription Resumed. Will ship tomorrow.") &
           detailsRenderer.setHtml()
       } else {
-        val nextShipDate = new SimpleDateFormat("MM/dd/yyyy").parse("08/01/2022")
+        val nextShipDate = LocalDate.of(2022, 8, 1).atStartOfDay(DefaultTimezone)
         updatedSubscription.map { subscriptionToUpdate =>
-          ParentService.updateNextShipBillDate(subscriptionToUpdate, nextShipDate)
+          ParentService.updateNextShipBillDate(subscriptionToUpdate, nextShipDate.toDate)
         }
 
         Alert("Subscription Paused.") &
@@ -529,7 +529,7 @@ class Parents extends Loggable {
           )
 
           ".pet" #> pets.map { pet =>
-            val birthday        = tryo(birthdayFormat.format(pet.birthday.get)).map(_.toString).openOr("")
+            val birthday        = tryo(pet.birthday.get.format(birthdayFormat)).openOr("")
             var nextGrowthDelay = tryo(pet.nextGrowthDelay.get.toString).openOr("")
             val subscriptionBox = SubscriptionBox.find(By(SubscriptionBox.pet, pet))
 
@@ -572,10 +572,10 @@ class Parents extends Loggable {
     }.getOrElse(Nil)
 
     var updateNextShipDate =
-      nextShipDate.map(date => nextShipDateFormat.format(date)).getOrElse("")
+      nextShipDate.map(_.format(nextShipDateFormat)).getOrElse("")
 
     def updateShipDate() = {
-      val updatedDate = nextShipDateFormat.parse(updateNextShipDate)
+      val updatedDate = nextShipDateFormat._1.parse(updateNextShipDate)
 
       subscription.map { oldSubscription =>
         ParentService.updateNextShipBillDate(oldSubscription, updatedDate)
@@ -603,9 +603,9 @@ class Parents extends Loggable {
           .map { shipment =>
             val itemsShipped = shipment.shipmentLineItems.toList.map(_.getPetNameProductName)
 
-            ".paid-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("-") &
-              ".ship-date *" #> tryo(dateFormat.format(shipment.dateShipped.get)).openOr("-") &
-              ".refund-date *" #> tryo(dateFormat.format(shipment.dateRefunded.get)).openOr("-") &
+            ".paid-date *" #> tryo(shipment.dateProcessed.get.format(dateFormat)).openOr("-") &
+              ".ship-date *" #> tryo(shipment.dateShipped.get.format(dateFormat)).openOr("-") &
+              ".refund-date *" #> tryo(shipment.dateRefunded.get.format(dateFormat)).openOr("-") &
               ".amount-paid .stripe-invoice *" #> s"$$${shipment.amountPaid.get}" &
               ".amount-paid .stripe-invoice [href]" #> s"${stripeInvoiceBaseURL}/${shipment.stripePaymentId.get}" &
               ".pets ul" #> {
@@ -655,7 +655,7 @@ class Parents extends Loggable {
                   ".referer *" #> refererName &
                   ".ship-date *" #> tryo(
                     displayNextShipDate(
-                      nextShipDate.map(dateFormat.format(_)),
+                      nextShipDate.map(_.format(dateFormat)),
                       isCancelled_?(parent)
                     )
                   ).openOr("-") &

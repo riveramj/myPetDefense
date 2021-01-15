@@ -1,7 +1,5 @@
 package com.mypetdefense.snippet.customer
 
-import java.text.SimpleDateFormat
-
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
@@ -119,7 +117,6 @@ class ShippingBilling extends Loggable {
   }
 
   def render: CssBindFunc = {
-    val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
     "#page-body-container" #> {
       for {
         user            <- user
@@ -152,7 +149,6 @@ class ShippingBilling extends Loggable {
   }
 
   def billingRenew: CssBindFunc = {
-    val dateFormat = new SimpleDateFormat("MMMM dd, yyyy")
     "#page-body-container" #> {
       for {
         user <- user

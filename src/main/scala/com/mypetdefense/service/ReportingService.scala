@@ -275,8 +275,8 @@ object ReportingService extends Loggable {
     println(amazonOrderExport + " 000000")
 
     val dateFormat      = AmazonOrderReport.dateFormat
-    val startDateExport = amazonOrderExport.startDate.map(dateFormat.parse)
-    val endDateExport   = amazonOrderExport.endDate.map(dateFormat.parse)
+    val startDateExport = amazonOrderExport.startDate.map(dateFormat._1.parse)
+    val endDateExport   = amazonOrderExport.endDate.map(dateFormat._1.parse)
     val petExport       = amazonOrderExport.animalType
 
     println(petExport)

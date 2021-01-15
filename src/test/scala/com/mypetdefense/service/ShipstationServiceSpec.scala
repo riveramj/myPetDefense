@@ -1,8 +1,8 @@
 package com.mypetdefense.service
 
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.ZonedDateTime
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator.{AddressGeneratedData, InsertGenData}
 import com.mypetdefense.helpers.DBTest
@@ -13,6 +13,7 @@ import com.mypetdefense.helpers.db.AddressDbUtil._
 import com.mypetdefense.helpers.db.InsertsDbHelper._
 import com.mypetdefense.model.{BoxType, Pet, Subscription}
 import com.mypetdefense.shipstation._
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.DateHelper.ZonedDateTimeOps
 import dispatch.{Future, Req}
 import net.liftweb.common._
@@ -27,7 +28,7 @@ import scala.collection.JavaConverters._
 
 class ShipstationServiceSpec extends DBTest with RestHelper {
 
-  private val expDateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  private val expDateFormat = `01/01/2021`
   private val someAddress   = Address(street1 = "", city = "", state = "", postalCode = "")
   private val defaultResponseOrder: Box[ShipStationObject] =
     Full[ShipStationObject](
@@ -67,7 +68,7 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
         in \ "orderStatus" shouldBe JString("awaiting_shipment")
         in \ "serviceCode" shouldBe JString("usps_first_class_mail")
         in \ "carrierCode" shouldBe JString("stamps_com")
-        in \ "orderDate" shouldBe JString(expDateFormat.format(new Date()))
+        in \ "orderDate" shouldBe JString(ZonedDateTime.now(DefaultTimezone).format(expDateFormat))
         in \ "customerEmail" shouldBe JString(inserted.user.email.get)
         val addressBillTo = in \ "billTo"
         val addressShipTo = in \ "shipTo"

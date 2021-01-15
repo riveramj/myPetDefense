@@ -1,6 +1,5 @@
 package com.mypetdefense.service
 
-import java.text.SimpleDateFormat
 import java.time.{LocalDate, ZonedDateTime}
 import java.util.Date
 
@@ -12,6 +11,7 @@ import com.mypetdefense.shipstation.{
   _
 }
 import com.mypetdefense.util.CalculationHelper
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.ModelSyntax.ListOfShipmentLineItemsSyntax
 import dispatch.Defaults._
 import dispatch._
@@ -28,7 +28,8 @@ trait ShipStationServiceTrait extends Loggable {
   val key: String    = Props.get("shipstation.key") openOr ""
   val secret: String = Props.get("shipstation.secret") openOr ""
   val url: String    = Props.get("shipstation.url") openOr ""
-  val dateFormat     = new SimpleDateFormat("MM/dd/yyyy")
+
+  val dateFormat = `01/01/2021`
 
   implicit val shipStationExecutor: ShipStationExecutor
 
@@ -190,7 +191,7 @@ trait ShipStationServiceTrait extends Loggable {
 
     Order.create(
       orderNumber = s"${order.treatOrderId.get}",
-      orderDate = dateFormat.format(new Date()),
+      orderDate = ZonedDateTime.now(DefaultTimezone).format(dateFormat),
       orderStatus = "awaiting_shipment",
       billTo = billShipTo,
       shipTo = billShipTo,
@@ -230,7 +231,7 @@ trait ShipStationServiceTrait extends Loggable {
 
     Order.create(
       orderNumber = s"${refreshedShipment.shipmentId.get}",
-      orderDate = dateFormat.format(new Date()),
+      orderDate = ZonedDateTime.now(DefaultTimezone).format(dateFormat),
       orderStatus = "awaiting_shipment",
       billTo = billShipTo,
       shipTo = billShipTo,
@@ -250,15 +251,13 @@ trait ShipStationServiceTrait extends Loggable {
   }
 
   def getYesterdayShipments(): Box[ShipmentList] = {
-    val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-    val yesterdayDate = Date.from(
+    val yesterdayDate =
       LocalDate
         .now(DefaultTimezone)
         .atStartOfDay(DefaultTimezone)
         .minusDays(1)
-        .toInstant
-    )
-    val shipDate = dateFormat.format(yesterdayDate)
+
+    val shipDate = yesterdayDate.format(dateFormat)
 
     Try(
       Await.result(

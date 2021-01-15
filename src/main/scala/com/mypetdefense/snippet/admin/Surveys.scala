@@ -1,13 +1,13 @@
 package com.mypetdefense.snippet
 package admin
 
-import java.text.SimpleDateFormat
 import java.time.ZonedDateTime
 
 import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service._
+import com.mypetdefense.util.DateFormatters._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -27,7 +27,7 @@ object Surveys extends Loggable {
 }
 
 class Surveys extends Loggable {
-  val dateFormat = new SimpleDateFormat("MMM dd, YYYY")
+  val dateFormat = `Jan 01, 2021`
 
   def addCoupon(parent: User, updatedCoupon: Box[Coupon]): Nothing = {
     parent.coupon(updatedCoupon).saveMe
@@ -67,13 +67,13 @@ class Surveys extends Loggable {
                   renderer.setHtml
                 }
 
-                ".survey-sent *" #> dateFormat.format(survey.sentDate.get) &
+                ".survey-sent *" #> survey.sentDate.get.format(dateFormat) &
                   ".ratings *" #> survey.ratingGiven.get &
                   ".testimonial *" #> survey.testimonialGiven.get & {
                   if (surveyCouponApplied == null) {
                     ".coupon .apply-coupon [onclick]" #> ajaxInvoke(applyCoupon _)
                   } else {
-                    ".coupon *" #> dateFormat.format(surveyCouponApplied) &
+                    ".coupon *" #> surveyCouponApplied.format(dateFormat) &
                       ".actions .resend-survey" #> ClearNodes
                   }
                 } &
