@@ -1,13 +1,12 @@
 package com.mypetdefense.actor
 
-import java.text.SimpleDateFormat
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.{Date, Locale}
+import java.time.{LocalDateTime, ZonedDateTime}
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.customer.ShippingBilling
 import com.mypetdefense.snippet.login.{ResetPassword, Signup}
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util._
 import net.liftweb.common._
 import net.liftweb.http._
@@ -232,7 +231,7 @@ trait ParentCancelledAccountHandling extends EmailHandlerChain {
 trait ParentPauseSubscriptionHandling extends EmailHandlerChain {
   addHandler {
     case ParentPauseSubscriptionEmail(user, subscription) =>
-      val dateFormatter = new SimpleDateFormat("MMMM dd, yyyy")
+      val dateFormatter = `January 01, 2021`
       val subject       = "Subscription Paused"
       val template =
         Templates("emails-hidden" :: "parent-subscription-paused-email" :: Nil) openOr NodeSeq.Empty
@@ -240,7 +239,7 @@ trait ParentPauseSubscriptionHandling extends EmailHandlerChain {
       val transform = {
         ".name *" #> user.firstName.get &
           "#email *" #> user.email.get &
-          ".next-ship-date *" #> dateFormatter.format(subscription.nextShipDate.get)
+          ".next-ship-date *" #> subscription.nextShipDate.get.format(dateFormatter)
       }
 
       sendEmail(subject, user.email.get, transform(template))
@@ -250,7 +249,7 @@ trait ParentPauseSubscriptionHandling extends EmailHandlerChain {
 trait ParentResumeSubscriptionHandling extends EmailHandlerChain {
   addHandler {
     case ParentResumeSubscriptionEmail(user, subscription) =>
-      val dateFormatter = new SimpleDateFormat("MMMM dd, yyyy")
+      val dateFormatter = `January 01, 2021`
       val subject       = "Subscription Active"
       val template =
         Templates("emails-hidden" :: "parent-subscription-resumed-email" :: Nil) openOr NodeSeq.Empty
@@ -258,7 +257,7 @@ trait ParentResumeSubscriptionHandling extends EmailHandlerChain {
       val transform = {
         ".name *" #> user.firstName.get &
           "#email *" #> user.email.get &
-          ".next-ship-date *" #> dateFormatter.format(subscription.nextShipDate.get)
+          ".next-ship-date *" #> subscription.nextShipDate.get.format(dateFormatter)
       }
 
       sendEmail(subject, user.email.get, transform(template))
@@ -383,18 +382,18 @@ trait InvoicePaymentFailedEmailHandling extends EmailHandlerChain {
           "Problem Billing your Card"
       }
 
-      val dateFormatter = new SimpleDateFormat("MMMM dd, yyyy")
+      val dateFormatter = `January 01, 2021`
 
       val transform = {
         "#card-problem [src]" #> (Paths.serverUrl + "/images/credit-card-problem@2x.png") &
-          ".attempted-date *" #> dateFormatter.format(new Date()) &
+          ".attempted-date *" #> ZonedDateTime.now(DefaultTimezone).format(dateFormatter) &
           ".first-name" #> user.firstName.get &
           ".billing-url [href]" #> (Paths.serverUrl + ShippingBilling.menu.loc.calcDefaultHref) &
           ".will-bill-again" #> (nextPaymentAttempt.isDefined ? PassThru | ClearNodes) andThen
           ".will-not-bill-again" #> (nextPaymentAttempt.isDefined ? ClearNodes | PassThru) andThen
           ".bill-amount" #> ("$" + ("%1.2f" format amount)) &
             ".next-payment-attempt" #> nextPaymentAttempt.map { paymentAttemptDate =>
-              dateFormatter.format(paymentAttemptDate.toDate)
+              paymentAttemptDate.toDate.toInstant.atZone(DefaultTimezone).format(dateFormatter)
             }
       }
 
@@ -586,7 +585,7 @@ trait SendShipmentRefundedEmailHandling extends EmailHandlerChain {
       val template =
         Templates("emails-hidden" :: "shipment-refunded-email" :: Nil) openOr NodeSeq.Empty
 
-      val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
+      val dateFormat = `Jan 01, 2021`
 
       val subject = s"Your Account has been Credited"
       val hostUrl = Paths.serverUrl
@@ -603,7 +602,7 @@ trait SendShipmentRefundedEmailHandling extends EmailHandlerChain {
 
       val transform = {
         ".first-name *" #> firstName &
-          ".shipment-date *" #> tryo(dateFormat.format(shipment.dateProcessed.get)).openOr("") &
+          ".shipment-date *" #> tryo(shipment.dateProcessed.get.format(dateFormat)).openOr("") &
           ".shipment-amount *" #> shipment.amountPaid.get
       }
 
@@ -625,10 +624,9 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
 
       val yesterdayDate = LocalDateTime.now().minusDays(1)
 
-      val subjectDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH))
-      val headerDate =
-        yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH))
-      val monthYear = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+      val subjectDate = yesterdayDate.format(`Jan 1`)
+      val headerDate  = yesterdayDate.format(`January 1, 2021`)
+      val monthYear   = yesterdayDate.format(`January 2021`)
 
       val subject = s"[$subjectDate] Daily My Pet Defense Sales Report"
       val hostUrl = Paths.serverUrl
@@ -682,10 +680,8 @@ trait InternalDailyEmailHandling extends EmailHandlerChain {
 
       val yesterdayDate = LocalDateTime.now().minusDays(1)
 
-      val subjectDate = yesterdayDate.format(DateTimeFormatter.ofPattern("MMM d", Locale.ENGLISH))
-      val headerDate =
-        yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM d, yyyy", Locale.ENGLISH))
-      val monthYear = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+      val subjectDate = yesterdayDate.format(`Jan 1`)
+      val headerDate  = yesterdayDate.format(`January 1, 2021`)
 
       val subject = s"[$subjectDate] MPD Sales Report"
       val hostUrl = Paths.serverUrl
@@ -755,7 +751,7 @@ trait AddOnReceiptEmailHandling extends EmailHandlerChain {
       val subject = "My Pet Defense Items Added"
       val email   = parent.map(_.email.get).openOr("")
       val nextShipDate = subscription.map { possibleSubscription =>
-        dateFormatter.format(possibleSubscription.nextShipDate.get)
+        possibleSubscription.nextShipDate.get.format(`2021/01/01`)
       }.openOr("")
 
       val transform = {
@@ -791,7 +787,7 @@ trait TreatShippedEmailHandling extends EmailHandlerChain {
       val subtotal = (order.amountPaid.get - order.taxPaid.get)
 
       val transform = {
-        "#ship-date" #> dateFormatter.format(new Date()) &
+        "#ship-date" #> ZonedDateTime.now(DefaultTimezone).format(`2021/01/01`) &
           ".tracking-link [href]" #> trackingLink &
           ".tracking-number *" #> trackingNumber &
           "#parent-name" #> order.firstName &
@@ -847,16 +843,18 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
       val trackingLink =
         s"https://tools.usps.com/go/TrackConfirmAction?tLabels=$possibleTrackingNumber"
 
-      val dateFormatter = new SimpleDateFormat("MMM dd")
+      val dateFormatter = `Jan 01`
 
       val boxes     = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
       val products  = boxes.flatMap(_.fleaTick.obj)
       val priceCode = subscription.map(_.priceCode.get).openOr("")
       val shipment: Box[Shipment] =
-        subscription.flatMap(_.shipments.toList.sortBy(_.createdAt.get).reverse.headOption)
+        subscription.flatMap(
+          _.shipments.toList.sortBy(_.createdAt.get.toInstant.toEpochMilli).reverse.headOption
+        )
 
       val transform = {
-        "#ship-date" #> dateFormatter.format(new Date()) &
+        "#ship-date" #> ZonedDateTime.now(DefaultTimezone).format(dateFormatter) &
           "#parent-name" #> user.firstName &
           ".name" #> user.name &
           "#ship-address-1" #> shipAddress.map(_.street1.get) &
@@ -904,13 +902,13 @@ trait SixMonthSaleReceiptEmailHandling extends EmailHandlerChain {
       val shipAddress =
         Address.find(By(Address.user, user), By(Address.addressType, AddressType.Shipping))
 
-      val dateFormatter = new SimpleDateFormat("MMM dd")
+      val dateFormatter = `Jan 01`
 
       val products   = user.subscription.map(_.subscriptionBoxes.flatMap(_.fleaTick.obj)).openOr(Nil)
       val amountPaid = subtotal + tax
 
       val transform = {
-        ".receipt-date" #> dateFormatter.format(new Date()) &
+        ".receipt-date" #> ZonedDateTime.now(DefaultTimezone).format(dateFormatter) &
           "#parent-name" #> user.firstName &
           ".name" #> user.name &
           "#ship-address-1" #> shipAddress.map(_.street1.get) &

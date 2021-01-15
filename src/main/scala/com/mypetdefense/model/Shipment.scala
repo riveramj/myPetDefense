@@ -1,9 +1,9 @@
 package com.mypetdefense.model
 
-import java.time.{LocalDate, ZoneId}
-import java.util.Date
+import java.time.{LocalDate, ZonedDateTime}
 
-import com.mypetdefense.util.DateHelper.{monthDayOne, nowDate}
+import com.mypetdefense.AppConstants.DefaultTimezone
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.mapper._
@@ -11,6 +11,7 @@ import net.liftweb.util.Helpers.tryo
 
 class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, Shipment] {
   def getSingleton: KeyedMetaMapper[Long, Shipment] = Shipment
+
   object shipmentId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -20,11 +21,11 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object stripeChargeId     extends MappedString(this, 100)
   object trackingNumber     extends MappedString(this, 100)
   object address            extends MappedString(this, 200)
-  object dateProcessed      extends MappedDateTime(this)
-  object dateRefunded       extends MappedDateTime(this)
-  object expectedShipDate   extends MappedDateTime(this)
-  object dateShipped        extends MappedDateTime(this)
-  object dateReceived       extends MappedDateTime(this)
+  object dateProcessed      extends MappedZonedDateTime(this) // TODO: maybe this should be dates
+  object dateRefunded       extends MappedZonedDateTime(this)
+  object expectedShipDate   extends MappedZonedDateTime(this)
+  object dateShipped        extends MappedZonedDateTime(this)
+  object dateReceived       extends MappedZonedDateTime(this)
   object taxPaid            extends MappedString(this, 100)
   object amountPaid         extends MappedString(this, 100)
   object shipmentLineItems  extends MappedOneToMany(ShipmentLineItem, ShipmentLineItem.shipment)
@@ -37,15 +38,13 @@ class Shipment extends LongKeyedMapper[Shipment] with IdPK with OneToMany[Long, 
   object status extends MappedEnum(this, Status) {
     override def defaultValue: Status.Value = Status.Active
   }
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt extends MappedZonedDateTime(this, useNowAsDefault = true)
 
   def getProcessDateOfShipment: LocalDate =
-    this.dateProcessed.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+    this.dateProcessed.get.toLocalDate
 
   def getMailedDateOfShipment: Box[LocalDate] =
-    tryo(this.dateShipped.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+    tryo(this.dateShipped.get.toLocalDate)
 
   def actualShipmentLineItems: List[ShipmentLineItem] =
     this.reload.shipmentLineItems.toList
@@ -65,7 +64,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
 
   def findTodayShipments: List[Shipment] = {
     Shipment.findAll(
-      By_>=(Shipment.dateProcessed, nowDate)
+      By_>=(Shipment.dateProcessed, nowAtStartOfDay)
     )
   }
 
@@ -80,7 +79,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
       shipmentStatus: ShipmentStatus.Value,
       sendFreeUpgrade: Boolean = false
   ): Shipment = {
-    val dateProcessed = new Date()
+    val dateProcessed = ZonedDateTime.now(DefaultTimezone)
 
     val shipment = Shipment.create
       .shipmentId(generateLongId)
@@ -100,7 +99,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
     shipment
   }
 
-  def notCancelledWithoutTrackingNumber(createdUntil: Date): List[Shipment] =
+  def notCancelledWithoutTrackingNumber(createdUntil: ZonedDateTime): List[Shipment] =
     Shipment
       .findAll(
         NotBy(Shipment.status, Status.Cancelled),
@@ -108,7 +107,7 @@ object Shipment extends Shipment with LongKeyedMetaMapper[Shipment] {
         By(Shipment.trackingNumber, "") // "" default value
       )
 
-  def notCancelledWithEmptyLineItems(createdUntil: Date): List[Shipment] = {
+  def notCancelledWithEmptyLineItems(createdUntil: ZonedDateTime): List[Shipment] = {
     Shipment
       .findAll(
         ByList(Shipment.shipmentStatus, List(ShipmentStatus.LabelCreated, ShipmentStatus.Paid)),

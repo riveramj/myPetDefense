@@ -1,7 +1,8 @@
 package com.mypetdefense.util
 
-import java.text.SimpleDateFormat
+import java.time.LocalDate
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import net.liftweb.common._
@@ -397,10 +398,9 @@ object DataLoader extends Loggable {
   }
 
   def findSeptEarlyShipments() {
-    val dateFormatter = new SimpleDateFormat("M/d/y")
-    val startFree     = dateFormatter.parse("8/7/2020")
-    val endFree       = dateFormatter.parse("9/6/2020")
-    val freeMonth     = dateFormatter.parse("8/1/2020")
+    val startFree     = LocalDate.of(2020, 8, 7).atStartOfDay(DefaultTimezone)
+    val endFree       = LocalDate.of(2020, 9, 6).atStartOfDay(DefaultTimezone)
+    val freeMonth     = LocalDate.of(2020, 8, 1).atStartOfDay(DefaultTimezone)
 
     for {
       shipment <- Shipment.findAll(
@@ -415,9 +415,8 @@ object DataLoader extends Loggable {
   }
 
   def clearRecentShipments() {
-    val dateFormatter = new SimpleDateFormat("M/d/y")
-    val startFree     = dateFormatter.parse("9/3/2020")
-    val endFree       = dateFormatter.parse("9/10/2020")
+    val startFree     = LocalDate.of(2020, 9, 3).atStartOfDay(DefaultTimezone)
+    val endFree       = LocalDate.of(2020, 9, 10).atStartOfDay(DefaultTimezone)
 
     for {
       shipment <- Shipment.findAll(
@@ -440,8 +439,7 @@ object DataLoader extends Loggable {
   }
 
   def dataCleanUp() {
-    val dateFormatter = new SimpleDateFormat("M/d/y")
-    val startDate     = dateFormatter.parse("7/1/2020")
+    val startDate = LocalDate.of(2020, 7, 1).atStartOfDay(DefaultTimezone)
 
     for {
       user         <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
@@ -459,8 +457,7 @@ object DataLoader extends Loggable {
   }
 
   def removeDupUsers() {
-    val dateFormatter = new SimpleDateFormat("M/d/y")
-    val startDate     = dateFormatter.parse("7/1/2020")
+    val startDate = LocalDate.of(2020, 7, 1).atStartOfDay(DefaultTimezone)
 
     for {
       badUser <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
@@ -549,10 +546,10 @@ object DataLoader extends Loggable {
 
     for {
       box <- SubscriptionBox.findAll(
-        By(SubscriptionBox.userModified, true),
-        By(SubscriptionBox.animalType, AnimalType.Dog),
-        By(SubscriptionBox.boxType, BoxType.healthAndWellness)
-      )
+              By(SubscriptionBox.userModified, true),
+              By(SubscriptionBox.animalType, AnimalType.Dog),
+              By(SubscriptionBox.boxType, BoxType.healthAndWellness)
+            )
       subscriptionItems = box.subscriptionItems.toList.flatMap(_.product.obj)
     } yield {
       if (subscriptionItems.forall(products.contains))

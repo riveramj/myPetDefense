@@ -1,13 +1,14 @@
 package com.mypetdefense.service
 
-import java.time.{LocalDate, Period, ZoneId}
-import java.util.Date
+import java.time.{Instant, LocalDate, Period, ZonedDateTime}
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.shipstation.Order
 import com.mypetdefense.snippet.TPPApi
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.StripeHelper._
 import com.stripe.param._
 import net.liftweb.common._
@@ -16,7 +17,8 @@ import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
 object ParentService extends LoggableBoxLogging {
-  val whelpDateFormat                  = new java.text.SimpleDateFormat("M/d/y")
+  val whelpDateFormat = `1/1/2021`
+
   val currentPetlandPrice: String      = Props.get("petland.6month.payment") openOr ""
   val petlandMonthlyPrice: Box[String] = Props.get("petland.1month.payment")
   val petland5MonthCoupon: Box[String] = Props.get("petland.5month.coupon")
@@ -166,10 +168,13 @@ object ParentService extends LoggableBoxLogging {
       if source.isCard
     } yield source.asCard
 
-  def updateNextShipBillDate(subscription: Subscription, nextDate: Date): Box[Subscription] = {
+  def updateNextShipBillDate(
+      subscription: Subscription,
+      nextDate: ZonedDateTime
+  ): Box[Subscription] = {
     val updatedSubscription = changeStripeBillDate(
       subscription.stripeSubscriptionId.get,
-      nextDate.getTime / 1000
+      nextDate.toEpochSecond
     )
 
     updatedSubscription match {
@@ -184,13 +189,12 @@ object ParentService extends LoggableBoxLogging {
     getStripeSubscription(stripeSubscriptionId) match {
       case Full(stripeSubscription) =>
         val currentPeriodEnd = stripeSubscription.currentPeriodEnd.getOrElse(0L)
-        val nextMonthDate    = new Date(currentPeriodEnd * 1000L)
+        val nextMonthDate    = Instant.ofEpochSecond(currentPeriodEnd).atZone(DefaultTimezone)
 
-        val nextMonthLocalDate =
-          nextMonthDate.toInstant.atZone(ZoneId.of("America/New_York")).toLocalDate
+        val nextMonthLocalDate = nextMonthDate.toLocalDate
 
         val startOfDayDate = nextMonthLocalDate
-          .atStartOfDay(ZoneId.of("America/New_York"))
+          .atStartOfDay(DefaultTimezone)
           .toInstant
           .getEpochSecond
 
@@ -285,13 +289,13 @@ object ParentService extends LoggableBoxLogging {
       .create(params)
       .logFailure("charge customer failed with stripe error")
 
-  def parseWhelpDate(whelpDate: String): Box[Date] = {
+  def parseWhelpDate(whelpDate: String): Box[LocalDate] = {
     val whelpDateFormats = List(
-      new java.text.SimpleDateFormat("M/d/y"),
-      new java.text.SimpleDateFormat("y-M-d")
+      `1/1/2021`,
+      `2021-1-1`
     )
 
-    whelpDateFormats.map { dateFormat => tryo(dateFormat.parse(whelpDate)) }
+    whelpDateFormats.map { dateFormat => tryo(LocalDate.parse(whelpDate, dateFormat)) }
       .find(_.isDefined)
       .getOrElse(Empty)
   }
@@ -314,7 +318,7 @@ object ParentService extends LoggableBoxLogging {
       name = name,
       animalType = animalType,
       size = size,
-      whelpDate = possibleBirthday,
+      whelpDate = possibleBirthday.map(_.atStartOfDay(DefaultTimezone)),
       breed = breed
     )
 
@@ -421,7 +425,7 @@ object ParentService extends LoggableBoxLogging {
   def findGrowthMonth(pet: Pet): Int = {
     val currentDate = LocalDate.now()
 
-    val birthday = tryo(pet.birthday.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
+    val birthday = tryo(pet.birthday.get.toLocalDate)
 
     val currentMonth = birthday.map(Period.between(_, currentDate).getMonths).openOr(0)
 
@@ -589,7 +593,7 @@ object ParentService extends LoggableBoxLogging {
       .logFailure("create refund failed with stripe error")
 
     refund foreach { _ =>
-      shipment.dateRefunded(new Date()).saveMe
+      shipment.dateRefunded(ZonedDateTime.now(DefaultTimezone)).saveMe
       EmailActor ! SendShipmentRefundedEmail(parent, shipment)
       ShipStationService.cancelShipstationOrder(shipment)
     }

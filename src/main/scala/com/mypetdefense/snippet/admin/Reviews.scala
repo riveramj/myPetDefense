@@ -1,9 +1,8 @@
 package com.mypetdefense.snippet
 package admin
 
-import java.text.SimpleDateFormat
-
 import com.mypetdefense.model._
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util._
 import net.liftweb.common._
@@ -28,7 +27,7 @@ class Reviews extends Loggable {
   var newReviews: List[Review]                    = Nil
   var newReviewsRenderer: Box[IdMemoizeTransform] = Empty
 
-  val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
+  val dateFormat = `Jan 01, 2021`
 
   def fileUpload: NodeSeq => NodeSeq = {
     var fileHolder: Box[FileParamHolder] = Empty
@@ -66,7 +65,7 @@ class Reviews extends Loggable {
               ".body *" #> review.body.get &
               ".rating *" #> review.rating.get &
               ".author *" #> review.author.get &
-              ".date *" #> dateFormat.format(review.date.get) &
+              ".date *" #> review.date.get.format(dateFormat) &
               ".product *" #> review.fleaTick.map(_.name.get)
           }
         }
@@ -82,7 +81,7 @@ class Reviews extends Loggable {
             ".body *" #> review.body.get &
             ".rating *" #> review.rating.get &
             ".author *" #> review.author.get &
-            ".date *" #> dateFormat.format(review.date.get) &
+            ".date *" #> review.date.get.format(dateFormat) &
             ".product *" #> review.fleaTick.map(_.name.get)
         }
   }

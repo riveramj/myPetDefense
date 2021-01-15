@@ -32,7 +32,7 @@ class SubscriptionSpec extends DBTest {
       val expectedIds = usersAndYesterdayCanceledSubs.map {
         case (uData, sData) =>
           insertUserAndSub(uData, sData).subscription.cancel
-            .cancellationDate(anyHourOfYesterday.toDate)
+            .cancellationDate(anyHourOfYesterday)
             .saveMe()
             .id
             .get
@@ -51,8 +51,8 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           fromTomorrowData,
           nextMonthData,
-          _.nextShipDate(anyDayOfThisMonthFromTomorrow.toDate).saveMe(),
-          _.nextShipDate(anyDayOfNextMonth.toDate).saveMe()
+          _.nextShipDate(anyDayOfThisMonthFromTomorrow).saveMe(),
+          _.nextShipDate(anyDayOfNextMonth).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findCurrentMonthUpcomingSubscriptions.map(_.id.get)
@@ -68,8 +68,8 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           todayData,
           untilTodayData,
-          _.createdAt(anyHourOfToday.toDate).saveMe(),
-          _.createdAt(anyDayUntilToday.toDate).saveMe()
+          _.createdAt(anyHourOfToday).saveMe(),
+          _.createdAt(anyDayUntilToday).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findNewTodaySubscriptions.map(_.id.get)
@@ -85,8 +85,8 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           thisDayMonthAgoData,
           anyDayExceptMonthAgoDayData,
-          _.createdAt(anyHourOfThisDayMonthAgo.toDate).saveMe(),
-          _.createdAt(anyDayExceptThisDayMonthAgo.toDate).saveMe()
+          _.createdAt(anyHourOfThisDayMonthAgo).saveMe(),
+          _.createdAt(anyDayExceptThisDayMonthAgo).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findNewTodaySubscriptionsLastMonth.map(_.id.get)
@@ -102,8 +102,8 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           thisDayYearAgoData,
           anyDayExceptYearAgoDayData,
-          _.createdAt(anyHourOfThisDayYearAgo.toDate).saveMe(),
-          _.createdAt(anyDayExceptThisDayYearAgo.toDate).saveMe()
+          _.createdAt(anyHourOfThisDayYearAgo).saveMe(),
+          _.createdAt(anyDayExceptThisDayYearAgo).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findNewTodaySubscriptionsLastYear.map(_.id.get)
@@ -119,8 +119,8 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           thisMonthData,
           anyDayUntilThisMonthData,
-          _.createdAt(anyDayOfThisMonth.toDate).saveMe(),
-          _.createdAt(anyDayUntilThisMonth.toDate).saveMe()
+          _.createdAt(anyDayOfThisMonth).saveMe(),
+          _.createdAt(anyDayUntilThisMonth).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findNewMTDSubscriptions.map(_.id.get)
@@ -136,8 +136,8 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           lastMonthData,
           anyDayUntilLastMonthData,
-          _.createdAt(anyDayOfLastMonthUntilMonthEnd.toDate).saveMe(),
-          _.createdAt(anyDayUntilLastMonth.toDate).saveMe()
+          _.createdAt(anyDayOfLastMonthUntilMonthEnd).saveMe(),
+          _.createdAt(anyDayUntilLastMonth).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findNewMTDSubscriptionsLastMonth.map(_.id.get)
@@ -153,8 +153,8 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           thisYearData,
           anyDayLastYearData,
-          _.createdAt(anyDayOfThisYear.toDate).saveMe(),
-          _.createdAt(anyDayOfLastYear.toDate).saveMe()
+          _.createdAt(anyDayOfThisYear).saveMe(),
+          _.createdAt(anyDayOfLastYear).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findNewYTDSubscriptions.map(_.id.get)
@@ -170,8 +170,8 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           thisYearDataUntilMonthAgo,
           anyDayFromMonthAgoData,
-          _.createdAt(anyDayOfThisYearUntilMonthAgo.toDate).saveMe(),
-          _.createdAt(anyDayOfThisYearFromMonthAgo.toDate).saveMe()
+          _.createdAt(anyDayOfThisYearUntilMonthAgo).saveMe(),
+          _.createdAt(anyDayOfThisYearFromMonthAgo).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findNewYTDSubscriptionsLastMonth.map(_.id.get)
@@ -187,8 +187,8 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           thisDayYearAgoData,
           anyDayExceptThisDayYearAgoData,
-          _.createdAt(anyDayOfLastYearThisDay.toDate).saveMe(),
-          _.createdAt(anyDayOfLastYearFromThisDayYearAgo.toDate).saveMe()
+          _.createdAt(anyDayOfLastYearThisDay).saveMe(),
+          _.createdAt(anyDayOfLastYearFromThisDayYearAgo).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findNewYTDSubscriptionsLastYear.map(_.id.get)
@@ -204,8 +204,8 @@ class SubscriptionSpec extends DBTest {
         val expectedSubscriptions = insertSubscriptionsForTests(
           thisMonthData,
           anyMonthExceptThisMonthData,
-          _.cancellationDate(anyDayOfThisMonth.toDate).saveMe(),
-          _.cancellationDate(anyDayExceptThisMonth.toDate).saveMe()
+          _.cancellationDate(anyDayOfThisMonth).saveMe(),
+          _.cancellationDate(anyDayExceptThisMonth).saveMe()
         ).map(_.id.get)
 
         val actualData = Subscription.findCancelledMtdSubscriptions.map(_.id.get)

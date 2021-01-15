@@ -1,13 +1,15 @@
 package com.mypetdefense.snippet
 package agency
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, LocalDateTime, ZoneId}
+import java.time.format.TextStyle
+import java.time.{LocalDate, LocalDateTime, Month}
 
+import com.mypetdefense.AppConstants.DefaultLocale
 import com.mypetdefense.model._
 import com.mypetdefense.service.ReportingService
 import com.mypetdefense.snippet.admin.UpdateChartData
-import com.mypetdefense.util.SecurityContext
+import com.mypetdefense.util.DateFormatters._
+import com.mypetdefense.util.{DateHelper, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -48,9 +50,8 @@ object AgencyOverview extends Loggable {
 
 class AgencyOverview extends Loggable {
   val currentUser: Box[User] = SecurityContext.currentUser
-  val signupCancelDateFormat = new SimpleDateFormat("MM/dd/yyyy")
-  val chartDateFormat        = new SimpleDateFormat("MM")
-  val chartDateFormatName    = new SimpleDateFormat("MMM")
+  val signupCancelDateFormat = `01/01/2021`
+  val chartDateFormat        = `01`
 
   val allUsers: List[User] = User.findAll(
     By(User.userType, UserType.Parent)
@@ -106,7 +107,7 @@ class AgencyOverview extends Loggable {
   def shipmentsByMonth: Map[Int, Int] =
     allShipments
       .map(_.dateProcessed.get)
-      .map(chartDateFormat.format)
+      .map(_.format(chartDateFormat))
       .map(toInt)
       .groupBy(identity)
       .mapValues(_.size)
@@ -116,9 +117,7 @@ class AgencyOverview extends Loggable {
   def shipmentsByMonthSorted: ListMap[Int, Int] =
     ListMap(adjustedShipmentsByMonth.toSeq.sortBy(_._1): _*)
 
-  def allShipmentsByMonthLabel: Array[String] = shipmentsByMonthSorted.keys.toArray.map { month =>
-    chartDateFormatName.format(chartDateFormat.parse(month.toString))
-  }
+  def allShipmentsByMonthLabel: Array[String] = shipmentsByMonthSorted.keys.toArray.map(asMMMString)
 
   var monthDateFilter       = "All Months"
   var storeIdFilter: String = chosenAgency.map(_.agencyId.get).openOr(-1L).toString
@@ -206,7 +205,7 @@ class AgencyOverview extends Loggable {
   }
 
   def getProcessDateOfShipment(shipment: Shipment): LocalDate = {
-    shipment.dateProcessed.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+    shipment.dateProcessed.get.toLocalDate
   }
 
   def findCurrentMonthShipment(shipment: Shipment, month: String = ""): Boolean = {
@@ -214,47 +213,35 @@ class AgencyOverview extends Loggable {
 
     val processedDate = getProcessDateOfShipment(shipment)
 
-    (
-      (processedDate.getYear == date.getYear) &&
-      (processedDate.getMonth == date.getMonth)
-    )
+    (processedDate.getYear == date.getYear) &&
+    (processedDate.getMonth == date.getMonth)
   }
 
   def findCurrentYearSubscriptionSignup(subscription: Subscription): Boolean = {
-    val signupDate =
-      subscription.startDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-
+    val signupDate = subscription.startDate.get.toLocalDate
     signupDate.getYear == currentDate.getYear
   }
 
   def findCurrentMonthSubscriptionSignup(subscription: Subscription): Boolean = {
-    val signupDate =
-      subscription.startDate.get.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
-
+    val signupDate = subscription.startDate.get.toLocalDate
     signupDate.getMonth == currentDate.getMonth
   }
 
-  def convertMonthToDate(month: String): LocalDateTime = {
-    val dateFormat = new SimpleDateFormat("MMMM yyyy")
-    val monthDate  = dateFormat.parse(s"$month 2018") //TODO: dynanmic year
-
-    monthDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
-  }
+  def convertMonthToDate(month: String): LocalDateTime =
+    DateHelper.convertMonthToDate(month, 2018) // TODO: dynamic year
 
   def updateCharts: JsCmd = {
     val activeUserSignupDates = activeUserSubscription.map(_.startDate.get)
 
     val activeUsersSignupByMonth = activeUserSignupDates
-      .map(chartDateFormat.format)
+      .map(_.format(chartDateFormat))
       .map(toInt)
       .groupBy(identity)
       .mapValues(_.size)
 
     val activeUsersSignupByMonthSorted = ListMap(activeUsersSignupByMonth.toSeq.sortBy(_._1): _*)
 
-    val activeUsersSignupByMonthLabel = activeUsersSignupByMonthSorted.keys.toArray.map { month =>
-      chartDateFormatName.format(chartDateFormat.parse(month.toString))
-    }
+    val activeUsersSignupByMonthLabel = activeUsersSignupByMonthSorted.keys.toArray.map(asMMMString)
 
     val activeUsersSignupByMonthValue = activeUsersSignupByMonthSorted.values.toArray
 
@@ -318,12 +305,13 @@ class AgencyOverview extends Loggable {
       }
     }
 
-    (
-      UpdateChartData("activeInactive", Array(activeUserCount, inactiveUserCount)) &
-        UpdateChartData("totalActive", totalActiveChartValues, totalActiveChartLabels) &
-        UpdateChartData("signup", activeUsersSignupByMonthValues, activeUsersSignupByMonthLabels)
-    )
+    UpdateChartData("activeInactive", Array(activeUserCount, inactiveUserCount)) &
+      UpdateChartData("totalActive", totalActiveChartValues, totalActiveChartLabels) &
+      UpdateChartData("signup", activeUsersSignupByMonthValues, activeUsersSignupByMonthLabels)
   }
+
+  private def asMMMString(month: Int): String =
+    Month.of(month).getDisplayName(TextStyle.SHORT, DefaultLocale)
 
   def snapShotBindings: CssSel = {
     val currentMonthSubscriptionShipments = {
@@ -399,14 +387,14 @@ class AgencyOverview extends Loggable {
                     val subscription = parent.subscription.obj
 
                     val signupDate = subscription.map { sub =>
-                      signupCancelDateFormat.format(sub.startDate.get)
+                      sub.startDate.get.format(signupCancelDateFormat)
                     }.getOrElse("")
 
                     val cancellationDate = {
                       if (parent.status.get == Status.Cancelled) {
                         val possibleCancelDate = subscription.map(_.cancellationDate.get)
                         possibleCancelDate.flatMap { date =>
-                          tryo(signupCancelDateFormat.format(date))
+                          tryo(date.format(signupCancelDateFormat))
                         }.getOrElse("")
                       } else {
                         "-"

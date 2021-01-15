@@ -1,13 +1,15 @@
 package com.mypetdefense.model
 
-import java.util.Date
+import java.time.ZonedDateTime
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.mapper._
 
 class TaggedItem extends LongKeyedMapper[TaggedItem] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, TaggedItem] = TaggedItem
+
   object taggedItemId extends MappedLong(this) {
     override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
@@ -21,10 +23,8 @@ class TaggedItem extends LongKeyedMapper[TaggedItem] with IdPK {
   object user         extends MappedLongForeignKey(this, User)
   object event        extends MappedLongForeignKey(this, Event)
   object tag          extends MappedLongForeignKey(this, Tag)
-  object dateTagged   extends MappedDateTime(this)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object dateTagged   extends MappedZonedDateTime(this)
+  object createdAt    extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object TaggedItem extends TaggedItem with LongKeyedMetaMapper[TaggedItem] {
@@ -47,7 +47,7 @@ object TaggedItem extends TaggedItem with LongKeyedMetaMapper[TaggedItem] {
       .treatOrder(treatOrder)
       .treat(treat)
       .tag(tag)
-      .dateTagged(new Date())
+      .dateTagged(ZonedDateTime.now(DefaultTimezone))
       .saveMe
   }
 }

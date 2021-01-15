@@ -1,10 +1,9 @@
 package com.mypetdefense.snippet
 package admin
 
-import java.text.SimpleDateFormat
-
 import com.mypetdefense.model._
 import com.mypetdefense.service._
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util._
 import net.liftweb.common._
@@ -81,7 +80,7 @@ class AmazonOrders extends Loggable {
   var endDate                                    = ""
   var petType                                    = ""
 
-  val dateFormat = new SimpleDateFormat("MMM dd, yyyy")
+  val dateFormat = `Jan 01, 2021`
 
   def fileUpload: NodeSeq => NodeSeq = {
     var fileHolder: Box[FileParamHolder] = Empty
@@ -130,7 +129,7 @@ class AmazonOrders extends Loggable {
               ".city *" #> order.city.get &
               ".state *" #> order.state.get &
               ".zip *" #> order.zip.get &
-              ".purchase-date *" #> dateFormat.format(order.purchaseDate.get)
+              ".purchase-date *" #> order.purchaseDate.get.format(dateFormat)
           }
         }
   }
@@ -176,7 +175,7 @@ class AmazonOrders extends Loggable {
             ".product-name *" #> order.productName.get &
             ".name *" #> order.name.get &
             ".address *" #> address &
-            ".purchase-date *" #> dateFormat.format(order.purchaseDate.get)
+            ".purchase-date *" #> order.purchaseDate.get.format(dateFormat)
         }
   }
 }

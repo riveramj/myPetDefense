@@ -1,14 +1,15 @@
 package com.mypetdefense.snippet
 package petland
 
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.{YearMonth, ZonedDateTime}
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
-import com.mypetdefense.util.DateHelper.tomorrowStart
+import com.mypetdefense.util.DateFormatters._
+import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -91,7 +92,7 @@ class NewOrder extends Loggable {
   var orderDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var totalsRenderer: Box[IdMemoizeTransform]       = Empty
 
-  val birthdayDateFormat = new SimpleDateFormat("MMM yyyy")
+  val birthdayDateFormat = `Jan 2021`
 
   val petlandPrice: Box[Stripe.Price] = ParentService.getCurrentPetlandProductPrice
   val petlandPriceId: String          = petlandPrice.map(_.id).openOr("")
@@ -203,11 +204,10 @@ class NewOrder extends Loggable {
     Subscription.createNewSubscription(
       Full(newParent),
       subscriptionId,
-      new Date(),
+      ZonedDateTime.now(DefaultTimezone),
       tomorrowStart,
       Price.currentPetlandMonthlyCode,
-      isUpgraded = false,
-      6
+      contractLength = 6
     )
 
     /*
@@ -290,7 +290,12 @@ class NewOrder extends Loggable {
       }
     }.headOption
 
-    val birthday = tryo(birthdayDateFormat.parse(s"$birthdayMonth $birthdayYear"))
+    val birthday = tryo {
+      YearMonth
+        .parse(s"$birthdayMonth $birthdayYear", birthdayDateFormat)
+        .atDay(1)
+        .atStartOfDay(DefaultTimezone)
+    }
 
     val newPet = {
       for {
@@ -368,7 +373,7 @@ class NewOrder extends Loggable {
     ".subscription-details" #> idMemoize { renderer =>
       orderDetailsRenderer = Full(renderer)
       ".pet-entry" #> pets.map { pet =>
-        val birthday = tryo(birthdayDateFormat.format(pet.birthday.get))
+        val birthday = tryo(pet.birthday.get.format(birthdayDateFormat))
 
         ".pet-name *" #> pet.name.get &
           ".pet-birthday *" #> birthday &

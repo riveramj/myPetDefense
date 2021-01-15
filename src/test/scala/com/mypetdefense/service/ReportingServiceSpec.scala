@@ -1,7 +1,9 @@
 package com.mypetdefense.service
 
-import java.util.Date
+import java.time.ZonedDateTime
+import java.time.format.TextStyle
 
+import com.mypetdefense.AppConstants.DefaultLocale
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator._
 import com.mypetdefense.helpers.DateUtil._
@@ -29,7 +31,7 @@ class ReportingServiceSpec extends DBTest {
 
   private def insertAgencySalesCreatedAt(
       agency: Agency,
-      createdAt: Date,
+      createdAt: ZonedDateTime,
       data: PetChainData
   ): InsertedUserAndPet = {
     val inserted    = insertUserAndPet(data)
@@ -122,15 +124,19 @@ class ReportingServiceSpec extends DBTest {
   it should "find new customers for month" in {
     forAll(listOfNUsersGen(), listOfNUsersGen()) { (registeredThisMonth, registeredLongTimeAgo) =>
       val expectedUsersIds =
-        registeredThisMonth.map(createUser(_).createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
+        registeredThisMonth.map(createUser(_).createdAt(anyDayOfThisMonth).saveMe().id.get)
       val oldIds =
-        registeredLongTimeAgo.map(createUser(_).createdAt(anyDayOfLastMonth.toDate).saveMe().id.get)
+        registeredLongTimeAgo.map(createUser(_).createdAt(anyDayOfLastMonth).saveMe().id.get)
 
       val users = User.findAll()
 
       val usersIdsRegisteredInThisMonth =
         ReportingService
-          .findNewCustomersMonth(users, now.getMonth.toString, now.getYear)
+          .findNewCustomersMonth(
+            users,
+            now.getMonth.getDisplayName(TextStyle.FULL, DefaultLocale),
+            now.getYear
+          )
           .map(_.id.get)
 
       usersIdsRegisteredInThisMonth should contain theSameElementsAs expectedUsersIds
@@ -148,15 +154,15 @@ class ReportingServiceSpec extends DBTest {
         case (u, s) =>
           val date = lastYear
           insertUserAndSub(u, s).subscription
-            .createdAt(date.toDate)
-            .cancellationDate(date.plusMonths(3).toDate)
+            .createdAt(date)
+            .cancellationDate(date.plusMonths(3))
             .saveMe()
       }
       val activeFirstMonthUsersIds = activeFirstMonthUsers.map {
         case (u, s) =>
           val thisMonthDay = anyDayOfThisMonth
           insertUserAndSub(u, s).subscription
-            .createdAt(thisMonthDay.toDate)
+            .createdAt(thisMonthDay)
             .saveMe()
             .id
             .get
@@ -165,8 +171,8 @@ class ReportingServiceSpec extends DBTest {
         case (u, s) =>
           val thisMonthDayDate = anyDayOfThisMonth.withDayOfMonth(1)
           insertUserAndSub(u, s).subscription
-            .createdAt(thisMonthDayDate.toDate)
-            .cancellationDate(thisMonthDayDate.plusDays(2).toDate)
+            .createdAt(thisMonthDayDate)
+            .cancellationDate(thisMonthDayDate.plusDays(2))
             .saveMe()
             .id
             .get
@@ -186,7 +192,7 @@ class ReportingServiceSpec extends DBTest {
       (currentMonth, oldOne) =>
         oldOne.foreach {
           case (u, s) =>
-            insertUserAndSub(u, s).subscription.createdAt(anyDayOfLastMonth.toDate).saveMe()
+            insertUserAndSub(u, s).subscription.createdAt(anyDayOfLastMonth).saveMe()
         }
         val expectedCurrentMonthIds = currentMonth.map(createUserAndSubReturnSubId)
 
@@ -236,7 +242,7 @@ class ReportingServiceSpec extends DBTest {
         val cancelledIds = cancelledInCurrentYear.map {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription.cancel
-              .cancellationDate(anyDayUntilThisMonth.toDate)
+              .cancellationDate(anyDayUntilThisMonth)
               .saveMe()
               .id
               .get
@@ -244,7 +250,7 @@ class ReportingServiceSpec extends DBTest {
         cancelledYearAgo.foreach {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription.cancel
-              .cancellationDate(anyDayOfLastYear.toDate)
+              .cancellationDate(anyDayOfLastYear)
               .saveMe()
         }
 
@@ -263,13 +269,13 @@ class ReportingServiceSpec extends DBTest {
         cancelledNotThisMonth.foreach {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription.cancel
-              .cancellationDate(anyDayUntilThisMonth.toDate)
+              .cancellationDate(anyDayUntilThisMonth)
               .saveMe()
         }
         val cancelledIds = cancelledThisMonth.map {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription.cancel
-              .cancellationDate(anyDayOfThisMonth.toDate)
+              .cancellationDate(anyDayOfThisMonth)
               .saveMe()
               .id
               .get
@@ -290,9 +296,9 @@ class ReportingServiceSpec extends DBTest {
     forAll(genShipmentChainData, genShipmentChainData) {
       (currentMonthProcessed, notInCurrentMonthProcessed) =>
         insertUserSubAndShipment(notInCurrentMonthProcessed).shipments
-          .foreach(_.dateProcessed(anyDayOfLastYear.toDate).saveMe())
+          .foreach(_.dateProcessed(anyDayOfLastYear).saveMe())
         val processedThisMonthIds = insertUserSubAndShipment(currentMonthProcessed).shipments
-          .map(_.dateProcessed(anyDayOfThisMonth.toDate).saveMe().id.get)
+          .map(_.dateProcessed(anyDayOfThisMonth).saveMe().id.get)
 
         val shipments = Shipment.findAll()
         val filteredShipmentsIds =
@@ -309,9 +315,9 @@ class ReportingServiceSpec extends DBTest {
     forAll(genShipmentChainData, genShipmentChainData) {
       (currentMonthShipments, notInCurrentMonthShipments) =>
         insertUserSubAndShipment(notInCurrentMonthShipments).shipments
-          .foreach(_.dateShipped(anyDayUntilThisMonth.toDate).saveMe())
+          .foreach(_.dateShipped(anyDayUntilThisMonth).saveMe())
         val thisMonthShipmentsIds = insertUserSubAndShipment(currentMonthShipments).shipments
-          .map(_.dateShipped(anyDayOfThisMonth.toDate).saveMe().id.get)
+          .map(_.dateShipped(anyDayOfThisMonth).saveMe().id.get)
 
         val shipments = Shipment.findAll()
         val filteredShipmentsIds =
@@ -328,9 +334,9 @@ class ReportingServiceSpec extends DBTest {
     forAll(genShipmentChainData, genShipmentChainData) {
       (currentYearShipments, notInCurrentYearShipments) =>
         insertUserSubAndShipment(notInCurrentYearShipments).shipments
-          .foreach(_.dateShipped(anyDayOfLastYear.toDate).saveMe())
+          .foreach(_.dateShipped(anyDayOfLastYear).saveMe())
         val currentYearShipmentsIds = insertUserSubAndShipment(currentYearShipments).shipments
-          .map(_.dateShipped(anyDayOfThisYear.toDate).saveMe().id.get)
+          .map(_.dateShipped(anyDayOfThisYear).saveMe().id.get)
 
         val shipments = Shipment.findAll()
         val filteredShipmentsIds =
@@ -346,10 +352,10 @@ class ReportingServiceSpec extends DBTest {
   it should "find yesterday shipments" in {
     forAll(genShipmentChainData, genShipmentChainData) { (withPaidShipments, newShipments) =>
       val paidShipments = insertUserSubAndShipment(withPaidShipments).shipments
-        .map(_.dateShipped(anyHourOfYesterday.toDate).saveMe())
+        .map(_.dateShipped(anyHourOfYesterday).saveMe())
       val newShipmentsSize =
         insertUserSubAndShipment(newShipments).shipments
-          .map(_.dateShipped(anyHourOfYesterday.toDate).saveMe())
+          .map(_.dateShipped(anyHourOfYesterday).saveMe())
           .map(_.amountPaid("0").saveMe())
           .size
       val expectedTotal =
@@ -369,17 +375,17 @@ class ReportingServiceSpec extends DBTest {
       (yesterdayNotOursSales, myPetDefenseSales, petlandSales) =>
         val mpdAndPetland = createPetlandAndMPDAgencies()
         myPetDefenseSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyHourOfYesterday.toDate, _)
+          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyHourOfYesterday, _)
         )
         petlandSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyHourOfYesterday.toDate, _)
+          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyHourOfYesterday, _)
         )
 
         val someAgencyName = Random.generateString.take(10)
         val someAgency     = createAgency(someAgencyName)
 
         val insertedPetsSize = yesterdayNotOursSales
-          .map(insertAgencySalesCreatedAt(someAgency, anyHourOfYesterday.toDate, _).pets.size)
+          .map(insertAgencySalesCreatedAt(someAgency, anyHourOfYesterday, _).pets.size)
           .sum
 
         val expectedInResult = someAgencyName -> insertedPetsSize
@@ -396,17 +402,17 @@ class ReportingServiceSpec extends DBTest {
       (yesterdayMonthNotOursSales, myPetDefenseSales, petlandSales) =>
         val mpdAndPetland = createPetlandAndMPDAgencies()
         myPetDefenseSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyDayOfThisMonth.toDate, _)
+          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyDayOfThisMonth, _)
         )
         petlandSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyDayOfThisMonth.toDate, _)
+          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyDayOfThisMonth, _)
         )
 
         val someAgencyName = Random.generateString.take(10)
         val someAgency     = createAgency(someAgencyName)
 
         val insertedPetsSize = yesterdayMonthNotOursSales
-          .map(insertAgencySalesCreatedAt(someAgency, anyDayOfThisMonth.toDate, _).pets.size)
+          .map(insertAgencySalesCreatedAt(someAgency, anyDayOfThisMonth, _).pets.size)
           .sum
 
         val expectedInResult = someAgencyName -> insertedPetsSize
@@ -423,10 +429,10 @@ class ReportingServiceSpec extends DBTest {
       (yesterdayNotOursSales, myPetDefenseSales, petlandSales) =>
         val mpdAndPetland = createPetlandAndMPDAgencies()
         myPetDefenseSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyHourOfYesterday.toDate, _)
+          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyHourOfYesterday, _)
         )
         petlandSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyHourOfYesterday.toDate, _)
+          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyHourOfYesterday, _)
         )
 
         val someAgencyName   = Random.generateString.take(10)
@@ -434,7 +440,7 @@ class ReportingServiceSpec extends DBTest {
         val someAgency       = createAgency(someAgencyName).saveMe()
 
         val insertedPetsSize = yesterdayNotOursSales
-          .map(insertAgencySalesCreatedAt(someAgency, anyHourOfYesterday.toDate, _))
+          .map(insertAgencySalesCreatedAt(someAgency, anyHourOfYesterday, _))
           .map { inserted =>
             inserted.user.salesAgentId(someSalesAgentId).saveMe()
             inserted.pets.size
@@ -455,12 +461,12 @@ class ReportingServiceSpec extends DBTest {
       (yesterdayMonthNotOursSales, myPetDefenseSales, petlandSales) =>
         val mpdAndPetland = createPetlandAndMPDAgencies()
         myPetDefenseSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyDayOfThisMonth.toDate, _)
+          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyDayOfThisMonth, _)
         )
         petlandSales.foreach(
           insertAgencySalesCreatedAt(
             createPetlandAndMPDAgencies().petland,
-            anyDayOfThisMonth.toDate,
+            anyDayOfThisMonth,
             _
           )
         )
@@ -470,7 +476,7 @@ class ReportingServiceSpec extends DBTest {
         val someAgency       = createAgency(someAgencyName).saveMe()
 
         val insertedPetsSize = yesterdayMonthNotOursSales
-          .map(insertAgencySalesCreatedAt(someAgency, anyDayOfThisMonth.toDate, _))
+          .map(insertAgencySalesCreatedAt(someAgency, anyDayOfThisMonth, _))
           .map { inserted =>
             inserted.user.salesAgentId(someSalesAgentId).saveMe()
             inserted.pets.size
@@ -495,7 +501,7 @@ class ReportingServiceSpec extends DBTest {
         val canceledShouldBeInResultSize =
           shouldBeInStatisticData.map(insertUserSubAndShipment).map { inserted =>
             inserted.subscription.cancel
-            inserted.shipments.map(_.dateShipped(anyDayOfThisYear.toDate).saveMe()).size
+            inserted.shipments.map(_.dateShipped(anyDayOfThisYear).saveMe()).size
           }
 
         val expectedData = ("0", 1) :: List(1, 2, 3, 4, 5).map { count =>

@@ -1,7 +1,5 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.mapper._
 
@@ -19,9 +17,7 @@ class CancelledUser
   object email     extends MappedEmail(this, 50)
   object address   extends MappedString(this, 100)
   object user      extends MappedLongForeignKey(this, User)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt extends MappedZonedDateTime(this, useNowAsDefault = true)
 
   def name = s"${firstName} ${lastName}"
 

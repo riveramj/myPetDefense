@@ -1,6 +1,6 @@
 package com.mypetdefense.model
 
-import java.util.Date
+import java.time.ZonedDateTime
 
 import com.mypetdefense.util.RandomIdGenerator._
 import com.mypetdefense.util.TitleCase
@@ -21,21 +21,15 @@ class Pet extends LongKeyedMapper[Pet] with IdPK {
   object animalType      extends MappedEnum(this, AnimalType)
   object size            extends MappedEnum(this, AnimalSize)
   object adultSize       extends MappedEnum(this, AnimalSize)
-  object birthday        extends MappedDateTime(this)
+  object birthday        extends MappedZonedDateTime(this) // TODO: maybe should be date only
   object nextGrowthDelay extends MappedInt(this)
-
   object sentDogTag extends MappedBoolean(this) {
     override def defaultValue = false
   }
-
   object status extends MappedEnum(this, Status) {
     override def defaultValue: Status.Value = Status.Active
   }
-
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
-
+  object createdAt extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object Pet extends Pet with LongKeyedMetaMapper[Pet] {
@@ -44,8 +38,8 @@ object Pet extends Pet with LongKeyedMetaMapper[Pet] {
       name: String,
       product: FleaTick,
       breed: String,
-      whelpDate: Box[Date]
-  ): Pet = {
+      whelpDate: Box[ZonedDateTime]
+  ): Pet =
     createNewPet(
       user,
       name,
@@ -54,16 +48,15 @@ object Pet extends Pet with LongKeyedMetaMapper[Pet] {
       whelpDate,
       breed
     )
-  }
 
   def createNewPet(
       user: User,
       name: String,
       animalType: AnimalType.Value,
       size: AnimalSize.Value,
-      whelpDate: Box[Date] = Empty,
+      whelpDate: Box[ZonedDateTime] = Empty,
       breed: String = ""
-  ): Pet = {
+  ): Pet =
     Pet.create
       .petId(generateLongId)
       .user(user)
@@ -73,11 +66,10 @@ object Pet extends Pet with LongKeyedMetaMapper[Pet] {
       .breed(breed)
       .birthday(whelpDate.openOr(null))
       .saveMe
-  }
 
-  def createNewPet(pet: Pet, user: User): Pet = {
+  def createNewPet(pet: Pet, user: User): Pet =
     pet.user(user).saveMe
-  }
+
   def notCancelledWithoutBox: List[Pet] =
     Pet.findAll(NotBy(Pet.status, Status.Cancelled), NullRef(Pet.box))
 }

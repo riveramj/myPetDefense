@@ -1,13 +1,12 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.mapper._
 
 class Insert extends LongKeyedMapper[Insert] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, Insert] = Insert
+
   object insertId extends MappedLong(this) {
     override def dbIndexed_?        = true
     override def defaultValue: Long = generateLongId
@@ -15,9 +14,7 @@ class Insert extends LongKeyedMapper[Insert] with IdPK {
   object name       extends MappedString(this, 100)
   object itemNumber extends MappedString(this, 100)
   object weight     extends MappedDouble(this)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt  extends MappedZonedDateTime(this, useNowAsDefault = true)
 
   def welcomeInsert: Box[Insert] = Insert.find(By(Insert.name, "Welcome Insert"))
 

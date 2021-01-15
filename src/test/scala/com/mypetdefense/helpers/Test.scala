@@ -1,7 +1,5 @@
 package com.mypetdefense.helpers
 
-import java.util.{Locale, TimeZone}
-
 import com.mypetdefense.helpers.GeneralDbUtils.clearTables
 import com.mypetdefense.util.DataLoader
 import net.liftweb.common.Empty
@@ -33,8 +31,6 @@ trait DBTest extends IntegrationTest with BeforeAndAfterEach with BeforeAndAfter
   override def beforeAll(): Unit = {
     BootUtil.bootOnceForTests
     DataLoader.loadProducts
-    TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
-    Locale.setDefault(Locale.US)
   }
 
   override def beforeEach(): Unit = {

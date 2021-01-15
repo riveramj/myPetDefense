@@ -1,7 +1,5 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.mapper._
 
@@ -17,9 +15,7 @@ class ItemReconciliation
   object inventoryItem       extends MappedLongForeignKey(this, InventoryItem)
   object expectedCount       extends MappedInt(this)
   object actualCount         extends MappedInt(this)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt           extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object ItemReconciliation extends ItemReconciliation with LongKeyedMetaMapper[ItemReconciliation] {

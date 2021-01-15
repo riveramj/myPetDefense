@@ -3,6 +3,7 @@ package com.mypetdefense.helpers
 import java.util.{Locale, TimeZone}
 
 import bootstrap.liftweb.{DbSetup, MailConfig}
+import com.mypetdefense.AppConstants.{DefaultLocale, DefaultTimezone}
 import com.mypetdefense.model._
 import net.liftweb.common.Full
 import net.liftweb.mapper.Schemifier
@@ -19,8 +20,8 @@ object BootUtil {
     }
 
   lazy val bootOnceForTests: Unit = {
-    TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
-    Locale.setDefault(Locale.US)
+    TimeZone.setDefault(TimeZone.getTimeZone(DefaultTimezone))
+    Locale.setDefault(DefaultLocale)
 
     setPropsFile()
 

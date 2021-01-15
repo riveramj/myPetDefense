@@ -1,12 +1,11 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.mapper._
 
 class GrowthRate extends LongKeyedMapper[GrowthRate] with IdPK with OneToMany[Long, GrowthRate] {
   def getSingleton: KeyedMetaMapper[Long, GrowthRate] = GrowthRate
+
   object growthRateId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -14,9 +13,7 @@ class GrowthRate extends LongKeyedMapper[GrowthRate] with IdPK with OneToMany[Lo
   object mediumProductMonth extends MappedInt(this)
   object largeProductMonth  extends MappedInt(this)
   object xlargeProductMonth extends MappedInt(this)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt          extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object GrowthRate extends GrowthRate with LongKeyedMetaMapper[GrowthRate] {

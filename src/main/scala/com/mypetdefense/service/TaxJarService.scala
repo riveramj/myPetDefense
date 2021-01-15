@@ -1,6 +1,9 @@
 package com.mypetdefense.service
 
-import java.util.Date
+import java.time.ZonedDateTime
+
+import com.mypetdefense.AppConstants.DefaultTimezone
+import com.mypetdefense.util.DateFormatters._
 import dispatch.Defaults._
 import dispatch._
 import net.liftweb.common._
@@ -9,7 +12,6 @@ import net.liftweb.util.Helpers.tryo
 import net.liftweb.util.Props
 import org.asynchttpclient.Response
 
-import java.text.SimpleDateFormat
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.concurrent.Await
@@ -21,7 +23,7 @@ object TaxJarService extends Loggable {
   val calculateTaxUrl: Req   = url("https://api.taxjar.com/v2/taxes").secure
   val createOrderTaxUrl: Req = url("https://api.taxjar.com/v2/transactions/orders").secure
 
-  val dateFormat = new SimpleDateFormat("yyyy-MM-dd")
+  val dateFormat = `2021-01-01`
 
   val authKey: String = Props.get("taxjar.api.key") openOr ""
 
@@ -107,7 +109,7 @@ object TaxJarService extends Loggable {
       subtotal: String,
       tax: String
   ): Any = {
-    val transactionDate = dateFormat.format(new Date())
+    val transactionDate = ZonedDateTime.now(DefaultTimezone).format(dateFormat)
     println("===================")
     println("in taxes charged")
     println(s"tax collected is ${tax}")

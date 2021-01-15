@@ -1,7 +1,5 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.mapper._
 
@@ -18,9 +16,7 @@ class ProductScheduleItem
   }
   object productSchedule extends MappedLongForeignKey(this, ProductSchedule)
   object product         extends MappedLongForeignKey(this, Product)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt       extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object ProductScheduleItem

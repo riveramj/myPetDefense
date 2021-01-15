@@ -1,11 +1,12 @@
 package com.mypetdefense.service
 
-import java.text.SimpleDateFormat
+import java.time.LocalDate
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.LiftTest
 import com.mypetdefense.model.{Coupon, Subscription, User, UserType}
-import com.mypetdefense.util.DateHelper.makeDate
+import com.mypetdefense.util.DateFormatters._
 import net.liftweb.common.{Empty, Full}
 
 class ValidationServiceSpec extends LiftTest {
@@ -279,7 +280,7 @@ class ValidationServiceSpec extends LiftTest {
 }
 
 object ValidationServiceSpec {
-  val dateFormat = new SimpleDateFormat("M/d/y")
+  val dateFormat = `1/1/2021`
 
   def newUserWithEmail(): User =
     User.createNewUser(
@@ -304,8 +305,8 @@ object ValidationServiceSpec {
     val sub = Subscription.createNewSubscription(
       Full(user),
       stripeSubscriptionId = "sub_1234",
-      startDate = makeDate(2020, 1, 1),
-      nextShipDate = makeDate(2020, 2, 1)
+      startDate = LocalDate.of(2020, 1, 1).atStartOfDay(DefaultTimezone),
+      nextShipDate = LocalDate.of(2020, 2, 1).atStartOfDay(DefaultTimezone)
     )
 
     user.subscription(sub).saveMe()

@@ -1,9 +1,10 @@
 package com.mypetdefense.service
 
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.ZonedDateTime
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
+import com.mypetdefense.util.DateFormatters._
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
@@ -131,8 +132,6 @@ object LabelExportService extends Loggable {
 
   def exportMPDLabelSet(shipments: List[Shipment]): Box[LiftResponse] = {
     val csvRows: List[List[String]] = {
-      val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-
       {
         for {
           shipment     <- shipments
@@ -144,7 +143,7 @@ object LabelExportService extends Loggable {
                     )
         } yield {
           shipment.shipmentId.get.toString ::
-            dateFormat.format(new Date()) ::
+            ZonedDateTime.now(DefaultTimezone).format(`01/01/2021`) ::
             "" ::
             "standard shipping" ::
             user.name ::
@@ -202,7 +201,7 @@ object LabelExportService extends Loggable {
     val shipments = ShipmentService.getCurrentPastDueShipments
 
     val csvRows: List[List[String]] = {
-      val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+      val dateFormat = `01/01/2021`
 
       {
         for {
@@ -238,8 +237,8 @@ object LabelExportService extends Loggable {
           }
 
           shipment.shipmentId.get.toString ::
-            dateFormat.format(new Date()) ::
-            dateFormat.format(shipment.dateProcessed.get) ::
+            ZonedDateTime.now(DefaultTimezone).format(dateFormat) ::
+            shipment.dateProcessed.get.format(dateFormat) ::
             "0" ::
             "0" ::
             "0" ::

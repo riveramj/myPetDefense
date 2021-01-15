@@ -11,9 +11,9 @@ class ShipmentSpec extends DBTest {
   it should "find mtd shipments" in {
     forAll(genShipmentChainData, genShipmentChainData) { (dataMonth, dataPreviousMonth) =>
       insertUserSubAndShipment(dataPreviousMonth).shipments
-        .map(_.createdAt(anyDayUntilThisMonth.toDate).saveMe())
+        .map(_.createdAt(anyDayUntilThisMonth).saveMe())
       val expectedShipments = insertUserSubAndShipment(dataMonth).shipments
-        .map(_.createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
+        .map(_.createdAt(anyDayOfThisMonth).saveMe().id.get)
 
       val actualData = Shipment.findMtdShipments.map(_.id.get)
 
@@ -25,9 +25,9 @@ class ShipmentSpec extends DBTest {
   it should "find today shipments" in {
     forAll(genShipmentChainData, genShipmentChainData) { (todayData, dataPreviousDays) =>
       insertUserSubAndShipment(dataPreviousDays).shipments
-        .map(_.dateProcessed(anyDayUntilToday.toDate).saveMe())
+        .map(_.dateProcessed(anyDayUntilToday).saveMe())
       val expectedShipments = insertUserSubAndShipment(todayData).shipments
-        .map(_.dateProcessed(anyHourOfToday.toDate).saveMe().id.get)
+        .map(_.dateProcessed(anyHourOfToday).saveMe().id.get)
 
       val actualData = Shipment.findTodayShipments.map(_.id.get)
 

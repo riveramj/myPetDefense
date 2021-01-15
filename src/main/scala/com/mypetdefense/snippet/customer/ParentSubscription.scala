@@ -1,14 +1,14 @@
 package com.mypetdefense.snippet.customer
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
-import java.util.Date
+import java.time.LocalDate
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.DateHelper.nowDate
+import com.mypetdefense.util.DateFormatters._
+import com.mypetdefense.util.DateHelper.now
 import com.mypetdefense.util.SecurityContext._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
@@ -75,7 +75,7 @@ object ParentSubscription extends Loggable {
 }
 
 class ParentSubscription extends Loggable {
-  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val dateFormat = `01/01/2021`
 
   val user: Box[User]          = currentUser
   val stripeCustomerId: String = user.map(_.stripeId.get).openOr("")
@@ -180,12 +180,18 @@ class ParentSubscription extends Loggable {
 
     val currentNextShipDate = userSubscription.map(_.nextShipDate.get)
 
-    var nextShipDate = currentNextShipDate.map(dateFormat.format).getOrElse("")
+    var nextShipDate = currentNextShipDate.map(_.format(dateFormat)).getOrElse("")
 
     def validateFields: List[ValidationError] = {
       val checkPause =
         if (!pauseAccount) Empty
-        else futureDate(nextShipDate, dateFormat, nowDate, "#pause-account .next-shipment")
+        else
+          futureDate(
+            nextShipDate,
+            dateFormat,
+            now,
+            "#pause-account .next-shipment"
+          )
 
       checkPause.toList
     }
@@ -243,13 +249,11 @@ class ParentSubscription extends Loggable {
   }
 
   def resumeSubscription: NodeSeq => NodeSeq = {
-    val nextShipDate = Date.from(
+    val nextShipDate =
       LocalDate
-        .now(ZoneId.of("America/New_York"))
-        .atStartOfDay(ZoneId.of("America/New_York"))
+        .now(DefaultTimezone)
+        .atStartOfDay(DefaultTimezone)
         .plusDays(1)
-        .toInstant
-    )
 
     def confirmResume() = {
       val subscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
@@ -271,7 +275,7 @@ class ParentSubscription extends Loggable {
     SHtml.makeFormsAjax andThen
       "#user-email *" #> email &
         ".subscription a [class+]" #> "current" &
-        ".next-shipment *" #> dateFormat.format(nextShipDate) &
+        ".next-shipment *" #> nextShipDate.format(dateFormat) &
         ".confirm-resume" #> SHtml.ajaxSubmit("Resume Subscription", confirmResume _)
   }
 
@@ -279,7 +283,7 @@ class ParentSubscription extends Loggable {
     val subscription        = ParentSubscription.currentUserSubscription.is.map(_.reload)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
-    val nextShipDate = currentNextShipDate.map(dateFormat.format).getOrElse("")
+    val nextShipDate = currentNextShipDate.map(_.format(dateFormat)).getOrElse("")
 
     "#user-email *" #> email &
       ".subscription a [class+]" #> "current" &
@@ -293,7 +297,9 @@ class ParentSubscription extends Loggable {
     def confirmPause(): Nothing = {
       val subscription = ParentSubscription.currentUserSubscription.is.map(_.reload)
 
-      val newShipDate = dateFormat.parse(nextShipDate)
+      val newShipDate =
+        LocalDate.parse(nextShipDate, dateFormat).atStartOfDay(DefaultTimezone)
+
       val updatedShipDateSubscription = subscription.flatMap { sub =>
         val updatedSubscriptionWithStripe =
           ParentService.updateNextShipBillDate(sub, newShipDate)
@@ -324,7 +330,7 @@ class ParentSubscription extends Loggable {
     val subscription        = ParentSubscription.currentUserSubscription.is.map(_.reload)
     val currentNextShipDate = subscription.map(_.nextShipDate.get)
 
-    val nextShipDate = currentNextShipDate.map(dateFormat.format).getOrElse("")
+    val nextShipDate = currentNextShipDate.map(_.format(dateFormat)).getOrElse("")
 
     "#user-email *" #> email &
       ".subscription a [class+]" #> "current" &

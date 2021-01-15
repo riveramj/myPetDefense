@@ -1,8 +1,12 @@
 package com.mypetdefense.snippet
 package admin
 
+import java.time.LocalDate
+
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.util.DateFormatters._
 import net.liftweb.common._
 import net.liftweb.http.SHtml.{ajaxInvoke, text}
 import net.liftweb.http._
@@ -25,9 +29,10 @@ class ProductSchedules extends Loggable {
   val coupons: List[Coupon] = Coupon.findAll()
   val dentalProducts =
     List(Product.dentalPowder, Product.dentalPowderSmall, Product.dentalPowderLarge).flatten
-  val supplements: List[Product]              = Product.supplements.filter(!dentalProducts.contains(_))
-  val productSchedules: List[ProductSchedule] = ProductSchedule.findAll().sortBy(_.startDate.get)
-  val startDateFormat                         = new java.text.SimpleDateFormat("M/d/y")
+  val supplements: List[Product] = Product.supplements.filter(!dentalProducts.contains(_))
+  val productSchedules: List[ProductSchedule] =
+    ProductSchedule.findAll().sortBy(_.startDate.get.toInstant.toEpochMilli)
+  val startDateFormat = `1/1/2021`
 
   var startDate = ""
   var firstBox  = false
@@ -70,7 +75,11 @@ class ProductSchedules extends Loggable {
       List(chosenSupplement1, chosenSupplement2, chosenSupplement3, Product.dentalPowder).flatten
 
     if (validateFields.isEmpty) {
-      ProductSchedule.createNew(startDateFormat.parse(startDate), selectedSupplements, firstBox)
+      ProductSchedule.createNew(
+        LocalDate.parse(startDate, startDateFormat).atStartOfDay(DefaultTimezone),
+        selectedSupplements,
+        firstBox
+      )
 
       S.redirectTo(ProductSchedules.menu.loc.calcDefaultHref)
     } else {
@@ -98,7 +107,7 @@ class ProductSchedules extends Loggable {
           val supplements = schedule.scheduledItems.toList
             .flatMap(_.product.obj)
             .filter(!dentalProducts.contains(_))
-          ".start-date *" #> startDateFormat.format(schedule.startDate.get) &
+          ".start-date *" #> schedule.startDate.get.format(startDateFormat) &
             ".first-box *" #> {
               if (schedule.firstBox.get)
                 "Yes"

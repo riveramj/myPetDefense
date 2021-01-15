@@ -1,13 +1,12 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common.Box
 import net.liftweb.mapper._
 
 class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, FleaTick] {
   def getSingleton: KeyedMetaMapper[Long, FleaTick] = FleaTick
+
   object fleaTickId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -22,9 +21,7 @@ class FleaTick extends LongKeyedMapper[FleaTick] with IdPK with OneToMany[Long, 
   object imageName   extends MappedString(this, 100)
   object sku         extends MappedString(this, 100)
   object weight      extends MappedDouble(this)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt   extends MappedZonedDateTime(this, useNowAsDefault = true)
 
   def getNameAndSize = s"${this.name} ${this.size.toString()} lbs"
 

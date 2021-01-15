@@ -23,8 +23,9 @@ class InventoryChangeAudits extends Loggable {
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
       ".inventory-audit [class+]" #> "current" &
-        ".audit-entry" #> audits.sortWith(_.createdAt.get.getTime > _.createdAt.get.getTime).map {
-          audit =>
+        ".audit-entry" #> audits
+          .sortWith(_.createdAt.get.toInstant.toEpochMilli > _.createdAt.get.toInstant.toEpochMilli)
+          .map { audit =>
             val oldCount = {
               if (audit.originalCount.get == -1)
                 ""
@@ -41,6 +42,6 @@ class InventoryChangeAudits extends Loggable {
               ".new-uom *" #> audit.newUnitOfMeasure.get &
               ".old-count *" #> oldCount &
               ".new-count *" #> audit.newCount.get
-        }
+          }
   }
 }

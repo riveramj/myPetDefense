@@ -1,8 +1,12 @@
 package com.mypetdefense.snippet
 package inventory
 
+import java.time.LocalDate
+
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.util.DateFormatters._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -24,7 +28,7 @@ object Reconciliations extends Loggable {
 }
 
 class Reconciliations extends Loggable {
-  val reconciliationDateFormat = new java.text.SimpleDateFormat("M/d/y")
+  val reconciliationDateFormat = `1/1/2021`
 
   val reconciliations: List[ReconciliationEvent] = ReconciliationEvent.findAll()
 
@@ -42,7 +46,8 @@ class Reconciliations extends Loggable {
     ).flatten
 
     if (validateFields.isEmpty) {
-      val realDate = reconciliationDateFormat.parse(newDate)
+      val realDate =
+        LocalDate.parse(newDate, reconciliationDateFormat).atStartOfDay(DefaultTimezone)
 
       ReconciliationEvent.createNewReconciliationEvent(realDate)
 
@@ -131,11 +136,12 @@ class Reconciliations extends Loggable {
               () => createReconciliationEvent
             )
         } &
-        "tbody" #> reconciliations.sortWith(_.eventDate.get.getTime > _.eventDate.get.getTime).map {
-          reconciliation =>
+        "tbody" #> reconciliations
+          .sortWith(_.eventDate.get.toInstant.toEpochMilli > _.eventDate.get.toInstant.toEpochMilli)
+          .map { reconciliation =>
             idMemoize { detailsRenderer =>
               ".reconciliation-entry" #> {
-                ".date *" #> reconciliationDateFormat.format(reconciliation.eventDate.get) &
+                ".date *" #> reconciliation.eventDate.get.format(reconciliationDateFormat) &
                   "^ [onclick]" #> ajaxInvoke(() => {
                     if (currentReconciliation.isEmpty) {
                       currentReconciliation = Full(reconciliation)
@@ -156,6 +162,6 @@ class Reconciliations extends Loggable {
                   }
                 }
             }
-        }
+          }
   }
 }

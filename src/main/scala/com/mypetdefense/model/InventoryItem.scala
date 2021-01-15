@@ -1,7 +1,5 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.mapper._
 
@@ -10,6 +8,7 @@ class InventoryItem
     with IdPK
     with OneToMany[Long, InventoryItem] {
   def getSingleton: KeyedMetaMapper[Long, InventoryItem] = InventoryItem
+
   object inventoryItemId extends MappedLong(this) {
     override def dbIndexed_? = true
   }
@@ -18,9 +17,7 @@ class InventoryItem
   object itemParts     extends MappedOneToMany(InventoryItemPart, InventoryItemPart.finishedItem)
   object unitOfMeasure extends MappedEnum(this, UnitOfMeasure)
   object total         extends MappedInt(this)
-  object createdAt extends MappedDateTime(this) {
-    override def defaultValue = new Date()
-  }
+  object createdAt     extends MappedZonedDateTime(this, useNowAsDefault = true)
 }
 
 object InventoryItem extends InventoryItem with LongKeyedMetaMapper[InventoryItem] {

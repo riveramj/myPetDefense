@@ -221,7 +221,7 @@ object ReportingService extends Loggable {
         agency       <- Agency.find(By(Agency.name, name)).toList
         customer     <- agency.customers.toList
         subscription <- customer.subscription.toList
-        shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+        shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.toInstant.toEpochMilli)
       } yield {
         shipment
       }
@@ -275,8 +275,8 @@ object ReportingService extends Loggable {
     println(amazonOrderExport + " 000000")
 
     val dateFormat      = AmazonOrderReport.dateFormat
-    val startDateExport = amazonOrderExport.startDate.map(dateFormat.parse)
-    val endDateExport   = amazonOrderExport.endDate.map(dateFormat.parse)
+    val startDateExport = amazonOrderExport.startDate.map(LocalDate.parse(_, dateFormat))
+    val endDateExport   = amazonOrderExport.endDate.map(LocalDate.parse(_, dateFormat))
     val petExport       = amazonOrderExport.animalType
 
     println(petExport)
@@ -350,7 +350,7 @@ object ReportingService extends Loggable {
         User.findAll(
           By(User.referer, agency),
           By_>=(User.createdAt, monthDayOne),
-          By_<(User.createdAt, beginngNextMonth)
+          By_<(User.createdAt, beginningNextMonth)
         )
       )
     }
@@ -397,7 +397,7 @@ object ReportingService extends Loggable {
         User.findAll(
           By(User.referer, agency),
           By_>=(User.createdAt, monthDayOne),
-          By_<(User.createdAt, beginngNextMonth)
+          By_<(User.createdAt, beginningNextMonth)
         )
       }
 
@@ -536,7 +536,7 @@ object ReportingService extends Loggable {
       agency       <- Agency.find(By(Agency.name, agencyName)).toList
       customer     <- agency.customers.toList
       subscription <- customer.subscription.toList
-      shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+      shipment     <- subscription.shipments.toList.sortBy(_.dateProcessed.get.toInstant.toEpochMilli)
       mailedDate   <- shipment.getMailedDateOfShipment
     } yield {
       val amountPaid = getShipmentAmountPaid(shipment)
@@ -896,7 +896,7 @@ object ReportingService extends Loggable {
     for {
       customer     <- customers.filter(_.status.get != Status.Active)
       subscription <- customer.subscription
-      shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.getTime)
+      shipments = subscription.shipments.toList.sortBy(_.dateProcessed.get.toInstant.toEpochMilli)
       firstShipment <- shipments.headOption
       if !firstShipment.getMailedDateOfShipment.isEmpty
       lastShipment <- shipments.lastOption

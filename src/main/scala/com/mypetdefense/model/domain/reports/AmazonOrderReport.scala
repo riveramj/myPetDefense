@@ -1,12 +1,12 @@
 package com.mypetdefense.model.domain.reports
 
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.ZonedDateTime
 
 import com.mypetdefense.model.AnimalType
 import com.mypetdefense.model.domain.reports.AmazonOrderReport.dateFormat
 import com.mypetdefense.typeclasses.ToCsvStringConverter
 import com.mypetdefense.util.CSVHelper
+import com.mypetdefense.util.DateFormatters._
 
 case class AmazonOrderReport(
     name: String,
@@ -17,7 +17,7 @@ case class AmazonOrderReport(
     state: String,
     zip: String,
     animalType: AnimalType.Value,
-    purchaseDate: Date,
+    purchaseDate: ZonedDateTime,
     productName: String
 ) {
   def toCsvRow: List[String] = {
@@ -27,7 +27,7 @@ case class AmazonOrderReport(
       name,
       address,
       animalType.toString,
-      dateFormat.format(purchaseDate),
+      purchaseDate.format(dateFormat),
       productName.replace(",", "")
     )
   }
@@ -35,7 +35,7 @@ case class AmazonOrderReport(
 
 object AmazonOrderReport {
 
-  val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
+  val dateFormat = `01/01/2021`
 
   implicit val amazonOrdersReportsToCSV: ToCsvStringConverter[List[AmazonOrderReport]] =
     new ToCsvStringConverter[List[AmazonOrderReport]] {

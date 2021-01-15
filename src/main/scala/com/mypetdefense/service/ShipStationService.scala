@@ -1,9 +1,8 @@
 package com.mypetdefense.service
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
-import java.util.Date
+import java.time.{LocalDate, ZonedDateTime}
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.model._
 import com.mypetdefense.shipstation.{
   Address => ShipStationAddress,
@@ -11,6 +10,7 @@ import com.mypetdefense.shipstation.{
   _
 }
 import com.mypetdefense.util.CalculationHelper
+import com.mypetdefense.util.DateFormatters._
 import com.mypetdefense.util.ModelSyntax.ListOfShipmentLineItemsSyntax
 import dispatch.Defaults._
 import dispatch._
@@ -27,7 +27,8 @@ trait ShipStationServiceTrait extends Loggable {
   val key: String    = Props.get("shipstation.key") openOr ""
   val secret: String = Props.get("shipstation.secret") openOr ""
   val url: String    = Props.get("shipstation.url") openOr ""
-  val dateFormat     = new SimpleDateFormat("MM/dd/yyyy")
+
+  val dateFormat = `01/01/2021`
 
   implicit val shipStationExecutor: ShipStationExecutor
 
@@ -189,7 +190,7 @@ trait ShipStationServiceTrait extends Loggable {
 
     Order.create(
       orderNumber = s"${order.treatOrderId.get}",
-      orderDate = dateFormat.format(new Date()),
+      orderDate = ZonedDateTime.now(DefaultTimezone).format(dateFormat),
       orderStatus = "awaiting_shipment",
       billTo = billShipTo,
       shipTo = billShipTo,
@@ -218,7 +219,8 @@ trait ShipStationServiceTrait extends Loggable {
     val refreshedShipment      = shipment.reload
     val shipmentLineItemsByPet = refreshedShipment.shipmentLineItemsByPets
 
-    val normalizedWeight = CalculationHelper.calculateOrderWeight(subscription.subscriptionBoxes.toList)
+    val normalizedWeight =
+      CalculationHelper.calculateOrderWeight(subscription.subscriptionBoxes.toList)
 
     val shipStationItems = allInserts.toList.zipWithIndex.map {
       case (insert, index) => insertToOrderItem(insert, index)
@@ -228,7 +230,7 @@ trait ShipStationServiceTrait extends Loggable {
 
     Order.create(
       orderNumber = s"${refreshedShipment.shipmentId.get}",
-      orderDate = dateFormat.format(new Date()),
+      orderDate = ZonedDateTime.now(DefaultTimezone).format(dateFormat),
       orderStatus = "awaiting_shipment",
       billTo = billShipTo,
       shipTo = billShipTo,
@@ -241,22 +243,20 @@ trait ShipStationServiceTrait extends Loggable {
     )
   }
 
-  def holdOrderUntil(orderId: Int, date: Date): Future[Box[HoldOrderResults]] = {
-    val holdDate = dateFormat.format(date)
+  def holdOrderUntil(orderId: Int, date: ZonedDateTime): Future[Box[HoldOrderResults]] = {
+    val holdDate = date.format(dateFormat)
 
     Order.holdUntil(orderId, holdDate)
   }
 
   def getYesterdayShipments(): Box[ShipmentList] = {
-    val dateFormat = new SimpleDateFormat("MM/dd/yyyy")
-    val yesterdayDate = Date.from(
+    val yesterdayDate =
       LocalDate
-        .now(ZoneId.of("America/New_York"))
-        .atStartOfDay(ZoneId.of("America/New_York"))
+        .now(DefaultTimezone)
+        .atStartOfDay(DefaultTimezone)
         .minusDays(1)
-        .toInstant()
-    )
-    val shipDate = dateFormat.format(yesterdayDate)
+
+    val shipDate = yesterdayDate.format(dateFormat)
 
     Try(
       Await.result(
@@ -309,7 +309,7 @@ trait ShipStationServiceTrait extends Loggable {
       .filter(_.animalType.get == AnimalType.Dog)
 
     if (dogs.nonEmpty) {
-      subscription.reload.freeUpgradeSampleDate(new Date).saveMe()
+      subscription.reload.freeUpgradeSampleDate(ZonedDateTime.now(DefaultTimezone)).saveMe()
       dogs.map(pet => ShipmentLineItem.sendFreeUpgradeItems(shipment, pet))
 
       Insert.tryUpgrade ++ shipmentLineItemsInserts

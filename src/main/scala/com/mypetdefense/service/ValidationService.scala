@@ -1,7 +1,7 @@
 package com.mypetdefense.service
 
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
@@ -220,15 +220,13 @@ object ValidationService extends Loggable {
 
   def validDate(
       date: String,
-      dateFormat: SimpleDateFormat,
+      dateFormat: DateTimeFormatter,
       errorId: String
   ): Box[ValidationError] = {
-    dateFormat.setLenient(false)
-
     if (date.isEmpty) {
       Empty
     } else {
-      tryo(dateFormat.parse(date)) match {
+      tryo(LocalDate.parse(date, dateFormat)) match {
         case Full(_) => Empty
         case _       => Full(ValidationError(errorId, "Not a valid date format."))
       }
@@ -237,7 +235,7 @@ object ValidationService extends Loggable {
 
   def checkBirthday(
       birthday: String,
-      dateFormat: SimpleDateFormat,
+      dateFormat: DateTimeFormatter,
       errorId: String
   ): Box[ValidationError] = {
     validDate(birthday, dateFormat, errorId)
@@ -245,11 +243,11 @@ object ValidationService extends Loggable {
 
   def futureDate(
       date: String,
-      dateFormat: SimpleDateFormat,
-      now: Date,
+      dateFormat: DateTimeFormatter,
+      now: LocalDate,
       fieldId: String
   ): Box[ValidationError] = {
-    Box.tryo(dateFormat.parse(date)).map(_.after(now)) match {
+    Box.tryo(LocalDate.parse(date, dateFormat)).map(_.isAfter(now)) match {
       case Full(true)  => Empty
       case Full(false) => Full(ValidationError(fieldId, "Not a future date."))
       case _           => Full(ValidationError(fieldId, "Not a valid date format."))

@@ -1,6 +1,6 @@
 package com.mypetdefense.service
 
-import java.util.Date
+import java.time.ZonedDateTime
 
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
@@ -53,7 +53,7 @@ class ShipmentServiceSpec extends DBTest {
       .flatMap(
         setExpShipDateStatusAndShipmentStatus(
           _,
-          properDate.toDate,
+          properDate,
           ShipmentStatus.Paid,
           Status.Active
         )
@@ -64,7 +64,7 @@ class ShipmentServiceSpec extends DBTest {
       .flatMap(
         setExpShipDateStatusAndShipmentStatus(
           _,
-          properDate.toDate,
+          properDate,
           ShipmentStatus.Paid,
           Status.Cancelled
         )
@@ -74,7 +74,7 @@ class ShipmentServiceSpec extends DBTest {
       .flatMap(
         setExpShipDateStatusAndShipmentStatus(
           _,
-          properDate.toDate,
+          properDate,
           ShipmentStatus.Other,
           Status.Active
         )
@@ -85,7 +85,7 @@ class ShipmentServiceSpec extends DBTest {
       .flatMap(
         setExpShipDateStatusAndShipmentStatus(
           _,
-          anyDayOfThisMonthFromTomorrow.toDate,
+          anyDayOfThisMonthFromTomorrow,
           ShipmentStatus.Paid,
           Status.Active
         )
@@ -102,14 +102,14 @@ class ShipmentServiceSpec extends DBTest {
     val shouldBeTooFutureData = mapWithNOfUserNSubscription()
     val insertedExpectedIds = shouldBeProperData
       .map(insertUserAndSubTupled)
-      .map(setStatusAndNextShipDate(_, anyDayOfNext19Days.toDate, Status.Active))
+      .map(setStatusAndNextShipDate(_, anyDayOfNext19Days, Status.Active))
       .map(_.id.get)
     shouldBeCancelledData
       .map(insertUserAndSubTupled)
-      .map(setStatusAndNextShipDate(_, anyDayOfNext19Days.toDate, Status.Cancelled))
+      .map(setStatusAndNextShipDate(_, anyDayOfNext19Days, Status.Cancelled))
     shouldBeTooFutureData
       .map(insertUserAndSubTupled)
-      .map(setStatusAndNextShipDate(_, anyDayOFromPlus21Days.toDate, Status.Active))
+      .map(setStatusAndNextShipDate(_, anyDayOFromPlus21Days, Status.Active))
     val actualDataIds = ShipmentService.getUpcomingSubscriptions.map(_.id.get)
 
     actualDataIds should contain theSameElementsAs insertedExpectedIds
@@ -120,11 +120,11 @@ class ShipmentServiceSpec extends DBTest {
     val shouldBeTooFutureData = mapWithNOfUserNSubscription()
     val insertedExpectedIds = shouldBeProperData
       .map(insertUserAndSubTupled)
-      .map(setStatusAndNextShipDate(_, validDateForGetPastDueShipments.toDate, Status.Active))
+      .map(setStatusAndNextShipDate(_, validDateForGetPastDueShipments, Status.Active))
       .map(_.id.get)
     shouldBeTooFutureData
       .map(insertUserAndSubTupled)
-      .map(setStatusAndNextShipDate(_, invalidDateForGetPastDueShipments.toDate, Status.Active))
+      .map(setStatusAndNextShipDate(_, invalidDateForGetPastDueShipments, Status.Active))
       .map(_.id.get)
     val actualDataIds = ShipmentService.getPastDueShipments.map(_.id.get)
 
@@ -209,7 +209,7 @@ class ShipmentServiceSpec extends DBTest {
 
   private def setExpShipDateStatusAndShipmentStatus(
       in: InsertedUserSubAndShipment,
-      expectedShipData: Date,
+      expectedShipData: ZonedDateTime,
       shipmentStatus: ShipmentStatus.Value,
       status: Status.Value
   ): List[Shipment] =
@@ -222,7 +222,7 @@ class ShipmentServiceSpec extends DBTest {
 
   private def setStatusAndNextShipDate(
       in: InsertedUserAndSub,
-      nextShipDate: Date,
+      nextShipDate: ZonedDateTime,
       status: Status.Value
   ): Subscription =
     in.subscription.nextShipDate(nextShipDate).status(status).saveMe()

@@ -1,7 +1,8 @@
 package com.mypetdefense.jobs
 
-import java.util.Date
+import java.time.ZonedDateTime
 
+import com.mypetdefense.AppConstants.DefaultTimezone
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.{InventoryService, ParentService, ShipStationService}
@@ -36,7 +37,7 @@ class SendTrackingEmailJob extends ManagedJob {
         }
 
         shipment
-          .dateShipped(new Date())
+          .dateShipped(ZonedDateTime.now(DefaultTimezone))
           .address(nameAddress)
           .trackingNumber(label.trackingNumber)
           .saveMe

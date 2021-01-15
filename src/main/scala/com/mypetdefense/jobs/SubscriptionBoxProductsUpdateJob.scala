@@ -1,7 +1,7 @@
 package com.mypetdefense.jobs
 
 import com.mypetdefense.model._
-import com.mypetdefense.util.DateHelper.DateOps
+import com.mypetdefense.util.DateHelper._
 import net.liftweb.common.Box
 import org.quartz._
 
