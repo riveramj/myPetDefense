@@ -37,6 +37,7 @@ trait CreateShipStationOrderJobTrait extends ManagedJob {
            [shipment-id:${shipment.id.get}]
            [subscription-id:${subscription.id.get}]
            [user-id:${user.id.get}]
+           [user-email:${user.email.get}]
            [run-in-batch:$thisRun]
            [job-run-id:$jobRunId]"""
       )
