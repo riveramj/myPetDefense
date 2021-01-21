@@ -53,7 +53,7 @@ trait CreateShipStationOrderJobTrait extends ManagedJob {
             .saveMe
           logger.info(s"[run-in-batch:$thisRun][job-run-id:$jobRunId] successfully done")
 
-        case TrySuccess(Failure(message, _, _)) =>
+        case TrySuccess(Failure(message, error, _)) =>
           Event.createEvent(
             Full(user),
             Full(subscription),
@@ -63,6 +63,7 @@ trait CreateShipStationOrderJobTrait extends ManagedJob {
             details = message
           )
           logger.error(s"[run-in-batch:$thisRun][job-run-id:$jobRunId] done with error $message")
+          logger.error(s"""[run-in-batch:$thisRun][job-run-id:$jobRunId]: $error""")
 
         case TrySuccess(Empty) =>
           Event.createEvent(
