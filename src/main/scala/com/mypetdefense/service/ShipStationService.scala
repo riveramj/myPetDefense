@@ -202,6 +202,13 @@ trait ShipStationServiceTrait extends Loggable {
 
   }
 
+  def findServiceCode(
+      weight: Double
+ ): String = if (weight < 16D)
+      "usps_first_class_mail"
+    else
+      "usps_parcel_select_ground"
+
   def createShipStationOrder(
       shipment: Shipment,
       user: User,
@@ -226,11 +233,7 @@ trait ShipStationServiceTrait extends Loggable {
       case ((pet, lineItems), index) => petFleaTickAndProductsToOrderItems(pet, lineItems, index)
     }
 
-    val serviceCode =
-      if (normalizedWeight.toDouble < 16D)
-        "usps_first_class_mail"
-      else
-        "usps_parcel_select_ground"
+    val serviceCode = findServiceCode(normalizedWeight.toDouble)
 
     Order.create(
       orderNumber = s"${refreshedShipment.shipmentId.get}",
