@@ -1,7 +1,5 @@
 package com.mypetdefense.service
 
-import java.text.SimpleDateFormat
-import java.util.Date
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator.{AddressGeneratedData, InsertGenData}
 import com.mypetdefense.helpers.DBTest
@@ -11,7 +9,6 @@ import com.mypetdefense.helpers.Random.randomPosInt
 import com.mypetdefense.helpers.db.AddressDbUtil._
 import com.mypetdefense.helpers.db.InsertsDbHelper._
 import com.mypetdefense.model.{BoxType, Pet, Subscription}
-import com.mypetdefense.service.ShipStationService.findServiceCode
 import com.mypetdefense.shipstation._
 import dispatch.{Future, Req}
 import net.liftweb.common._
@@ -22,6 +19,8 @@ import org.asynchttpclient.Param
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers._
 
+import java.text.SimpleDateFormat
+import java.util.Date
 import scala.collection.JavaConverters._
 
 class ShipstationServiceSpec extends DBTest with RestHelper {
@@ -64,7 +63,7 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
     val serviceCode = if (expectedWeight.toDouble < 16D)
       "usps_first_class_mail"
     else
-      "usps_parcel_select_ground"
+      "usps_parcel_select"
 
     def jsonAssertFun(maybeIn: Option[JValue]): Unit = {
       maybeIn.fold(fail("json is empty")) { in =>
