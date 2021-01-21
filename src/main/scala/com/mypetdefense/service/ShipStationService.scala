@@ -226,6 +226,12 @@ trait ShipStationServiceTrait extends Loggable {
       case ((pet, lineItems), index) => petFleaTickAndProductsToOrderItems(pet, lineItems, index)
     }
 
+    val serviceCode =
+      if (normalizedWeight.toDouble < 16D)
+        "usps_first_class_mail"
+      else
+        "usps_parcel_select_ground"
+
     Order.create(
       orderNumber = s"${refreshedShipment.shipmentId.get}",
       orderDate = dateFormat.format(new Date()),
@@ -235,7 +241,7 @@ trait ShipStationServiceTrait extends Loggable {
       items = Some(shipStationItems.sortBy(_.lineItemKey)),
       weight = Some(Weight(normalizedWeight.toDouble, "ounces")),
       carrierCode = Some("stamps_com"),
-      serviceCode = Some("usps_first_class_mail"),
+      serviceCode = Some(serviceCode),
       packageCode = Some("package"),
       customerEmail = Some(user.email.get)
     )
