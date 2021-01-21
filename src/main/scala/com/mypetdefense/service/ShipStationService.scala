@@ -235,7 +235,7 @@ trait ShipStationServiceTrait extends Loggable {
 
     val serviceCode = findServiceCode(normalizedWeight.toDouble)
 
-    Order.create(
+    val foo = Order.create(
       orderNumber = s"${refreshedShipment.shipmentId.get}",
       orderDate = dateFormat.format(new Date()),
       orderStatus = "awaiting_shipment",
@@ -248,6 +248,10 @@ trait ShipStationServiceTrait extends Loggable {
       packageCode = Some("package"),
       customerEmail = Some(user.email.get)
     )
+
+    println(foo)
+
+    foo
   }
 
   def holdOrderUntil(orderId: Int, date: Date): Future[Box[HoldOrderResults]] = {
