@@ -207,7 +207,7 @@ trait ShipStationServiceTrait extends Loggable {
  ): String = if (weight < 16D)
       "usps_first_class_mail"
     else
-      "usps_parcel_select_ground"
+      "usps_parcel_select"
 
   def createShipStationOrder(
       shipment: Shipment,
@@ -235,7 +235,7 @@ trait ShipStationServiceTrait extends Loggable {
 
     val serviceCode = findServiceCode(normalizedWeight.toDouble)
 
-    val foo = Order.create(
+    Order.create(
       orderNumber = s"${refreshedShipment.shipmentId.get}",
       orderDate = dateFormat.format(new Date()),
       orderStatus = "awaiting_shipment",
@@ -248,10 +248,6 @@ trait ShipStationServiceTrait extends Loggable {
       packageCode = Some("package"),
       customerEmail = Some(user.email.get)
     )
-
-    println(foo)
-
-    foo
   }
 
   def holdOrderUntil(orderId: Int, date: Date): Future[Box[HoldOrderResults]] = {
