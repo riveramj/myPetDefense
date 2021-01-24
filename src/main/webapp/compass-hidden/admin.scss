@@ -276,8 +276,12 @@ td.email {
 }
 
 .parent-subscription {
-  .subscription-status {
+  .subscription-status, .subscription-level {
     font-size: 20px;
+  }
+
+  .information li {
+    padding-right: 40px;
   }
   .change-status {
     margin-top: 10px;
