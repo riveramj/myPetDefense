@@ -45,9 +45,9 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
     )
   }
 
-  def possiblePrice(subscriptionBox: SubscriptionBox): Double =
+  def possiblePrice(subscriptionBox: SubscriptionBox, upgradedBox: Boolean = false): Double =
     if (subscriptionBox.subscriptionItems.toList.nonEmpty)
-      subscriptionBox.pet.obj.map(basePrice(_, false)).openOr(0d)
+      subscriptionBox.pet.obj.map(basePrice(_, upgradedBox)).openOr(0d)
     else
       0d
 
