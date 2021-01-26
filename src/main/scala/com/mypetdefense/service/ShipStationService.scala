@@ -224,8 +224,9 @@ trait ShipStationServiceTrait extends Loggable {
 
     val refreshedShipment      = shipment.reload
     val shipmentLineItemsByPet = refreshedShipment.shipmentLineItemsByPets
+    val activeSubscriptionBoxes = subscription.subscriptionBoxes.toList.filter(_.status.get == Status.Active)
 
-    val normalizedWeight = CalculationHelper.calculateOrderWeight(subscription.subscriptionBoxes.toList)
+    val normalizedWeight = CalculationHelper.calculateOrderWeight(activeSubscriptionBoxes, shipment)
 
     val shipStationItems = allInserts.toList.zipWithIndex.map {
       case (insert, index) => insertToOrderItem(insert, index)
