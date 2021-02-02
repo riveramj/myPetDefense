@@ -48,7 +48,14 @@ class Checkout extends Loggable {
 
   var stripeToken         = ""
   var coupon: Box[Coupon] = PetFlowChoices.coupon.is
-  var couponCode: String  = coupon.map(_.couponCode.get.toLowerCase()).openOr("")
+  var couponCode: String  = {
+    val code = coupon.map(_.couponCode.get.toLowerCase()).getOrElse("")
+
+    if (code == "100off")
+      ""
+    else
+      code
+  }
 
   val pets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
   val petCount: Int                          = pets.size
@@ -157,8 +164,9 @@ class Checkout extends Loggable {
 
   def validateCouponCode(): JsCmd = {
     val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
+    val possibleCode = possibleCoupon.map(_.couponCode.get).openOr("")
 
-    if (possibleCoupon.isEmpty) {
+    if (possibleCoupon.isEmpty || possibleCode == "100off") {
       PromoCodeMessage("error")
     } else {
       coupon = possibleCoupon
