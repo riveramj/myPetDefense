@@ -15,6 +15,7 @@ import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
+import scala.collection.immutable.Range
 import scala.collection.mutable
 import scala.xml.NodeSeq
 
@@ -43,6 +44,8 @@ class Checkout extends Loggable {
   var zip                                             = ""
   var taxRate                                         = 0d
   var taxDue                                          = 0d
+  var monthlyTotal: BigDecimal                        = 0
+  var todayTotal: BigDecimal                          = 0
   var priceAdditionsRenderer: Box[IdMemoizeTransform] = None
   var accountRenderer: Box[IdMemoizeTransform]        = None
 
@@ -60,19 +63,12 @@ class Checkout extends Loggable {
   val pets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
   val petCount: Int                          = pets.size
 
-  val smMedPets: Int = pets.values.count { pet =>
-    pet.size.get != AnimalSize.DogLargeZo && pet.size.get != AnimalSize.DogXLargeZo
-  }
+  val smPets: Int = pets.values.count {_.size.get == AnimalSize.DogSmallZo}
+  val medLgXlPets: Int = petCount - smPets
 
-  val lgXlPets: Int = petCount - smMedPets
+  val subtotal: BigDecimal = (smPets * BigDecimal(24.99)) + (medLgXlPets * BigDecimal(27.99))
 
-  val subtotal: BigDecimal = (smMedPets * BigDecimal(24.99)) + (lgXlPets * BigDecimal(27.99))
-  val discount: BigDecimal = petCount match {
-    case 0 | 1 => BigDecimal(0)
-    case _     => subtotal * 0.1
-  }
-  var promotionAmount: BigDecimal      = (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
-  val subtotalWithDiscount: BigDecimal = subtotal - discount
+  var promotionAmount: BigDecimal = findPromotionAmount()
 
   val pennyCount: Int = (subtotal * 100).toInt
 
@@ -84,11 +80,25 @@ class Checkout extends Loggable {
   }
 
   private def updateSessionVars() = {
-    val total = subtotalWithDiscount + taxDue
+
     PetFlowChoices.petCount(Full(petCount))
     PetFlowChoices.completedPets(mutable.LinkedHashMap.empty)
-    PetFlowChoices.total(Full(total))
-    PetFlowChoices.freeMonths(coupon.map(_.numberOfMonths.get))
+    PetFlowChoices.monthlyTotal(Full(monthlyTotal))
+    PetFlowChoices.todayTotal(Full(todayTotal))
+  }
+
+  private def findPromotionAmount(): BigDecimal = {
+    (coupon.map(_.percentOff.get), coupon.map(_.dollarOff.get)) match {
+      case (Full(percent), _) if percent > 0 =>
+        (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
+
+      case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount < subtotal =>
+        dollarAmount
+
+      case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount > subtotal =>
+        subtotal
+      case (_,_) => 0
+    }
   }
 
   private def setupNewUserAndRedirect(customer: StripeFacade.CustomerWithSubscriptions): Nothing = {
@@ -201,7 +211,7 @@ class Checkout extends Loggable {
       city,
       state,
       zip,
-      subtotalWithDiscount
+      subtotal
     )
 
     taxDue = taxInfo._1
@@ -221,32 +231,24 @@ class Checkout extends Loggable {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
 
-        promotionAmount = (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
+        promotionAmount = findPromotionAmount()
 
-        val monthlyTotal = subtotalWithDiscount + taxDue
-        val todayTotal   = subtotalWithDiscount + taxDue - promotionAmount
+        monthlyTotal = subtotal + taxDue
+        todayTotal   = if (subtotal > promotionAmount)
+          subtotal + taxDue - promotionAmount
+        else
+          subtotal - promotionAmount
 
         "#subtotal span *" #> f"$$$subtotal%2.2f" &
-          "#discount" #> ClearNodesIf(discount == 0) &
-          "#promotion" #> ClearNodesIf(promotionAmount == 0) &
-          "#promotion span *" #> f"-$$$promotionAmount%2.2f" &
-          "#discount span *" #> f"$$$discount%2.2f" &
-          "#tax" #> ClearNodesIf(taxDue == 0d) &
-          "#tax span *" #> f"$$$taxDue%2.2f" &
-          "#monthly-total span *" #> f"$$$monthlyTotal%2.2f" & {
-          val couponDiscountPercent = coupon.map(_.percentOff.get).openOr(0)
-          val couponMonthCount      = coupon.map(_.numberOfMonths.get).openOr(0)
-
-          if (coupon.isEmpty || couponDiscountPercent != 100) {
+        "#promotion" #> ClearNodesIf(promotionAmount == 0) &
+        "#promotion span *" #> f"-$$$promotionAmount%2.2f" &
+        "#tax" #> ClearNodesIf(taxDue == 0d) &
+        "#tax span *" #> f"$$$taxDue%2.2f" &
+        "#monthly-total span *" #> f"$$$monthlyTotal%2.2f" & {
+          if (coupon.isEmpty || subtotal - promotionAmount > 0) {
             "#order span *" #> f"$$$todayTotal%2.2f"
           } else {
-            "#order span *" #> {
-              if (couponMonthCount == 1) {
-                s"First Month Free"
-              } else {
-                s"""First $couponMonthCount months free"""
-              }
-            }
+            "#order span *" #> "First Month Free"
           }
         }
       }
