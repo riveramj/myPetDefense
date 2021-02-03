@@ -62,6 +62,8 @@ trait StripeHook extends RestHelper with Loggable {
         }
 
         if (activePets_?) {
+          subscription.reload.status(Status.Active).save()
+          
           TaxJarService.processTaxesCharged(
             invoicePaymentId,
             city,
