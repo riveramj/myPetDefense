@@ -1,13 +1,13 @@
 package com.mypetdefense.service
 
 import java.util.Date
-
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers.GeneralDbUtils._
 import com.mypetdefense.helpers.Random._
 import com.mypetdefense.helpers.TestTags.PostgresOnlyTest
+import com.mypetdefense.helpers.db.AgencyDbUtils.createAgency
 import com.mypetdefense.model._
 import net.liftweb.common.Full
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
@@ -131,7 +131,7 @@ class ShipmentServiceSpec extends DBTest {
     actualDataIds should contain theSameElementsAs insertedExpectedIds
   }
 
-  "shouldSendFreeUpgradeShipment" should "send upgrade on second shipment" in {
+  "shouldSendFreeUpgradeShipment" should "send upgrade on second shipment for TPP" in {
     forAllNoShrink(listOfNSimplePetsGen()) { pets =>
       val dogs = pets.filter(_.animalType.get == AnimalType.Dog)
       whenever(dogs.nonEmpty) {
@@ -139,6 +139,20 @@ class ShipmentServiceSpec extends DBTest {
         subscriptionBoxWithFreeUpgrade(sub).saveMe()
 
         ShipmentService.shouldSendFreeUpgradeShipment(sub, shipmentCount = 1, dogs) mustBe true
+
+        clearTables()
+      }
+    }
+  }
+
+  it should "not send upgrade on second shipment for non-tpp" in {
+    forAllNoShrink(listOfNSimplePetsGen()) { pets =>
+      val dogs = pets.filter(_.animalType.get == AnimalType.Dog)
+      whenever(dogs.nonEmpty) {
+        val sub = subscriptionWithoutFreeUpgrade.saveMe()
+        subscriptionBoxWithFreeUpgrade(sub).saveMe()
+
+        ShipmentService.shouldSendFreeUpgradeShipment(sub, shipmentCount = 1, dogs) mustBe false
 
         clearTables()
       }
@@ -230,9 +244,17 @@ class ShipmentServiceSpec extends DBTest {
 }
 
 object ShipmentServiceSpec {
+  val tppAgency = createAgency(tppAgencyName)
+
+  val user: User =
+    User.create
+      .referer(tppAgency)
+      .saveMe()
+
   val subscriptionWithFreeUpgrade: Subscription =
     Subscription.create
       .isUpgraded(false)
+      .user(user)
 
   val subscriptionWithoutFreeUpgrade: Subscription =
     Subscription.create
