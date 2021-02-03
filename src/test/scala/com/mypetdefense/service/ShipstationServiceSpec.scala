@@ -48,17 +48,18 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
       .find(By(Subscription.id, insertedUser.subscription.get))
       .openOrThrowException("oops")
 
+    val shipment = inserted.shipments.head.reload
+
     val expectedWeight = insertedSub.subscriptionBoxes
       .map(b =>
         b.boxType.get match {
-          case BoxType.basic             => BigDecimal(5)
+          case BoxType.basic if !shipment.freeUpgradeSample.get => BigDecimal(5)
+          case BoxType.basic             => BigDecimal(15)
           case BoxType.healthAndWellness => BigDecimal(15)
           case _                         => BigDecimal(0)
         }
       )
       .sum
-
-    val shipment = inserted.shipments.head.reload
 
     val serviceCode = if (expectedWeight.toDouble < 16D)
       "usps_first_class_mail"
