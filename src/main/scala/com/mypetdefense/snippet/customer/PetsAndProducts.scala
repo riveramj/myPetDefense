@@ -4,6 +4,7 @@ import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
+import com.mypetdefense.snippet.login.Login
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.SecurityContext._
 import net.liftweb.common._
@@ -12,6 +13,7 @@ import net.liftweb.http._
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.mapper.By
+import net.liftweb.sitemap.Loc.{IfValue, MatchWithoutCurrentValue}
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
@@ -24,6 +26,18 @@ object PetsAndProducts extends Loggable {
   val menu: Menu.Menuable = Menu.i("Pets and Products") / "pets-products" >>
     loggedIn >>
     parent
+
+  val preBillingMagicLink: Menu.ParamMenuable[User] =
+    Menu.param[User](
+      "PreBilling",
+      "PreBilling",
+      accessKey => KeyService.findUserByKey(accessKey, "preBillingKey"),
+      user => user.accessKey.get
+    ) / "pre-billing" >>
+      MatchWithoutCurrentValue >>
+      IfValue(_.isDefined, () => {
+        RedirectResponse(Login.menu.loc.calcDefaultHref)
+      })
 }
 
 class PetsAndProducts extends Loggable {

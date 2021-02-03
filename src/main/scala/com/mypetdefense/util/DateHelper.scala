@@ -47,6 +47,10 @@ object DateHelper {
 
   def tomorrowStart: Date = Date.from(nowAtStartOfDay.plusDays(1).toInstant)
 
+  def threeDaysFutureStart: Date = Date.from(nowAtStartOfDay.plusDays(3).toInstant)
+
+  def fourDaysFutureStart: Date = Date.from(nowAtStartOfDay.plusDays(4).toInstant)
+
   def beginngNextMonth: Date =
     Date.from(YearMonth.now().atEndOfMonth().atStartOfDay(zoneId).plusDays(1).toInstant)
 
