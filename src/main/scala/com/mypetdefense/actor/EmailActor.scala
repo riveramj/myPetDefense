@@ -897,39 +897,44 @@ trait InvoicePaymentSucceededEmailHandling extends EmailHandlerChain {
       val dateFormatter = new SimpleDateFormat("MMM dd")
 
       val boxes     = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
-      val products  = boxes.flatMap(_.fleaTick.obj)
-      val priceCode = subscription.map(_.priceCode.get).openOr("")
       val shipment: Box[Shipment] =
         subscription.flatMap(_.shipments.toList.sortBy(_.createdAt.get).reverse.headOption)
 
       val transform = {
         "#ship-date" #> dateFormatter.format(new Date()) &
-          "#parent-name" #> user.firstName &
-          ".name" #> user.name &
-          "#ship-address-1" #> shipAddress.map(_.street1.get) &
-          "#ship-address-2" #> ClearNodesIf(shipAddress.map(_.street2.get).getOrElse("") == "") andThen
-          "#ship-address-2-content" #> shipAddress.map(_.street2.get) &
-            "#ship-city" #> shipAddress.map(_.city.get) &
-            "#ship-state" #> shipAddress.map(_.state.get) &
-            "#ship-zip" #> shipAddress.map(_.zip.get) &
-            "#bill-address-1" #> billAddress.map(_.street1.get) &
-            "#bill-address-2" #> ClearNodesIf(billAddress.map(_.street2.get).getOrElse("") == "") andThen
-          "#bill-address-2-content" #> billAddress.map(_.street2.get) &
-            "#bill-city" #> billAddress.map(_.city.get) &
-            "#bill-state" #> billAddress.map(_.state.get) &
-            "#bill-zip" #> billAddress.map(_.zip.get) &
-            "#tax" #> ClearNodesIf(taxPaid == "0") andThen
-          ".ordered-product" #> products.map { product =>
-            ".product *" #> s"${product.name.get}, ${product.size.get.toString} pounds"
-          } &
-            "#tax #tax-due *" #> s"$$${taxPaid}" &
-            "#total *" #> s"$$${amountPaid}" &
-            ".with-tracking-number" #> ClearNodesIf(possibleTrackingNumber.isEmpty) andThen
-          ".no-tracking-number" #> ClearNodesIf(!possibleTrackingNumber.isEmpty) andThen
-          ".tracking-link [href]" #> trackingLink &
-            ".tracking-number *" #> possibleTrackingNumber &
-            ".freeUpgrade img [src]" #> (hostUrl + "/images/wellness-box.jpg") andThen
-          ".freeUpgrade" #> ClearNodesIf(shipment.forall(_.freeUpgradeSample.get == false))
+        "#parent-name" #> user.firstName &
+        ".name" #> user.name &
+        "#ship-address-1" #> shipAddress.map(_.street1.get) &
+        "#ship-address-2" #> ClearNodesIf(shipAddress.map(_.street2.get).getOrElse("") == "") andThen
+        "#ship-address-2-content" #> shipAddress.map(_.street2.get) &
+        "#ship-city" #> shipAddress.map(_.city.get) &
+        "#ship-state" #> shipAddress.map(_.state.get) &
+        "#ship-zip" #> shipAddress.map(_.zip.get) &
+        "#bill-address-1" #> billAddress.map(_.street1.get) &
+        "#bill-address-2" #> ClearNodesIf(billAddress.map(_.street2.get).getOrElse("") == "") andThen
+        "#bill-address-2-content" #> billAddress.map(_.street2.get) &
+        "#bill-city" #> billAddress.map(_.city.get) &
+        "#bill-state" #> billAddress.map(_.state.get) &
+        "#bill-zip" #> billAddress.map(_.zip.get) &
+        "#tax" #> ClearNodesIf(taxPaid == "0") andThen
+        ".subscription-boxes" #> boxes.map { box =>
+          val productsNames = box.subscriptionItems.toList.flatMap { subscriptionItem =>
+            subscriptionItem.product.obj.map(_.name.get)
+          } ++ box.fleaTick.obj.map(_.getNameAndSize).toList
+
+          ".pet-name *" #> box.pet.obj.map(_.name.get) &
+            ".product" #> productsNames.map { name =>
+              "span *" #> name
+            }
+        } &
+        "#tax #tax-due *" #> s"$$${taxPaid}" &
+        "#total *" #> s"$$${amountPaid}" &
+        ".with-tracking-number" #> ClearNodesIf(possibleTrackingNumber.isEmpty) andThen
+        ".no-tracking-number" #> ClearNodesIf(!possibleTrackingNumber.isEmpty) andThen
+        ".tracking-link [href]" #> trackingLink &
+        ".tracking-number *" #> possibleTrackingNumber &
+        ".freeUpgrade img [src]" #> (hostUrl + "/images/wellness-box.jpg") andThen
+        ".freeUpgrade" #> ClearNodesIf(shipment.forall(_.freeUpgradeSample.get == false))
       }
 
       sendEmail(subject, user.email.get, transform(invoicePaymentSucceededEmailTemplate))
