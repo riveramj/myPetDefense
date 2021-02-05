@@ -336,34 +336,24 @@ object ParentService extends LoggableBoxLogging {
     val updatedUser       = oldUser.reload
     val maybeSubscription = updatedUser.subscription.obj
 
-    val products: List[FleaTick] = {
-      for {
-        subscription <- maybeSubscription.toList
-        boxes        <- subscription.subscriptionBoxes
-        fleaTick     <- boxes.fleaTick
-      } yield {
-        fleaTick
-      }
-    }
-
-    val update = for {
-      subscription <- updatedUser.subscription.obj
-      subscriptionId = subscription.stripeSubscriptionId.get if subscriptionId.nonEmpty
-      priceCode      = subscription.priceCode.get
-
-      prices = products.map { product =>
+    val totalCost = (for {
+      subscription <- maybeSubscription.toList
+      box          <- subscription.subscriptionBoxes.toList
+      product      <- box.fleaTick.obj
+      priceCode    = subscription.priceCode.get
+    } yield {
+      val cost = if (box.boxType.get == BoxType.healthAndWellness)
+        SubscriptionBox.possiblePrice(box)
+      else
         Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0d)
-      }
-      totalCost = "%.2f".format(prices.foldLeft(0d)(_ + _)).toDouble
 
-      updated <- updateStripeSubscriptionQuantity(
-                  subscriptionId,
-                  tryo((totalCost * 100).toInt).openOr(0)
-                )
-    } yield updated
+      cost
+    }).sum
 
-    update
-      .logEmptyBox("update stripe subscription total failed")
+    updateStripeSubscriptionQuantity(
+      maybeSubscription.map(_.stripeSubscriptionId.get).openOr(""),
+      tryo((totalCost * 100).toInt).openOr(0)
+    ).logEmptyBox("update stripe subscription total failed")
   }
 
   def removePet(oldUser: Box[User], pet: Pet): Box[Pet] = {
