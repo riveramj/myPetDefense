@@ -39,5 +39,7 @@ object Product extends Product with LongKeyedMetaMapper[Product] {
   def dentalPowderSmall: Box[Product] = Product.find(By(Product.name, "Dental Powder Small"))
   def dentalPowderLarge: Box[Product] = Product.find(By(Product.name, "Dental Powder Large"))
 
+  def allDentalPowder: List[Product]   = List(dentalPowder, dentalPowderSmall, dentalPowderLarge).flatten
+
   def supplements: List[Product] = Product.findAll(NotBy(Product.name, "Dental Powder"))
 }

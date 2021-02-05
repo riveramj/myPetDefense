@@ -33,6 +33,9 @@ class SubscriptionBox
   object userModified extends MappedBoolean(this) {
     override def defaultValue: Boolean = false
   }
+  object monthSupply extends MappedBoolean(this) {
+    override def defaultValue: Boolean = true
+  }
 }
 
 object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[SubscriptionBox] {
@@ -48,6 +51,12 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
   def possiblePrice(subscriptionBox: SubscriptionBox, upgradedBox: Boolean = false): Double =
     if (subscriptionBox.subscriptionItems.toList.nonEmpty)
       subscriptionBox.pet.obj.map(basePrice(_, upgradedBox)).openOr(0d)
+    else
+      0d
+
+  def possiblePrice(subscriptionBox: SubscriptionBox): Double =
+    if (subscriptionBox.boxType.get == BoxType.healthAndWellness)
+      subscriptionBox.pet.obj.map(basePrice(_, true)).openOr(0d)
     else
       0d
 

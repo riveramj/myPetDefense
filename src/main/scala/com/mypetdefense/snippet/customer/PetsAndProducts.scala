@@ -135,7 +135,7 @@ class PetsAndProducts extends Loggable {
   }
 
   def showProducts(pet: Box[Pet])(): JsCmd = {
-    selectedPet = pet
+    selectedPet = pet.map(_.reload)
 
     petProductsRender.map(_.setHtml()).openOr(Noop)
   }
@@ -151,13 +151,11 @@ class PetsAndProducts extends Loggable {
     } yield {
       box.fleaTick(fleaTick).saveMe
 
-      val items = box.subscriptionItems.toList.filterNot(_.product.obj == Product.dentalPowder)
+      box.subscriptionItems.toList
+        .filterNot(Product.allDentalPowder.contains(_))
+        .map(_.delete_!)
 
-      for {
-        index <- items.indices
-      } yield {
-        items(index).product(supplements(index)).saveMe()
-      }
+      supplements.map(SubscriptionItem.createSubscriptionItem(_, box))
     }
 
     val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal)
@@ -181,6 +179,7 @@ class PetsAndProducts extends Loggable {
   def petProductsBindings = {
     "#product-picker-modal" #> idMemoize { renderer =>
       petProductsRender = Full(renderer)
+
       val box = selectedPet.flatMap(_.box.obj)
       val products =
         if (selectedPet.map(_.animalType.get.equals(AnimalType.Dog)).openOr(true))
@@ -188,7 +187,7 @@ class PetsAndProducts extends Loggable {
         else
           FleaTick.zoGuardCat.toList
 
-      val availableSupplements = Product.findAll().filterNot(Full(_) == Product.dentalPowder)
+      val availableSupplements = Product.findAll().filterNot(Product.allDentalPowder.contains(_))
 
       var currentProduct = box.flatMap(_.fleaTick.obj)
       val currentSupplements = {
@@ -196,16 +195,24 @@ class PetsAndProducts extends Loggable {
           currentBox       <- box.toList
           subscriptionItem <- currentBox.subscriptionItems.toList
           product          <- subscriptionItem.product.obj.toList
-          if Full(product) != Product.dentalPowder
+          if !Product.allDentalPowder.contains(product)
         } yield {
           product
         }
       }
 
-      var firstSupplement = currentSupplements.headOption
-      var secondSupplement =
-        if (currentSupplements.nonEmpty) currentSupplements.tail.headOption else None
-      var thirdSupplement = currentSupplements.reverse.headOption
+      var firstSupplement: Box[Product] = currentSupplements.headOption
+      var secondSupplement: Box[Product] =
+        if (currentSupplements.nonEmpty && currentSupplements.size > 1)
+          currentSupplements.tail.headOption
+        else
+          Empty
+
+      var thirdSupplement: Box[Product] =
+        if (currentSupplements.nonEmpty && currentSupplements.size > 2)
+          currentSupplements.reverse.headOption
+        else
+          Empty
 
       val zoGuardProducts =
         if (currentProduct.map(_.isZoGuard_?).openOr(false))
@@ -223,51 +230,49 @@ class PetsAndProducts extends Loggable {
       )
 
       val firstSupplementDropDown = SHtml.ajaxSelectObj(
-        availableSupplements.map(product => (product, product.name.get)),
-        firstSupplement,
-        (possibleProduct: Product) =>
+        (Empty, "") +: availableSupplements.map(product => (Full(product), product.name.get)),
+        Full(firstSupplement),
+        (possibleProduct: Box[Product]) =>
           firstSupplement = {
-            Full(possibleProduct)
+            possibleProduct
           }
       )
 
       val secondSupplementDropDown = SHtml.ajaxSelectObj(
-        availableSupplements.map(product => (product, product.name.get)),
-        secondSupplement,
-        (possibleProduct: Product) =>
-          secondSupplement = {
-            Full(possibleProduct)
-          }
+        (Empty, "") +: availableSupplements.map(product => (Full(product), product.name.get)),
+        Full(secondSupplement),
+        (possibleProduct: Box[Product]) => secondSupplement = possibleProduct
       )
 
       val thirdSupplementDropDown = SHtml.ajaxSelectObj(
-        availableSupplements.map(product => (product, product.name.get)),
-        thirdSupplement,
-        (possibleProduct: Product) =>
-          thirdSupplement = {
-            Full(possibleProduct)
-          }
+        (Empty, "") +: availableSupplements.map(product => (Full(product), product.name.get)),
+        Full(thirdSupplement),
+        (possibleProduct: Box[Product]) => thirdSupplement = possibleProduct
       )
 
+      val monthSupply = box.map(_.monthSupply.get).openOr(false)
+
       "^ [class+]" #> (if (!selectedPet.isEmpty) "active" else "") &
-        ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
-        "#flea-tick" #> currentProductDropdown &
-          "#first-supplement" #> firstSupplementDropDown &
-          "#second-supplement" #> secondSupplementDropDown &
-          "#third-supplement" #> thirdSupplementDropDown &
-          ".save" #> ajaxSubmit(
-            "Save",
-            () =>
-              savePet(
-                box,
-                currentProduct,
-                List(firstSupplement, secondSupplement, thirdSupplement).flatten
-              )
-          ) &
-          ".cancel" #> ajaxSubmit("Cancel", () => {
-            selectedPet = Empty
-            petProductsRender.map(_.setHtml()).openOr(Noop)
-          })
+      ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
+      ".second-choice" #> ClearNodesIf(monthSupply) andThen
+      ".third-choice" #> ClearNodesIf(monthSupply) andThen
+      "#flea-tick" #> currentProductDropdown &
+      "#first-supplement" #> firstSupplementDropDown &
+      "#second-supplement" #> secondSupplementDropDown &
+      "#third-supplement" #> thirdSupplementDropDown &
+      ".save" #> ajaxSubmit(
+        "Save",
+        () =>
+          savePet(
+            box,
+            currentProduct,
+            List(firstSupplement, secondSupplement, thirdSupplement).flatten
+          )
+      ) &
+      ".cancel" #> ajaxSubmit("Cancel", () => {
+        selectedPet = Empty
+        petProductsRender.map(_.setHtml()).openOr(Noop)
+      })
     }
   }
 
