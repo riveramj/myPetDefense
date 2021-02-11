@@ -2,8 +2,7 @@ package com.mypetdefense.snippet
 package admin
 
 import java.time.LocalDate
-
-import com.mypetdefense.model._
+import com.mypetdefense.model.{BoxType, _}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
@@ -28,21 +27,32 @@ object Prices extends Loggable {
 case class DisplayPrice(code: String, price: Double, productName: String)
 
 class Prices extends Loggable {
-  val productNames: List[String] = FleaTick.findAll().map(_.name.get).distinct
+  val productNames: List[String] = FleaTick.findAll().map(_.name.get)
   val allPrices: List[Price]     = Price.findAll()
   val prices: List[DisplayPrice] = allPrices.map { price =>
     DisplayPrice(price.code.get, price.price.get, price.fleaTick.obj.map(_.name.get).openOr(""))
   }.distinct
+  val boxTypes: List[BoxType.Value] = BoxType.values.toList
 
   var code          = ""
   var rawPrice      = ""
   var chosenProduct = ""
+  var chosenBoxType: Box[BoxType.Value] = Empty
 
   def productDropdown: Elem = {
     SHtml.select(
       ("", "") +: productNames.sortWith(_ < _).map(name => (name, name)),
       Full(chosenProduct),
       chosenProduct = _
+    )
+  }
+
+  def boxTypeDropdown: Elem = {
+    SHtml.selectObj(
+      List((Empty, "Box Type")) ++ boxTypes.map(name => (Full(name), name.toString)),
+      Full(chosenBoxType),
+      (possibleBoxType: Box[BoxType.Value]) =>
+        chosenBoxType = possibleBoxType
     )
   }
 
@@ -62,7 +72,7 @@ class Prices extends Loggable {
       for {
         product <- selectedProducts
       } yield {
-        Price.createPrice(priceDbId, price, code, product, name)
+        Price.createPrice(priceDbId, price, code, Full(product), name, chosenBoxType)
       }
 
       S.redirectTo(Prices.menu.loc.calcDefaultHref)
@@ -88,6 +98,7 @@ class Prices extends Loggable {
           "#code" #> ajaxText(code, code = _) &
             "#price" #> ajaxText(rawPrice, rawPrice = _) &
             "#product-container #product-select" #> productDropdown &
+            "#box-type-container #box-type-select" #> boxTypeDropdown &
             "#create-item" #> SHtml.ajaxSubmit("Create Price", () => createPrice)
         } &
         ".price-entry" #> prices.sortWith(_.code < _.code).map { price =>

@@ -1,11 +1,11 @@
 package com.mypetdefense.util
 
-import java.text.SimpleDateFormat
-
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import net.liftweb.common._
 import net.liftweb.mapper._
+
+import java.text.SimpleDateFormat
 
 object DataLoader extends Loggable {
   def loadProducts: Any = {
