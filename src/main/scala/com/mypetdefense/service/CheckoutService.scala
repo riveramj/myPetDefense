@@ -50,7 +50,8 @@ object CheckoutService {
           coupon,
           coupon.flatMap(_.agency.obj),
           None,
-          UserType.Parent
+          UserType.Parent,
+          newUserData.ipAddress
         )
       )
     } else {

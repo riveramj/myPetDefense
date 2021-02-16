@@ -29,11 +29,11 @@ $(document).ready ->
       stripeCallback: stripeCallback
     )
 
-  $(document).on "use-new-card", (event) ->
-    $('.form-row').removeClass('hide-card')
-    $('.existing-card').remove()
-    card.mount '#card-element'
-    newCard = true
+$(document).on "use-new-card", (event) ->
+  $('.form-row').removeClass('hide-card')
+  $('.existing-card').remove()
+  card.mount '#card-element'
+  newCard = true
 
 $(document).on "form-validation-error", (event) ->
   $(".checkout.submit, input.update-billing").prop('value', 'Place Order').prop("disabled", false).removeClass("processing")
