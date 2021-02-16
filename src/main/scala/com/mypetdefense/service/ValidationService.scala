@@ -27,6 +27,13 @@ object ValidationService extends Loggable {
     }
   }
 
+  def checkDuplicateIpAddress(ipAddress: String, fieldId: String): Box[ErrorMessage] = {
+    User.find(By(User.ipAddress, ipAddress)) match {
+      case Full(_) => Full(ErrorMessage(fieldId, S ? "Coupon already applied for this address. Coupon has been removed."))
+      case _       => Empty
+    }
+  }
+
   private def checkDuplicateEmail(email: String, errorId: String): Box[ValidationError] = {
     if (email.nonEmpty) {
       User.find(By(User.email, email)) match {
@@ -260,3 +267,6 @@ object ValidationService extends Loggable {
 
 case class ValidationError(fieldSelector: String, error: String)
     extends MyPetDefenseEvent("form-validation-error")
+
+case class ErrorMessage(fieldSelector: String, error: String)
+  extends MyPetDefenseEvent("error-message")
