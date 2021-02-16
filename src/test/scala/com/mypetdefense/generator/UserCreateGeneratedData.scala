@@ -13,5 +13,6 @@ case class UserCreateGeneratedData(
     coupon: Box[Coupon],
     referer: Box[Agency],
     agency: Box[Agency],
-    userType: UserType.Value
+    userType: UserType.Value,
+    ipAddress: String
 )
