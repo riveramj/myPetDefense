@@ -35,7 +35,7 @@ object SubscriptionService {
     boxes.map(SubscriptionItem.createFirstBox)
     val updatedBoxes = boxes.map(_.reload)
 
-    val cost = updatedBoxes.map(SubscriptionBox.possiblePrice(_, true)).sum
+    val cost = updatedBoxes.map(SubscriptionBox.findBoxPrice).sum
 
     updateStripeSubscriptionQuantity(
       updatedSubscription.map(_.stripeSubscriptionId.get).openOr(""),

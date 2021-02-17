@@ -84,12 +84,7 @@ class AccountOverview extends Loggable {
           ".pet" #> boxes.map { box =>
             val pet     = box.pet.obj
             val product = box.fleaTick.obj
-            val price = if (SubscriptionBox.possiblePrice(box) == 0d) {
-              product.flatMap { item => Price.getPricesByCode(item, priceCode).map(_.price.get) }
-                .openOr(0d)
-            } else {
-              SubscriptionBox.possiblePrice(box)
-            }
+            val price = SubscriptionBox.findBoxPrice(box)
 
             ".pet-name *" #> pet.map(_.name.get) &
               ".pet-product *" #> product.map(_.name.get) &

@@ -48,27 +48,14 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
     )
   }
 
-  def possiblePrice(subscriptionBox: SubscriptionBox, upgradedBox: Boolean = false): Double =
-    if (subscriptionBox.subscriptionItems.toList.nonEmpty)
-      subscriptionBox.pet.obj.map(basePrice(_, upgradedBox)).openOr(0d)
-    else
-      0d
-
-  def possiblePrice(subscriptionBox: SubscriptionBox): Double =
-    if (subscriptionBox.boxType.get == BoxType.healthAndWellness)
-      subscriptionBox.pet.obj.map(basePrice(_, true)).openOr(0d)
-    else
-      0d
-
-  def basePrice(pet: Pet, upgradedBox: Boolean): Double = {
-    val smallDogs = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
-
-    (pet.animalType.get, pet.size.get, upgradedBox) match {
-      case (_, _, false)                                                  => 12.99
-      case (AnimalType.Cat, _, _)                                         => 12.99
-      case (AnimalType.Dog, dogSize, true) if smallDogs.contains(dogSize) => 24.99
-      case (AnimalType.Dog, _, true)                                      => 27.99
-    }
+  def findBoxPrice(subscriptionBox: SubscriptionBox): Double = {
+    (for {
+      fleaTick <- subscriptionBox.fleaTick.obj
+      subscription <- subscriptionBox.subscription.obj
+      price <- Price.getPricesByCode(fleaTick, subscription.priceCode.get, subscriptionBox.boxType.get)
+    } yield
+      price.price.get
+    ).openOrThrowException("Couldn't find price. Please try again.")
   }
 
   def createNewBox(
@@ -89,12 +76,14 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       .pet(pet)
       .animalType(pet.animalType.get)
       .fleaTick(fleaTick)
-      .basePrice(basePrice(pet, upgradedBox))
+
 
     if (upgradedBox)
-      newSubscriptionBox.boxType(BoxType.healthAndWellness).saveMe()
+      newSubscriptionBox.boxType(BoxType.healthAndWellness)
     else
-      newSubscriptionBox.boxType(BoxType.basic).saveMe()
+      newSubscriptionBox.boxType(BoxType.basic)
+
+    newSubscriptionBox.basePrice(findBoxPrice(newSubscriptionBox)).saveMe()
   }
 }
 

@@ -295,13 +295,7 @@ class PetsAndProducts extends Loggable {
           val pet            = box.pet.obj
           var currentPetName = pet.map(_.name.get).openOr("")
           val product        = box.fleaTick.obj
-
-          val price = if (SubscriptionBox.possiblePrice(box) == 0d) {
-            product.flatMap { item => Price.getPricesByCode(item, priceCode).map(_.price.get) }
-              .openOr(0d)
-          } else {
-            SubscriptionBox.possiblePrice(box)
-          }
+          val price = SubscriptionBox.findBoxPrice(box)
 
           ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
             ".price *" #> f"$$$price%2.2f" &

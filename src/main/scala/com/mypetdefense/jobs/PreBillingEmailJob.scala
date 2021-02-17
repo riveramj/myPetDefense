@@ -10,11 +10,8 @@ class PreBillingEmailJob extends ManagedJob {
   implicit val formats: DefaultFormats.type = DefaultFormats
 
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
-    println("in the job")
-
     for {
       subscription <- findSubscriptionsShippingInThreeDays
-      _ = println(subscription)
       user <- subscription.user.obj
       boxes = subscription.subscriptionBoxes.toList
       address <- user.addresses.headOption
