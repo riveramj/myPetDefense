@@ -48,6 +48,9 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object subscription     extends MappedLongForeignKey(this, Subscription)
   object addresses        extends MappedOneToMany(Address, Address.user)
   object taxRate          extends MappedDouble(this)
+  object ipAddress        extends MappedString(this, 50) {
+    override def dbIndexed_? = true
+  }
   object status extends MappedEnum(this, Status) {
     override def defaultValue: Status.Value = Status.Active
     override def dbIndexed_?                = true
@@ -156,7 +159,8 @@ object User extends User with LongKeyedMetaMapper[User] {
       coupon: Box[Coupon],
       referer: Box[Agency],
       agency: Box[Agency],
-      userType: UserType.Value
+      userType: UserType.Value,
+      ipAddress: String
   ): User = {
     val user = User.create
       .userId(generateLongId)
@@ -170,6 +174,7 @@ object User extends User with LongKeyedMetaMapper[User] {
       .referer(referer)
       .agency(agency)
       .userType(userType)
+      .ipAddress(ipAddress)
 
     setUserPassword(user, password)
   }

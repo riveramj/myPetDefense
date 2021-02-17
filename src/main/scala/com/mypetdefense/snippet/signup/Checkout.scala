@@ -6,6 +6,7 @@ import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import net.liftweb.common.Box.box2Iterable
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -15,7 +16,6 @@ import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
-import scala.collection.immutable.Range
 import scala.collection.mutable
 import scala.xml.NodeSeq
 
@@ -42,6 +42,7 @@ class Checkout extends Loggable {
   var city                                            = ""
   var state                                           = ""
   var zip                                             = ""
+  var ipAddress                                       = ""
   var taxRate                                         = 0d
   var taxDue                                          = 0d
   var monthlyTotal: BigDecimal                        = 0
@@ -103,7 +104,7 @@ class Checkout extends Loggable {
 
   private def setupNewUserAndRedirect(customer: StripeFacade.CustomerWithSubscriptions): Nothing = {
     val newUserAddress          = NewUserAddress(street1, street2, city, state, zip)
-    val newUserData             = NewUserData(email, firstName, lastName, password, newUserAddress, coupon)
+    val newUserData             = NewUserData(email, firstName, lastName, password, newUserAddress, coupon, ipAddress)
     val petsToCreate            = pets.values.toList
     val priceCodeOfSubscription = priceCode.is.openOr(Price.defaultPriceCode)
     val userWithSubscription = CheckoutService.newUserSetup(
@@ -142,9 +143,10 @@ class Checkout extends Loggable {
     }
   }
 
-  private def validateFields: List[ValidationError] = {
+  private def validateFields: (List[MyPetDefenseEvent], Boolean) = {
     val passwordError = checkEmpty(password, "#password")
     val facebookError = checkFacebookId(facebookId, "#facebook-id", signup = true)
+    val duplicateIpAddress = if (coupon.nonEmpty) checkDuplicateIpAddress(ipAddress, "#ip-address-error") else Empty
 
     val baseFields = List(
       checkEmpty(firstName, "#first-name"),
@@ -153,7 +155,8 @@ class Checkout extends Loggable {
       checkEmpty(street1, "#street-1"),
       checkEmpty(city, "#city"),
       checkEmpty(state, "#state"),
-      checkEmpty(zip, "#zip")
+      checkEmpty(zip, "#zip"),
+      duplicateIpAddress
     )
 
     val validationResult = {
@@ -163,7 +166,10 @@ class Checkout extends Loggable {
         facebookError :: baseFields
     }.flatten
 
-    validationResult
+    if (duplicateIpAddress.nonEmpty)
+      coupon = Empty
+
+    (validationResult, duplicateIpAddress.nonEmpty)
   }
 
   def codeMatchesCoupon(code: String, coupon: Box[Coupon]): Boolean =
@@ -221,9 +227,15 @@ class Checkout extends Loggable {
   }
 
   def signup(): JsCmd = {
-    val validationErrors = validateFields
+    val (validationErrors, duplicateIpAddress) = validateFields
     if (validationErrors.isEmpty) tryToCreateUser
-    else validationErrors.foldLeft(Noop)(_ & _)
+    else if (duplicateIpAddress)
+      priceAdditionsRenderer.map(_.setHtml).openOr(Noop) &
+      PromoCodeMessage("error") &
+      validationErrors.foldLeft(Noop)(_ & _)
+
+    else
+      validationErrors.foldLeft(Noop)(_ & _)
   }
 
   def render: NodeSeq => NodeSeq = {
@@ -288,9 +300,10 @@ class Checkout extends Loggable {
             "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
       } andThen
       "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
-        ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup()) &
-        ".promotion-info [class+]" #> successCoupon &
-        "#promo-code" #> ajaxText(couponCode, couponCode = _) &
-        ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
+      "#ip-address" #> hidden(ipAddress = _, ipAddress) &
+      ".checkout" #> SHtml.ajaxSubmit("Place Order", () => signup()) &
+      ".promotion-info [class+]" #> successCoupon &
+      "#promo-code" #> ajaxText(couponCode, couponCode = _) &
+      ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
   }
 }
