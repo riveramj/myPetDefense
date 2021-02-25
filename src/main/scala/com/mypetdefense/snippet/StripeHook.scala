@@ -53,28 +53,26 @@ trait StripeHook extends RestHelper with Loggable {
       }
 
       if (notTrial_? && activePets_?) {
-        if (activePets_?) {
-          subscription.reload.status(Status.Active).save()
-          
-          TaxJarService.processTaxesCharged(
-            invoicePaymentId,
-            city,
-            state,
-            zip,
-            formatAmount(subtotal),
-            formatAmount(tax)
-          )
+        subscription.reload.status(Status.Active).save()
 
-          //ParentService.updatePuppyProducts(user)
+        TaxJarService.processTaxesCharged(
+          invoicePaymentId,
+          city,
+          state,
+          zip,
+          formatAmount(subtotal),
+          formatAmount(tax)
+        )
 
-          ShipmentService.createNewShipment(
-            user,
-            invoicePaymentId,
-            charge,
-            formatAmount(amountPaid),
-            formatAmount(tax)
-          )
-        }
+        //ParentService.updatePuppyProducts(user)
+
+        ShipmentService.createNewShipment(
+          user,
+          invoicePaymentId,
+          charge,
+          formatAmount(amountPaid),
+          formatAmount(tax)
+        )
       }
 
       OkResponse()
