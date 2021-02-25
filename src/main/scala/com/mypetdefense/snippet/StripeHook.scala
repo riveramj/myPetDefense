@@ -106,9 +106,6 @@ trait StripeHook extends RestHelper with Loggable {
       }
       val amount = totalAmountInCents / 100d
 
-      if (nextPaymentAttempt.isEmpty)
-        ParentService.updateNextShipDate(subscription)
-
       emailActor ! SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt)
 
       OkResponse()
