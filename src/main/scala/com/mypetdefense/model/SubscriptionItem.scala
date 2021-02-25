@@ -36,9 +36,9 @@ object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[Subscr
     val products          = ProductSchedule.getFirstBoxProducts
     val smallSizes        = List(AnimalSize.DogSmallZo, AnimalSize.DogSmallShld, AnimalSize.DogSmallAdv)
     val isSmallDog        = subscriptionBox.fleaTick.obj.map(_.size.get).forall(smallSizes.contains)
-    val dentalPowder      = Product.dentalPowder
-    val dentalPowderSmall = Product.dentalPowderSmall
-    val dentalPowderLarge = Product.dentalPowderLarge
+    val dentalPowder      = Product.dentalPowderForDogs
+    val dentalPowderSmall = Product.dentalPowderSmallForDogs
+    val dentalPowderLarge = Product.dentalPowderLargeForDogs
 
     products.flatMap { product =>
       val newItem = SubscriptionItem.create.subscriptionBox(subscriptionBox)

@@ -152,7 +152,7 @@ class PetsAndProducts extends Loggable {
       box.fleaTick(fleaTick).saveMe
 
       box.subscriptionItems.toList
-        .filterNot(Product.allDentalPowder.contains(_))
+        .filterNot(Product.allDentalPowderForDogs.contains(_))
         .map(_.delete_!)
 
       supplements.map(SubscriptionItem.createSubscriptionItem(_, box))
@@ -187,7 +187,7 @@ class PetsAndProducts extends Loggable {
         else
           FleaTick.zoGuardCat.toList
 
-      val availableSupplements = Product.findAll().filterNot(Product.allDentalPowder.contains(_))
+      val availableSupplements = Product.findAll().filterNot(Product.allDentalPowderForDogs.contains(_))
 
       var currentProduct = box.flatMap(_.fleaTick.obj)
       val currentSupplements = {
@@ -195,7 +195,7 @@ class PetsAndProducts extends Loggable {
           currentBox       <- box.toList
           subscriptionItem <- currentBox.subscriptionItems.toList
           product          <- subscriptionItem.product.obj.toList
-          if !Product.allDentalPowder.contains(product)
+          if !Product.allDentalPowderForDogs.contains(product)
         } yield {
           product
         }

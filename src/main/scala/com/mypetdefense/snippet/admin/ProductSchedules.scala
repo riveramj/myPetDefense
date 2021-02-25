@@ -24,8 +24,8 @@ object ProductSchedules extends Loggable {
 class ProductSchedules extends Loggable {
   val coupons: List[Coupon] = Coupon.findAll()
   val dentalProducts =
-    List(Product.dentalPowder, Product.dentalPowderSmall, Product.dentalPowderLarge).flatten
-  val supplements: List[Product]              = Product.supplements.filter(!dentalProducts.contains(_))
+    List(Product.dentalPowderForDogs, Product.dentalPowderSmallForDogs, Product.dentalPowderLargeForDogs).flatten
+  val supplements: List[Product]              = Product.supplements(30, AnimalType.Dog)
   val productSchedules: List[ProductSchedule] = ProductSchedule.findAll().sortBy(_.startDate.get)
   val startDateFormat                         = new java.text.SimpleDateFormat("M/d/y")
 
@@ -67,7 +67,7 @@ class ProductSchedules extends Loggable {
     ).flatten
 
     val selectedSupplements =
-      List(chosenSupplement1, chosenSupplement2, chosenSupplement3, Product.dentalPowder).flatten
+      List(chosenSupplement1, chosenSupplement2, chosenSupplement3, Product.dentalPowderForDogs).flatten
 
     if (validateFields.isEmpty) {
       ProductSchedule.createNew(startDateFormat.parse(startDate), selectedSupplements, firstBox)

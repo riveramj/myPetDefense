@@ -228,16 +228,15 @@ object DataLoader extends Loggable {
   }
 
   def createProducts: Any = {
-    if (Product.hipAndJoint.isEmpty) {
-      Product.createNewProduct("Hip & Joint Chews", "hipJointChews")
-      Product.createNewProduct("Calming Chews", "calmingChews")
-      Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews")
-      Product.createNewProduct("Dental Powder", "dentalPowder")
-    }
-
-    if (Product.skinAndCoat.isEmpty) {
-      Product.createNewProduct("Skin and Coat Chews", "skinAndCoatChews")
-      Product.createNewProduct("Probiotic Chews", "probioticChews")
+    for {
+    quantity <- List(10, 30)
+    } yield
+    if (Product.hipAndJointForDogs(quantity).isEmpty) {
+      Product.createNewProduct("Hip & Joint Chews For Dogs", "hipJointChews", quantity, AnimalType.Dog)
+      Product.createNewProduct("Calming Chews For Dogs", "calmingChews", quantity, AnimalType.Dog)
+      Product.createNewProduct("Multi-Vitamin Chews For Dogs", "multiVitaminChews", quantity, AnimalType.Dog)
+      Product.createNewProduct("Skin and Coat Chews For Dogs", "skinAndCoatChews", quantity, AnimalType.Dog)
+      Product.createNewProduct("Probiotic Chews For Dogs", "probioticChews", quantity, AnimalType.Dog)
     }
   }
 
@@ -536,16 +535,16 @@ object DataLoader extends Loggable {
   }
 
   def subscriptionBoxCheck(): Unit = {
-    if (Product.dentalPowderSmall.isEmpty) {
-      Product.createNewProduct("Dental Powder Small", "dentalPowderSmall")
-      Product.createNewProduct("Dental Powder Large", "dentalPowderLarge")
+    if (Product.dentalPowderSmallForDogs.isEmpty) {
+      Product.createNewProduct("Dental Powder Small For Dogs", "dentalPowderSmall", 0, AnimalType.Dog)
+      Product.createNewProduct("Dental Powder Large For Dogs", "dentalPowderLarge", 0, AnimalType.Dog)
     }
 
     val products = List(
-      Product.skinAndCoat,
-      Product.multiVitamin,
-      Product.probiotic,
-      Product.dentalPowder
+      Product.skinAndCoatForDogs(10),
+      Product.multiVitaminForDogs(10),
+      Product.probioticForDogs(10),
+      Product.dentalPowderForDogs
     ).flatten
 
     for {
@@ -592,4 +591,62 @@ object DataLoader extends Loggable {
       box.status(Status.Cancelled).saveMe()
     }
   }
+
+  def updateChewCounts() = {
+    for {
+      supplement <- Product.findAll(
+        Like(Product.name, "%Chews"),
+        NullRef(Product.quantity)
+      )
+      name = supplement.name.get
+    } yield {
+      supplement
+        .name(s"$name For Dogs")
+        .quantity(10)
+        .animalType(AnimalType.Cat)
+        .animalType(AnimalType.Dog)
+        .saveMe()
+    }
+
+    for {
+      dental <- Product.findAll(
+        Like(Product.name, "Dental%"),
+        NullRef(Product.quantity)
+      )
+    } yield {
+      dental.quantity(1).quantity(0).animalType(AnimalType.Cat).animalType(AnimalType.Dog).saveMe()
+    }
+  }
+
+  def migrateTo30DaySupply() = {
+    val monthMultiVitamin = Product.multiVitaminForDogs(30).toList
+
+    for {
+      box <- SubscriptionBox.findAll(
+        By(SubscriptionBox.userModified, false),
+        NullRef(SubscriptionBox.monthSupply)
+      )
+      multiVitamin <- monthMultiVitamin
+    } yield {
+      box.monthSupply(true).saveMe()
+
+      for {
+        boxItem <- box.subscriptionItems.toList
+        product <- boxItem.product.obj
+      } yield {
+        if(!product.name.get.contains("Dental"))
+          boxItem.delete_!
+      }
+      SubscriptionItem.createSubscriptionItem(multiVitamin, box)
+    }
+
+    for {
+      box <- SubscriptionBox.findAll(
+        NullRef(SubscriptionBox.monthSupply)
+      )
+    } yield {
+      box.monthSupply(false).saveMe()
+    }
+  }
+
 }

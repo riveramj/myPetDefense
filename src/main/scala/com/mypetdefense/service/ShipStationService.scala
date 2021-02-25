@@ -336,7 +336,7 @@ trait ShipStationServiceTrait extends Loggable {
       lineItemKey = Some(s"${index + 1} - ${productIndex + 1}"),
       quantity = 1,
       sku = product.sku.get,
-      name = s"${index + 1} - ${product.name.get} for Dogs"
+      name = s"${index + 1} - ${product.nameAndQuantity}"
     )
 
   private def petFleaTickAndProductsToOrderItems(

@@ -1,7 +1,6 @@
 package com.mypetdefense.model
 
 import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.mapper._
@@ -16,30 +15,88 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   object price  extends MappedDouble(this)
   object sku    extends MappedString(this, 100)
   object weight extends MappedDouble(this)
-  object createdAt extends MappedDateTime(this) {
+  object quantity   extends MappedInt(this)
+  object animalType extends MappedEnum(this, AnimalType)
+  object createdAt  extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+
+  def nameAndQuantity = s"${this.name} (${this.quantity} ct)"
 }
 
 object Product extends Product with LongKeyedMetaMapper[Product] {
-  def createNewProduct(name: String, sku: String): Product = {
+  def createNewProduct(name: String, sku: String, quantity: Int, animalType: AnimalType.Value): Product = {
     Product.create
       .name(name)
       .sku(sku)
+      .quantity(quantity)
+      .animalType(animalType)
       .saveMe
   }
 
-  def hipAndJoint: Box[Product]  = Product.find(By(Product.name, "Hip & Joint Chews"))
-  def calming: Box[Product]      = Product.find(By(Product.name, "Calming Chews"))
-  def multiVitamin: Box[Product] = Product.find(By(Product.name, "Multi-Vitamin Chews"))
-  def skinAndCoat: Box[Product]  = Product.find(By(Product.name, "Skin and Coat Chews"))
-  def probiotic: Box[Product]    = Product.find(By(Product.name, "Probiotic Chews"))
+  def hipAndJointForDogs(quantity: Int): Box[Product] =
+    Product.find(
+      By(Product.name, "Hip & Joint Chews For Dogs"),
+      By(Product.quantity, quantity),
+      By(Product.animalType, AnimalType.Dog)
+    )
 
-  def dentalPowder: Box[Product]      = Product.find(By(Product.name, "Dental Powder"))
-  def dentalPowderSmall: Box[Product] = Product.find(By(Product.name, "Dental Powder Small"))
-  def dentalPowderLarge: Box[Product] = Product.find(By(Product.name, "Dental Powder Large"))
+  def calmingForDogs(quantity: Int): Box[Product] =
+    Product.find(
+      By(Product.name, "Calming Chews For Dogs"),
+      By(Product.quantity, quantity),
+      By(Product.animalType, AnimalType.Dog)
+    )
 
-  def allDentalPowder: List[Product]   = List(dentalPowder, dentalPowderSmall, dentalPowderLarge).flatten
+  def multiVitaminForDogs(quantity: Int): Box[Product] =
+    Product.find(
+      By(Product.name, "Multi-Vitamin Chews For Dogs"),
+      By(Product.quantity, quantity),
+      By(Product.animalType, AnimalType.Dog)
+    )
 
-  def supplements: List[Product] = Product.findAll(NotBy(Product.name, "Dental Powder"))
+  def skinAndCoatForDogs(quantity: Int): Box[Product] =
+    Product.find(
+      By(Product.name, "Skin and Coat Chews For Dogs"),
+      By(Product.quantity, quantity),
+      By(Product.animalType, AnimalType.Dog)
+    )
+
+  def probioticForDogs(quantity: Int): Box[Product] =
+    Product.find(
+      By(Product.name, "Probiotic Chews For Dogs"),
+      By(Product.quantity, quantity),
+      By(Product.animalType, AnimalType.Dog)
+    )
+
+  def dentalPowderForDogs: Box[Product]      =
+    Product.find(
+      By(Product.name, "Dental Powder For Dogs"),
+      By(Product.animalType, AnimalType.Dog)
+    )
+
+  def dentalPowderSmallForDogs: Box[Product] =
+    Product.find(
+      By(Product.name, "Dental Powder Small For Dogs"),
+      By(Product.animalType, AnimalType.Dog)
+    )
+
+  def dentalPowderLargeForDogs: Box[Product] =
+    Product.find(
+      By(Product.name, "Dental Powder Large For Dogs"),
+      By(Product.animalType, AnimalType.Dog)
+    )
+
+  def allDentalPowderForDogs: List[Product]  =
+    Product.findAll(
+      Like(Product.name, "Dental Powder%"),
+      By(Product.animalType, AnimalType.Dog)
+    )
+
+  def supplements(quantity: Int, animalType: AnimalType.Value): List[Product] =
+    Product.findAll(
+      NotLike(Product.name, "Dental Powder%"),
+      By(Product.quantity, quantity),
+      By(Product.animalType, animalType)
+    )
 }
