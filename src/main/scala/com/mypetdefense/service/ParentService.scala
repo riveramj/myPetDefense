@@ -178,7 +178,7 @@ object ParentService extends LoggableBoxLogging {
     }
   }
 
-  def updateNextShipDate(subscription: Subscription): Serializable = {
+  def updateNextShipDate(subscription: Subscription): Box[Subscription] = {
     val stripeSubscriptionId = subscription.stripeSubscriptionId.get
 
     getStripeSubscription(stripeSubscriptionId) match {
@@ -186,17 +186,7 @@ object ParentService extends LoggableBoxLogging {
         val currentPeriodEnd = stripeSubscription.currentPeriodEnd.getOrElse(0L)
         val nextMonthDate    = new Date(currentPeriodEnd * 1000L)
 
-        val nextMonthLocalDate =
-          nextMonthDate.toInstant.atZone(ZoneId.of("America/New_York")).toLocalDate
-
-        val startOfDayDate = nextMonthLocalDate
-          .atStartOfDay(ZoneId.of("America/New_York"))
-          .toInstant
-          .getEpochSecond
-
-        changeStripeBillDate(subscription.stripeSubscriptionId.get, startOfDayDate)
-
-        subscription.nextShipDate(nextMonthDate).saveMe
+        Full(subscription.nextShipDate(nextMonthDate).saveMe())
 
       case _ => Empty
     }
