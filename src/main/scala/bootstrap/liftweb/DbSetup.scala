@@ -62,7 +62,8 @@ object DbSetup extends Loggable {
     AmazonOrder,
     ApiRequestBackup,
     ProductSchedule,
-    ProductScheduleItem
+    ProductScheduleItem,
+    WoofTraxOrder
   )
 
 }
