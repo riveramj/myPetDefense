@@ -115,18 +115,20 @@ class Checkout extends Loggable {
       customer
     )
     userWithSubscription.map(_.reload).map(SecurityContext.logIn)
+
+    for {
+      offerCode <- PetFlowChoices.woofTraxOfferCode.is
+      userId <- PetFlowChoices.woofTraxUserId.is
+      user <- userWithSubscription
+    } yield {
+      WoofTraxOrder.createWoofTraxOrder(offerCode, userId, user)
+    }
+
     updateSessionVars()
     S.redirectTo(Success.menu.loc.calcDefaultHref)
   }
 
-  private def setMultiPetCouponIfPossible(): Unit = (coupon, petCount) match {
-    case (Empty, 2) => coupon = Coupon.find(By(Coupon.couponCode, "multiPet"))
-    case (_, _)     => ()
-  }
-
   private def tryToCreateUser = {
-    setMultiPetCouponIfPossible()
-
     val stripeCustomer =
       StripeFacade.Customer.createWithSubscription(
         email,
