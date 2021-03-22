@@ -1,8 +1,12 @@
-<html lang="en"><head>
-  <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
-  <meta content="width=device-width, initial-scale=1" name="viewport">
-  <meta content="IE=edge" http-equiv="X-UA-Compatible">
-  <meta content="telephone=no" name="format-detection">
+<!-- Built on top of the antwort template under the MIT license here (https://github.com/InterNations/antwort) -->
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- So that mobile will display zoomed in -->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge"> <!-- enable media queries for windows phone 8 -->
+  <meta name="format-detection" content="telephone=no"> <!-- disable auto telephone linking in iOS -->
   <title>Welcome To My Pet Defense</title>
 
   <style type="text/css">
@@ -80,157 +84,57 @@
 
 </head>
 
-<body marginheight="0" marginwidth="0" topmargin="0" leftmargin="0" bgcolor="#F1F1F1" style="margin:0; padding:0;">
+<body style="margin:0; padding:0;" bgcolor="#F1F1F1" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
 
+<!-- 100% background wrapper (grey background) -->
+<table border="0" width="100%" height="100%" cellpadding="0" cellspacing="0" bgcolor="#F1F1F1">
+  <tr>
+    <td align="center" valign="top" bgcolor="#F0F0F0" style="background-color: #F1F1F1;">
 
-<table bgcolor="#F1F1F1" cellspacing="0" cellpadding="0" height="100%" width="100%" border="0">
-  <tbody><tr>
-    <td style="background-color: #F1F1F1;" bgcolor="#F0F0F0" valign="top" align="center">
-
-
-      <table bgcolor="#F1F1F1" class="container" cellspacing="0" cellpadding="0" width="600" border="0" id="banner">
-        <tbody><tr>
-          <td style="padding-top: 30px;" align="center" valign="middle">
-            <div style="background-color: #2E9F9B; padding-top: 25px; padding-bottom: 25px; font-family: Helvetica; font-weight: bold; font-size: 12px; color: #ffffff" id="banner-title">
-              <img src="http://localhost:8080/images/logo/logo-name-white@2x.png" style="width:185px;" id="logo" alt="My Pet Defense">
+      <!-- Top banner -->
+      <table id="banner" border="0" width="600" cellpadding="0" cellspacing="0" class="container" bgcolor="#F1F1F1">
+        <tr>
+          <td valign="middle" align="center" style="padding-top: 30px;">
+            <div id="banner-title" style="background-color: #2E9F9B; padding-top: 25px; padding-bottom: 25px; font-family: Helvetica; font-weight: bold; font-size: 12px; color: #ffffff">
+              <img src="../images/logo/logo-name-white@2x.png" alt="My Pet Defense" id="logo" style="width:185px;">
             </div>
           </td>
         </tr>
-        </tbody></table>
+      </table>
 
+      <!-- 600px container (white background) -->
+      <table border="0" width="600" cellpadding="0" cellspacing="0" class="container" style="width:600px;max-width:600px;font-family:Helvetica, Arial, sans-serif;" >
+        <tr>
+          <td id="content" class="container-padding" style="padding-top:25px;padding-right:45px;padding-bottom:50px;padding-left:45px;background-color:#ffffff;">
 
-      <table style="width:600px;max-width:600px;font-family:Helvetica, Arial, sans-serif;" class="container" cellspacing="0" cellpadding="0" width="600" border="0">
-        <tbody><tr>
-          <td style="padding-top:25px;padding-right:45px;padding-bottom:50px;padding-left:45px;background-color:#ffffff;" class="container-padding" id="content"><div>
+            Hi there!
 
-            <table>
-              <tbody><tr>
-                <td style="padding-bottom:40px;" align="center" colspan="2" class="content">
-                  <div style="font-size:30px;font-weight:600;color:#454343;" class="title">
-                    Your order is shipping soon!
-                  </div>
-                  <div style="font-size:20px;font-weight:400;color:#454343;" class="title">
-                    Shipping on <span id="ship-date">August 15</span>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td align="left" colspan="2" class="content">
-                  <div style="padding-bottom:50px;font-size:17px;line-height:20px;text-align:left;color:#4F4E4E;" class="body-text">
-                    Hi <span id="parent-name">Mike</span>!
-                    <br><br>
-                    <div class="no-tracking-number">Your order is nearly on it's way!</div>
-
-                    <br><br>
-
-                    <div>Now is the time to make changes to your box.</div>
-
-                    <br><br>
-
-                    To adjust your shipment, go to the <a style="color:#1D8883 !important;" id="go-to-pets" href="http://mypetdefense.com/pre-billing/">Pets Page</a> in your account.
-                    <br><br>
-
-                    Sincerely,
-                    <br>
-                    <span style="color:#626161;"><strong>The My Pet Defense Team</strong></span>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td style="width:100%;margin-top:50px;font-size:20px;color:#454343;background-color:#E7E7E7;text-align:center;padding-top:9px;padding-bottom:10px;" colspan="2">
-                  Order Info
-                </td>
-              </tr>
-              <tr>
-                <td style="padding-top:20px;padding-bottom:30px;" colspan="2">
-                  <table id="order" style="width:100%;">
-                    <tbody><tr>
-                      <th style="text-align:left;">Pet</th>
-                      <th class="product" style="text-align:left;">Products</th>
-                    </tr>
-                    <tr class="subscription-boxes">
-                      <td style="width:30%;" class="pet-name">bob</td>
-                      <td>
-                        <ul class="products" style="list-style:none;margin:0;padding:10 0 0 0;">
-                          <li class="product" style="padding-bottom:7px;"><span>Calming Chews</span></li><li class="product" style="padding-bottom:7px;"><span>Skin and Coat Chews</span></li><li class="product" style="padding-bottom:7px;"><span>Multi-Vitamin Chews</span></li><li class="product" style="padding-bottom:7px;"><span>Dental Powder Small</span></li><li class="product" style="padding-bottom:7px;"><span>ZoGuard Plus for Dogs 5-22 lbs</span></li>
-
-
-
-
-                        </ul>
-                      </td>
-                    </tr><tr class="subscription-boxes">
-                      <td style="width:30%;" class="pet-name">Spot</td>
-                      <td>
-                        <ul class="products" style="list-style:none;margin:0;padding:10 0 0 0;">
-                          <li class="product" style="padding-bottom:7px;"><span>ZoGuard Plus for Dogs 23-44 lbs</span></li>
-
-
-
-
-                        </ul>
-                      </td>
-                    </tr>
-                    </tbody></table>
-                </td>
-              </tr>
-              <tr>
-                <td style="width:100%;margin-top:50px;font-size:20px;color:#454343;background-color:#E7E7E7;text-align:center;padding-top:9px;padding-bottom:10px;" colspan="2">
-                  Shipping Info
-                </td>
-              </tr>
-              <tr>
-                <td style="width:50%;padding-top:20px;font-size:14px;text-align:left;color:#333333;text-align:center" valign="top">
-                  <div style="font-size:14px;font-weight:600;padding-bottom:5px;">Shipped To</div>
-                  <span class="name">Mike Rivera</span><br>
-                  3605 Bellhaven Dr<br>
-
-                  Valdosta, GA 31605
-                </td>
-              </tr>
-              <tr>
-                <td style="padding-top:20px;" colspan="2">
-                  <div style="height:1px;border-bottom:1px solid #E7E7E7" class="hr"> </div>
-                </td>
-              </tr>
-              <tr id="tax">
-                <td style="padding-top:18px;text-align:right;" colspan="2">
-                  <span style="font-weight:600">Tax</span>    <span id="tax-due">$0.90</span>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding-top:18px;text-align:right;" colspan="2">
-                  <span style="font-weight:600">Billed Total</span>    <span id="total">$1.99</span>
-                </td>
-              </tr>
-              </tbody></table>
-          </div></td>
+          </td>
         </tr>
         <tr>
-          <td style="font-size:12px;line-height:18px;color:#A3A2A2;" align="center" class="footer-text">
+          <td class="footer-text" align="center" style="font-size:12px;line-height:18px;color:#A3A2A2;">
             <br><br>
-            You are registered as rivera.mj@gmail.com123
+            You are registered as <span id="user-email" style="color:#1D8883 !important;">useremail@gmail.com</span>
             <br><br>
 
-            <div style="font-size:12px;" class="ios-footer">
-              © 2019 <a style="color:#1D8883 !important;" href="http://mypetdefense.com">MyPetDefense.com</a>
+            <div class="ios-footer" style="font-size:12px;">
+              &copy; 2020 <a href="http://mypetdefense.com" style="color:#1D8883 !important;">MyPetDefense.com</a>
               <br>
               All Rights Reserved
               <br>
-              <a style="color:#1D8883 !important;" href="http://mypetdefense.com/terms-of-service">Terms of Service</a>
+              <a href="http://mypetdefense.com/terms-of-service" style="color:#1D8883 !important;">Terms of Service</a>
             </div>
 
             <br><br>
 
           </td>
         </tr>
-        </tbody></table>
-
+      </table>
+      <!--/600px container -->
     </td>
   </tr>
-  </tbody></table>
+</table>
+<!--/100% background wrapper-->
 
-
-
-
-</body></html>
+</body>
+</html>
