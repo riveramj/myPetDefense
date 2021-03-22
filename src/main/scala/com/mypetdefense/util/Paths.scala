@@ -184,6 +184,7 @@ object Paths {
     admin.EventsDashboard.menu,
     admin.AmazonOrders.menu,
     admin.AmazonOrders.exportAmazonOrder,
+    admin.EmailReports.menu,
     agency.LegacyAgencyOverview.agencyMtdYtdExportMenu,
     agency.LegacyAgencyOverview.exportTPPMontSalesMenu,
     agency.LegacyAgencyOverview.menu,

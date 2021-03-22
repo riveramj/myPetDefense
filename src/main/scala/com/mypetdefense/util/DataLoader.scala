@@ -584,7 +584,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def cancelBoxesForCancelledPets() = {
+  def cancelBoxesForCancelledPets(): Seq[SubscriptionBox] = {
     for {
       pet <- Pet.findAll(By(Pet.status, Status.Cancelled))
       box <- pet.box.obj
@@ -592,4 +592,6 @@ object DataLoader extends Loggable {
       box.status(Status.Cancelled).saveMe()
     }
   }
+  
+  
 }

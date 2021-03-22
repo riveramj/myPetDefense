@@ -1,0 +1,58 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+<div data-lift="admin.EmailReports.render?eager_eval=true">
+  <div data-lift="embed?what=admin/admin-nav-bar"></div>
+  <div id="item-container">
+    <h2>Email Reports</h2>
+    <form>
+      <fieldset class="create">
+        <legend>Assign Email Report</legend>
+        <label class="tiny-field promo">
+          <span class="field-label">Email</span>
+          <input id="assign-email" type="text">
+        </label>
+        <div class="tiny-field" id="email-report-container">
+          <span class="field-label">Reports</span>
+          <select id="email-report-select">
+            <option value="123456">daily</option>
+            <option value="099221">weekly</option>
+          </select>
+        </div>
+
+        <div class="tiny-field">
+          <span class="field-label">Description</span>
+          <span id="report-description">some report</span>
+        </div>
+        <div class="create-item tiny-field">
+          <button type="submit" id="create-item">Assign Report</button>
+        </div>
+      </fieldset>
+    </form>
+    <table>
+      <thead>
+        <tr>
+          <td>Email
+          <td>User Name
+          <td>Report Name
+          <td>Actions
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="report-record">
+          <td class="email">foo@bar
+          <td class="user-name">joe smith
+          <td class="report-name">daily sales
+          <td class="actions">
+            <button class="delete">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=admin">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=admin"></script>
+  </tail>
+</div>
