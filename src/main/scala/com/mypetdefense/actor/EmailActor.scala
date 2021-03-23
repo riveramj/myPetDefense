@@ -412,17 +412,17 @@ trait NewSaleEmailHandling extends EmailHandlerChain {
 
       val transform = {
         "#name *" #> user.map(_.name).openOr("") &
-          "#email *" #> user.map(_.email.get).openOr("") &
-          "#count *" #> petCount &
-          "#coupon *" #> couponCode &
-          ".amount" #> ClearNodes
+        "#email *" #> user.map(_.email.get).openOr("") &
+        "#count *" #> petCount &
+        "#coupon *" #> couponCode &
+        ".amount" #> ClearNodes
       }
 
-      sendEmail(subject, "sales@mypetdefense.com", transform(newSaleTemplate))
-      sendEmail(subject, "rivera.mj@gmail.com", transform(newSaleTemplate))
-      sendEmail(subject, "amela.hasanovic@mypetdefense.com", transform(newSaleTemplate))
-      sendEmail(subject, "calvin.leach@mypetdefense.com", transform(newSaleTemplate))
-      sendEmail(subject, "kyle@getskybound.com", transform(newSaleTemplate))
+      val emails = EmailReport.findAll(By(EmailReport.reportType, ReportType.NewSaleEmail))
+
+      emails.map { email =>
+        sendEmail(subject, email, transform(newSaleTemplate))
+      }
   }
 }
 
@@ -436,15 +436,17 @@ trait UpgradeSubscriptionEmailHandling extends EmailHandlerChain {
 
       val transform = {
         "#name *" #> user.map(_.name).openOr("") &
-          "#email *" #> user.map(_.email.get).openOr("") &
-          "#count *" #> boxCount &
-          ".coupon *" #> ClearNodes &
-          ".amount" #> ClearNodes
+        "#email *" #> user.map(_.email.get).openOr("") &
+        "#count *" #> boxCount &
+        ".coupon *" #> ClearNodes &
+        ".amount" #> ClearNodes
       }
 
-      sendEmail(subject, "sales@mypetdefense.com", transform(newSaleTemplate))
-      sendEmail(subject, "rivera.mj@gmail.com", transform(newSaleTemplate))
-      sendEmail(subject, "calvin.leach@mypetdefense.com", transform(newSaleTemplate))
+      val emails = EmailReport.findAll(By(EmailReport.reportType, ReportType.NewSaleEmail))
+
+      emails.map { email =>
+        sendEmail(subject, email, transform(newSaleTemplate))
+      }
   }
 }
 
@@ -458,10 +460,10 @@ trait ShipmentReadyEmailHandling extends EmailHandlerChain {
 
       val transform = {
         "#name *" #> user.name &
-          "#email *" #> user.email &
-          ".count" #> ClearNodes &
-          ".coupon" #> ClearNodes &
-          "#amount *" #> ("$" + ("%1.2f" format amount))
+        "#email *" #> user.email &
+        ".count" #> ClearNodes &
+        ".coupon" #> ClearNodes &
+        "#amount *" #> ("$" + ("%1.2f" format amount))
       }
 
       sendEmail(subject, "mike.rivera@mypetdefense.com", transform(paymentTemplate))
@@ -478,9 +480,9 @@ trait ContactUsEmailHandling extends EmailHandlerChain {
 
       val transform = {
         "#name *" #> name &
-          "#email *" #> email &
-          "#message *" #> message &
-          "#source-page *" #> sourcePage
+        "#email *" #> email &
+        "#message *" #> message &
+        "#source-page *" #> sourcePage
       }
 
       sendEmail(subject, "help@mypetdefense.com", transform(contactTemplate))
