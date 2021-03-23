@@ -104,25 +104,25 @@ class Users extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
-      ".users [class+]" #> "current" &
-        ".create" #> idMemoize { renderer =>
-          "#first-name" #> ajaxText(firstName, firstName = _) &
-            "#last-name" #> ajaxText(lastName, lastName = _) &
-            "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
-            "#user-type-select" #> userTypeRadio(renderer) &
-            "#agency-container #agency-select" #> agencyDropdown &
-            "#create-item" #> SHtml.ajaxSubmit("Create User", () => createUser)
-        } &
-        ".user" #> users.map { user =>
-          ".name *" #> user.name &
-            ".email *" #> user.email &
-            ".type *" #> user.userType &
-            ".agency *" #> user.agency.obj.map(_.name.get) &
-            ".actions .delete" #> ClearNodesIf(user.userType == UserType.Parent) &
-            ".actions .delete [onclick]" #> Confirm(
-              s"Delete ${user.name}?",
-              ajaxInvoke(deleteUser(user) _)
-            )
-        }
+    ".users [class+]" #> "current" &
+    ".create" #> idMemoize { renderer =>
+      "#first-name" #> ajaxText(firstName, firstName = _) &
+      "#last-name" #> ajaxText(lastName, lastName = _) &
+      "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
+      "#user-type-select" #> userTypeRadio(renderer) &
+      "#agency-container #agency-select" #> agencyDropdown &
+      "#create-item" #> SHtml.ajaxSubmit("Create User", () => createUser)
+    } &
+    ".user" #> users.map { user =>
+      ".name *" #> user.name &
+      ".email *" #> user.email &
+      ".type *" #> user.userType &
+      ".agency *" #> user.agency.obj.map(_.name.get) &
+      ".actions .delete" #> ClearNodesIf(user.userType == UserType.Parent) &
+      ".actions .delete [onclick]" #> Confirm(
+        s"Delete ${user.name}?",
+        ajaxInvoke(deleteUser(user) _)
+      )
+    }
   }
 }

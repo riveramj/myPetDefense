@@ -63,7 +63,9 @@ object DbSetup extends Loggable {
     ApiRequestBackup,
     ProductSchedule,
     ProductScheduleItem,
-    WoofTraxOrder
+    WoofTraxOrder,
+    EmailReport,
+    EmailReportRecord
   )
 
 }
