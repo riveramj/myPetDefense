@@ -14,6 +14,7 @@ class EmailReport extends LongKeyedMapper[EmailReport] with IdPK with OneToMany[
 
   object name           extends MappedString(this, 1000)
   object description    extends MappedString(this, 1000)
+  object reportType     extends MappedEnum(this, ReportType )
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -22,12 +23,14 @@ class EmailReport extends LongKeyedMapper[EmailReport] with IdPK with OneToMany[
 object EmailReport extends EmailReport with LongKeyedMetaMapper[EmailReport] {
   def createNewEmailReport(
                        name: String,
-                       description: String
+                       description: String,
+                       reportType: ReportType.Value
                      ): EmailReport = {
     EmailReport.create
       .emailReportId(generateLongId)
       .name(name)
       .description(description)
+      .reportType(reportType)
       .saveMe
   }
 }
@@ -59,4 +62,8 @@ object EmailReportRecord extends EmailReportRecord with LongKeyedMetaMapper[Emai
       .email(email)
       .saveMe
   }
+}
+
+object ReportType extends Enumeration {
+  val DailyTPPAgentSalesReportEmail, DailyInternalReportEmail, NewSaleEmail, UpgradeSubscriptionEmail = Value
 }

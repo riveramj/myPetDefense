@@ -27,18 +27,24 @@ class EmailReports extends Loggable {
 
   var email = ""
   var chosenReport: Box[EmailReport] = Empty
+  var reportDescriptionRenderer: Box[IdMemoizeTransform] = Empty
+
 
   def emailReportDropdown: Elem = {
-    SHtml.selectObj(
+    SHtml.ajaxSelectObj(
       List((Empty, "")) ++ emailReports.map(report => (Full(report), report.name.get)),
       Full(chosenReport),
-      (report: Box[EmailReport]) => chosenReport = report
+      (report: Box[EmailReport]) => {
+        chosenReport = report
+        
+        reportDescriptionRenderer.map(_.setHtml).openOr(Noop)
+      }
     )
   }
 
   def createReportRecord: JsCmd = {
     val validateFields = List(
-      checkEmail(email, "#assign-email")
+      validEmailFormat(email, "#email")
     ).flatten
 
     if (validateFields.isEmpty) {
@@ -56,7 +62,7 @@ class EmailReports extends Loggable {
 
   def deleteEmailReportRecord(emailReportRecord: EmailReportRecord)(): Alert = {
     if (emailReportRecord.delete_!)
-      S.redirectTo(Coupons.menu.loc.calcDefaultHref)
+      S.redirectTo(EmailReports.menu.loc.calcDefaultHref)
     else
       Alert("An error has occurred. Please try again.")
   }
@@ -65,7 +71,11 @@ class EmailReports extends Loggable {
     SHtml.makeFormsAjax andThen
     ".coupons [class+]" #> "current" &
     "#email" #> text(email, email = _) &
-    "#report-descirption" #> chosenReport.map(_.description.get) &
+    ".report-description" #> idMemoize { renderer =>
+      reportDescriptionRenderer = Full(renderer)
+      
+      "#report-description" #> chosenReport.map(_.description.get)
+    } &
     "#email-report-container #email-report-select" #> emailReportDropdown &
     "#create-item" #> SHtml.ajaxSubmit("Assign Report", () => createReportRecord) &
     ".report-record" #> emailReportRecords.map { reportRecord =>
@@ -74,7 +84,7 @@ class EmailReports extends Loggable {
       ".user-name *" #> reportRecord.user.obj.map(_.name) &
       ".report-name *" #> report.map(_.name.get) &
       ".actions .delete [onclick]" #> Confirm(
-        s"Delete ${reportRecord.email.get} for report ${report.map(_.name.get)}?",
+        s"Delete ${reportRecord.email.get} for report ${report.map(_.name.get).openOr("")}?",
         ajaxInvoke(deleteEmailReportRecord(reportRecord))
       )
     }
