@@ -418,7 +418,8 @@ trait NewSaleEmailHandling extends EmailHandlerChain {
         ".amount" #> ClearNodes
       }
 
-      val emails = EmailReport.findAll(By(EmailReport.reportType, ReportType.NewSaleEmail))
+      val report = EmailReport.findAll(By(EmailReport.reportType, ReportType.NewSaleEmail))
+      val emails = report.flatMap(_.emailRecords.toList).map(_.email.get)
 
       emails.map { email =>
         sendEmail(subject, email, transform(newSaleTemplate))
@@ -442,7 +443,8 @@ trait UpgradeSubscriptionEmailHandling extends EmailHandlerChain {
         ".amount" #> ClearNodes
       }
 
-      val emails = EmailReport.findAll(By(EmailReport.reportType, ReportType.NewSaleEmail))
+      val report = EmailReport.findAll(By(EmailReport.reportType, ReportType.NewSaleEmail))
+      val emails = report.flatMap(_.emailRecords.toList).map(_.email.get)
 
       emails.map { email =>
         sendEmail(subject, email, transform(newSaleTemplate))
