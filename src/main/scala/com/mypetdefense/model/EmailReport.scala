@@ -15,6 +15,7 @@ class EmailReport extends LongKeyedMapper[EmailReport] with IdPK with OneToMany[
   object name           extends MappedString(this, 1000)
   object description    extends MappedString(this, 1000)
   object reportType     extends MappedEnum(this, ReportType )
+  object emailRecords extends MappedOneToMany(EmailReportRecord, EmailReportRecord.emailReport)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -41,10 +42,10 @@ class EmailReportRecord extends LongKeyedMapper[EmailReportRecord] with IdPK wit
     override def dbIndexed_? = true
   }
 
-  object emailReport extends MappedLongForeignKey(this, EmailReport)
-  object user        extends MappedLongForeignKey(this, User)
-  object email       extends MappedString(this, 500)
-  object createdAt   extends MappedDateTime(this) {
+  object emailReport  extends MappedLongForeignKey(this, EmailReport)
+  object user         extends MappedLongForeignKey(this, User)
+  object email        extends MappedString(this, 500)
+  object createdAt    extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 }

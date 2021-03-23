@@ -1,8 +1,9 @@
 package com.mypetdefense.jobs
 
 import com.mypetdefense.actor._
-import com.mypetdefense.model.Subscription
+import com.mypetdefense.model.{EmailReport, ReportType, Subscription}
 import com.mypetdefense.service.ReportingService
+import net.liftweb.mapper.By
 import org.quartz._
 
 import scala.collection.JavaConverters._
@@ -11,7 +12,8 @@ class InternalEmailReportingJob extends ManagedJob {
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
     val emailScope = context.getMergedJobDataMap.get("scope")
 
-    val internalEmails = EmailReport.findAll(By(EmailReport.reportType, ReportType.DailyInternalReportEmail))
+    val report = EmailReport.findAll(By(EmailReport.reportType, ReportType.DailyInternalReportEmail))
+    val internalEmails = report.flatMap(_.emailRecords.toList).map(_.email.get)
 
     emailScope match {
       case "daily" =>
