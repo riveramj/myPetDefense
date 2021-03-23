@@ -584,7 +584,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def cancelBoxesForCancelledPets() = {
+  def cancelBoxesForCancelledPets(): Seq[SubscriptionBox] = {
     for {
       pet <- Pet.findAll(By(Pet.status, Status.Cancelled))
       box <- pet.box.obj
@@ -592,4 +592,22 @@ object DataLoader extends Loggable {
       box.status(Status.Cancelled).saveMe()
     }
   }
+ 
+  def createEmailReports(): List[EmailReport] = {
+    if (EmailReport.findAll().isEmpty) {
+      val emailReports = List(
+        ("Daily TPP Agent Sales Report", "Daily email that shows sales by agent an store by day", ReportType.DailyTPPAgentSalesReportEmail),
+        ("Daily MPD report", "Daily email that shows shipment statistics from previous day", ReportType.DailyInternalReportEmail),
+        ("New Sale Email", "Instant email for every MPD.com sale.", ReportType.NewSaleEmail),
+        ("New Upgrade Email", "Instant email for every upgrade to the H&W box.", ReportType.UpgradeSubscriptionEmail)
+      )
+
+      for {
+        report <- emailReports
+      } yield {
+        EmailReport.createNewEmailReport(report._1, report._2, report._3)
+      }
+    } else Nil
+  }
+  
 }

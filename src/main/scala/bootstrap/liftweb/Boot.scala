@@ -39,6 +39,7 @@ class Boot {
     //DataLoader.cancellationDataSync()
     //DataLoader.createMissingDogBoxes()
     //ReportingService.getPetlandCustomersWithStats
+    DataLoader.createEmailReports()
 
     //DataLoader.upgradeSubscriptionBoxDetails()
     //DataLoader.subscriptionBoxCheck()

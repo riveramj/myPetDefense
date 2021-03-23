@@ -13,61 +13,17 @@ class SalesAgentReportEmailJob extends ManagedJob {
     val dailyAgencyData   = ReportingService.findYesterdaySalesByAgency
     val monthlyAgencyData = ReportingService.findMTDSalesByAgency
 
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "mike.rivera@mypetdefense.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "silvia@thirdpartypet.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "mike@canineregistrations.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "keith@thirdpartypet.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "toni@thirdpartypet.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "Angie.Luckey@thirdpartypet.com"
-    )
-
-    EmailActor ! DailySalesEmail(
-      dailyAgentData,
-      monthlyAgentData,
-      dailyAgencyData,
-      monthlyAgencyData,
-      "Laura@thirdpartypet.com"
-    )
+    val emails = EmailReport.findAll(By(EmailReport.reportType, ReportType.DailyTPPAgentSalesReportEmail))
+      
+    emails.map { email =>
+      EmailActor ! DailySalesEmail(
+        dailyAgentData,
+        monthlyAgentData,
+        dailyAgencyData,
+        monthlyAgencyData,
+        email
+      )
+    }
   }
 }
 
