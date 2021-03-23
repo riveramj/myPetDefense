@@ -60,7 +60,7 @@ object Paths {
     RedirectResponse("/logout")
   )
   val finishedCheckout: If = If(
-    () => !total.is.isEmpty,
+    () => !monthlyTotal.is.isEmpty,
     RedirectResponse(Checkout.menu.loc.calcDefaultHref)
   )
   val petChosen: If = If(
@@ -110,7 +110,6 @@ object Paths {
 
   def applyCouponRedirect(couponCode: String): Nothing = {
     val coupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
-    println(coupon)
     PetFlowChoices.coupon(coupon)
     PetFlowChoices.coupon.is
 
@@ -185,6 +184,7 @@ object Paths {
     admin.EventsDashboard.menu,
     admin.AmazonOrders.menu,
     admin.AmazonOrders.exportAmazonOrder,
+    admin.EmailReports.menu,
     agency.LegacyAgencyOverview.agencyMtdYtdExportMenu,
     agency.LegacyAgencyOverview.exportTPPMontSalesMenu,
     agency.LegacyAgencyOverview.menu,

@@ -46,15 +46,16 @@ object CalculationHelper {
   }
 
   def calculateOrderWeight(
-      subscriptionBoxes: List[SubscriptionBox]
-  ): BigDecimal = {
-    val smallDogs    = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
+                            subscriptionBoxes: List[SubscriptionBox],
+                            shipment: Shipment
+                          ): BigDecimal = {
     val groupedBoxes = subscriptionBoxes.groupBy(_.boxType.get)
 
     val boxWeights = groupedBoxes map {
-      case (BoxType.basic, boxes)             => boxes.size * 4.0
-      case (BoxType.healthAndWellness, boxes) => boxes.size * 13.0
-      case (_, _)                             => 0.0
+      case (BoxType.basic, boxes) if !shipment.freeUpgradeSample.get => boxes.size * 5.0
+      case (BoxType.basic, boxes) => boxes.size * 15.0
+      case (BoxType.healthAndWellness, boxes) => boxes.size * 15.0
+      case (_,_) => 0.0
     }
 
     boxWeights.sum

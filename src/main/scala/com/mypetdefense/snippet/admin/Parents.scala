@@ -1,10 +1,6 @@
 package com.mypetdefense.snippet
 package admin
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
-import java.util.Date
-
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
@@ -19,6 +15,9 @@ import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
+import java.text.SimpleDateFormat
+import java.time.{LocalDate, ZoneId}
+import java.util.Date
 import scala.xml.{Elem, NodeSeq}
 
 object Parents extends Loggable {
@@ -266,10 +265,14 @@ class Parents extends Loggable {
 
   def subscriptionBinding(
       detailsRenderer: IdMemoizeTransform,
-      oldSubscription: Option[Subscription]
+      oldSubscription: Box[Subscription]
   ): CssBindFunc = {
     val subscription       = oldSubscription.map(_.reload)
     val subscriptionStatus = subscription.map(_.status.get)
+    val subscriptionLevel = if (subscription.exists(_.isUpgraded.get))
+      "Health & Wellness"
+    else
+      "Flea & Tick only"
 
     def setSubscriptionStatus(status: Status.Value) = {
       val updatedSubscription = subscription.map(_.status(status).saveMe())
@@ -299,6 +302,11 @@ class Parents extends Loggable {
       }
     }
 
+    def upgradeAccount = {
+      SubscriptionService.upgradeAccount(subscription, true) &
+      detailsRenderer.setHtml
+    }
+
     ".parent-subscription" #> ClearNodesIf(isCancelled_?(currentParent)) &
       ".parent-subscription" #> {
         ".subscription-status *" #> subscriptionStatus.map(_.toString) &
@@ -309,7 +317,10 @@ class Parents extends Loggable {
           ".resume-subscription" #> ClearNodesIf(subscriptionStatus.contains(Status.Active)) &
           ".resume-subscription [onclick]" #> SHtml.ajaxInvoke(() =>
             setSubscriptionStatus(Status.Active)
-          )
+          ) &
+          ".subscription-level *" #> subscriptionLevel &
+          ".upgrade-subscription" #> ClearNodesIf(subscription.exists(_.isUpgraded.get)) &
+          ".upgrade-subscription [onclick]" #> SHtml.ajaxInvoke(() => upgradeAccount)
       }
   }
 

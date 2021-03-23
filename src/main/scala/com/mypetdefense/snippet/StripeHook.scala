@@ -53,34 +53,26 @@ trait StripeHook extends RestHelper with Loggable {
       }
 
       if (notTrial_? && activePets_?) {
-        subscription.status(Status.Active).saveMe
+        subscription.reload.status(Status.Active).save()
 
-        if (subscription.contractLength.get > 0) {
-          if (subscription.shipments.toList.size < 2) {
-            ParentService.changeToPetlandMonthlyStripePrice(stripeSubscriptionId)
-          }
-        }
+        TaxJarService.processTaxesCharged(
+          invoicePaymentId,
+          city,
+          state,
+          zip,
+          formatAmount(subtotal),
+          formatAmount(tax)
+        )
 
-        if (activePets_?) {
-          TaxJarService.processTaxesCharged(
-            invoicePaymentId,
-            city,
-            state,
-            zip,
-            formatAmount(subtotal),
-            formatAmount(tax)
-          )
+        //ParentService.updatePuppyProducts(user)
 
-          //ParentService.updatePuppyProducts(user)
-
-          ShipmentService.createNewShipment(
-            user,
-            invoicePaymentId,
-            charge,
-            formatAmount(amountPaid),
-            formatAmount(tax)
-          )
-        }
+        ShipmentService.createNewShipment(
+          user,
+          invoicePaymentId,
+          charge,
+          formatAmount(amountPaid),
+          formatAmount(tax)
+        )
       }
 
       OkResponse()
@@ -103,9 +95,6 @@ trait StripeHook extends RestHelper with Loggable {
         _ isAfterNow
       }
       val amount = totalAmountInCents / 100d
-
-      if (nextPaymentAttempt.isEmpty)
-        ParentService.updateNextShipDate(subscription)
 
       emailActor ! SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt)
 
