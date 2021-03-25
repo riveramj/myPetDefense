@@ -131,6 +131,7 @@ object Paths {
     homePage,
     halfOff,
     freeMonth,
+    twentyOff,
     termsOfService,
     thanksPage,
     billingThanksPage,
