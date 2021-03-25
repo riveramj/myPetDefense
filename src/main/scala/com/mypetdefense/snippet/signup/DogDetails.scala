@@ -126,6 +126,7 @@ class DogDetails extends Loggable {
   def yearDropdown: Elem = {
     SHtml.select(
       ("", "") +: List(
+        "2021",
         "2020",
         "2019",
         "2018",

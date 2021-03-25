@@ -27,8 +27,9 @@ object PetsAndProducts extends Loggable {
 }
 
 class PetsAndProducts extends Loggable {
-  val user: Box[User]                 = currentUser
+  val user: Box[User]                 = currentUser.map(_.reload)
   val subscription: Box[Subscription] = user.flatMap(_.subscription.obj)
+  val upgradedSubscription = subscription.map(_.isUpgraded.get).openOr(false)
   val priceCode: String               = subscription.map(_.priceCode.get).getOrElse("")
 
   var newPetType: Box[AnimalType.Value]  = Empty
@@ -230,41 +231,41 @@ class PetsAndProducts extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     val boxes: List[SubscriptionBox] = user.flatMap { parent =>
-      parent.subscription.obj.map(_.subscriptionBoxes.toList)
+      parent.subscription.obj.map(_.subscriptionBoxes.toList.filter(_.status.get == Status.Active))
     }.openOr(Nil)
 
     SHtml.makeFormsAjax andThen
-      petProductsBindings andThen
-      ".pets-products a [class+]" #> "current" &
-        "#user-email *" #> user.map(_.email.get) &
-        "#new-pet" #> idMemoize { renderer =>
-          "#new-pet-name" #> ajaxText(newPetName, newPetName = _) &
-            "#pet-type-select" #> petTypeDropdown(renderer) &
-            "#new-pet-product-select" #> productDropdown() &
-            "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
-        } &
-        ".pet" #> boxes.map { box =>
-          val pet            = box.pet.obj
-          var currentPetName = pet.map(_.name.get).openOr("")
-          val product        = box.fleaTick.obj
+    petProductsBindings andThen
+    ".pets-products a [class+]" #> "current" &
+    "#user-email *" #> user.map(_.email.get) &
+    "#new-pet" #> idMemoize { renderer =>
+      "#new-pet-name" #> ajaxText(newPetName, newPetName = _) &
+      "#pet-type-select" #> petTypeDropdown(renderer) &
+      "#new-pet-product-select" #> productDropdown() &
+      "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
+    } &
+    ".pet" #> boxes.map { box =>
+      val pet            = box.pet.obj
+      var currentPetName = pet.map(_.name.get).openOr("")
+      val product        = box.fleaTick.obj
+      val possiblePrice = SubscriptionBox.possiblePrice(box, upgradedSubscription)
 
-          val price = if (SubscriptionBox.possiblePrice(box) == 0d) {
-            product.flatMap { item => Price.getPricesByCode(item, priceCode).map(_.price.get) }
-              .openOr(0d)
-          } else {
-            SubscriptionBox.possiblePrice(box)
-          }
+      val price = if (possiblePrice == 0d) {
+        product.flatMap { item => Price.getPricesByCode(item, priceCode).map(_.price.get) }
+          .openOr(0d)
+      } else {
+        possiblePrice
+      }
 
-          ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
-            ".price *" #> f"$$$price%2.2f" &
-            ".pet-status *" #> pet.map(_.status.get.toString) &
-            ".show-pet-product [onClick]" #> ajaxInvoke(showProducts(pet) _) &
-            ".cancel [onclick]" #> Confirm(
-              s"Remove $currentPetName and cancel future shipments?",
-              ajaxInvoke(deletePet(pet) _)
-            ) &
-            ".save" #> ajaxSubmit("Save", () => savePetName(pet, currentPetName))
-        }
-
+      ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
+      ".price *" #> f"$$$price%2.2f" &
+      ".pet-status *" #> pet.map(_.status.get.toString) &
+      ".show-pet-product [onClick]" #> ajaxInvoke(showProducts(pet) _) &
+      ".cancel [onclick]" #> Confirm(
+        s"Remove $currentPetName and cancel future shipments?",
+        ajaxInvoke(deletePet(pet) _)
+      ) &
+      ".save" #> ajaxSubmit("Save", () => savePetName(pet, currentPetName))
+    }
   }
 }

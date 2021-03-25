@@ -41,11 +41,11 @@ class Login extends Loggable {
     }
 
     SHtml.makeFormsAjax andThen
-      "#login-container" #> {
-        "#email" #> SHtml.text(email, email = _) &
-          "#password" #> SHtml.password(password, password = _) &
-          "#fb-id" #> SHtml.password(fbId, fbId = _) &
-          "#login" #> SHtml.ajaxSubmit("Log In", () => LoginService.login(email, password, fbId))
-      }
+    "#login-container" #> {
+      "#email" #> SHtml.text(email, email = _) &
+      "#password" #> SHtml.password(password, password = _) &
+      "#fb-id" #> SHtml.password(fbId, fbId = _) &
+      "#login" #> SHtml.ajaxSubmit("Log In", () => LoginService.login(email, password, fbId))
+    }
   }
 }

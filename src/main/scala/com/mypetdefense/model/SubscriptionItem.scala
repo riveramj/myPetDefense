@@ -31,8 +31,14 @@ object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[Subscr
       .saveMe
   }
 
-  def createFirstBox(subscriptionBox: SubscriptionBox): List[SubscriptionItem] = {
-    val products   = ProductSchedule.getFirstBoxProducts
+  def createFirstBox(subscriptionBox: SubscriptionBox, firstBox: Boolean = true): List[SubscriptionItem] = {
+    val products = {
+      if(firstBox)
+        ProductSchedule.getFirstBoxProducts
+      else
+        ProductSchedule.getRegularScheduleBoxProducts
+    }
+
     val smallSizes = List(AnimalSize.DogSmallZo, AnimalSize.DogSmallShld, AnimalSize.DogSmallAdv)
     val isSmallDog = subscriptionBox.fleaTick.obj.map(_.size.get).forall(smallSizes.contains)
 

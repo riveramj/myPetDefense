@@ -85,6 +85,16 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
       .toList
       .flatMap(_.scheduledItems.toList.flatMap(_.product.obj))
   }
+
+  def getRegularScheduleBoxProducts: List[Product] = {
+    ProductSchedule
+      .find(
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
+        By(ProductSchedule.firstBox, false)
+      )
+      .toList
+      .flatMap(_.scheduledItems.toList.flatMap(_.product.obj))
+  }
 }
 
 object ProductScheduleStatus extends Enumeration {

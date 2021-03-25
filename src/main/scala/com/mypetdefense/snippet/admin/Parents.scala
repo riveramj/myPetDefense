@@ -50,8 +50,7 @@ class Parents extends Loggable {
   val coupons: List[Coupon] = Coupon.findAll()
   val dogProducts: List[FleaTick] =
     FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog)).filter(_.isZoGuard_?)
-  val catProducts: List[FleaTick] =
-    FleaTick.findAll(By(FleaTick.animalType, AnimalType.Cat)).filter(_.isZoGuard_?)
+  val catProducts: List[FleaTick] = FleaTick.zoGuardCat.toList
 
   val stripeBaseUrl: String =
     Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
@@ -608,14 +607,14 @@ class Parents extends Loggable {
       petsRenderer = Full(renderer)
       ".create" #> {
           ".new-pet-name" #> ajaxText(petName, petName = _) &
-            ".new-pet-breed" #> ajaxText(petBreed, petBreed = _) &
-            ".new-pet-birthday" #> ajaxText(petBirthday, petBirthday = _) &
-            ".pet-type-select" #> petTypeRadio(renderer) &
-            ".product-container .product-select" #> productDropdown &
-            ".create-item-container .create-item" #> SHtml.ajaxSubmit(
-              "Add Pet",
-              () => addPet(parent, renderer)
-            )
+          ".new-pet-breed" #> ajaxText(petBreed, petBreed = _) &
+          ".new-pet-birthday" #> ajaxText(petBirthday, petBirthday = _) &
+          ".pet-type-select" #> petTypeRadio(renderer) &
+          ".product-container .product-select" #> productDropdown &
+          ".create-item-container .create-item" #> SHtml.ajaxSubmit(
+            "Add Pet",
+            () => addPet(parent, renderer)
+          )
         } &
       ".add-coupon" #> {
         ".coupon-container .coupon-select" #> couponDropdown &

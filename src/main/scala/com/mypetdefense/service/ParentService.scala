@@ -311,6 +311,9 @@ object ParentService extends LoggableBoxLogging {
     oldUser.subscription.obj.map { subscription =>
       val box = SubscriptionBox.createNewBox(subscription, newPet, isUpgraded)
 
+      if (newPet.animalType.get == AnimalType.Dog)
+        SubscriptionItem.createFirstBox(box, false)
+
       newPet.box(box).saveMe()
     }
 
@@ -329,6 +332,7 @@ object ParentService extends LoggableBoxLogging {
     val totalCost = (for {
       subscription <- maybeSubscription.toList
       box          <- subscription.subscriptionBoxes.toList
+        if box.status.get == Status.Active
       product      <- box.fleaTick.obj
       priceCode    = subscription.priceCode.get
     } yield {

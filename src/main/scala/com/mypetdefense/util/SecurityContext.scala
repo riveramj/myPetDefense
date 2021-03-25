@@ -25,9 +25,7 @@ object SecurityContext extends Loggable {
 
     val seenPrompt = user.subscription.obj.map(_.promptedUpgrade.get).openOr(false)
     val upgraded = user.subscription.obj
-      .map(_.subscriptionBoxes.toList.map(_.subscriptionItems.toList.nonEmpty))
-      .openOr(Nil)
-      .foldLeft(true)(_ && _)
+      .map(_.isUpgraded.get).openOr(false)
 
     user.userType.get match {
       case UserType.Admin =>
