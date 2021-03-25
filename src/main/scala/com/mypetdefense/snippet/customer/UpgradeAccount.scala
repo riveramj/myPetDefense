@@ -20,28 +20,23 @@ object UpgradeAccount extends Loggable {
 
 class UpgradeAccount extends Loggable {
   def render: NodeSeq => NodeSeq = {
-    val userSubscription =
-      SecurityContext.currentUser.flatMap(_.subscription.obj).map(_.reload)
+    val user = SecurityContext.currentUser
+    val userSubscription = user.flatMap(_.subscription.obj).map(_.reload)
 
     val updatedSubscription = userSubscription.map(_.promptedUpgrade(true).saveMe())
 
-    val upgraded = updatedSubscription
-      .map(_.subscriptionBoxes.toList.map(_.subscriptionItems.toList.nonEmpty))
-      .openOr(Nil)
-      .foldLeft(true)(_ && _)
-
-    val user = SecurityContext.currentUser
+    val upgraded = updatedSubscription.map(_.isUpgraded.get).openOr(false)
 
     def doNotUpgradeAccount() = {
       Alert("Your account will not be upgraded. You can upgrade later whenever you would like.")
     }
 
     SHtml.makeFormsAjax andThen
-      ".upgrade-account a [class+]" #> "current" &
-        "#user-email *" #> user.map(_.email.get) &
-        ".already-upgraded" #> ClearNodesIf(!upgraded) &
-        ".upgrade" #> ClearNodesIf(upgraded) andThen
-      ".yes-upgrade" #> SHtml.ajaxSubmit("Upgrade me!", () => upgradeAccount(updatedSubscription)) &
-        ".no-upgrade" #> SHtml.ajaxSubmit("No thanks.", doNotUpgradeAccount _)
+    ".upgrade-account a [class+]" #> "current" &
+    "#user-email *" #> user.map(_.email.get) &
+    ".already-upgraded" #> ClearNodesIf(!upgraded) &
+    ".upgrade" #> ClearNodesIf(upgraded) andThen
+    ".yes-upgrade" #> SHtml.ajaxSubmit("Upgrade me!", () => upgradeAccount(updatedSubscription)) &
+    ".no-upgrade" #> SHtml.ajaxSubmit("No thanks.", doNotUpgradeAccount _)
   }
 }

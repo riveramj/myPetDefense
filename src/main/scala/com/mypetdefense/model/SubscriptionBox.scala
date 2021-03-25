@@ -72,6 +72,7 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       case AnimalSize.DogMediumZo => FleaTick.zoGuardMediumDog
       case AnimalSize.DogLargeZo  => FleaTick.zoGuardLargeDog
       case AnimalSize.DogXLargeZo => FleaTick.zoGuardXLargeDog
+      case AnimalSize.CatAllSize  => FleaTick.zoGuardCat
     }
 
     val newSubscriptionBox = SubscriptionBox.create
@@ -82,7 +83,7 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       .fleaTick(fleaTick)
       .basePrice(basePrice(pet, upgradedBox))
 
-    if (upgradedBox)
+    if (upgradedBox && pet.animalType == AnimalType.Dog)
       newSubscriptionBox.boxType(BoxType.healthAndWellness).saveMe()
     else
       newSubscriptionBox.boxType(BoxType.basic).saveMe()

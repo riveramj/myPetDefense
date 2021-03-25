@@ -23,8 +23,9 @@ class ProductSchedule
   }
   object scheduledItems
       extends MappedOneToMany(ProductScheduleItem, ProductScheduleItem.productSchedule)
+
   object startDate extends MappedDateTime(this)
-  object firstBox extends MappedBoolean(this) {
+  object firstBox  extends MappedBoolean(this) {
     override def defaultValue: Boolean = false
   }
   object createdAt extends MappedDateTime(this) {
@@ -80,6 +81,16 @@ object ProductSchedule extends ProductSchedule with LongKeyedMetaMapper[ProductS
       .find(
         By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
         By(ProductSchedule.firstBox, true)
+      )
+      .toList
+      .flatMap(_.scheduledItems.toList.flatMap(_.product.obj))
+  }
+
+  def getRegularScheduleBoxProducts: List[Product] = {
+    ProductSchedule
+      .find(
+        By(ProductSchedule.scheduleStatus, ProductScheduleStatus.Active),
+        By(ProductSchedule.firstBox, false)
       )
       .toList
       .flatMap(_.scheduledItems.toList.flatMap(_.product.obj))
