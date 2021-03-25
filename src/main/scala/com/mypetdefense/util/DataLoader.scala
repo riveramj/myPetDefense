@@ -229,15 +229,15 @@ object DataLoader extends Loggable {
 
   def createProducts: Any = {
     if (Product.hipAndJoint.isEmpty) {
-      Product.createNewProduct("Hip & Joint Chews", "hipJointChews")
-      Product.createNewProduct("Calming Chews", "calmingChews")
-      Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews")
-      Product.createNewProduct("Dental Powder", "dentalPowder")
+      Product.createNewProduct("Hip & Joint Chews", "hipJointChews", true)
+      Product.createNewProduct("Calming Chews", "calmingChews", true)
+      Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews", true)
+      Product.createNewProduct("Dental Powder", "dentalPowder", true)
     }
 
     if (Product.skinAndCoat.isEmpty) {
-      Product.createNewProduct("Skin and Coat Chews", "skinAndCoatChews")
-      Product.createNewProduct("Probiotic Chews", "probioticChews")
+      Product.createNewProduct("Skin and Coat Chews", "skinAndCoatChews", true)
+      Product.createNewProduct("Probiotic Chews", "probioticChews", true)
     }
   }
 
@@ -537,8 +537,8 @@ object DataLoader extends Loggable {
 
   def subscriptionBoxCheck(): Unit = {
     if (Product.dentalPowderSmall.isEmpty) {
-      Product.createNewProduct("Dental Powder Small", "dentalPowderSmall")
-      Product.createNewProduct("Dental Powder Large", "dentalPowderLarge")
+      Product.createNewProduct("Dental Powder Small", "dentalPowderSmall", false)
+      Product.createNewProduct("Dental Powder Large", "dentalPowderLarge" , false)
     }
 
     val products = List(
@@ -609,5 +609,9 @@ object DataLoader extends Loggable {
       }
     } else Nil
   }
-  
+
+  def markSupplements: Seq[Product] = {
+    Product.findAll(NotLike(Product.name, "%Dental Powder%")).map(_.isSupplement(true).saveMe())
+    Product.findAll(Like(Product.name, "%Dental Powder%")).map(_.isSupplement(false).saveMe())
+  }
 }

@@ -131,20 +131,7 @@ class PetsAndProducts extends Loggable {
       updatedFleaTick: Box[FleaTick],
       supplements: List[Product]
   ) = {
-    for {
-      fleaTick <- updatedFleaTick
-      box      <- subscriptionBox
-    } yield {
-      box.fleaTick(fleaTick).saveMe
-
-      val items = box.subscriptionItems.toList.filterNot(_.product.obj == Product.dentalPowder)
-
-      for {
-        index <- items.indices
-      } yield {
-        items(index).product(supplements(index)).saveMe()
-      }
-    }
+    SubscriptionService.saveNewPetProducts(updatedFleaTick, subscriptionBox, supplements)
 
     val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal)
 
@@ -167,43 +154,26 @@ class PetsAndProducts extends Loggable {
   def petProductsBindings = {
     "#product-picker-modal" #> idMemoize { renderer =>
       petProductsRender = Full(renderer)
+
       val box = selectedPet.flatMap(_.box.obj)
-      val products =
-        if (selectedPet.map(_.animalType.get.equals(AnimalType.Dog)).openOr(true))
-          FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
-        else
-          FleaTick.zoGuardCat.toList
+      val availableFleaTick = SubscriptionService.getAvailableFleaTick(selectedPet)
+      val availableSupplements = Product.supplements
+      val currentSupplements = SubscriptionService.getCurrentSupplements(box)
 
-      val availableSupplements = Product.findAll().filterNot(Full(_) == Product.dentalPowder)
+      var currentFleaTick = box.flatMap(_.fleaTick.obj)
+      var (firstSupplement, secondSupplement, thirdSupplement) =
+        SubscriptionService.getFirstSecondThirdSupplements(currentSupplements)
 
-      var currentProduct = box.flatMap(_.fleaTick.obj)
-      val currentSupplements = {
-        for {
-          currentBox       <- box.toList
-          subscriptionItem <- currentBox.subscriptionItems.toList
-          product          <- subscriptionItem.product.obj.toList
-          if Full(product) != Product.dentalPowder
-        } yield {
-          product
-        }
-      }
-
-      var firstSupplement = currentSupplements.headOption
-      var secondSupplement =
-        if (currentSupplements.nonEmpty) currentSupplements.tail.headOption else None
-      var thirdSupplement = currentSupplements.reverse.headOption
-
-      val zoGuardProducts =
-        if (currentProduct.map(_.isZoGuard_?).openOr(false))
-          products.filter(_.isZoGuard_?)
-        else
-          currentProduct.toList ++ products.filter(_.isZoGuard_?)
+      val zoGuardProducts = SubscriptionService.getZoGuardProductsAndCurrent(
+        currentFleaTick,
+        availableFleaTick
+      )
 
       val currentProductDropdown = SHtml.ajaxSelectObj(
         zoGuardProducts.map(product => (product, product.getNameAndSize)),
-        currentProduct,
+        currentFleaTick,
         (possibleProduct: FleaTick) =>
-          currentProduct = {
+          currentFleaTick = {
             Full(possibleProduct)
           }
       )
@@ -236,24 +206,25 @@ class PetsAndProducts extends Loggable {
       )
 
       "^ [class+]" #> (if (!selectedPet.isEmpty) "active" else "") &
-        ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
-        "#flea-tick" #> currentProductDropdown &
-          "#first-supplement" #> firstSupplementDropDown &
-          "#second-supplement" #> secondSupplementDropDown &
-          "#third-supplement" #> thirdSupplementDropDown &
-          ".save" #> ajaxSubmit(
-            "Save",
-            () =>
-              savePet(
-                box,
-                currentProduct,
-                List(firstSupplement, secondSupplement, thirdSupplement).flatten
-              )
-          ) &
-          ".cancel" #> ajaxSubmit("Cancel", () => {
-            selectedPet = Empty
-            petProductsRender.map(_.setHtml()).openOr(Noop)
-          })
+      ".modal-header .admin" #> ClearNodes &
+      ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
+      "#flea-tick" #> currentProductDropdown &
+      "#first-supplement" #> firstSupplementDropDown &
+      "#second-supplement" #> secondSupplementDropDown &
+      "#third-supplement" #> thirdSupplementDropDown &
+      ".save" #> ajaxSubmit(
+        "Save",
+        () =>
+          savePet(
+            box,
+            currentFleaTick,
+            List(firstSupplement, secondSupplement, thirdSupplement).flatten
+          )
+      ) &
+      ".cancel" #> ajaxSubmit("Cancel", () => {
+        selectedPet = Empty
+        petProductsRender.map(_.setHtml()).openOr(Noop)
+      })
     }
   }
 

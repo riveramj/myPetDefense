@@ -333,9 +333,9 @@ object ParentService extends LoggableBoxLogging {
       priceCode    = subscription.priceCode.get
     } yield {
       val cost = if (box.boxType.get == BoxType.healthAndWellness)
-        SubscriptionBox.possiblePrice(box)
+        SubscriptionBox.possiblePrice(box, true)
       else
-        Price.getPricesByCode(product, priceCode).map(_.price.get).openOr(0d)
+        Price.getPricesByCode(product, priceCode).map(_.price.get).openOrThrowException("Please try again or contact Support.")
 
       cost
     }).sum

@@ -23,8 +23,9 @@ class ProductSchedule
   }
   object scheduledItems
       extends MappedOneToMany(ProductScheduleItem, ProductScheduleItem.productSchedule)
+
   object startDate extends MappedDateTime(this)
-  object firstBox extends MappedBoolean(this) {
+  object firstBox  extends MappedBoolean(this) {
     override def defaultValue: Boolean = false
   }
   object createdAt extends MappedDateTime(this) {
