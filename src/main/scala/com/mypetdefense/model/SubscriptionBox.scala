@@ -62,8 +62,11 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
     }
   }
 
-
-  def createNewBox(subscription: Subscription, pet: Pet, upgradedBox: Boolean = false): SubscriptionBox = {
+  def createNewBox(
+      subscription: Subscription,
+      pet: Pet,
+      upgradedBox: Boolean = false
+  ): SubscriptionBox = {
     val fleaTick = FleaTick.find(By(FleaTick.size, pet.size.get))
 
     val newSubscriptionBox = SubscriptionBox.create
@@ -74,7 +77,7 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       .fleaTick(fleaTick)
       .basePrice(basePrice(pet, upgradedBox))
 
-    if (upgradedBox)
+    if (upgradedBox && pet.animalType == AnimalType.Dog)
       newSubscriptionBox.boxType(BoxType.healthAndWellness).saveMe()
     else
       newSubscriptionBox.boxType(BoxType.basic).saveMe()

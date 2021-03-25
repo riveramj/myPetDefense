@@ -15,8 +15,11 @@
   }
 }
 
-.modal-content {
-  background-color: #F7F7F7;
+.pets .modal-content, .modal-content {
+  form {
+    background-color: #F7F7F7;
+  }
+
   margin: 80px auto;
 
   @include box-shadow(rgba(0,0,0,0.5) 0 2px 10px);
@@ -76,10 +79,15 @@ button.modal-action, input.modal-action {
   color: #ffffff;
   font-size: 17px;
   cursor: pointer;
+  margin-bottom: 14px;
 
   &.cancel {
-  color: #605F5F;
+    color: #605F5F;
     background: #cdcdcd;
+  }
+
+  &.save {
+    background-color: #45ADA9;
   }
 
   @media (min-width: $bp-medium) {
@@ -88,6 +96,8 @@ button.modal-action, input.modal-action {
 }
 
 .products {
+  font-size: 16px;
+
   li {
     padding-bottom: 10px;
   }
@@ -97,6 +107,13 @@ button.modal-action, input.modal-action {
   }
 
   select {
-    margin-top: 5px;
+    color: #454343;
+    border: #CECECE 1px solid;
+    border-radius: 3px;
+    padding: 0.3125rem 0.625rem;
+    background-color: #FFFFFF;
+    margin: 5px 0 14px;
+    font-size: 1em;
+    width: 100%;
   }
 }
