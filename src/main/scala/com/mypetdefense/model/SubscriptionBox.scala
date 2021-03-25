@@ -67,13 +67,7 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       pet: Pet,
       upgradedBox: Boolean = false
   ): SubscriptionBox = {
-    val fleaTick = pet.size.get match {
-      case AnimalSize.DogSmallZo  => FleaTick.zoGuardSmallDog
-      case AnimalSize.DogMediumZo => FleaTick.zoGuardMediumDog
-      case AnimalSize.DogLargeZo  => FleaTick.zoGuardLargeDog
-      case AnimalSize.DogXLargeZo => FleaTick.zoGuardXLargeDog
-      case AnimalSize.CatAllSize  => FleaTick.zoGuardCat
-    }
+    val fleaTick = FleaTick.find(By(FleaTick.size, pet.size.get))
 
     val newSubscriptionBox = SubscriptionBox.create
       .boxId(generateLongId)
