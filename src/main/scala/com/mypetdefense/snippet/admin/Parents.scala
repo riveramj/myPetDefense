@@ -527,8 +527,9 @@ class Parents extends Loggable {
         petProductsRender = Full(renderer)
 
         val box = selectedPet.flatMap(_.box.obj)
+        val petType = selectedPet.map(_.animalType.get).openOrThrowException("Missing animal type")
         val availableFleaTick = SubscriptionService.getAvailableFleaTick(selectedPet)
-        val availableSupplements = Product.supplements
+        val availableSupplements = Product.allSupplements(petType)
         val currentSupplements = SubscriptionService.getCurrentSupplements(box)
 
         var currentFleaTick = box.flatMap(_.fleaTick.obj)

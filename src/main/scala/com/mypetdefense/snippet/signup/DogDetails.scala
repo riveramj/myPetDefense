@@ -48,7 +48,7 @@ class DogDetails extends Loggable {
   val largeDog: Option[AnimalSize.Value]  = getSizeNumber(AnimalSize.DogLargeZo)
   val xlargeDog: Option[AnimalSize.Value] = getSizeNumber(AnimalSize.DogXLargeZo)
 
-  val supplements = Product.supplements(30, AnimalType.Dog)
+  val supplements = Product.supplementsByAmount(30, AnimalType.Dog)
 
   def getSizeNumber(size: AnimalSize.Value): Option[AnimalSize.Value] = {
     products.find(_.size.get == size).map(_.size.get)
