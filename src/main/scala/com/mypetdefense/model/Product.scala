@@ -15,9 +15,16 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   object price  extends MappedDouble(this)
   object sku    extends MappedString(this, 100)
   object weight extends MappedDouble(this)
-  object quantity   extends MappedInt(this)
-  object animalType extends MappedEnum(this, AnimalType)
-  object createdAt  extends MappedDateTime(this) {
+  object quantity   extends MappedInt(this) {
+    override def dbIndexed_? = true
+  }
+  object animalType extends MappedEnum(this, AnimalType) {
+    override def dbIndexed_? = true
+  }
+  object isSupplement extends MappedBoolean(this) {
+    override def dbIndexed_? = true
+  }
+  object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 
@@ -25,12 +32,19 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
 }
 
 object Product extends Product with LongKeyedMetaMapper[Product] {
-  def createNewProduct(name: String, sku: String, quantity: Int, animalType: AnimalType.Value): Product = {
+  def createNewProduct(
+                        name: String,
+                        sku: String,
+                        quantity: Int,
+                        animalType: AnimalType.Value,
+                        isSupplement: Boolean
+                      ): Product = {
     Product.create
       .name(name)
       .sku(sku)
       .quantity(quantity)
       .animalType(animalType)
+      .isSupplement(isSupplement)
       .saveMe
   }
 
@@ -93,10 +107,16 @@ object Product extends Product with LongKeyedMetaMapper[Product] {
       By(Product.animalType, AnimalType.Dog)
     )
 
-  def supplements(quantity: Int, animalType: AnimalType.Value): List[Product] =
+  def supplementsByAmount(quantity: Int, animalType: AnimalType.Value): List[Product] =
     Product.findAll(
-      NotLike(Product.name, "Dental Powder%"),
+      By(Product.isSupplement, true),
       By(Product.quantity, quantity),
+      By(Product.animalType, animalType)
+    )
+
+  def allSupplements(animalType: AnimalType.Value): List[Product] =
+    Product.findAll(
+      By(Product.isSupplement, true),
       By(Product.animalType, animalType)
     )
 }

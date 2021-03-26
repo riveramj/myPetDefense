@@ -1,10 +1,9 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
-import net.liftweb.common.Full
 import net.liftweb.mapper._
+
+import java.util.Date
 
 class SubscriptionItem extends LongKeyedMapper[SubscriptionItem] with IdPK {
   def getSingleton: KeyedMetaMapper[Long, SubscriptionItem] = SubscriptionItem
@@ -32,23 +31,27 @@ object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[Subscr
       .saveMe
   }
 
-  def createFirstBox(subscriptionBox: SubscriptionBox): List[SubscriptionItem] = {
-    val products          = ProductSchedule.getFirstBoxProducts
-    val smallSizes        = List(AnimalSize.DogSmallZo, AnimalSize.DogSmallShld, AnimalSize.DogSmallAdv)
-    val isSmallDog        = subscriptionBox.fleaTick.obj.map(_.size.get).forall(smallSizes.contains)
-    val dentalPowder      = Product.dentalPowderForDogs
-    val dentalPowderSmall = Product.dentalPowderSmallForDogs
-    val dentalPowderLarge = Product.dentalPowderLargeForDogs
 
-    products.flatMap { product =>
-      val newItem = SubscriptionItem.create.subscriptionBox(subscriptionBox)
-
-      if (!dentalPowder.contains(product))
-        Full(newItem.product(product).saveMe())
-      else if (isSmallDog)
-        dentalPowderSmall.map(newItem.product(_).saveMe())
+  def createFirstBox(subscriptionBox: SubscriptionBox, firstBox: Boolean = true): List[SubscriptionItem] = {
+    val products = {
+      if(firstBox)
+        ProductSchedule.getFirstBoxProducts
       else
-        dentalPowderLarge.map(newItem.product(_).saveMe())
+        ProductSchedule.getRegularScheduleBoxProducts
     }
+
+    val smallSizes = List(AnimalSize.DogSmallZo, AnimalSize.DogSmallShld, AnimalSize.DogSmallAdv)
+    val isSmallDog = subscriptionBox.fleaTick.obj.map(_.size.get).forall(smallSizes.contains)
+
+    val supplements = products.map { product =>
+      val newItem = SubscriptionItem.create.subscriptionBox(subscriptionBox)
+      newItem.product(product).saveMe()
+    }
+
+    val dentalPowder = SubscriptionItem.create.subscriptionBox(subscriptionBox)
+    if (isSmallDog)
+      supplements ++ Product.dentalPowderSmallForDogs.map(dentalPowder.product(_).saveMe())
+    else
+      supplements ++ Product.dentalPowderLargeForDogs.map(dentalPowder.product(_).saveMe())
   }
 }

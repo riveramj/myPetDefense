@@ -21,6 +21,8 @@ object Paths {
   val homePage: Menu.Menuable with Menu.WithSlash = Menu.i("Home") / "index"
   val halfOff: Menu.Menuable =
     Menu.i("50% Off") / "50off" >> EarlyResponse(() => applyCouponRedirect("50off"))
+  val twentyOff: Menu.Menuable =
+    Menu.i("$20 Off") / "20off" >> EarlyResponse(() => applyCouponRedirect("20off"))
   val freeMonth: Menu.Menuable =
     Menu.i("100% Off") / "100off" >> EarlyResponse(() => applyCouponRedirect("100off"))
   val termsOfService: Menu.Menuable with Menu.WithSlash =
@@ -129,6 +131,7 @@ object Paths {
     homePage,
     halfOff,
     freeMonth,
+    twentyOff,
     termsOfService,
     thanksPage,
     billingThanksPage,
@@ -184,6 +187,7 @@ object Paths {
     admin.EventsDashboard.menu,
     admin.AmazonOrders.menu,
     admin.AmazonOrders.exportAmazonOrder,
+    admin.EmailReports.menu,
     agency.LegacyAgencyOverview.agencyMtdYtdExportMenu,
     agency.LegacyAgencyOverview.exportTPPMontSalesMenu,
     agency.LegacyAgencyOverview.menu,

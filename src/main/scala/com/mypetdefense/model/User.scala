@@ -48,6 +48,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object subscription     extends MappedLongForeignKey(this, Subscription)
   object addresses        extends MappedOneToMany(Address, Address.user)
   object taxRate          extends MappedDouble(this)
+  object emailReports     extends MappedOneToMany(EmailReportRecord, EmailReportRecord.user)
   object ipAddress        extends MappedString(this, 50) {
     override def dbIndexed_? = true
   }

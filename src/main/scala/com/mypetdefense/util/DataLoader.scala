@@ -232,11 +232,10 @@ object DataLoader extends Loggable {
     quantity <- List(10, 30)
     } yield
     if (Product.hipAndJointForDogs(quantity).isEmpty) {
-      Product.createNewProduct("Hip & Joint Chews For Dogs", "hipJointChews", quantity, AnimalType.Dog)
-      Product.createNewProduct("Calming Chews For Dogs", "calmingChews", quantity, AnimalType.Dog)
-      Product.createNewProduct("Multi-Vitamin Chews For Dogs", "multiVitaminChews", quantity, AnimalType.Dog)
-      Product.createNewProduct("Skin and Coat Chews For Dogs", "skinAndCoatChews", quantity, AnimalType.Dog)
-      Product.createNewProduct("Probiotic Chews For Dogs", "probioticChews", quantity, AnimalType.Dog)
+      Product.createNewProduct("Hip & Joint Chews For Dogs", "hipJointChews", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Calming Chews For Dogs", "calmingChews", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Multi-Vitamin Chews For Dogs", "multiVitaminChews", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Skin and Coat Chews For Dogs", "skinAndCoatChews", quantity, AnimalType.Dog, true)
     }
   }
 
@@ -536,8 +535,8 @@ object DataLoader extends Loggable {
 
   def subscriptionBoxCheck(): Unit = {
     if (Product.dentalPowderSmallForDogs.isEmpty) {
-      Product.createNewProduct("Dental Powder Small For Dogs", "dentalPowderSmall", 0, AnimalType.Dog)
-      Product.createNewProduct("Dental Powder Large For Dogs", "dentalPowderLarge", 0, AnimalType.Dog)
+      Product.createNewProduct("Dental Powder Small For Dogs", "dentalPowderSmall", 0, AnimalType.Dog, false)
+      Product.createNewProduct("Dental Powder Large For Dogs", "dentalPowderLarge", 0, AnimalType.Dog, false)
     }
 
     val products = List(
@@ -583,7 +582,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def cancelBoxesForCancelledPets() = {
+  def cancelBoxesForCancelledPets(): Seq[SubscriptionBox] = {
     for {
       pet <- Pet.findAll(By(Pet.status, Status.Cancelled))
       box <- pet.box.obj
@@ -649,4 +648,25 @@ object DataLoader extends Loggable {
     }
   }
 
+  def createEmailReports(): List[EmailReport] = {
+    if (EmailReport.findAll().isEmpty) {
+      val emailReports = List(
+        ("Daily TPP Agent Sales Report", "Daily email that shows sales by agent an store by day", ReportType.DailyTPPAgentSalesReportEmail),
+        ("Daily MPD report", "Daily email that shows shipment statistics from previous day", ReportType.DailyInternalReportEmail),
+        ("New Sale Email", "Instant email for every MPD.com sale.", ReportType.NewSaleEmail),
+        ("New Upgrade Email", "Instant email for every upgrade to the H&W box.", ReportType.UpgradeSubscriptionEmail)
+      )
+
+      for {
+        report <- emailReports
+      } yield {
+        EmailReport.createNewEmailReport(report._1, report._2, report._3)
+      }
+    } else Nil
+  }
+
+  def markSupplements: Seq[Product] = {
+    Product.findAll(NotLike(Product.name, "%Dental Powder%")).map(_.isSupplement(true).saveMe())
+    Product.findAll(Like(Product.name, "%Dental Powder%")).map(_.isSupplement(false).saveMe())
+  }
 }

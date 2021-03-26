@@ -41,8 +41,9 @@ object PetsAndProducts extends Loggable {
 }
 
 class PetsAndProducts extends Loggable {
-  val user: Box[User]                 = currentUser
+  val user: Box[User]                 = currentUser.map(_.reload)
   val subscription: Box[Subscription] = user.flatMap(_.subscription.obj)
+  val upgradedSubscription = subscription.map(_.isUpgraded.get).openOr(false)
   val priceCode: String               = subscription.map(_.priceCode.get).getOrElse("")
 
   var newPetType: Box[AnimalType.Value]  = Empty
@@ -145,18 +146,7 @@ class PetsAndProducts extends Loggable {
       updatedFleaTick: Box[FleaTick],
       supplements: List[Product]
   ) = {
-    for {
-      fleaTick <- updatedFleaTick
-      box      <- subscriptionBox
-    } yield {
-      box.fleaTick(fleaTick).saveMe
-
-      box.subscriptionItems.toList
-        .filterNot(Product.allDentalPowderForDogs.contains(_))
-        .map(_.delete_!)
-
-      supplements.map(SubscriptionItem.createSubscriptionItem(_, box))
-    }
+    SubscriptionService.saveNewPetProducts(updatedFleaTick, subscriptionBox, supplements)
 
     val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal)
 
@@ -181,50 +171,28 @@ class PetsAndProducts extends Loggable {
       petProductsRender = Full(renderer)
 
       val box = selectedPet.flatMap(_.box.obj)
-      val products =
-        if (selectedPet.map(_.animalType.get.equals(AnimalType.Dog)).openOr(true))
-          FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
-        else
-          FleaTick.zoGuardCat.toList
+      val availableFleaTick = SubscriptionService.getAvailableFleaTick(selectedPet)
+      val petType = selectedPet.map(_.animalType.get).openOrThrowException("Missing animal type")
+      val monthSupply = box.map(_.monthSupply.get).openOr(false)
+      val supplementCount = if (monthSupply) 30 else 10
 
-      val availableSupplements = Product.findAll().filterNot(Product.allDentalPowderForDogs.contains(_))
+      val availableSupplements = Product.supplementsByAmount(supplementCount, petType)
+      val currentSupplements = SubscriptionService.getCurrentSupplements(box)
 
-      var currentProduct = box.flatMap(_.fleaTick.obj)
-      val currentSupplements = {
-        for {
-          currentBox       <- box.toList
-          subscriptionItem <- currentBox.subscriptionItems.toList
-          product          <- subscriptionItem.product.obj.toList
-          if !Product.allDentalPowderForDogs.contains(product)
-        } yield {
-          product
-        }
-      }
+      var currentFleaTick = box.flatMap(_.fleaTick.obj)
+      var (firstSupplement, secondSupplement, thirdSupplement) =
+        SubscriptionService.getFirstSecondThirdSupplements(currentSupplements)
 
-      var firstSupplement: Box[Product] = currentSupplements.headOption
-      var secondSupplement: Box[Product] =
-        if (currentSupplements.nonEmpty && currentSupplements.size > 1)
-          currentSupplements.tail.headOption
-        else
-          Empty
-
-      var thirdSupplement: Box[Product] =
-        if (currentSupplements.nonEmpty && currentSupplements.size > 2)
-          currentSupplements.reverse.headOption
-        else
-          Empty
-
-      val zoGuardProducts =
-        if (currentProduct.map(_.isZoGuard_?).openOr(false))
-          products.filter(_.isZoGuard_?)
-        else
-          currentProduct.toList ++ products.filter(_.isZoGuard_?)
+      val zoGuardProducts = SubscriptionService.getZoGuardProductsAndCurrent(
+        currentFleaTick,
+        availableFleaTick
+      )
 
       val currentProductDropdown = SHtml.ajaxSelectObj(
         zoGuardProducts.map(product => (product, product.getNameAndSize)),
-        currentProduct,
+        currentFleaTick,
         (possibleProduct: FleaTick) =>
-          currentProduct = {
+          currentFleaTick = {
             Full(possibleProduct)
           }
       )
@@ -250,9 +218,8 @@ class PetsAndProducts extends Loggable {
         (possibleProduct: Box[Product]) => thirdSupplement = possibleProduct
       )
 
-      val monthSupply = box.map(_.monthSupply.get).openOr(false)
-
       "^ [class+]" #> (if (!selectedPet.isEmpty) "active" else "") &
+      ".modal-header .admin" #> ClearNodes &
       ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
       ".second-choice" #> ClearNodesIf(monthSupply) andThen
       ".third-choice" #> ClearNodesIf(monthSupply) andThen
@@ -265,7 +232,7 @@ class PetsAndProducts extends Loggable {
         () =>
           savePet(
             box,
-            currentProduct,
+            currentFleaTick,
             List(firstSupplement, secondSupplement, thirdSupplement).flatten
           )
       ) &
@@ -278,35 +245,34 @@ class PetsAndProducts extends Loggable {
 
   def render: NodeSeq => NodeSeq = {
     val boxes: List[SubscriptionBox] = user.flatMap { parent =>
-      parent.subscription.obj.map(_.subscriptionBoxes.toList)
+      parent.subscription.obj.map(_.subscriptionBoxes.toList.filter(_.status.get == Status.Active))
     }.openOr(Nil)
 
     SHtml.makeFormsAjax andThen
-      petProductsBindings andThen
-      ".pets-products a [class+]" #> "current" &
-        "#user-email *" #> user.map(_.email.get) &
-        "#new-pet" #> idMemoize { renderer =>
-          "#new-pet-name" #> ajaxText(newPetName, newPetName = _) &
-            "#pet-type-select" #> petTypeDropdown(renderer) &
-            "#new-pet-product-select" #> productDropdown() &
-            "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
-        } &
-        ".pet" #> boxes.map { box =>
-          val pet            = box.pet.obj
-          var currentPetName = pet.map(_.name.get).openOr("")
-          val product        = box.fleaTick.obj
-          val price = SubscriptionBox.findBoxPrice(box)
+    petProductsBindings andThen
+    ".pets-products a [class+]" #> "current" &
+    "#user-email *" #> user.map(_.email.get) &
+    "#new-pet" #> idMemoize { renderer =>
+      "#new-pet-name" #> ajaxText(newPetName, newPetName = _) &
+      "#pet-type-select" #> petTypeDropdown(renderer) &
+      "#new-pet-product-select" #> productDropdown() &
+      "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
+    } &
+    ".pet" #> boxes.map { box =>
+      val pet            = box.pet.obj
+      var currentPetName = pet.map(_.name.get).openOr("")
+      val product        = box.fleaTick.obj
+      val price = SubscriptionBox.findBoxPrice(box)
 
-          ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
-            ".price *" #> f"$$$price%2.2f" &
-            ".pet-status *" #> pet.map(_.status.get.toString) &
-            ".show-pet-product [onClick]" #> ajaxInvoke(showProducts(pet) _) &
-            ".cancel [onclick]" #> Confirm(
-              s"Remove $currentPetName and cancel future shipments?",
-              ajaxInvoke(deletePet(pet) _)
-            ) &
-            ".save" #> ajaxSubmit("Save", () => savePetName(pet, currentPetName))
-        }
-
+      ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
+      ".price *" #> f"$$$price%2.2f" &
+      ".pet-status *" #> pet.map(_.status.get.toString) &
+      ".show-pet-product [onClick]" #> ajaxInvoke(showProducts(pet) _) &
+      ".cancel [onclick]" #> Confirm(
+        s"Remove $currentPetName and cancel future shipments?",
+        ajaxInvoke(deletePet(pet) _)
+      ) &
+      ".save" #> ajaxSubmit("Save", () => savePetName(pet, currentPetName))
+    }
   }
 }
