@@ -4,7 +4,7 @@ db.url=jdbc:postgresql:mypetdefense
 db.user=mypetdefense
 db.password=mypetdefense
 
-[Postmark]
+[Mandrill]
 mail.smtp.host=localhost
 
 [Stripe]
