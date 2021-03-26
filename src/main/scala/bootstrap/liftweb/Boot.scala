@@ -39,15 +39,17 @@ class Boot {
     //DataLoader.cancellationDataSync()
     //DataLoader.createMissingDogBoxes()
     //ReportingService.getPetlandCustomersWithStats
-    //DataLoader.createEmailReports()
-    DataLoader.markSupplements
 
+    //DataLoader.createEmailReports()
+    //DataLoader.markSupplements
     //DataLoader.upgradeSubscriptionBoxDetails()
     //DataLoader.subscriptionBoxCheck()
-
     //DataLoader.connectCancelledUsersToSubscription()
-
     //DataLoader.cancelBoxesForCancelledPets()
+
+    DataLoader.updateChewCounts()
+    DataLoader.createProducts
+    DataLoader.migrateTo30DaySupply()
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")

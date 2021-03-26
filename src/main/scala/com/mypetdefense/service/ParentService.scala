@@ -2,8 +2,8 @@ package com.mypetdefense.service
 
 import java.time.{LocalDate, Period, ZoneId}
 import java.util.Date
-
 import com.mypetdefense.actor._
+import com.mypetdefense.model.SubscriptionBox.findBoxPrice
 import com.mypetdefense.model._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.shipstation.Order
@@ -332,16 +332,9 @@ object ParentService extends LoggableBoxLogging {
     val totalCost = (for {
       subscription <- maybeSubscription.toList
       box          <- subscription.subscriptionBoxes.toList
-        if box.status.get == Status.Active
-      product      <- box.fleaTick.obj
-      priceCode    = subscription.priceCode.get
+      if box.status.get == Status.Active
     } yield {
-      val cost = if (box.boxType.get == BoxType.healthAndWellness)
-        SubscriptionBox.possiblePrice(box, true)
-      else
-        Price.getPricesByCode(product, priceCode).map(_.price.get).openOrThrowException("Please try again or contact Support.")
-
-      cost
+      findBoxPrice(box)
     }).sum
 
     updateStripeSubscriptionQuantity(

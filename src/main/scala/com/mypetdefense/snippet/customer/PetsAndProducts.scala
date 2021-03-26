@@ -4,6 +4,7 @@ import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
+import com.mypetdefense.snippet.login.Login
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.SecurityContext._
 import net.liftweb.common._
@@ -12,6 +13,7 @@ import net.liftweb.http._
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds._
 import net.liftweb.mapper.By
+import net.liftweb.sitemap.Loc.{IfValue, MatchWithoutCurrentValue}
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
@@ -24,6 +26,18 @@ object PetsAndProducts extends Loggable {
   val menu: Menu.Menuable = Menu.i("Pets and Products") / "pets-products" >>
     loggedIn >>
     parent
+
+  val preBillingMagicLink: Menu.ParamMenuable[User] =
+    Menu.param[User](
+      "PreBilling",
+      "PreBilling",
+      accessKey => KeyService.findUserByKey(accessKey, "preBillingKey"),
+      user => user.accessKey.get
+    ) / "pre-billing" >>
+      MatchWithoutCurrentValue >>
+      IfValue(_.isDefined, () => {
+        RedirectResponse(Login.menu.loc.calcDefaultHref)
+      })
 }
 
 class PetsAndProducts extends Loggable {
@@ -122,7 +136,7 @@ class PetsAndProducts extends Loggable {
   }
 
   def showProducts(pet: Box[Pet])(): JsCmd = {
-    selectedPet = pet
+    selectedPet = pet.map(_.reload)
 
     petProductsRender.map(_.setHtml()).openOr(Noop)
   }
@@ -158,7 +172,11 @@ class PetsAndProducts extends Loggable {
 
       val box = selectedPet.flatMap(_.box.obj)
       val availableFleaTick = SubscriptionService.getAvailableFleaTick(selectedPet)
-      val availableSupplements = Product.supplements
+      val petType = selectedPet.map(_.animalType.get).openOrThrowException("Missing animal type")
+      val monthSupply = box.map(_.monthSupply.get).openOr(false)
+      val supplementCount = if (monthSupply) 30 else 10
+
+      val availableSupplements = Product.supplementsByAmount(supplementCount, petType)
       val currentSupplements = SubscriptionService.getCurrentSupplements(box)
 
       var currentFleaTick = box.flatMap(_.fleaTick.obj)
@@ -180,35 +198,31 @@ class PetsAndProducts extends Loggable {
       )
 
       val firstSupplementDropDown = SHtml.ajaxSelectObj(
-        availableSupplements.map(product => (product, product.name.get)),
-        firstSupplement,
-        (possibleProduct: Product) =>
+        (Empty, "") +: availableSupplements.map(product => (Full(product), product.name.get)),
+        Full(firstSupplement),
+        (possibleProduct: Box[Product]) =>
           firstSupplement = {
-            Full(possibleProduct)
+            possibleProduct
           }
       )
 
       val secondSupplementDropDown = SHtml.ajaxSelectObj(
-        availableSupplements.map(product => (product, product.name.get)),
-        secondSupplement,
-        (possibleProduct: Product) =>
-          secondSupplement = {
-            Full(possibleProduct)
-          }
+        (Empty, "") +: availableSupplements.map(product => (Full(product), product.name.get)),
+        Full(secondSupplement),
+        (possibleProduct: Box[Product]) => secondSupplement = possibleProduct
       )
 
       val thirdSupplementDropDown = SHtml.ajaxSelectObj(
-        availableSupplements.map(product => (product, product.name.get)),
-        thirdSupplement,
-        (possibleProduct: Product) =>
-          thirdSupplement = {
-            Full(possibleProduct)
-          }
+        (Empty, "") +: availableSupplements.map(product => (Full(product), product.name.get)),
+        Full(thirdSupplement),
+        (possibleProduct: Box[Product]) => thirdSupplement = possibleProduct
       )
 
       "^ [class+]" #> (if (!selectedPet.isEmpty) "active" else "") &
       ".modal-header .admin" #> ClearNodes &
       ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
+      ".second-choice" #> ClearNodesIf(monthSupply) andThen
+      ".third-choice" #> ClearNodesIf(monthSupply) andThen
       "#flea-tick" #> currentProductDropdown &
       "#first-supplement" #> firstSupplementDropDown &
       "#second-supplement" #> secondSupplementDropDown &
@@ -248,14 +262,7 @@ class PetsAndProducts extends Loggable {
       val pet            = box.pet.obj
       var currentPetName = pet.map(_.name.get).openOr("")
       val product        = box.fleaTick.obj
-      val possiblePrice = SubscriptionBox.possiblePrice(box, upgradedSubscription)
-
-      val price = if (possiblePrice == 0d) {
-        product.flatMap { item => Price.getPricesByCode(item, priceCode).map(_.price.get) }
-          .openOr(0d)
-      } else {
-        possiblePrice
-      }
+      val price = SubscriptionBox.findBoxPrice(box)
 
       ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
       ".price *" #> f"$$$price%2.2f" &

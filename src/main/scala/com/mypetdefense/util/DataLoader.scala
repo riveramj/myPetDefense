@@ -1,11 +1,11 @@
 package com.mypetdefense.util
 
-import java.text.SimpleDateFormat
-
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import net.liftweb.common._
 import net.liftweb.mapper._
+
+import java.text.SimpleDateFormat
 
 object DataLoader extends Loggable {
   def loadProducts: Any = {
@@ -228,16 +228,14 @@ object DataLoader extends Loggable {
   }
 
   def createProducts: Any = {
-    if (Product.hipAndJoint.isEmpty) {
-      Product.createNewProduct("Hip & Joint Chews", "hipJointChews", true)
-      Product.createNewProduct("Calming Chews", "calmingChews", true)
-      Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews", true)
-      Product.createNewProduct("Dental Powder", "dentalPowder", true)
-    }
-
-    if (Product.skinAndCoat.isEmpty) {
-      Product.createNewProduct("Skin and Coat Chews", "skinAndCoatChews", true)
-      Product.createNewProduct("Probiotic Chews", "probioticChews", true)
+    for {
+    quantity <- List(10, 30)
+    } yield
+    if (Product.hipAndJointForDogs(quantity).isEmpty) {
+      Product.createNewProduct("Hip & Joint Chews For Dogs", "hipJointChews", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Calming Chews For Dogs", "calmingChews", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Multi-Vitamin Chews For Dogs", "multiVitaminChews", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Skin and Coat Chews For Dogs", "skinAndCoatChews", quantity, AnimalType.Dog, true)
     }
   }
 
@@ -537,16 +535,16 @@ object DataLoader extends Loggable {
   }
 
   def subscriptionBoxCheck(): Unit = {
-    if (Product.dentalPowderSmall.isEmpty) {
-      Product.createNewProduct("Dental Powder Small", "dentalPowderSmall", false)
-      Product.createNewProduct("Dental Powder Large", "dentalPowderLarge" , false)
+    if (Product.dentalPowderSmallForDogs.isEmpty) {
+      Product.createNewProduct("Dental Powder Small For Dogs", "dentalPowderSmall", 0, AnimalType.Dog, false)
+      Product.createNewProduct("Dental Powder Large For Dogs", "dentalPowderLarge", 0, AnimalType.Dog, false)
     }
 
     val products = List(
-      Product.skinAndCoat,
-      Product.multiVitamin,
-      Product.probiotic,
-      Product.dentalPowder
+      Product.skinAndCoatForDogs(10),
+      Product.multiVitaminForDogs(10),
+      Product.probioticForDogs(10),
+      Product.dentalPowderForDogs
     ).flatten
 
     for {
@@ -593,7 +591,64 @@ object DataLoader extends Loggable {
       box.status(Status.Cancelled).saveMe()
     }
   }
- 
+
+  def updateChewCounts() = {
+    for {
+      supplement <- Product.findAll(
+        Like(Product.name, "%Chews"),
+        NullRef(Product.quantity)
+      )
+      name = supplement.name.get
+    } yield {
+      supplement
+        .name(s"$name For Dogs")
+        .quantity(10)
+        .animalType(AnimalType.Cat)
+        .animalType(AnimalType.Dog)
+        .saveMe()
+    }
+
+    for {
+      dental <- Product.findAll(
+        Like(Product.name, "Dental%"),
+        NullRef(Product.quantity)
+      )
+    } yield {
+      dental.quantity(1).quantity(0).animalType(AnimalType.Cat).animalType(AnimalType.Dog).saveMe()
+    }
+  }
+
+  def migrateTo30DaySupply() = {
+    val monthMultiVitamin = Product.multiVitaminForDogs(30).toList
+
+    for {
+      multiVitamin <- monthMultiVitamin
+      box <- SubscriptionBox.findAll(
+        By(SubscriptionBox.userModified, false),
+        NullRef(SubscriptionBox.monthSupply)
+      )
+    } yield {
+      box.monthSupply(true).saveMe()
+      val boxItem = box.subscriptionItems.toList
+
+      boxItem.foreach { item =>
+        val possibleSupplement = item.product.obj
+        if (possibleSupplement.map(_.isSupplement.get).openOrThrowException("Missing Supplement Check"))
+          item.delete_!
+      }
+
+      SubscriptionItem.createSubscriptionItem(multiVitamin, box)
+    }
+
+    for {
+      box <- SubscriptionBox.findAll(
+        NullRef(SubscriptionBox.monthSupply)
+      )
+    } yield {
+      box.monthSupply(false).saveMe()
+    }
+  }
+
   def createEmailReports(): List[EmailReport] = {
     if (EmailReport.findAll().isEmpty) {
       val emailReports = List(

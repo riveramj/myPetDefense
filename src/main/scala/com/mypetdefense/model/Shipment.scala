@@ -147,9 +147,9 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
 
     val products = ProductSchedule.getFirstBoxProducts ++ {
       if (smallDogs.contains(pet.size.get))
-        Product.dentalPowderSmall.toList
+        Product.dentalPowderSmallForDogs.toList
       else
-        Product.dentalPowderLarge.toList
+        Product.dentalPowderLargeForDogs.toList
     }
 
     shipment.reload.freeUpgradeSample(true).saveMe()

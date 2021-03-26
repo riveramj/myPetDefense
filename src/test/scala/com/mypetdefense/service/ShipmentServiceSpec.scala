@@ -244,7 +244,7 @@ class ShipmentServiceSpec extends DBTest {
 }
 
 object ShipmentServiceSpec {
-  val tppAgency = createAgency(tppAgencyName)
+  val tppAgency: Agency = createAgency(tppAgencyName)
 
   val user: User =
     User.create

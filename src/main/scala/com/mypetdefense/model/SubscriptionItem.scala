@@ -31,6 +31,7 @@ object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[Subscr
       .saveMe
   }
 
+
   def createFirstBox(subscriptionBox: SubscriptionBox, firstBox: Boolean = true): List[SubscriptionItem] = {
     val products = {
       if(firstBox)
@@ -49,8 +50,8 @@ object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[Subscr
 
     val dentalPowder = SubscriptionItem.create.subscriptionBox(subscriptionBox)
     if (isSmallDog)
-      supplements ++ Product.dentalPowderSmall.map(dentalPowder.product(_).saveMe())
+      supplements ++ Product.dentalPowderSmallForDogs.map(dentalPowder.product(_).saveMe())
     else
-      supplements ++ Product.dentalPowderLarge.map(dentalPowder.product(_).saveMe())
+      supplements ++ Product.dentalPowderLargeForDogs.map(dentalPowder.product(_).saveMe())
   }
 }
