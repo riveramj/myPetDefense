@@ -39,7 +39,7 @@ class DogDetails extends Loggable {
   var petYear                                       = ""
   var petSize: Box[AnimalSize.Value]                = Empty
   var nameErrors: List[String]                      = Nil
-  var chosenSupplement: Box[Product]                = Empty
+  var chosenSupplement: Box[Product]                = Product.multiVitaminForDogs(30)
 
   val products: List[FleaTick] = FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Dogs"))
 

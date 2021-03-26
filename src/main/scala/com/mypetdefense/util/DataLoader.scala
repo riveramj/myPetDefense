@@ -621,21 +621,21 @@ object DataLoader extends Loggable {
     val monthMultiVitamin = Product.multiVitaminForDogs(30).toList
 
     for {
+      multiVitamin <- monthMultiVitamin
       box <- SubscriptionBox.findAll(
         By(SubscriptionBox.userModified, false),
         NullRef(SubscriptionBox.monthSupply)
       )
-      multiVitamin <- monthMultiVitamin
     } yield {
       box.monthSupply(true).saveMe()
+      val boxItem = box.subscriptionItems.toList
 
-      for {
-        boxItem <- box.subscriptionItems.toList
-        product <- boxItem.product.obj
-      } yield {
-        if(!product.name.get.contains("Dental"))
-          boxItem.delete_!
+      boxItem.foreach { item =>
+        val possibleSupplement = item.product.obj
+        if (possibleSupplement.map(_.isSupplement.get).openOrThrowException("Missing Supplement Check"))
+          item.delete_!
       }
+
       SubscriptionItem.createSubscriptionItem(multiVitamin, box)
     }
 
