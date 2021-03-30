@@ -64,10 +64,10 @@ class Checkout extends Loggable {
   val pets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
   val petCount: Int                          = pets.size
 
-  val smPets: Int = pets.values.count {_.size.get == AnimalSize.DogSmallZo}
-  val medLgXlPets: Int = petCount - smPets
+  val smallDogCount: Int = pets.values.count {_.size.get == AnimalSize.DogSmallZo}
+  val nonSmallDogCount: Int = petCount - smallDogCount
 
-  val subtotal: BigDecimal = (smPets * BigDecimal(24.99)) + (medLgXlPets * BigDecimal(27.99))
+  val subtotal: BigDecimal = (smallDogCount * BigDecimal(24.99)) + (nonSmallDogCount * BigDecimal(27.99))
 
   var promotionAmount: BigDecimal = findPromotionAmount()
 
@@ -94,10 +94,26 @@ class Checkout extends Loggable {
         (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
 
       case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount < subtotal =>
-        dollarAmount
+        if (couponCode == "20off") {
+
+          val smallDogPromo = smallDogCount * BigDecimal(19.99)
+          val nonSmallDogPromo = nonSmallDogCount * BigDecimal(22.99)
+
+          val totalPromoAmount = {
+            if (nonSmallDogCount >= 3)
+              3 * BigDecimal(22.99)
+            else if ((smallDogCount + nonSmallDogCount) >= 3)
+              nonSmallDogPromo + ((3 - nonSmallDogCount) * BigDecimal(19.99))
+            else
+              smallDogPromo + nonSmallDogPromo
+          }
+
+          totalPromoAmount
+        } else dollarAmount
 
       case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount > subtotal =>
         subtotal
+
       case (_,_) => 0
     }
   }
@@ -129,14 +145,32 @@ class Checkout extends Loggable {
   }
 
   private def tryToCreateUser = {
+    val promoPennyCount = {
+      if (couponCode == "20off") {
+        if (nonSmallDogCount >= 3)
+          (smallDogCount * 2499) + ((nonSmallDogCount - 3) * 2799) + 1500
+        else if ((smallDogCount + nonSmallDogCount) >= 3)
+          ((smallDogCount - (3 - nonSmallDogCount)) * 2499) + 1500
+        else (smallDogCount + nonSmallDogCount) * 500
+      } else
+        pennyCount
+    }
+
+    val promoPennyCoupon = {
+      if (couponCode == "20off")
+        Empty
+      else
+        coupon
+    }
+
     val stripeCustomer =
       StripeFacade.Customer.createWithSubscription(
         email,
         stripeToken,
         priceId = "pennyProduct",
-        pennyCount,
+        promoPennyCount,
         taxRate,
-        coupon
+        promoPennyCoupon
       )
 
     stripeCustomer match {
@@ -285,21 +319,21 @@ class Checkout extends Loggable {
             "#password" #> SHtml.password(password, userPassword => password = userPassword.trim)
           else {
             ".password-container" #> ClearNodes &
-              ".facebook-option" #> ClearNodes &
-              "#facebook-id" #> ClearNodes &
-              "#email [disabled]" #> "disabled"
+            ".facebook-option" #> ClearNodes &
+            "#facebook-id" #> ClearNodes &
+            "#email [disabled]" #> "disabled"
           }
         } andThen
           "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
-            "#facebook-id" #> ajaxText(facebookId, facebookId = _) &
-            "#first-name" #> ajaxText(firstName, firstName = _) &
-            "#last-name" #> ajaxText(lastName, lastName = _) &
-            ".connect-facebook [onClick]" #> SHtml.ajaxInvoke(() => connectFacebook()) &
-            "#street-1" #> text(street1, street1 = _) &
-            "#street-2" #> text(street2, street2 = _) &
-            "#city" #> ajaxText(city, city = _) &
-            "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
-            "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
+          "#facebook-id" #> ajaxText(facebookId, facebookId = _) &
+          "#first-name" #> ajaxText(firstName, firstName = _) &
+          "#last-name" #> ajaxText(lastName, lastName = _) &
+          ".connect-facebook [onClick]" #> SHtml.ajaxInvoke(() => connectFacebook()) &
+          "#street-1" #> text(street1, street1 = _) &
+          "#street-2" #> text(street2, street2 = _) &
+          "#city" #> ajaxText(city, city = _) &
+          "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
+          "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
       } andThen
       "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
       "#ip-address" #> hidden(ipAddress = _, ipAddress) &
