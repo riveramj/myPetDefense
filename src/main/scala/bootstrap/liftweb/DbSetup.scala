@@ -65,7 +65,8 @@ object DbSetup extends Loggable {
     ProductScheduleItem,
     WoofTraxOrder,
     EmailReport,
-    EmailReportRecord
+    EmailReportRecord,
+    StatisticsSnapshot
   )
 
 }
