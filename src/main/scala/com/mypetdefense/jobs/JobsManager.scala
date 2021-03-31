@@ -43,6 +43,7 @@ object JobManager extends SimpleInjector with Loggable {
     DailySubscriptionBoxProductsUpdateJob ::
     HalfHourCreateOrderJob ::
     OneTimePerDayDataIntegrityCheckJob ::
+    DailyRecordStatisticsSnapshotJob ::
     Nil
   }
 
@@ -55,6 +56,7 @@ object JobManager extends SimpleInjector with Loggable {
     //FrequentTrackShipmentDeliveryJob ::
     //FrequentCreateTreatLabelJob ::
     //FrequentSubscriptionBoxProductsUpdateJob ::
+    FrequentRecordStatisticsSnapshotJob ::
     Nil
   }
 }
