@@ -10,6 +10,7 @@ class RecordStatisticsSnapshotJob extends ManagedJob {
     val usersByAgency = users.groupBy(_.referer.obj)
     val boxesByTypeAndAgency = usersByAgency.map { case (agency, users) =>
       val activeBoxes = users.flatMap(_.subscription.obj.toList
+        .filter(_.status == Status.Active)
         .flatMap(_.subscriptionBoxes.toList.filter(_.status.get == Status.Active))
       )
       (agency, activeBoxes.groupBy(_.boxType.get))
