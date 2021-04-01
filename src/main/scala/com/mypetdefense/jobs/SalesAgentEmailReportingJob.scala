@@ -63,7 +63,7 @@ object MonthlyAgentSalesReportEmailJob extends TriggeredJob {
     .newTrigger()
     .withIdentity("MonthlyAgentSalesReportEmailJobTrigger")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * * *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 1 * * *"))
     .build()
 }
 
@@ -77,7 +77,7 @@ object DailyAgentSalesReportEmailJob extends TriggeredJob {
     .newTrigger()
     .withIdentity("DailyAgentSalesReportEmailJobTrigger")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * * *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 7 ? * * *")) // sec, min, hour, DoM
     .build()
 }
 
