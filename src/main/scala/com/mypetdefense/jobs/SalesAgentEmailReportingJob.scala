@@ -55,8 +55,8 @@ class MonthlySalesAgentReportEmailJob extends SalesAgentReportEmailJobTrait {
 
 object MonthlyAgentSalesReportEmailJob extends TriggeredJob {
   val detail: JobDetail = JobBuilder
-    .newJob(classOf[DailySalesAgentReportEmailJob])
-    .withIdentity("DailyAgentSalesReportEmailJob")
+    .newJob(classOf[MonthlySalesAgentReportEmailJob])
+    .withIdentity("MonthlyAgentSalesReportEmailJob")
     .build()
 
   val trigger: Trigger = TriggerBuilder
