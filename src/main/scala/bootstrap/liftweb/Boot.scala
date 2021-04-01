@@ -40,7 +40,8 @@ class Boot {
     //DataLoader.createMissingDogBoxes()
     //ReportingService.getPetlandCustomersWithStats
     //DataLoader.createEmailReports()
-    DataLoader.markSupplements
+    //DataLoader.markSupplements
+    DataLoader.addMonthlyTPPAgentReport()
 
     //DataLoader.upgradeSubscriptionBoxDetails()
     //DataLoader.subscriptionBoxCheck()

@@ -599,7 +599,8 @@ object DataLoader extends Loggable {
         ("Daily TPP Agent Sales Report", "Daily email that shows sales by agent an store by day", ReportType.DailyTPPAgentSalesReportEmail),
         ("Daily MPD report", "Daily email that shows shipment statistics from previous day", ReportType.DailyInternalReportEmail),
         ("New Sale Email", "Instant email for every MPD.com sale.", ReportType.NewSaleEmail),
-        ("New Upgrade Email", "Instant email for every upgrade to the H&W box.", ReportType.UpgradeSubscriptionEmail)
+        ("New Upgrade Email", "Instant email for every upgrade to the H&W box.", ReportType.UpgradeSubscriptionEmail),
+        ("Monthly TPP Agent Report", "Monthly email that shows sales by agent and store for the month", ReportType.MonthlyTPPAgentSalesReportEmail)
       )
 
       for {
@@ -608,6 +609,15 @@ object DataLoader extends Loggable {
         EmailReport.createNewEmailReport(report._1, report._2, report._3)
       }
     } else Nil
+  }
+
+  def addMonthlyTPPAgentReport() = {
+    if (EmailReport.find(By(EmailReport.reportType, ReportType.MonthlyTPPAgentSalesReportEmail)).isEmpty)
+      EmailReport.createNewEmailReport(
+        "Monthly TPP Agent Report",
+        "Monthly email that shows sales by agent and store for the month",
+        ReportType.MonthlyTPPAgentSalesReportEmail
+      )
   }
 
   def markSupplements: Seq[Product] = {
