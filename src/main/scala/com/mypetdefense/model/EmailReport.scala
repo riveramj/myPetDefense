@@ -66,5 +66,9 @@ object EmailReportRecord extends EmailReportRecord with LongKeyedMetaMapper[Emai
 }
 
 object ReportType extends Enumeration {
-  val DailyTPPAgentSalesReportEmail, DailyInternalReportEmail, NewSaleEmail, UpgradeSubscriptionEmail = Value
+  val DailyTPPAgentSalesReportEmail, //0
+  DailyInternalReportEmail, //1
+  NewSaleEmail, //2
+  UpgradeSubscriptionEmail, //3
+  MonthlyTPPAgentSalesReportEmail = Value //4
 }
