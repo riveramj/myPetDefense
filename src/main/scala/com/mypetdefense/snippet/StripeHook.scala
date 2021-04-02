@@ -29,6 +29,7 @@ trait StripeHook extends RestHelper with Loggable {
       amountPaid           <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
       user                 <- User.find(By(User.stripeId, stripeCustomerId))
       subscription         <- user.subscription
+      coupon               <- user.coupon.obj
       shippingAddress <- Address.find(
                           By(Address.user, user),
                           By(Address.addressType, AddressType.Shipping)
@@ -74,6 +75,9 @@ trait StripeHook extends RestHelper with Loggable {
           formatAmount(tax)
         )
       }
+
+      if (coupon.couponCode.get == "20off")
+        ParentService.updateStripeSubscriptionTotal(user)
 
       OkResponse()
     }

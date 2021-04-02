@@ -39,6 +39,9 @@ class Boot {
     //DataLoader.cancellationDataSync()
     //DataLoader.createMissingDogBoxes()
     //ReportingService.getPetlandCustomersWithStats
+    //DataLoader.createEmailReports()
+    //DataLoader.markSupplements
+    //DataLoader.addMonthlyTPPAgentReport()
 
     //DataLoader.createEmailReports()
     //DataLoader.markSupplements
