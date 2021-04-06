@@ -11,6 +11,7 @@ mail.smtp.auth=true
 mail.smtp.starttls.enable=true
 mail.user=My Pet Defense
 mail.password=4ixwgbSHlM_6mYyKmWIY8w
+mail.auth.key=4ixwgbSHlM_6mYyKmWIY8w
 
 [Stripe]
 secret.key=sk_test_REo8GgSa41Vj3gc9g2J5Ne03

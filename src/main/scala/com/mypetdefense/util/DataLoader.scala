@@ -679,4 +679,8 @@ object DataLoader extends Loggable {
     Product.findAll(NotLike(Product.name, "%Dental Powder%")).map(_.isSupplement(true).saveMe())
     Product.findAll(Like(Product.name, "%Dental Powder%")).map(_.isSupplement(false).saveMe())
   }
+
+  def createResetPasswordEmailTemplate =
+    MandrillTemplate.createMandrillTemplate("reset password temp", "reset password", EmailType.PasswordReset)
+
 }

@@ -4,8 +4,8 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.{Date, Locale}
-
 import com.mypetdefense.model._
+import com.mypetdefense.service.MandrillService
 import com.mypetdefense.snippet.customer.ShippingBilling
 import com.mypetdefense.snippet.login.{ResetPassword, Signup}
 import com.mypetdefense.util._
@@ -356,8 +356,9 @@ trait SendNewUserEmailHandling extends EmailHandlerChain {
 
 trait ResetPasswordHandling extends EmailHandlerChain {
   val resetSubject = "Reset your My Pet Defense password"
-  val resetPasswordTemplate: NodeSeq =
-    Templates("emails-hidden" :: "reset-password-email" :: Nil) openOr NodeSeq.Empty
+  val templateName = MandrillTemplate.find(
+    By(MandrillTemplate.emailType, EmailType.PasswordReset)
+  ).map(_.mandrillTemplateName.get).openOrThrowException("Missing Mandrill Template Record")
 
   addHandler {
     case SendPasswordResetEmail(userWithKey) =>
@@ -365,7 +366,9 @@ trait ResetPasswordHandling extends EmailHandlerChain {
       val transform =
         "#reset-link [href]" #> passwordResetLink
 
-      sendEmail(resetSubject, userWithKey.email.get, transform(resetPasswordTemplate))
+      val emailVars = Map(("name", "Mike"))
+
+      sendTemplateEmail(resetSubject, userWithKey.email.get, templateName, emailVars)
   }
 }
 
@@ -1130,6 +1133,23 @@ trait EmailActor
       Subject(envSubj),
       To(to),
       XHTMLMailBodyType(body)
+    )
+  }
+  def sendTemplateEmail(
+    subject: String,
+    to: String,
+    templateName: String,
+    emailVars: Map[String, String],
+    fromEmail: String
+  )  {
+    val envSubj = envTag + subject
+
+    MandrillService.sendTemplateEmail(
+      envSubj,
+      to,
+      templateName,
+      emailVars,
+      fromEmail
     )
   }
 }

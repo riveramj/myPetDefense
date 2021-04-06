@@ -66,7 +66,8 @@ object DbSetup extends Loggable {
     WoofTraxOrder,
     EmailReport,
     EmailReportRecord,
-    StatisticsSnapshot
+    StatisticsSnapshot,
+    MandrillTemplate
   )
 
 }

@@ -49,6 +49,7 @@ class Boot {
     //DataLoader.subscriptionBoxCheck()
     //DataLoader.connectCancelledUsersToSubscription()
     //DataLoader.cancelBoxesForCancelledPets()
+    DataLoader.createResetPasswordEmailTemplate
 
     DataLoader.updateChewCounts()
     DataLoader.createProducts
