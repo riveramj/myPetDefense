@@ -3,7 +3,6 @@ package com.mypetdefense.snippet
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service._
-import net.liftweb.common.BoxLogging.LogEmptyOrFailure
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.rest._
@@ -23,33 +22,18 @@ trait StripeHook extends RestHelper with Loggable {
 
   def cancelledAccountWithPayment(objectJson: JValue): Box[OkResponse] = ({
     for {
-      stripeCustomerId     <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
-      stripeSubscriptionId <- tryo((objectJson \ "subscription").extract[String]) ?~! "No subscription id."
-      subtotal             <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
-      tax                  <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
-      amountPaid           <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
-      user                 <- User.find(By(User.stripeId, stripeCustomerId)) ?~! "No user found"
-      invoicePaymentId     <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
+      stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
+      parent           <- User.find(By(User.stripeId, stripeCustomerId)) ?~! "No user found"
+      subscription     = parent.subscription.obj
+      if subscription.isEmpty
     } yield {
-      val subscription = user.subscription.obj
+      val pets: List[Pet] = parent.pets.toList
+      pets.map(ParentService.removePet(parent, _))
 
-      if (subscription.isEmpty) {
-        val deletedCustomer = StripeFacade.Customer
-          .delete(stripeCustomerId)
-          .logFailure("remove customer failed with stripe error")
-
-        deletedCustomer match {
-          case Full(_) =>
-            user.cancel
-
-            Full(OkResponse())
-          case _ =>
-            Failure("Couldnt cancel Stripe Customer")
-        }
-      } else
-        Failure("Found mpd subscription")
+      ParentService.removeParent(parent)
+      Full(OkResponse())
     }
-  }).flatten
+  }).openOr(Failure("couldnt cancel user in MPD and Stripe"))
 
   def invoicePaymentSucceeded(objectJson: JValue): Box[OkResponse] = {
     for {
