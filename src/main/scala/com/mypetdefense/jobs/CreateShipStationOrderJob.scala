@@ -19,7 +19,7 @@ trait CreateShipStationOrderJobTrait extends ManagedJob {
     val newShipments = Shipment.findAll(
       By(Shipment.shipStationOrderId, 0),
       By(Shipment.shipmentStatus, ShipmentStatus.Paid)
-    )
+    ).filter(_.subscription.obj.map(_.status.get) == Full(Status.Active))
 
     logger.info(newShipments.size + s" shipment size begin batch [job-run-id:$jobRunId]")
     var count = 0
