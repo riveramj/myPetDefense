@@ -27,15 +27,15 @@ trait StripeHook extends RestHelper with Loggable {
       subtotal             <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
       tax                  <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
       amountPaid           <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
-      user                 <- User.find(By(User.stripeId, stripeCustomerId))
-      subscription         <- user.subscription
-      coupon               <- user.coupon.obj
+      user                 <- User.find(By(User.stripeId, stripeCustomerId)) ?~! "No user found"
+      subscription         <- user.subscription ?~! "No mpd subscription found"
       shippingAddress <- Address.find(
                           By(Address.user, user),
                           By(Address.addressType, AddressType.Shipping)
-                        )
+                        ) ?~! "No mpd address found"
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
+      val coupon = user.coupon.obj
       val charge = tryo((objectJson \ "charge").extract[String])
 
       val notTrial_?   = ParentService.notTrialSubscription_?(stripeSubscriptionId)
@@ -76,7 +76,7 @@ trait StripeHook extends RestHelper with Loggable {
         )
       }
 
-      if (coupon.couponCode.get == "20off")
+      if (coupon.map(_.couponCode.get == "20off").openOr(false))
         ParentService.updateStripeSubscriptionTotal(user)
 
       OkResponse()
