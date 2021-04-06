@@ -3,6 +3,7 @@ package com.mypetdefense.snippet
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service._
+import net.liftweb.common.BoxLogging.LogEmptyOrFailure
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.rest._
@@ -19,6 +20,36 @@ object StripeHook extends StripeHook {
 
 trait StripeHook extends RestHelper with Loggable {
   def emailActor: EmailActor
+
+  def cancelledAccountWithPayment(objectJson: JValue): Box[OkResponse] = ({
+    for {
+      stripeCustomerId     <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
+      stripeSubscriptionId <- tryo((objectJson \ "subscription").extract[String]) ?~! "No subscription id."
+      subtotal             <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
+      tax                  <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
+      amountPaid           <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
+      user                 <- User.find(By(User.stripeId, stripeCustomerId)) ?~! "No user found"
+      invoicePaymentId     <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
+    } yield {
+      val subscription = user.subscription.obj
+
+      if (subscription.isEmpty) {
+        val deletedCustomer = StripeFacade.Customer
+          .delete(stripeCustomerId)
+          .logFailure("remove customer failed with stripe error")
+
+        deletedCustomer match {
+          case Full(_) =>
+            user.cancel
+
+            Full(OkResponse())
+          case _ =>
+            Failure("Couldnt cancel Stripe Customer")
+        }
+      } else
+        Failure("Found mpd subscription")
+    }
+  }).flatten
 
   def invoicePaymentSucceeded(objectJson: JValue): Box[OkResponse] = {
     for {
@@ -130,7 +161,12 @@ trait StripeHook extends RestHelper with Loggable {
         objectJson = (dataJson \ "object")
       } yield {
         val result: Box[LiftResponse] = eventType match {
-          case "invoice.payment_succeeded"     => invoicePaymentSucceeded(objectJson)
+          case "invoice.payment_succeeded"     =>
+            val reconciliationAttempt = invoicePaymentSucceeded(objectJson)
+            if (reconciliationAttempt.isDefined)
+              reconciliationAttempt
+            else
+              cancelledAccountWithPayment(objectJson)
           case "invoice.payment_failed"        => invoicePaymentFailed(objectJson)
           case "customer.subscription.updated" => subscriptionPastDue(objectJson)
           case _                               => Full(OkResponse())
