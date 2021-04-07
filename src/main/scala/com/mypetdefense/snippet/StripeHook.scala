@@ -20,6 +20,21 @@ object StripeHook extends StripeHook {
 trait StripeHook extends RestHelper with Loggable {
   def emailActor: EmailActor
 
+  def cancelledAccountWithPayment(objectJson: JValue): Box[OkResponse] = ({
+    for {
+      stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
+      parent           <- User.find(By(User.stripeId, stripeCustomerId)) ?~! "No user found"
+      subscription     = parent.subscription.obj
+      if subscription.isEmpty
+    } yield {
+      val pets: List[Pet] = parent.pets.toList
+      pets.map(ParentService.removePet(parent, _))
+
+      ParentService.removeParent(parent)
+      Full(OkResponse())
+    }
+  }).openOr(Failure("couldnt cancel user in MPD and Stripe"))
+
   def invoicePaymentSucceeded(objectJson: JValue): Box[OkResponse] = {
     for {
       stripeCustomerId     <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
@@ -27,14 +42,15 @@ trait StripeHook extends RestHelper with Loggable {
       subtotal             <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
       tax                  <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
       amountPaid           <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
-      user                 <- User.find(By(User.stripeId, stripeCustomerId))
-      subscription         <- user.subscription
+      user                 <- User.find(By(User.stripeId, stripeCustomerId)) ?~! "No user found"
+      subscription         <- user.subscription ?~! "No mpd subscription found"
       shippingAddress <- Address.find(
                           By(Address.user, user),
                           By(Address.addressType, AddressType.Shipping)
-                        )
+                        ) ?~! "No mpd address found"
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
+      val coupon = user.coupon.obj
       val charge = tryo((objectJson \ "charge").extract[String])
 
       val notTrial_?   = ParentService.notTrialSubscription_?(stripeSubscriptionId)
@@ -53,35 +69,30 @@ trait StripeHook extends RestHelper with Loggable {
       }
 
       if (notTrial_? && activePets_?) {
-        subscription.status(Status.Active).saveMe
+        subscription.reload.status(Status.Active).save()
 
-        if (subscription.contractLength.get > 0) {
-          if (subscription.shipments.toList.size < 2) {
-            ParentService.changeToPetlandMonthlyStripePrice(stripeSubscriptionId)
-          }
-        }
+        TaxJarService.processTaxesCharged(
+          invoicePaymentId,
+          city,
+          state,
+          zip,
+          formatAmount(subtotal),
+          formatAmount(tax)
+        )
 
-        if (activePets_?) {
-          TaxJarService.processTaxesCharged(
-            invoicePaymentId,
-            city,
-            state,
-            zip,
-            formatAmount(subtotal),
-            formatAmount(tax)
-          )
+        //ParentService.updatePuppyProducts(user)
 
-          //ParentService.updatePuppyProducts(user)
-
-          ShipmentService.createNewShipment(
-            user,
-            invoicePaymentId,
-            charge,
-            formatAmount(amountPaid),
-            formatAmount(tax)
-          )
-        }
+        ShipmentService.createNewShipment(
+          user,
+          invoicePaymentId,
+          charge,
+          formatAmount(amountPaid),
+          formatAmount(tax)
+        )
       }
+
+      if (coupon.map(_.couponCode.get == "20off").openOr(false))
+        ParentService.updateStripeSubscriptionTotal(user)
 
       OkResponse()
     }
@@ -103,9 +114,6 @@ trait StripeHook extends RestHelper with Loggable {
         _ isAfterNow
       }
       val amount = totalAmountInCents / 100d
-
-      if (nextPaymentAttempt.isEmpty)
-        ParentService.updateNextShipDate(subscription)
 
       emailActor ! SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt)
 
@@ -137,7 +145,12 @@ trait StripeHook extends RestHelper with Loggable {
         objectJson = (dataJson \ "object")
       } yield {
         val result: Box[LiftResponse] = eventType match {
-          case "invoice.payment_succeeded"     => invoicePaymentSucceeded(objectJson)
+          case "invoice.payment_succeeded"     =>
+            val reconciliationAttempt = invoicePaymentSucceeded(objectJson)
+            if (reconciliationAttempt.isDefined)
+              reconciliationAttempt
+            else
+              cancelledAccountWithPayment(objectJson)
           case "invoice.payment_failed"        => invoicePaymentFailed(objectJson)
           case "customer.subscription.updated" => subscriptionPastDue(objectJson)
           case _                               => Full(OkResponse())

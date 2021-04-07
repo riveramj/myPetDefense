@@ -94,7 +94,8 @@ object Generator extends ScalaCheckHelper {
       Empty,
       Empty,
       Empty,
-      userType
+      userType,
+      ""
     )
 
   def genPriceCode: Gen[String] =
@@ -184,7 +185,7 @@ object Generator extends ScalaCheckHelper {
       lastName  <- genNonEmptyAlphaStr
       password  <- genNonEmptyAlphaStr
       address   <- generateNewUserAddress
-    } yield NewUserData(email, firstName, lastName, password, address, Empty)
+    } yield NewUserData(email, firstName, lastName, password, address, Empty, "")
 
   def generateAddress: Gen[AddressGeneratedData] =
     for {

@@ -1,8 +1,5 @@
 package com.mypetdefense.service
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator.{AddressGeneratedData, InsertGenData}
 import com.mypetdefense.helpers.DBTest
@@ -22,6 +19,8 @@ import org.asynchttpclient.Param
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers._
 
+import java.text.SimpleDateFormat
+import java.util.Date
 import scala.collection.JavaConverters._
 
 class ShipstationServiceSpec extends DBTest with RestHelper {
@@ -49,22 +48,28 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
       .find(By(Subscription.id, insertedUser.subscription.get))
       .openOrThrowException("oops")
 
+    val shipment = inserted.shipments.head.reload
+
     val expectedWeight = insertedSub.subscriptionBoxes
       .map(b =>
         b.boxType.get match {
-          case BoxType.basic             => BigDecimal(4)
-          case BoxType.healthAndWellness => BigDecimal(13)
+          case BoxType.basic if !shipment.freeUpgradeSample.get => BigDecimal(5)
+          case BoxType.basic             => BigDecimal(15)
+          case BoxType.healthAndWellness => BigDecimal(15)
           case _                         => BigDecimal(0)
         }
       )
       .sum
 
-    val shipment = inserted.shipments.head.reload
+    val serviceCode = if (expectedWeight.toDouble < 16D)
+      "usps_first_class_mail"
+    else
+      "usps_parcel_select"
 
     def jsonAssertFun(maybeIn: Option[JValue]): Unit = {
       maybeIn.fold(fail("json is empty")) { in =>
         in \ "orderStatus" shouldBe JString("awaiting_shipment")
-        in \ "serviceCode" shouldBe JString("usps_first_class_mail")
+        in \ "serviceCode" shouldBe JString(serviceCode)
         in \ "carrierCode" shouldBe JString("stamps_com")
         in \ "orderDate" shouldBe JString(expDateFormat.format(new Date()))
         in \ "customerEmail" shouldBe JString(inserted.user.email.get)

@@ -9,7 +9,8 @@ final case class NewUserData(
     lastName: String,
     password: String,
     address: NewUserAddress,
-    coupon: Box[Coupon]
+    coupon: Box[Coupon],
+    ipAddress: String
 )
 
 final case class NewUserAddress(
