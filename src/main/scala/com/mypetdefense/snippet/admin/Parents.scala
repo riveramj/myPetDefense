@@ -3,9 +3,10 @@ package admin
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.SupportAction.{SupportAddedPet, SupportRemovedPet}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.ClearNodesIf
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext, SplitTitleCase}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -60,6 +61,7 @@ class Parents extends Loggable {
   val nextShipDateFormat = new SimpleDateFormat("MM/dd/yyyy")
   val birthdayFormat     = new SimpleDateFormat("MM/dd/yyyy")
   val dateFormat         = new SimpleDateFormat("MMM dd, yyyy")
+  val dateTimeFormat     = new SimpleDateFormat("MM/dd/yy h:mm a")
 
   var parentDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var currentParent: Box[User]                       = Empty
@@ -189,6 +191,15 @@ class Parents extends Loggable {
         )
       }).flatMap(identity) match {
         case Full(pet) =>
+          ActionLogService.logAction(
+            SupportAddedPet(
+              possibleParent.map(_.userId.get).openOrThrowException("No Parent Id"),
+              SecurityContext.currentUserId,
+              pet.petId.get,
+              pet.name.get
+            )
+          )
+
           petName = ""
           petBreed = ""
           petBirthday = ""
@@ -207,6 +218,15 @@ class Parents extends Loggable {
   def deletePet(parent: Box[User], pet: Pet, renderer: IdMemoizeTransform)(): JsCmd = {
     ParentService.removePet(parent, pet) match {
       case Full(_) =>
+        ActionLogService.logAction(
+          SupportRemovedPet(
+            parent.map(_.userId.get).openOr(0L),
+            SecurityContext.currentUserId,
+            pet.petId.get,
+            pet.name.get
+          )
+        )
+
         renderer.setHtml
       case _ =>
         Alert("An error has occured. Please try again.")
@@ -729,6 +749,23 @@ class Parents extends Loggable {
           }
   }
 
+  def actionLogBinding(
+ ): CssBindFunc = {
+    val parent = currentParent
+    lazy val actions = ActionLogService.findActionsByParentId(parent.map(_.userId.get).openOr(0L))
+
+    ".action" #> actions.sortBy( _.timestamp).reverse.map { action =>
+      val actionDetails = action.details.stringDetails.map { case (key, value) =>
+        s"${SplitTitleCase(key)}: $value"
+      }.mkString(". ")
+
+      ".action-date *" #> dateTimeFormat.format(Date.from(action.timestamp)) &
+      ".action-subtype *" #> SplitTitleCase(action.actionSubtype.toString) &
+      ".performed-by *" #> User.find(By(User.userId, action.userId)).map(_.name) &
+      ".details *" #> actionDetails
+    }
+  }
+
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
       ".parents [class+]" #> "current" &
@@ -784,9 +821,10 @@ class Parents extends Loggable {
                 ".parent-info" #> {
                   if (!currentParent.isEmpty) {
                     petBindings andThen
-                      shipmentBindings(detailsRenderer, subscription) andThen
-                      parentInformationBinding(detailsRenderer, subscription) andThen
-                      subscriptionBinding(detailsRenderer, subscription)
+                    shipmentBindings(detailsRenderer, subscription) andThen
+                    parentInformationBinding(detailsRenderer, subscription) andThen
+                    subscriptionBinding(detailsRenderer, subscription) andThen
+                    actionLogBinding()
                   } else {
                     "^" #> ClearNodes
                   }

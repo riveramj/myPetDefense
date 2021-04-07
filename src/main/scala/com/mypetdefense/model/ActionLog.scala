@@ -10,6 +10,7 @@ class ActionLog extends LongKeyedMapper[ActionLog] with IdPK with OneToMany[Long
   object actionType    extends MappedString(this, maxLen = 50)
   object actionSubtype extends MappedString(this, maxLen = 50)
   object details       extends MappedOneToMany(ActionLogDetails, ActionLogDetails.action)
+  object parent        extends MappedLongForeignKey(this, User)
   object user          extends MappedLongForeignKey(this, User)
   object timestamp extends MappedDateTime(this) {
     override def defaultValue = new Date()

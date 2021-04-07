@@ -290,10 +290,11 @@ object Generator extends ScalaCheckHelper {
     for {
       subtype <- Gen.oneOf(CustomerActionSubtype.values)
       userId  <- genPosLong
+      parentId  <- genPosLong
       petId   <- genPosLong
     } yield subtype match {
-      case CustomerActionSubtype.CustomerAddedPet   => CustomerAddedPet(userId, petId)
-      case CustomerActionSubtype.CustomerRemovedPet => CustomerRemovedPet(userId, petId)
+      case CustomerActionSubtype.CustomerAddedPet   => CustomerAddedPet(parentId, petId)
+      case CustomerActionSubtype.CustomerRemovedPet => CustomerRemovedPet(parentId, petId)
     }
 
   def mapWithNOfUserNSubscriptionGen(

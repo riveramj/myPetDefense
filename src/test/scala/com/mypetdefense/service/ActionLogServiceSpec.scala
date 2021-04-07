@@ -18,6 +18,7 @@ class ActionLogServiceSpec extends DBTest {
       log.actionType.get mustBe action.actionType.toString
       log.actionSubtype.get mustBe action.actionSubtype.toString
       log.user.get mustBe action.userId
+      log.parent.get mustBe action.parentId
       log.timestamp.get.toInstant mustBe action.timestamp
 
       cleanUpSuccess()

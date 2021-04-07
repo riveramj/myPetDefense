@@ -5,3 +5,8 @@ object TitleCase {
     word.toLowerCase.split(' ').map(_.capitalize).mkString(" ")
   }
 }
+
+object SplitTitleCase {
+  def apply(word: String): String =
+    word.split("(?<!^)(?=[A-Z])").mkString(" ")
+}

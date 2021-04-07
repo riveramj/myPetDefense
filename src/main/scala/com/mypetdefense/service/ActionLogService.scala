@@ -1,10 +1,10 @@
 package com.mypetdefense.service
 
-import java.util.Date
-
-import com.mypetdefense.model.domain.action.{Action, ActionType}
+import com.mypetdefense.model.domain.action.Action
 import com.mypetdefense.model.{ActionLog, ActionLogDetails}
 import net.liftweb.mapper._
+
+import java.util.Date
 
 object ActionLogService {
 
@@ -14,17 +14,19 @@ object ActionLogService {
         .actionType(action.actionType.toString)
         .actionSubtype(action.actionSubtype.toString)
         .user(action.userId)
+        .parent(action.parentId)
         .timestamp(Date.from(action.timestamp))
         .saveMe()
 
     def saveDetails[T](
         details: Map[String, T]
-    )(setValue: (ActionLogDetails, T) => ActionLogDetails): Unit =
+    )(setValue: (ActionLogDetails, T) => ActionLogDetails): Unit = {
       details foreach {
         case (key, value) =>
           val detail = ActionLogDetails.create.action(actionLog).key(key)
           setValue(detail, value).saveMe()
       }
+    }
 
     action.details match {
       case Action.Details(longDetails, stringDetails) =>
@@ -33,11 +35,10 @@ object ActionLogService {
     }
   }
 
-  def findActionsByUserIdAndType(userId: Long, actionType: ActionType): List[Action] = {
+  def findActionsByParentId(parentId: Long): List[Action] = {
     val actions =
       ActionLog.findAll(
-        By(ActionLog.user, userId),
-        By(ActionLog.actionType, actionType.toString)
+        By(ActionLog.parent, parentId)
       )
 
     val actionIds = actions.map(_.id.get)

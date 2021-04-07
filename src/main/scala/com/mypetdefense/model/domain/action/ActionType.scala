@@ -23,8 +23,10 @@ object CustomerActionSubtype extends EnumCompanion[CustomerActionSubtype] {
 }
 
 object SupportActionSubtype extends EnumCompanion[SupportActionSubtype] {
-  // TODO
-  override val values: Set[SupportActionSubtype] = Set.empty
+  case object SupportAddedPet   extends SupportActionSubtype
+  case object SupportRemovedPet extends SupportActionSubtype
+
+  override val values: Set[SupportActionSubtype] = Set(SupportAddedPet, SupportRemovedPet)
 }
 
 object SystemActionSubtype extends EnumCompanion[SystemActionSubtype] {

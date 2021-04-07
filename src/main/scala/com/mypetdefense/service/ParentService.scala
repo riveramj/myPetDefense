@@ -1,8 +1,5 @@
 package com.mypetdefense.service
 
-import java.time.{LocalDate, Period, ZoneId}
-import java.util.Date
-
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
@@ -14,6 +11,9 @@ import net.liftweb.common._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
+
+import java.time.{LocalDate, Period, ZoneId}
+import java.util.Date
 
 object ParentService extends LoggableBoxLogging {
   val whelpDateFormat                  = new java.text.SimpleDateFormat("M/d/y")

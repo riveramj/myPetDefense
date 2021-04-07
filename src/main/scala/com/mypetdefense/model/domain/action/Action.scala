@@ -10,6 +10,7 @@ sealed trait Action extends Product with Serializable {
   val actionSubtype: ActionSubtype
   val actionId: Option[Long]
   val userId: Long
+  val parentId: Long
   val timestamp: Instant
   def details: Action.Details
 }
@@ -58,45 +59,106 @@ object CustomerAction {
     }
 
   final case class CustomerAddedPet(
-      userId: Long,
-      petId: Long,
-      actionId: Option[Long] = None,
-      timestamp: Instant = nowMillisAsInstant()
+                                     parentId: Long,
+                                     userId: Long,
+                                     petId: Long,
+                                     petName: String,
+                                     actionId: Option[Long] = None,
+                                     timestamp: Instant = nowMillisAsInstant()
   ) extends CustomerAction(CustomerActionSubtype.CustomerAddedPet) {
     override def details: Action.Details =
       Action.Details(
-        longDetails = Map("petId" -> petId)
+        longDetails = Map("PetId" -> petId),
+        stringDetails = Map("PetName" -> petName)
       )
   }
 
   final case class CustomerRemovedPet(
-      userId: Long,
-      petId: Long,
-      actionId: Option[Long] = None,
-      timestamp: Instant = nowMillisAsInstant()
+                                       parentId: Long,
+                                       userId: Long,
+                                       petId: Long,
+                                       petName: String,
+                                       actionId: Option[Long] = None,
+                                       timestamp: Instant = nowMillisAsInstant()
   ) extends CustomerAction(CustomerActionSubtype.CustomerRemovedPet) {
     override def details: Action.Details =
       Action.Details(
-        longDetails = Map("petId" -> petId)
+        longDetails = Map("PetId" -> petId),
+        stringDetails = Map("PetName" -> petName)
       )
   }
 
   object CustomerAddedPet {
     private[action] def apply(log: ParsedLog): CustomerAddedPet =
-      CustomerAddedPet(log.userId, log.longDetails("petId"), Some(log.actionId), log.timestamp)
+      CustomerAddedPet(
+        log.parentId,
+        log.userId,
+        log.longDetails("PetId"),
+        log.stringDetails("PetName"),
+        Some(log.actionId),
+        log.timestamp
+      )
   }
 
   object CustomerRemovedPet {
     private[action] def apply(log: ParsedLog): CustomerRemovedPet =
-      CustomerRemovedPet(log.userId, log.longDetails("petId"), Some(log.actionId), log.timestamp)
+      CustomerRemovedPet(
+        log.parentId,
+        log.userId,
+        log.longDetails("PetId"),
+        log.stringDetails("PetName"),
+        Some(log.actionId),
+        log.timestamp
+      )
   }
 }
 
 object SupportAction {
   private[action] def apply(log: ParsedLog): SupportAction =
-    ???
+    log.actionSubtype match {
+      case SupportActionSubtype.SupportAddedPet   => SupportAddedPet(log)
+      case SupportActionSubtype.SupportRemovedPet => SupportRemovedPet(log)
+    }
 
-  // TODO
+  final case class SupportAddedPet(
+                                    parentId: Long,
+                                    userId: Long,
+                                    petId: Long,
+                                    petName: String,
+                                    actionId: Option[Long] = None,
+                                    timestamp: Instant = nowMillisAsInstant()
+                                   ) extends SupportAction(SupportActionSubtype.SupportAddedPet) {
+    override def details: Action.Details =
+      Action.Details(
+        longDetails = Map("PetId" -> petId),
+        stringDetails = Map("PetName" -> petName)
+      )
+  }
+
+  final case class SupportRemovedPet(
+                                      parentId: Long,
+                                      userId: Long,
+                                      petId: Long,
+                                      petName: String,
+                                      actionId: Option[Long] = None,
+                                      timestamp: Instant = nowMillisAsInstant()
+                                     ) extends SupportAction(SupportActionSubtype.SupportRemovedPet) {
+    override def details: Action.Details =
+      Action.Details(
+        longDetails = Map("PetId" -> petId),
+        stringDetails = Map("PetName" -> petName)
+      )
+  }
+
+  object SupportAddedPet {
+    private[action] def apply(log: ParsedLog): SupportAddedPet =
+      SupportAddedPet(log.parentId, log.userId, log.longDetails("PetId"), log.stringDetails("PetName"), Some(log.actionId), log.timestamp)
+  }
+
+  object SupportRemovedPet {
+    private[action] def apply(log: ParsedLog): SupportRemovedPet =
+      SupportRemovedPet(log.parentId, log.userId, log.longDetails("PetId"), log.stringDetails("PetName"), Some(log.actionId), log.timestamp)
+  }
 }
 
 object SystemAction {
@@ -111,6 +173,7 @@ private final case class ParsedLog(
     actionSubtype: ActionSubtype,
     actionId: Long,
     userId: Long,
+    parentId: Long,
     timestamp: Instant,
     longDetails: Map[String, Long],
     stringDetails: Map[String, String]
@@ -124,6 +187,7 @@ private object ParsedLog {
   ): ParsedLog = {
     val actionId   = actionLog.id.get
     val userId     = actionLog.user.get
+    val parentId   = actionLog.parent.get
     val timestamp  = actionLog.timestamp.get.toInstant
     val actionType = ActionType.fromString(actionLog.actionType.get)
 
@@ -144,6 +208,7 @@ private object ParsedLog {
       actionSubtype,
       actionId,
       userId,
+      parentId,
       timestamp,
       longDetailsMap,
       stringDetailsMap
