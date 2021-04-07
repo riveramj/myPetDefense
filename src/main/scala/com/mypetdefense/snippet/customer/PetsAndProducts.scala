@@ -2,9 +2,10 @@ package com.mypetdefense.snippet.customer
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.SupportAction.{SupportAddedPet, SupportRemovedPet}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.ClearNodesIf
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import com.mypetdefense.util.SecurityContext._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -95,6 +96,15 @@ class PetsAndProducts extends Loggable {
         )
       }).flatMap(identity) match {
         case Full(pet) =>
+          ActionLogService.logAction(
+            SupportAddedPet(
+              SecurityContext.currentUserId,
+              SecurityContext.currentUserId,
+              pet.petId.get,
+              pet.name.get
+            )
+          )
+
           if (Props.mode != Props.RunModes.Pilot) {
             user.map { parent => EmailActor ! NewPetAddedEmail(parent, pet) }
           }
@@ -111,6 +121,15 @@ class PetsAndProducts extends Loggable {
   def deletePet(pet: Box[Pet])(): Alert = {
     ParentService.removePet(user, pet) match {
       case Full(_) =>
+        ActionLogService.logAction(
+          SupportRemovedPet(
+            SecurityContext.currentUserId,
+            SecurityContext.currentUserId,
+            pet.map(_.petId.get).openOr(0),
+            pet.map(_.name.get).openOr("-")
+          )
+        )
+
         if (Props.mode != Props.RunModes.Pilot) {
           user.map { parent => pet.map(p => EmailActor ! PetRemovedEmail(parent, p)) }
         }
