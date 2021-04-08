@@ -3,9 +3,10 @@ package admin
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.SupportAction.{SupportAddedPet, SupportCanceledAccount, SupportRemovedPet}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.ClearNodesIf
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext, SplitTitleCase}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -60,6 +61,7 @@ class Parents extends Loggable {
   val nextShipDateFormat = new SimpleDateFormat("MM/dd/yyyy")
   val birthdayFormat     = new SimpleDateFormat("MM/dd/yyyy")
   val dateFormat         = new SimpleDateFormat("MMM dd, yyyy")
+  val dateTimeFormat     = new SimpleDateFormat("MM/dd/yy h:mm a")
 
   var parentDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var currentParent: Box[User]                       = Empty
@@ -177,6 +179,13 @@ class Parents extends Loggable {
         parent  <- possibleParent
         size = product.size.get
       } yield {
+        val actionReport = SupportAddedPet(
+          possibleParent.map(_.userId.get).openOrThrowException("No Parent Id"),
+          Some(SecurityContext.currentUserId),
+          0L,
+          petName
+        )
+
         ParentService.addNewPet(
           oldUser = parent,
           name = petName,
@@ -185,7 +194,8 @@ class Parents extends Loggable {
           product = product,
           isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
           breed = petBreed,
-          birthday = petBirthday
+          birthday = petBirthday,
+          actionLog = Right(actionReport)
         )
       }).flatMap(identity) match {
         case Full(pet) =>
@@ -205,7 +215,14 @@ class Parents extends Loggable {
   }
 
   def deletePet(parent: Box[User], pet: Pet, renderer: IdMemoizeTransform)(): JsCmd = {
-    ParentService.removePet(parent, pet) match {
+    val actionLog = SupportRemovedPet(
+      parent.map(_.userId.get).openOr(0L),
+      Some(SecurityContext.currentUserId),
+      pet.petId.get,
+      pet.name.get
+    )
+
+    ParentService.removePet(parent, pet, actionLog) match {
       case Full(_) =>
         renderer.setHtml
       case _ =>
@@ -214,7 +231,12 @@ class Parents extends Loggable {
   }
 
   def deleteParent(parent: User)(): Alert = {
-    ParentService.removeParent(parent, true) match {
+    val actionLog = SupportCanceledAccount(
+      parent.userId.get,
+      Some(SecurityContext.currentUserId),
+      parent.subscription.obj.map(_.subscriptionId.get).openOr(0L)
+    )
+    ParentService.removeParent(parent, actionLog, true) match {
       case Full(_) =>
         S.redirectTo(Parents.menu.loc.calcDefaultHref)
       case _ =>
@@ -225,9 +247,24 @@ class Parents extends Loggable {
   def cancelParent(parent: User)(): JsCmd = {
     val pets: List[Pet] = parent.pets.toList
 
-    pets.map(ParentService.removePet(parent, _))
+    pets.map { pet =>
+      val actionLog = SupportRemovedPet(
+        parent.userId.get,
+        Some(SecurityContext.currentUserId),
+        pet.petId.get,
+        pet.name.get
+      )
 
-    ParentService.removeParent(parent) match {
+      ParentService.removePet(parent, pet, actionLog)
+    }
+
+    val actionLog = SupportCanceledAccount(
+      parent.userId.get,
+      Some(SecurityContext.currentUserId),
+      parent.subscription.obj.map(_.subscriptionId.get).openOr(0L)
+    )
+
+    ParentService.removeParent(parent, actionLog = actionLog) match {
       case Full(_) =>
         EmailActor ! ParentCancelledAccountEmail(parent)
 
@@ -729,6 +766,23 @@ class Parents extends Loggable {
           }
   }
 
+  def actionLogBinding(
+ ): CssBindFunc = {
+    val parent = currentParent
+    lazy val actions = ActionLogService.findActionsByParentId(parent.map(_.userId.get).openOr(0L))
+
+    ".action" #> actions.sortBy( _.timestamp).reverse.map { action =>
+      val actionDetails = action.details.stringDetails.map { case (key, value) =>
+        s"${SplitTitleCase(key)}: $value"
+      }.mkString(". ")
+
+      ".action-date *" #> dateTimeFormat.format(Date.from(action.timestamp)) &
+      ".action-subtype *" #> SplitTitleCase(action.actionSubtype.toString) &
+      ".performed-by *" #> User.find(By(User.userId, action.userId.getOrElse(0L))).map(_.name) &
+      ".details *" #> actionDetails
+    }
+  }
+
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
       ".parents [class+]" #> "current" &
@@ -784,9 +838,10 @@ class Parents extends Loggable {
                 ".parent-info" #> {
                   if (!currentParent.isEmpty) {
                     petBindings andThen
-                      shipmentBindings(detailsRenderer, subscription) andThen
-                      parentInformationBinding(detailsRenderer, subscription) andThen
-                      subscriptionBinding(detailsRenderer, subscription)
+                    shipmentBindings(detailsRenderer, subscription) andThen
+                    parentInformationBinding(detailsRenderer, subscription) andThen
+                    subscriptionBinding(detailsRenderer, subscription) andThen
+                    actionLogBinding()
                   } else {
                     "^" #> ClearNodes
                   }

@@ -411,7 +411,7 @@ class ReportingServiceSpec extends DBTest {
 
         val expectedInResult = someAgencyName -> insertedPetsSize
 
-        val actualData = ReportingService.findMTDSalesByAgency
+        val actualData = ReportingService.findYesterdayMTDSalesByAgency
 
         actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
         actualData should contain(expectedInResult)
@@ -479,7 +479,7 @@ class ReportingServiceSpec extends DBTest {
 
         val expectedInResult = someSalesAgentId -> insertedPetsSize
 
-        val actualData = ReportingService.findMTDSalesByAgent
+        val actualData = ReportingService.findYesterdayMTDSalesByAgent
 
         actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
         actualData should contain(expectedInResult)
