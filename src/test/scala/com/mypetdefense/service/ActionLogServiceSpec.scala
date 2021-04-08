@@ -2,7 +2,7 @@ package com.mypetdefense.service
 
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.helpers.DBTest
-import com.mypetdefense.model.domain.action.{ActionSubtype, ActionType}
+import com.mypetdefense.model.domain.action.ActionSubtype
 import com.mypetdefense.model.{ActionLog, ActionLogDetails}
 
 class ActionLogServiceSpec extends DBTest {
@@ -17,7 +17,7 @@ class ActionLogServiceSpec extends DBTest {
       val log = actionLogs.head
       log.actionType.get mustBe action.actionType.toString
       log.actionSubtype.get mustBe action.actionSubtype.toString
-      log.user.get mustBe action.userId
+      log.user.get mustBe action.userId.getOrElse(0)
       log.parent.get mustBe action.parentId
       log.timestamp.get.toInstant mustBe action.timestamp
 
@@ -30,11 +30,11 @@ class ActionLogServiceSpec extends DBTest {
       ActionLogService.logAction(action)
 
       val details = ActionLogDetails.findAll()
-      details.length mustBe 1
+      details.length mustBe 2
 
       val detail = details.head
-      detail.key.get mustBe "petId"
-      detail.longValue.get mustBe action.details.longDetails("petId")
+      detail.key.get mustBe "PetId"
+      detail.longValue.get mustBe action.details.longDetails("PetId")
       detail.stringValue.get mustBe ""
 
       cleanUpSuccess()
@@ -45,12 +45,11 @@ class ActionLogServiceSpec extends DBTest {
     forAllNoShrink(genCustomerAction) { action =>
       ActionLogService.logAction(action)
 
-      val result = ActionLogService.findActionsByUserIdAndType(action.userId, action.actionType)
+      val result = ActionLogService.findActionsByParentId(action.parentId)
       result.length mustBe 1
 
       val actual = result.head
       actual.getClass mustBe action.getClass
-      actual.actionType mustBe action.actionType
       actual.actionSubtype mustBe action.actionSubtype
       actual.actionId mustBe defined
       actual.userId mustBe action.userId
@@ -65,18 +64,18 @@ class ActionLogServiceSpec extends DBTest {
     forAllNoShrink(listOfNCustomerActions()) { actions =>
       actions foreach { action => ActionLogService.logAction(action) }
 
-      def expected(userId: Long): List[(ActionSubtype, Long)] =
+      def expected(parentId: Long): List[(ActionSubtype, Long)] =
         actions
-          .filter(_.userId == userId)
-          .map(a => (a.actionSubtype, a.details.longDetails("petId")))
+          .filter(_.parentId == parentId)
+          .map(a => (a.actionSubtype, a.details.longDetails("PetId")))
 
-      def actual(userId: Long): List[(ActionSubtype, Long)] =
+      def actual(parentId: Long): List[(ActionSubtype, Long)] =
         ActionLogService
-          .findActionsByUserIdAndType(userId, ActionType.CustomerAction)
-          .map(a => (a.actionSubtype, a.details.longDetails("petId")))
+          .findActionsByParentId(parentId)
+          .map(a => (a.actionSubtype, a.details.longDetails("PetId")))
 
-      actual(userId = 1L) mustBe expected(userId = 1L)
-      actual(userId = 2L) mustBe expected(userId = 2L)
+      actual(parentId = 1L) mustBe expected(parentId = 1L)
+      actual(parentId = 2L) mustBe expected(parentId = 2L)
 
       cleanUpSuccess()
     }

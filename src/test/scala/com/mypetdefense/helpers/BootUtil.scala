@@ -77,7 +77,11 @@ object BootUtil {
     ProductSchedule,
     ProductScheduleItem,
     ActionLog,
-    ActionLogDetails
+    ActionLogDetails,
+    WoofTraxOrder,
+    EmailReport,
+    EmailReportRecord,
+    StatisticsSnapshot
   )
 
 }

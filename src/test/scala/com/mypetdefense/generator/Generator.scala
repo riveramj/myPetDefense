@@ -1,7 +1,5 @@
 package com.mypetdefense.generator
 
-import java.util.{Collections => JCollections}
-
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfNextMonth, anyDayOfThisMonth}
 import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.helpers.ScalaCheckHelper
@@ -14,6 +12,8 @@ import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
 import com.stripe.model.{Customer, PaymentSource, PaymentSourceCollection}
 import net.liftweb.common.{Box, Empty, Full}
 import org.scalacheck._
+
+import java.util.{Collections => JCollections}
 
 object Generator extends ScalaCheckHelper {
 
@@ -273,7 +273,8 @@ object Generator extends ScalaCheckHelper {
     for {
       productName <- genAlphaStr
       sku         <- genAlphaStr
-    } yield ProductGeneratedData(productName, sku)
+      isSupplement <- genBool
+    } yield ProductGeneratedData(productName, sku, isSupplement)
 
   def genProductsSchedule(
       productsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
@@ -288,13 +289,14 @@ object Generator extends ScalaCheckHelper {
 
   def genCustomerAction: Gen[CustomerAction] =
     for {
-      subtype <- Gen.oneOf(CustomerActionSubtype.values)
+      subtype <- Gen.oneOf(Set(CustomerActionSubtype.CustomerAddedPet, CustomerActionSubtype.CustomerRemovedPet))
       userId  <- genPosLong
       parentId  <- genPosLong
       petId   <- genPosLong
+      petName   <- genAlphaStr
     } yield subtype match {
-      case CustomerActionSubtype.CustomerAddedPet   => CustomerAddedPet(parentId, petId)
-      case CustomerActionSubtype.CustomerRemovedPet => CustomerRemovedPet(parentId, petId)
+      case CustomerActionSubtype.CustomerAddedPet   => CustomerAddedPet(parentId, Some(userId), petId, petName)
+      case CustomerActionSubtype.CustomerRemovedPet => CustomerRemovedPet(parentId, Some(userId), petId, petName)
     }
 
   def mapWithNOfUserNSubscriptionGen(
