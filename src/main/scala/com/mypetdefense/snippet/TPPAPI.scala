@@ -471,7 +471,7 @@ object TPPApi extends RestHelper with Loggable {
       } yield {
         val actionLog = SystemCanceledAccount(
           user.userId.get,
-          0L,
+          None,
           user.subscription.obj.map(_.subscriptionId.get).openOr(0L)
         )
         ParentService.removeParent(user, actionLog, fullDelete = true)

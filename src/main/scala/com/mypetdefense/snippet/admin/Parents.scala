@@ -181,7 +181,7 @@ class Parents extends Loggable {
       } yield {
         val actionReport = SupportAddedPet(
           possibleParent.map(_.userId.get).openOrThrowException("No Parent Id"),
-          SecurityContext.currentUserId,
+          Some(SecurityContext.currentUserId),
           0L,
           petName
         )
@@ -217,7 +217,7 @@ class Parents extends Loggable {
   def deletePet(parent: Box[User], pet: Pet, renderer: IdMemoizeTransform)(): JsCmd = {
     val actionLog = SupportRemovedPet(
       parent.map(_.userId.get).openOr(0L),
-      SecurityContext.currentUserId,
+      Some(SecurityContext.currentUserId),
       pet.petId.get,
       pet.name.get
     )
@@ -233,7 +233,7 @@ class Parents extends Loggable {
   def deleteParent(parent: User)(): Alert = {
     val actionLog = SupportCanceledAccount(
       parent.userId.get,
-      SecurityContext.currentUserId,
+      Some(SecurityContext.currentUserId),
       parent.subscription.obj.map(_.subscriptionId.get).openOr(0L)
     )
     ParentService.removeParent(parent, actionLog, true) match {
@@ -250,7 +250,7 @@ class Parents extends Loggable {
     pets.map { pet =>
       val actionLog = SupportRemovedPet(
         parent.userId.get,
-        SecurityContext.currentUserId,
+        Some(SecurityContext.currentUserId),
         pet.petId.get,
         pet.name.get
       )
@@ -260,7 +260,7 @@ class Parents extends Loggable {
 
     val actionLog = SupportCanceledAccount(
       parent.userId.get,
-      SecurityContext.currentUserId,
+      Some(SecurityContext.currentUserId),
       parent.subscription.obj.map(_.subscriptionId.get).openOr(0L)
     )
 
@@ -778,7 +778,7 @@ class Parents extends Loggable {
 
       ".action-date *" #> dateTimeFormat.format(Date.from(action.timestamp)) &
       ".action-subtype *" #> SplitTitleCase(action.actionSubtype.toString) &
-      ".performed-by *" #> User.find(By(User.userId, action.userId)).map(_.name) &
+      ".performed-by *" #> User.find(By(User.userId, action.userId.getOrElse(0L))).map(_.name) &
       ".details *" #> actionDetails
     }
   }

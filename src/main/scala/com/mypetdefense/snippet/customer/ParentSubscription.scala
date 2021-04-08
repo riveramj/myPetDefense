@@ -1,12 +1,8 @@
 package com.mypetdefense.snippet.customer
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
-import java.util.Date
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import com.mypetdefense.model.domain.action.CustomerAction.CustomerCanceledAccount
-import com.mypetdefense.model.domain.action.SystemAction.SystemRemovedPet
+import com.mypetdefense.model.domain.action.CustomerAction.{CustomerCanceledAccount, CustomerRemovedPet}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.DateHelper.nowDate
@@ -20,6 +16,9 @@ import net.liftweb.http.js._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
+import java.text.SimpleDateFormat
+import java.time.{LocalDate, ZoneId}
+import java.util.Date
 import scala.xml.NodeSeq
 
 object ParentSubscription extends Loggable {
@@ -136,9 +135,9 @@ class ParentSubscription extends Loggable {
     val pets: List[Pet] = user.map(_.pets.toList).openOr(Nil)
 
     pets.map { pet =>
-      val actionLog = SystemRemovedPet(
+      val actionLog = CustomerRemovedPet(
         SecurityContext.currentUserId,
-        0L,
+        Some(SecurityContext.currentUserId),
         pet.petId.get,
         pet.name.get
       )
@@ -148,7 +147,7 @@ class ParentSubscription extends Loggable {
 
     val actionLog = CustomerCanceledAccount(
       user.map(_.userId.get).openOr(0L),
-      user.map(_.userId.get).openOr(0L),
+      user.map(_.userId.get),
       user.flatMap(_.subscription.obj.map(_.subscriptionId.get)).openOr(0L)
     )
 

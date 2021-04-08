@@ -9,7 +9,7 @@ sealed trait Action extends Product with Serializable {
   val actionType: ActionType
   val actionSubtype: ActionSubtype
   val actionId: Option[Long]
-  val userId: Long
+  val userId: Option[Long]
   val parentId: Long
   val timestamp: Instant
   def details: Action.Details
@@ -61,7 +61,7 @@ object CustomerAction {
 
   final case class CustomerAddedPet(
                                      parentId: Long,
-                                     userId: Long,
+                                     userId: Option[Long],
                                      petId: Long,
                                      petName: String,
                                      actionId: Option[Long] = None,
@@ -76,7 +76,7 @@ object CustomerAction {
 
   final case class CustomerRemovedPet(
                                        parentId: Long,
-                                       userId: Long,
+                                       userId: Option[Long],
                                        petId: Long,
                                        petName: String,
                                        actionId: Option[Long] = None,
@@ -91,7 +91,7 @@ object CustomerAction {
 
   final case class CustomerCanceledAccount(
                                        parentId: Long,
-                                       userId: Long,
+                                       userId: Option[Long],
                                        subscriptionId: Long,
                                        actionId: Option[Long] = None,
                                        timestamp: Instant = nowMillisAsInstant()
@@ -148,7 +148,7 @@ object SupportAction {
 
   final case class SupportAddedPet(
                                     parentId: Long,
-                                    userId: Long,
+                                    userId: Option[Long],
                                     petId: Long,
                                     petName: String,
                                     actionId: Option[Long] = None,
@@ -163,7 +163,7 @@ object SupportAction {
 
   final case class SupportRemovedPet(
                                       parentId: Long,
-                                      userId: Long,
+                                      userId: Option[Long],
                                       petId: Long,
                                       petName: String,
                                       actionId: Option[Long] = None,
@@ -178,7 +178,7 @@ object SupportAction {
 
   final case class SupportCanceledAccount(
                                       parentId: Long,
-                                      userId: Long,
+                                      userId: Option[Long],
                                       subscriptionId: Long,
                                       actionId: Option[Long] = None,
                                       timestamp: Instant = nowMillisAsInstant()
@@ -214,7 +214,7 @@ object SystemAction {
 
   final case class SystemRemovedPet(
                                      parentId: Long,
-                                     userId: Long,
+                                     userId: Option[Long],
                                      petId: Long,
                                      petName: String,
                                      actionId: Option[Long] = None,
@@ -229,7 +229,7 @@ object SystemAction {
 
   final case class SystemCanceledAccount(
                                            parentId: Long,
-                                           userId: Long,
+                                           userId: Option[Long],
                                            subscriptionId: Long,
                                            actionId: Option[Long] = None,
                                            timestamp: Instant = nowMillisAsInstant()
@@ -255,7 +255,7 @@ private final case class ParsedLog(
     actionType: ActionType,
     actionSubtype: ActionSubtype,
     actionId: Long,
-    userId: Long,
+    userId: Option[Long],
     parentId: Long,
     timestamp: Instant,
     longDetails: Map[String, Long],
@@ -269,7 +269,7 @@ private object ParsedLog {
       stringDetails: List[ActionLogDetails]
   ): ParsedLog = {
     val actionId   = actionLog.id.get
-    val userId     = actionLog.user.get
+    val userId     = Some(actionLog.user.get)
     val parentId   = actionLog.parent.get
     val timestamp  = actionLog.timestamp.get.toInstant
     val actionType = ActionType.fromString(actionLog.actionType.get)

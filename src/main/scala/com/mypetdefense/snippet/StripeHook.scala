@@ -34,7 +34,7 @@ trait StripeHook extends RestHelper with Loggable {
       pets.map { pet =>
         val actionLog = SystemRemovedPet(
           SecurityContext.currentUserId,
-          0L,
+          None,
           pet.petId.get,
           pet.name.get
         )
@@ -44,7 +44,7 @@ trait StripeHook extends RestHelper with Loggable {
 
       val actionLog = SystemCanceledAccount(
         parent.userId.get,
-        0L,
+        None,
         parent.subscription.obj.map(_.subscriptionId.get).openOr(0L)
       )
 

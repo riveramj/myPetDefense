@@ -15,6 +15,9 @@ class ActionLog extends LongKeyedMapper[ActionLog] with IdPK with OneToMany[Long
   object timestamp extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
+  object createdAt extends MappedDateTime(this) {
+    override def defaultValue = new Date()
+  }
 }
 
 object ActionLog extends ActionLog with LongKeyedMetaMapper[ActionLog]

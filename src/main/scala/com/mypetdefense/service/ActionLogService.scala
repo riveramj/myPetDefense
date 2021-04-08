@@ -13,7 +13,7 @@ object ActionLogService {
       ActionLog.create
         .actionType(action.actionType.toString)
         .actionSubtype(action.actionSubtype.toString)
-        .user(action.userId)
+        .user(action.userId.getOrElse(0L))
         .parent(action.parentId)
         .timestamp(Date.from(action.timestamp))
         .saveMe()

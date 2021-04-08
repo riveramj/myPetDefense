@@ -88,7 +88,7 @@ class PetsAndProducts extends Loggable {
       } yield {
         val actionLog = CustomerAddedPet(
           SecurityContext.currentUserId,
-          SecurityContext.currentUserId,
+          Some(SecurityContext.currentUserId),
           0L,
           newPetName
         )
@@ -120,7 +120,7 @@ class PetsAndProducts extends Loggable {
   def deletePet(pet: Box[Pet])(): Alert = {
     val actionLog = CustomerRemovedPet(
       SecurityContext.currentUserId,
-      SecurityContext.currentUserId,
+      Some(SecurityContext.currentUserId),
       pet.map(_.petId.get).openOr(0),
       pet.map(_.name.get).openOr("-")
     )
