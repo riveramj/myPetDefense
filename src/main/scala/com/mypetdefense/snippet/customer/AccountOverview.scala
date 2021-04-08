@@ -24,7 +24,6 @@ object AccountOverview extends Loggable {
 class AccountOverview extends Loggable {
   val oldUser: Box[User]              = currentUser
   val user: Box[User]                 = currentUser.map(_.reload)
-  val pets: Seq[Pet]                  = user.map(_.activePets).openOr(Nil)
   val subscription: Box[Subscription] = user.flatMap(_.subscription).map(_.reload)
   val priceCode: String               = subscription.map(_.priceCode.get).getOrElse("")
 
@@ -78,46 +77,48 @@ class AccountOverview extends Loggable {
     "#page-body-container" #> {
       user.map { parent =>
         val nextShipDate = subscription.map(_.nextShipDate.get)
-        val boxes        = subscription.map(_.subscriptionBoxes.toList).openOr(Nil)
+        val upgradedSubscription = subscription.map(_.isUpgraded.get).openOr(false)
+        val boxes = subscription.map(_.subscriptionBoxes.toList.filter(_.status.get == Status.Active)).openOr(Nil)
 
         val petBindings = {
           ".pet" #> boxes.map { box =>
             val pet     = box.pet.obj
             val product = box.fleaTick.obj
-            val price = if (SubscriptionBox.possiblePrice(box) == 0d) {
+            val possiblePrice = SubscriptionBox.possiblePrice(box, upgradedSubscription)
+            val price = if (possiblePrice == 0d) {
               product.flatMap { item => Price.getPricesByCode(item, priceCode).map(_.price.get) }
                 .openOr(0d)
             } else {
-              SubscriptionBox.possiblePrice(box)
+              possiblePrice
             }
 
             ".pet-name *" #> pet.map(_.name.get) &
-              ".pet-product *" #> product.map(_.name.get) &
-              ".pet-size *" #> product.map(_.getSizeAndSizeName) &
-              ".price *" #> f"$$$price%2.2f"
+            ".pet-product *" #> product.map(_.name.get) &
+            ".pet-size *" #> product.map(_.getSizeAndSizeName) &
+            ".price *" #> f"$$$price%2.2f"
           }
         }
 
         "#upcoming-order a [class+]" #> "current" &
-          "#user-email *" #> parent.email &
-          ".next-ship-date *" #> nextShipDate.map(dateFormat.format) &
-          ".status *" #> subscription.map(_.status.get.toString) &
-          ".next-bill-date *" #> nextBillDate.map(dateFormat.format) &
-          "#user-address" #> shippingAddress.map { address =>
-            "#name *" #> parent.name &
-              "#address-one *" #> address.street1.get &
-              "#address-two *" #> ClearNodesIf(address.street2.get == "") &
-              "#address-two *" #> address.street2.get &
-              "#city *" #> address.city.get &
-              "#state *" #> address.state.get &
-              "#zip *" #> address.zip.get
-          } &
-          petBindings &
-          ".subtotal *" #> f"$$$productSubtotal%2.2f" &
-          ".discount *" #> discountAmount &
-          ".tax-charge" #> ClearNodesIf(taxDue == 0d) &
-          ".tax-charge .tax *" #> f"$taxDue%2.2f" &
-          ".total *" #> f"$$$totalDue%2.2f"
+        "#user-email *" #> parent.email &
+        ".next-ship-date *" #> nextShipDate.map(dateFormat.format) &
+        ".status *" #> subscription.map(_.status.get.toString) &
+        ".next-bill-date *" #> nextBillDate.map(dateFormat.format) &
+        "#user-address" #> shippingAddress.map { address =>
+          "#name *" #> parent.name &
+          "#address-one *" #> address.street1.get &
+          "#address-two *" #> ClearNodesIf(address.street2.get == "") &
+          "#address-two *" #> address.street2.get &
+          "#city *" #> address.city.get &
+          "#state *" #> address.state.get &
+          "#zip *" #> address.zip.get
+        } &
+        petBindings &
+        ".subtotal *" #> f"$$$productSubtotal%2.2f" &
+        ".discount *" #> discountAmount &
+        ".tax-charge" #> ClearNodesIf(taxDue == 0d) &
+        ".tax-charge .tax *" #> f"$taxDue%2.2f" &
+        ".total *" #> f"$$$totalDue%2.2f"
       }
     }
   }

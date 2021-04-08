@@ -8,6 +8,11 @@ window.myPetDefenseSite =
       fieldSelector: fieldSelector,
       error: error
 
+  errorMessage: (fieldSelector, error) ->
+    myPetDefenseSite.event 'error-message',
+      fieldSelector: fieldSelector,
+      error: error
+
 # Alias setTimeout. nextTick is so we're clear when we're using a
 # setTimeout just to delay an operation one tick.
 window.myPetDefenseSite.nextTick = (fn) -> setTimeout fn
@@ -18,6 +23,9 @@ $(document).on 'form-validation-error', (event) ->
 
   $target.addClass "error"
   $targetContainer.append $("<div />").addClass("validation-error").text(event.error)
+
+$(document).on 'error-message', (event) ->
+  $(event.fieldSelector).text(event.error)
 
 $(document).on 'testimonial-sent', (event) ->
   $('.testimonial-sent').removeClass("hidden")

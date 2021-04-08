@@ -1,9 +1,9 @@
 package com.mypetdefense.snippet
 
 import java.util.Date
-
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.SystemAction.SystemCanceledAccount
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
 import com.mypetdefense.util.DateHelper.tomorrowStart
 import com.mypetdefense.util.StripeHelper._
@@ -469,7 +469,12 @@ object TPPApi extends RestHelper with Loggable {
                  User
                ]) ?~! s"User not found: $sanitizedEmail." ~> 404
       } yield {
-        ParentService.removeParent(user, fullDelete = true)
+        val actionLog = SystemCanceledAccount(
+          user.userId.get,
+          None,
+          user.subscription.obj.map(_.subscriptionId.get).openOr(0L)
+        )
+        ParentService.removeParent(user, actionLog, fullDelete = true)
         OkResponse()
       }
   }

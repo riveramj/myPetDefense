@@ -15,6 +15,7 @@
       Please take a moment to fill out the following information.
     </h2>
     <input type="hidden" id="stripe-token">
+    <input type="hidden" id="ip-address">
     <div id="left-column">
       <fieldset id="account-container">
         <legend>Create your account</legend>
@@ -91,13 +92,12 @@
       <fieldset class="billing-info">
         <legend>Billing Info</legend>
         <div class="billing-container">
+          <!-- Used to display form errors -->
+          <div id="card-errors" role="alert"></div>
           <div class="form-row">
             <div id="card-element">
               <!-- a Stripe Element will be inserted here. -->
             </div>
-
-            <!-- Used to display form errors -->
-            <div id="card-errors" role="alert"></div>
           </div>
         </div>
       </fieldset>
@@ -107,8 +107,8 @@
           <h2>Order Summary</h2>
         </div>
         <ul id="order-details">
+          <li id="ip-address-error"></li>
           <li id="subtotal">Subtotal <span>$1.99</span></li>
-          <li id="discount">Discount <span>$0.02</span></li>
           <li id="promotion">FIrst Month Promotion <span>$1.98</span></li>
           <li id="tax">GA Sales Tax <span>$0.04</span></li>
           <li id="monthly-total">Monthly Total <span>$11.99</span></li>

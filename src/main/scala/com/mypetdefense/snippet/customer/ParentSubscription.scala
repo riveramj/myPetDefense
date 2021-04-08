@@ -1,11 +1,8 @@
 package com.mypetdefense.snippet.customer
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
-import java.util.Date
-
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.CustomerAction.{CustomerCanceledAccount, CustomerRemovedPet}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.DateHelper.nowDate
@@ -19,6 +16,9 @@ import net.liftweb.http.js._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
+import java.text.SimpleDateFormat
+import java.time.{LocalDate, ZoneId}
+import java.util.Date
 import scala.xml.NodeSeq
 
 object ParentSubscription extends Loggable {
@@ -134,9 +134,24 @@ class ParentSubscription extends Loggable {
   def cancelUserAccount(): Nothing = {
     val pets: List[Pet] = user.map(_.pets.toList).openOr(Nil)
 
-    pets.map(ParentService.removePet(user, _))
+    pets.map { pet =>
+      val actionLog = CustomerRemovedPet(
+        SecurityContext.currentUserId,
+        Some(SecurityContext.currentUserId),
+        pet.petId.get,
+        pet.name.get
+      )
 
-    user.map(ParentService.removeParent(_))
+      ParentService.removePet(user, pet, actionLog)
+    }
+
+    val actionLog = CustomerCanceledAccount(
+      user.map(_.userId.get).openOr(0L),
+      user.map(_.userId.get),
+      user.flatMap(_.subscription.obj.map(_.subscriptionId.get)).openOr(0L)
+    )
+
+    user.map( parent => ParentService.removeParent(parent, actionLog))
 
     user.map { parent => EmailActor ! ParentCancelledAccountEmail(parent) }
 
@@ -347,11 +362,10 @@ class ParentSubscription extends Loggable {
     var additionalComments = ""
 
     val cancelReasons = List(
-      "I use a chewable pill.",
-      "I don't use flea and tick at all.",
-      "My vet said I don't need this.",
-      "I like my current product more.",
-      "Other."
+      "The price was a bit steep for me.",
+      "The contents of the box were not what I need.",
+      "My pet is no longer with me.",
+      "Other. (We would love to know why below.)"
     )
 
     def submitSurvey() = {

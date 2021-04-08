@@ -204,7 +204,8 @@ object DataLoader extends Loggable {
         None,
         None,
         mpdAgency,
-        UserType.Admin
+        UserType.Admin,
+        ""
       )
     }
   }
@@ -228,15 +229,15 @@ object DataLoader extends Loggable {
 
   def createProducts: Any = {
     if (Product.hipAndJoint.isEmpty) {
-      Product.createNewProduct("Hip & Joint Chews", "hipJointChews")
-      Product.createNewProduct("Calming Chews", "calmingChews")
-      Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews")
-      Product.createNewProduct("Dental Powder", "dentalPowder")
+      Product.createNewProduct("Hip & Joint Chews", "hipJointChews", true)
+      Product.createNewProduct("Calming Chews", "calmingChews", true)
+      Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews", true)
+      Product.createNewProduct("Dental Powder", "dentalPowder", true)
     }
 
     if (Product.skinAndCoat.isEmpty) {
-      Product.createNewProduct("Skin and Coat Chews", "skinAndCoatChews")
-      Product.createNewProduct("Probiotic Chews", "probioticChews")
+      Product.createNewProduct("Skin and Coat Chews", "skinAndCoatChews", true)
+      Product.createNewProduct("Probiotic Chews", "probioticChews", true)
     }
   }
 
@@ -536,8 +537,8 @@ object DataLoader extends Loggable {
 
   def subscriptionBoxCheck(): Unit = {
     if (Product.dentalPowderSmall.isEmpty) {
-      Product.createNewProduct("Dental Powder Small", "dentalPowderSmall")
-      Product.createNewProduct("Dental Powder Large", "dentalPowderLarge")
+      Product.createNewProduct("Dental Powder Small", "dentalPowderSmall", false)
+      Product.createNewProduct("Dental Powder Large", "dentalPowderLarge" , false)
     }
 
     val products = List(
@@ -581,5 +582,46 @@ object DataLoader extends Loggable {
           .userModified(false)
           .saveMe()
     }
+  }
+
+  def cancelBoxesForCancelledPets(): Seq[SubscriptionBox] = {
+    for {
+      pet <- Pet.findAll(By(Pet.status, Status.Cancelled))
+      box <- pet.box.obj
+    } yield {
+      box.status(Status.Cancelled).saveMe()
+    }
+  }
+ 
+  def createEmailReports(): List[EmailReport] = {
+    if (EmailReport.findAll().isEmpty) {
+      val emailReports = List(
+        ("Daily TPP Agent Sales Report", "Daily email that shows sales by agent an store by day", ReportType.DailyTPPAgentSalesReportEmail),
+        ("Daily MPD report", "Daily email that shows shipment statistics from previous day", ReportType.DailyInternalReportEmail),
+        ("New Sale Email", "Instant email for every MPD.com sale.", ReportType.NewSaleEmail),
+        ("New Upgrade Email", "Instant email for every upgrade to the H&W box.", ReportType.UpgradeSubscriptionEmail),
+        ("Monthly TPP Agent Report", "Monthly email that shows sales by agent and store for the month", ReportType.MonthlyTPPAgentSalesReportEmail)
+      )
+
+      for {
+        report <- emailReports
+      } yield {
+        EmailReport.createNewEmailReport(report._1, report._2, report._3)
+      }
+    } else Nil
+  }
+
+  def addMonthlyTPPAgentReport() = {
+    if (EmailReport.find(By(EmailReport.reportType, ReportType.MonthlyTPPAgentSalesReportEmail)).isEmpty)
+      EmailReport.createNewEmailReport(
+        "Monthly TPP Agent Report",
+        "Monthly email that shows sales by agent and store for the month",
+        ReportType.MonthlyTPPAgentSalesReportEmail
+      )
+  }
+
+  def markSupplements: Seq[Product] = {
+    Product.findAll(NotLike(Product.name, "%Dental Powder%")).map(_.isSupplement(true).saveMe())
+    Product.findAll(Like(Product.name, "%Dental Powder%")).map(_.isSupplement(false).saveMe())
   }
 }
