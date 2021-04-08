@@ -30,7 +30,7 @@ final case class SubscriptionRetentionForPeriod(
     }
 
   def toCsvRow(periodsCount: Int) =
-    s"$period,${shipmentPercentages.mkString(",")}${"," * (periodsCount - shipmentCounts.length)}"
+    s"$period,${shipmentPercentages.map(_+"%").mkString(",")}${"," * (periodsCount - shipmentCounts.length)}"
 
   def toJson: JObject =
     (("period"                 -> period.toJson)
