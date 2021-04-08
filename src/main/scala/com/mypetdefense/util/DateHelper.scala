@@ -3,6 +3,7 @@ package com.mypetdefense.util
 import java.text.SimpleDateFormat
 import java.time._
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit.MILLIS
 import java.util.{Date, Locale}
 
 import net.liftweb.util.Helpers.tryo
@@ -10,6 +11,8 @@ import net.liftweb.util.Helpers.tryo
 object DateHelper {
   val dateFormat     = new SimpleDateFormat("MM/dd/yyyy")
   val zoneId: ZoneId = ZoneId.of("America/New_York")
+
+  def nowMillisAsInstant(): Instant = Instant.now().truncatedTo(MILLIS)
 
   def currentDate: LocalDateTime     = LocalDateTime.now()
   def now: LocalDate                 = LocalDate.now(zoneId)
