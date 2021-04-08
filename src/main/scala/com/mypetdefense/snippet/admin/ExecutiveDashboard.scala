@@ -33,9 +33,18 @@ object ExecutiveDashboard extends Loggable {
   ) / "admin" / "executive-dashboard" / "executive-snapshot.csv" >>
     mpdAdmin >>
     loggedIn >>
-    EarlyResponse(exportexecutiveSnapshot _)
+    EarlyResponse(exportExecutiveSnapshot _)
 
-  def exportexecutiveSnapshot: Box[LiftResponse] = ReportingService.executiveSnapshot
+  def exportExecutiveSnapshot: Box[LiftResponse] = ReportingService.executiveSnapshot
+
+  val retentionSnapshotExportMenu: Menu.Menuable = Menu.i(
+    "Export Retention Snapshot"
+  ) / "admin" / "executive-dashboard" / "retention-snapshot.csv" >>
+    mpdAdmin >>
+    loggedIn >>
+    EarlyResponse(retentionExecutiveSnapshot _)
+
+  def retentionExecutiveSnapshot: Box[LiftResponse] = ReportingService.subscriptionRetentionCsv()
 }
 
 class ExecutiveDashboard extends Loggable {
@@ -97,6 +106,7 @@ class ExecutiveDashboard extends Loggable {
       ".executive-dashboard [class+]" #> "current" &
       ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
       ".executive-snapshot .executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
+      ".retention-snapshot .retention-snapshot-export [href]" #> ExecutiveDashboard.retentionSnapshotExportMenu.loc.calcDefaultHref &
       ".mtd-shipments .count *" #> numberFormatter.format(mtdShipmentsData.numberOfShipments) &
       ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentsData.totalAmount.toDouble) &
       ".today-shipments .count *" #> numberFormatter.format(todayShipmentsData.numberOfShipments) &
