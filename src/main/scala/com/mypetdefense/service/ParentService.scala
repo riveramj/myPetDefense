@@ -1,10 +1,10 @@
 package com.mypetdefense.service
 
-import java.time.{LocalDate, Period, ZoneId}
-import java.util.Date
-
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.Action
+import com.mypetdefense.model.domain.action.CustomerAction.CustomerAddedPet
+import com.mypetdefense.model.domain.action.SupportAction.SupportAddedPet
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.shipstation.Order
 import com.mypetdefense.snippet.TPPApi
@@ -14,6 +14,9 @@ import net.liftweb.common._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
+
+import java.time.{LocalDate, Period, ZoneId}
+import java.util.Date
 
 object ParentService extends LoggableBoxLogging {
   val whelpDateFormat                  = new java.text.SimpleDateFormat("M/d/y")
@@ -73,7 +76,7 @@ object ParentService extends LoggableBoxLogging {
     openShipments.map(ShipStationService.cancelShipstationOrder)
   }
 
-  def removeParent(oldUser: User, fullDelete: Boolean = false): Box[Any] = {
+  def removeParent(oldUser: User, actionLog: Action, fullDelete: Boolean = false): Box[Any] = {
     val user             = oldUser.reload
     val stripeCustomerId = user.stripeId.get
 
@@ -100,6 +103,8 @@ object ParentService extends LoggableBoxLogging {
           }
           addresses.map(_.delete_!)
           subscription.map(_.delete_!)
+          ActionLogService.logAction(actionLog)
+
           Full {
             user.pets.toList.map(_.delete_!)
             user.delete_!
@@ -108,14 +113,19 @@ object ParentService extends LoggableBoxLogging {
           user.cancel
           paidOpenShipments.map(shipment => refundShipment(shipment, Full(user)))
           addresses.map(_.cancel)
+          ActionLogService.logAction(actionLog)
+
           subscription.map(_.cancel)
         }
+
 
       case _ =>
         user.cancel
         paidOpenShipments.map(shipment => refundShipment(shipment, Full(user)))
         addresses.map(_.cancel)
         subscription.map(_.cancel)
+
+        ActionLogService.logAction(actionLog)
 
         Empty
     }
@@ -287,14 +297,15 @@ object ParentService extends LoggableBoxLogging {
   }
 
   def addNewPet(
-      oldUser: User,
-      name: String,
-      animalType: AnimalType.Value,
-      size: AnimalSize.Value,
-      product: FleaTick,
-      isUpgraded: Boolean,
-      breed: String = "",
-      birthday: String = ""
+                 oldUser: User,
+                 name: String,
+                 animalType: AnimalType.Value,
+                 size: AnimalSize.Value,
+                 product: FleaTick,
+                 isUpgraded: Boolean,
+                 actionLog: Either[CustomerAddedPet,SupportAddedPet],
+                 breed: String = "",
+                 birthday: String = ""
   ): Box[Pet] = {
 
     val possibleBirthday = parseWhelpDate(birthday)
@@ -307,6 +318,12 @@ object ParentService extends LoggableBoxLogging {
       whelpDate = possibleBirthday,
       breed = breed
     )
+    val updatedActionLog = actionLog match {
+      case Left(customerAddedPet) =>
+        customerAddedPet.copy(petId = newPet.petId.get)
+      case Right(supportAddedPet) =>
+        supportAddedPet.copy(petId = newPet.petId.get)
+    }
 
     oldUser.subscription.obj.map { subscription =>
       val box = SubscriptionBox.createNewBox(subscription, newPet, isUpgraded)
@@ -320,7 +337,9 @@ object ParentService extends LoggableBoxLogging {
     val updatedSubscription = updateStripeSubscriptionTotal(oldUser)
 
     updatedSubscription match {
-      case Full(_) => Full(newPet)
+      case Full(_) =>
+        ActionLogService.logAction(updatedActionLog)
+        Full(newPet)
       case _       => Empty
     }
   }
@@ -350,17 +369,17 @@ object ParentService extends LoggableBoxLogging {
     ).logEmptyBox("update stripe subscription total failed")
   }
 
-  def removePet(oldUser: Box[User], pet: Pet): Box[Pet] = {
-    oldUser.flatMap(user => removePet(user, pet))
+  def removePet(oldUser: Box[User], pet: Pet, actionLog: Action): Box[Pet] = {
+    oldUser.flatMap(user => removePet(user, pet, actionLog))
   }
 
-  def removePet(oldUser: Box[User], oldPet: Box[Pet]): Box[Pet] =
+  def removePet(oldUser: Box[User], oldPet: Box[Pet], actionLog: Action): Box[Pet] =
     (for {
       user <- oldUser
       pet  <- oldPet
-    } yield removePet(user, pet)).flatten
+    } yield removePet(user, pet, actionLog)).flatten
 
-  def removePet(oldUser: User, oldPet: Pet): Box[Pet] = {
+  def removePet(oldUser: User, oldPet: Pet, actionLog: Action): Box[Pet] = {
     val refreshedPet = Pet.find(By(Pet.petId, oldPet.petId.get))
     val updatedPet   = refreshedPet.map(_.status(Status.Cancelled).saveMe)
 
@@ -381,6 +400,8 @@ object ParentService extends LoggableBoxLogging {
           val subscription = updatedUser.subscription.obj
           subscription.map(_.status(Status.UserSuspended).saveMe)
         }
+
+        ActionLogService.logAction(actionLog)
 
         updatedPet
 
