@@ -77,5 +77,5 @@ case class CountedByAgency(agencyName: String, count: Int) {
 
 object ExecutiveSnapshotReport {
   implicit val toCsvStringConverter: ToCsvStringConverter[ExecutiveSnapshotReport] =
-    (input: ExecutiveSnapshotReport) => input.toCsv
+    ToCsvStringConverter.fromFunction(_.toCsv)
 }

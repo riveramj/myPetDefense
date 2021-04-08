@@ -1,5 +1,6 @@
 package com.mypetdefense.service
 
+import java.time.LocalDate
 import java.util.Date
 
 import com.mypetdefense.generator.Generator._
@@ -13,6 +14,8 @@ import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.util.CalculationHelper
+import com.mypetdefense.util.RandomIdGenerator.generateLongId
+import net.liftweb.common.{Empty, Full}
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class ReportingServiceSpec extends DBTest {
@@ -591,6 +594,88 @@ class ReportingServiceSpec extends DBTest {
 
       cleanUpSuccess()
     }
+  }
+
+  it should "count shipments in period" in {
+    val subs = List(
+      makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 3),
+      makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 2),
+      makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 1)
+    )
+
+    val period = RetentionPeriod(10, 2020)
+
+    ReportingService.shipmentCountsForPeriod(subs, period, shipmentsCount = 3) mustBe List(3, 2, 1)
+  }
+
+  it should "select proper periods and create a retention report" in {
+    makeUserSubAndNShipments(LocalDate.of(2020, 9, 5), 4)
+    makeUserSubAndNShipments(LocalDate.of(2020, 9, 5), 4)
+    makeUserSubAndNShipments(LocalDate.of(2020, 9, 5), 3)
+    makeUserSubAndNShipments(LocalDate.of(2020, 9, 5), 2)
+    makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 3)
+    makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 3)
+    makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 2)
+    makeUserSubAndNShipments(LocalDate.of(2020, 11, 5), 2)
+    makeUserSubAndNShipments(LocalDate.of(2020, 11, 5), 2)
+    makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1)
+    makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1)
+
+    val lastPeriod = RetentionPeriod(12, 2020)
+
+    ReportingService.subscriptionRetentionReport(lastPeriod, periodsCount = 3) mustBe
+      SubscriptionRetentionReport(
+        List(
+          SubscriptionRetentionForPeriod(RetentionPeriod(10, 2020), List(3, 3, 2)),
+          SubscriptionRetentionForPeriod(RetentionPeriod(11, 2020), List(2, 2)),
+          SubscriptionRetentionForPeriod(RetentionPeriod(12, 2020), List(2))
+        )
+      )
+  }
+
+  private def makeUserSubAndNShipments(startDate: LocalDate, n: Int): Subscription = {
+    val user = User.createNewUser(
+      firstName = "John",
+      lastName = "Doe",
+      stripeId = "cus_1234",
+      email = "john@example.com",
+      password = "1234",
+      phone = "123456789",
+      coupon = Empty,
+      referer = Empty,
+      agency = Empty,
+      UserType.Agent,
+      ""
+    )
+
+    val start = startDate.atStartOfDay(zoneId)
+
+    val sub = Subscription.createNewSubscription(
+      Full(user),
+      stripeSubscriptionId = "sub_1234",
+      startDate = Date.from(start.toInstant),
+      nextShipDate = Date.from(start.plusDays(5).toInstant)
+    )
+
+    (0 until n).reverse foreach { i =>
+      val dateProcessed    = start.minusMonths(i)
+      val expectedShipDate = dateProcessed.plusDays(5)
+
+      Shipment.create
+        .shipmentId(generateLongId)
+        .stripePaymentId("pay_1234")
+        .stripeChargeId("")
+        .subscription(sub)
+        .expectedShipDate(Date.from(expectedShipDate.toInstant))
+        .dateProcessed(Date.from(dateProcessed.toInstant))
+        .amountPaid("10.00")
+        .taxPaid("2.00")
+        .shipmentStatus(ShipmentStatus.Paid)
+        .freeUpgradeSample(false)
+        .saveMe
+    }
+
+    sub.reload
   }
 
 }
