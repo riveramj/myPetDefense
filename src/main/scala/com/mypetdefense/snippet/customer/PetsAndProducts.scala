@@ -2,11 +2,11 @@ package com.mypetdefense.snippet.customer
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import com.mypetdefense.model.domain.action.SupportAction.{SupportAddedPet, SupportRemovedPet}
+import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerRemovedPet}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import com.mypetdefense.util.SecurityContext._
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -86,25 +86,24 @@ class PetsAndProducts extends Loggable {
         product <- newPetChosenProduct
         size = product.size.get
       } yield {
+        val actionLog = CustomerAddedPet(
+          SecurityContext.currentUserId,
+          SecurityContext.currentUserId,
+          0L,
+          newPetName
+        )
+
         ParentService.addNewPet(
           oldUser = parent,
           name = newPetName,
           animalType = pet,
           size = size,
           product = product,
-          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false)
+          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
+          actionLog = Left(actionLog)
         )
       }).flatMap(identity) match {
         case Full(pet) =>
-          ActionLogService.logAction(
-            SupportAddedPet(
-              SecurityContext.currentUserId,
-              SecurityContext.currentUserId,
-              pet.petId.get,
-              pet.name.get
-            )
-          )
-
           if (Props.mode != Props.RunModes.Pilot) {
             user.map { parent => EmailActor ! NewPetAddedEmail(parent, pet) }
           }
@@ -119,17 +118,15 @@ class PetsAndProducts extends Loggable {
   }
 
   def deletePet(pet: Box[Pet])(): Alert = {
-    ParentService.removePet(user, pet) match {
-      case Full(_) =>
-        ActionLogService.logAction(
-          SupportRemovedPet(
-            SecurityContext.currentUserId,
-            SecurityContext.currentUserId,
-            pet.map(_.petId.get).openOr(0),
-            pet.map(_.name.get).openOr("-")
-          )
-        )
+    val actionLog = CustomerRemovedPet(
+      SecurityContext.currentUserId,
+      SecurityContext.currentUserId,
+      pet.map(_.petId.get).openOr(0),
+      pet.map(_.name.get).openOr("-")
+    )
 
+    ParentService.removePet(user, pet, actionLog) match {
+      case Full(_) =>
         if (Props.mode != Props.RunModes.Pilot) {
           user.map { parent => pet.map(p => EmailActor ! PetRemovedEmail(parent, p)) }
         }

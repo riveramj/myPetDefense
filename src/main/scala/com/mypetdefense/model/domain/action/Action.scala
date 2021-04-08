@@ -1,9 +1,9 @@
 package com.mypetdefense.model.domain.action
 
-import java.time.Instant
-
 import com.mypetdefense.model.{ActionLog, ActionLogDetails}
 import com.mypetdefense.util.DateHelper.nowMillisAsInstant
+
+import java.time.Instant
 
 sealed trait Action extends Product with Serializable {
   val actionType: ActionType
@@ -56,6 +56,7 @@ object CustomerAction {
     log.actionSubtype match {
       case CustomerActionSubtype.CustomerAddedPet   => CustomerAddedPet(log)
       case CustomerActionSubtype.CustomerRemovedPet => CustomerRemovedPet(log)
+      case CustomerActionSubtype.CustomerCanceledAccount => CustomerCanceledAccount(log)
     }
 
   final case class CustomerAddedPet(
@@ -88,6 +89,19 @@ object CustomerAction {
       )
   }
 
+  final case class CustomerCanceledAccount(
+                                       parentId: Long,
+                                       userId: Long,
+                                       subscriptionId: Long,
+                                       actionId: Option[Long] = None,
+                                       timestamp: Instant = nowMillisAsInstant()
+                                     ) extends CustomerAction(CustomerActionSubtype.CustomerCanceledAccount) {
+    override def details: Action.Details =
+      Action.Details(
+        longDetails = Map("SubscriptionId" -> subscriptionId)
+      )
+  }
+
   object CustomerAddedPet {
     private[action] def apply(log: ParsedLog): CustomerAddedPet =
       CustomerAddedPet(
@@ -111,6 +125,17 @@ object CustomerAction {
         log.timestamp
       )
   }
+
+  object CustomerCanceledAccount {
+    private[action] def apply(log: ParsedLog): CustomerCanceledAccount =
+      CustomerCanceledAccount(
+        log.parentId,
+        log.userId,
+        log.longDetails("SubscriptionId"),
+        Some(log.actionId),
+        log.timestamp
+      )
+  }
 }
 
 object SupportAction {
@@ -118,6 +143,7 @@ object SupportAction {
     log.actionSubtype match {
       case SupportActionSubtype.SupportAddedPet   => SupportAddedPet(log)
       case SupportActionSubtype.SupportRemovedPet => SupportRemovedPet(log)
+      case SupportActionSubtype.SupportCanceledAccount => SupportCanceledAccount(log)
     }
 
   final case class SupportAddedPet(
@@ -150,6 +176,19 @@ object SupportAction {
       )
   }
 
+  final case class SupportCanceledAccount(
+                                      parentId: Long,
+                                      userId: Long,
+                                      subscriptionId: Long,
+                                      actionId: Option[Long] = None,
+                                      timestamp: Instant = nowMillisAsInstant()
+                                    ) extends SupportAction(SupportActionSubtype.SupportCanceledAccount) {
+    override def details: Action.Details =
+      Action.Details(
+        longDetails = Map("SubscriptionId" -> subscriptionId)
+      )
+  }
+
   object SupportAddedPet {
     private[action] def apply(log: ParsedLog): SupportAddedPet =
       SupportAddedPet(log.parentId, log.userId, log.longDetails("PetId"), log.stringDetails("PetName"), Some(log.actionId), log.timestamp)
@@ -159,13 +198,57 @@ object SupportAction {
     private[action] def apply(log: ParsedLog): SupportRemovedPet =
       SupportRemovedPet(log.parentId, log.userId, log.longDetails("PetId"), log.stringDetails("PetName"), Some(log.actionId), log.timestamp)
   }
+
+  object SupportCanceledAccount {
+    private[action] def apply(log: ParsedLog): SupportCanceledAccount =
+      SupportCanceledAccount(log.parentId, log.userId, log.longDetails("SubscriptionId"), Some(log.actionId), log.timestamp)
+  }
 }
 
 object SystemAction {
   private[action] def apply(log: ParsedLog): SystemAction =
-    ???
+    log.actionSubtype match {
+      case SystemActionSubtype.SystemRemovedPet => SystemRemovedPet(log)
+      case SystemActionSubtype.SystemCanceledAccount => SystemCanceledAccount(log)
+    }
 
-  // TODO
+  final case class SystemRemovedPet(
+                                     parentId: Long,
+                                     userId: Long,
+                                     petId: Long,
+                                     petName: String,
+                                     actionId: Option[Long] = None,
+                                     timestamp: Instant = nowMillisAsInstant()
+                                   ) extends SystemAction(SystemActionSubtype.SystemRemovedPet) {
+    override def details: Action.Details =
+      Action.Details(
+        longDetails = Map("PetId" -> petId),
+        stringDetails = Map("PetName" -> petName)
+      )
+  }
+
+  final case class SystemCanceledAccount(
+                                           parentId: Long,
+                                           userId: Long,
+                                           subscriptionId: Long,
+                                           actionId: Option[Long] = None,
+                                           timestamp: Instant = nowMillisAsInstant()
+                                         ) extends SystemAction(SystemActionSubtype.SystemCanceledAccount) {
+    override def details: Action.Details =
+      Action.Details(
+        longDetails = Map("SubscriptionId" -> subscriptionId)
+      )
+  }
+
+  object SystemCanceledAccount {
+    private[action] def apply(log: ParsedLog): SystemCanceledAccount =
+      SystemCanceledAccount(log.parentId, log.userId, log.longDetails("SubscriptionId"), Some(log.actionId), log.timestamp)
+  }
+
+  object SystemRemovedPet {
+    private[action] def apply(log: ParsedLog): SystemRemovedPet =
+      SystemRemovedPet(log.parentId, log.userId, log.longDetails("PetId"), log.stringDetails("PetName"), Some(log.actionId), log.timestamp)
+  }
 }
 
 private final case class ParsedLog(

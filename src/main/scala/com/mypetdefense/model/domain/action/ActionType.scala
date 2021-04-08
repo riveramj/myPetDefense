@@ -16,22 +16,25 @@ sealed trait SupportActionSubtype  extends ActionSubtype
 sealed trait SystemActionSubtype   extends ActionSubtype
 
 object CustomerActionSubtype extends EnumCompanion[CustomerActionSubtype] {
-  case object CustomerAddedPet   extends CustomerActionSubtype
-  case object CustomerRemovedPet extends CustomerActionSubtype
+  case object CustomerAddedPet        extends CustomerActionSubtype
+  case object CustomerRemovedPet      extends CustomerActionSubtype
+  case object CustomerCanceledAccount extends CustomerActionSubtype
 
-  override val values: Set[CustomerActionSubtype] = Set(CustomerAddedPet, CustomerRemovedPet)
+  override val values: Set[CustomerActionSubtype] = Set(CustomerAddedPet, CustomerRemovedPet, CustomerCanceledAccount)
 }
 
 object SupportActionSubtype extends EnumCompanion[SupportActionSubtype] {
-  case object SupportAddedPet   extends SupportActionSubtype
-  case object SupportRemovedPet extends SupportActionSubtype
+  case object SupportAddedPet      extends SupportActionSubtype
+  case object SupportRemovedPet    extends SupportActionSubtype
+  case object SupportCanceledAccount extends SupportActionSubtype
 
-  override val values: Set[SupportActionSubtype] = Set(SupportAddedPet, SupportRemovedPet)
+  override val values: Set[SupportActionSubtype] = Set(SupportAddedPet, SupportRemovedPet, SupportCanceledAccount)
 }
 
 object SystemActionSubtype extends EnumCompanion[SystemActionSubtype] {
-  // TODO
-  override val values: Set[SystemActionSubtype] = Set.empty
+  case object SystemRemovedPet      extends SystemActionSubtype
+  case object SystemCanceledAccount extends SystemActionSubtype
+  override val values: Set[SystemActionSubtype] = Set(SystemRemovedPet, SystemCanceledAccount)
 }
 
 trait EnumCompanion[A] {

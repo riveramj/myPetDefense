@@ -3,9 +3,10 @@ package com.mypetdefense.snippet.customer
 import java.text.SimpleDateFormat
 import java.time.{LocalDate, ZoneId}
 import java.util.Date
-
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.CustomerAction.CustomerCanceledAccount
+import com.mypetdefense.model.domain.action.SystemAction.SystemRemovedPet
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.DateHelper.nowDate
@@ -134,9 +135,24 @@ class ParentSubscription extends Loggable {
   def cancelUserAccount(): Nothing = {
     val pets: List[Pet] = user.map(_.pets.toList).openOr(Nil)
 
-    pets.map(ParentService.removePet(user, _))
+    pets.map { pet =>
+      val actionLog = SystemRemovedPet(
+        SecurityContext.currentUserId,
+        0L,
+        pet.petId.get,
+        pet.name.get
+      )
 
-    user.map(ParentService.removeParent(_))
+      ParentService.removePet(user, pet, actionLog)
+    }
+
+    val actionLog = CustomerCanceledAccount(
+      user.map(_.userId.get).openOr(0L),
+      user.map(_.userId.get).openOr(0L),
+      user.flatMap(_.subscription.obj.map(_.subscriptionId.get)).openOr(0L)
+    )
+
+    user.map( parent => ParentService.removeParent(parent, actionLog))
 
     user.map { parent => EmailActor ! ParentCancelledAccountEmail(parent) }
 

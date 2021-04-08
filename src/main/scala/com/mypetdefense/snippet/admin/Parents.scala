@@ -3,7 +3,7 @@ package admin
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import com.mypetdefense.model.domain.action.SupportAction.{SupportAddedPet, SupportRemovedPet}
+import com.mypetdefense.model.domain.action.SupportAction.{SupportAddedPet, SupportCanceledAccount, SupportRemovedPet}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.util.{ClearNodesIf, SecurityContext, SplitTitleCase}
@@ -179,6 +179,13 @@ class Parents extends Loggable {
         parent  <- possibleParent
         size = product.size.get
       } yield {
+        val actionReport = SupportAddedPet(
+          possibleParent.map(_.userId.get).openOrThrowException("No Parent Id"),
+          SecurityContext.currentUserId,
+          0L,
+          petName
+        )
+
         ParentService.addNewPet(
           oldUser = parent,
           name = petName,
@@ -187,19 +194,11 @@ class Parents extends Loggable {
           product = product,
           isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
           breed = petBreed,
-          birthday = petBirthday
+          birthday = petBirthday,
+          actionLog = Right(actionReport)
         )
       }).flatMap(identity) match {
         case Full(pet) =>
-          ActionLogService.logAction(
-            SupportAddedPet(
-              possibleParent.map(_.userId.get).openOrThrowException("No Parent Id"),
-              SecurityContext.currentUserId,
-              pet.petId.get,
-              pet.name.get
-            )
-          )
-
           petName = ""
           petBreed = ""
           petBirthday = ""
@@ -216,17 +215,15 @@ class Parents extends Loggable {
   }
 
   def deletePet(parent: Box[User], pet: Pet, renderer: IdMemoizeTransform)(): JsCmd = {
-    ParentService.removePet(parent, pet) match {
-      case Full(_) =>
-        ActionLogService.logAction(
-          SupportRemovedPet(
-            parent.map(_.userId.get).openOr(0L),
-            SecurityContext.currentUserId,
-            pet.petId.get,
-            pet.name.get
-          )
-        )
+    val actionLog = SupportRemovedPet(
+      parent.map(_.userId.get).openOr(0L),
+      SecurityContext.currentUserId,
+      pet.petId.get,
+      pet.name.get
+    )
 
+    ParentService.removePet(parent, pet, actionLog) match {
+      case Full(_) =>
         renderer.setHtml
       case _ =>
         Alert("An error has occured. Please try again.")
@@ -234,7 +231,12 @@ class Parents extends Loggable {
   }
 
   def deleteParent(parent: User)(): Alert = {
-    ParentService.removeParent(parent, true) match {
+    val actionLog = SupportCanceledAccount(
+      parent.userId.get,
+      SecurityContext.currentUserId,
+      parent.subscription.obj.map(_.subscriptionId.get).openOr(0L)
+    )
+    ParentService.removeParent(parent, actionLog, true) match {
       case Full(_) =>
         S.redirectTo(Parents.menu.loc.calcDefaultHref)
       case _ =>
@@ -245,9 +247,24 @@ class Parents extends Loggable {
   def cancelParent(parent: User)(): JsCmd = {
     val pets: List[Pet] = parent.pets.toList
 
-    pets.map(ParentService.removePet(parent, _))
+    pets.map { pet =>
+      val actionLog = SupportRemovedPet(
+        parent.userId.get,
+        SecurityContext.currentUserId,
+        pet.petId.get,
+        pet.name.get
+      )
 
-    ParentService.removeParent(parent) match {
+      ParentService.removePet(parent, pet, actionLog)
+    }
+
+    val actionLog = SupportCanceledAccount(
+      parent.userId.get,
+      SecurityContext.currentUserId,
+      parent.subscription.obj.map(_.subscriptionId.get).openOr(0L)
+    )
+
+    ParentService.removeParent(parent, actionLog = actionLog) match {
       case Full(_) =>
         EmailActor ! ParentCancelledAccountEmail(parent)
 

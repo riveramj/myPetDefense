@@ -2,7 +2,9 @@ package com.mypetdefense.snippet
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.SystemAction.{SystemCanceledAccount, SystemRemovedPet}
 import com.mypetdefense.service._
+import com.mypetdefense.util.SecurityContext
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.rest._
@@ -28,9 +30,25 @@ trait StripeHook extends RestHelper with Loggable {
       if subscription.isEmpty
     } yield {
       val pets: List[Pet] = parent.pets.toList
-      pets.map(ParentService.removePet(parent, _))
 
-      ParentService.removeParent(parent)
+      pets.map { pet =>
+        val actionLog = SystemRemovedPet(
+          SecurityContext.currentUserId,
+          0L,
+          pet.petId.get,
+          pet.name.get
+        )
+
+        ParentService.removePet(parent, pet, actionLog)
+      }
+
+      val actionLog = SystemCanceledAccount(
+        parent.userId.get,
+        0L,
+        parent.subscription.obj.map(_.subscriptionId.get).openOr(0L)
+      )
+
+      ParentService.removeParent(parent, actionLog)
       Full(OkResponse())
     }
   }).openOr(Failure("couldnt cancel user in MPD and Stripe"))
