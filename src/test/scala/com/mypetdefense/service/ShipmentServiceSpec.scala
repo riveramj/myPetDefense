@@ -85,7 +85,7 @@ class ShipmentServiceSpec extends DBTest {
       .flatMap(
         setExpShipDateStatusAndShipmentStatus(
           _,
-          anyDayOfThisMonthFromTomorrow.toDate,
+          anyDayOfThisMonthFromTomorrow.getOrElse(firstDayOfNextMonth).toDate,
           ShipmentStatus.Paid,
           Status.Active
         )

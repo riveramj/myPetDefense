@@ -1,7 +1,5 @@
 package com.mypetdefense.service
 
-import java.time._
-
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports
 import com.mypetdefense.model.domain.reports._
@@ -14,6 +12,8 @@ import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
+
+import java.time._
 
 object ReportingService extends Loggable {
 
@@ -578,6 +578,55 @@ object ReportingService extends Loggable {
       newUserCount,
       cancellationsCount
     )
+  }
+
+  def subscriptionRetentionCsv(
+      lastPeriod: RetentionPeriod = RetentionPeriod.current(),
+      periodsCount: Int = 12
+  ): Box[InMemoryResponse] = {
+    val data     = subscriptionRetentionReport(lastPeriod, periodsCount)
+    val fileName = s"subscription-retention-${LocalDate.now()}.csv"
+    CSVHelper.inMemoryCsv(fileName, data)
+  }
+
+  def subscriptionRetentionReport(
+      lastPeriod: RetentionPeriod = RetentionPeriod.current(),
+      periodsCount: Int = 12
+  ): SubscriptionRetentionReport = {
+    val firstPeriod     = lastPeriod - (periodsCount - 1)
+    val afterLastPeriod = lastPeriod.next
+
+    val subs = Subscription.findAll(
+      By_>=(Subscription.startDate, firstPeriod.startDate),
+      By_<(Subscription.startDate, afterLastPeriod.startDate)
+    )
+
+    val periods        = (0 until periodsCount).reverse.map(lastPeriod - _).toList
+    val shipmentCounts = (1 to periodsCount).reverse
+    val retentions =
+      (periods zip shipmentCounts).map {
+        case (p, c) => SubscriptionRetentionForPeriod(p, shipmentCountsForPeriod(subs, p, c))
+      }
+
+    SubscriptionRetentionReport(retentions)
+  }
+
+  private[service] def shipmentCountsForPeriod(
+      subs: List[Subscription],
+      period: RetentionPeriod,
+      shipmentsCount: Int
+  ): List[Int] = {
+    val shipmentCountsByPeriod =
+      subs
+        .filter(s => RetentionPeriod.fromDate(s.startDate.get) == period)
+        .flatMap(_.shipments)
+        .groupBy(s => period - RetentionPeriod.fromDate(s.dateProcessed.get))
+        .mapValues(_.length)
+        .withDefaultValue(0)
+
+    (0 until shipmentsCount)
+      .map(shipmentCountsByPeriod)
+      .toList
   }
 
   private[service] def rawSalesReport(agencyName: String): List[RawSaleDataReport] = {
