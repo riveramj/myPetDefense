@@ -1,7 +1,5 @@
 package com.mypetdefense.service
 
-import java.time._
-
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports
 import com.mypetdefense.model.domain.reports._
@@ -14,6 +12,8 @@ import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
+
+import java.time._
 
 object ReportingService extends Loggable {
 
@@ -597,8 +597,8 @@ object ReportingService extends Loggable {
     val afterLastPeriod = lastPeriod.next
 
     val subs = Subscription.findAll(
-      By_>=(Subscription.createdAt, firstPeriod.startDate),
-      By_<(Subscription.createdAt, afterLastPeriod.startDate)
+      By_>=(Subscription.startDate, firstPeriod.startDate),
+      By_<(Subscription.startDate, afterLastPeriod.startDate)
     )
 
     val periods        = (0 until periodsCount).reverse.map(lastPeriod - _).toList

@@ -641,7 +641,8 @@ class ReportingServiceSpec extends DBTest {
       coupon = Empty,
       referer = Empty,
       agency = Empty,
-      UserType.Agent
+      UserType.Agent,
+      ""
     )
 
     val start = startDate.atStartOfDay(zoneId)
