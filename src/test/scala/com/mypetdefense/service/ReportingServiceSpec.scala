@@ -2,7 +2,6 @@ package com.mypetdefense.service
 
 import java.time.LocalDate
 import java.util.Date
-
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator._
 import com.mypetdefense.helpers.DateUtil._
@@ -16,6 +15,7 @@ import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.util.CalculationHelper
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.{Empty, Full}
+import net.liftweb.util.Props
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class ReportingServiceSpec extends DBTest {
@@ -649,10 +649,12 @@ class ReportingServiceSpec extends DBTest {
     )
 
     val start = startDate.atStartOfDay(zoneId)
+    val hwPriceCode = Props.get("default.price.code").openOr("")
 
     val sub = Subscription.createNewSubscription(
       Full(user),
       stripeSubscriptionId = "sub_1234",
+      priceCode = hwPriceCode,
       startDate = Date.from(start.toInstant),
       nextShipDate = Date.from(start.plusDays(5).toInstant)
     )

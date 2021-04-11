@@ -85,6 +85,6 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
 }
 
 object BoxType extends Enumeration {
-  val basic: BoxType.Value             = Value("Basic")               // 0
+  val basic: BoxType.Value             = Value("Flea & Tick Only")  // 0
   val healthAndWellness: BoxType.Value = Value("Health and Wellness") // 1
 }

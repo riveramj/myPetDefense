@@ -7,11 +7,12 @@ import com.mypetdefense.snippet.admin.AmazonOrderExport
 import com.mypetdefense.util.CalculationHelper._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.ModelSyntax._
-import com.mypetdefense.util.{CSVHelper, CalculationHelper}
+import com.mypetdefense.util.{CSVHelper, CalculationHelper, DateHelper}
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
+import net.liftweb.util.Props
 
 import java.time._
 
@@ -589,16 +590,26 @@ object ReportingService extends Loggable {
     CSVHelper.inMemoryCsv(fileName, data)
   }
 
+  def snapshotInTimeCsv(
+                         date: String
+                       ): Box[InMemoryResponse] = {
+    val data     = snapshotInTimeReport(date)
+    val fileName = s"snapshot-in-time-$date.csv"
+    CSVHelper.inMemoryCsv(fileName, data)
+  }
+
   def subscriptionRetentionReport(
       lastPeriod: RetentionPeriod = RetentionPeriod.current(),
       periodsCount: Int = 12
   ): SubscriptionRetentionReport = {
     val firstPeriod     = lastPeriod - (periodsCount - 1)
     val afterLastPeriod = lastPeriod.next
+    val hwPriceCode = Props.get("default.price.code").openOr("")
 
     val subs = Subscription.findAll(
       By_>=(Subscription.startDate, firstPeriod.startDate),
-      By_<(Subscription.startDate, afterLastPeriod.startDate)
+      By_<(Subscription.startDate, afterLastPeriod.startDate),
+      By(Subscription.priceCode, hwPriceCode)
     )
 
     val periods        = (0 until periodsCount).reverse.map(lastPeriod - _).toList
@@ -883,6 +894,64 @@ object ReportingService extends Loggable {
       currentYearCancelSalesRow,
       currentMonthCancelSalesRow,
       allCancellationRows
+    )
+  }
+
+  private[service] def calculateAgencyStats(agencyName: String, stats: List[StatisticsSnapshot]) = {
+    CountedByAgency(
+      agencyName,
+      stats.map(_.quantity.get).sum
+    )
+  }
+
+  private[service] def calculateStatsByProgram(stats: Iterable[StatisticsSnapshot]) = {
+    stats
+      .groupBy(_.program.get)
+      .map { case (program, stats) =>
+        (program, stats.map(_.quantity.get).sum)
+      }
+      .map { case (program, count) =>
+        val programName = program.toString
+        CountedByProgram(programName, count)
+      }
+  }
+
+  private[service] def snapshotInTimeReport(rawDate: String): SnapshotInTimeReport = {
+    val date = DateHelper.dateFormat.parse(rawDate)
+    val snapshotStatistics = StatisticsSnapshot.findAll(
+      By_>=(StatisticsSnapshot.date, date)
+    )
+
+    val totalPets = snapshotStatistics.map(_.quantity.get).sum
+    val petsByProgram = calculateStatsByProgram(snapshotStatistics)
+
+    val mpdAgency = Agency.mpdAgency
+    val tppAgency = Agency.tppAgency
+
+    val mpdAgencyName = mpdAgency.map(_.name.get).openOr("")
+    val tppAgencyName = tppAgency.map(_.name.get).openOr("")
+
+    val mpdId = mpdAgency.map(_.id.get).openOr(0L)
+    val petsByAgency = snapshotStatistics
+      .partition(_.agency.get == mpdId)
+
+    val mpdStats = petsByAgency._1
+    val tppStats = petsByAgency._2
+
+    val mpdCalculated = calculateAgencyStats(mpdAgencyName, mpdStats)
+    val tppCalculated = calculateAgencyStats(tppAgencyName, tppStats)
+
+    val mpdStatsByProgram = calculateStatsByProgram(mpdStats)
+    val tppStatsByProgram = calculateStatsByProgram(tppStats)
+
+    val mpdStatsByProgramByAgency = CountedByProgramByAgency(mpdAgencyName, mpdStatsByProgram)
+    val tppStatsByProgramByAgency = CountedByProgramByAgency(tppAgencyName, tppStatsByProgram)
+
+    SnapshotInTimeReport(
+      totalPets,
+      petsByProgram,
+      List(mpdCalculated, tppCalculated),
+      List(mpdStatsByProgramByAgency, tppStatsByProgramByAgency)
     )
   }
 
