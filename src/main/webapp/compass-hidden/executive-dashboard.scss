@@ -93,6 +93,12 @@ nav {
       padding: 0 0 10px;
       width: 100%;
 
+      .info {
+        font-weight: normal;
+        font-size: 14px;
+        padding: 4px 0 0 0;
+      }
+
       @media (min-width: $bp-medium) {
         margin-top: 0;
         padding-bottom: 13px;
