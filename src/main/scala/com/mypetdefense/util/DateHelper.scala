@@ -10,6 +10,7 @@ import net.liftweb.util.Helpers.tryo
 
 object DateHelper {
   val dateFormat     = new SimpleDateFormat("MM/dd/yyyy")
+  val dateFormatDashes     = new SimpleDateFormat("MM-dd-yyyy")
   val zoneId: ZoneId = ZoneId.of("America/New_York")
 
   def nowMillisAsInstant(): Instant = Instant.now().truncatedTo(MILLIS)
