@@ -918,8 +918,11 @@ object ReportingService extends Loggable {
 
   private[service] def snapshotInTimeReport(rawDate: String): SnapshotInTimeReport = {
     val date = DateHelper.dateFormat.parse(rawDate)
+    val datePlusOne = DateHelper.datePlusDays(date, 1)
+
     val snapshotStatistics = StatisticsSnapshot.findAll(
-      By_>=(StatisticsSnapshot.date, date)
+      By_>=(StatisticsSnapshot.date, date),
+      By_<(StatisticsSnapshot.date, datePlusOne)
     )
 
     val totalPets = snapshotStatistics.map(_.quantity.get).sum
