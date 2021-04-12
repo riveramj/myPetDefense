@@ -3,22 +3,22 @@ package com.mypetdefense.model.domain.reports
 import com.mypetdefense.typeclasses.ToCsvStringConverter
 
 case class SnapshotInTimeReport(
-    activePets: Long,
-    petsByProgram: Iterable[CountedByProgram],
-    petsByAgency: Iterable[CountedByAgency],
-    petsByProgramAgency: Iterable[CountedByProgramByAgency]
+                                 activePets: Long,
+                                 petsByProgram: Iterable[CountedByProgram],
+                                 petsByAgency: Iterable[CountedByAgency],
+                                 petsByProgramByAgency: Iterable[CountedByProgramByAgency]
 ) {
   def toCsv: String =
     s"""Active Pets,$activePets
        |,
        |Pets by Program,
-       ${petsByProgram.toList.sortBy(_.count).map(_.toCsvRow).mkString("\n")}
+       |${petsByProgram.toList.sortBy(_.count).map(_.toCsvRow).mkString("\n")}
        |,
        |Pets by Agency,
        |${petsByAgency.toList.sortBy(_.count).map(_.toCsvRow).mkString("\n")}
        |,
        |Pets by Program by Agency,
-       |${petsByProgramAgency.toList.sortBy(_.agencyName).map(_.toCsvRow).mkString("\n")}
+       |${petsByProgramByAgency.toList.sortBy(_.agencyName).map(_.toCsvRow).mkString("\n")}
        |""".stripMargin
 }
 
