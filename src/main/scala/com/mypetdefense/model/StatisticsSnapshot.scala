@@ -12,7 +12,8 @@ class StatisticsSnapshot extends LongKeyedMapper[StatisticsSnapshot] with IdPK w
     override def defaultValue: Long = generateLongId
   }
 
-  object quantity extends MappedInt(this)
+  object subscriptionCount extends MappedInt(this)
+  object petCount extends MappedInt(this)
   object program  extends MappedEnum(this, BoxType) {
     override def dbIndexed_? = true
   }
@@ -29,9 +30,10 @@ class StatisticsSnapshot extends LongKeyedMapper[StatisticsSnapshot] with IdPK w
 }
 
 object StatisticsSnapshot extends StatisticsSnapshot with LongKeyedMetaMapper[StatisticsSnapshot] {
-  def createDailySnapShot(quantity: Int, boxType: BoxType.Value, agency: Agency) = {
+  def createDailySnapShot(subscriptions: Int, pets: Int, boxType: BoxType.Value, agency: Agency) = {
     StatisticsSnapshot.create
-      .quantity(quantity)
+      .subscriptionCount(subscriptions)
+      .petCount(pets)
       .program(boxType)
       .agency(agency)
       .saveMe()
