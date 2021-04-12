@@ -7,40 +7,45 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class SnapshotInTimeReportSpec extends AnyFlatSpec with Matchers {
   it should "properly converted to csv when needed" in {
-    val petsByProgram = List(CountedByProgram("Flea & Tick Only", 32), CountedByProgram("Health and Wellness", 42))
-    val petsByAgency = List(CountedByAgency("TPP", 15), CountedByAgency("My Pet Defense", 30))
-    val petsByProgramByAgency = List(
-      CountedByProgramByAgency("TPP", List(CountedByProgram("Flea & Tick Only", 32), CountedByProgram("Health and Wellness", 42))),
-      CountedByProgramByAgency("My Pet Defense", List(CountedByProgram("Flea & Tick Only", 11), CountedByProgram("Health and Wellness", 19))),
+    val statsByProgram = List(StatsByProgram("Flea & Tick Only",28, 32), StatsByProgram("Health and Wellness", 35, 42))
+    val statsByAgency = List(StatsByAgency("TPP",11, 15), StatsByAgency("My Pet Defense", 21, 30))
+    val statsByProgramByAgency = List(
+      StatsByProgramByAgency("TPP", List(StatsByProgram("Flea & Tick Only", 25, 32), StatsByProgram("Health and Wellness", 41, 42))),
+      StatsByProgramByAgency("My Pet Defense", List(StatsByProgram("Flea & Tick Only", 8, 11), StatsByProgram("Health and Wellness", 13, 19))),
     )
 
     val report = SnapshotInTimeReport(
+      150,
       100,
-      petsByProgram,
-      petsByAgency,
-      petsByProgramByAgency
+      statsByProgram,
+      statsByAgency,
+      statsByProgramByAgency
     )
     val reportCsv = report.toCsv
 
     val expectedReportString =
-      s"""Active Pets,100
+      s"""Active Subscriptions,150
+         |Active Pets,100
          |,
-         |Pets by Program,
-         |Flea & Tick Only,32
-         |Health and Wellness,42
+         |Stats by Program,
+         |Program,Subscriptions,Pets
+         |Flea & Tick Only,28,32
+         |Health and Wellness,35,42
          |,
-         |Pets by Agency,
-         |TPP,15
-         |My Pet Defense,30
+         |Stats by Agency,
+         |Agency,Subscriptions,Pets
+         |TPP,11,15
+         |My Pet Defense,21,30
          |,
-         |Pets by Program by Agency,
+         |Stats by Program by Agency,
+         |Agency,Subscriptions,Pets
          |My Pet Defense,
-         |Flea & Tick Only,11
-         |Health and Wellness,19
+         |Flea & Tick Only,8,11
+         |Health and Wellness,13,19
          |
          |TPP,
-         |Flea & Tick Only,32
-         |Health and Wellness,42
+         |Flea & Tick Only,25,32
+         |Health and Wellness,41,42
          |
          |""".stripMargin
     reportCsv shouldBe expectedReportString

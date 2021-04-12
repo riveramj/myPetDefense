@@ -1,27 +1,34 @@
 package com.mypetdefense.jobs
 
-import com.mypetdefense.model.{StatisticsSnapshot, Status, User}
+import com.mypetdefense.model._
+import net.liftweb.common.Box
 import net.liftweb.mapper.By
 import org.quartz._
 
 class RecordStatisticsSnapshotJob extends ManagedJob {
+  case class SnapshotStatistics(agency: Box[Agency], subscriptionCount: Int, boxCountByType: Map[BoxType.Value, Int])
+
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
     val users = User.findAll(By(User.status, Status.Active))
     val usersByAgency = users.groupBy(_.referer.obj)
     val boxesByTypeAndAgency = usersByAgency.map { case (agency, users) =>
-      val activeBoxes = users.flatMap(_.subscription.obj.toList
+      val subscriptions = users.flatMap(_.subscription.obj.toList
         .filter(_.status == Status.Active)
-        .flatMap(_.subscriptionBoxes.toList.filter(_.status.get == Status.Active))
       )
-      (agency, activeBoxes.groupBy(_.boxType.get))
+      val activeBoxes = subscriptions.flatMap(_.subscriptionBoxes.toList.filter(_.status.get == Status.Active))
+      val boxCountByType = activeBoxes.groupBy(_.boxType.get).map { case (boxType, subscriptions) =>
+        (boxType, subscriptions.size)
+      }
+
+      SnapshotStatistics(agency, subscriptions.size, boxCountByType)
     }
 
     for {
-      (possibleAgency, boxesByType) <- boxesByTypeAndAgency
-      agency <- possibleAgency.toList
-      (boxType, boxes) <- boxesByType
+      snapShotStatistic <- boxesByTypeAndAgency.toList
+      agency <- snapShotStatistic.agency.toList
+      (boxType, boxCount) <- snapShotStatistic.boxCountByType
     } yield {
-      StatisticsSnapshot.createDailySnapShot(boxes.size, boxType, agency)
+      StatisticsSnapshot.createDailySnapShot(snapShotStatistic.subscriptionCount, boxCount, boxType, agency)
     }
   }
 }
