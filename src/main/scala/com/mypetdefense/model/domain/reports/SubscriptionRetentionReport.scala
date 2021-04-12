@@ -12,7 +12,7 @@ import net.liftweb.json.JsonDSL._
 final case class SubscriptionRetentionReport(retentions: List[SubscriptionRetentionForPeriod]) {
   def toCsv: String = {
     val periodsCount = retentions.headOption.map(_.shipmentCounts.length).getOrElse(12)
-    s"""Cohort,${(1 to periodsCount).mkString(",")}
+    s"""Start Month,Signups,${(1 to periodsCount).map(_ + " Shipment").mkString(",")}
        |${retentions.map(_.toCsvRow(periodsCount)).mkString("\n")}
        |""".stripMargin
   }
@@ -22,6 +22,7 @@ final case class SubscriptionRetentionReport(retentions: List[SubscriptionRetent
 
 final case class SubscriptionRetentionForPeriod(
     period: RetentionPeriod,
+    signups: Int,
     shipmentCounts: List[Int]
 ) {
   def shipmentPercentages: List[Int] =
@@ -30,7 +31,7 @@ final case class SubscriptionRetentionForPeriod(
     }
 
   def toCsvRow(periodsCount: Int) =
-    s"$period,${shipmentPercentages.map(_+"%").mkString(",")}${"," * (periodsCount - shipmentCounts.length)}"
+    s"$period, $signups, ${shipmentPercentages.map(_+"%").mkString(",")}${"," * (periodsCount - shipmentCounts.length)}"
 
   def toJson: JObject =
     (("period"                 -> period.toJson)

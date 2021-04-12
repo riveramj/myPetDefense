@@ -616,7 +616,14 @@ object ReportingService extends Loggable {
     val shipmentCounts = (1 to periodsCount).reverse
     val retentions =
       (periods zip shipmentCounts).map {
-        case (p, c) => SubscriptionRetentionForPeriod(p, shipmentCountsForPeriod(subs, p, c))
+        case (period, shipmentCount) =>
+          val startingSubs = subs.filter(s => RetentionPeriod.fromDate(s.startDate.get) == period)
+
+          SubscriptionRetentionForPeriod(
+            period,
+            startingSubs.size,
+            shipmentCountsForPeriod(startingSubs, period, shipmentCount)
+          )
       }
 
     SubscriptionRetentionReport(retentions)
@@ -629,7 +636,6 @@ object ReportingService extends Loggable {
   ): List[Int] = {
     val shipmentCountsByPeriod =
       subs
-        .filter(s => RetentionPeriod.fromDate(s.startDate.get) == period)
         .flatMap(_.shipments)
         .groupBy(s => RetentionPeriod.fromDate(s.dateProcessed.get) - period)
         .mapValues(_.length)
