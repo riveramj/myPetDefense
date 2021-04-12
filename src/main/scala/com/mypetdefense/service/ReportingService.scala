@@ -635,8 +635,8 @@ object ReportingService extends Loggable {
       shipmentsCount: Int
   ): List[Int] = {
     val shipmentCountsByPeriod =
-      subs
-        .flatMap(_.shipments)
+      filterMailedShipments(subs
+        .flatMap(_.shipments))
         .groupBy(s => RetentionPeriod.fromDate(s.dateProcessed.get) - period)
         .mapValues(_.length)
         .withDefaultValue(0)
