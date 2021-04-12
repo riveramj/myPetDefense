@@ -2,7 +2,6 @@ package com.mypetdefense.service
 
 import java.time.LocalDate
 import java.util.Date
-
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator._
 import com.mypetdefense.helpers.DateUtil._
@@ -16,6 +15,7 @@ import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.util.CalculationHelper
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.{Empty, Full}
+import net.liftweb.util.Props
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class ReportingServiceSpec extends DBTest {
@@ -620,6 +620,7 @@ class ReportingServiceSpec extends DBTest {
     makeUserSubAndNShipments(LocalDate.of(2020, 11, 5), 2)
     makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1)
     makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1)
+    makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1, "tpp")
 
     val lastPeriod = RetentionPeriod(12, 2020)
 
@@ -633,7 +634,7 @@ class ReportingServiceSpec extends DBTest {
       )
   }
 
-  private def makeUserSubAndNShipments(startDate: LocalDate, n: Int): Subscription = {
+  private def makeUserSubAndNShipments(startDate: LocalDate, n: Int, priceCode: String = "default"): Subscription = {
     val user = User.createNewUser(
       firstName = "John",
       lastName = "Doe",
@@ -649,10 +650,16 @@ class ReportingServiceSpec extends DBTest {
     )
 
     val start = startDate.atStartOfDay(zoneId)
+    val hwPriceCode =
+      if (priceCode == "default")
+        Props.get("default.price.code").openOr("")
+      else
+        priceCode
 
     val sub = Subscription.createNewSubscription(
       Full(user),
       stripeSubscriptionId = "sub_1234",
+      priceCode = hwPriceCode,
       startDate = Date.from(start.toInstant),
       nextShipDate = Date.from(start.plusDays(5).toInstant)
     )
