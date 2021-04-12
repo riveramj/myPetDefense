@@ -1,7 +1,5 @@
 package com.mypetdefense.service
 
-import java.time.LocalDate
-import java.util.Date
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator._
 import com.mypetdefense.helpers.DateUtil._
@@ -17,6 +15,9 @@ import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.{Empty, Full}
 import net.liftweb.util.Props
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
+
+import java.time.LocalDate
+import java.util.Date
 
 class ReportingServiceSpec extends DBTest {
 
@@ -624,12 +625,14 @@ class ReportingServiceSpec extends DBTest {
 
     val lastPeriod = RetentionPeriod(12, 2020)
 
+    val subSize = 4 + 4 + 3 + 2 + 3 + 3 + 2 + 2 + 2 + 1 + 1
+
     ReportingService.subscriptionRetentionReport(lastPeriod, periodsCount = 3) mustBe
       SubscriptionRetentionReport(
         List(
-          SubscriptionRetentionForPeriod(RetentionPeriod(10, 2020), List(3, 3, 2)),
-          SubscriptionRetentionForPeriod(RetentionPeriod(11, 2020), List(2, 2)),
-          SubscriptionRetentionForPeriod(RetentionPeriod(12, 2020), List(2))
+          SubscriptionRetentionForPeriod(RetentionPeriod(10, 2020), subSize, List(3, 3, 2)),
+          SubscriptionRetentionForPeriod(RetentionPeriod(11, 2020), subSize, List(2, 2)),
+          SubscriptionRetentionForPeriod(RetentionPeriod(12, 2020), subSize, List(2))
         )
       )
   }
