@@ -906,9 +906,10 @@ object ReportingService extends Loggable {
   }
 
   private[service] def calculateAgencyStats(agencyName: String, stats: List[StatisticsSnapshot]) = {
-    CountedByAgency(
+    StatsByAgency(
       agencyName,
-      stats.map(_.quantity.get).sum
+      stats.map(_.subscriptionCount.get).sum,
+      stats.map(_.petCount.get).sum
     )
   }
 
@@ -916,11 +917,11 @@ object ReportingService extends Loggable {
     stats
       .groupBy(_.program.get)
       .map { case (program, stats) =>
-        (program, stats.map(_.quantity.get).sum)
+        (program, stats.map(_.subscriptionCount.get).sum, stats.map(_.petCount.get).sum)
       }
-      .map { case (program, count) =>
+      .map { case (program, subscriptionCount, petCount) =>
         val programName = program.toString
-        CountedByProgram(programName, count)
+        StatsByProgram(programName, subscriptionCount, petCount)
       }
   }
 
@@ -933,7 +934,8 @@ object ReportingService extends Loggable {
       By_<(StatisticsSnapshot.date, datePlusOne)
     )
 
-    val totalPets = snapshotStatistics.map(_.quantity.get).sum
+    val totalSubscriptions = snapshotStatistics.map(_.subscriptionCount.get).sum
+    val totalPets = snapshotStatistics.map(_.petCount.get).sum
     val petsByProgram = calculateStatsByProgram(snapshotStatistics)
 
     val mpdAgency = Agency.mpdAgency
@@ -955,10 +957,11 @@ object ReportingService extends Loggable {
     val mpdStatsByProgram = calculateStatsByProgram(mpdStats)
     val tppStatsByProgram = calculateStatsByProgram(tppStats)
 
-    val mpdStatsByProgramByAgency = CountedByProgramByAgency(mpdAgencyName, mpdStatsByProgram)
-    val tppStatsByProgramByAgency = CountedByProgramByAgency(tppAgencyName, tppStatsByProgram)
+    val mpdStatsByProgramByAgency = StatsByProgramByAgency(mpdAgencyName, mpdStatsByProgram)
+    val tppStatsByProgramByAgency = StatsByProgramByAgency(tppAgencyName, tppStatsByProgram)
 
     SnapshotInTimeReport(
+      totalSubscriptions,
       totalPets,
       petsByProgram,
       List(mpdCalculated, tppCalculated),
