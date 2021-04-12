@@ -13,6 +13,16 @@ object DateHelper {
   val dateFormatDashes     = new SimpleDateFormat("MM-dd-yyyy")
   val zoneId: ZoneId = ZoneId.of("America/New_York")
 
+  def datePlusDays(date: Date, days: Int): Date = {
+    Date.from(date
+      .toInstant
+      .atZone(zoneId)
+      .toLocalDate
+      .plusDays(days)
+      .atStartOfDay(zoneId)
+      .toInstant
+    )
+  }
   def nowMillisAsInstant(): Instant = Instant.now().truncatedTo(MILLIS)
 
   def currentDate: LocalDateTime     = LocalDateTime.now()
