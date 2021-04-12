@@ -617,7 +617,9 @@ object ReportingService extends Loggable {
     val retentions =
       (periods zip shipmentCounts).map {
         case (period, shipmentCount) =>
-          val startingSubs = subs.filter(s => RetentionPeriod.fromDate(s.startDate.get) == period)
+          val startingSubs = subs
+            .filter(s => RetentionPeriod.fromDate(s.startDate.get) == period)
+            .filter(_.shipments.nonEmpty)
 
           SubscriptionRetentionForPeriod(
             period,
