@@ -165,6 +165,7 @@ object Paths {
     admin.ExecutiveDashboard.menu,
     admin.ExecutiveDashboard.executiveSnapshotExportMenu,
     admin.ExecutiveDashboard.retentionSnapshotExportMenu,
+    admin.ExecutiveDashboard.snapshotInTimeExportMenu,
     admin.ShipmentDashboard.menu,
     admin.ShipmentDashboard.newLabelsExportMenu,
     admin.ShipmentDashboard.existingLabelsExportMenu,

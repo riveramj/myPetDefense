@@ -2,14 +2,15 @@ package com.mypetdefense.snippet
 package admin
 
 import java.text.NumberFormat
-
 import com.mypetdefense.model.Agency._
 import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.service._
+import com.mypetdefense.util.DateHelper
 import net.liftweb.common._
-import net.liftweb.http.LiftResponse
-import net.liftweb.http.SHtml.ajaxInvoke
+import net.liftweb.http.{IdMemoizeTransform, LiftResponse, SHtml}
+import net.liftweb.http.SHtml.{ajaxInvoke, ajaxText}
 import net.liftweb.http.js.JsCmd
+import net.liftweb.http.js.JsCmds.Noop
 import net.liftweb.sitemap.Loc.EarlyResponse
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
@@ -45,9 +46,26 @@ object ExecutiveDashboard extends Loggable {
     EarlyResponse(retentionExecutiveSnapshot _)
 
   def retentionExecutiveSnapshot: Box[LiftResponse] = ReportingService.subscriptionRetentionCsv()
+
+  val snapshotInTimeExportMenu: Menu.ParamMenuable[String] = Menu.param[String](
+    "Export Snapshot in Time",
+    "Export Snapshot in Time",
+    Full(_),
+    string => string
+  ) / "admin" / "executive-dashboard" / "snapshot-in-time.csv" >>
+    mpdAdmin >>
+    loggedIn >>
+    EarlyResponse(snapshotInTime _)
+
+  def snapshotInTime: Box[LiftResponse] = snapshotInTimeExportMenu.currentValue.flatMap { date =>
+    ReportingService.snapshotInTimeCsv(date)
+  }
 }
 
 class ExecutiveDashboard extends Loggable {
+  var snapshotDate: String = DateHelper.dateFormat.format(DateHelper.yesterdayStart)
+  var snapshotInTimeRenderer: Box[IdMemoizeTransform] = Empty
+
   val topLevelAgencies = List(mpdAgency, tppAgency)
 
   val dollarFormatter: NumberFormat    = NumberFormat.getCurrencyInstance
@@ -101,10 +119,20 @@ class ExecutiveDashboard extends Loggable {
     }
   }
 
+  def createExportLink = ExecutiveDashboard.snapshotInTimeExportMenu.calcHref(snapshotDate)
+
   def render: CssBindFunc = {
     newStartBindings &
       ".executive-dashboard [class+]" #> "current" &
       ".update-data [onclick]" #> ajaxInvoke(() => updateCharts()) &
+      ".snapshot-in-time li #date-for-snapshot" #> ajaxText(snapshotDate, date => {
+        snapshotDate = date
+        snapshotInTimeRenderer.map(_.setHtml()).openOr(Noop)
+      }) &
+      ".snapshot-in-time .snapshot-in-time-container" #> SHtml.idMemoize { renderer =>
+        snapshotInTimeRenderer = Full(renderer)
+        ".snapshot-in-time-export [href]" #> createExportLink
+      } &
       ".executive-snapshot .executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
       ".retention-snapshot .retention-snapshot-export [href]" #> ExecutiveDashboard.retentionSnapshotExportMenu.loc.calcDefaultHref &
       ".mtd-shipments .count *" #> numberFormatter.format(mtdShipmentsData.numberOfShipments) &
