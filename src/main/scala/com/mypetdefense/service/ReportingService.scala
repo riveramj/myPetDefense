@@ -631,7 +631,7 @@ object ReportingService extends Loggable {
       subs
         .filter(s => RetentionPeriod.fromDate(s.startDate.get) == period)
         .flatMap(_.shipments)
-        .groupBy(s => period - RetentionPeriod.fromDate(s.dateProcessed.get))
+        .groupBy(s => RetentionPeriod.fromDate(s.dateProcessed.get) - period)
         .mapValues(_.length)
         .withDefaultValue(0)
 
