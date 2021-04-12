@@ -620,6 +620,7 @@ class ReportingServiceSpec extends DBTest {
     makeUserSubAndNShipments(LocalDate.of(2020, 11, 5), 2)
     makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1)
     makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1)
+    makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1, "tpp")
 
     val lastPeriod = RetentionPeriod(12, 2020)
 
@@ -633,7 +634,7 @@ class ReportingServiceSpec extends DBTest {
       )
   }
 
-  private def makeUserSubAndNShipments(startDate: LocalDate, n: Int): Subscription = {
+  private def makeUserSubAndNShipments(startDate: LocalDate, n: Int, priceCode: String = "default"): Subscription = {
     val user = User.createNewUser(
       firstName = "John",
       lastName = "Doe",
@@ -649,7 +650,11 @@ class ReportingServiceSpec extends DBTest {
     )
 
     val start = startDate.atStartOfDay(zoneId)
-    val hwPriceCode = Props.get("default.price.code").openOr("")
+    val hwPriceCode =
+      if (priceCode == "default")
+        Props.get("default.price.code").openOr("")
+      else
+        priceCode
 
     val sub = Subscription.createNewSubscription(
       Full(user),
