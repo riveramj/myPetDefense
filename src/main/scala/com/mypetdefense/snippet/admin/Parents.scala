@@ -777,9 +777,16 @@ class Parents extends Loggable {
         s"${SplitTitleCase(key)}: $value"
       }.mkString(". ")
 
+      val performedBy = {
+        if (action.userId.contains(0))
+          User.find(By(User.userId, action.parentId))
+        else
+          User.find(By(User.userId, action.userId.getOrElse(0L)))
+      }
+
       ".action-date *" #> dateTimeFormat.format(Date.from(action.timestamp)) &
       ".action-subtype *" #> SplitTitleCase(action.actionSubtype.toString) &
-      ".performed-by *" #> User.find(By(User.userId, action.userId.getOrElse(0L))).map(_.name) &
+      ".performed-by *" #> performedBy.map(_.name) &
       ".details *" #> actionDetails
     }
   }
