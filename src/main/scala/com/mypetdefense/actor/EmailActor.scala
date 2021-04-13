@@ -1144,12 +1144,16 @@ trait EmailActor
   )  {
     val envSubj = envTag + subject
 
-    MandrillService.sendTemplateEmail(
-      envSubj,
-      to,
+    val sendMandrillMessage = MandrillService.SendTemplateMandrillMessage(
+      MandrillService.MandrillMessage(
+        envSubj, fromEmail,
+        List(MandrillService.MandrillTo(to)),
+        Some(fromName)
+      ),
       templateName,
-      emailVars,
-      fromEmail
+      Nil,
     )
+
+    MandrillService.sendTemplateEmail(sendMandrillMessage)
   }
 }

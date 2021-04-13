@@ -3,127 +3,72 @@ package com.mypetdefense.service
 import dispatch.Defaults._
 import dispatch._
 import net.liftweb.common._
+import net.liftweb.json.Extraction.decompose
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json._
 import net.liftweb.util.Props
 import org.asynchttpclient.Response
 
-import scala.annotation.tailrec
-import scala.collection.JavaConverters._
-import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.util.parsing.json.JSON
-import scala.util.{Failure => TryFail, _}
 
 object MandrillService extends Loggable {
   implicit val formats: Formats = DefaultFormats
 
-  val sendMessageWithTemplateUrl: Req = url("https://mandrillapp.com/api/1.0/messages/send-template").secure
-  val pingUrl: Req = url("https://mandrillapp.com/api/1.0/users/ping").secure
-  val authKey: String = Props.get("mail.test.auth.key") openOr ""
-  val retryAttempts = 10
+  private val endpointHost = "mandrillapp.com"
+  private val endpointVersion = "1.0"
+  private val authKey: String = Props.get("mail.test.auth.key") openOr ""
 
+  case class MandrillTo(email: String, name: Option[String] = None, `type`: String = "to")
 
-  def sendTemplateEmail(
+  case class MandrillMessage(
     subject: String,
-    toEmail: String,
-    templateName: String,
-    emailVars: Map[String, String],
-    fromEmail: String
-  ) = {
-    def emailResponse(messageContents: JValue): Future[Box[String]] = {
-      val bar = parse("{}")
-      val fooRaw = Map(
-        "key" -> "MagByJ-S9IT6C7vUa2aYeQ",
-        "template_name" -> templateName,
-        "template_content" -> compactRender(Nil),
-        "message" -> compactRender(List(bar))
-      )
+    from_email: String,
+    to: List[MandrillTo],
+    from_name: Option[String] = None,
+    html: Option[String] = None,
+    text: Option[String] = None
+  )
 
-      println(fooRaw)
-      val fooString = Serialization.write(fooRaw.toString)
-      println(fooString)
-
-      Http
-        .default(
-          sendMessageWithTemplateUrl
-              <<
-            "{\"template_name\": \"reset password temp\",\"key\": \"MagByJ-S9IT6C7vUa2aYeQ\",\"template_content\": [],\"message\": {\"to\": [{\"email\": \"rivera.mj@gmail.com\"}],\"global_merge_vars\": [{\"name\": \"name\",\"content\": \"mike\"}]}}" <:< Map("Content-Type" -> "application/json") > successAsStringOrThrowError
-        )
-        .either
-        .map {
-          case Left(e: UnexpectedResponseException) =>
-            logger.error(s"[createTaxOrder > orderResponse] ${e.prettyPrint}", e)
-            Failure("Unexpected response while talking to taxJar.", Full(e), Empty)
-          case Left(throwable) =>
-            logger.error(s"[createTaxOrder > orderResponse] taxjar error.", throwable)
-            Failure("Error occurred while talking to taxJar.", Full(throwable), Empty)
-          case Right(possibleOrderResponse) =>
-            Full(possibleOrderResponse)
-        }
-    }
-
-    @tailrec
-    def sendEmail(messageContents: JValue, attemptsLeft: Int): Box[String] =
-      Try(Await.result(emailResponse(messageContents), 1 seconds)) match {
-        case Success(response) =>
-          response
-        case TryFail(throwable: Throwable) =>
-          if(attemptsLeft > 0)
-            sendEmail(messageContents, attemptsLeft - 1)
-          else {
-            logger.error(
-              s"[createTaxOrder > raw order] Timeout occurred while talking to taxJar for orderCreate.",
-              throwable
-            )
-            Failure(
-              "Timeout occurred while talking to taxJar for orderCreate.",
-              Full(throwable),
-              Empty
-            )
-          }
-      }
-
-    val messageJson: JValue =
-      List(("message" ->
-        ("subject" -> subject) ~
-        ("to" -> List(
-          ("email" -> toEmail)
-        )) ~
-        ("global_merge_vars" ->
-          emailVars.map { case (name, value) =>
-            ("name" -> name) ~
-            ("content" -> value)
-          }
-        )
-      ))
-
-    val messageContents = compactRender(messageJson)
-
-    val email = sendEmail(messageJson, retryAttempts)
-
-    email
+  trait MandrillApiCall {
+    def uri(requestBuilder: dispatch.Req): dispatch.Req
   }
 
-  private val successAsStringOrThrowError: Response => String =
-    resp =>
-      if(resp.getStatusCode / 100 == 2) as.String(resp)
-      else throw UnexpectedResponseException(resp)
+  case class SendMandrillMessage(message: MandrillMessage, async: Boolean = false) extends MandrillApiCall {
+    def uri(requestBuilder: dispatch.Req): Req = requestBuilder / "messages" / "send.json"
+  }
 
-  private final case class UnexpectedResponseException(resp: Response)
-    extends RuntimeException(s"Unexpected response: ${resp.getStatusCode}") {
+  case class SendTemplateMandrillMessage(message: MandrillMessage, template_name: String, template_content: List[Map[String, String]], async: Boolean = false) extends MandrillApiCall {
+    def uri(requestBuilder: dispatch.Req): Req = requestBuilder / "messages" / "send-template.json"
+  }
 
-    def prettyPrint: String =
-      s"""Unexpected response:
-         |  * status code: ${resp.getStatusCode}
-         |  * headers: $formatHeaders
-         |  * body: ${resp.getResponseBody}
-         |""".stripMargin
+  case class CodeResponse(code: Int)
+  protected object AsCodeResponse extends (Response => CodeResponse) {
+    def apply(r:Response): CodeResponse = {
+      CodeResponse(
+        r.getStatusCode()
+      )
+    }
+  }
 
-    private def formatHeaders: String =
-      resp.getHeaders.iteratorAsString.asScala
-        .map(entry => s"    * ${entry.getKey}: ${entry.getValue}")
-        .mkString("\n", "\n", "")
+  def sendTemplateEmail(apiCall: MandrillApiCall) = {
+    val postJson = decompose(apiCall) match {
+      case obj:JObject =>
+        obj ~
+          ("key" -> authKey)
+
+      case _ => JObject(Nil)
+    }
+
+    val requestBody = compactRender(postJson)
+    val request = (apiCall.uri(host(endpointHost) / "api" / endpointVersion)).secure <<
+      requestBody
+
+    val response = Http.default(request > AsCodeResponse).either
+
+    response() match {
+      case Right(CodeResponse(200)) => // All good.
+      case Right(CodeResponse(code)) => logger.error("Mandrill returned code: " + code)
+      case Left(dispatchError) => logger.error("Dispatch error: " + dispatchError)
+    }
   }
 }
