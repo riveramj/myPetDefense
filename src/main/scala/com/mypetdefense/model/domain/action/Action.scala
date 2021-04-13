@@ -55,9 +55,24 @@ object CustomerAction {
   private[action] def apply(log: ParsedLog): CustomerAction =
     log.actionSubtype match {
       case CustomerActionSubtype.CustomerAddedPet   => CustomerAddedPet(log)
+      case CustomerActionSubtype.CustomerSignedUp   => CustomerSignedUp(log)
       case CustomerActionSubtype.CustomerRemovedPet => CustomerRemovedPet(log)
       case CustomerActionSubtype.CustomerCanceledAccount => CustomerCanceledAccount(log)
     }
+
+  final case class CustomerSignedUp(
+                                     parentId: Long,
+                                     userId: Option[Long],
+                                     startDate: String,
+                                     couponCode: Option[String],
+                                     actionId: Option[Long] = None,
+                                     timestamp: Instant = nowMillisAsInstant()
+                                   ) extends CustomerAction(CustomerActionSubtype.CustomerSignedUp) {
+    override def details: Action.Details =
+      Action.Details(
+        stringDetails = Map("StartDate" -> startDate) ++ couponCode.map("CouponCode" -> _).toMap
+      )
+  }
 
   final case class CustomerAddedPet(
                                      parentId: Long,
@@ -132,6 +147,18 @@ object CustomerAction {
         log.parentId,
         log.userId,
         log.longDetails("SubscriptionId"),
+        Some(log.actionId),
+        log.timestamp
+      )
+  }
+
+  object CustomerSignedUp {
+    private[action] def apply(log: ParsedLog): CustomerSignedUp =
+      CustomerSignedUp(
+        log.parentId,
+        log.userId,
+        log.stringDetails("StartDate"),
+        Some(log.stringDetails("CouponCode")),
         Some(log.actionId),
         log.timestamp
       )

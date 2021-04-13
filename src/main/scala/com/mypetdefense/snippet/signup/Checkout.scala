@@ -1,11 +1,12 @@
 package com.mypetdefense.snippet.signup
 
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerSignedUp}
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
-import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import com.mypetdefense.util.{ClearNodesIf, DateHelper, SecurityContext}
 import net.liftweb.common.Box.box2Iterable
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -139,6 +140,27 @@ class Checkout extends Loggable {
     } yield {
       WoofTraxOrder.createWoofTraxOrder(offerCode, userId, user)
     }
+
+    val todayDateTime = DateHelper.now.toString
+    val signUpActionLog = CustomerSignedUp(
+      SecurityContext.currentUserId,
+      None,
+      todayDateTime,
+      coupon.map(_.couponCode.get)
+    )
+    val petActionLog = userWithSubscription.toList
+      .flatMap(_.pets.toList)
+      .map { pet =>
+        CustomerAddedPet(
+          SecurityContext.currentUserId,
+          None,
+          pet.petId.get,
+          pet.name.get
+        )
+      }
+
+    ActionLogService.logAction(signUpActionLog)
+    petActionLog.foreach(ActionLogService.logAction)
 
     updateSessionVars()
     S.redirectTo(Success.menu.loc.calcDefaultHref)
