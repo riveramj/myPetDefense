@@ -131,12 +131,13 @@ class Checkout extends Loggable {
       newUserData,
       customer
     )
-    userWithSubscription.map(_.reload).map(SecurityContext.logIn)
+    val updatedUserWithSubscription = userWithSubscription.map(_.reload)
+    updatedUserWithSubscription.map(SecurityContext.logIn)
 
     for {
       offerCode <- PetFlowChoices.woofTraxOfferCode.is
       userId <- PetFlowChoices.woofTraxUserId.is
-      user <- userWithSubscription
+      user <- updatedUserWithSubscription
     } yield {
       WoofTraxOrder.createWoofTraxOrder(offerCode, userId, user)
     }
@@ -148,7 +149,7 @@ class Checkout extends Loggable {
       todayDateTime,
       coupon.map(_.couponCode.get)
     )
-    val petActionLog = userWithSubscription.toList
+    val petActionLog = updatedUserWithSubscription.toList
       .flatMap(_.pets.toList)
       .map { pet =>
         CustomerAddedPet(

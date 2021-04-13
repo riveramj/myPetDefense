@@ -2,6 +2,7 @@ package com.mypetdefense.model.domain.action
 
 import com.mypetdefense.model.{ActionLog, ActionLogDetails}
 import com.mypetdefense.util.DateHelper.nowMillisAsInstant
+import net.liftweb.common.Box.tryo
 
 import java.time.Instant
 
@@ -158,7 +159,7 @@ object CustomerAction {
         log.parentId,
         log.userId,
         log.stringDetails("StartDate"),
-        Some(log.stringDetails("CouponCode")),
+        tryo(log.stringDetails("CouponCode")),
         Some(log.actionId),
         log.timestamp
       )
