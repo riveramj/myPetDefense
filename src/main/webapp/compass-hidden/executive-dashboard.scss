@@ -128,7 +128,7 @@ nav {
 
     div {
       color: #4F4E4E;
-      
+
       @media (min-width: $bp-medium) {
         line-height: 24px;
         font-weight: $bold;
@@ -200,4 +200,8 @@ li.key-stat {
 
 .hidden {
   display: none;
+}
+
+.picker__day--outfocus {
+  color: #ddd !important;
 }
