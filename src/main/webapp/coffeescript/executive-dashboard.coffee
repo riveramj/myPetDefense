@@ -54,3 +54,11 @@ updateData = (chartName, newData, newLabels) ->
       newStartsChart.update()
 
 $('.update-data').click()
+
+$('#date-for-snapshot').pickadate({
+  format: 'mm/dd/yyyy',
+  editable: true,
+  onClose: ->
+    $('#date-for-snapshot').blur()
+    $('.snapshot-in-time').focusout()
+})

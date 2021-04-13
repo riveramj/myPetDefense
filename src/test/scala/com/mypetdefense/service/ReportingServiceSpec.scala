@@ -1,7 +1,5 @@
 package com.mypetdefense.service
 
-import java.util.Date
-
 import com.mypetdefense.generator.Generator._
 import com.mypetdefense.generator._
 import com.mypetdefense.helpers.DateUtil._
@@ -13,7 +11,13 @@ import com.mypetdefense.helpers.db.UserDbUtils._
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.util.CalculationHelper
+import com.mypetdefense.util.RandomIdGenerator.generateLongId
+import net.liftweb.common.{Empty, Full}
+import net.liftweb.util.Props
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
+
+import java.time.LocalDate
+import java.util.Date
 
 class ReportingServiceSpec extends DBTest {
 
@@ -233,14 +237,17 @@ class ReportingServiceSpec extends DBTest {
   it should "find current year paying cancelled subscriptions" in {
     forAll(mapWithNOfUserNSubscriptionGen(), mapWithNOfUserNSubscriptionGen()) {
       (cancelledInCurrentYear, cancelledYearAgo) =>
-        val cancelledIds = cancelledInCurrentYear.map {
-          case (uData, sData) =>
-            insertUserAndSub(uData, sData).subscription.cancel
-              .cancellationDate(anyDayUntilThisMonth.toDate)
-              .saveMe()
-              .id
-              .get
-        }
+        val cancelledIds =
+          anyDayOfThisYearUntilThisMonth.fold(Iterable.empty[Long]) { anyDayUntilThisMonth =>
+            cancelledInCurrentYear.map {
+              case (uData, sData) =>
+                insertUserAndSub(uData, sData).subscription.cancel
+                  .cancellationDate(anyDayUntilThisMonth.toDate)
+                  .saveMe()
+                  .id
+                  .get
+            }
+          }
         cancelledYearAgo.foreach {
           case (uData, sData) =>
             insertUserAndSub(uData, sData).subscription.cancel
@@ -411,7 +418,7 @@ class ReportingServiceSpec extends DBTest {
 
         val expectedInResult = someAgencyName -> insertedPetsSize
 
-        val actualData = ReportingService.findMTDSalesByAgency
+        val actualData = ReportingService.findYesterdayMTDSalesByAgency
 
         actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
         actualData should contain(expectedInResult)
@@ -479,7 +486,7 @@ class ReportingServiceSpec extends DBTest {
 
         val expectedInResult = someSalesAgentId -> insertedPetsSize
 
-        val actualData = ReportingService.findMTDSalesByAgent
+        val actualData = ReportingService.findYesterdayMTDSalesByAgent
 
         actualData.map(_._1) shouldNot contain("My Pet Defense", "Petland")
         actualData should contain(expectedInResult)
@@ -588,6 +595,97 @@ class ReportingServiceSpec extends DBTest {
 
       cleanUpSuccess()
     }
+  }
+
+  it should "count shipments in period" in {
+    val subs = List(
+      makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 3),
+      makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 2),
+      makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 1)
+    )
+
+    val period = RetentionPeriod(10, 2020)
+
+    ReportingService.shipmentCountsForPeriod(subs, period, shipmentsCount = 3) mustBe List(3, 2, 1)
+  }
+
+  it should "select proper periods and create a retention report" in {
+    makeUserSubAndNShipments(LocalDate.of(2020, 9, 5), 4)
+    makeUserSubAndNShipments(LocalDate.of(2020, 9, 5), 4)
+    makeUserSubAndNShipments(LocalDate.of(2020, 9, 5), 3)
+    makeUserSubAndNShipments(LocalDate.of(2020, 9, 5), 2)
+    makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 3)
+    makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 3)
+    makeUserSubAndNShipments(LocalDate.of(2020, 10, 5), 2)
+    makeUserSubAndNShipments(LocalDate.of(2020, 11, 5), 2)
+    makeUserSubAndNShipments(LocalDate.of(2020, 11, 5), 2)
+    makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1)
+    makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1)
+    makeUserSubAndNShipments(LocalDate.of(2020, 12, 5), 1, "tpp")
+
+    val lastPeriod = RetentionPeriod(12, 2020)
+
+    val subSize = 4 + 4 + 3 + 2 + 3 + 3 + 2 + 2 + 2 + 1 + 1
+
+    ReportingService.subscriptionRetentionReport(lastPeriod, periodsCount = 3) mustBe
+      SubscriptionRetentionReport(
+        List(
+          SubscriptionRetentionForPeriod(RetentionPeriod(10, 2020), subSize, List(3, 3, 2)),
+          SubscriptionRetentionForPeriod(RetentionPeriod(11, 2020), subSize, List(2, 2)),
+          SubscriptionRetentionForPeriod(RetentionPeriod(12, 2020), subSize, List(2))
+        )
+      )
+  }
+
+  private def makeUserSubAndNShipments(startDate: LocalDate, n: Int, priceCode: String = "default"): Subscription = {
+    val user = User.createNewUser(
+      firstName = "John",
+      lastName = "Doe",
+      stripeId = "cus_1234",
+      email = "john@example.com",
+      password = "1234",
+      phone = "123456789",
+      coupon = Empty,
+      referer = Empty,
+      agency = Empty,
+      UserType.Agent,
+      ""
+    )
+
+    val start = startDate.atStartOfDay(zoneId)
+    val hwPriceCode =
+      if (priceCode == "default")
+        Props.get("default.price.code").openOr("")
+      else
+        priceCode
+
+    val sub = Subscription.createNewSubscription(
+      Full(user),
+      stripeSubscriptionId = "sub_1234",
+      priceCode = hwPriceCode,
+      startDate = Date.from(start.toInstant),
+      nextShipDate = Date.from(start.plusDays(5).toInstant)
+    )
+
+    (0 until n).reverse foreach { i =>
+      val dateProcessed    = start.minusMonths(i)
+      val expectedShipDate = dateProcessed.plusDays(5)
+
+      Shipment.create
+        .shipmentId(generateLongId)
+        .stripePaymentId("pay_1234")
+        .stripeChargeId("")
+        .subscription(sub)
+        .expectedShipDate(Date.from(expectedShipDate.toInstant))
+        .dateProcessed(Date.from(dateProcessed.toInstant))
+        .amountPaid("10.00")
+        .taxPaid("2.00")
+        .shipmentStatus(ShipmentStatus.Paid)
+        .freeUpgradeSample(false)
+        .saveMe
+    }
+
+    sub.reload
   }
 
 }
