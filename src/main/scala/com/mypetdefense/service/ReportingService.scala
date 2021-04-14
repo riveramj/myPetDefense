@@ -16,6 +16,9 @@ import net.liftweb.util.Props
 
 import java.time._
 
+case class SnapshotStatistics(agency: Agency, boxStatistics: BoxStatistics)
+case class BoxStatistics(boxType: BoxType.Value, boxCount: Int, subscriptionCount: Int)
+
 object ReportingService extends Loggable {
 
   val tppName          = "TPP"
@@ -1248,4 +1251,31 @@ object ReportingService extends Loggable {
     )
   }
 
+  def getActiveSubscriptionsByAgency: Map[Agency, List[Subscription]] = {
+    val activeSubscriptions = Subscription.activeSubscriptions
+
+    val agencyAndSubscriptions = for {
+      sub <- activeSubscriptions
+      user <- sub.user.obj
+      agency <- user.referer.obj
+    } yield (agency, sub)
+
+    agencyAndSubscriptions.groupBy(_._1).collect { case (agency, agencySubs) =>
+      agency -> agencySubs.map(_._2)
+    }
+  }
+
+  def getSnapshotStatisticsForSubsByAgency(subsByAgency:  Map[Agency, List[Subscription]]): Iterable[SnapshotStatistics] = {
+    for {
+      (agency, subscriptions) <- subsByAgency
+      activeBoxes = subscriptions
+        .flatMap(_.subscriptionBoxes)
+        .filter(_.status.get == Status.Active)
+      (boxType, boxes) <- activeBoxes.groupBy(_.boxType.get)
+      subIds = boxes.map(_.subscription.get).distinct
+      boxStatistics = BoxStatistics(boxType, boxes.size, subIds.size)
+    } yield {
+      SnapshotStatistics(agency, boxStatistics)
+    }
+  }
 }

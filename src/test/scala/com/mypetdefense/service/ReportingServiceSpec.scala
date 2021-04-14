@@ -13,6 +13,7 @@ import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.util.CalculationHelper
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.{Empty, Full}
+import net.liftweb.mapper.By
 import net.liftweb.util.Props
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
@@ -635,6 +636,81 @@ class ReportingServiceSpec extends DBTest {
           SubscriptionRetentionForPeriod(RetentionPeriod(12, 2020), subSize, List(2))
         )
       )
+  }
+
+  it should "list active subscriptions by agency" in {
+    forAll(
+      mapWithNOfUserNSubscriptionGen(),
+      mapWithNOfUserNSubscriptionGen(),
+      mapWithNOfUserNSubscriptionGen(),
+      mapWithNOfUserNSubscriptionGen()
+    ) { (mpdActiveUsersSubscription, tppActiveUsersSubscription, canceledMPDUsersSubscription, activeTPPUsersSuspendedSubscription) =>
+      val myPetDefenseAgency = createAgency(mpdAgencyName)
+      val tppAgency = createAgency(tppAgencyName)
+
+      val activeMPDSubscriptions = mpdActiveUsersSubscription.map {
+        case (u, s) =>
+          val userSub = insertUserAndSub(u, s)
+          userSub.user.referer(myPetDefenseAgency).saveMe()
+          userSub.subscription.saveMe()
+      }
+      val activeTPPSubscriptions = tppActiveUsersSubscription.map {
+        case (u, s) =>
+          val userSub = insertUserAndSub(u, s)
+          userSub.user.status(Status.Active).referer(tppAgency).saveMe()
+          userSub.subscription.status(Status.Active).saveMe()
+      }
+      canceledMPDUsersSubscription.map {
+        case (u, s) =>
+          val userSub = insertUserAndSub(u, s)
+          userSub.subscription.status(Status.Cancelled).saveMe()
+          userSub.user.status(Status.Cancelled).referer(myPetDefenseAgency).saveMe()
+      }
+      activeTPPUsersSuspendedSubscription.map {
+        case (u, s) =>
+          val userSub = insertUserAndSub(u, s)
+          userSub.subscription.status(Status.BillingSuspended).saveMe()
+          userSub.user.status(Status.Active).referer(tppAgency).saveMe()
+      }
+
+      val expectedSubscriptionsByAgency = Map(myPetDefenseAgency -> activeMPDSubscriptions.toList, tppAgency -> activeTPPSubscriptions)
+      val result = ReportingService.getActiveSubscriptionsByAgency
+
+      result should contain theSameElementsAs expectedSubscriptionsByAgency
+      cleanUpSuccess()
+    }
+  }
+
+  it should "create SnapshotStatistics for subs by agency" in {
+    forAll(
+      petsAndShipmentChainDataGen(petsSize = 3),
+      petsAndShipmentChainDataGen(petsSize = 7)
+    ) { (upgradedPets, basicPets) =>
+      val myPetDefenseAgency = createAgency(mpdAgencyName)
+
+      val hwMpdPets =
+        insertPetAndShipmentsChainAtAgency(upgradedPets, myPetDefenseAgency, subUpgraded = true)
+      val upgradedPetCount = hwMpdPets.pets.size
+
+      val basicMpdPets =
+        insertPetAndShipmentsChainAtAgency(basicPets, myPetDefenseAgency, subUpgraded = false)
+      val basicPetCount = basicMpdPets.pets.size
+
+      val expectedUpgradedBoxStatistics = BoxStatistics(BoxType.healthAndWellness, upgradedPetCount, 1)
+      val expectedBasicBoxStatistics = BoxStatistics(BoxType.basic, basicPetCount, 1)
+
+      val expectedResult = List(
+        SnapshotStatistics(myPetDefenseAgency, expectedUpgradedBoxStatistics),
+        SnapshotStatistics(myPetDefenseAgency, expectedBasicBoxStatistics)
+      )
+
+      val subsByAgency = Map(myPetDefenseAgency -> List(basicMpdPets.subscription, hwMpdPets.subscription))
+
+      val result = ReportingService.getSnapshotStatisticsForSubsByAgency(subsByAgency)
+
+      result should contain theSameElementsAs expectedResult
+      cleanUpSuccess()
+    }
   }
 
   private def makeUserSubAndNShipments(startDate: LocalDate, n: Int, priceCode: String = "default"): Subscription = {
