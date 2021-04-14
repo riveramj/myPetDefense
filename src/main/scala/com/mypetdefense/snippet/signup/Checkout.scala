@@ -95,7 +95,7 @@ class Checkout extends Loggable {
         (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
 
       case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount < subtotal =>
-        if (couponCode == "20off") {
+        if (List("20off", "80off").contains(couponCode)) {
 
           val smallDogPromo = smallDogCount * BigDecimal(19.99)
           val nonSmallDogPromo = nonSmallDogCount * BigDecimal(22.99)
@@ -169,7 +169,7 @@ class Checkout extends Loggable {
 
   private def tryToCreateUser = {
     val promoPennyCount = {
-      if (couponCode == "20off") {
+      if (List("20off", "80off").contains(couponCode)) {
         if (nonSmallDogCount >= 3)
           (smallDogCount * 2499) + ((nonSmallDogCount - 3) * 2799) + 1500
         else if ((smallDogCount + nonSmallDogCount) >= 3)
@@ -180,7 +180,7 @@ class Checkout extends Loggable {
     }
 
     val promoPennyCoupon = {
-      if (couponCode == "20off")
+      if (List("20off", "80off").contains(couponCode))
         Empty
       else
         coupon
