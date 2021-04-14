@@ -1,34 +1,48 @@
 package com.mypetdefense.jobs
 
 import com.mypetdefense.model._
-import net.liftweb.common.Box
 import net.liftweb.mapper.By
 import org.quartz._
 
 class RecordStatisticsSnapshotJob extends ManagedJob {
-  case class SnapshotStatistics(agency: Box[Agency], subscriptionCount: Int, boxCountByType: Map[BoxType.Value, Int])
+  case class SnapshotStatistics(agency: Agency, boxStatistics: BoxStatistics)
+  case class BoxStatistics(boxType: BoxType.Value, boxCount: Int, subscriptionCount: Int)
 
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
-    val users = User.findAll(By(User.status, Status.Active))
-    val usersByAgency = users.groupBy(_.referer.obj)
-    val boxesByTypeAndAgency = usersByAgency.map { case (agency, users) =>
-      val subscriptions = users.flatMap(_.subscription.obj.toList
-        .filter(_.status == Status.Active)
-      )
-      val activeBoxes = subscriptions.flatMap(_.subscriptionBoxes.toList.filter(_.status.get == Status.Active))
-      val boxCountByType = activeBoxes.groupBy(_.boxType.get).map { case (boxType, subscriptions) =>
-        (boxType, subscriptions.size)
-      }
+    val activeSubscriptions = Subscription.findAll(By(Subscription.status, Status.Active))
+    val agencyAndSubscriptions =
+      for {
+        sub <- activeSubscriptions
+        user <- sub.user.obj
+        agency <- user.referer.obj
+      } yield (agency, sub)
 
-      SnapshotStatistics(agency, subscriptions.size, boxCountByType)
+    val subsByAgency = agencyAndSubscriptions.groupBy(_._1).collect { case (agency, agencySubs) =>
+      agency -> agencySubs.map(_._2)
     }
 
+    val snapshotStatistics =
+      (for {
+        (agency, subscriptions) <- subsByAgency
+        subscription <- subscriptions
+        activeBoxes = subscription.subscriptionBoxes.filter(_.status.get == Status.Active)
+      } yield {
+        val boxStatistics: Iterable[BoxStatistics] = activeBoxes.groupBy(_.boxType.get).map { case (boxType, boxes) =>
+          val subIds = boxes.map(_.subscription.get).distinct
+          BoxStatistics(boxType, boxes.size, subIds.size)
+        }
+
+        boxStatistics.map(SnapshotStatistics(agency, _))
+      }).flatten
+
     for {
-      snapShotStatistic <- boxesByTypeAndAgency.toList
-      agency <- snapShotStatistic.agency.toList
-      (boxType, boxCount) <- snapShotStatistic.boxCountByType
+      snapShotStatistic <- snapshotStatistics
+      agency = snapShotStatistic.agency
+      boxType = snapShotStatistic.boxStatistics.boxType
+      subscriptionCount = snapShotStatistic.boxStatistics.subscriptionCount
+      boxCount = snapShotStatistic.boxStatistics.boxCount
     } yield {
-      StatisticsSnapshot.createDailySnapShot(snapShotStatistic.subscriptionCount, boxCount, boxType, agency)
+      StatisticsSnapshot.createDailySnapShot(subscriptionCount, boxCount, boxType, agency)
     }
   }
 }
