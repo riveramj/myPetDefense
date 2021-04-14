@@ -1,38 +1,13 @@
 package com.mypetdefense.jobs
 
 import com.mypetdefense.model._
-import net.liftweb.mapper.By
+import com.mypetdefense.service.ReportingService
 import org.quartz._
 
 class RecordStatisticsSnapshotJob extends ManagedJob {
-  case class SnapshotStatistics(agency: Agency, boxStatistics: BoxStatistics)
-  case class BoxStatistics(boxType: BoxType.Value, boxCount: Int, subscriptionCount: Int)
-
   def execute(context: JobExecutionContext): Unit = executeOp(context) {
-    val activeSubscriptions = Subscription.findAll(By(Subscription.status, Status.Active))
-    val agencyAndSubscriptions =
-      for {
-        sub <- activeSubscriptions
-        user <- sub.user.obj
-        agency <- user.referer.obj
-      } yield (agency, sub)
-
-    val subsByAgency = agencyAndSubscriptions.groupBy(_._1).collect { case (agency, agencySubs) =>
-      agency -> agencySubs.map(_._2)
-    }
-
-    val snapshotStatistics =
-      for {
-        (agency, subscriptions) <- subsByAgency
-        activeBoxes = subscriptions
-          .flatMap(_.subscriptionBoxes)
-          .filter(_.status.get == Status.Active)
-        (boxType, boxes) <- activeBoxes.groupBy(_.boxType.get)
-        subIds = boxes.map(_.subscription.get).distinct
-        boxStatistics = BoxStatistics(boxType, boxes.size, subIds.size)
-      } yield {
-        SnapshotStatistics(agency, boxStatistics)
-      }
+    val subsByAgency = ReportingService.getActiveSubscriptionsByAgency
+    val snapshotStatistics = ReportingService.getSnapshotStatisticsForSubsByAgency(subsByAgency)
 
     for {
       snapShotStatistic <- snapshotStatistics
