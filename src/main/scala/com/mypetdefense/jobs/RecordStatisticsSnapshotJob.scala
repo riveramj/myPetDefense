@@ -22,18 +22,17 @@ class RecordStatisticsSnapshotJob extends ManagedJob {
     }
 
     val snapshotStatistics =
-      (for {
+      for {
         (agency, subscriptions) <- subsByAgency
-        subscription <- subscriptions
-        activeBoxes = subscription.subscriptionBoxes.filter(_.status.get == Status.Active)
+        activeBoxes = subscriptions
+          .flatMap(_.subscriptionBoxes)
+          .filter(_.status.get == Status.Active)
+        (boxType, boxes) <- activeBoxes.groupBy(_.boxType.get)
+        subIds = boxes.map(_.subscription.get).distinct
+        boxStatistics = BoxStatistics(boxType, boxes.size, subIds.size)
       } yield {
-        val boxStatistics: Iterable[BoxStatistics] = activeBoxes.groupBy(_.boxType.get).map { case (boxType, boxes) =>
-          val subIds = boxes.map(_.subscription.get).distinct
-          BoxStatistics(boxType, boxes.size, subIds.size)
-        }
-
-        boxStatistics.map(SnapshotStatistics(agency, _))
-      }).flatten
+        SnapshotStatistics(agency, boxStatistics)
+      }
 
     for {
       snapShotStatistic <- snapshotStatistics
