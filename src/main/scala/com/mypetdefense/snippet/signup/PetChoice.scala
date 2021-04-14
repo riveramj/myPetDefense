@@ -19,8 +19,10 @@ object PetChoice extends Loggable {
       PetFlowChoices.woofTraxOfferCode(woofTraxOfferCode)
       PetFlowChoices.woofTraxUserId(S.param("ui"))
 
-      val possibleCoupon: Box[Coupon] = woofTraxOfferCode.flatMap(oc => Coupon.find(By(Coupon.couponCode, oc)))
-      PetFlowChoices.coupon(possibleCoupon)
+      if (woofTraxOfferCode.isDefined) {
+        val coupon = Coupon.find(By(Coupon.couponCode, "80off"))
+        PetFlowChoices.coupon(coupon)
+      }
 
       S.redirectTo(DogDetails.menu.loc.calcDefaultHref)
     })

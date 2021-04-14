@@ -108,8 +108,9 @@ trait StripeHook extends RestHelper with Loggable {
           formatAmount(tax)
         )
       }
+      val couponCode = coupon.map(_.couponCode.get).openOr("")
 
-      if (coupon.map(_.couponCode.get == "20off").openOr(false))
+      if (List("20off", "80off").contains(couponCode))
         ParentService.updateStripeSubscriptionTotal(user)
 
       OkResponse()
