@@ -57,7 +57,7 @@ object DailyRecordStatisticsSnapshotJob extends TriggeredJob {
     .newTrigger()
     .withIdentity("DailyRecordStatisticsSnapshotJobTrigger")
     .startNow()
-    .withSchedule(CronScheduleBuilder.cronSchedule("0 56 23 ? * * *"))
+    .withSchedule(CronScheduleBuilder.cronSchedule("0 04 13 ? * * *"))
     .build()
 }
 
