@@ -72,7 +72,6 @@ object BootUtil {
     TaggedItem,
     Tag,
     AddOnProduct,
-    AmazonOrder,
     ApiRequestBackup,
     ProductSchedule,
     ProductScheduleItem,

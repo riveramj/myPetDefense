@@ -59,7 +59,6 @@ object DbSetup extends Loggable {
     TaggedItem,
     Tag,
     AddOnProduct,
-    AmazonOrder,
     ApiRequestBackup,
     ProductSchedule,
     ProductScheduleItem,
