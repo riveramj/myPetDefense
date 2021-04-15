@@ -113,21 +113,6 @@ object Generator extends ScalaCheckHelper {
       weight = generateMoneyString.toDouble
     } yield InsertGenData(name, itemNumber, weight)
 
-  def genUnitOfMeasure: Gen[UnitOfMeasure.Value] =
-    Gen.oneOf(UnitOfMeasure.values)
-
-  def genInventoryItem: Gen[InventoryItem] =
-    for {
-      itemNumber <- genNonEmptyAlphaStr
-      desc       <- genNonEmptyAlphaStr
-      unit       <- genUnitOfMeasure
-      total      <- genPosInt
-    } yield InventoryItem.create
-      .itemNumber(itemNumber)
-      .description(desc)
-      .unitOfMeasure(unit)
-      .total(total)
-
   def genSubscriptionToCreate: Gen[SubscriptionCreateGeneratedData] =
     for {
       stripeSubscriptionId <- genNonEmptyAlphaStr
@@ -320,11 +305,6 @@ object Generator extends ScalaCheckHelper {
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[InsertGenData]] =
     Gen.listOfN(length, genInsertData)
-
-  def listOfNInventoryItemsGen(
-      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
-  ): Gen[List[InventoryItem]] =
-    Gen.listOfN(length, genInventoryItem)
 
   def listOfNPosIntsGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
