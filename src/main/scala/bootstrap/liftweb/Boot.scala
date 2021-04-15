@@ -41,7 +41,8 @@ class Boot {
     //ReportingService.getPetlandCustomersWithStats
     //DataLoader.createEmailReports()
     //DataLoader.markSupplements
-    DataLoader.addMonthlyTPPAgentReport()
+    //DataLoader.addMonthlyTPPAgentReport()
+    DataLoader.checkUpgradesAgainstBoxes
 
     //DataLoader.upgradeSubscriptionBoxDetails()
     //DataLoader.subscriptionBoxCheck()
