@@ -103,15 +103,6 @@ class Boot {
     }) openOr resp
   }
 
-  LiftRules.supplementalHeaders.default.set(
-    List(
-      ("X-Lift-Version", LiftRules.liftVersion),
-      ("Access-Control-Allow-Origin", "https://promikallcresources.com"),
-      ("Access-Control-Allow-Content-Type", "application/json"),
-      ("Access-Control-Allow-Methods", "GET")
-    )
-  )
-
   TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
   Locale.setDefault(Locale.US)
 
