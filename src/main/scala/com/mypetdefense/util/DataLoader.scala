@@ -9,7 +9,7 @@ import net.liftweb.mapper._
 
 object DataLoader extends Loggable {
   def loadProducts: Any = {
-    if (FleaTick.findAll().isEmpty) {
+    if(FleaTick.findAll().isEmpty) {
       FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
         animalType = AnimalType.Cat,
@@ -187,13 +187,13 @@ object DataLoader extends Loggable {
     val mpdAgency = {
       val possibleMpd = Agency.mpdAgency
 
-      if (possibleMpd.isEmpty)
+      if(possibleMpd.isEmpty)
         Full(Agency.createNewAgency("My Pet Defense"))
       else
         possibleMpd
     }
 
-    if (User.findAll(By(User.userType, UserType.Admin)).isEmpty) {
+    if(User.findAll(By(User.userType, UserType.Admin)).isEmpty) {
       User.createNewUser(
         "Mike",
         "Rivera",
@@ -221,28 +221,28 @@ object DataLoader extends Loggable {
 
     for {
       subscription <- upcomingSubscriptions
-      user         <- subscription.user.obj
+      user <- subscription.user.obj
     } yield {
       ParentService.updateNextShipDate(subscription)
     }
   }
 
   def createProducts: Any = {
-    if (Product.hipAndJoint.isEmpty) {
+    if(Product.hipAndJoint.isEmpty) {
       Product.createNewProduct("Hip & Joint Chews", "hipJointChews", true)
       Product.createNewProduct("Calming Chews", "calmingChews", true)
       Product.createNewProduct("Multi-Vitamin Chews", "multiVitaminChews", true)
       Product.createNewProduct("Dental Powder", "dentalPowder", true)
     }
 
-    if (Product.skinAndCoat.isEmpty) {
+    if(Product.skinAndCoat.isEmpty) {
       Product.createNewProduct("Skin and Coat Chews", "skinAndCoatChews", true)
       Product.createNewProduct("Probiotic Chews", "probioticChews", true)
     }
   }
 
   def createBoxedTag: Any = {
-    if (Tag.findAll().isEmpty) {
+    if(Tag.findAll().isEmpty) {
       Tag.createNewTag("Use Box")
     }
   }
@@ -329,23 +329,23 @@ object DataLoader extends Loggable {
     val parents = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
 
     for {
-      parent  <- parents
+      parent <- parents
       address <- parent.shippingAddress
     } yield {
-      if (address.state.get.toLowerCase == "ga" && parent.taxRate.get == 0d) {
+      if(address.state.get.toLowerCase == "ga" && parent.taxRate.get == 0d) {
         parent.setTaxRate
-      } else if (address.state.get.toLowerCase != "ga") {
+      } else if(address.state.get.toLowerCase != "ga") {
         parent.taxRate(0d).saveMe
       }
     }
   }
 
   def createBasicExistingBoxes: Any = {
-    if (SubscriptionBox.findAll().isEmpty) {
+    if(SubscriptionBox.findAll().isEmpty) {
       for {
-        user         <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
+        user <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
         subscription <- Subscription.find(By(Subscription.user, user)).toList
-        pet          <- subscription.getPets
+        pet <- subscription.getPets
       } yield {
         val box = SubscriptionBox.createNewBox(subscription, pet, false)
         pet.box(box).saveMe()
@@ -356,7 +356,7 @@ object DataLoader extends Loggable {
 
   def connectCancelledUsersToSubscription() {
     for {
-      user         <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Cancelled))
+      user <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Cancelled))
       subscription <- Subscription.find(By(Subscription.user, user)).toList
     } yield {
       user.subscription(subscription).saveMe()
@@ -364,7 +364,7 @@ object DataLoader extends Loggable {
   }
 
   def defaultSaleCoupons: Any = {
-    if (Coupon.find(By(Coupon.couponCode, "50off")).isEmpty) {
+    if(Coupon.find(By(Coupon.couponCode, "50off")).isEmpty) {
       val mpdAgency = Agency.mpdAgency
       CouponService.createCoupon("50off", mpdAgency, "1", "50", "0")
       CouponService.createCoupon("100off", mpdAgency, "1", "100", "0")
@@ -372,7 +372,7 @@ object DataLoader extends Loggable {
   }
 
   def upgradeInsert: Any =
-    if (Insert.tryUpgrade.isEmpty) {
+    if(Insert.tryUpgrade.isEmpty) {
       Insert.createNewInsert(
         "Try Upgraded Box",
         "upgrade-insert",
@@ -392,22 +392,22 @@ object DataLoader extends Loggable {
       if !subscription.isUpgraded.get
       box <- subscription.subscriptionBoxes.headOption
     } yield {
-      if (box.subscriptionItems.toList.nonEmpty)
+      if(box.subscriptionItems.toList.nonEmpty)
         subscription.isUpgraded(true).saveMe()
     }
   }
 
   def findSeptEarlyShipments() {
     val dateFormatter = new SimpleDateFormat("M/d/y")
-    val startFree     = dateFormatter.parse("8/7/2020")
-    val endFree       = dateFormatter.parse("9/6/2020")
-    val freeMonth     = dateFormatter.parse("8/1/2020")
+    val startFree = dateFormatter.parse("8/7/2020")
+    val endFree = dateFormatter.parse("9/6/2020")
+    val freeMonth = dateFormatter.parse("8/1/2020")
 
     for {
       shipment <- Shipment.findAll(
-                   By_>(Shipment.dateShipped, startFree),
-                   By_<(Shipment.dateShipped, endFree)
-                 )
+        By_>(Shipment.dateShipped, startFree),
+        By_<(Shipment.dateShipped, endFree)
+      )
       subscription <- shipment.subscription.obj
       if subscription.freeUpgradeSampleDate.get == null
     } yield {
@@ -417,14 +417,14 @@ object DataLoader extends Loggable {
 
   def clearRecentShipments() {
     val dateFormatter = new SimpleDateFormat("M/d/y")
-    val startFree     = dateFormatter.parse("9/3/2020")
-    val endFree       = dateFormatter.parse("9/10/2020")
+    val startFree = dateFormatter.parse("9/3/2020")
+    val endFree = dateFormatter.parse("9/10/2020")
 
     for {
       shipment <- Shipment.findAll(
-                   By_>(Shipment.dateProcessed, startFree),
-                   By_<(Shipment.dateProcessed, endFree)
-                 )
+        By_>(Shipment.dateProcessed, startFree),
+        By_<(Shipment.dateProcessed, endFree)
+      )
       if shipment.shipmentStatus.get == ShipmentStatus.LabelCreated
     } yield {
       shipment.shipStationOrderId(0).shipmentStatus(ShipmentStatus.Paid).saveMe()
@@ -442,10 +442,10 @@ object DataLoader extends Loggable {
 
   def dataCleanUp() {
     val dateFormatter = new SimpleDateFormat("M/d/y")
-    val startDate     = dateFormatter.parse("7/1/2020")
+    val startDate = dateFormatter.parse("7/1/2020")
 
     for {
-      user         <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
+      user <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
       subscription <- Subscription.find(By(Subscription.user, user))
     } {
       user.subscription(subscription).saveMe()
@@ -461,21 +461,21 @@ object DataLoader extends Loggable {
 
   def removeDupUsers() {
     val dateFormatter = new SimpleDateFormat("M/d/y")
-    val startDate     = dateFormatter.parse("7/1/2020")
+    val startDate = dateFormatter.parse("7/1/2020")
 
     for {
       badUser <- User.findAll(NullRef(User.subscription), By_>(User.createdAt, startDate))
     } {
       val dupUsers = User.findAll(By(User.email, badUser.email.get))
 
-      if (dupUsers.size > 1) {
-        val possibleBadUserSub     = Subscription.find(By(Subscription.user, badUser)).toList
+      if(dupUsers.size > 1) {
+        val possibleBadUserSub = Subscription.find(By(Subscription.user, badUser)).toList
         val possibleBadUserAddress = Address.findAll(By(Address.user, badUser))
-        val pets                   = Pet.findAll(By(Pet.user, badUser))
+        val pets = Pet.findAll(By(Pet.user, badUser))
 
         val badUserInfo = List(possibleBadUserSub, possibleBadUserAddress, pets).flatten
 
-        if (badUserInfo.isEmpty)
+        if(badUserInfo.isEmpty)
           badUser.delete_!
       }
     }
@@ -483,27 +483,27 @@ object DataLoader extends Loggable {
 
   def createMissingCatBoxes(): Unit = {
     for {
-      cat          <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
-      user         <- cat.user.obj.toList
+      cat <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
+      user <- cat.user.obj.toList
       subscription <- user.subscription.obj.toList
-      catFleaTick  <- FleaTick.zoGuardCat.toList
+      catFleaTick <- FleaTick.zoGuardCat.toList
     } {
       val updatedCat = cat.size(catFleaTick.size.get).saveMe
-      val box        = SubscriptionBox.createNewBox(subscription, updatedCat, false)
+      val box = SubscriptionBox.createNewBox(subscription, updatedCat, false)
       updatedCat.box(box).saveMe()
     }
   }
 
   def createMissingDogBoxes(): Unit =
     for {
-      dog          <- Pet.findAll(By(Pet.animalType, AnimalType.Dog), NullRef(Pet.box))
-      user         <- dog.user.obj.toList
+      dog <- Pet.findAll(By(Pet.animalType, AnimalType.Dog), NullRef(Pet.box))
+      user <- dog.user.obj.toList
       subscription <- user.subscription.obj.toList
     } {
       val box = SubscriptionBox.createNewBox(subscription, dog)
       dog.box(box).saveMe()
 
-      if (subscription.isUpgraded.get) {
+      if(subscription.isUpgraded.get) {
         SubscriptionItem.createFirstBox(box)
       }
     }
@@ -515,21 +515,21 @@ object DataLoader extends Loggable {
 
     for {
       subscription <- Subscription.findAll(By(Subscription.status, Status.Cancelled))
-      user         <- subscription.user.obj.toList
+      user <- subscription.user.obj.toList
       pets = user.pets.toList
     } {
-      if (user.status.get != Status.Cancelled)
+      if(user.status.get != Status.Cancelled)
         user.status(Status.Cancelled).saveMe()
 
       cancelPets(pets)
     }
 
     for {
-      user         <- User.findAll(By(User.status, Status.Cancelled))
+      user <- User.findAll(By(User.status, Status.Cancelled))
       subscription <- user.subscription.obj.toList
       pets = user.pets.toList
     } {
-      if (subscription.status.get != Status.Cancelled)
+      if(subscription.status.get != Status.Cancelled)
         subscription.status(Status.Cancelled).saveMe()
 
       cancelPets(pets)
@@ -537,9 +537,9 @@ object DataLoader extends Loggable {
   }
 
   def subscriptionBoxCheck(): Unit = {
-    if (Product.dentalPowderSmall.isEmpty) {
+    if(Product.dentalPowderSmall.isEmpty) {
       Product.createNewProduct("Dental Powder Small", "dentalPowderSmall", false)
-      Product.createNewProduct("Dental Powder Large", "dentalPowderLarge" , false)
+      Product.createNewProduct("Dental Powder Large", "dentalPowderLarge", false)
     }
 
     val products = List(
@@ -557,7 +557,7 @@ object DataLoader extends Loggable {
       )
       subscriptionItems = box.subscriptionItems.toList.flatMap(_.product.obj)
     } yield {
-      if (subscriptionItems.forall(products.contains))
+      if(subscriptionItems.forall(products.contains))
         box.userModified(false).save()
     }
   }
@@ -568,7 +568,7 @@ object DataLoader extends Loggable {
       pet <- box.pet.obj
       products = box.subscriptionItems.toList
     } yield {
-      if (products.nonEmpty)
+      if(products.nonEmpty)
         box
           .animalType(AnimalType.Cat)
           .animalType(pet.animalType.get)
@@ -593,9 +593,9 @@ object DataLoader extends Loggable {
       box.status(Status.Cancelled).saveMe()
     }
   }
- 
+
   def createEmailReports(): List[EmailReport] = {
-    if (EmailReport.findAll().isEmpty) {
+    if(EmailReport.findAll().isEmpty) {
       val emailReports = List(
         ("Daily TPP Agent Sales Report", "Daily email that shows sales by agent an store by day", ReportType.DailyTPPAgentSalesReportEmail),
         ("Daily MPD report", "Daily email that shows shipment statistics from previous day", ReportType.DailyInternalReportEmail),
@@ -613,7 +613,7 @@ object DataLoader extends Loggable {
   }
 
   def addMonthlyTPPAgentReport() = {
-    if (EmailReport.find(By(EmailReport.reportType, ReportType.MonthlyTPPAgentSalesReportEmail)).isEmpty)
+    if(EmailReport.find(By(EmailReport.reportType, ReportType.MonthlyTPPAgentSalesReportEmail)).isEmpty)
       EmailReport.createNewEmailReport(
         "Monthly TPP Agent Report",
         "Monthly email that shows sales by agent and store for the month",
@@ -625,4 +625,15 @@ object DataLoader extends Loggable {
     Product.findAll(NotLike(Product.name, "%Dental Powder%")).map(_.isSupplement(true).saveMe())
     Product.findAll(Like(Product.name, "%Dental Powder%")).map(_.isSupplement(false).saveMe())
   }
+
+  def checkUpgradesAgainstBoxes =
+    for {
+      subscription <- Subscription.findAll(By(Subscription.isUpgraded, true))
+      boxes = subscription.subscriptionBoxes
+        .filter(_.status.get == Status.Active)
+        .filter(_.boxType == BoxType.healthAndWellness)
+    } yield {
+      if (boxes.isEmpty)
+        subscription.isUpgraded(false).saveMe()
+    }
 }
