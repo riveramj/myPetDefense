@@ -204,10 +204,6 @@ object Paths {
     AddOnSale.addOnSaleMenu,
     TreatCheckout.menu,
     AddOnCheckout.menu,
-    inventory.InventoryItems.menu,
-    inventory.Reconciliations.menu,
-    inventory.InventoryChangeAudits.menu,
-    inventory.ItemProduction.menu,
     petland.NewOrder.menu,
     PetChoice.menu,
     DogDetails.menu
