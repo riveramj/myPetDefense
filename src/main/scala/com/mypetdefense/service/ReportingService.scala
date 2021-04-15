@@ -977,12 +977,14 @@ object ReportingService extends Loggable {
     val allActiveUpgradedSubs = Subscription.upgradedActiveSubscriptions
     val upgradedCancelledSubs = Subscription.upgradedAndCancelledSubscriptions
     val allActivePets         = allActiveSubs.getAllActivePets
-    val allActiveUpgradedPets = allActiveUpgradedSubs.getAllActivePets
+    val allActiveUpgradedBoxes = allActiveUpgradedSubs
+      .flatMap(_.subscriptionBoxes.filter(_.boxType == BoxType.healthAndWellness))
+      .filter(_.status.get == Status.Active)
     val allAccountsReport     = AllAccountsReport(allActiveSubs.size, allActivePets.size)
     val upgradedSubsReport =
       upgradedSubscriptionsReport(
         allActiveUpgradedSubs,
-        allActiveUpgradedPets,
+        allActiveUpgradedBoxes,
         upgradedCancelledSubs
       )
     val activeUpgradedPetsBySize    = countPetsByProduct(allActiveUpgradedSubs)
@@ -1048,12 +1050,12 @@ object ReportingService extends Loggable {
 
   private def upgradedSubscriptionsReport(
       allActiveUpgradedSubs: List[Subscription],
-      allActivePets: List[Pet],
+      allActiveBoxes: List[SubscriptionBox],
       upgradedCancelledSubs: List[Subscription]
   ): UpgradedSubscriptionsReport =
     UpgradedSubscriptionsReport(
       allActiveUpgradedSubs.size,
-      allActivePets.size,
+      allActiveBoxes.size,
       upgradedCancelledSubs.size
     )
 
