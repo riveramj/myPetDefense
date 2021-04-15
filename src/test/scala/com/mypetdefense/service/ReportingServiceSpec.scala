@@ -13,7 +13,6 @@ import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.util.CalculationHelper
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.{Empty, Full}
-import net.liftweb.mapper.By
 import net.liftweb.util.Props
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
@@ -626,14 +625,12 @@ class ReportingServiceSpec extends DBTest {
 
     val lastPeriod = RetentionPeriod(12, 2020)
 
-    val subSize = 4 + 4 + 3 + 2 + 3 + 3 + 2 + 2 + 2 + 1 + 1
-
     ReportingService.subscriptionRetentionReport(lastPeriod, periodsCount = 3) mustBe
       SubscriptionRetentionReport(
         List(
-          SubscriptionRetentionForPeriod(RetentionPeriod(10, 2020), subSize, List(3, 3, 2)),
-          SubscriptionRetentionForPeriod(RetentionPeriod(11, 2020), subSize, List(2, 2)),
-          SubscriptionRetentionForPeriod(RetentionPeriod(12, 2020), subSize, List(2))
+          SubscriptionRetentionForPeriod(RetentionPeriod(10, 2020), 3, List(3, 3, 2)),
+          SubscriptionRetentionForPeriod(RetentionPeriod(11, 2020), 2, List(2, 2)),
+          SubscriptionRetentionForPeriod(RetentionPeriod(12, 2020), 2, List(2))
         )
       )
   }
@@ -744,7 +741,7 @@ class ReportingServiceSpec extends DBTest {
     )
 
     (0 until n).reverse foreach { i =>
-      val dateProcessed    = start.minusMonths(i)
+      val dateProcessed    = start.plusMonths(i)
       val expectedShipDate = dateProcessed.plusDays(5)
 
       Shipment.create
@@ -754,6 +751,7 @@ class ReportingServiceSpec extends DBTest {
         .subscription(sub)
         .expectedShipDate(Date.from(expectedShipDate.toInstant))
         .dateProcessed(Date.from(dateProcessed.toInstant))
+        .dateShipped(Date.from(dateProcessed.toInstant))
         .amountPaid("10.00")
         .taxPaid("2.00")
         .shipmentStatus(ShipmentStatus.Paid)

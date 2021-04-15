@@ -28,11 +28,12 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
     override def defaultValue = new Date()
   }
 
-  def currentMonthShipments: List[Shipment] = this.findAllShipments.filter { shipment =>
-    val mailedDate = shipment.getMailedDateOfShipment
-    mailedDate.map(_.getMonth == currentDate.getMonth).openOr(false) &&
-    mailedDate.map(_.getYear == currentDate.getYear).openOr(false)
-  }
+  def currentMonthShipments: List[Shipment] =
+    this.findAllShipments.filter { shipment =>
+      val mailedDate = shipment.getMailedDateOfShipment
+      mailedDate.map(_.getMonth == currentDate.getMonth).openOr(false) &&
+      mailedDate.map(_.getYear == currentDate.getYear).openOr(false)
+    }
 
   def findAllShipments: List[Shipment] =
     for {
