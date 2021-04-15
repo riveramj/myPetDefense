@@ -42,6 +42,7 @@ class Boot {
     //DataLoader.createEmailReports()
     //DataLoader.markSupplements
     //DataLoader.addMonthlyTPPAgentReport()
+    DataLoader.checkUpgradesAgainstBoxes
 
     //DataLoader.upgradeSubscriptionBoxDetails()
     //DataLoader.subscriptionBoxCheck()
