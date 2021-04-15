@@ -628,12 +628,14 @@ object DataLoader extends Loggable {
 
   def checkUpgradesAgainstBoxes =
     for {
-      subscription <- Subscription.findAll(By(Subscription.isUpgraded, true))
+      subscription <- Subscription.findAll(
+        By(Subscription.isUpgraded, false),
+        By(Subscription.status, Status.Cancelled),
+      )
       boxes = subscription.subscriptionBoxes
-        .filter(_.status.get == Status.Active)
         .filter(_.boxType == BoxType.healthAndWellness)
     } yield {
-      if (boxes.isEmpty)
-        subscription.isUpgraded(false).saveMe()
+      if (boxes.nonEmpty)
+        subscription.isUpgraded(true).saveMe()
     }
 }
