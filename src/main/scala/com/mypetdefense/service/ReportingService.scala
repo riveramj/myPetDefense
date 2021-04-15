@@ -3,7 +3,6 @@ package com.mypetdefense.service
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports
 import com.mypetdefense.model.domain.reports._
-import com.mypetdefense.snippet.admin.AmazonOrderExport
 import com.mypetdefense.util.CalculationHelper._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.ModelSyntax._
@@ -271,29 +270,6 @@ object ReportingService extends Loggable {
     val data = exportMonthToDateSalesReport(name)
 
     val fileName = s"month-to-date-salesData-$fileNameMonthDayYear.csv"
-
-    CSVHelper.inMemoryCsv(fileName, data)
-  }
-
-  def exportAmazonOrders(amazonOrderExport: AmazonOrderExport): Box[LiftResponse] = {
-    println(amazonOrderExport + " 000000")
-
-    val dateFormat      = AmazonOrderReport.dateFormat
-    val startDateExport = amazonOrderExport.startDate.map(dateFormat.parse)
-    val endDateExport   = amazonOrderExport.endDate.map(dateFormat.parse)
-    val petExport       = amazonOrderExport.animalType
-
-    println(petExport)
-
-    val data: List[AmazonOrderReport] =
-      for {
-        startDate <- startDateExport.toList
-        endDate   <- endDateExport.toList
-        pet       <- petExport.toList
-        order     <- AmazonOrder.findOrdersToReport(startDate, endDate, pet)
-      } yield order
-
-    val fileName = s"amazon-orders-$startDateExport-$endDateExport.csv"
 
     CSVHelper.inMemoryCsv(fileName, data)
   }
