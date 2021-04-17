@@ -14,6 +14,32 @@
         </ul>
       </section>
 
+      <section class="retention-snapshot snapshot">
+        <ul>
+          <li class="header">
+            <h3>Retention Snapshot</h3>
+            <div class="info">Health & Wellness Signups Only</div>
+          </li>
+          <li>
+            <a href="/retention-snapshot" class="retention-snapshot-export">Export Retention Snapshot</a>
+          </li>
+        </ul>
+      </section>
+
+      <section class="snapshot-in-time snapshot">
+        <ul>
+          <li class="header">
+            <h3>Snapshot in Time</h3>
+          </li>
+          <li>
+            <input id="date-for-snapshot" type="text" placeholder="mm/dd/yyyy">
+          </li>
+          <li class="snapshot-in-time-container">
+            <a href="/snapshot-in-time" class="snapshot-in-time-export">Export Snapshot in Time</a>
+          </li>
+        </ul>
+      </section>
+
       <section class="new-starts snapshot">
         <ul>
           <li class="header">
@@ -145,7 +171,11 @@
   <tail>
     <script type="text/javascript" src="/static/js/chart.bundle.min.js"></script>
     <script type="text/javascript" src="/static/js/chartjs-plugin-datalabels.min.js"></script>
+    <script type="text/javascript" src="/static/js/picker.js"></script>
+    <script type="text/javascript" src="/static/js/picker.date.js"></script>
 
     <script type="text/javascript" data-lift="script-bundle?name=executive-dashboard"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/date-picker/default.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/date-picker/default.date.css">
   </tail>
 </div>

@@ -39,12 +39,18 @@ class Boot {
     //DataLoader.cancellationDataSync()
     //DataLoader.createMissingDogBoxes()
     //ReportingService.getPetlandCustomersWithStats
+    //DataLoader.createEmailReports()
+    //DataLoader.markSupplements
+    //DataLoader.addMonthlyTPPAgentReport()
+    //DataLoader.checkUpgradesAgainstBoxes
 
     //DataLoader.upgradeSubscriptionBoxDetails()
     //DataLoader.rebuildSubscriptionUpgrades()
     //DataLoader.subscriptionBoxCheck()
 
     //DataLoader.connectCancelledUsersToSubscription()
+
+    //DataLoader.cancelBoxesForCancelledPets()
 
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
@@ -97,15 +103,6 @@ class Boot {
       }
     }) openOr resp
   }
-
-  LiftRules.supplementalHeaders.default.set(
-    List(
-      ("X-Lift-Version", LiftRules.liftVersion),
-      ("Access-Control-Allow-Origin", "https://promikallcresources.com"),
-      ("Access-Control-Allow-Content-Type", "application/json"),
-      ("Access-Control-Allow-Methods", "GET")
-    )
-  )
 
   TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
   Locale.setDefault(Locale.US)

@@ -11,7 +11,7 @@ class ShipmentSpec extends DBTest {
   it should "find mtd shipments" in {
     forAll(genShipmentChainData, genShipmentChainData) { (dataMonth, dataPreviousMonth) =>
       insertUserSubAndShipment(dataPreviousMonth).shipments
-        .map(_.createdAt(anyDayUntilThisMonth.toDate).saveMe())
+        .map(_.createdAt(anyDayOfLastMonth.toDate).saveMe())
       val expectedShipments = insertUserSubAndShipment(dataMonth).shipments
         .map(_.createdAt(anyDayOfThisMonth.toDate).saveMe().id.get)
 

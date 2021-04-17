@@ -15,7 +15,7 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 class DataIntegrityCheckJobSpec extends DBTest {
 
   private val threeDaysAgoDate: Date = threeDaysAgo.toDate
-  private val sixtyDaysAgo: Date     = anyDayOfThisYearUntilSixtyDaysAgo.toDate
+  private val sixtyDaysAgo: Date     = anyDayUntilSixtyDaysAgo.toDate
 
   it should "properly check data integrity and don't make duplicates" in {
     forAll(
