@@ -1,7 +1,7 @@
 package com.mypetdefense.model.domain.reports
 
 import com.mypetdefense.typeclasses.ToCsvStringConverter
-import com.mypetdefense.util.CSVHelper
+import com.mypetdefense.util.csv.CSVHelper
 
 case class AgencyCustomersReport(agencyName: String, customersInfo: List[CustomerDataReport]) {
   def customersInfoToCSV(headers: List[String]): String =

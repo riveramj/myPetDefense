@@ -4,7 +4,7 @@ import java.time.Month
 
 import com.mypetdefense.model.Status
 import com.mypetdefense.typeclasses.ToCsvStringConverter
-import com.mypetdefense.util.CSVHelper.spacerRow
+import com.mypetdefense.util.csv.CSVHelper.spacerRow
 import net.liftweb.common.Box
 
 case class CancellationDataReport(
