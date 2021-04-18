@@ -45,7 +45,7 @@ class Boot {
     //DataLoader.checkUpgradesAgainstBoxes
 
     //DataLoader.upgradeSubscriptionBoxDetails()
-    //DataLoader.rebuildSubscriptionUpgrades()
+    DataLoader.rebuildSubscriptionUpgrades()
     //DataLoader.subscriptionBoxCheck()
 
     //DataLoader.connectCancelledUsersToSubscription()

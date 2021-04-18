@@ -560,19 +560,60 @@ object ReportingService extends Loggable {
     )
   }
 
-  def basicUsersUpgradeReport: BasicUsersUpgradeReport = {
-    val userReports =
-      SubscriptionUpgrade
-        .findAll()
-        .map(u =>
-          BasicUserUpgradeReport(
-            u.subscription.get,
-            u.shipmentCountAtUpgrade.get,
-            u.upgradeDate.get
-          )
-        )
+  def basicUsersUpgradeCsv: Box[InMemoryResponse] = {
+    val data     = basicUsersUpgradeReport
+    val fileName = s"user-upgrade-report-${LocalDate.now()}.csv"
+    CSVHelper.inMemoryCsv(fileName, data)
+  }
 
-    BasicUsersUpgradeReport(userReports)
+  def basicUsersUpgradeReport: BasicUsersUpgradeReport = {
+    val upgradeReports =
+      for {
+        upgrade <- SubscriptionUpgrade.findAll
+        subscription <- upgrade.subscription.obj.toList
+        subscriptionStatus = subscription.status.get
+      } yield {
+        BasicUserUpgradeReport(
+          upgrade.subscription.get,
+          upgrade.user.get,
+          subscriptionStatus,
+          upgrade.shipmentCountAtUpgrade.get,
+          upgrade.referrer.obj,
+          upgrade.upgradeDate.get
+        )
+      }
+
+    val activeUpgradesByAgency = upgradeReports
+      .groupBy(_.agency)
+      .map { case (agency, upgrades) =>
+        val activeUpgrades = upgrades.filter { report =>
+          List(Status.Active, Status.Paused).contains(report.subscriptionStatus)
+        }
+
+        val upgradeCounts = upgrades.map(_.shipmentCountAtUpgrade)
+        val averageShipmentsBeforeUpgrade: Double = tryo(upgradeCounts.sum/upgradeCounts.size.toDouble).openOr(0)
+
+        val petCount = activeUpgrades
+          .flatMap(u=> User.find(u.userId))
+          .flatMap(_.pets)
+
+        UpgradesByAgency(
+          agency.map(_.name.get).getOrElse(""),
+          upgrades.size,
+          averageShipmentsBeforeUpgrade,
+          activeUpgrades.size,
+          petCount.size
+        )
+      }.toList
+
+    val totalActiveUpgradedCount = activeUpgradesByAgency.map(_.activeUpgradeCount).sum
+    val totalInactiveUpgradedCount = activeUpgradesByAgency.map(_.totalUpgradedCount).sum - totalActiveUpgradedCount
+
+    BasicUsersUpgradeReport(
+      totalActiveUpgradedCount,
+      totalInactiveUpgradedCount,
+      activeUpgradesByAgency
+    )
   }
 
   def subscriptionRetentionCsv(

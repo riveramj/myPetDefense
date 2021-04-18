@@ -8,8 +8,9 @@ import com.mypetdefense.helpers.db.ProductDbUtils.createNewProduct
 import com.mypetdefense.helpers.db.ProductScheduleDbUtils
 import com.mypetdefense.helpers.db.ShipmentDbUtils.createShipment
 import com.mypetdefense.helpers.db.SubscriptionDbUtils.createSubscription
+import com.mypetdefense.helpers.db.SubscriptionUpgradeDbUtil.createSubscriptionUpgrade
 import com.mypetdefense.helpers.db.UserDbUtils.createUser
-import com.mypetdefense.helpers.models.PetlandAndMPDAgencies
+import com.mypetdefense.helpers.models.{PetlandAndMPDAgencies, TppAndMPDAgencies}
 import com.mypetdefense.model._
 import net.liftweb.common._
 import net.liftweb.mapper.{DB, DefaultConnectionIdentifier}
@@ -21,6 +22,13 @@ object GeneralDbUtils {
   val petLandAgencyName = "Petland"
 
   case class InsertedUserAndSub(user: User, subscription: Subscription)
+
+  case class InsertedUserSubPetsUpgradeCount(
+    user: User,
+    subscription: Subscription,
+    pets: List[Pet],
+    countAtUpgrade: Int
+)
 
   case class InsertedUserAndPet(user: User, pets: List[Pet])
 
@@ -48,22 +56,41 @@ object GeneralDbUtils {
 
   def clearTables(): Unit = {
     val tables = List(
+      User,
+      CancelledUser,
       Address,
-      Agency,
-      Event,
       Pet,
-      Insert,
+      FleaTick,
+      Shipment,
+      Event,
+      ShipmentLineItem,
       Subscription,
       SubscriptionBox,
       SubscriptionItem,
-      Shipment,
-      ShipmentLineItem,
+      SubscriptionUpgrade,
+      Agency,
+      Coupon,
+      Price,
+      GrowthRate,
+      Review,
+      Survey,
+      TreatOrder,
+      Insert,
+      Product,
+      TreatOrderLineItem,
+      Packaging,
+      TaggedItem,
+      Tag,
+      AddOnProduct,
+      ApiRequestBackup,
       ProductSchedule,
       ProductScheduleItem,
-      Product,
-      User,
       ActionLog,
-      ActionLogDetails
+      ActionLogDetails,
+      WoofTraxOrder,
+      EmailReport,
+      EmailReportRecord,
+      StatisticsSnapshot
     )
 
     val truncateAllQuery = testDatabase.truncateAllQuery(tables.map(_.dbTableName))
@@ -138,6 +165,26 @@ object GeneralDbUtils {
     inserted.copy(user = updatedUser, subscription = updatedSub)
   }
 
+  def insertSubscriptionUpgrade(
+    upgradeData: SubscriptionUpgradeCreateGeneratedData,
+    user: User,
+    subscription: Subscription
+  ) =
+    createSubscriptionUpgrade(
+      upgradeData,
+      user,
+      subscription
+    )
+
+  def insertPetsAndUserData(
+    data: List[PetData],
+    user: User
+  ): List[Pet] =
+    data.map(insertPetWithUserId(_, user))
+
+  def insertPetWithUserId(pet: PetData, user: User) =
+    createPet(user, pet)
+
   def insertProductScheduleGeneratedData(
       in: ProductScheduleGeneratedChainData
   ): InsertedScheduleAndProduct = {
@@ -151,6 +198,12 @@ object GeneralDbUtils {
     val myPetDefenseAgency = createAgency(mpdAgencyName)
     val petlandAgency      = createAgency(petLandAgencyName)
     PetlandAndMPDAgencies(petlandAgency, myPetDefenseAgency)
+  }
+
+  def createTppAndMPDAgencies(): TppAndMPDAgencies = {
+    val myPetDefenseAgency = createAgency(mpdAgencyName)
+    val tppAgency      = createAgency(tppAgencyName)
+    TppAndMPDAgencies(tppAgency, myPetDefenseAgency)
   }
 
   def insertProductToToSubBoxes(subscription: Subscription, product: Product): Unit =

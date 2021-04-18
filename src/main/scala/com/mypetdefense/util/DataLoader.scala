@@ -1,7 +1,8 @@
 package com.mypetdefense.util
 
-import java.text.SimpleDateFormat
+import com.mypetdefense.model.Agency.getHQFor
 
+import java.text.SimpleDateFormat
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import net.liftweb.common._
@@ -613,10 +614,13 @@ object DataLoader extends Loggable {
 
       val shipmentCount = shipmentNumber + 1
       val upgradeDate = upgradedShipment.dateProcessed.get
+      val user = sub.user.obj
+      val referrer = user.flatMap(_.referer.obj).map(getHQFor)
 
       SubscriptionUpgrade.create
         .subscription(sub)
-        .user(sub.user.get)
+        .user(user)
+        .referrer(referrer)
         .shipmentCountAtUpgrade(shipmentCount)
         .upgradeDate(upgradeDate)
         .saveMe

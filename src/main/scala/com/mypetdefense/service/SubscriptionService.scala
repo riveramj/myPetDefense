@@ -55,12 +55,11 @@ object SubscriptionService {
     }
 
     for {
-      box          <- updatedBoxes
       subscription <- updatedSubscription.toList
       user         <- SecurityContext.currentUser.toList
       shipmentCount = subscription.shipments.toList.size
     } yield {
-      SubscriptionUpgrade.createSubscriptionUpgrade(subscription, box, user, shipmentCount)
+      SubscriptionUpgrade.createSubscriptionUpgrade(subscription, user, shipmentCount)
       subscription.isUpgraded(true).saveMe()
     }
 
