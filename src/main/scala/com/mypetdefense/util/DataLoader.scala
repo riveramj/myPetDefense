@@ -587,23 +587,16 @@ object DataLoader extends Loggable {
   }
 
   def rebuildSubscriptionUpgrades(): Unit = {
-    val upgradedSubscriptions =
-      Subscription.findAllByInsecureSql(
-        "SELECT s.nextshipdate, s.stripesubscriptionid, s.pricecode, s.isupgraded, s.contractlength, " +
-          "s.subscriptionid, s.promptedupgrade, s.freeupgradesampledate, s.renewaldate, s.cancellationdate, " +
-          "s.cancellationreason, s.cancellationcomment, s.createdat, s.id, s.status, s.user_c, s.startdate " +
-          "FROM subscription AS s " +
-          "JOIN shipment AS sh ON s.id = sh.subscription " +
-          "JOIN shipmentlineitem AS i ON sh.id = i.shipment " +
-          "WHERE i.product IS NOT NULL;",
-        IHaveValidatedThisSQL("Arek", "2020-12-17")
-      )
+    val upgradedBasicSubs = Subscription.findAll(
+      NotBy(Subscription.priceCode, "2.0-launch"),
+      By(Subscription.isUpgraded, true)
+    )
 
     val alreadyIncluded =
       SubscriptionUpgrade.findAll().map(_.subscription.get).toSet
 
     val subsToProcess =
-      upgradedSubscriptions.filterNot(s => alreadyIncluded(s.id.get))
+      upgradedBasicSubs.filterNot(s => alreadyIncluded(s.id.get))
 
     subsToProcess foreach { sub =>
       val (upgradedShipment, shipmentNumber) =
