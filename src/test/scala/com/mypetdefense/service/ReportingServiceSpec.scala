@@ -724,7 +724,7 @@ class ReportingServiceSpec extends DBTest {
       val mpdActive = mpdUpgradesActive.map(makeUserSubAndPets(_, myPetDefenseAgency, Status.Active))
       val mpdCancelled = mpdUpgradesCancelled.map(makeUserSubAndPets(_, myPetDefenseAgency, Status.Cancelled))
       val tppActive = tppUpgradesActive.map(makeUserSubAndPets(_, tppAgency, Status.Active))
-      val tppPaused = tppUpgradesActive.map(makeUserSubAndPets(_, tppAgency, Status.Paused))
+      val tppPaused = tppUpgradesPaused.map(makeUserSubAndPets(_, tppAgency, Status.Paused))
 
       val mpdUpgrades = mpdActive ++ mpdCancelled
       val tppUpgrades = tppActive ++ tppPaused
