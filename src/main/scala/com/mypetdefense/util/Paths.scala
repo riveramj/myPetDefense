@@ -193,7 +193,6 @@ object Paths {
     agency.LegacyAgencyOverview.menu,
     agency.AgencyOverview.menu,
     agency.AgencyOverview.exportAgencyCustomerMenu,
-    agency.CustomerUpload.menu,
     admin.ProductSchedules.menu,
     Login.menu,
     ForgotPassword.menu,
