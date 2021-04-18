@@ -588,8 +588,7 @@ object DataLoader extends Loggable {
 
   def rebuildSubscriptionUpgrades(): Unit = {
     val upgradedBasicSubs = Subscription.findAll(
-      NotBy(Subscription.priceCode, "2.0-launch"),
-      By(Subscription.isUpgraded, true)
+      NotBy(Subscription.priceCode, "2.0-launch")
     )
 
     val alreadyIncluded =
@@ -598,18 +597,17 @@ object DataLoader extends Loggable {
     val subsToProcess =
       upgradedBasicSubs.filterNot(s => alreadyIncluded(s.id.get))
 
-    subsToProcess foreach { sub =>
-      val (upgradedShipment, shipmentNumber) =
-        sub.shipments
-          .sortBy(_.createdAt.get)
-          .zipWithIndex
-          .find(_._1.shipmentLineItems.exists(!_.product.isEmpty))
-          .get
-
+    for {
+      sub <- subsToProcess
+      user <- sub.user.toList
+      referrer <- user.referer.obj.map(getHQFor)
+      (upgradedShipment, shipmentNumber) <- sub.shipments
+        .sortBy(_.createdAt.get)
+        .zipWithIndex
+        .find(_._1.shipmentLineItems.exists(!_.product.isEmpty))
+    } yield {
       val shipmentCount = shipmentNumber + 1
       val upgradeDate = upgradedShipment.dateProcessed.get
-      val user = sub.user.obj
-      val referrer = user.flatMap(_.referer.obj).map(getHQFor)
 
       SubscriptionUpgrade.create
         .subscription(sub)
@@ -618,7 +616,6 @@ object DataLoader extends Loggable {
         .shipmentCountAtUpgrade(shipmentCount)
         .upgradeDate(upgradeDate)
         .saveMe
-
     }
   }
 
