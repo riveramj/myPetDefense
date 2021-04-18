@@ -1,7 +1,7 @@
 package com.mypetdefense.model.domain.reports
 
 import com.mypetdefense.typeclasses.ToCsvStringConverter
-import com.mypetdefense.util.CSVHelper.spacerRow
+import com.mypetdefense.util.csv.CSVHelper.spacerRow
 
 case class AgencyMonthSalesReport(
     year: Int,
