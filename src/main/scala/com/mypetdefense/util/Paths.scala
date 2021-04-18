@@ -164,6 +164,7 @@ object Paths {
     ParentSubscription.surveyCompleteSubscriptionMenu,
     admin.ExecutiveDashboard.menu,
     admin.ExecutiveDashboard.executiveSnapshotExportMenu,
+    admin.ExecutiveDashboard.userUpgradeExportMenu,
     admin.ExecutiveDashboard.retentionSnapshotExportMenu,
     admin.ExecutiveDashboard.snapshotInTimeExportMenu,
     admin.ShipmentDashboard.menu,

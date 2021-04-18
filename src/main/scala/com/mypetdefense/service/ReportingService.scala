@@ -15,6 +15,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.util.Props
 
 import java.time._
+import scala.math.BigDecimal.double2bigDecimal
 
 case class SnapshotStatistics(agency: Agency, boxStatistics: BoxStatistics)
 case class BoxStatistics(boxType: BoxType.Value, boxCount: Int, subscriptionCount: Int)
@@ -558,6 +559,62 @@ object ReportingService extends Loggable {
       remainingMonthSubscriptions,
       newUserCount,
       cancellationsCount
+    )
+  }
+
+  def basicUsersUpgradeCsv: Box[InMemoryResponse] = {
+    val data     = basicUsersUpgradeReport
+    val fileName = s"user-upgrade-report-${LocalDate.now()}.csv"
+    CSVHelper.inMemoryCsv(fileName, data)
+  }
+
+  def basicUsersUpgradeReport: BasicUsersUpgradeReport = {
+    val upgradeReports =
+      for {
+        upgrade <- SubscriptionUpgrade.findAll
+        subscription <- upgrade.subscription.obj.toList
+        subscriptionStatus = subscription.status.get
+      } yield {
+        BasicUserUpgradeReport(
+          upgrade.subscription.get,
+          upgrade.user.get,
+          subscriptionStatus,
+          upgrade.shipmentCountAtUpgrade.get,
+          upgrade.referrer.obj,
+          upgrade.upgradeDate.get
+        )
+      }
+
+    val activeUpgradesByAgency = upgradeReports
+      .groupBy(_.agency)
+      .map { case (agency, upgrades) =>
+        val activeUpgrades = upgrades.filter { report =>
+          List(Status.Active, Status.Paused).contains(report.subscriptionStatus)
+        }
+
+        val upgradeCounts = upgrades.map(_.shipmentCountAtUpgrade)
+        val averageShipmentsBeforeUpgrade = BigDecimal(tryo(upgradeCounts.sum/upgradeCounts.size.toDouble).openOr(0D)).setScale(2, BigDecimal.RoundingMode.HALF_UP)
+
+        val petCount = activeUpgrades
+          .flatMap(u=> User.find(u.userId))
+          .flatMap(_.pets)
+
+        UpgradesByAgency(
+          agency.map(_.name.get).getOrElse(""),
+          upgrades.size,
+          averageShipmentsBeforeUpgrade,
+          activeUpgrades.size,
+          petCount.size
+        )
+      }.toList
+
+    val totalActiveUpgradedCount = activeUpgradesByAgency.map(_.activeUpgradeCount).sum
+    val totalInactiveUpgradedCount = activeUpgradesByAgency.map(_.totalUpgradedCount).sum - totalActiveUpgradedCount
+
+    BasicUsersUpgradeReport(
+      totalActiveUpgradedCount,
+      totalInactiveUpgradedCount,
+      activeUpgradesByAgency
     )
   }
 

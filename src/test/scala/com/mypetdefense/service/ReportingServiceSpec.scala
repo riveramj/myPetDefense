@@ -710,6 +710,95 @@ class ReportingServiceSpec extends DBTest {
     }
   }
 
+  it should "create basic users upgrade report" in {
+    forAll(
+      listOfNSubscriptionUpgradeChainData(3, 2),
+      listOfNSubscriptionUpgradeChainData(3, 2),
+      listOfNSubscriptionUpgradeChainData(3, 2),
+      listOfNSubscriptionUpgradeChainData(3, 2)
+    ) { (mpdUpgradesActive, mpdUpgradesCancelled, tppUpgradesActive, tppUpgradesPaused) =>
+      val tppAndMPDAgencies = createTppAndMPDAgencies()
+      val myPetDefenseAgency = tppAndMPDAgencies.mpd
+      val tppAgency = tppAndMPDAgencies.tpp
+
+      val mpdActive = mpdUpgradesActive.map(makeUserSubAndPets(_, myPetDefenseAgency, Status.Active))
+      val mpdCancelled = mpdUpgradesCancelled.map(makeUserSubAndPets(_, myPetDefenseAgency, Status.Cancelled))
+      val tppActive = tppUpgradesActive.map(makeUserSubAndPets(_, tppAgency, Status.Active))
+      val tppPaused = tppUpgradesPaused.map(makeUserSubAndPets(_, tppAgency, Status.Paused))
+
+      val mpdUpgrades = mpdActive ++ mpdCancelled
+      val tppUpgrades = tppActive ++ tppPaused
+
+      val mpdAvgShipmentCount = calcAvg(
+        mpdUpgrades.map(_.countAtUpgrade)
+      )
+      val tppAvgShipmentCount = calcAvg(
+        tppUpgrades.map(_.countAtUpgrade)
+      )
+
+      val mpdActivePets = mpdActive.flatMap(_.pets)
+      val tppActivePets = tppActive.flatMap(_.pets) ++ tppPaused.flatMap(_.pets)
+
+      val mpdUpgradeData = if (mpdUpgrades.nonEmpty)
+        Full(UpgradesByAgency(
+          myPetDefenseAgency.name.get,
+          mpdActive.size + mpdCancelled.size,
+          mpdAvgShipmentCount,
+          mpdActive.size,
+          mpdActivePets.size
+        ))
+      else
+        Empty
+
+      val tppUpgradeData = if (tppUpgrades.nonEmpty)
+        Full(UpgradesByAgency(
+          tppAgency.name.get,
+          tppActive.size + tppPaused.size,
+          tppAvgShipmentCount,
+          tppActive.size + tppPaused.size,
+          tppActivePets.size
+        ))
+      else
+        Empty
+
+      val activeUpgradesByAgency = List(
+        mpdUpgradeData,
+        tppUpgradeData
+      ).flatten
+
+      val expectedResult = BasicUsersUpgradeReport(
+        mpdActive.size + tppActive.size + tppPaused.size,
+        mpdCancelled.size,
+        activeUpgradesByAgency
+      )
+
+      val result = ReportingService.basicUsersUpgradeReport
+
+      result.inactiveUpgradeCount shouldBe expectedResult.inactiveUpgradeCount
+      result.activeUpgradeCount shouldBe expectedResult.activeUpgradeCount
+      result.upgradesByAgency should contain theSameElementsAs expectedResult.upgradesByAgency
+
+      cleanUpSuccess()
+    }
+  }
+
+  private def makeUserSubAndPets(
+    upgradeData: SubscriptionUpgradeChainData,
+    agency: Agency,
+    status: Status.Value
+  ) = {
+    val userSub = insertUserAndSub(upgradeData.user, upgradeData.subscription)
+    val pets = insertPetsAndUserData(upgradeData.pets, userSub.user).map(_.status(Status.Active).saveMe())
+    val updatedSubscription = userSub.subscription.status(status).saveMe()
+    val updatedUser = userSub.user.referer(agency).saveMe()
+
+    val upgrade = insertSubscriptionUpgrade(upgradeData.subscriptionUpgrade, updatedUser, updatedSubscription)
+    InsertedUserSubPetsUpgradeCount(updatedUser, updatedSubscription, pets, upgrade.shipmentCountAtUpgrade.get)
+  }
+
+  private def calcAvg(data: List[Int]) =
+    BigDecimal(data.sum/data.size.toDouble).setScale(2, BigDecimal.RoundingMode.HALF_UP)
+
   private def makeUserSubAndNShipments(startDate: LocalDate, n: Int, priceCode: String = "default"): Subscription = {
     val user = User.createNewUser(
       firstName = "John",
