@@ -1,4 +1,4 @@
-package com.mypetdefense.util
+package com.mypetdefense.util.csv
 
 import com.mypetdefense.typeclasses.ToCsvStringConverter
 import com.mypetdefense.typeclasses.ToCsvStringConverter._
