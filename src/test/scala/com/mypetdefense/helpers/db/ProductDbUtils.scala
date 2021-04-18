@@ -5,5 +5,5 @@ import com.mypetdefense.model.Product
 
 object ProductDbUtils {
   def createNewProduct(productData: ProductGeneratedData): Product =
-    Product.createNewProduct(productData.name, productData.sku)
+    Product.createNewProduct(productData.name, productData.sku, productData.isSupplement)
 }

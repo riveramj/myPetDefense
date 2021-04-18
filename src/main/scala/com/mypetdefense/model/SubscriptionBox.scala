@@ -45,9 +45,9 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
     )
   }
 
-  def possiblePrice(subscriptionBox: SubscriptionBox): Double =
+  def possiblePrice(subscriptionBox: SubscriptionBox, upgradedBox: Boolean = false): Double =
     if (subscriptionBox.subscriptionItems.toList.nonEmpty)
-      subscriptionBox.pet.obj.map(basePrice(_, false)).openOr(0d)
+      subscriptionBox.pet.obj.map(basePrice(_, upgradedBox)).openOr(0d)
     else
       0d
 
@@ -67,12 +67,7 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       pet: Pet,
       upgradedBox: Boolean = false
   ): SubscriptionBox = {
-    val fleaTick = pet.size.get match {
-      case AnimalSize.DogSmallZo  => FleaTick.zoGuardSmallDog
-      case AnimalSize.DogMediumZo => FleaTick.zoGuardMediumDog
-      case AnimalSize.DogLargeZo  => FleaTick.zoGuardLargeDog
-      case AnimalSize.DogXLargeZo => FleaTick.zoGuardXLargeDog
-    }
+    val fleaTick = FleaTick.find(By(FleaTick.size, pet.size.get))
 
     val newSubscriptionBox = SubscriptionBox.create
       .boxId(generateLongId)
@@ -82,7 +77,7 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       .fleaTick(fleaTick)
       .basePrice(basePrice(pet, upgradedBox))
 
-    if (upgradedBox)
+    if (upgradedBox && pet.animalType == AnimalType.Dog)
       newSubscriptionBox.boxType(BoxType.healthAndWellness).saveMe()
     else
       newSubscriptionBox.boxType(BoxType.basic).saveMe()
@@ -90,6 +85,6 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
 }
 
 object BoxType extends Enumeration {
-  val basic: BoxType.Value             = Value("Basic")               // 0
+  val basic: BoxType.Value = Value("Flea & Tick Only")  // 0
   val healthAndWellness: BoxType.Value = Value("Health and Wellness") // 1
 }

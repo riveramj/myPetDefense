@@ -16,7 +16,8 @@ object UserDbUtils {
       data.coupon,
       data.referer,
       data.agency,
-      data.userType
+      data.userType,
+      data.ipAddress
     )
 
 }

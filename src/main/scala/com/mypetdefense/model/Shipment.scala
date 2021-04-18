@@ -143,12 +143,16 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
   }
 
   def sendFreeUpgradeItems(shipment: Shipment, pet: Pet): List[ShipmentLineItem] = {
-    val products = List(
-      Product.skinAndCoat,
-      Product.multiVitamin,
-      Product.probiotic,
-      Product.dentalPowder
-    ).flatten
+    val smallDogs = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
+
+    val products = ProductSchedule.getFirstBoxProducts ++ {
+      if (smallDogs.contains(pet.size.get))
+        Product.dentalPowderSmall.toList
+      else
+        Product.dentalPowderLarge.toList
+    }
+
+    shipment.reload.freeUpgradeSample(true).saveMe()
 
     products.map { item =>
       ShipmentLineItem.create
@@ -170,7 +174,9 @@ class ShipmentLineItem extends LongKeyedMapper[ShipmentLineItem] with IdPK {
     for {
       subscription <- user.subscription.toList
       box          <- subscription.subscriptionBoxes
+      if box.status.get == Status.Active
       pet          <- box.pet.obj
+      if pet.status.get == Status.Active
       fleaTick          = box.fleaTick.obj
       subscriptionItems = box.subscriptionItems
     } yield {

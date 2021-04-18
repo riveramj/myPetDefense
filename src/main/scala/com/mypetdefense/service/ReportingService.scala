@@ -1,7 +1,5 @@
 package com.mypetdefense.service
 
-import java.time._
-
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports
 import com.mypetdefense.model.domain.reports._
@@ -11,10 +9,20 @@ import com.mypetdefense.util.CalculationHelper._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.ModelSyntax._
 import com.mypetdefense.util.csv.CSVHelper
+import com.mypetdefense.util.CalculationHelper._
+import com.mypetdefense.util.DateHelper._
+import com.mypetdefense.util.ModelSyntax._
+import com.mypetdefense.util.{CalculationHelper, DateHelper}
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
+import net.liftweb.util.Props
+
+import java.time._
+
+case class SnapshotStatistics(agency: Agency, boxStatistics: BoxStatistics)
+case class BoxStatistics(boxType: BoxType.Value, boxCount: Int, subscriptionCount: Int)
 
 object ReportingService extends Loggable {
 
@@ -272,29 +280,6 @@ object ReportingService extends Loggable {
     CSVHelper.inMemoryCsv(fileName, data)
   }
 
-  def exportAmazonOrders(amazonOrderExport: AmazonOrderExport): Box[LiftResponse] = {
-    println(amazonOrderExport + " 000000")
-
-    val dateFormat      = AmazonOrderReport.dateFormat
-    val startDateExport = amazonOrderExport.startDate.map(dateFormat.parse)
-    val endDateExport   = amazonOrderExport.endDate.map(dateFormat.parse)
-    val petExport       = amazonOrderExport.animalType
-
-    println(petExport)
-
-    val data: List[AmazonOrderReport] =
-      for {
-        startDate <- startDateExport.toList
-        endDate   <- endDateExport.toList
-        pet       <- petExport.toList
-        order     <- AmazonOrder.findOrdersToReport(startDate, endDate, pet)
-      } yield order
-
-    val fileName = s"amazon-orders-$startDateExport-$endDateExport.csv"
-
-    CSVHelper.inMemoryCsv(fileName, data)
-  }
-
   def exportAgencyMtdYtdSales(name: String): Box[LiftResponse] = {
     val data     = agencyMtdYtdSalesReport(name)
     val fileName = s"$name-mtd-ytd-$fileNameMonthDayYear.csv"
@@ -339,7 +324,7 @@ object ReportingService extends Loggable {
     }.sortBy(_._1)
   }
 
-  def findMTDSalesByAgency: List[(String, Int)] = {
+  def findYesterdayMTDSalesByAgency: List[(String, Int)] = {
     val agencies = Agency.findAll(
       NotBy(Agency.name, myPetDefenseName),
       NotBy(Agency.name, petlandName)
@@ -350,13 +335,37 @@ object ReportingService extends Loggable {
         agency,
         User.findAll(
           By(User.referer, agency),
-          By_>=(User.createdAt, monthDayOne),
-          By_<(User.createdAt, beginngNextMonth)
+          By_>=(User.createdAt, yesterdayMonthStart),
+          By_<(User.createdAt, yesterdayMonthEnd)
         )
       )
     }
 
     newUsersThisMonthByAgency.map {
+      case (agency, users) =>
+        val pets = users.flatMap(_.pets)
+        agency.name.get -> pets.size
+    }.sortBy(_._1)
+  }
+
+  def findLastMonthSalesByAgency: List[(String, Int)] = {
+    val agencies = Agency.findAll(
+      NotBy(Agency.name, myPetDefenseName),
+      NotBy(Agency.name, petlandName)
+    )
+
+    val newUsersLastMonthByAgency = agencies.map { agency =>
+      (
+        agency,
+        User.findAll(
+          By(User.referer, agency),
+          By_>=(User.createdAt, monthDayOneLastMonth),
+          By_<(User.createdAt, currentDayLastMonthEnd)
+        )
+      )
+    }
+
+    newUsersLastMonthByAgency.map {
       case (agency, users) =>
         val pets = users.flatMap(_.pets)
         agency.name.get -> pets.size
@@ -388,7 +397,7 @@ object ReportingService extends Loggable {
       .sortBy(_._1)
   }
 
-  def findMTDSalesByAgent: List[(String, Int)] = {
+  def findYesterdayMTDSalesByAgent: List[(String, Int)] = {
     val newUsersThisMonth = Agency
       .findAll(
         NotBy(Agency.name, myPetDefenseName),
@@ -397,12 +406,37 @@ object ReportingService extends Loggable {
       .flatMap { agency =>
         User.findAll(
           By(User.referer, agency),
-          By_>=(User.createdAt, monthDayOne),
-          By_<(User.createdAt, beginngNextMonth)
+          By_>=(User.createdAt, yesterdayMonthStart),
+          By_<(User.createdAt, yesterdayMonthEnd)
         )
       }
 
     newUsersThisMonth
+      .groupBy(_.salesAgentId.get)
+      .map {
+        case (agentId, users) =>
+          val pets = users.flatMap(_.pets)
+          agentId -> pets.size
+      }
+      .toList
+      .sortBy(_._1)
+  }
+
+  def findLastMonthSalesByAgent: List[(String, Int)] = {
+    val newUsersLastMonth = Agency
+      .findAll(
+        NotBy(Agency.name, myPetDefenseName),
+        NotBy(Agency.name, petlandName)
+      )
+      .flatMap { agency =>
+        User.findAll(
+          By(User.referer, agency),
+          By_>=(User.createdAt, monthDayOneLastMonth),
+          By_<(User.createdAt, currentDayLastMonthEnd)
+        )
+      }
+
+    newUsersLastMonth
       .groupBy(_.salesAgentId.get)
       .map {
         case (agentId, users) =>
@@ -530,6 +564,73 @@ object ReportingService extends Loggable {
       newUserCount,
       cancellationsCount
     )
+  }
+
+  def subscriptionRetentionCsv(
+      lastPeriod: RetentionPeriod = RetentionPeriod.current(),
+      periodsCount: Int = 12
+  ): Box[InMemoryResponse] = {
+    val data     = subscriptionRetentionReport(lastPeriod, periodsCount)
+    val fileName = s"subscription-retention-${LocalDate.now()}.csv"
+    CSVHelper.inMemoryCsv(fileName, data)
+  }
+
+  def snapshotInTimeCsv(
+                         date: String
+                       ): Box[InMemoryResponse] = {
+    val data     = snapshotInTimeReport(date)
+    val fileName = s"snapshot-in-time-$date.csv"
+    CSVHelper.inMemoryCsv(fileName, data)
+  }
+
+  def subscriptionRetentionReport(
+      lastPeriod: RetentionPeriod = RetentionPeriod.current(),
+      periodsCount: Int = 12
+  ): SubscriptionRetentionReport = {
+    val firstPeriod     = lastPeriod - (periodsCount - 1)
+    val afterLastPeriod = lastPeriod.next
+    val hwPriceCode = Props.get("default.price.code").openOr("")
+
+    val subs = Subscription.findAll(
+      By_>=(Subscription.startDate, firstPeriod.startDate),
+      By_<(Subscription.startDate, afterLastPeriod.startDate),
+      By(Subscription.priceCode, hwPriceCode)
+    )
+
+    val periods        = (0 until periodsCount).reverse.map(lastPeriod - _).toList
+    val shipmentCounts = (1 to periodsCount).reverse
+    val retentions =
+      (periods zip shipmentCounts).map {
+        case (period, shipmentCount) =>
+          val startingSubs = subs
+            .filter(s => RetentionPeriod.fromDate(s.startDate.get) == period)
+            .filter(_.shipments.nonEmpty)
+
+          SubscriptionRetentionForPeriod(
+            period,
+            startingSubs.size,
+            shipmentCountsForPeriod(startingSubs, period, shipmentCount)
+          )
+      }
+
+    SubscriptionRetentionReport(retentions)
+  }
+
+  private[service] def shipmentCountsForPeriod(
+      subs: List[Subscription],
+      period: RetentionPeriod,
+      shipmentsCount: Int
+  ): List[Int] = {
+    val shipmentCountsByPeriod =
+      filterMailedShipments(subs
+        .flatMap(_.shipments))
+        .groupBy(s => RetentionPeriod.fromDate(s.dateProcessed.get) - period)
+        .mapValues(_.length)
+        .withDefaultValue(0)
+
+    (0 until shipmentsCount)
+      .map(shipmentCountsByPeriod)
+      .toList
   }
 
   private[service] def rawSalesReport(agencyName: String): List[RawSaleDataReport] = {
@@ -789,17 +890,83 @@ object ReportingService extends Loggable {
     )
   }
 
+  private[service] def calculateAgencyStats(agencyName: String, stats: List[StatisticsSnapshot]) = {
+    StatsByAgency(
+      agencyName,
+      stats.map(_.subscriptionCount.get).sum,
+      stats.map(_.petCount.get).sum
+    )
+  }
+
+  private[service] def calculateStatsByProgram(stats: Iterable[StatisticsSnapshot]) = {
+    stats
+      .groupBy(_.program.get)
+      .map { case (program, stats) =>
+        (program, stats.map(_.subscriptionCount.get).sum, stats.map(_.petCount.get).sum)
+      }
+      .map { case (program, subscriptionCount, petCount) =>
+        val programName = program.toString
+        StatsByProgram(programName, subscriptionCount, petCount)
+      }
+  }
+
+  private[service] def snapshotInTimeReport(rawDate: String): SnapshotInTimeReport = {
+    val date = DateHelper.dateFormat.parse(rawDate)
+    val datePlusOne = DateHelper.datePlusDays(date, 1)
+
+    val snapshotStatistics = StatisticsSnapshot.findAll(
+      By_>=(StatisticsSnapshot.date, date),
+      By_<(StatisticsSnapshot.date, datePlusOne)
+    )
+
+    val totalSubscriptions = snapshotStatistics.map(_.subscriptionCount.get).sum
+    val totalPets = snapshotStatistics.map(_.petCount.get).sum
+    val petsByProgram = calculateStatsByProgram(snapshotStatistics)
+
+    val mpdAgency = Agency.mpdAgency
+    val tppAgency = Agency.tppAgency
+
+    val mpdAgencyName = mpdAgency.map(_.name.get).openOr("")
+    val tppAgencyName = tppAgency.map(_.name.get).openOr("")
+
+    val mpdId = mpdAgency.map(_.id.get).openOr(0L)
+    val petsByAgency = snapshotStatistics
+      .partition(_.agency.get == mpdId)
+
+    val mpdStats = petsByAgency._1
+    val tppStats = petsByAgency._2
+
+    val mpdCalculated = calculateAgencyStats(mpdAgencyName, mpdStats)
+    val tppCalculated = calculateAgencyStats(tppAgencyName, tppStats)
+
+    val mpdStatsByProgram = calculateStatsByProgram(mpdStats)
+    val tppStatsByProgram = calculateStatsByProgram(tppStats)
+
+    val mpdStatsByProgramByAgency = StatsByProgramByAgency(mpdAgencyName, mpdStatsByProgram)
+    val tppStatsByProgramByAgency = StatsByProgramByAgency(tppAgencyName, tppStatsByProgram)
+
+    SnapshotInTimeReport(
+      totalSubscriptions,
+      totalPets,
+      petsByProgram,
+      List(mpdCalculated, tppCalculated),
+      List(mpdStatsByProgramByAgency, tppStatsByProgramByAgency)
+    )
+  }
+
   private[service] def executiveSnapshotReport: ExecutiveSnapshotReport = {
     val allActiveSubs         = Subscription.activeSubscriptions
     val allActiveUpgradedSubs = Subscription.upgradedActiveSubscriptions
     val upgradedCancelledSubs = Subscription.upgradedAndCancelledSubscriptions
     val allActivePets         = allActiveSubs.getAllActivePets
-    val allActiveUpgradedPets = allActiveUpgradedSubs.getAllActivePets
+    val allActiveUpgradedBoxes = allActiveUpgradedSubs
+      .flatMap(_.subscriptionBoxes.filter(_.boxType == BoxType.healthAndWellness))
+      .filter(_.status.get == Status.Active)
     val allAccountsReport     = AllAccountsReport(allActiveSubs.size, allActivePets.size)
     val upgradedSubsReport =
       upgradedSubscriptionsReport(
         allActiveUpgradedSubs,
-        allActiveUpgradedPets,
+        allActiveUpgradedBoxes,
         upgradedCancelledSubs
       )
     val activeUpgradedPetsBySize    = countPetsByProduct(allActiveUpgradedSubs)
@@ -865,12 +1032,12 @@ object ReportingService extends Loggable {
 
   private def upgradedSubscriptionsReport(
       allActiveUpgradedSubs: List[Subscription],
-      allActivePets: List[Pet],
+      allActiveBoxes: List[SubscriptionBox],
       upgradedCancelledSubs: List[Subscription]
   ): UpgradedSubscriptionsReport =
     UpgradedSubscriptionsReport(
       allActiveUpgradedSubs.size,
-      allActivePets.size,
+      allActiveBoxes.size,
       upgradedCancelledSubs.size
     )
 
@@ -1068,4 +1235,31 @@ object ReportingService extends Loggable {
     )
   }
 
+  def getActiveSubscriptionsByAgency: Map[Agency, List[Subscription]] = {
+    val activeSubscriptions = Subscription.activeSubscriptions
+
+    val agencyAndSubscriptions = for {
+      sub <- activeSubscriptions
+      user <- sub.user.obj
+      agency <- user.referer.obj
+    } yield (agency, sub)
+
+    agencyAndSubscriptions.groupBy(_._1).collect { case (agency, agencySubs) =>
+      agency -> agencySubs.map(_._2)
+    }
+  }
+
+  def getSnapshotStatisticsForSubsByAgency(subsByAgency:  Map[Agency, List[Subscription]]): Iterable[SnapshotStatistics] = {
+    for {
+      (agency, subscriptions) <- subsByAgency
+      activeBoxes = subscriptions
+        .flatMap(_.subscriptionBoxes)
+        .filter(_.status.get == Status.Active)
+      (boxType, boxes) <- activeBoxes.groupBy(_.boxType.get)
+      subIds = boxes.map(_.subscription.get).distinct
+      boxStatistics = BoxStatistics(boxType, boxes.size, subIds.size)
+    } yield {
+      SnapshotStatistics(agency, boxStatistics)
+    }
+  }
 }

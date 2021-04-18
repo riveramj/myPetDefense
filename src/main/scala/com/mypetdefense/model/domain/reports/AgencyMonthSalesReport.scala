@@ -31,5 +31,5 @@ case class AgencyMonthSalesReport(
 
 object AgencyMonthSalesReport {
   implicit val agencyMonthSalesCsvConverter: ToCsvStringConverter[AgencyMonthSalesReport] =
-    (input: AgencyMonthSalesReport) => input.toCsvRow
+    ToCsvStringConverter.fromFunction(_.toCsvRow)
 }

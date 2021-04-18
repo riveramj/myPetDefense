@@ -12,7 +12,8 @@ object PetFlowChoices extends Loggable {
   object subtotal      extends SessionVar[Box[Double]](Empty)
   object priceCode     extends SessionVar[Box[String]](Empty)
   object coupon        extends SessionVar[Box[Coupon]](Empty)
-  object total         extends SessionVar[Box[BigDecimal]](Empty)
+  object monthlyTotal  extends SessionVar[Box[BigDecimal]](Empty)
+  object todayTotal    extends SessionVar[Box[BigDecimal]](Empty)
   object recentProduct extends RequestVar[Box[FleaTick]](Empty)
   object shoppingCart  extends SessionVar[Map[Long, (String, FleaTick, Double)]](Map())
   object purchased     extends SessionVar[Box[Boolean]](Empty)
@@ -21,6 +22,9 @@ object PetFlowChoices extends Loggable {
   object petId         extends SessionVar[Box[Long]](Empty)
   object completedPets extends SessionVar[LinkedHashMap[Long, Pet]](LinkedHashMap.empty)
   object petCount      extends SessionVar[Box[Int]](Empty)
+
+  object woofTraxOfferCode  extends SessionVar[Box[String]](Empty)
+  object woofTraxUserId     extends SessionVar[Box[String]](Empty)
 }
 
 object TreatsFlow extends Loggable {

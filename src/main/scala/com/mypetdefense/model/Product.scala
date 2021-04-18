@@ -16,16 +16,18 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
   object price  extends MappedDouble(this)
   object sku    extends MappedString(this, 100)
   object weight extends MappedDouble(this)
+  object isSupplement extends MappedBoolean(this)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
 }
 
 object Product extends Product with LongKeyedMetaMapper[Product] {
-  def createNewProduct(name: String, sku: String): Product = {
+  def createNewProduct(name: String, sku: String, isSupplement: Boolean): Product = {
     Product.create
       .name(name)
       .sku(sku)
+      .isSupplement(isSupplement)
       .saveMe
   }
 
@@ -39,5 +41,5 @@ object Product extends Product with LongKeyedMetaMapper[Product] {
   def dentalPowderSmall: Box[Product] = Product.find(By(Product.name, "Dental Powder Small"))
   def dentalPowderLarge: Box[Product] = Product.find(By(Product.name, "Dental Powder Large"))
 
-  def supplements: List[Product] = Product.findAll(NotBy(Product.name, "Dental Powder"))
+  def supplements: List[Product] = Product.findAll(By(Product.isSupplement, true))
 }

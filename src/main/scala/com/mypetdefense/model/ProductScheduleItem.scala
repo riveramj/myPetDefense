@@ -26,6 +26,7 @@ class ProductScheduleItem
 object ProductScheduleItem
     extends ProductScheduleItem
     with LongKeyedMetaMapper[ProductScheduleItem] {
+
   def createNew(product: Product, schedule: ProductSchedule): ProductScheduleItem =
     ProductScheduleItem.create.product(product).productSchedule(schedule).saveMe()
 }

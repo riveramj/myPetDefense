@@ -1,7 +1,5 @@
 package com.mypetdefense.snippet.signup
 
-import java.text.SimpleDateFormat
-
 import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
@@ -15,6 +13,7 @@ import net.liftweb.http.js._
 import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 
+import java.text.SimpleDateFormat
 import scala.collection.mutable
 import scala.xml.{Elem, NodeSeq}
 
@@ -25,6 +24,15 @@ object DogDetails extends Loggable {
 }
 
 class DogDetails extends Loggable {
+  val woofTraxOfferCode = S.param("oc")
+  PetFlowChoices.woofTraxOfferCode(woofTraxOfferCode)
+  PetFlowChoices.woofTraxUserId(S.param("ui"))
+
+  if (woofTraxOfferCode.isDefined) {
+    val coupon = Coupon.find(By(Coupon.couponCode, "80off"))
+    PetFlowChoices.coupon(coupon)
+  }
+  
   petChoice(Full(AnimalType.Dog))
 
   if (petId.is.isEmpty)
@@ -126,6 +134,7 @@ class DogDetails extends Loggable {
   def yearDropdown: Elem = {
     SHtml.select(
       ("", "") +: List(
+        "2021",
         "2020",
         "2019",
         "2018",

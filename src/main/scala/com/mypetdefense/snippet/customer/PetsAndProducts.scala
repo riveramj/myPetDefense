@@ -2,10 +2,11 @@ package com.mypetdefense.snippet.customer
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerRemovedPet}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.SecurityContext._
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -27,8 +28,9 @@ object PetsAndProducts extends Loggable {
 }
 
 class PetsAndProducts extends Loggable {
-  val user: Box[User]                 = currentUser
+  val user: Box[User]                 = currentUser.map(_.reload)
   val subscription: Box[Subscription] = user.flatMap(_.subscription.obj)
+  val upgradedSubscription = subscription.map(_.isUpgraded.get).openOr(false)
   val priceCode: String               = subscription.map(_.priceCode.get).getOrElse("")
 
   var newPetType: Box[AnimalType.Value]  = Empty
@@ -84,13 +86,21 @@ class PetsAndProducts extends Loggable {
         product <- newPetChosenProduct
         size = product.size.get
       } yield {
+        val actionLog = CustomerAddedPet(
+          SecurityContext.currentUserId,
+          Some(SecurityContext.currentUserId),
+          0L,
+          newPetName
+        )
+
         ParentService.addNewPet(
           oldUser = parent,
           name = newPetName,
           animalType = pet,
           size = size,
           product = product,
-          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false)
+          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
+          actionLog = Left(actionLog)
         )
       }).flatMap(identity) match {
         case Full(pet) =>
@@ -108,7 +118,14 @@ class PetsAndProducts extends Loggable {
   }
 
   def deletePet(pet: Box[Pet])(): Alert = {
-    ParentService.removePet(user, pet) match {
+    val actionLog = CustomerRemovedPet(
+      SecurityContext.currentUserId,
+      Some(SecurityContext.currentUserId),
+      pet.map(_.petId.get).openOr(0),
+      pet.map(_.name.get).openOr("-")
+    )
+
+    ParentService.removePet(user, pet, actionLog) match {
       case Full(_) =>
         if (Props.mode != Props.RunModes.Pilot) {
           user.map { parent => pet.map(p => EmailActor ! PetRemovedEmail(parent, p)) }
@@ -131,20 +148,7 @@ class PetsAndProducts extends Loggable {
       updatedFleaTick: Box[FleaTick],
       supplements: List[Product]
   ) = {
-    for {
-      fleaTick <- updatedFleaTick
-      box      <- subscriptionBox
-    } yield {
-      box.fleaTick(fleaTick).saveMe
-
-      val items = box.subscriptionItems.toList.filterNot(_.product.obj == Product.dentalPowder)
-
-      for {
-        index <- items.indices
-      } yield {
-        items(index).product(supplements(index)).saveMe()
-      }
-    }
+    SubscriptionService.saveNewPetProducts(updatedFleaTick, subscriptionBox, supplements)
 
     val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal)
 
@@ -167,43 +171,26 @@ class PetsAndProducts extends Loggable {
   def petProductsBindings = {
     "#product-picker-modal" #> idMemoize { renderer =>
       petProductsRender = Full(renderer)
+
       val box = selectedPet.flatMap(_.box.obj)
-      val products =
-        if (selectedPet.map(_.animalType.get.equals(AnimalType.Dog)).openOr(true))
-          FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
-        else
-          FleaTick.zoGuardCat.toList
+      val availableFleaTick = SubscriptionService.getAvailableFleaTick(selectedPet)
+      val availableSupplements = Product.supplements
+      val currentSupplements = SubscriptionService.getCurrentSupplements(box)
 
-      val availableSupplements = Product.findAll().filterNot(Full(_) == Product.dentalPowder)
+      var currentFleaTick = box.flatMap(_.fleaTick.obj)
+      var (firstSupplement, secondSupplement, thirdSupplement) =
+        SubscriptionService.getFirstSecondThirdSupplements(currentSupplements)
 
-      var currentProduct = box.flatMap(_.fleaTick.obj)
-      val currentSupplements = {
-        for {
-          currentBox       <- box.toList
-          subscriptionItem <- currentBox.subscriptionItems.toList
-          product          <- subscriptionItem.product.obj.toList
-          if Full(product) != Product.dentalPowder
-        } yield {
-          product
-        }
-      }
-
-      var firstSupplement = currentSupplements.headOption
-      var secondSupplement =
-        if (currentSupplements.nonEmpty) currentSupplements.tail.headOption else None
-      var thirdSupplement = currentSupplements.reverse.headOption
-
-      val zoGuardProducts =
-        if (currentProduct.map(_.isZoGuard_?).openOr(false))
-          products.filter(_.isZoGuard_?)
-        else
-          currentProduct.toList ++ products.filter(_.isZoGuard_?)
+      val zoGuardProducts = SubscriptionService.getZoGuardProductsAndCurrent(
+        currentFleaTick,
+        availableFleaTick
+      )
 
       val currentProductDropdown = SHtml.ajaxSelectObj(
         zoGuardProducts.map(product => (product, product.getNameAndSize)),
-        currentProduct,
+        currentFleaTick,
         (possibleProduct: FleaTick) =>
-          currentProduct = {
+          currentFleaTick = {
             Full(possibleProduct)
           }
       )
@@ -236,64 +223,65 @@ class PetsAndProducts extends Loggable {
       )
 
       "^ [class+]" #> (if (!selectedPet.isEmpty) "active" else "") &
-        ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
-        "#flea-tick" #> currentProductDropdown &
-          "#first-supplement" #> firstSupplementDropDown &
-          "#second-supplement" #> secondSupplementDropDown &
-          "#third-supplement" #> thirdSupplementDropDown &
-          ".save" #> ajaxSubmit(
-            "Save",
-            () =>
-              savePet(
-                box,
-                currentProduct,
-                List(firstSupplement, secondSupplement, thirdSupplement).flatten
-              )
-          ) &
-          ".cancel" #> ajaxSubmit("Cancel", () => {
-            selectedPet = Empty
-            petProductsRender.map(_.setHtml()).openOr(Noop)
-          })
+      ".modal-header .admin" #> ClearNodes &
+      ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
+      "#flea-tick" #> currentProductDropdown &
+      "#first-supplement" #> firstSupplementDropDown &
+      "#second-supplement" #> secondSupplementDropDown &
+      "#third-supplement" #> thirdSupplementDropDown &
+      ".save" #> ajaxSubmit(
+        "Save",
+        () =>
+          savePet(
+            box,
+            currentFleaTick,
+            List(firstSupplement, secondSupplement, thirdSupplement).flatten
+          )
+      ) &
+      ".cancel" #> ajaxSubmit("Cancel", () => {
+        selectedPet = Empty
+        petProductsRender.map(_.setHtml()).openOr(Noop)
+      })
     }
   }
 
   def render: NodeSeq => NodeSeq = {
     val boxes: List[SubscriptionBox] = user.flatMap { parent =>
-      parent.subscription.obj.map(_.subscriptionBoxes.toList)
+      parent.subscription.obj.map(_.subscriptionBoxes.toList.filter(_.status.get == Status.Active))
     }.openOr(Nil)
 
     SHtml.makeFormsAjax andThen
-      petProductsBindings andThen
-      ".pets-products a [class+]" #> "current" &
-        "#user-email *" #> user.map(_.email.get) &
-        "#new-pet" #> idMemoize { renderer =>
-          "#new-pet-name" #> ajaxText(newPetName, newPetName = _) &
-            "#pet-type-select" #> petTypeDropdown(renderer) &
-            "#new-pet-product-select" #> productDropdown() &
-            "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
-        } &
-        ".pet" #> boxes.map { box =>
-          val pet            = box.pet.obj
-          var currentPetName = pet.map(_.name.get).openOr("")
-          val product        = box.fleaTick.obj
+    petProductsBindings andThen
+    ".pets-products a [class+]" #> "current" &
+    "#user-email *" #> user.map(_.email.get) &
+    "#new-pet" #> idMemoize { renderer =>
+      "#new-pet-name" #> ajaxText(newPetName, newPetName = _) &
+      "#pet-type-select" #> petTypeDropdown(renderer) &
+      "#new-pet-product-select" #> productDropdown() &
+      "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
+    } &
+    ".pet" #> boxes.map { box =>
+      val pet            = box.pet.obj
+      var currentPetName = pet.map(_.name.get).openOr("")
+      val product        = box.fleaTick.obj
+      val possiblePrice = SubscriptionBox.possiblePrice(box, upgradedSubscription)
 
-          val price = if (SubscriptionBox.possiblePrice(box) == 0d) {
-            product.flatMap { item => Price.getPricesByCode(item, priceCode).map(_.price.get) }
-              .openOr(0d)
-          } else {
-            SubscriptionBox.possiblePrice(box)
-          }
+      val price = if (possiblePrice == 0d) {
+        product.flatMap { item => Price.getPricesByCode(item, priceCode).map(_.price.get) }
+          .openOr(0d)
+      } else {
+        possiblePrice
+      }
 
-          ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
-            ".price *" #> f"$$$price%2.2f" &
-            ".pet-status *" #> pet.map(_.status.get.toString) &
-            ".show-pet-product [onClick]" #> ajaxInvoke(showProducts(pet) _) &
-            ".cancel [onclick]" #> Confirm(
-              s"Remove $currentPetName and cancel future shipments?",
-              ajaxInvoke(deletePet(pet) _)
-            ) &
-            ".save" #> ajaxSubmit("Save", () => savePetName(pet, currentPetName))
-        }
-
+      ".pet-name" #> ajaxText(currentPetName, currentPetName = _) &
+      ".price *" #> f"$$$price%2.2f" &
+      ".pet-status *" #> pet.map(_.status.get.toString) &
+      ".show-pet-product [onClick]" #> ajaxInvoke(showProducts(pet) _) &
+      ".cancel [onclick]" #> Confirm(
+        s"Remove $currentPetName and cancel future shipments?",
+        ajaxInvoke(deletePet(pet) _)
+      ) &
+      ".save" #> ajaxSubmit("Save", () => savePetName(pet, currentPetName))
+    }
   }
 }

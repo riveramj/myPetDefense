@@ -53,8 +53,6 @@ object GeneralDbUtils {
       Event,
       Pet,
       Insert,
-      InventoryChangeAudit,
-      InventoryItem,
       Subscription,
       SubscriptionBox,
       SubscriptionItem,
@@ -63,7 +61,9 @@ object GeneralDbUtils {
       ProductSchedule,
       ProductScheduleItem,
       Product,
-      User
+      User,
+      ActionLog,
+      ActionLogDetails
     )
 
     val truncateAllQuery = testDatabase.truncateAllQuery(tables.map(_.dbTableName))

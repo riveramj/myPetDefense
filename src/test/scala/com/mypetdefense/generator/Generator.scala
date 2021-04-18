@@ -1,17 +1,19 @@
 package com.mypetdefense.generator
 
-import java.util.{Collections => JCollections}
-
 import com.mypetdefense.helpers.DateUtil.{ZonedDateTimeSyntax, anyDayOfNextMonth, anyDayOfThisMonth}
 import com.mypetdefense.helpers.Random.generateMoneyString
 import com.mypetdefense.helpers.ScalaCheckHelper
 import com.mypetdefense.model.Price._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerRemovedPet}
+import com.mypetdefense.model.domain.action.{CustomerAction, CustomerActionSubtype}
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
 import com.stripe.model.{Customer, PaymentSource, PaymentSourceCollection}
 import net.liftweb.common.{Box, Empty, Full}
 import org.scalacheck._
+
+import java.util.{Collections => JCollections}
 
 object Generator extends ScalaCheckHelper {
 
@@ -92,7 +94,8 @@ object Generator extends ScalaCheckHelper {
       Empty,
       Empty,
       Empty,
-      userType
+      userType,
+      ""
     )
 
   def genPriceCode: Gen[String] =
@@ -109,21 +112,6 @@ object Generator extends ScalaCheckHelper {
       itemNumber <- Gen.posNum[Int]
       weight = generateMoneyString.toDouble
     } yield InsertGenData(name, itemNumber, weight)
-
-  def genUnitOfMeasure: Gen[UnitOfMeasure.Value] =
-    Gen.oneOf(UnitOfMeasure.values)
-
-  def genInventoryItem: Gen[InventoryItem] =
-    for {
-      itemNumber <- genNonEmptyAlphaStr
-      desc       <- genNonEmptyAlphaStr
-      unit       <- genUnitOfMeasure
-      total      <- genPosInt
-    } yield InventoryItem.create
-      .itemNumber(itemNumber)
-      .description(desc)
-      .unitOfMeasure(unit)
-      .total(total)
 
   def genSubscriptionToCreate: Gen[SubscriptionCreateGeneratedData] =
     for {
@@ -182,7 +170,7 @@ object Generator extends ScalaCheckHelper {
       lastName  <- genNonEmptyAlphaStr
       password  <- genNonEmptyAlphaStr
       address   <- generateNewUserAddress
-    } yield NewUserData(email, firstName, lastName, password, address, Empty)
+    } yield NewUserData(email, firstName, lastName, password, address, Empty, "")
 
   def generateAddress: Gen[AddressGeneratedData] =
     for {
@@ -270,7 +258,8 @@ object Generator extends ScalaCheckHelper {
     for {
       productName <- genAlphaStr
       sku         <- genAlphaStr
-    } yield ProductGeneratedData(productName, sku)
+      isSupplement <- genBool
+    } yield ProductGeneratedData(productName, sku, isSupplement)
 
   def genProductsSchedule(
       productsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
@@ -282,6 +271,18 @@ object Generator extends ScalaCheckHelper {
 
   def genStatusLabelCreatedOrPaid: Gen[ShipmentStatus.Value] =
     Gen.oneOf(ShipmentStatus.LabelCreated, ShipmentStatus.Paid)
+
+  def genCustomerAction: Gen[CustomerAction] =
+    for {
+      subtype <- Gen.oneOf(Set(CustomerActionSubtype.CustomerAddedPet, CustomerActionSubtype.CustomerRemovedPet))
+      userId  <- genPosLong
+      parentId  <- genPosLong
+      petId   <- genPosLong
+      petName   <- genAlphaStr
+    } yield subtype match {
+      case CustomerActionSubtype.CustomerAddedPet   => CustomerAddedPet(parentId, Some(userId), petId, petName)
+      case CustomerActionSubtype.CustomerRemovedPet => CustomerRemovedPet(parentId, Some(userId), petId, petName)
+    }
 
   def mapWithNOfUserNSubscriptionGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
@@ -304,11 +305,6 @@ object Generator extends ScalaCheckHelper {
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[InsertGenData]] =
     Gen.listOfN(length, genInsertData)
-
-  def listOfNInventoryItemsGen(
-      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
-  ): Gen[List[InventoryItem]] =
-    Gen.listOfN(length, genInventoryItem)
 
   def listOfNPosIntsGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
@@ -382,6 +378,11 @@ object Generator extends ScalaCheckHelper {
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[PetsAndShipmentChainData]] =
     Gen.listOfN(length, genPetAndShipmentChainData())
+
+  def listOfNCustomerActions(
+      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[CustomerAction]] =
+    Gen.listOfN(length, genCustomerAction)
 
   def listOfSubscriptionToCreateGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES

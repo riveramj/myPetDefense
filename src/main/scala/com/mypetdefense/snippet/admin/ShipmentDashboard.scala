@@ -104,8 +104,6 @@ class ShipmentDashboard extends Loggable {
 
     shipment.dateShipped(new Date()).address(address).saveMe
 
-    InventoryService.deductShipmentItems(shipment)
-
     EmailActor ! SendInvoicePaymentSucceededEmail(
       user,
       subscription,
