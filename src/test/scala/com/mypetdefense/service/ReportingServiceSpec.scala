@@ -774,7 +774,10 @@ class ReportingServiceSpec extends DBTest {
 
       val result = ReportingService.basicUsersUpgradeReport
 
-      result shouldBe expectedResult
+      result.inactiveUpgradeCount shouldBe expectedResult.inactiveUpgradeCount
+      result.activeUpgradeCount shouldBe expectedResult.activeUpgradeCount
+      result.upgradesByAgency should contain theSameElementsAs expectedResult.upgradesByAgency
+
       cleanUpSuccess()
     }
   }
@@ -794,7 +797,7 @@ class ReportingServiceSpec extends DBTest {
   }
 
   private def calcAvg(data: List[Int]) =
-    data.sum/data.size.toDouble
+    BigDecimal(data.sum/data.size.toDouble).setScale(2, BigDecimal.RoundingMode.HALF_UP)
 
   private def makeUserSubAndNShipments(startDate: LocalDate, n: Int, priceCode: String = "default"): Subscription = {
     val user = User.createNewUser(

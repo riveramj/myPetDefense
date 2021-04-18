@@ -15,6 +15,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.util.Props
 
 import java.time._
+import scala.math.BigDecimal.double2bigDecimal
 
 case class SnapshotStatistics(agency: Agency, boxStatistics: BoxStatistics)
 case class BoxStatistics(boxType: BoxType.Value, boxCount: Int, subscriptionCount: Int)
@@ -592,7 +593,7 @@ object ReportingService extends Loggable {
         }
 
         val upgradeCounts = upgrades.map(_.shipmentCountAtUpgrade)
-        val averageShipmentsBeforeUpgrade: Double = tryo(upgradeCounts.sum/upgradeCounts.size.toDouble).openOr(0)
+        val averageShipmentsBeforeUpgrade = BigDecimal(tryo(upgradeCounts.sum/upgradeCounts.size.toDouble).openOr(0D)).setScale(2, BigDecimal.RoundingMode.HALF_UP)
 
         val petCount = activeUpgrades
           .flatMap(u=> User.find(u.userId))

@@ -33,7 +33,7 @@ final case class BasicUserUpgradeReport(
     upgradeDate: Date
 )
 
-case class UpgradesByAgency(agencyName: String, totalUpgradedCount: Int, averageShipmentsBeforeUpgrade: Double, activeUpgradeCount: Int, petCount: Int) {
+case class UpgradesByAgency(agencyName: String, totalUpgradedCount: Int, averageShipmentsBeforeUpgrade: BigDecimal, activeUpgradeCount: Int, petCount: Int) {
   def toCsvRow = s"$agencyName,$totalUpgradedCount,$averageShipmentsBeforeUpgrade,$activeUpgradeCount,$petCount"
 }
 
