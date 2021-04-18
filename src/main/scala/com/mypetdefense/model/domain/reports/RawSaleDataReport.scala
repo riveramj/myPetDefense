@@ -4,7 +4,7 @@ import java.time.{LocalDate, Month}
 
 import com.mypetdefense.model.Status
 import com.mypetdefense.typeclasses.ToCsvStringConverter
-import com.mypetdefense.util.CSVHelper
+import com.mypetdefense.util.csv.CSVHelper
 
 case class RawSaleDataReport(
     year: Int,

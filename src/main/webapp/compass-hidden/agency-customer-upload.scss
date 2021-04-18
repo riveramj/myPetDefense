@@ -1,0 +1,130 @@
+@import "base";
+@import "admin-nav-bar";
+
+#top-bar {
+  padding: 15px 0 15px;
+  text-align: center;
+
+  @media (min-width: $bp-medium) {
+    padding: 15px;
+    text-align: left;
+  }
+
+  @media (min-width: $bp-large) {
+    padding: 15px 50px;
+  }
+}
+
+#menu-entries {
+  margin: 8px 15px 0;
+  display: flex;
+  justify-content: space-between;
+  
+  @media (min-width: $bp-medium) {
+    margin: 8px 0 0 0;
+    display: block;
+  }
+}
+
+nav {
+  float: none;
+
+  @media (min-width: $bp-medium) {
+    float: right;
+  }
+}
+
+#logo-name {
+  padding-bottom: 5px;
+}
+
+nav .entry {
+  margin-right: 0;
+
+  @media (min-width: $bp-medium) {
+    margin-right: 25px;
+  }
+
+  a {
+    color: #919191;
+    letter-spacing: 0.4px;
+  }
+
+  &.current {
+    padding-bottom: 10px;
+
+    a {
+      color: #605F5F;
+    }
+  }
+}
+
+body {
+  background-color: #DCDBDB;
+}
+
+#item-container {
+  width: 1189px;
+  margin: 0 auto;
+
+  form {
+    background-color: #F1F1F1;
+    padding: 20px;
+
+    .customer-info {
+      display: flex;
+
+      .email {
+        margin-right: 100px;
+      }
+
+      .email, #customer-email {
+        width: 300px;
+      }
+
+      .billing {
+        width: 500px;
+      }
+
+      #card-element, #customer-email {
+        background: #ffffff;
+        padding: 10px;
+        display: block;
+        border-radius: 5px;
+        border: 1px solid #cecece;
+        font-size: 14px;
+      }
+
+      #card-element iframe {
+        background-color: transparent !important;
+      }
+    }
+
+    label {
+      padding-bottom: 30px;
+      display: block;
+    }
+  }
+}
+
+h2 {
+  color: #605F5F;
+  line-height: 33px;
+  font-size: 27px;
+  font-weight: $bold;
+  padding: 42px 0 15px;
+  display: inline-block;
+}
+
+h3 {
+  color: #454343;
+  font-size: 22px;
+  line-height: 33px;
+  margin-bottom: 11px;
+  margin-top: 35px;
+}
+
+.field-label {
+  display: block;
+  padding-bottom: 3px;
+}
