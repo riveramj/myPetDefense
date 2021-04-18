@@ -121,11 +121,16 @@ class Boot {
         ContentSecurityPolicy(
           scriptSources = List(
             ContentSourceRestriction.Self,
-            ContentSourceRestriction.Host("https://ajax.googleapis.com")
+            ContentSourceRestriction.UnsafeInline,
+            ContentSourceRestriction.Host("https://ajax.googleapis.com"),
+            ContentSourceRestriction.Host("https://connect.facebook.net"),
+            ContentSourceRestriction.Host("https://facebook.com"),
           ),
           styleSources = List(
             ContentSourceRestriction.Self,
-            ContentSourceRestriction.Host("https://fonts.googleapis.com")
+            ContentSourceRestriction.UnsafeInline,
+            ContentSourceRestriction.Host("https://fonts.googleapis.com"),
+            ContentSourceRestriction.Host("https://cdn.jsdelivr.net"),
           ),
           fontSources = List(
             ContentSourceRestriction.Self,
@@ -134,8 +139,15 @@ class Boot {
             ContentSourceRestriction.Host("data:")
           ),
           frameSources = List(
-            ContentSourceRestriction.Host("https://www.youtube.com")
-          )
+            ContentSourceRestriction.Host("https://www.youtube.com"),
+            ContentSourceRestriction.Host("https://www.facebook.com")
+          ),
+          connectSources = List(
+            ContentSourceRestriction.Host("https://facebook.com"),
+            ContentSourceRestriction.UnsafeInline,
+            ContentSourceRestriction.Self,
+            ContentSourceRestriction.All
+          ),
         )
       )
     )
