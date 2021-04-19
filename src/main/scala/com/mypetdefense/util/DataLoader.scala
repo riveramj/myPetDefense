@@ -5,6 +5,7 @@ import com.mypetdefense.model.Agency.getHQFor
 import java.text.SimpleDateFormat
 import com.mypetdefense.model._
 import com.mypetdefense.service._
+import net.liftweb.common.Box.tryo
 import net.liftweb.common._
 import net.liftweb.mapper._
 
@@ -606,7 +607,8 @@ object DataLoader extends Loggable {
         .zipWithIndex
         .find { case (shipment, _) =>
           shipment.shipmentLineItems.exists(!_.product.isEmpty) &&
-          !shipment.freeUpgradeSample.get
+          !shipment.freeUpgradeSample.get &&
+          tryo(shipment.amountPaid.get.toDouble).map(_ > 12.99).openOr(false)
         }
     } yield {
       val shipmentCount = shipmentNumber + 1
