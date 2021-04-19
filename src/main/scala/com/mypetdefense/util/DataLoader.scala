@@ -603,7 +603,10 @@ object DataLoader extends Loggable {
       (upgradedShipment, shipmentNumber) <- sub.shipments
         .sortBy(_.createdAt.get)
         .zipWithIndex
-        .find(_._1.shipmentLineItems.exists(!_.product.isEmpty))
+        .find { case (shipment, _) =>
+          shipment.shipmentLineItems.exists(!_.product.isEmpty) &&
+          !shipment.freeUpgradeSample.get
+        }
     } yield {
       val shipmentCount = shipmentNumber + 1
       val upgradeDate = upgradedShipment.dateProcessed.get
