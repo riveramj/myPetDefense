@@ -15,6 +15,7 @@ import net.liftweb.util.Helpers._
 import net.liftweb.util.Props
 
 import java.time._
+import java.util.Date
 import scala.math.BigDecimal.double2bigDecimal
 
 case class SnapshotStatistics(agency: Agency, boxStatistics: BoxStatistics)
@@ -635,6 +636,12 @@ object ReportingService extends Loggable {
     CSVHelper.inMemoryCsv(fileName, data)
   }
 
+  def customerLifespanCsv: Box[InMemoryResponse] = {
+    val data     = customerLifespanReport
+    val fileName = s"customer-lifespan-${LocalDate.now()}.csv"
+    CSVHelper.inMemoryCsv(fileName, data)
+  }
+
   def subscriptionRetentionReport(
       lastPeriod: RetentionPeriod = RetentionPeriod.current(),
       periodsCount: Int = 12
@@ -960,6 +967,74 @@ object ReportingService extends Loggable {
         val programName = program.toString
         StatsByProgram(programName, subscriptionCount, petCount)
       }
+  }
+
+  private[service] def customerLifespanReport: CustomerLifespanReport = {
+    val agencies = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
+
+    agencies
+
+    val subs = Subscription.findAll().groupBy(_.status)
+    val users = User.findAll().groupBy(_.referer)
+    subs
+    users
+
+    val report = agencies.flatMap { agency =>
+      val customers = agency.customers.toList
+      val subscriptions = customers.flatMap(_.subscription.obj)
+      val subscriptionsGrouped = subscriptions.groupBy(_.isActive)
+      subscriptionsGrouped
+
+      val lifespanStatistics = subscriptionsGrouped.map { case (isActive, subscriptions) =>
+        val status = if (isActive) "Active" else "Inactive"
+
+        val foo = subscriptions.groupBy { subscription =>
+          val startDate = subscription.startDate.get
+          val endDate = if(isActive) Empty else tryo(subscription.cancellationDate.get)
+
+          calculateLifespan(startDate, endDate)
+        }
+
+        val subscriptionGroupedByLifespan = foo.mapValues(_.length).withDefaultValue(0)
+
+        subscriptionGroupedByLifespan
+
+        status ->
+          LifespanStatistics(
+            subscriptionGroupedByLifespan(ZeroFourMonths),
+            subscriptionGroupedByLifespan(FourSixMonths),
+            subscriptionGroupedByLifespan(SixTwelveMonths),
+            subscriptionGroupedByLifespan(OneTwoYears),
+            subscriptionGroupedByLifespan(TwoThreeYears),
+            subscriptionGroupedByLifespan(ThreePlusYears),
+          )
+      }
+
+      val foo = lifespanStatistics.map { case (status, statistics) =>
+        LifespanByAgency(
+          agency.name.get,
+          status,
+          statistics,
+          LifespanStatistics(0,0,0,0,0,0)
+        )
+      }
+
+      foo
+    }
+    CustomerLifespanReport(report)
+  }
+
+  private def calculateLifespan(startDate: Date, endDate: Box[Date]) = {
+    val monthDiff = getMonthDiff(startDate, endDate)
+
+    monthDiff match {
+      case diff if diff >= 0 && diff < 4   => ZeroFourMonths
+      case diff if diff >= 4 && diff < 6   => FourSixMonths
+      case diff if diff >= 6 && diff < 12  => SixTwelveMonths
+      case diff if diff >= 12 && diff < 24 => OneTwoYears
+      case diff if diff >= 24 && diff < 36 => TwoThreeYears
+      case diff if diff >= 36              => ThreePlusYears
+    }
   }
 
   private[service] def snapshotInTimeReport(rawDate: String): SnapshotInTimeReport = {

@@ -12,11 +12,11 @@ import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports._
 import com.mypetdefense.util.CalculationHelper
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
-import net.liftweb.common.{Empty, Full}
+import net.liftweb.common.{Box, Empty, Full}
 import net.liftweb.util.Props
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
-import java.time.LocalDate
+import java.time.{LocalDate, ZonedDateTime}
 import java.util.Date
 
 class ReportingServiceSpec extends DBTest {
@@ -780,6 +780,122 @@ class ReportingServiceSpec extends DBTest {
 
       cleanUpSuccess()
     }
+  }
+
+  it should "create customer lifespan report" in {
+    forAll(
+      mapWithNOfUserNSubscriptionGen(),
+      mapWithNOfUserNSubscriptionGen(),
+      mapWithNOfUserNSubscriptionGen(),
+      mapWithNOfUserNSubscriptionGen()
+    ) { (mpdActiveTwoMonthSubs, mpdPausedEightMonthSubs, tppActiveThreeYearSubs, tppCancelledOneYearSubs) =>
+      val mpdAgency = createTppAndMPDAgencies().mpd
+      val tppAgency = createTppAndMPDAgencies().tpp
+
+      val mpdActive = mpdActiveTwoMonthSubs.map {
+        case (u, s) =>
+          val startDate = twoMonthsAgo
+          val userSub = insertUserAndSub(u, s)
+
+          updateUserSubs(userSub, Status.Active, mpdAgency, startDate)
+      }
+
+      val mpdPaused = mpdPausedEightMonthSubs.map {
+        case (u, s) =>
+          val startDate = eightMonthsAgo
+          val userSub = insertUserAndSub(u, s)
+
+          updateUserSubs(userSub, Status.Paused, mpdAgency, startDate)
+      }
+
+      val tppActive = tppActiveThreeYearSubs.map {
+        case (u, s) =>
+          val startDate = threeYearAgo
+          val userSub = insertUserAndSub(u, s)
+
+          updateUserSubs(userSub, Status.Active, tppAgency, startDate)
+      }
+
+      val tppCancelled = tppCancelledOneYearSubs.map {
+        case (u, s) =>
+          val startDate = twoYearAgo
+          val endDate = lastYear
+          val userSub = insertUserAndSub(u, s)
+
+          updateUserSubs(userSub, Status.Cancelled, tppAgency, startDate, Full(endDate))
+      }
+
+      val mpdActiveStats = LifespanStatistics(mpdActive.size, 0, mpdPaused.size, 0, 0, 0)
+      val tppActiveStats = LifespanStatistics(0, 0, 0, 0, 0, tppActive.size)
+      val tppInactiveStats = LifespanStatistics(0, 0, 0, tppCancelled.size, 0, 0)
+
+      val mpd =
+        if ((mpdActive ++ mpdPaused).nonEmpty)
+          List(
+            LifespanByAgency(
+              mpdAgency.name.get,
+              "Active",
+              mpdActiveStats,
+              LifespanStatistics(0,0,0,0,0,0)
+            )
+          )
+        else
+          Nil
+
+
+      val tppActiveResult =
+        if (tppActive.nonEmpty)
+          List(
+            LifespanByAgency(
+              tppAgency.name.get,
+              "Active",
+              tppActiveStats,
+              LifespanStatistics(0,0,0,0,0,0)
+            )
+          )
+        else
+          Nil
+
+      val tppInactiveResult =
+        if (tppCancelled.nonEmpty)
+          List(
+            LifespanByAgency(
+              tppAgency.name.get,
+              "Inactive",
+              tppInactiveStats,
+              LifespanStatistics(0,0,0,0,0,0)
+            )
+          )
+        else
+          Nil
+
+      val expectedResult = CustomerLifespanReport(mpd ++ tppActiveResult ++ tppInactiveResult)
+      val result = ReportingService.customerLifespanReport
+
+      result.lifespansByAgency should contain theSameElementsAs expectedResult.lifespansByAgency
+      cleanUpSuccess()
+    }
+  }
+
+  private def updateUserSubs(
+    userSub: InsertedUserAndSub,
+    status: Status.Value,
+    agency: Agency,
+    startDate: ZonedDateTime,
+    endDate: Box[ZonedDateTime] = Empty
+  ) = {
+    val uS = userSub.subscription
+      .status(status)
+      .startDate(startDate.toDate)
+      .saveMe()
+
+    val uuS = endDate.map { d =>
+      uS.cancellationDate(d.toDate).saveMe()
+    }.openOr(uS)
+
+    val uU = userSub.user.referer(agency).saveMe()
+
+    InsertedUserAndSub(uU, uuS)
   }
 
   private def makeUserSubAndPets(
