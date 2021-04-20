@@ -45,7 +45,16 @@ object ExecutiveDashboard extends Loggable {
     loggedIn >>
     EarlyResponse(exportUserUpgradeReport _)
 
+  val customerLifespanExportMenu: Menu.Menuable = Menu.i(
+    "Customer Lifespan Upgrade Report"
+  ) / "admin" / "executive-dashboard" / "customer-lifespan-report.csv" >>
+    mpdAdmin >>
+    loggedIn >>
+    EarlyResponse(exportCustomerLifespanReport _)
+
   def exportUserUpgradeReport: Box[LiftResponse] = ReportingService.basicUsersUpgradeCsv
+
+  def exportCustomerLifespanReport: Box[LiftResponse] = ReportingService.customerLifespanCsv
 
   val retentionSnapshotExportMenu: Menu.Menuable = Menu.i(
     "Export Retention Snapshot"
@@ -144,6 +153,7 @@ class ExecutiveDashboard extends Loggable {
       } &
       ".executive-snapshot .executive-snapshot-export [href]" #> ExecutiveDashboard.executiveSnapshotExportMenu.loc.calcDefaultHref &
       ".upgrade-stats .user-upgrade-export [href]" #> ExecutiveDashboard.userUpgradeExportMenu.loc.calcDefaultHref &
+      ".customer-lifespan-stats .customer-lifespan-export [href]" #> ExecutiveDashboard.customerLifespanExportMenu.loc.calcDefaultHref &
       ".retention-snapshot .retention-snapshot-export [href]" #> ExecutiveDashboard.retentionSnapshotExportMenu.loc.calcDefaultHref &
       ".mtd-shipments .count *" #> numberFormatter.format(mtdShipmentsData.numberOfShipments) &
       ".mtd-shipments .value *" #> dollarFormatter.format(mtdShipmentsData.totalAmount.toDouble) &
