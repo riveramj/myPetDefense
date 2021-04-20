@@ -86,6 +86,7 @@ class Subscription
   def getNextShipDate: LocalDate =
     this.nextShipDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
 
+  def isActive: Boolean = List(Status.Active, Status.Paused).contains(this.status.get)
 }
 
 object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] {
