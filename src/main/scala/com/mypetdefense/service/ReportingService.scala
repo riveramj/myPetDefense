@@ -636,7 +636,7 @@ object ReportingService extends Loggable {
     CSVHelper.inMemoryCsv(fileName, data)
   }
 
-  def CustomerLifespanCsv: Box[InMemoryResponse] = {
+  def customerLifespanCsv: Box[InMemoryResponse] = {
     val data     = customerLifespanReport
     val fileName = s"customer-lifespan-${LocalDate.now()}.csv"
     CSVHelper.inMemoryCsv(fileName, data)
