@@ -20,9 +20,9 @@ object DataStatusDashboard extends Loggable {
 }
 
 class DataStatusDashboard extends Loggable {
-  val parentsCount: Long = User.count()
+  val parentsCount: Long = User.count(By(User.userType, UserType.Parent))
   val parentsWithAgencyCount: Long = User.count(NotNullRef(User.referer))
-  val agenciesCustomersCount: Int = Agency.findAll().map(_.customers).size
+  val agenciesCustomersCount: Int = Agency.findAll().flatMap(_.customers.toList).size
 
   val activeUsers: immutable.Seq[User] = User.findAll(By(User.status, Status.Active))
   val activeUsersSubscriptionCount: Int = activeUsers
