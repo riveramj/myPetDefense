@@ -1,0 +1,104 @@
+<div id="main" data-lift="surround?with=default-template;at=content">
+  <div data-lift="admin.DataStatusDashboard.render?eager_eval=true">
+    <div data-lift="embed?what=admin/admin-nav-bar"></div>
+
+    <div id="item-container">
+      <section class="customers-and-agencies snapshot percentage">
+        <ul>
+          <li class="header">
+            <h3>Customers and Agencies</h3>
+          </li>
+          <li>
+            <div>Customers have Agency</div>
+            <div class="customers-have-agency coverage-percentage">0.1%</div>
+          </li>
+          <li>
+            <div>Agencies Contain Customers </div>
+            <div class="agencies-have-customers coverage-percentage">0.1%</div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="users-subscription-active snapshot percentage">
+        <ul>
+          <li class="header">
+            <h3>Active Users and Subscriptions</h3>
+          </li>
+          <li>
+            <div>Active Parents have Non-Cancelled Subscription</div>
+            <div class="active-parents-subscription coverage-percentage">0.1%</div>
+          </li>
+          <li>
+            <div>Non-Cancelled Subscription have Active Parent</div>
+            <div class="non-cancelled-subscription-user coverage-percentage">0.1%</div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="users-subscription-cancelled snapshot percentage">
+        <ul>
+          <li class="header">
+            <h3>Cancelled Users and Subscriptions</h3>
+          </li>
+          <li>
+            <div>Cancelled Parents have Cancelled Subscription</div>
+            <div class="cancelled-parents-subscription coverage-percentage">0.1%</div>
+          </li>
+          <li>
+            <div>Cancelled Subscription have Cancelled Parent</div>
+            <div class="cancelled-subscription-user coverage-percentage">0.1%</div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="active-subscription-pets snapshot percentage">
+        <ul>
+          <li class="header">
+            <h3>Active Subscription and Pets</h3>
+          </li>
+          <li>
+            <div>Active Subscription has Pets</div>
+            <div class="active-subscription-has-pets coverage-percentage">0.1%</div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="subscription-box-subscription snapshot percentage">
+        <ul>
+          <li class="header">
+            <h3>Subscription Box and Subscription</h3>
+          </li>
+          <li>
+            <div>Non-cancelled Subscription has Active Box</div>
+            <div class="non-cancelled-subscription-has-box coverage-percentage">0.1%</div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="pets-subscription-box snapshot percentage">
+        <ul>
+          <li class="header">
+            <h3>Pets and Subscription Box</h3>
+          </li>
+          <li>
+            <div>Active Subscription has Pets</div>
+            <div class="active-pets-has-box coverage-percentage">0.1%</div>
+          </li>
+        </ul>
+      </section>
+    </div>
+  </div>
+  <head_merge>
+    <link rel="stylesheet" data-lift="style-bundle?name=executive-dashboard">
+  </head_merge>
+  <tail>
+    <script type="text/javascript" src="/static/js/chart.bundle.min.js"></script>
+    <script type="text/javascript" src="/static/js/chartjs-plugin-datalabels.min.js"></script>
+    <script type="text/javascript" src="/static/js/picker.js"></script>
+    <script type="text/javascript" src="/static/js/picker.date.js"></script>
+
+    <script type="text/javascript" data-lift="script-bundle?name=executive-dashboard"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/date-picker/default.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/date-picker/default.date.css">
+  </tail>
+</div>

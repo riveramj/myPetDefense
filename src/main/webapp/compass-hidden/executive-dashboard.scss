@@ -139,6 +139,17 @@ nav {
   }
 }
 
+.snapshot.percentage {
+  .header {
+    font-weight: $bold;
+  }
+
+  div {
+    font-size: 17px;
+    font-weight: $normal;
+  }
+}
+
 li.key-stat {
   width: 100%;
 
