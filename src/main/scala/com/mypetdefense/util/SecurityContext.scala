@@ -75,8 +75,8 @@ object SecurityContext extends Loggable {
       agency.name.get
     })
 
-    if (agencyName == "My Pet Defense") {
-      ShipmentDashboard.menu.loc.calcDefaultHref
+    if (agencyName.contains("My Pet Defense")) {
+      Parents.menu.loc.calcDefaultHref
     } else {
       AgencyOverview.menu.loc.calcDefaultHref
     }

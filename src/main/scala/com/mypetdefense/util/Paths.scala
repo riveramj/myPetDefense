@@ -162,6 +162,7 @@ object Paths {
     ParentSubscription.successfulResumeMenu,
     ParentSubscription.cancelSurveySubscriptionMenu,
     ParentSubscription.surveyCompleteSubscriptionMenu,
+    admin.DataStatusDashboard.menu,
     admin.ExecutiveDashboard.menu,
     admin.ExecutiveDashboard.executiveSnapshotExportMenu,
     admin.ExecutiveDashboard.userUpgradeExportMenu,
