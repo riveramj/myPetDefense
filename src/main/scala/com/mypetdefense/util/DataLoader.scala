@@ -483,7 +483,7 @@ object DataLoader extends Loggable {
     }
   }
 
-  def createMissingCatBoxes(): Unit =
+  def createMissingCatBoxes(): Unit = {
     for {
       cat <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
       user <- cat.user.obj.toList
@@ -494,6 +494,7 @@ object DataLoader extends Loggable {
       val box = SubscriptionBox.createNewBox(subscription, updatedCat, false)
       updatedCat.box(box).saveMe()
     }
+  }
 
   def createMissingDogBoxes(): Unit =
     for {

@@ -109,3 +109,10 @@ button::-moz-focus-inner {
     background-image: url("#{$at2x_path}"); 
   }
 }
+
+iframe {
+  display: block;
+  background-color: #454343;
+  width: 100%;
+  height: 1px;
+}
