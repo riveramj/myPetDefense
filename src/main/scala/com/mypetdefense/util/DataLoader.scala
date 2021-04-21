@@ -1,13 +1,13 @@
 package com.mypetdefense.util
 
-import com.mypetdefense.model.Agency.getHQFor
-
-import java.text.SimpleDateFormat
+import com.mypetdefense.model.Agency.{getCustomersAndAllChildrenCustomers, getHQFor}
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import net.liftweb.common.Box.tryo
 import net.liftweb.common._
 import net.liftweb.mapper._
+
+import java.text.SimpleDateFormat
 
 object DataLoader extends Loggable {
   def loadProducts: Any = {

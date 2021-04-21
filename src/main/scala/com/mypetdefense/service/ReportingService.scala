@@ -1,12 +1,13 @@
 package com.mypetdefense.service
 
+import com.mypetdefense.model.Agency.getCustomersAndAllChildrenCustomers
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports
 import com.mypetdefense.model.domain.reports._
-import com.mypetdefense.util.csv.CSVHelper
 import com.mypetdefense.util.CalculationHelper._
 import com.mypetdefense.util.DateHelper._
 import com.mypetdefense.util.ModelSyntax._
+import com.mypetdefense.util.csv.CSVHelper
 import com.mypetdefense.util.{CalculationHelper, DateHelper}
 import net.liftweb.common._
 import net.liftweb.http._
@@ -972,32 +973,20 @@ object ReportingService extends Loggable {
   private[service] def customerLifespanReport: CustomerLifespanReport = {
     val agencies = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
 
-    agencies
-
-    val subs = Subscription.findAll().groupBy(_.status)
-    val users = User.findAll().groupBy(_.referer)
-    subs
-    users
-
     val report = agencies.flatMap { agency =>
-      val customers = agency.customers.toList
+      val customers = getCustomersAndAllChildrenCustomers(agency)
       val subscriptions = customers.flatMap(_.subscription.obj)
       val subscriptionsGrouped = subscriptions.groupBy(_.isActive)
-      subscriptionsGrouped
 
       val lifespanStatistics = subscriptionsGrouped.map { case (isActive, subscriptions) =>
         val status = if (isActive) "Active" else "Inactive"
 
-        val foo = subscriptions.groupBy { subscription =>
+        val subscriptionGroupedByLifespan = subscriptions.groupBy { subscription =>
           val startDate = subscription.startDate.get
           val endDate = if(isActive) Empty else tryo(subscription.cancellationDate.get)
 
           calculateLifespan(startDate, endDate)
-        }
-
-        val subscriptionGroupedByLifespan = foo.mapValues(_.length).withDefaultValue(0)
-
-        subscriptionGroupedByLifespan
+        }.mapValues(_.length).withDefaultValue(0)
 
         status ->
           LifespanStatistics(
@@ -1010,7 +999,7 @@ object ReportingService extends Loggable {
           )
       }
 
-      val foo = lifespanStatistics.map { case (status, statistics) =>
+      lifespanStatistics.map { case (status, statistics) =>
         LifespanByAgency(
           agency.name.get,
           status,
@@ -1018,8 +1007,6 @@ object ReportingService extends Loggable {
           LifespanStatistics(0,0,0,0,0,0)
         )
       }
-
-      foo
     }
     CustomerLifespanReport(report)
   }
