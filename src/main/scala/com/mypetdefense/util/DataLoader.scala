@@ -683,7 +683,7 @@ object DataLoader extends Loggable {
       By(User.userType, UserType.Parent),
       NullRef(User.subscription)
     )
-    subscription <- Subscription.find(By(Subscription.user, user.userId.get))
+    subscription <- Subscription.find(By(Subscription.user, user.id.get))
     } yield {
       user.subscription(subscription).saveMe()
     }
