@@ -21,10 +21,10 @@ object DataStatusDashboard extends Loggable {
 
 class DataStatusDashboard extends Loggable {
   val parentsCount: Long = User.count(By(User.userType, UserType.Parent))
-  val parentsWithAgencyCount: Long = User.count(NotNullRef(User.referer))
+  val parentsWithAgencyCount: Long = User.count(By(User.userType, UserType.Parent), NotNullRef(User.referer))
   val agenciesCustomersCount: Int = Agency.findAll().flatMap(_.customers.toList).size
 
-  val activeUsers: immutable.Seq[User] = User.findAll(By(User.status, Status.Active))
+  val activeUsers: immutable.Seq[User] = User.findAll(By(User.userType, UserType.Parent),By(User.status, Status.Active))
   val activeUsersSubscriptionCount: Int = activeUsers
     .flatMap(_.subscription.obj.toList)
     .count(_.status != Status.Cancelled)
@@ -34,7 +34,7 @@ class DataStatusDashboard extends Loggable {
     .flatMap(_.user.obj.toList)
     .count(_.status != Status.Cancelled)
 
-  val cancelledUsers: immutable.Seq[User] = User.findAll(By(User.status, Status.Cancelled))
+  val cancelledUsers: immutable.Seq[User] = User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Cancelled))
   val cancelledUsersSubscriptionCount: Int = cancelledUsers
     .flatMap(_.subscription.obj.toList)
     .count(_.status == Status.Cancelled)
