@@ -52,6 +52,8 @@ class Boot {
 
     //DataLoader.cancelBoxesForCancelledPets()
 
+    DataLoader.setUserSubId
+
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
 

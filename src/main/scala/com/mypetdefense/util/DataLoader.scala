@@ -1,6 +1,6 @@
 package com.mypetdefense.util
 
-import com.mypetdefense.model.Agency.{getCustomersAndAllChildrenCustomers, getHQFor}
+import com.mypetdefense.model.Agency.getHQFor
 import com.mypetdefense.model._
 import com.mypetdefense.service._
 import net.liftweb.common.Box.tryo
@@ -677,4 +677,16 @@ object DataLoader extends Loggable {
       if (boxes.nonEmpty)
         subscription.isUpgraded(true).saveMe()
     }
+
+  def setUserSubId = {
+    for {
+    user <- User.findAll(
+      By(User.userType, UserType.Parent),
+      NullRef(User.subscription)
+    )
+    subscription <- Subscription.find(By(Subscription.user, user.userId.get))
+    } yield {
+      user.subscription(subscription).saveMe()
+    }
+  }
 }
