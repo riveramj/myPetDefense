@@ -192,7 +192,9 @@ object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] 
   }
 
   def activeSubscriptions: List[Subscription] =
-    Subscription.findAll(By(Subscription.status, Status.Active))
+    Subscription.findAll(
+      ByList(Subscription.status, List(Status.Paused, Status.Active))
+    )
 
   def upgradedActiveSubscriptions: List[Subscription] =
     Subscription.findAll(
