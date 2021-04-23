@@ -48,8 +48,14 @@ class DataStatusDashboard extends Loggable {
     ByList(Subscription.status, List(Status.Active, Status.Paused))
   )
 
-  val nonCancelledSubscriptionBox = nonCancelledSubscription
+  val activeSubscriptionHasBox = activeSubscription
     .count(_.subscriptionBoxes.map(_.status.get).contains(Status.Active))
+
+  val activeSubscriptionBox = SubscriptionBox.findAll(By(SubscriptionBox.status, Status.Active))
+
+  val activeBoxPetCount = activeSubscriptionBox.count(_.pet.obj.map(_.status.get).contains(Status.Active))
+
+  val activeSubscriptionBoxHasSubscription = activeSubscriptionBox.flatMap(_.subscription.obj)
 
   val activePetsActiveSubsCount = activeSubscription.count(_.getPets.map(_.status.get).contains(Status.Active))
 
@@ -77,10 +83,12 @@ class DataStatusDashboard extends Loggable {
       ".active-subscription-has-pets *" #> formatPercentage(activePetsActiveSubsCount, activeSubscription.size)
     } &
     ".subscription-box-subscription" #> {
-      ".non-cancelled-subscription-has-box *" #> formatPercentage(nonCancelledSubscriptionBox, nonCancelledSubscription.size)
+      ".active-subscription-has-box *" #> formatPercentage(activeSubscriptionHasBox, activeSubscription.size) &
+      ".active-subscription-box-subscription *" #> formatPercentage(activeSubscriptionBoxHasSubscription.size, activeSubscriptionBox.size)
     } &
     ".pets-subscription-box" #> {
-      ".active-pets-has-box *" #> formatPercentage(activePetBoxCount, activePets.size)
+      ".active-box-has-pet *" #> formatPercentage(activeBoxPetCount, activeSubscriptionBox.size) &
+      ".active-pet-has-box *" #> formatPercentage(activePetBoxCount, activePets.size)
     }
   }
 }
