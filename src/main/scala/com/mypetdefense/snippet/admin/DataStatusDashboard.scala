@@ -44,9 +44,7 @@ class DataStatusDashboard extends Loggable {
     .flatMap(_.user.obj.toList)
     .count(_.status == Status.Cancelled)
 
-  val activeSubscription = Subscription.findAll(
-    ByList(Subscription.status, List(Status.Active, Status.Paused))
-  )
+  val activeSubscription = Subscription.activeSubscriptions
 
   val activeSubscriptionHasBox = activeSubscription
     .count(_.subscriptionBoxes.map(_.status.get).contains(Status.Active))

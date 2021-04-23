@@ -83,12 +83,7 @@ object Agency extends Agency with LongKeyedMetaMapper[Agency] {
 
   def getAllHQ: List[Agency] = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
 
-  def getCustomersAndAllChildrenCustomers(agency: Agency): List[User] = {
-    agency.customers.toList ++ getAllChildrenCustomers(agency)
-  }
-
   def getAllChildrenCustomers(agency: Agency): List[User] = {
-
     val childrenAgencies = Agency.findAll(By(Agency.parent, agency))
 
     if (childrenAgencies.isEmpty) {
