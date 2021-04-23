@@ -1,6 +1,6 @@
 package com.mypetdefense.service
 
-import com.mypetdefense.model.Agency.getCustomersAndAllChildrenCustomers
+import com.mypetdefense.model.Agency.{getAllChildrenCustomers, getCustomersAndAllChildrenCustomers}
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports
 import com.mypetdefense.model.domain.reports._
@@ -974,7 +974,7 @@ object ReportingService extends Loggable {
     val agencies = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
 
     val report = agencies.flatMap { agency =>
-      val customers = getCustomersAndAllChildrenCustomers(agency)
+      val customers = getAllChildrenCustomers(agency)
       val subscriptions = customers.flatMap(_.subscription.obj)
       val subscriptionsGrouped = subscriptions.groupBy(_.isActive)
 
