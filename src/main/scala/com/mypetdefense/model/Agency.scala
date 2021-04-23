@@ -1,12 +1,13 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.service.ReportingService.petlandName
 import com.mypetdefense.util.DateHelper.currentDate
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.mapper._
+
+import java.util.Date
+import scala.annotation.tailrec
 
 class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agency] {
   def getSingleton: KeyedMetaMapper[Long, Agency] = Agency
@@ -16,6 +17,7 @@ class Agency extends LongKeyedMapper[Agency] with IdPK with OneToMany[Long, Agen
 
   object name       extends MappedString(this, 100)
   object parent     extends MappedLongForeignKey(this, Agency)
+  object stores     extends MappedOneToMany(Agency, Agency.parent)
   object agencyType extends MappedEnum(this, AgencyType)
   object customers  extends MappedOneToMany(User, User.referer)
   object members    extends MappedOneToMany(User, User.agency)
@@ -84,13 +86,16 @@ object Agency extends Agency with LongKeyedMetaMapper[Agency] {
   def getAllHQ: List[Agency] = Agency.findAll(By(Agency.agencyType, AgencyType.Headquarters))
 
   def getAllChildrenCustomers(agency: Agency): List[User] = {
-    val childrenAgencies = Agency.findAll(By(Agency.parent, agency))
-
-    if (childrenAgencies.isEmpty) {
-      agency.customers.toList
-    } else {
-      childrenAgencies.flatMap { child => getAllChildrenCustomers(child) }
+    @tailrec
+    def getAllCustomers(possibleAgencies: List[Agency], customers: List[User]): List[User] ={
+      possibleAgencies match {
+        case Nil => customers
+        case head :: tail =>
+          getAllCustomers(tail ++ head.stores.toList, customers ++ head.customers.toList)
+      }
     }
+
+    getAllCustomers(agency.stores.toList, agency.customers.toList)
   }
 
   def getUsersForAgency(agencyName: String): List[User] = {

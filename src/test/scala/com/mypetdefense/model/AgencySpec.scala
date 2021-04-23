@@ -1,11 +1,11 @@
 package com.mypetdefense.model
 
 import com.mypetdefense.generator.Generator._
-import com.mypetdefense.helpers.DateUtil.anyDayOfThisMonth
+import com.mypetdefense.helpers.DateUtil.{anyDayOfThisMonth, _}
 import com.mypetdefense.helpers.GeneralDbUtils._
-import com.mypetdefense.helpers.DateUtil._
 import com.mypetdefense.helpers._
 import com.mypetdefense.helpers.db.AgencyDbUtils.createAgency
+import net.liftweb.common.{Empty, Full}
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class AgencySpec extends DBTest {
@@ -58,5 +58,57 @@ class AgencySpec extends DBTest {
         actualData should contain theSameElementsAs expectedShipments
         cleanUpSuccess()
     }
+  }
+
+  it should "get all customers for HQ" in {
+    val tppHQ = createTppAndMPDAgencies().tpp
+    val tppChild = createAgency(
+      "tppChild",
+      AgencyType.Store,
+      Full(tppHQ),
+      "tppChild",
+      false
+    )
+    val tppChildSibling = createAgency(
+      "tppChildSibling",
+      AgencyType.Store,
+      Full(tppHQ),
+      "tppChild",
+      false
+    )
+    val tppGrandchild = createAgency(
+      "tppGrandChild",
+      AgencyType.Store,
+      Full(tppChild),
+      "tppGrandchild",
+      false
+    )
+    val tpp = makeUsersForAgency(tppHQ)
+    val child = makeUsersForAgency(tppChild)
+    val childSibling = makeUsersForAgency(tppChildSibling)
+    val childSiblingSecond = makeUsersForAgency(tppChildSibling)
+    val grandChild = makeUsersForAgency(tppGrandchild)
+
+    val expectedResult = List(tpp, child, childSibling, childSiblingSecond, grandChild).map(_.id.get)
+    val result = Agency.getAllChildrenCustomers(tppHQ.reload).map(_.id.get)
+
+    result should contain theSameElementsAs expectedResult
+    cleanUpSuccess()
+  }
+
+  private def makeUsersForAgency(agency: Agency) = {
+    User.createNewUser(
+      firstName = "John",
+      lastName = "Doe",
+      stripeId = "cus_1234",
+      email = "john@example.com",
+      password = "1234",
+      phone = "123456789",
+      coupon = Empty,
+      referer = Full(agency),
+      agency = Empty,
+      UserType.Parent,
+      ""
+    )
   }
 }
