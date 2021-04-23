@@ -1,6 +1,6 @@
 package com.mypetdefense.service
 
-import com.mypetdefense.model.Agency.{getAllChildrenCustomers, getCustomersAndAllChildrenCustomers}
+import com.mypetdefense.model.Agency.getAllChildrenCustomers
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.reports
 import com.mypetdefense.model.domain.reports._
