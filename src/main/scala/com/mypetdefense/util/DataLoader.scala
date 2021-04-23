@@ -678,15 +678,33 @@ object DataLoader extends Loggable {
         subscription.isUpgraded(true).saveMe()
     }
 
-  def setUserSubId = {
+  def createCancelledSubForUser = {
     for {
     user <- User.findAll(
       By(User.userType, UserType.Parent),
       NullRef(User.subscription)
     )
-    subscription <- Subscription.find(By(Subscription.user, user.id.get))
     } yield {
+      val (priceCode, isUpgraded) = if(user.salesAgentId.get.isEmpty)
+        (Price.defaultPriceCode, true)
+      else
+        (Price.currentTppPriceCode, false)
+
+      val subscription =
+        Subscription.createNewSubscription(
+          Full(user),
+          "",
+          user.createdAt.get,
+          user.createdAt.get,
+          priceCode,
+          isUpgraded
+        )
+        .status(Status.Cancelled)
+        .cancellationDate(user.createdAt.get)
+        .saveMe()
+
       user.subscription(subscription).saveMe()
+      user.cancel
     }
   }
 }
