@@ -56,7 +56,7 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
 
     val boxesToUpdate =
       if (onlyForYesterdayUsers)
-        unmodifiedBoxes.filter(_.subscription.obj.exists(_.createdAt.get.isYesterday))
+        unmodifiedBoxes.filter(_.subscription.obj.exists(_.startDate.get.isYesterday))
       else
         unmodifiedBoxes
 

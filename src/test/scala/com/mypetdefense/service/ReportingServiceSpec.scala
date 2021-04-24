@@ -31,13 +31,13 @@ class ReportingServiceSpec extends DBTest {
   ): Long =
     insertUserAndSub(t._1, t._2).subscription.cancel.saveMe().id.get
 
-  private def insertAgencySalesCreatedAt(
+  private def insertAgencySalesstartDate(
       agency: Agency,
-      createdAt: Date,
+      startDate: Date,
       data: PetChainData
   ): InsertedUserAndPet = {
     val inserted    = insertUserAndPet(data)
-    val updatedUser = inserted.user.referer(agency).createdAt(createdAt).saveMe()
+    val updatedUser = inserted.user.referer(agency).createdAt(startDate).saveMe()
     inserted.copy(user = updatedUser)
   }
 
@@ -152,7 +152,7 @@ class ReportingServiceSpec extends DBTest {
         case (u, s) =>
           val date = lastYear
           insertUserAndSub(u, s).subscription
-            .createdAt(date.toDate)
+            .startDate(date.toDate)
             .cancellationDate(date.plusMonths(3).toDate)
             .saveMe()
       }
@@ -160,7 +160,7 @@ class ReportingServiceSpec extends DBTest {
         case (u, s) =>
           val thisMonthDay = anyDayOfThisMonth
           insertUserAndSub(u, s).subscription
-            .createdAt(thisMonthDay.toDate)
+            .startDate(thisMonthDay.toDate)
             .saveMe()
             .id
             .get
@@ -169,7 +169,7 @@ class ReportingServiceSpec extends DBTest {
         case (u, s) =>
           val thisMonthDayDate = anyDayOfThisMonth.withDayOfMonth(1)
           insertUserAndSub(u, s).subscription
-            .createdAt(thisMonthDayDate.toDate)
+            .startDate(thisMonthDayDate.toDate)
             .cancellationDate(thisMonthDayDate.plusDays(2).toDate)
             .saveMe()
             .id
@@ -190,7 +190,7 @@ class ReportingServiceSpec extends DBTest {
       (currentMonth, oldOne) =>
         oldOne.foreach {
           case (u, s) =>
-            insertUserAndSub(u, s).subscription.createdAt(anyDayOfLastMonth.toDate).saveMe()
+            insertUserAndSub(u, s).subscription.startDate(anyDayOfLastMonth.toDate).saveMe()
         }
         val expectedCurrentMonthIds = currentMonth.map(createUserAndSubReturnSubId)
 
@@ -376,17 +376,17 @@ class ReportingServiceSpec extends DBTest {
       (yesterdayNotOursSales, myPetDefenseSales, petlandSales) =>
         val mpdAndPetland = createPetlandAndMPDAgencies()
         myPetDefenseSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyHourOfYesterday.toDate, _)
+          insertAgencySalesstartDate(mpdAndPetland.mpd, anyHourOfYesterday.toDate, _)
         )
         petlandSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyHourOfYesterday.toDate, _)
+          insertAgencySalesstartDate(mpdAndPetland.petland, anyHourOfYesterday.toDate, _)
         )
 
         val someAgencyName = Random.generateString.take(10)
         val someAgency     = createAgency(someAgencyName)
 
         val insertedPetsSize = yesterdayNotOursSales
-          .map(insertAgencySalesCreatedAt(someAgency, anyHourOfYesterday.toDate, _).pets.size)
+          .map(insertAgencySalesstartDate(someAgency, anyHourOfYesterday.toDate, _).pets.size)
           .sum
 
         val expectedInResult = someAgencyName -> insertedPetsSize
@@ -403,17 +403,17 @@ class ReportingServiceSpec extends DBTest {
       (yesterdayMonthNotOursSales, myPetDefenseSales, petlandSales) =>
         val mpdAndPetland = createPetlandAndMPDAgencies()
         myPetDefenseSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyDayOfThisMonth.toDate, _)
+          insertAgencySalesstartDate(mpdAndPetland.mpd, anyDayOfThisMonth.toDate, _)
         )
         petlandSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyDayOfThisMonth.toDate, _)
+          insertAgencySalesstartDate(mpdAndPetland.petland, anyDayOfThisMonth.toDate, _)
         )
 
         val someAgencyName = Random.generateString.take(10)
         val someAgency     = createAgency(someAgencyName)
 
         val insertedPetsSize = yesterdayMonthNotOursSales
-          .map(insertAgencySalesCreatedAt(someAgency, anyDayOfThisMonth.toDate, _).pets.size)
+          .map(insertAgencySalesstartDate(someAgency, anyDayOfThisMonth.toDate, _).pets.size)
           .sum
 
         val expectedInResult = someAgencyName -> insertedPetsSize
@@ -430,10 +430,10 @@ class ReportingServiceSpec extends DBTest {
       (yesterdayNotOursSales, myPetDefenseSales, petlandSales) =>
         val mpdAndPetland = createPetlandAndMPDAgencies()
         myPetDefenseSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyHourOfYesterday.toDate, _)
+          insertAgencySalesstartDate(mpdAndPetland.mpd, anyHourOfYesterday.toDate, _)
         )
         petlandSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.petland, anyHourOfYesterday.toDate, _)
+          insertAgencySalesstartDate(mpdAndPetland.petland, anyHourOfYesterday.toDate, _)
         )
 
         val someAgencyName   = Random.generateString.take(10)
@@ -441,7 +441,7 @@ class ReportingServiceSpec extends DBTest {
         val someAgency       = createAgency(someAgencyName).saveMe()
 
         val insertedPetsSize = yesterdayNotOursSales
-          .map(insertAgencySalesCreatedAt(someAgency, anyHourOfYesterday.toDate, _))
+          .map(insertAgencySalesstartDate(someAgency, anyHourOfYesterday.toDate, _))
           .map { inserted =>
             inserted.user.salesAgentId(someSalesAgentId).saveMe()
             inserted.pets.size
@@ -462,10 +462,10 @@ class ReportingServiceSpec extends DBTest {
       (yesterdayMonthNotOursSales, myPetDefenseSales, petlandSales) =>
         val mpdAndPetland = createPetlandAndMPDAgencies()
         myPetDefenseSales.foreach(
-          insertAgencySalesCreatedAt(mpdAndPetland.mpd, anyDayOfThisMonth.toDate, _)
+          insertAgencySalesstartDate(mpdAndPetland.mpd, anyDayOfThisMonth.toDate, _)
         )
         petlandSales.foreach(
-          insertAgencySalesCreatedAt(
+          insertAgencySalesstartDate(
             createPetlandAndMPDAgencies().petland,
             anyDayOfThisMonth.toDate,
             _
@@ -477,7 +477,7 @@ class ReportingServiceSpec extends DBTest {
         val someAgency       = createAgency(someAgencyName).saveMe()
 
         val insertedPetsSize = yesterdayMonthNotOursSales
-          .map(insertAgencySalesCreatedAt(someAgency, anyDayOfThisMonth.toDate, _))
+          .map(insertAgencySalesstartDate(someAgency, anyDayOfThisMonth.toDate, _))
           .map { inserted =>
             inserted.user.salesAgentId(someSalesAgentId).saveMe()
             inserted.pets.size
