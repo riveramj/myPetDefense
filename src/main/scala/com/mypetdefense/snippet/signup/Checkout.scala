@@ -2,13 +2,14 @@ package com.mypetdefense.snippet.signup
 
 import com.mypetdefense.constants.StripePrices
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerSignedUp}
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
 import com.mypetdefense.util.AggregationHelper.combineSimilarItems
 import com.mypetdefense.util.CalculationHelper.countOccurrencesByKey
-import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
+import com.mypetdefense.util.{ClearNodesIf, DateHelper, SecurityContext}
 import net.liftweb.common.Box.box2Iterable
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -74,6 +75,9 @@ class Checkout extends Loggable {
       + petSizes(AnimalSize.DogLargeZo) * StripePrices.Dog.HealthAndWellnessBox.Large.monthlyCharge
       + petSizes(AnimalSize.DogXLargeZo) * StripePrices.Dog.HealthAndWellnessBox.XLarge.monthlyCharge)
 
+  val smallDogCount: Int = pets.values.count {_.size.get == AnimalSize.DogSmallZo}
+  val nonSmallDogCount: Int = petCount - smallDogCount
+
   var promotionAmount: BigDecimal = findPromotionAmount()
 
   private def handleStripeFailureOnSignUp(
@@ -97,10 +101,26 @@ class Checkout extends Loggable {
         (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
 
       case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount < subtotal =>
-        dollarAmount
+        if (List("20off", "80off").contains(couponCode)) {
+
+          val smallDogPromo = smallDogCount * BigDecimal(19.99)
+          val nonSmallDogPromo = nonSmallDogCount * BigDecimal(22.99)
+
+          val totalPromoAmount = {
+            if (nonSmallDogCount >= 3)
+              3 * BigDecimal(22.99)
+            else if ((smallDogCount + nonSmallDogCount) >= 3)
+              nonSmallDogPromo + ((3 - nonSmallDogCount) * BigDecimal(19.99))
+            else
+              smallDogPromo + nonSmallDogPromo
+          }
+
+          totalPromoAmount
+        } else dollarAmount
 
       case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount > subtotal =>
         subtotal
+
       case (_,_) => 0
     }
   }
@@ -117,15 +137,37 @@ class Checkout extends Loggable {
       newUserData,
       customer
     )
-    userWithSubscription.map(_.reload).map(SecurityContext.logIn)
+    val updatedUserWithSubscription = userWithSubscription.map(_.reload)
+    updatedUserWithSubscription.map(SecurityContext.logIn)
 
     for {
       offerCode <- PetFlowChoices.woofTraxOfferCode.is
       userId <- PetFlowChoices.woofTraxUserId.is
-      user <- userWithSubscription
+      user <- updatedUserWithSubscription
     } yield {
       WoofTraxOrder.createWoofTraxOrder(offerCode, userId, user)
     }
+
+    val todayDateTime = DateHelper.now.toString
+    val signUpActionLog = CustomerSignedUp(
+      SecurityContext.currentUserId,
+      None,
+      todayDateTime,
+      coupon.map(_.couponCode.get)
+    )
+    val petActionLog = updatedUserWithSubscription.toList
+      .flatMap(_.pets.toList)
+      .map { pet =>
+        CustomerAddedPet(
+          SecurityContext.currentUserId,
+          None,
+          pet.petId.get,
+          pet.name.get
+        )
+      }
+
+    ActionLogService.logAction(signUpActionLog)
+    petActionLog.foreach(ActionLogService.logAction)
 
     updateSessionVars()
     S.redirectTo(Success.menu.loc.calcDefaultHref)
@@ -156,11 +198,43 @@ class Checkout extends Loggable {
       )
     }
 
+      /*
+    val promoPennyCount = {
+      if (List("20off", "80off").contains(couponCode)) {
+        if (nonSmallDogCount >= 3)
+          (smallDogCount * 2499) + ((nonSmallDogCount - 3) * 2799) + 1500
+        else if ((smallDogCount + nonSmallDogCount) >= 3)
+          ((smallDogCount - (3 - nonSmallDogCount)) * 2499) + 1500
+        else (smallDogCount + nonSmallDogCount) * 500
+      } else
+        pennyCount
+    }
+
+    val promoPennyCoupon = {
+      if (List("20off", "80off").contains(couponCode))
+        Empty
+      else
+        coupon
+    }
+
+    val stripeCustomer =
+      StripeFacade.Customer.createWithSubscription(
+        email,
+        stripeToken,
+        priceId = "pennyProduct",
+        promoPennyCount,
+        taxRate,
+        promoPennyCoupon
+      )
+    }
+    */
+
     stripeCustomer match {
       case Full(customer) => setupNewUserAndRedirect(customer)
       case stripeFailure  => handleStripeFailureOnSignUp(stripeFailure)
     }
   }
+
 
   private def validateFields: (List[MyPetDefenseEvent], Boolean) = {
     val passwordError = checkEmpty(password, "#password")
@@ -302,21 +376,21 @@ class Checkout extends Loggable {
             "#password" #> SHtml.password(password, userPassword => password = userPassword.trim)
           else {
             ".password-container" #> ClearNodes &
-              ".facebook-option" #> ClearNodes &
-              "#facebook-id" #> ClearNodes &
-              "#email [disabled]" #> "disabled"
+            ".facebook-option" #> ClearNodes &
+            "#facebook-id" #> ClearNodes &
+            "#email [disabled]" #> "disabled"
           }
         } andThen
           "#email" #> ajaxText(email, userEmail => email = userEmail.trim) &
-            "#facebook-id" #> ajaxText(facebookId, facebookId = _) &
-            "#first-name" #> ajaxText(firstName, firstName = _) &
-            "#last-name" #> ajaxText(lastName, lastName = _) &
-            ".connect-facebook [onClick]" #> SHtml.ajaxInvoke(() => connectFacebook()) &
-            "#street-1" #> text(street1, street1 = _) &
-            "#street-2" #> text(street2, street2 = _) &
-            "#city" #> ajaxText(city, city = _) &
-            "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
-            "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
+          "#facebook-id" #> ajaxText(facebookId, facebookId = _) &
+          "#first-name" #> ajaxText(firstName, firstName = _) &
+          "#last-name" #> ajaxText(lastName, lastName = _) &
+          ".connect-facebook [onClick]" #> SHtml.ajaxInvoke(() => connectFacebook()) &
+          "#street-1" #> text(street1, street1 = _) &
+          "#street-2" #> text(street2, street2 = _) &
+          "#city" #> ajaxText(city, city = _) &
+          "#state" #> ajaxText(state, possibleState => calculateTax(possibleState, zip)) &
+          "#zip" #> ajaxText(zip, possibleZip => calculateTax(state, possibleZip))
       } andThen
       "#stripe-token" #> hidden(stripeToken = _, stripeToken) &
       "#ip-address" #> hidden(ipAddress = _, ipAddress) &

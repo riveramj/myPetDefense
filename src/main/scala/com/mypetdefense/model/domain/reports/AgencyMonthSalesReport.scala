@@ -1,7 +1,7 @@
 package com.mypetdefense.model.domain.reports
 
 import com.mypetdefense.typeclasses.ToCsvStringConverter
-import com.mypetdefense.util.CSVHelper.spacerRow
+import com.mypetdefense.util.csv.CSVHelper.spacerRow
 
 case class AgencyMonthSalesReport(
     year: Int,
@@ -31,5 +31,5 @@ case class AgencyMonthSalesReport(
 
 object AgencyMonthSalesReport {
   implicit val agencyMonthSalesCsvConverter: ToCsvStringConverter[AgencyMonthSalesReport] =
-    (input: AgencyMonthSalesReport) => input.toCsvRow
+    ToCsvStringConverter.fromFunction(_.toCsvRow)
 }

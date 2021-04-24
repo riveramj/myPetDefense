@@ -9,7 +9,7 @@ import java.util.{Date, Locale}
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
 import com.mypetdefense.service._
-import com.mypetdefense.util._
+import com.mypetdefense.util.csv.{TrackingInfo, TrackingUploadCSV}
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.js.JsCmd._
@@ -104,8 +104,6 @@ class ShipmentDashboard extends Loggable {
 
     shipment.dateShipped(new Date()).address(address).saveMe
 
-    InventoryService.deductShipmentItems(shipment)
-
     EmailActor ! SendInvoicePaymentSucceededEmail(
       user,
       subscription,
@@ -129,7 +127,7 @@ class ShipmentDashboard extends Loggable {
         "Received: %s [size=%d, type=%s]" format (file.fileName, file.length, file.mimeType)
       )
       val parsedFile    = TrackingUploadCSV.parse(file.file)
-      val trackingInfos = parsedFile.map(_.list).openOr(Nil)
+      val trackingInfos = parsedFile.openOr(Nil)
 
       trackingInfos.map(updateShipment)
 

@@ -135,7 +135,7 @@ object CheckoutService {
 
     val boxes = pets.map(createNewBox(mpdSubscription, _))
 
-    boxes.map(SubscriptionItem.createFirstBox)
+    boxes.map(SubscriptionItem.createFirstBox(_))
 
     sendCheckoutEmails(userWithSubscription, petCount, coupon)
 

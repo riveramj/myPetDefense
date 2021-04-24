@@ -25,9 +25,7 @@ object SecurityContext extends Loggable {
 
     val seenPrompt = user.subscription.obj.map(_.promptedUpgrade.get).openOr(false)
     val upgraded = user.subscription.obj
-      .map(_.subscriptionBoxes.toList.map(_.subscriptionItems.toList.nonEmpty))
-      .openOr(Nil)
-      .foldLeft(true)(_ && _)
+      .map(_.isUpgraded.get).openOr(false)
 
     user.userType.get match {
       case UserType.Admin =>
@@ -77,8 +75,8 @@ object SecurityContext extends Loggable {
       agency.name.get
     })
 
-    if (agencyName == "My Pet Defense") {
-      ShipmentDashboard.menu.loc.calcDefaultHref
+    if (agencyName.contains("My Pet Defense")) {
+      Parents.menu.loc.calcDefaultHref
     } else {
       AgencyOverview.menu.loc.calcDefaultHref
     }

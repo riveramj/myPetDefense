@@ -3,7 +3,7 @@ package com.mypetdefense.model.domain.reports
 import java.time.Month
 
 import com.mypetdefense.typeclasses.ToCsvStringConverter
-import com.mypetdefense.util.CSVHelper
+import com.mypetdefense.util.csv.CSVHelper
 
 case class CancelsInMonthReport(month: Month, cancels: Int) {
   def toCsvRow: List[String] = {
