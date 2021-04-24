@@ -7,7 +7,6 @@ import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
-import java.text.NumberFormat
 import scala.collection.immutable
 
 object DataStatusDashboard extends Loggable {
@@ -60,8 +59,10 @@ class DataStatusDashboard extends Loggable {
   val activePets = Pet.findAll(By(Pet.status, Status.Active))
   val activePetBoxCount = activePets.count(_.box.obj.map(_.status.get).contains(Status.Active))
 
-  def formatPercentage(num: Long, dem: Long): String =
-    NumberFormat.getPercentInstance.format(num/dem.toDouble)
+  def formatPercentage(num: Long, dem: Long): String = {
+    val percentage = (num/dem.toDouble) * 100
+    f"${percentage.floor}%.0f%%"
+  }
 
   def render: CssBindFunc = {
     ".data-status-dashboard [class+]" #> "current" &
