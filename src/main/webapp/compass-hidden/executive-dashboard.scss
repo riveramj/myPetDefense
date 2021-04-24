@@ -93,6 +93,12 @@ nav {
       padding: 0 0 10px;
       width: 100%;
 
+      .info {
+        font-weight: normal;
+        font-size: 14px;
+        padding: 4px 0 0 0;
+      }
+
       @media (min-width: $bp-medium) {
         margin-top: 0;
         padding-bottom: 13px;
@@ -122,7 +128,7 @@ nav {
 
     div {
       color: #4F4E4E;
-      
+
       @media (min-width: $bp-medium) {
         line-height: 24px;
         font-weight: $bold;
@@ -130,6 +136,17 @@ nav {
         padding-bottom: 2px;
       }
     }
+  }
+}
+
+.snapshot.percentage {
+  .header {
+    font-weight: $bold;
+  }
+
+  div {
+    font-size: 17px;
+    font-weight: $normal;
   }
 }
 
@@ -194,4 +211,8 @@ li.key-stat {
 
 .hidden {
   display: none;
+}
+
+.picker__day--outfocus {
+  color: #ddd !important;
 }

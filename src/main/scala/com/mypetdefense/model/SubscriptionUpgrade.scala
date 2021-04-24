@@ -1,7 +1,8 @@
 package com.mypetdefense.model
 
-import java.util.Date
+import com.mypetdefense.model.Agency.getHQFor
 
+import java.util.Date
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.mapper._
 
@@ -14,8 +15,8 @@ class SubscriptionUpgrade extends LongKeyedMapper[SubscriptionUpgrade] with IdPK
 
   object shipmentCountAtUpgrade extends MappedInt(this)
   object user                   extends MappedLongForeignKey(this, User)
+  object referrer               extends MappedLongForeignKey(this, Agency)
   object subscription           extends MappedLongForeignKey(this, Subscription)
-  object subscriptionBox        extends MappedLongForeignKey(this, SubscriptionBox)
   object upgradeDate extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -29,13 +30,12 @@ object SubscriptionUpgrade
     with LongKeyedMetaMapper[SubscriptionUpgrade] {
   def createSubscriptionUpgrade(
       subscription: Subscription,
-      subscriptionBox: SubscriptionBox,
       user: User,
       shipmentCount: Int
   ): SubscriptionUpgrade = {
     SubscriptionUpgrade.create
       .subscription(subscription)
-      .subscriptionBox(subscriptionBox)
+      .referrer(user.referer.obj.map(getHQFor))
       .user(user)
       .shipmentCountAtUpgrade(shipmentCount)
       .saveMe

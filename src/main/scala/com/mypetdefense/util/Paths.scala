@@ -21,6 +21,8 @@ object Paths {
   val homePage: Menu.Menuable with Menu.WithSlash = Menu.i("Home") / "index"
   val halfOff: Menu.Menuable =
     Menu.i("50% Off") / "50off" >> EarlyResponse(() => applyCouponRedirect("50off"))
+  val twentyOff: Menu.Menuable =
+    Menu.i("$20 Off") / "20off" >> EarlyResponse(() => applyCouponRedirect("20off"))
   val freeMonth: Menu.Menuable =
     Menu.i("100% Off") / "100off" >> EarlyResponse(() => applyCouponRedirect("100off"))
   val termsOfService: Menu.Menuable with Menu.WithSlash =
@@ -60,7 +62,7 @@ object Paths {
     RedirectResponse("/logout")
   )
   val finishedCheckout: If = If(
-    () => !total.is.isEmpty,
+    () => !monthlyTotal.is.isEmpty,
     RedirectResponse(Checkout.menu.loc.calcDefaultHref)
   )
   val petChosen: If = If(
@@ -110,7 +112,6 @@ object Paths {
 
   def applyCouponRedirect(couponCode: String): Nothing = {
     val coupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
-    println(coupon)
     PetFlowChoices.coupon(coupon)
     PetFlowChoices.coupon.is
 
@@ -130,6 +131,7 @@ object Paths {
     homePage,
     halfOff,
     freeMonth,
+    twentyOff,
     termsOfService,
     thanksPage,
     billingThanksPage,
@@ -160,8 +162,13 @@ object Paths {
     ParentSubscription.successfulResumeMenu,
     ParentSubscription.cancelSurveySubscriptionMenu,
     ParentSubscription.surveyCompleteSubscriptionMenu,
+    admin.DataStatusDashboard.menu,
     admin.ExecutiveDashboard.menu,
     admin.ExecutiveDashboard.executiveSnapshotExportMenu,
+    admin.ExecutiveDashboard.userUpgradeExportMenu,
+    admin.ExecutiveDashboard.customerLifespanExportMenu,
+    admin.ExecutiveDashboard.retentionSnapshotExportMenu,
+    admin.ExecutiveDashboard.snapshotInTimeExportMenu,
     admin.ShipmentDashboard.menu,
     admin.ShipmentDashboard.newLabelsExportMenu,
     admin.ShipmentDashboard.existingLabelsExportMenu,
@@ -183,8 +190,7 @@ object Paths {
     admin.PhonePortal.menu,
     admin.Surveys.menu,
     admin.EventsDashboard.menu,
-    admin.AmazonOrders.menu,
-    admin.AmazonOrders.exportAmazonOrder,
+    admin.EmailReports.menu,
     agency.LegacyAgencyOverview.agencyMtdYtdExportMenu,
     agency.LegacyAgencyOverview.exportTPPMontSalesMenu,
     agency.LegacyAgencyOverview.menu,
@@ -201,10 +207,6 @@ object Paths {
     AddOnSale.addOnSaleMenu,
     TreatCheckout.menu,
     AddOnCheckout.menu,
-    inventory.InventoryItems.menu,
-    inventory.Reconciliations.menu,
-    inventory.InventoryChangeAudits.menu,
-    inventory.ItemProduction.menu,
     petland.NewOrder.menu,
     PetChoice.menu,
     DogDetails.menu

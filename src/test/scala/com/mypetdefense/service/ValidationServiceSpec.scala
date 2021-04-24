@@ -292,7 +292,8 @@ object ValidationServiceSpec {
       coupon = Empty,
       referer = Empty,
       agency = Empty,
-      UserType.Agent
+      UserType.Agent,
+      ""
     )
 
   def newUserWithFbId(): User =

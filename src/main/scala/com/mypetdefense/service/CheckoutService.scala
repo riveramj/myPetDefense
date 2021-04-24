@@ -50,7 +50,8 @@ object CheckoutService {
           coupon,
           coupon.flatMap(_.agency.obj),
           None,
-          UserType.Parent
+          UserType.Parent,
+          newUserData.ipAddress
         )
       )
     } else {
@@ -134,7 +135,7 @@ object CheckoutService {
 
     val boxes = pets.map(createNewBox(mpdSubscription, _))
 
-    boxes.map(SubscriptionItem.createFirstBox)
+    boxes.map(SubscriptionItem.createFirstBox(_))
 
     sendCheckoutEmails(userWithSubscription, petCount, coupon)
 

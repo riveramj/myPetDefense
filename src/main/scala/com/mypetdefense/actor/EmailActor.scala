@@ -53,6 +53,11 @@ case class DailySalesEmail(
     monthlySalesByAgency: List[(String, Int)],
     email: String
 ) extends EmailActorMessage
+case class MonthlySalesEmail(
+  monthAgentNameAndCount: List[(String, Int)],
+  monthlySalesByAgency: List[(String, Int)],
+  email: String
+) extends EmailActorMessage
 case class InternalDailyEmail(
     newShipmentCount: Int,
     paidShipmentCount: Int,
@@ -412,17 +417,18 @@ trait NewSaleEmailHandling extends EmailHandlerChain {
 
       val transform = {
         "#name *" #> user.map(_.name).openOr("") &
-          "#email *" #> user.map(_.email.get).openOr("") &
-          "#count *" #> petCount &
-          "#coupon *" #> couponCode &
-          ".amount" #> ClearNodes
+        "#email *" #> user.map(_.email.get).openOr("") &
+        "#count *" #> petCount &
+        "#coupon *" #> couponCode &
+        ".amount" #> ClearNodes
       }
 
-      sendEmail(subject, "sales@mypetdefense.com", transform(newSaleTemplate))
-      sendEmail(subject, "rivera.mj@gmail.com", transform(newSaleTemplate))
-      sendEmail(subject, "amela.hasanovic@mypetdefense.com", transform(newSaleTemplate))
-      sendEmail(subject, "calvin.leach@mypetdefense.com", transform(newSaleTemplate))
-      sendEmail(subject, "kyle@getskybound.com", transform(newSaleTemplate))
+      val report = EmailReport.findAll(By(EmailReport.reportType, ReportType.NewSaleEmail))
+      val emails = report.flatMap(_.emailRecords.toList).map(_.email.get)
+
+      emails.map { email =>
+        sendEmail(subject, email, transform(newSaleTemplate))
+      }
   }
 }
 
@@ -436,15 +442,18 @@ trait UpgradeSubscriptionEmailHandling extends EmailHandlerChain {
 
       val transform = {
         "#name *" #> user.map(_.name).openOr("") &
-          "#email *" #> user.map(_.email.get).openOr("") &
-          "#count *" #> boxCount &
-          ".coupon *" #> ClearNodes &
-          ".amount" #> ClearNodes
+        "#email *" #> user.map(_.email.get).openOr("") &
+        "#count *" #> boxCount &
+        ".coupon *" #> ClearNodes &
+        ".amount" #> ClearNodes
       }
 
-      sendEmail(subject, "sales@mypetdefense.com", transform(newSaleTemplate))
-      sendEmail(subject, "rivera.mj@gmail.com", transform(newSaleTemplate))
-      sendEmail(subject, "calvin.leach@mypetdefense.com", transform(newSaleTemplate))
+      val report = EmailReport.findAll(By(EmailReport.reportType, ReportType.NewSaleEmail))
+      val emails = report.flatMap(_.emailRecords.toList).map(_.email.get)
+
+      emails.map { email =>
+        sendEmail(subject, email, transform(newSaleTemplate))
+      }
   }
 }
 
@@ -458,10 +467,10 @@ trait ShipmentReadyEmailHandling extends EmailHandlerChain {
 
       val transform = {
         "#name *" #> user.name &
-          "#email *" #> user.email &
-          ".count" #> ClearNodes &
-          ".coupon" #> ClearNodes &
-          "#amount *" #> ("$" + ("%1.2f" format amount))
+        "#email *" #> user.email &
+        ".count" #> ClearNodes &
+        ".coupon" #> ClearNodes &
+        "#amount *" #> ("$" + ("%1.2f" format amount))
       }
 
       sendEmail(subject, "mike.rivera@mypetdefense.com", transform(paymentTemplate))
@@ -478,9 +487,9 @@ trait ContactUsEmailHandling extends EmailHandlerChain {
 
       val transform = {
         "#name *" #> name &
-          "#email *" #> email &
-          "#message *" #> message &
-          "#source-page *" #> sourcePage
+        "#email *" #> email &
+        "#message *" #> message &
+        "#source-page *" #> sourcePage
       }
 
       sendEmail(subject, "help@mypetdefense.com", transform(contactTemplate))
@@ -611,7 +620,53 @@ trait SendShipmentRefundedEmailHandling extends EmailHandlerChain {
   }
 }
 
-trait DailySalesEmailHandling extends EmailHandlerChain {
+trait AgentSalesEmailHandling extends EmailHandlerChain {
+  def agentTemplate =
+    Templates("emails-hidden" :: "agent-report-email" :: Nil) openOr NodeSeq.Empty
+
+  def agentHostUrl = Paths.serverUrl
+
+  def emailTransform(
+                      totalSales: Box[Int],
+                      monthlySales: Int,
+                      headerDate: String,
+                      monthYear: String,
+                      agentNameAndCount: List[(String, Int)],
+                      monthAgentNameAndCount: List[(String, Int)],
+                      dailySalesByAgency: List[(String, Int)],
+                      monthlySalesByAgency: List[(String, Int)],
+                    ) = {
+    "#shield-logo [src]" #> (agentHostUrl + "/images/logo/shield-logo@2x.png") &
+    ".new-customer-sales" #> ClearNodesIf(totalSales.isEmpty) andThen
+    ".only-daily" #> ClearNodesIf(totalSales.isEmpty) andThen
+    ".daily-agent" #> ClearNodesIf(agentNameAndCount.isEmpty) andThen
+    ".daily-agency-container" #> ClearNodesIf(dailySalesByAgency.isEmpty) andThen
+    ".new-sales *" #> totalSales.openOr(0) &
+    ".month-sales *" #> monthlySales &
+    ".date *" #> headerDate &
+    ".month *" #> monthYear &
+    ".agent-container .agent" #> agentNameAndCount.map {
+      case (agent, count) =>
+        ".agent-name *" #> agent &
+        ".sale-count *" #> count
+    } &
+    ".monthly-agent" #> monthAgentNameAndCount.map {
+      case (agent, count) =>
+        ".agent-name *" #> agent &
+        ".sale-count *" #> count
+    } &
+    ".daily-agency" #> dailySalesByAgency.map {
+      case (agencyName, count) =>
+        ".agency-name *" #> agencyName &
+        ".sale-count *" #> count
+    } &
+    ".monthly-agency-container .monthly-agency" #> monthlySalesByAgency.map {
+      case (agencyName, count) =>
+        ".agency-name *" #> agencyName &
+        ".sale-count *" #> count
+    }
+  }
+
   addHandler {
     case DailySalesEmail(
         agentNameAndCount,
@@ -620,8 +675,6 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
         monthlySalesByAgency,
         email
         ) =>
-      val template =
-        Templates("emails-hidden" :: "daily-agent-report-email" :: Nil) openOr NodeSeq.Empty
 
       val yesterdayDate = LocalDateTime.now().minusDays(1)
 
@@ -631,40 +684,54 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
       val monthYear = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
 
       val subject = s"[$subjectDate] Daily My Pet Defense Sales Report"
-      val hostUrl = Paths.serverUrl
 
       val totalSales   = agentNameAndCount.map(_._2).sum
       val monthlySales = monthAgentNameAndCount.map(_._2).sum
 
-      val transform = {
-        "#shield-logo [src]" #> (hostUrl + "/images/logo/shield-logo@2x.png") &
-          ".new-sales *" #> totalSales &
-          ".month-sales *" #> monthlySales &
-          ".date *" #> headerDate &
-          ".month *" #> monthYear &
-          ".agent-container .agent" #> agentNameAndCount.map {
-            case (agent, count) =>
-              ".agent-name *" #> agent &
-                ".sale-count *" #> count
-          } &
-          ".monthly-agent" #> monthAgentNameAndCount.map {
-            case (agent, count) =>
-              ".agent-name *" #> agent &
-                ".sale-count *" #> count
-          } &
-          ".daily-agency" #> dailySalesByAgency.map {
-            case (agencyName, count) =>
-              ".agency-name *" #> agencyName &
-                ".sale-count *" #> count
-          } &
-          ".monthly-agency-container .monthly-agency" #> monthlySalesByAgency.map {
-            case (agencyName, count) =>
-              ".agency-name *" #> agencyName &
-                ".sale-count *" #> count
-          }
-      }
+      val transform = emailTransform(
+        Full(totalSales),
+        monthlySales,
+        headerDate,
+        monthYear,
+        agentNameAndCount,
+        monthAgentNameAndCount,
+        dailySalesByAgency,
+        monthlySalesByAgency
+      )
 
-      sendEmail(subject, email, transform(template))
+      sendEmail(subject, email, transform(agentTemplate))
+  }
+
+  addHandler {
+    case MonthlySalesEmail(
+      monthAgentNameAndCount,
+      monthlySalesByAgency,
+      email
+    ) =>
+
+      val lastMonthDate = LocalDateTime.now().minusMonths(1)
+
+      val subjectDate = lastMonthDate.format(DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH))
+      val headerDate =
+        lastMonthDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+      val monthYear = lastMonthDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+
+      val subject = s"$subjectDate My Pet Defense Sales Report"
+
+      val monthlySales = monthAgentNameAndCount.map(_._2).sum
+
+      val transform = emailTransform(
+        Empty,
+        monthlySales,
+        headerDate,
+        monthYear,
+        Nil,
+        monthAgentNameAndCount,
+        Nil,
+        monthlySalesByAgency
+      )
+
+      sendEmail(subject, email, transform(agentTemplate))
   }
 }
 
@@ -954,7 +1021,7 @@ trait EmailActor
     with ContactUsEmailHandling
     with Send5kEmailHandling
     with NotifyParentGrowthRateHandling
-    with DailySalesEmailHandling
+    with AgentSalesEmailHandling
     with InternalDailyEmailHandling
     with TreatReceiptEmailHandling
     with AddOnReceiptEmailHandling

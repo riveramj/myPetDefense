@@ -180,7 +180,8 @@ class NewOrder extends Loggable {
       coupon = None,
       referer = currentUser.flatMap(_.agency.obj),
       agency = None,
-      userType = UserType.Parent
+      userType = UserType.Parent,
+      ""
     )
 
     Address.createNewAddress(

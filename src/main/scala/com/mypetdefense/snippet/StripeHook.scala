@@ -2,7 +2,9 @@ package com.mypetdefense.snippet
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.SystemAction.{SystemCanceledAccount, SystemRemovedPet}
 import com.mypetdefense.service._
+import com.mypetdefense.util.SecurityContext
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.rest._
@@ -20,6 +22,37 @@ object StripeHook extends StripeHook {
 trait StripeHook extends RestHelper with Loggable {
   def emailActor: EmailActor
 
+  def cancelledAccountWithPayment(objectJson: JValue): Box[OkResponse] = ({
+    for {
+      stripeCustomerId <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
+      parent           <- User.find(By(User.stripeId, stripeCustomerId)) ?~! "No user found"
+      subscription     = parent.subscription.obj
+      if subscription.isEmpty
+    } yield {
+      val pets: List[Pet] = parent.pets.toList
+
+      pets.map { pet =>
+        val actionLog = SystemRemovedPet(
+          SecurityContext.currentUserId,
+          None,
+          pet.petId.get,
+          pet.name.get
+        )
+
+        ParentService.removePet(parent, pet, actionLog)
+      }
+
+      val actionLog = SystemCanceledAccount(
+        parent.userId.get,
+        None,
+        parent.subscription.obj.map(_.subscriptionId.get).openOr(0L)
+      )
+
+      ParentService.removeParent(parent, actionLog)
+      Full(OkResponse())
+    }
+  }).openOr(Failure("couldnt cancel user in MPD and Stripe"))
+
   def invoicePaymentSucceeded(objectJson: JValue): Box[OkResponse] = {
     for {
       stripeCustomerId     <- tryo((objectJson \ "customer").extract[String]) ?~! "No customer."
@@ -27,14 +60,15 @@ trait StripeHook extends RestHelper with Loggable {
       subtotal             <- tryo((objectJson \ "subtotal").extract[String]) ?~! "No subtotal"
       tax                  <- tryo((objectJson \ "tax").extract[String]) ?~! "No tax paid"
       amountPaid           <- tryo((objectJson \ "amount_due").extract[String]) ?~! "No amount paid"
-      user                 <- User.find(By(User.stripeId, stripeCustomerId))
-      subscription         <- user.subscription
+      user                 <- User.find(By(User.stripeId, stripeCustomerId)) ?~! "No user found"
+      subscription         <- user.subscription ?~! "No mpd subscription found"
       shippingAddress <- Address.find(
                           By(Address.user, user),
                           By(Address.addressType, AddressType.Shipping)
-                        )
+                        ) ?~! "No mpd address found"
       invoicePaymentId <- tryo((objectJson \ "id").extract[String]) ?~! "No ID."
     } yield {
+      val coupon = user.coupon.obj
       val charge = tryo((objectJson \ "charge").extract[String])
 
       val notTrial_?   = ParentService.notTrialSubscription_?(stripeSubscriptionId)
@@ -53,35 +87,31 @@ trait StripeHook extends RestHelper with Loggable {
       }
 
       if (notTrial_? && activePets_?) {
-        subscription.status(Status.Active).saveMe
+        subscription.reload.status(Status.Active).save()
 
-        if (subscription.contractLength.get > 0) {
-          if (subscription.shipments.toList.size < 2) {
-            ParentService.changeToPetlandMonthlyStripePrice(stripeSubscriptionId)
-          }
-        }
+        TaxJarService.processTaxesCharged(
+          invoicePaymentId,
+          city,
+          state,
+          zip,
+          formatAmount(subtotal),
+          formatAmount(tax)
+        )
 
-        if (activePets_?) {
-          TaxJarService.processTaxesCharged(
-            invoicePaymentId,
-            city,
-            state,
-            zip,
-            formatAmount(subtotal),
-            formatAmount(tax)
-          )
+        //ParentService.updatePuppyProducts(user)
 
-          //ParentService.updatePuppyProducts(user)
-
-          ShipmentService.createNewShipment(
-            user,
-            invoicePaymentId,
-            charge,
-            formatAmount(amountPaid),
-            formatAmount(tax)
-          )
-        }
+        ShipmentService.createNewShipment(
+          user,
+          invoicePaymentId,
+          charge,
+          formatAmount(amountPaid),
+          formatAmount(tax)
+        )
       }
+      val couponCode = coupon.map(_.couponCode.get).openOr("")
+
+      if (List("20off", "80off").contains(couponCode))
+        ParentService.updateStripeSubscriptionTotal(user)
 
       OkResponse()
     }
@@ -103,9 +133,6 @@ trait StripeHook extends RestHelper with Loggable {
         _ isAfterNow
       }
       val amount = totalAmountInCents / 100d
-
-      if (nextPaymentAttempt.isEmpty)
-        ParentService.updateNextShipDate(subscription)
 
       emailActor ! SendInvoicePaymentFailedEmail(user, amount, nextPaymentAttempt)
 
@@ -137,7 +164,12 @@ trait StripeHook extends RestHelper with Loggable {
         objectJson = (dataJson \ "object")
       } yield {
         val result: Box[LiftResponse] = eventType match {
-          case "invoice.payment_succeeded"     => invoicePaymentSucceeded(objectJson)
+          case "invoice.payment_succeeded"     =>
+            val reconciliationAttempt = invoicePaymentSucceeded(objectJson)
+            if (reconciliationAttempt.isDefined)
+              reconciliationAttempt
+            else
+              cancelledAccountWithPayment(objectJson)
           case "invoice.payment_failed"        => invoicePaymentFailed(objectJson)
           case "customer.subscription.updated" => subscriptionPastDue(objectJson)
           case _                               => Full(OkResponse())

@@ -1,11 +1,12 @@
 package com.mypetdefense.service
 
-import java.util.Date
-
+import com.mypetdefense.model.Agency.mpdAgency
 import com.mypetdefense.model._
 import net.liftweb.common.Box.tryo
 import net.liftweb.common._
 import net.liftweb.mapper._
+
+import java.util.Date
 
 object ShipmentService extends Loggable {
   def getCurrentPastDueShipments: List[Shipment] = {
@@ -85,8 +86,10 @@ object ShipmentService extends Loggable {
       dogs: Seq[Pet]
   ): Boolean = {
     val isSecondShipment = shipmentCount == 1
+    val refererAgency = subscription.user.obj.flatMap(_.referer.obj)
+
     val isTppCustomer =
-      !subscription.isUpgraded.get && subscription.subscriptionBoxes.forall(_ == BoxType.basic)
+      refererAgency != mpdAgency && !subscription.isUpgraded.get
 
     isSecondShipment && isTppCustomer &&
     tryo(subscription.freeUpgradeSampleDate) == Full(null) && dogs.nonEmpty

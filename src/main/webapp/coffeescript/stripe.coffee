@@ -17,23 +17,23 @@ if !$('.form-row').hasClass('hide-card')
   
 stripeCallback = (token) ->
   $("#stripe-token").val(token.id)
-  $(".checkout, .update-billing").submit()
+  $(".checkout, .update-billing, #create-customer").submit()
 
 $(document).ready ->
-  $("body").on "click", '.checkout, .update-billing', (event) ->
+  $("body").on "click", '.checkout, .update-billing, #create-customer', (event) ->
     event.preventDefault()
-    $(".checkout.submit, input.update-billing").prop('value', 'Please Wait')
-    $(".checkout.submit, input.update-billing").prop('value', 'Please Wait').prop("disabled", true).addClass("processing")
+    $(".checkout.submit, input.update-billing, .create-customer").prop('value', 'Please Wait')
+    $(".checkout.submit, input.update-billing, .create-customer").prop('value', 'Please Wait').prop("disabled", true).addClass("processing")
 
     myPetDefenseSite.event("validate-stripe-form",
       stripeCallback: stripeCallback
     )
 
-  $(document).on "use-new-card", (event) ->
-    $('.form-row').removeClass('hide-card')
-    $('.existing-card').remove()
-    card.mount '#card-element'
-    newCard = true
+$(document).on "use-new-card", (event) ->
+  $('.form-row').removeClass('hide-card')
+  $('.existing-card').remove()
+  card.mount '#card-element'
+  newCard = true
 
 $(document).on "form-validation-error", (event) ->
   $(".checkout.submit, input.update-billing").prop('value', 'Place Order').prop("disabled", false).removeClass("processing")
@@ -44,9 +44,17 @@ $(document).on "validate-stripe-form", (event) ->
 
   if newCard
     stripe.createToken(card).then((result) ->
+      $('#card-errors').first().text("")
+      $('#card-errors').removeClass('active')
+
       if (result.error)
         # Inform the user if there was an error
         $('#card-errors').val(result.error.message)
+        $(".checkout.submit, input.update-billing").prop('value', 'Place Order').prop("disabled", false).removeClass("processing")
+      else if (result.token.card.funding == "prepaid")
+        $('#card-errors').addClass('active')
+        $('#card-errors').first().text("Prepaid cards are not supported at this time. Please use another card.")
+
         $(".checkout.submit, input.update-billing").prop('value', 'Place Order').prop("disabled", false).removeClass("processing")
       else
         # Send the token to your server

@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 
 import com.mypetdefense.model._
 import com.mypetdefense.util.RandomIdGenerator._
-import com.mypetdefense.util._
+import com.mypetdefense.util.csv.ReviewsUploadCSV
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.http.js.JsCmd._
@@ -38,13 +38,13 @@ class Reviews extends Loggable {
         "Received: %s [size=%d, type=%s]" format (file.fileName, file.length, file.mimeType)
       )
       val parsedFile = ReviewsUploadCSV.parse(file.file)
-      newReviews = parsedFile.map(_.list).openOr(Nil)
+      newReviews = parsedFile.openOr(Nil)
       newReviewsRenderer.map(_.setHtml).openOr(Noop)
     }
 
     def createReviews() = {
       newReviews.map(_.reviewId(generateLongId).saveMe)
-      ReviewsUploadCSV.updateProductRatings
+      ReviewsUploadCSV.updateProductRatings()
 
       S.redirectTo(Reviews.menu.loc.calcDefaultHref)
     }

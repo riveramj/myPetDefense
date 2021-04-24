@@ -1,4 +1,5 @@
 <div class="parent-details parent-pets">
+  <div data-lift="embed?what=product-picker-modal"></div>
   <table>
     <thead>
       <tr>
@@ -6,8 +7,6 @@
         <td>Pet Type</td>
         <td>Breed</td>
         <td>DoB</td>
-        <td>Product</td>
-        <td>Delay Next Shipment
         <td>Actions</td>
       </tr>
     </thead>
@@ -20,9 +19,10 @@
         <input placeholder="Pet Breed" class="pet-breed">
       </td>
       <td class="pet-birthday">01/01/2001</td>
-      <td class="pet-product">adventure plus 10 pounds</td>
-      <td class="pet-delay-growth"><input placeholder="Months?"></td>
-      <td class="actions"><button class="delete">Delete</button></td>
+      <td class="actions">
+        <button class="show-pet-product">View / Update Products</button>
+        <button class="delete">Delete</button>
+      </td>
     </tr>
   </table>
   <div class="add-to-parent">

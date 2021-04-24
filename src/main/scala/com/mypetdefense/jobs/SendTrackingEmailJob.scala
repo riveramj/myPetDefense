@@ -4,7 +4,7 @@ import java.util.Date
 
 import com.mypetdefense.actor._
 import com.mypetdefense.model._
-import com.mypetdefense.service.{InventoryService, ParentService, ShipStationService}
+import com.mypetdefense.service.{ParentService, ShipStationService}
 import net.liftweb.common._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
@@ -42,7 +42,6 @@ class SendTrackingEmailJob extends ManagedJob {
           .saveMe
 
         ParentService.updateNextShipDate(subscription)
-        InventoryService.deductShipmentItems(shipment)
 
         EmailActor ! SendInvoicePaymentSucceededEmail(
           Full(user),

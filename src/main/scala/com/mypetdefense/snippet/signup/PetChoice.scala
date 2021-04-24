@@ -1,10 +1,11 @@
 package com.mypetdefense.snippet.signup
 
-import com.mypetdefense.model.AnimalType
+import com.mypetdefense.model.{AnimalType, Coupon}
 import com.mypetdefense.service._
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.http._
+import net.liftweb.mapper.By
 import net.liftweb.sitemap.Loc.EarlyResponse
 import net.liftweb.util.CssSel
 import net.liftweb.util.Helpers._
@@ -13,7 +14,18 @@ object PetChoice extends Loggable {
   import net.liftweb.sitemap._
 
   val menu: Menu.Menuable = Menu.i("Pet Choice") / "pet-choice" >>
-    EarlyResponse(() => S.redirectTo(DogDetails.menu.loc.calcDefaultHref))
+    EarlyResponse(() => {
+      val woofTraxOfferCode = S.param("oc")
+      PetFlowChoices.woofTraxOfferCode(woofTraxOfferCode)
+      PetFlowChoices.woofTraxUserId(S.param("ui"))
+
+      if (woofTraxOfferCode.isDefined) {
+        val coupon = Coupon.find(By(Coupon.couponCode, "80off"))
+        PetFlowChoices.coupon(coupon)
+      }
+
+      S.redirectTo(DogDetails.menu.loc.calcDefaultHref)
+    })
 }
 
 class PetChoice extends Loggable {
