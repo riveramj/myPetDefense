@@ -25,9 +25,9 @@ class SubscriptionServiceSpec extends DBTest {
           .map(insertUserSubAndShipment)
           .map { inserted =>
             inserted.subscription.cancel
-            inserted.subscription.createdAt(anyDayOfThisYear.toDate).saveMe()
+            inserted.subscription.startDate(anyDayOfThisYear.toDate).saveMe()
           }
-          .groupBy(_.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate.getMonth)
+          .groupBy(_.startDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate.getMonth)
           .mapValues(_.size)
 
         val subs = Subscription.findAll()

@@ -110,13 +110,13 @@ object ReportingService extends Loggable {
 
   def findCurrentMonthSubscriptions(subscriptions: List[Subscription]): List[Subscription] = {
     subscriptions.filter { subscription =>
-      subscription.getCreatedDateOfSubscription.getMonth == currentDate.getMonth
+      subscription.getStartDateOfSubscription.getMonth == currentDate.getMonth
     }
   }
 
   def findActiveSubscriptionsFirstMonth(subscriptions: List[Subscription]): List[Subscription] = {
     subscriptions.filter { subscription =>
-      val createdDate      = subscription.getCreatedDateOfSubscription
+      val createdDate      = subscription.getStartDateOfSubscription
       val cancellationDate = subscription.getCancelledDateOfSubscription
       if (cancellationDate.isEmpty) {
         true
@@ -176,7 +176,7 @@ object ReportingService extends Loggable {
       subscriptions: List[Subscription]
   ): List[Subscription] = {
     subscriptions.filter { subscription =>
-      val createdDate      = subscription.getCreatedDateOfSubscription
+      val createdDate      = subscription.getStartDateOfSubscription
       val cancellationDate = subscription.getCancelledDateOfSubscription
       if (cancellationDate.isEmpty) {
         false
@@ -509,7 +509,7 @@ object ReportingService extends Loggable {
       customer     <- agency.customers.toList
       subscription <- customer.subscription.toList
     } yield {
-      val startDate  = subscription.getStartDateOfSubscription
+      val startDate  = tryo(dateFormat.format(subscription.getStartDateOfSubscription)).openOr("")
       val cancelDate = subscription.getCancelDateOfSubscription
       reports.CustomerDataReport(
         customer.name,

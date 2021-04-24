@@ -71,14 +71,11 @@ class Subscription
     }
   }
 
-  def getStartDateOfSubscription: String =
-    tryo(dateFormat.format(this.startDate.get)).openOr("")
-
   def getCancelDateOfSubscription: String =
     tryo(dateFormat.format(this.cancellationDate.get)).openOr("")
 
-  def getCreatedDateOfSubscription: LocalDate =
-    this.createdAt.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
+  def getStartDateOfSubscription: LocalDate =
+    this.startDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate
 
   def getCancelledDateOfSubscription: Box[LocalDate] =
     tryo(this.cancellationDate.get.toInstant.atZone(ZoneId.systemDefault()).toLocalDate)
@@ -113,8 +110,8 @@ object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] 
 
   def findNewYTDSubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
-      By_>=(Subscription.createdAt, yearDayOneLastYear),
-      By_<(Subscription.createdAt, currentDayLastYearEnd)
+      By_>=(Subscription.startDate, yearDayOneLastYear),
+      By_<(Subscription.startDate, currentDayLastYearEnd)
     )
   }
 
@@ -126,54 +123,54 @@ object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] 
 
   def findNewYTDSubscriptionsLastMonth: List[Subscription] = {
     Subscription.findAll(
-      By_>=(Subscription.createdAt, yearDayOne),
-      By_<(Subscription.createdAt, todayLastMonthEnd)
+      By_>=(Subscription.startDate, yearDayOne),
+      By_<(Subscription.startDate, todayLastMonthEnd)
     )
   }
 
   def findNewYTDSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>=(Subscription.createdAt, yearDayOne)
+      By_>=(Subscription.startDate, yearDayOne)
     )
   }
 
   def findNewMTDSubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
-      By_>=(Subscription.createdAt, monthDayOneLastYear),
-      By_<(Subscription.createdAt, currentDayLastYearEnd)
+      By_>=(Subscription.startDate, monthDayOneLastYear),
+      By_<(Subscription.startDate, currentDayLastYearEnd)
     )
   }
 
   def findNewMTDSubscriptionsLastMonth: List[Subscription] = {
     Subscription.findAll(
-      By_>=(Subscription.createdAt, monthDayOneLastMonth),
-      By_<(Subscription.createdAt, currentDayLastMonthEnd)
+      By_>=(Subscription.startDate, monthDayOneLastMonth),
+      By_<(Subscription.startDate, currentDayLastMonthEnd)
     )
   }
 
   def findNewMTDSubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>=(Subscription.createdAt, monthDayOne)
+      By_>=(Subscription.startDate, monthDayOne)
     )
   }
 
   def findNewTodaySubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
-      By_>=(Subscription.createdAt, todayLastYear),
-      By_<(Subscription.createdAt, todayLastYearEnd)
+      By_>=(Subscription.startDate, todayLastYear),
+      By_<(Subscription.startDate, todayLastYearEnd)
     )
   }
 
   def findNewTodaySubscriptionsLastMonth: List[Subscription] = {
     Subscription.findAll(
-      By_>=(Subscription.createdAt, todayLastMonth),
-      By_<(Subscription.createdAt, todayLastMonthEnd)
+      By_>=(Subscription.startDate, todayLastMonth),
+      By_<(Subscription.startDate, todayLastMonthEnd)
     )
   }
 
   def findNewTodaySubscriptions: List[Subscription] = {
     Subscription.findAll(
-      By_>=(Subscription.createdAt, nowDate)
+      By_>=(Subscription.startDate, nowDate)
     )
   }
 
