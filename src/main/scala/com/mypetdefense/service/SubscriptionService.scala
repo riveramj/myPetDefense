@@ -21,7 +21,7 @@ object SubscriptionService {
         .filter(_.filterMailedShipments.isEmpty)
 
     val cancelsByMonth = sameDayCancels.groupBy { subscription =>
-      subscription.getCreatedDateOfSubscription.getMonth
+      subscription.getStartDateOfSubscription.getMonth
     }
 
     cancelsByMonth.map {
