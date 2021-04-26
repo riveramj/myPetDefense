@@ -56,7 +56,7 @@ class Boot {
 
     DataLoader.updateChewCounts()
     DataLoader.createProducts
-    DataLoader.migrateTo30DaySupply()
+    //DataLoader.migrateTo30DaySupply()
 
     //DataLoader.createCancelledSubForUser
 
