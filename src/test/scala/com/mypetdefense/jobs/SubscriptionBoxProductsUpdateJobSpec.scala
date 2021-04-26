@@ -105,8 +105,8 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
         mpdAndPld.mpd,
         subUpgraded = true
       )
-    shouldBeAffectedData.subscription.createdAt(yesterday.toDate).saveMe()
-    shouldNotBeAffectedData.subscription.createdAt(anyDayExceptYesterday.toDate).saveMe()
+    shouldBeAffectedData.subscription.startDate(yesterday.toDate).saveMe()
+    shouldNotBeAffectedData.subscription.startDate(anyDayExceptYesterday.toDate).saveMe()
     insertProductToToSubBoxes(shouldBeAffectedData.subscription, someOldInsertedProduct)
     insertProductToToSubBoxes(shouldNotBeAffectedData.subscription, someOldInsertedProduct)
 

@@ -1,12 +1,14 @@
 package com.mypetdefense.util
 
+import net.liftweb.common.Box
+import net.liftweb.util.Helpers.tryo
+
 import java.text.SimpleDateFormat
 import java.time._
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.time.temporal.ChronoUnit.MILLIS
 import java.util.{Date, Locale}
-
-import net.liftweb.util.Helpers.tryo
 
 object DateHelper {
   val dateFormat     = new SimpleDateFormat("MM/dd/yyyy")
@@ -103,6 +105,17 @@ object DateHelper {
     } else {
       convertMonthToDate(month, year)
     }
+  }
+
+  def getMonthDiff(dateOne: Date, dateTwo: Box[Date]): Long = {
+    val startDate = dateOne.toLocalDate
+    val endDate =
+      if (dateTwo.contains(null))
+        now
+      else
+        dateTwo.openOr(nowDate).toLocalDate
+
+    ChronoUnit.MONTHS.between(startDate, endDate)
   }
 
   def getYearOrCurrent(year: String): Int = {

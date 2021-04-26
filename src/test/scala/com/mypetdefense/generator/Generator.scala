@@ -113,21 +113,6 @@ object Generator extends ScalaCheckHelper {
       weight = generateMoneyString.toDouble
     } yield InsertGenData(name, itemNumber, weight)
 
-  def genUnitOfMeasure: Gen[UnitOfMeasure.Value] =
-    Gen.oneOf(UnitOfMeasure.values)
-
-  def genInventoryItem: Gen[InventoryItem] =
-    for {
-      itemNumber <- genNonEmptyAlphaStr
-      desc       <- genNonEmptyAlphaStr
-      unit       <- genUnitOfMeasure
-      total      <- genPosInt
-    } yield InventoryItem.create
-      .itemNumber(itemNumber)
-      .description(desc)
-      .unitOfMeasure(unit)
-      .total(total)
-
   def genSubscriptionToCreate: Gen[SubscriptionCreateGeneratedData] =
     for {
       stripeSubscriptionId <- genNonEmptyAlphaStr
@@ -249,12 +234,27 @@ object Generator extends ScalaCheckHelper {
       sendFreeUpgrade
     )
 
+  def genSubscriptionUpdateToCreate: Gen[SubscriptionUpgradeCreateGeneratedData] =
+    for {
+      shipmentCountAtUpgrade <- genNonNegInt
+    } yield SubscriptionUpgradeCreateGeneratedData(shipmentCountAtUpgrade)
+
   def genShipmentChainData: Gen[ShipmentChainData] =
     for {
       user     <- genUserToCreate
       sub      <- genSubscriptionToCreate
       shipment <- Gen.listOfN(MAX_LENGTH_OF_GENERATED_TRAVERSABLES, genShipmentToCreate)
     } yield ShipmentChainData(user, sub, shipment)
+
+  def genSubscriptionUpgradeChainData(
+      petCount: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[SubscriptionUpgradeChainData] =
+    for {
+      user     <- genUserToCreate
+      sub      <- genSubscriptionToCreate
+      subscriptionUpdate <- genSubscriptionUpdateToCreate
+      pets <- Gen.listOfN(petCount, genPetData)
+    } yield SubscriptionUpgradeChainData(sub, user, pets, subscriptionUpdate)
 
   def genPetAndShipmentChainData(
       petsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
@@ -321,11 +321,6 @@ object Generator extends ScalaCheckHelper {
   ): Gen[List[InsertGenData]] =
     Gen.listOfN(length, genInsertData)
 
-  def listOfNInventoryItemsGen(
-      length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
-  ): Gen[List[InventoryItem]] =
-    Gen.listOfN(length, genInventoryItem)
-
   def listOfNPosIntsGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[Int]] =
@@ -369,6 +364,12 @@ object Generator extends ScalaCheckHelper {
   ): PetsAndShipmentChainData =
     genPetAndShipmentChainData(petsSize).pureApply(Gen.Parameters.default, rng.Seed(seed))
 
+  def listOfNSubscriptionUpgradeChainData(
+    upgradeCount: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES,
+    petCount: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[SubscriptionUpgradeChainData]] =
+    listOfNSubscriptionUpgradeChainDataGen(upgradeCount, petCount)
+
   def address(seed: Long = 42L): AddressGeneratedData =
     generateAddress.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
@@ -393,6 +394,12 @@ object Generator extends ScalaCheckHelper {
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[ShipmentChainData]] =
     Gen.listOfN(length, genShipmentChainData)
+
+  def listOfNSubscriptionUpgradeChainDataGen(
+    length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES,
+    petCount: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
+  ): Gen[List[SubscriptionUpgradeChainData]] =
+    Gen.listOfN(length, genSubscriptionUpgradeChainData(petCount))
 
   def listOfNPetsAndShipmentChainDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES

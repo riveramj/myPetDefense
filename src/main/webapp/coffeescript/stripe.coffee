@@ -17,13 +17,13 @@ if !$('.form-row').hasClass('hide-card')
   
 stripeCallback = (token) ->
   $("#stripe-token").val(token.id)
-  $(".checkout, .update-billing").submit()
+  $(".checkout, .update-billing, #create-customer").submit()
 
 $(document).ready ->
-  $("body").on "click", '.checkout, .update-billing', (event) ->
+  $("body").on "click", '.checkout, .update-billing, #create-customer', (event) ->
     event.preventDefault()
-    $(".checkout.submit, input.update-billing").prop('value', 'Please Wait')
-    $(".checkout.submit, input.update-billing").prop('value', 'Please Wait').prop("disabled", true).addClass("processing")
+    $(".checkout.submit, input.update-billing, .create-customer").prop('value', 'Please Wait')
+    $(".checkout.submit, input.update-billing, .create-customer").prop('value', 'Please Wait').prop("disabled", true).addClass("processing")
 
     myPetDefenseSite.event("validate-stripe-form",
       stripeCallback: stripeCallback

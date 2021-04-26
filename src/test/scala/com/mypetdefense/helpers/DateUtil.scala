@@ -47,9 +47,29 @@ object DateUtil {
   def inReportForecastDefaultRange: ZonedDateTime           = now.plusDays(14).atStartOfDay(zoneId)
   def notInReportForecastDefaultRange: ZonedDateTime        = getAnyDayOfTheYearExceptDay(now.plusDays(14))
 
+  def twoMonthsAgo: ZonedDateTime = {
+    val nowDate = now
+    nowDate.minusMonths(2).atStartOfDay(zoneId)
+  }
+
+  def eightMonthsAgo: ZonedDateTime = {
+    val nowDate = now
+    nowDate.minusMonths(8).atStartOfDay(zoneId)
+  }
+
   def lastYear: ZonedDateTime = {
     val nowDate = now
     nowDate.minusYears(1).atStartOfDay(zoneId)
+  }
+
+  def twoYearAgo: ZonedDateTime = {
+    val nowDate = now
+    nowDate.minusYears(2).atStartOfDay(zoneId)
+  }
+
+  def threeYearAgo: ZonedDateTime = {
+    val nowDate = now
+    nowDate.minusYears(3).atStartOfDay(zoneId)
   }
 
   // not always defined

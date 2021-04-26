@@ -85,14 +85,6 @@ box-landing.css
 box-checkout
 box-checkout.css
 
-inventory-items
-inventory-items.css
-admin.css
-
-reconciliations
-reconciliations.css
-admin.css
-
 item-production
 item-production.css
 admin.css
@@ -111,3 +103,6 @@ pet-size.css
 
 pet-details
 pet-details.css
+
+agency-customer-upload
+agency-customer-upload.css
