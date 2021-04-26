@@ -11,6 +11,7 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
   it should "do regular schedule job properly" in {
+    val prices = Price.findAll()
     val mpdAndPld                      = createPetlandAndMPDAgencies()
     val someGeneratedProduct           = product()
     val someOldInsertedProduct         = createNewProduct(someGeneratedProduct)
@@ -105,8 +106,8 @@ class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
         mpdAndPld.mpd,
         subUpgraded = true
       )
-    shouldBeAffectedData.subscription.createdAt(yesterday.toDate).saveMe()
-    shouldNotBeAffectedData.subscription.createdAt(anyDayExceptYesterday.toDate).saveMe()
+    shouldBeAffectedData.subscription.startDate(yesterday.toDate).saveMe()
+    shouldNotBeAffectedData.subscription.startDate(anyDayExceptYesterday.toDate).saveMe()
     insertProductToToSubBoxes(shouldBeAffectedData.subscription, someOldInsertedProduct)
     insertProductToToSubBoxes(shouldNotBeAffectedData.subscription, someOldInsertedProduct)
 

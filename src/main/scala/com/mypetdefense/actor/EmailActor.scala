@@ -4,8 +4,8 @@ import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.{Date, Locale}
-
 import com.mypetdefense.model._
+import com.mypetdefense.service.MandrillService
 import com.mypetdefense.snippet.customer.ShippingBilling
 import com.mypetdefense.snippet.login.{ResetPassword, Signup}
 import com.mypetdefense.util._
@@ -52,6 +52,11 @@ case class DailySalesEmail(
     dailySalesByAgency: List[(String, Int)],
     monthlySalesByAgency: List[(String, Int)],
     email: String
+) extends EmailActorMessage
+case class MonthlySalesEmail(
+  monthAgentNameAndCount: List[(String, Int)],
+  monthlySalesByAgency: List[(String, Int)],
+  email: String
 ) extends EmailActorMessage
 case class InternalDailyEmail(
     newShipmentCount: Int,
@@ -351,8 +356,9 @@ trait SendNewUserEmailHandling extends EmailHandlerChain {
 
 trait ResetPasswordHandling extends EmailHandlerChain {
   val resetSubject = "Reset your My Pet Defense password"
-  val resetPasswordTemplate: NodeSeq =
-    Templates("emails-hidden" :: "reset-password-email" :: Nil) openOr NodeSeq.Empty
+  val templateName = MandrillTemplate.find(
+    By(MandrillTemplate.emailType, EmailType.PasswordReset)
+  ).map(_.mandrillTemplateName.get).openOrThrowException("Missing Mandrill Template Record")
 
   addHandler {
     case SendPasswordResetEmail(userWithKey) =>
@@ -360,7 +366,9 @@ trait ResetPasswordHandling extends EmailHandlerChain {
       val transform =
         "#reset-link [href]" #> passwordResetLink
 
-      sendEmail(resetSubject, userWithKey.email.get, transform(resetPasswordTemplate))
+      val emailVars = Map(("name", "Mike"))
+
+      sendTemplateEmail(resetSubject, userWithKey.email.get, templateName, emailVars)
   }
 }
 
@@ -621,7 +629,53 @@ trait SendShipmentRefundedEmailHandling extends EmailHandlerChain {
   }
 }
 
-trait DailySalesEmailHandling extends EmailHandlerChain {
+trait AgentSalesEmailHandling extends EmailHandlerChain {
+  def agentTemplate =
+    Templates("emails-hidden" :: "agent-report-email" :: Nil) openOr NodeSeq.Empty
+
+  def agentHostUrl = Paths.serverUrl
+
+  def emailTransform(
+                      totalSales: Box[Int],
+                      monthlySales: Int,
+                      headerDate: String,
+                      monthYear: String,
+                      agentNameAndCount: List[(String, Int)],
+                      monthAgentNameAndCount: List[(String, Int)],
+                      dailySalesByAgency: List[(String, Int)],
+                      monthlySalesByAgency: List[(String, Int)],
+                    ) = {
+    "#shield-logo [src]" #> (agentHostUrl + "/images/logo/shield-logo@2x.png") &
+    ".new-customer-sales" #> ClearNodesIf(totalSales.isEmpty) andThen
+    ".only-daily" #> ClearNodesIf(totalSales.isEmpty) andThen
+    ".daily-agent" #> ClearNodesIf(agentNameAndCount.isEmpty) andThen
+    ".daily-agency-container" #> ClearNodesIf(dailySalesByAgency.isEmpty) andThen
+    ".new-sales *" #> totalSales.openOr(0) &
+    ".month-sales *" #> monthlySales &
+    ".date *" #> headerDate &
+    ".month *" #> monthYear &
+    ".agent-container .agent" #> agentNameAndCount.map {
+      case (agent, count) =>
+        ".agent-name *" #> agent &
+        ".sale-count *" #> count
+    } &
+    ".monthly-agent" #> monthAgentNameAndCount.map {
+      case (agent, count) =>
+        ".agent-name *" #> agent &
+        ".sale-count *" #> count
+    } &
+    ".daily-agency" #> dailySalesByAgency.map {
+      case (agencyName, count) =>
+        ".agency-name *" #> agencyName &
+        ".sale-count *" #> count
+    } &
+    ".monthly-agency-container .monthly-agency" #> monthlySalesByAgency.map {
+      case (agencyName, count) =>
+        ".agency-name *" #> agencyName &
+        ".sale-count *" #> count
+    }
+  }
+
   addHandler {
     case DailySalesEmail(
         agentNameAndCount,
@@ -630,8 +684,6 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
         monthlySalesByAgency,
         email
         ) =>
-      val template =
-        Templates("emails-hidden" :: "daily-agent-report-email" :: Nil) openOr NodeSeq.Empty
 
       val yesterdayDate = LocalDateTime.now().minusDays(1)
 
@@ -641,40 +693,54 @@ trait DailySalesEmailHandling extends EmailHandlerChain {
       val monthYear = yesterdayDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
 
       val subject = s"[$subjectDate] Daily My Pet Defense Sales Report"
-      val hostUrl = Paths.serverUrl
 
       val totalSales   = agentNameAndCount.map(_._2).sum
       val monthlySales = monthAgentNameAndCount.map(_._2).sum
 
-      val transform = {
-        "#shield-logo [src]" #> (hostUrl + "/images/logo/shield-logo@2x.png") &
-          ".new-sales *" #> totalSales &
-          ".month-sales *" #> monthlySales &
-          ".date *" #> headerDate &
-          ".month *" #> monthYear &
-          ".agent-container .agent" #> agentNameAndCount.map {
-            case (agent, count) =>
-              ".agent-name *" #> agent &
-                ".sale-count *" #> count
-          } &
-          ".monthly-agent" #> monthAgentNameAndCount.map {
-            case (agent, count) =>
-              ".agent-name *" #> agent &
-                ".sale-count *" #> count
-          } &
-          ".daily-agency" #> dailySalesByAgency.map {
-            case (agencyName, count) =>
-              ".agency-name *" #> agencyName &
-                ".sale-count *" #> count
-          } &
-          ".monthly-agency-container .monthly-agency" #> monthlySalesByAgency.map {
-            case (agencyName, count) =>
-              ".agency-name *" #> agencyName &
-                ".sale-count *" #> count
-          }
-      }
+      val transform = emailTransform(
+        Full(totalSales),
+        monthlySales,
+        headerDate,
+        monthYear,
+        agentNameAndCount,
+        monthAgentNameAndCount,
+        dailySalesByAgency,
+        monthlySalesByAgency
+      )
 
-      sendEmail(subject, email, transform(template))
+      sendEmail(subject, email, transform(agentTemplate))
+  }
+
+  addHandler {
+    case MonthlySalesEmail(
+      monthAgentNameAndCount,
+      monthlySalesByAgency,
+      email
+    ) =>
+
+      val lastMonthDate = LocalDateTime.now().minusMonths(1)
+
+      val subjectDate = lastMonthDate.format(DateTimeFormatter.ofPattern("MMM", Locale.ENGLISH))
+      val headerDate =
+        lastMonthDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+      val monthYear = lastMonthDate.format(DateTimeFormatter.ofPattern("MMMM yyyy", Locale.ENGLISH))
+
+      val subject = s"$subjectDate My Pet Defense Sales Report"
+
+      val monthlySales = monthAgentNameAndCount.map(_._2).sum
+
+      val transform = emailTransform(
+        Empty,
+        monthlySales,
+        headerDate,
+        monthYear,
+        Nil,
+        monthAgentNameAndCount,
+        Nil,
+        monthlySalesByAgency
+      )
+
+      sendEmail(subject, email, transform(agentTemplate))
   }
 }
 
@@ -1010,7 +1076,7 @@ trait EmailActor
     with ContactUsEmailHandling
     with Send5kEmailHandling
     with NotifyParentGrowthRateHandling
-    with DailySalesEmailHandling
+    with AgentSalesEmailHandling
     with InternalDailyEmailHandling
     with TreatReceiptEmailHandling
     with AddOnReceiptEmailHandling
@@ -1068,5 +1134,26 @@ trait EmailActor
       To(to),
       XHTMLMailBodyType(body)
     )
+  }
+  def sendTemplateEmail(
+    subject: String,
+    to: String,
+    templateName: String,
+    emailVars: Map[String, String],
+    fromEmail: String
+  )  {
+    val envSubj = envTag + subject
+
+    val sendMandrillMessage = MandrillService.SendTemplateMandrillMessage(
+      MandrillService.MandrillMessage(
+        envSubj, fromEmail,
+        List(MandrillService.MandrillTo(to)),
+        Some(fromName)
+      ),
+      templateName,
+      Nil,
+    )
+
+    MandrillService.sendTemplateEmail(sendMandrillMessage)
   }
 }

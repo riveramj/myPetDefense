@@ -25,4 +25,12 @@ trait EmailHandlerChain extends HandlerChain {
       body: NodeSeq,
       fromEmail: String = "sales@mypetdefense.com"
   ): Unit
+
+  def sendTemplateEmail(
+     subject: String,
+     to: String,
+     templateName: String,
+     emailVars: Map[String, String],
+     fromEmail: String = "sales@mypetdefense.com"
+   ): Unit
 }

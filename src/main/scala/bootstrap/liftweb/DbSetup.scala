@@ -47,25 +47,23 @@ object DbSetup extends Loggable {
     Review,
     Survey,
     TreatOrder,
-    ItemReconciliation,
-    ReconciliationEvent,
-    InventoryItem,
-    InventoryChangeAudit,
     Insert,
-    InventoryItemPart,
     Product,
     TreatOrderLineItem,
     Packaging,
     TaggedItem,
     Tag,
     AddOnProduct,
-    AmazonOrder,
     ApiRequestBackup,
     ProductSchedule,
     ProductScheduleItem,
+    ActionLog,
+    ActionLogDetails,
     WoofTraxOrder,
     EmailReport,
-    EmailReportRecord
+    EmailReportRecord,
+    StatisticsSnapshot,
+    MandrillTemplate
   )
 
 }
