@@ -1,9 +1,11 @@
 package com.mypetdefense.snippet.signup
 
-import com.mypetdefense.constants.StripePrices
+import com.mypetdefense.constants.StripeProductsPrices
+import com.mypetdefense.constants.StripeProductsPrices.Dog.HealthAndWellnessBox._
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerSignedUp}
 import com.mypetdefense.service.PetFlowChoices._
+import com.mypetdefense.service.StripeFacade.Customer
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
@@ -70,10 +72,10 @@ class Checkout extends Loggable {
   val petSizes: Map[AnimalSize.Value, Int]   = countOccurrencesByKey(pets.values)(_.size.get)
 
   val subtotal: BigDecimal =
-    (petSizes(AnimalSize.DogSmallZo) * StripePrices.Dog.HealthAndWellnessBox.Small.monthlyCharge
-      + petSizes(AnimalSize.DogMediumZo) * StripePrices.Dog.HealthAndWellnessBox.Medium.monthlyCharge
-      + petSizes(AnimalSize.DogLargeZo) * StripePrices.Dog.HealthAndWellnessBox.Large.monthlyCharge
-      + petSizes(AnimalSize.DogXLargeZo) * StripePrices.Dog.HealthAndWellnessBox.XLarge.monthlyCharge)
+    (petSizes(AnimalSize.DogSmallZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.Small.monthlyCharge
+      + petSizes(AnimalSize.DogMediumZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.Medium.monthlyCharge
+      + petSizes(AnimalSize.DogLargeZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.Large.monthlyCharge
+      + petSizes(AnimalSize.DogXLargeZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.XLarge.monthlyCharge)
 
   val smallDogCount: Int = pets.values.count {_.size.get == AnimalSize.DogSmallZo}
   val nonSmallDogCount: Int = petCount - smallDogCount
@@ -174,27 +176,26 @@ class Checkout extends Loggable {
   }
 
   private def tryToCreateUser = {
-    val stripeCustomer = {
-      import StripeFacade._
-      import StripePrices._
-      import Dog.HealthAndWellnessBox._
+    val subscriptionItems =
+      (combineSimilarItems(
+        List(
+          StripeFacade.Subscription.Item(Small.priceId, petSizes(AnimalSize.DogSmallZo)),
+          StripeFacade.Subscription.Item(Medium.priceId, petSizes(AnimalSize.DogMediumZo)),
+          StripeFacade.Subscription.Item(Large.priceId, petSizes(AnimalSize.DogLargeZo)),
+          StripeFacade.Subscription.Item(XLarge.priceId, petSizes(AnimalSize.DogXLargeZo))
+        )
+      )(
+        similarity = _.priceId,
+        combine = (i1, i2) => StripeFacade.Subscription.Item(i1.priceId, i1.quantity + i2.quantity)
+      )).filter(_.quantity == 0)
 
+    val stripeCustomer = {
       Customer.createWithSubscription(
         email,
         stripeToken,
         taxRate,
         coupon,
-        combineSimilarItems(
-          List(
-            Subscription.Item(Small.priceId, petSizes(AnimalSize.DogSmallZo)),
-            Subscription.Item(Medium.priceId, petSizes(AnimalSize.DogMediumZo)),
-            Subscription.Item(Large.priceId, petSizes(AnimalSize.DogLargeZo)),
-            Subscription.Item(XLarge.priceId, petSizes(AnimalSize.DogXLargeZo))
-          )
-        )(
-          similarity = _.priceId,
-          combine = (i1, i2) => Subscription.Item(i1.priceId, i1.quantity + i2.quantity)
-        )
+        subscriptionItems
       )
     }
 

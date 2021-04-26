@@ -136,6 +136,21 @@ object StripeFacade {
               )
       } yield sub
 
+    def updateSubscriptionItem(
+      subscriptionId: String,
+      params: SubscriptionItemUpdateParams,
+      productId: String
+    ): Box[Stripe.Subscription] = {
+      (for {
+        subscription <- Stripe.Subscription.retrieve(subscriptionId).toList
+        items   <- subscription.items.toList
+        item    <- items.data
+          if item.underlying.getPrice.getProduct == productId
+        _       <- item.update(params)
+        updated <- Stripe.Subscription.retrieve(subscription.id)
+      } yield updated).headOption
+    }
+
     def updateFirstItem(
         subscription: Stripe.Subscription,
         params: SubscriptionItemUpdateParams

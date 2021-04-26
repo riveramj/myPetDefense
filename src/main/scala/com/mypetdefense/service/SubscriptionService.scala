@@ -47,6 +47,7 @@ object SubscriptionService {
 
     updateStripeSubscriptionQuantity(
       updatedSubscription.map(_.stripeSubscriptionId.get).openOr(""),
+      "",
       tryo((cost * 100).toInt).openOr(0)
     )
 

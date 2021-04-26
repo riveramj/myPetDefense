@@ -2,7 +2,7 @@ package com.mypetdefense.snippet
 
 import java.util.Date
 import com.mypetdefense.actor._
-import com.mypetdefense.constants.StripePrices
+import com.mypetdefense.constants.StripeProductsPrices
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.action.SystemAction.SystemCanceledAccount
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
@@ -170,7 +170,7 @@ object TPPApi extends RestHelper with Loggable {
 
     val subscriptionItems = {
       import StripeFacade._
-      import StripePrices._
+      import StripeProductsPrices._
 
       List(
         Subscription.Item(Cat.BasicBox.priceId, catsCount),

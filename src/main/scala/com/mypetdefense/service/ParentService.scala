@@ -1,6 +1,7 @@
 package com.mypetdefense.service
 
 import com.mypetdefense.actor._
+import com.mypetdefense.constants.StripeProductsPrices
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.action.Action
 import com.mypetdefense.model.domain.action.CustomerAction.CustomerAddedPet
@@ -41,18 +42,18 @@ object ParentService extends LoggableBoxLogging {
 
   def updateStripeSubscriptionQuantity(
       subscriptionId: String,
+      productId: String,
       quantity: Int
   ): Box[Stripe.Subscription] = {
-    import SubscriptionItemUpdateParams._
 
     val params =
       SubscriptionItemUpdateParams.builder
         .setQuantity(quantity)
-        .setProrationBehavior(ProrationBehavior.NONE)
+        .setProrationBehavior(SubscriptionItemUpdateParams.ProrationBehavior.NONE)
         .build
 
     StripeFacade.Subscription
-      .updateFirstItem(subscriptionId, params)
+      .updateSubscriptionItem(subscriptionId, params, productId)
       .logFailure("update subscription failed with stripe error")
   }
 
@@ -203,12 +204,11 @@ object ParentService extends LoggableBoxLogging {
   }
 
   def changeStripeBillDate(subscriptionId: String, date: Long): Box[Stripe.Subscription] = {
-    import SubscriptionUpdateParams._
 
     val params =
       SubscriptionUpdateParams.builder
         .setTrialEnd(date)
-        .setProrationBehavior(ProrationBehavior.NONE)
+        .setProrationBehavior(SubscriptionUpdateParams.ProrationBehavior.NONE)
         .build
 
     //TODO actually use this result or do something, not just yelling into the void
@@ -325,7 +325,7 @@ object ParentService extends LoggableBoxLogging {
         supportAddedPet.copy(petId = newPet.petId.get)
     }
 
-    oldUser.subscription.obj.map { subscription =>
+    val updatedPet = oldUser.subscription.obj.map { subscription =>
       val box = SubscriptionBox.createNewBox(subscription, newPet, isUpgraded)
 
       if (newPet.animalType.get == AnimalType.Dog)
@@ -334,7 +334,7 @@ object ParentService extends LoggableBoxLogging {
       newPet.box(box).saveMe()
     }
 
-    val updatedSubscription = updateStripeSubscriptionTotal(oldUser)
+    val updatedSubscription = updateStripeSubscriptionTotal(oldUser, updatedPet, Full(AddPet))
 
     updatedSubscription match {
       case Full(_) =>
@@ -344,28 +344,41 @@ object ParentService extends LoggableBoxLogging {
     }
   }
 
-  def updateStripeSubscriptionTotal(oldUser: User): Box[Stripe.Subscription] = {
+  def updateStripeSubscriptionTotal(
+    oldUser: User,
+    petToUpdate: Box[Pet] = Empty,
+    action: Box[PetAction] = Empty
+): Box[Stripe.Subscription] = {
     val updatedUser       = oldUser.reload
     val maybeSubscription = updatedUser.subscription.obj
 
-    val totalCost = (for {
-      subscription <- maybeSubscription.toList
-      box          <- subscription.subscriptionBoxes.toList
-        if box.status.get == Status.Active
-      product      <- box.fleaTick.obj
-      priceCode    = subscription.priceCode.get
+    val priceId = for {
+      subscription <- maybeSubscription
+      pet <- petToUpdate
+      box <- pet.box.obj
+      product <- box.fleaTick.obj
+      priceCode = subscription.priceCode.get
+      isUpgraded = subscription.isUpgraded.get
     } yield {
-      val cost = if (box.boxType.get == BoxType.healthAndWellness)
-        SubscriptionBox.possiblePrice(box, true)
-      else
-        Price.getPricesByCode(product, priceCode).map(_.price.get).openOrThrowException("Please try again or contact Support.")
 
-      cost
-    }).sum
+    }
+
+    val productToUpdate = petToUpdate.map(_.size.get) match {
+      case Full(AnimalSize.DogSmallZo)  =>
+        StripeProductsPrices.Dog.HealthAndWellnessBox.Small.productId
+      case Full(AnimalSize.DogMediumZo) =>
+        StripeProductsPrices.Dog.HealthAndWellnessBox.Medium.productId
+      case Full(AnimalSize.DogLargeZo)  =>
+        StripeProductsPrices.Dog.HealthAndWellnessBox.Large.productId
+      case Full(AnimalSize.DogXLargeZo) =>
+        StripeProductsPrices.Dog.HealthAndWellnessBox.XLarge.productId
+
+    }
 
     updateStripeSubscriptionQuantity(
       maybeSubscription.map(_.stripeSubscriptionId.get).openOr(""),
-      tryo((totalCost * 100).toInt).openOr(0)
+      productToUpdate,
+      2
     ).logEmptyBox("update stripe subscription total failed")
   }
 
@@ -390,7 +403,7 @@ object ParentService extends LoggableBoxLogging {
       box.status(Status.Cancelled).saveMe
     }
 
-    val updatedSubscription = updateStripeSubscriptionTotal(oldUser)
+    val updatedSubscription = updateStripeSubscriptionTotal(oldUser, Full(oldPet), Full(RemovePet))
 
     val updatedUser = oldUser.reload
 
@@ -553,9 +566,9 @@ object ParentService extends LoggableBoxLogging {
   def getCurrentPetlandProductPrice: Box[Stripe.Price] =
     getStripeProductPrice(currentPetlandPrice)
 
+  /*
   def changeToPetlandMonthlyStripePrice(subscriptionId: String): Box[Stripe.Subscription] = {
     def subscriptionUpdate: Box[Stripe.Subscription] = {
-      import SubscriptionUpdateParams._
 
       val params =
         SubscriptionUpdateParams.builder
@@ -566,8 +579,8 @@ object ParentService extends LoggableBoxLogging {
       StripeFacade.Subscription.update(subscriptionId, params)
     }
 
+
     def subscriptionItemUpdate(subscription: Stripe.Subscription): Box[Stripe.Subscription] = {
-      import SubscriptionItemUpdateParams._
 
       val params =
         SubscriptionItemUpdateParams.builder
@@ -582,6 +595,7 @@ object ParentService extends LoggableBoxLogging {
       .flatMap(subscriptionItemUpdate)
       .logFailure("update subscription failed with stripe error")
   }
+  */
 
   def refundShipment(shipment: Shipment, possibleParent: Box[User] = Empty): Box[Stripe.Refund] = {
     val parent =
@@ -602,3 +616,7 @@ object ParentService extends LoggableBoxLogging {
     refund
   }
 }
+
+sealed trait PetAction extends Product with Serializable
+case object AddPet extends PetAction
+case object RemovePet extends PetAction

@@ -16,6 +16,8 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
   object fleaTick   extends MappedLongForeignKey(this, FleaTick)
   object active     extends MappedBoolean(this)
   object stripeName extends MappedString(this, 200)
+  object stripePriceId   extends MappedString(this, 200)
+  object stripeProductId extends MappedString(this, 200)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -27,18 +29,23 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
   final val currentPetland6MonthPaymentCode =
     Props.get("petland.6month.payment").openOr(defaultPriceCode)
   final val currentPetlandMonthlyCode = Props.get("petland.1month.payment").openOr(defaultPriceCode)
+
   def createPrice(
       priceId: Long,
       price: Double,
       code: String,
       fleaTick: FleaTick,
-      stripeName: String
+      stripeName: String,
+      stripePriceId: String = "",
+      stripeProductId: String = ""
   ): Price = {
     Price.create
       .priceId(priceId)
       .price(price)
       .code(code)
       .fleaTick(fleaTick)
+      .stripePriceId(stripePriceId)
+      .stripeProductId(stripeProductId)
       .active(true)
       .stripeName(stripeName)
       .saveMe
