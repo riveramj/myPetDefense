@@ -273,8 +273,9 @@ object Generator extends ScalaCheckHelper {
     for {
       productName <- genAlphaStr
       sku         <- genAlphaStr
+      quantity    <- genNonNegInt
       isSupplement <- genBool
-    } yield ProductGeneratedData(productName, sku, isSupplement)
+    } yield ProductGeneratedData(productName, sku, quantity, isSupplement)
 
   def genProductsSchedule(
       productsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES

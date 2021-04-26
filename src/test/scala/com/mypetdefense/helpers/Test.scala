@@ -33,6 +33,8 @@ trait DBTest extends IntegrationTest with BeforeAndAfterEach with BeforeAndAfter
   override def beforeAll(): Unit = {
     BootUtil.bootOnceForTests
     DataLoader.loadProducts
+    DataLoader.testLoadPrices
+    DataLoader.createMandrillTemplates
     TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
     Locale.setDefault(Locale.US)
   }

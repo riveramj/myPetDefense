@@ -185,6 +185,55 @@ object DataLoader extends Loggable {
     }
   }
 
+  def testLoadPrices = {
+    if(Price.findAll().isEmpty) {
+      val allFleaTick = FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
+        .filter(_.isZoGuard_?)
+      val tppPrice = 12.99D
+      val smallHwBox = 24.99
+      val mdXLHwBox = 27.99
+
+      for {
+        fleaTick <- allFleaTick
+        code <- List(Price.defaultPriceCode, Price.currentTppPriceCode)
+      } yield {
+        Price.createPrice(
+          price = tppPrice,
+          code = code,
+          fleaTick = Full(fleaTick),
+          stripeName = "",
+          boxType = Full(BoxType.basic)
+        )
+      }
+
+      for {
+      fleaTick <- allFleaTick.filterNot(_.size.get == AnimalSize.DogSmallZo)
+      code <- List(Price.defaultPriceCode, Price.currentTppPriceCode)
+      } yield {
+        Price.createPrice(
+          price = smallHwBox,
+          code = code,
+          fleaTick = Full(fleaTick),
+          stripeName = "",
+          boxType = Full(BoxType.healthAndWellness)
+        )
+      }
+
+      for {
+        fleaTick <- allFleaTick.filter(_.size.get == AnimalSize.DogSmallZo)
+        code <- List(Price.defaultPriceCode, Price.currentTppPriceCode)
+      } yield {
+        Price.createPrice(
+          price = mdXLHwBox,
+          code = code,
+          fleaTick = Full(fleaTick),
+          stripeName = "",
+          boxType = Full(BoxType.healthAndWellness)
+        )
+      }
+    }
+  }
+
   def loadAdmin: Any = {
     val mpdAgency = {
       val possibleMpd = Agency.mpdAgency
@@ -718,6 +767,10 @@ object DataLoader extends Loggable {
     Product.findAll(NotLike(Product.name, "%Dental Powder%")).map(_.isSupplement(true).saveMe())
     Product.findAll(Like(Product.name, "%Dental Powder%")).map(_.isSupplement(false).saveMe())
   }
+
+  def createMandrillTemplates =
+    if (MandrillTemplate.findAll().isEmpty)
+      createResetPasswordEmailTemplate
 
   def createResetPasswordEmailTemplate =
     MandrillTemplate.createMandrillTemplate("reset password temp", "reset password", EmailType.PasswordReset)
