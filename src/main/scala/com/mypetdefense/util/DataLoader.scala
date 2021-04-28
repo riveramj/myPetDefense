@@ -10,7 +10,7 @@ import net.liftweb.mapper._
 import java.text.SimpleDateFormat
 
 object DataLoader extends Loggable {
-  def loadProducts: Any = {
+  def loadFleaTick: Any = {
     if(FleaTick.findAll().isEmpty) {
       FleaTick.createFleaTick(
         name = "ZoGuard Plus for Cats",
@@ -281,8 +281,7 @@ object DataLoader extends Loggable {
   def createProducts: Any = {
     for {
     quantity <- List(10, 30)
-    } yield
-    if (Product.hipAndJointForDogs(quantity).isEmpty) {
+    } yield {
       Product.createNewProduct("Hip & Joint Chews For Dogs", "hipJointChews", quantity, AnimalType.Dog, true)
       Product.createNewProduct("Calming Chews For Dogs", "calmingChews", quantity, AnimalType.Dog, true)
       Product.createNewProduct("Multi-Vitamin Chews For Dogs", "multiVitaminChews", quantity, AnimalType.Dog, true)

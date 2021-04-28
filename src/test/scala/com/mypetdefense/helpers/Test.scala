@@ -32,7 +32,8 @@ trait IntegrationTest extends AnyTest {
 trait DBTest extends IntegrationTest with BeforeAndAfterEach with BeforeAndAfterAll {
   override def beforeAll(): Unit = {
     BootUtil.bootOnceForTests
-    DataLoader.loadProducts
+    DataLoader.loadFleaTick
+    DataLoader.createProducts
     DataLoader.testLoadPrices
     DataLoader.createMandrillTemplates
     TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
