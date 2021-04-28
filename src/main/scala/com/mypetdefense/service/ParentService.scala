@@ -1,6 +1,5 @@
 package com.mypetdefense.service
 
-import java.time.{LocalDate, Period, ZoneId}
 import com.mypetdefense.actor._
 import com.mypetdefense.model.SubscriptionBox.findBoxPrice
 import com.mypetdefense.model._
@@ -16,6 +15,8 @@ import net.liftweb.common._
 import net.liftweb.mapper._
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
+
+import java.time.{LocalDate, Period, ZoneId}
 import java.util.Date
 
 object ParentService extends LoggableBoxLogging {
@@ -305,7 +306,8 @@ object ParentService extends LoggableBoxLogging {
                  isUpgraded: Boolean,
                  actionLog: Either[CustomerAddedPet,SupportAddedPet],
                  breed: String = "",
-                 birthday: String = ""
+                 birthday: String = "",
+                 chosenMonthlySupplement: Box[Product] = Empty
   ): Box[Pet] = {
 
     val possibleBirthday = parseWhelpDate(birthday)
@@ -326,10 +328,12 @@ object ParentService extends LoggableBoxLogging {
     }
 
     oldUser.subscription.obj.map { subscription =>
-      val box = SubscriptionBox.createNewBox(subscription, newPet, isUpgraded)
+      val box = SubscriptionBox.createNewBox(subscription, newPet, isUpgraded, chosenMonthlySupplement.isDefined)
 
-      if (newPet.animalType.get == AnimalType.Dog)
+      if (newPet.animalType.get == AnimalType.Dog && chosenMonthlySupplement.isEmpty)
         SubscriptionItem.createFirstBox(box, false)
+      else if (newPet.animalType.get == AnimalType.Dog && chosenMonthlySupplement.isDefined)
+        SubscriptionItem.createNewBox(PendingPet(newPet, chosenMonthlySupplement, Full(box)))
 
       newPet.box(box).saveMe()
     }

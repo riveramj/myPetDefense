@@ -62,10 +62,10 @@ class Checkout extends Loggable {
       code
   }
 
-  val pets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
-  val petCount: Int                          = pets.size
+  val pets: mutable.LinkedHashMap[Long, PendingPet] = completedPets.is
+  val petCount: Int = pets.size
 
-  val smallDogCount: Int = pets.values.count {_.size.get == AnimalSize.DogSmallZo}
+  val smallDogCount: Int = pets.values.map(_.pet).count(_.size.get == AnimalSize.DogSmallZo)
   val nonSmallDogCount: Int = petCount - smallDogCount
 
   val subtotal: BigDecimal = (smallDogCount * BigDecimal(24.99)) + (nonSmallDogCount * BigDecimal(27.99))

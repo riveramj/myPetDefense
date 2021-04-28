@@ -11,12 +11,12 @@ import net.liftweb.util.Props
 
 object CheckoutService {
 
-  private def createNewPets(user: Box[User], pets: List[Pet]): List[Pet] = {
+  private def createNewPets(user: Box[User], pets: List[PendingPet]): List[PendingPet] = {
     for {
       usr <- user.toList
       pet <- pets
     } yield {
-      Pet.createNewPet(pet, usr)
+      PendingPet(Pet.createNewPet(pet.pet, usr), pet.thirtyDaySupplement)
     }
   }
 
@@ -104,16 +104,16 @@ object CheckoutService {
     EmailActor ! SendWelcomeEmail(userWithSubscription)
   }
 
-  private def createNewBox(mpdSubscription: Subscription, pet: Pet) = {
-    val box = SubscriptionBox.createNewBox(mpdSubscription, pet, true)
-    pet.box(box).saveMe()
+  private def createNewBox(mpdSubscription: Subscription, pet: PendingPet) = {
+    val box = SubscriptionBox.createNewBox(mpdSubscription, pet.pet, true, true)
+    val updatedPet = pet.pet.box(box).saveMe()
 
-    box
+    PendingPet(updatedPet, pet.thirtyDaySupplement, Full(box))
   }
 
   def newUserSetup(
       maybeCurrentUser: Box[User],
-      petsToCreate: List[Pet],
+      petsToCreate: List[PendingPet],
       priceCode: String,
       newUserData: NewUserData,
       customer: StripeFacade.CustomerWithSubscriptions
@@ -135,7 +135,7 @@ object CheckoutService {
 
     val boxes = pets.map(createNewBox(mpdSubscription, _))
 
-    boxes.map(SubscriptionItem.createFirstBox(_))
+    boxes.map(SubscriptionItem.createNewBox)
 
     sendCheckoutEmails(userWithSubscription, petCount, coupon)
 

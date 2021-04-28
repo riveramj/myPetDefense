@@ -24,7 +24,7 @@ class CheckoutServiceSpec extends DBTest {
 
   it should "create user, subscription, address and pet on setting up new user" in {
     val user: Box[User]   = Empty
-    val petsToCreate      = Generator.simplePetsNonEmptyList()
+    val petsToCreate      = Generator.pendingPetsNonEmptyList()
     val generatedUserData = Generator.newUserData()
     val stripeCustomer    = Generator.stripeCustomer()
 
