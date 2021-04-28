@@ -41,7 +41,7 @@ class DogDetails extends Loggable {
   val formatter          = new SimpleDateFormat("MM/yy")
   val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 
-  var currentPets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
+  var currentPets: mutable.LinkedHashMap[Long, PendingPet] = completedPets.is
   var petName                                       = ""
   var petMonth                                      = ""
   var petYear                                       = ""
@@ -89,7 +89,7 @@ class DogDetails extends Loggable {
           .birthday(birthday)
           .size(petSize.openOr(null))
 
-        currentPets(newPetId) = newPet
+        currentPets(newPetId) = PendingPet(newPet, chosenSupplement)
         completedPets(currentPets)
       }
 
@@ -164,7 +164,7 @@ class DogDetails extends Loggable {
 
   def productDropdown = {
     SHtml.selectObj(
-      supplements.map(supplement => (Full(supplement), supplement.name.get)),
+      supplements.map(supplement => (Full(supplement), supplement.nameAndQuantity)),
       Full(chosenSupplement),
       (possibleSupplement: Box[Product]) => chosenSupplement = possibleSupplement
     )

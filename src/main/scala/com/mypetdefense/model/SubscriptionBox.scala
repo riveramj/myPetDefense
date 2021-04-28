@@ -1,9 +1,9 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.mapper._
+
+import java.util.Date
 
 class SubscriptionBox
     extends LongKeyedMapper[SubscriptionBox]
@@ -61,7 +61,8 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
   def createNewBox(
       subscription: Subscription,
       pet: Pet,
-      upgradedBox: Boolean = false
+      upgradedBox: Boolean = false,
+      monthSupply: Boolean = false,
   ): SubscriptionBox = {
     val fleaTick = FleaTick.find(By(FleaTick.size, pet.size.get))
 
@@ -71,6 +72,7 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       .pet(pet)
       .animalType(pet.animalType.get)
       .fleaTick(fleaTick)
+      .monthSupply(monthSupply)
 
     if (upgradedBox && pet.animalType == AnimalType.Dog)
       newSubscriptionBox.boxType(BoxType.healthAndWellness).saveMe()

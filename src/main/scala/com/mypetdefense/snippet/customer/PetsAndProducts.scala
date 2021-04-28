@@ -46,6 +46,8 @@ class PetsAndProducts extends Loggable {
   val subscription: Box[Subscription] = user.flatMap(_.subscription.obj)
   val upgradedSubscription = subscription.map(_.isUpgraded.get).openOr(false)
   val priceCode: String               = subscription.map(_.priceCode.get).getOrElse("")
+  val monthlyDogSupplements           = Product.supplementsByAmount(30, AnimalType.Dog)
+  var chosenNewPetSupplement: Box[Product]  = Empty
 
   var newPetType: Box[AnimalType.Value]  = Empty
   var newPetChosenProduct: Box[FleaTick] = Empty
@@ -70,9 +72,23 @@ class PetsAndProducts extends Loggable {
     )
   }
 
+  def newPetSupplementDropdown() = {
+    val firstSupplementDropDown = SHtml.ajaxSelectObj(
+      (Empty, "Choose Supplement") +: monthlyDogSupplements.map(product => (Full(product), product.nameAndQuantity)),
+      Full(chosenNewPetSupplement),
+      (possibleProduct: Box[Product]) =>
+        chosenNewPetSupplement = possibleProduct
+    )
+
+    "^" #> ClearNodesIf(newPetType != AnimalType.Dog && subscription.map(_.isUpgraded.get).openOr(false)) &
+    "#choose-supplement #new-pet-choose-supplement" #> firstSupplementDropDown
+  }
+
   def productDropdown(): Elem = {
     val products =
-      if (newPetType.map(_.equals(AnimalType.Dog)).openOr(true))
+      if (newPetType.isEmpty)
+        Nil
+      else if (newPetType.contains(AnimalType.Dog))
         FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
       else
         FleaTick.zoGuardCat.toList
@@ -114,7 +130,8 @@ class PetsAndProducts extends Loggable {
           size = size,
           product = product,
           isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
-          actionLog = Left(actionLog)
+          actionLog = Left(actionLog),
+          chosenMonthlySupplement = chosenNewPetSupplement
         )
       }).flatMap(identity) match {
         case Full(pet) =>
@@ -188,11 +205,11 @@ class PetsAndProducts extends Loggable {
 
       val box = selectedPet.flatMap(_.box.obj)
       val availableFleaTick = SubscriptionService.getAvailableFleaTick(selectedPet)
-      val petType = selectedPet.map(_.animalType.get).openOrThrowException("Missing animal type")
+      val petType = selectedPet.map(_.animalType.get)
       val monthSupply = box.map(_.monthSupply.get).openOr(false)
       val supplementCount = if (monthSupply) 30 else 10
 
-      val availableSupplements = Product.supplementsByAmount(supplementCount, petType)
+      val availableSupplements = petType.toList.flatMap(pt => Product.supplementsByAmount(supplementCount, pt))
       val currentSupplements = SubscriptionService.getCurrentSupplements(box)
 
       var currentFleaTick = box.flatMap(_.fleaTick.obj)
@@ -214,7 +231,7 @@ class PetsAndProducts extends Loggable {
       )
 
       val firstSupplementDropDown = SHtml.ajaxSelectObj(
-        (Empty, "") +: availableSupplements.map(product => (Full(product), product.name.get)),
+        (Empty, "") +: availableSupplements.map(product => (Full(product), product.nameAndQuantity)),
         Full(firstSupplement),
         (possibleProduct: Box[Product]) =>
           firstSupplement = {
@@ -223,13 +240,13 @@ class PetsAndProducts extends Loggable {
       )
 
       val secondSupplementDropDown = SHtml.ajaxSelectObj(
-        (Empty, "") +: availableSupplements.map(product => (Full(product), product.name.get)),
+        (Empty, "") +: availableSupplements.map(product => (Full(product), product.nameAndQuantity)),
         Full(secondSupplement),
         (possibleProduct: Box[Product]) => secondSupplement = possibleProduct
       )
 
       val thirdSupplementDropDown = SHtml.ajaxSelectObj(
-        (Empty, "") +: availableSupplements.map(product => (Full(product), product.name.get)),
+        (Empty, "") +: availableSupplements.map(product => (Full(product), product.nameAndQuantity)),
         Full(thirdSupplement),
         (possibleProduct: Box[Product]) => thirdSupplement = possibleProduct
       )
@@ -272,6 +289,7 @@ class PetsAndProducts extends Loggable {
       "#new-pet-name" #> ajaxText(newPetName, newPetName = _) &
       "#pet-type-select" #> petTypeDropdown(renderer) &
       "#new-pet-product-select" #> productDropdown() &
+      "#choose-supplement" #> newPetSupplementDropdown() &
       "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
     } &
     ".pet" #> boxes.map { box =>
