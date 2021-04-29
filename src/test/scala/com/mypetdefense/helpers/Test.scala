@@ -1,11 +1,11 @@
 package com.mypetdefense.helpers
 
 import java.util.{Locale, TimeZone}
-
 import com.mypetdefense.helpers.GeneralDbUtils.clearTables
+import com.mypetdefense.snippet.TPPApi
 import com.mypetdefense.util.DataLoader
 import net.liftweb.common.Empty
-import net.liftweb.http.{LiftSession, S}
+import net.liftweb.http.{LiftRules, LiftSession, S}
 import net.liftweb.util.StringHelpers
 import org.scalactic.anyvals.PosInt
 import org.scalatest.flatspec.AnyFlatSpec
@@ -38,6 +38,7 @@ trait DBTest extends IntegrationTest with BeforeAndAfterEach with BeforeAndAfter
     DataLoader.createMandrillTemplates
     TimeZone.setDefault(TimeZone.getTimeZone("America/New_York"))
     Locale.setDefault(Locale.US)
+    LiftRules.statelessDispatch.append(TPPApi)
   }
 
   override def beforeEach(): Unit = {
