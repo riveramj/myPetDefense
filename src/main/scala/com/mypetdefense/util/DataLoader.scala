@@ -280,7 +280,8 @@ object DataLoader extends Loggable {
 
   def createProducts: Any = {
     for {
-    quantity <- List(10, 30)
+      quantity <- List(10, 30)
+        if Product.findAll(By(Product.quantity, quantity)).isEmpty
     } yield {
       Product.createNewProduct("Hip & Joint Chews For Dogs", s"hipJointChews-$quantity", quantity, AnimalType.Dog, true)
       Product.createNewProduct("Calming Chews For Dogs", s"calmingChews-$quantity", quantity, AnimalType.Dog, true)
@@ -585,8 +586,8 @@ object DataLoader extends Loggable {
 
   def subscriptionBoxCheck(): Unit = {
     if (Product.dentalPowderSmallForDogs.isEmpty) {
-      Product.createNewProduct("Dental Powder Small For Dogs", "dentalPowderSmall", 0, AnimalType.Dog, false)
-      Product.createNewProduct("Dental Powder Large For Dogs", "dentalPowderLarge", 0, AnimalType.Dog, false)
+      Product.createNewProduct("Dental Powder For Dogs (Small)", "dentalPowderSmallDog", 0, AnimalType.Dog, false)
+      Product.createNewProduct("Dental Powder For Dogs (Large)", "dentalPowderLargeDog", 0, AnimalType.Dog, false)
     }
 
     val products = List(
@@ -687,20 +688,34 @@ object DataLoader extends Loggable {
       name = supplement.name.get
     } yield {
       supplement
-        .name(s"$name For Dogs")
+        .animalType(AnimalType.Cat)
+        .animalType(AnimalType.Dog)
         .quantity(10)
+        .sku(s"${supplement.name.get}-10")
+        .name(s"${supplement.name.get} for Dogs")
+        .saveMe()
+    }
+
+    Product.find(By(Product.sku, "dentalPowderSmall")).map { dental =>
+      dental
+        .sku("dentalPowderSmallDog")
+        .name("Dental Powder For Dogs (Small)")
+        .quantity(1)
+        .quantity(0)
         .animalType(AnimalType.Cat)
         .animalType(AnimalType.Dog)
         .saveMe()
     }
 
-    for {
-      dental <- Product.findAll(
-        Like(Product.name, "Dental%"),
-        NullRef(Product.quantity)
-      )
-    } yield {
-      dental.quantity(1).quantity(0).animalType(AnimalType.Cat).animalType(AnimalType.Dog).saveMe()
+    Product.find(By(Product.sku, "dentalPowderLarge")).map { dental =>
+      dental
+        .sku("dentalPowderLargeDog")
+        .name("Dental Powder For Dogs (Large)")
+        .quantity(1)
+        .quantity(0)
+        .animalType(AnimalType.Cat)
+        .animalType(AnimalType.Dog)
+        .saveMe()
     }
   }
 
