@@ -68,7 +68,6 @@ object GeneralDbUtils {
       ShipmentLineItem,
       ProductSchedule,
       ProductScheduleItem,
-      Product,
       User,
       ActionLog,
       ActionLogDetails,

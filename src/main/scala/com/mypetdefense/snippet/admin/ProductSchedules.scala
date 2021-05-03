@@ -23,7 +23,7 @@ object ProductSchedules extends Loggable {
 
 class ProductSchedules extends Loggable {
   val coupons: List[Coupon] = Coupon.findAll()
-  val supplements: List[Product]              = Product.supplements
+  val supplements: List[Product]              = Product.supplementsByAmount(30, AnimalType.Dog)
   val productSchedules: List[ProductSchedule] = ProductSchedule.findAll().sortBy(_.startDate.get)
   val startDateFormat                         = new java.text.SimpleDateFormat("M/d/y")
 
@@ -36,25 +36,25 @@ class ProductSchedules extends Loggable {
 
   def supplement1Dropdown: Elem = {
     SHtml.selectObj(
-      supplements.map(supplement => (supplement, supplement.name.get)),
-      chosenSupplement1,
-      (supplement: Product) => chosenSupplement1 = Full(supplement)
+      (Empty, "") +: supplements.map(supplement => (Full(supplement), supplement.name.get)),
+      Full(chosenSupplement1),
+      (supplement: Box[Product]) => chosenSupplement1 = supplement
     )
   }
 
   def supplement2Dropdown: Elem = {
     SHtml.selectObj(
-      supplements.map(supplement => (supplement, supplement.name.get)),
-      chosenSupplement2,
-      (supplement: Product) => chosenSupplement2 = Full(supplement)
+      (Empty, "") +: supplements.map(supplement => (Full(supplement), supplement.name.get)),
+      Full(chosenSupplement2),
+      (supplement: Box[Product]) => chosenSupplement2 = supplement
     )
   }
 
   def supplement3Dropdown: Elem = {
     SHtml.selectObj(
-      supplements.map(supplement => (supplement, supplement.name.get)),
-      chosenSupplement3,
-      (supplement: Product) => chosenSupplement3 = Full(supplement)
+      (Empty, "") +: supplements.map(supplement => (Full(supplement), supplement.name.get)),
+      Full(chosenSupplement3),
+      (supplement: Box[Product]) => chosenSupplement3 = supplement
     )
   }
 
@@ -96,19 +96,26 @@ class ProductSchedules extends Loggable {
           val supplements = schedule.scheduledItems.toList
             .flatMap(_.product.obj)
             .filter(_.isSupplement.get)
+
+          val supplementNames: List[String] = supplements.size match {
+            case 2 => supplements.map(_.name.get) ++ List("-")
+            case 1 => supplements.map(_.name.get) ++ List("-") ++ List("-")
+            case _ => supplements.map(_.name.get)
+          }
+
           ".start-date *" #> startDateFormat.format(schedule.startDate.get) &
-            ".first-box *" #> {
-              if (schedule.firstBox.get)
-                "Yes"
-              else
-                "No"
-            } &
-            ".supplement-name *" #> supplements.map(_.name.get) &
-            ".status *" #> schedule.scheduleStatus.get.toString &
-            ".actions .delete [onclick]" #> Confirm(
-              s"Delete ${schedule.startDate.toString()}?",
-              ajaxInvoke(deleteSchedule(schedule))
-            )
+          ".first-box *" #> {
+            if (schedule.firstBox.get)
+              "Yes"
+            else
+              "No"
+          } &
+          ".supplement-name *" #> supplementNames &
+          ".status *" #> schedule.scheduleStatus.get.toString &
+          ".actions .delete [onclick]" #> Confirm(
+            s"Delete ${schedule.startDate.toString()}?",
+            ajaxInvoke(deleteSchedule(schedule))
+          )
         }
   }
 }

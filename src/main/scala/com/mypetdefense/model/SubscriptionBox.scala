@@ -1,9 +1,9 @@
 package com.mypetdefense.model
 
-import java.util.Date
-
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.mapper._
+
+import java.util.Date
 
 class SubscriptionBox
     extends LongKeyedMapper[SubscriptionBox]
@@ -33,6 +33,9 @@ class SubscriptionBox
   object userModified extends MappedBoolean(this) {
     override def defaultValue: Boolean = false
   }
+  object monthSupply extends MappedBoolean(this) {
+    override def defaultValue: Boolean = true
+  }
 }
 
 object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[SubscriptionBox] {
@@ -45,27 +48,21 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
     )
   }
 
-  def possiblePrice(subscriptionBox: SubscriptionBox, upgradedBox: Boolean = false): Double =
-    if (subscriptionBox.subscriptionItems.toList.nonEmpty)
-      subscriptionBox.pet.obj.map(basePrice(_, upgradedBox)).openOr(0d)
-    else
-      0d
-
-  def basePrice(pet: Pet, upgradedBox: Boolean): Double = {
-    val smallDogs = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
-
-    (pet.animalType.get, pet.size.get, upgradedBox) match {
-      case (_, _, false)                                                  => 12.99
-      case (AnimalType.Cat, _, _)                                         => 12.99
-      case (AnimalType.Dog, dogSize, true) if smallDogs.contains(dogSize) => 24.99
-      case (AnimalType.Dog, _, true)                                      => 27.99
-    }
+  def findBoxPrice(subscriptionBox: SubscriptionBox): Double = {
+    (for {
+      fleaTick <- subscriptionBox.fleaTick.obj
+      subscription <- subscriptionBox.subscription.obj
+      price <- Price.getPricesByCode(fleaTick, subscription.priceCode.get, subscriptionBox.boxType.get)
+    } yield
+      price.price.get
+    ).openOrThrowException("Couldn't find price. Please try again.")
   }
 
   def createNewBox(
       subscription: Subscription,
       pet: Pet,
-      upgradedBox: Boolean = false
+      upgradedBox: Boolean = false,
+      monthSupply: Boolean = false,
   ): SubscriptionBox = {
     val fleaTick = FleaTick.find(By(FleaTick.size, pet.size.get))
 
@@ -75,12 +72,14 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
       .pet(pet)
       .animalType(pet.animalType.get)
       .fleaTick(fleaTick)
-      .basePrice(basePrice(pet, upgradedBox))
+      .monthSupply(monthSupply)
 
     if (upgradedBox && pet.animalType == AnimalType.Dog)
       newSubscriptionBox.boxType(BoxType.healthAndWellness).saveMe()
     else
-      newSubscriptionBox.boxType(BoxType.basic).saveMe()
+      newSubscriptionBox.boxType(BoxType.basic)
+
+    newSubscriptionBox.basePrice(findBoxPrice(newSubscriptionBox)).saveMe()
   }
 }
 

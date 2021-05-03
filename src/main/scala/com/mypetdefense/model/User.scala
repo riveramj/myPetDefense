@@ -32,6 +32,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
   object salt       extends MappedString(this, 100)
   object phone      extends MappedString(this, 100)
   object accessKey  extends MappedString(this, 100)
+  object preBillingKey  extends MappedString(this, 100)
   object canSeePetlandData extends MappedBoolean(this) {
     override def defaultValue = false
   }

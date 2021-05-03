@@ -108,6 +108,14 @@ object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] 
       .saveMe
   }
 
+  def findSubscriptionsShippingInThreeDays: List[Subscription] = {
+    Subscription.findAll(
+      By_>=(Subscription.nextShipDate, threeDaysFutureStart),
+      By_<(Subscription.nextShipDate, fourDaysFutureStart),
+      By(Subscription.status, Status.Active)
+    )
+  }
+
   def findNewYTDSubscriptionsLastYear: List[Subscription] = {
     Subscription.findAll(
       By_>=(Subscription.startDate, yearDayOneLastYear),
