@@ -287,8 +287,12 @@ object DataLoader extends Loggable {
       Product.createNewProduct("Calming Chews For Dogs", s"calmingChews-$quantity", quantity, AnimalType.Dog, true)
       Product.createNewProduct("Multi-Vitamin Chews For Dogs", s"multiVitaminChews-$quantity", quantity, AnimalType.Dog, true)
       Product.createNewProduct("Skin and Coat Chews For Dogs", s"skinAndCoatChews-$quantity", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Probiotic Chews For Dogs", s"skinAndCoatChews-$quantity", quantity, AnimalType.Dog, true)
     }
   }
+
+  def createMissingProbiotic =
+    Product.createNewProduct("Probiotic Chews For Dogs", s"skinAndCoatChews-30", 30, AnimalType.Dog, true)
 
   def createBoxedTag: Any = {
     if(Tag.findAll().isEmpty) {
