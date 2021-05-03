@@ -28,7 +28,10 @@ class Product extends LongKeyedMapper[Product] with IdPK with OneToMany[Long, Pr
     override def defaultValue = new Date()
   }
 
-  def nameAndQuantity = s"${this.name} (${this.quantity} ct)"
+  def nameAndQuantity = if (this.quantity.get == 0)
+    this.name.get
+  else
+    s"${this.name.get} (${this.quantity.get} ct)"
 }
 
 object Product extends Product with LongKeyedMetaMapper[Product] {

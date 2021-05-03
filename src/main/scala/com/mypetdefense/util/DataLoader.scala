@@ -282,10 +282,10 @@ object DataLoader extends Loggable {
     for {
     quantity <- List(10, 30)
     } yield {
-      Product.createNewProduct("Hip & Joint Chews For Dogs", "hipJointChews", quantity, AnimalType.Dog, true)
-      Product.createNewProduct("Calming Chews For Dogs", "calmingChews", quantity, AnimalType.Dog, true)
-      Product.createNewProduct("Multi-Vitamin Chews For Dogs", "multiVitaminChews", quantity, AnimalType.Dog, true)
-      Product.createNewProduct("Skin and Coat Chews For Dogs", "skinAndCoatChews", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Hip & Joint Chews For Dogs", s"hipJointChews-$quantity", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Calming Chews For Dogs", s"calmingChews-$quantity", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Multi-Vitamin Chews For Dogs", s"multiVitaminChews-$quantity", quantity, AnimalType.Dog, true)
+      Product.createNewProduct("Skin and Coat Chews For Dogs", s"skinAndCoatChews-$quantity", quantity, AnimalType.Dog, true)
     }
   }
 
