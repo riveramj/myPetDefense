@@ -41,12 +41,13 @@ class DogDetails extends Loggable {
   val formatter          = new SimpleDateFormat("MM/yy")
   val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 
-  var currentPets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
+  var currentPets: mutable.LinkedHashMap[Long, PendingPet] = completedPets.is
   var petName                                       = ""
   var petMonth                                      = ""
   var petYear                                       = ""
   var petSize: Box[AnimalSize.Value]                = Empty
   var nameErrors: List[String]                      = Nil
+  var chosenSupplement: Box[Product]                = Product.multiVitaminForDogs(30)
 
   val products: List[FleaTick] = FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Dogs"))
 
@@ -54,6 +55,8 @@ class DogDetails extends Loggable {
   val mediumDog: Option[AnimalSize.Value] = getSizeNumber(AnimalSize.DogMediumZo)
   val largeDog: Option[AnimalSize.Value]  = getSizeNumber(AnimalSize.DogLargeZo)
   val xlargeDog: Option[AnimalSize.Value] = getSizeNumber(AnimalSize.DogXLargeZo)
+
+  val supplements = Product.supplementsByAmount(30, AnimalType.Dog)
 
   def getSizeNumber(size: AnimalSize.Value): Option[AnimalSize.Value] = {
     products.find(_.size.get == size).map(_.size.get)
@@ -86,7 +89,7 @@ class DogDetails extends Loggable {
           .birthday(birthday)
           .size(petSize.openOr(null))
 
-        currentPets(newPetId) = newPet
+        currentPets(newPetId) = PendingPet(newPet, chosenSupplement)
         completedPets(currentPets)
       }
 
@@ -159,11 +162,20 @@ class DogDetails extends Loggable {
     )
   }
 
+  def productDropdown = {
+    SHtml.selectObj(
+      supplements.map(supplement => (Full(supplement), supplement.nameAndQuantity)),
+      Full(chosenSupplement),
+      (possibleSupplement: Box[Product]) => chosenSupplement = possibleSupplement
+    )
+  }
+
   def render: NodeSeq => NodeSeq = {
     SHtml.makeFormsAjax andThen
       "#pet-name" #> ajaxText(petName, petName = _) &
         "#month-container #pet-month" #> monthDropdown &
         "#year-container #pet-year" #> yearDropdown &
+        "#supplement-container #pet-supplement" #> productDropdown &
         ".small-dog .weight-number *" #> smallDog.map(_.toString + " lb") &
         ".small-dog #small-dog [onclick]" #> ajaxInvoke(() => chooseSize(smallDog)) &
         ".medium-dog .weight-number *" #> mediumDog.map(_.toString + " lb") &

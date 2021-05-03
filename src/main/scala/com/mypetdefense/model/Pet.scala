@@ -108,3 +108,9 @@ object AnimalSize extends Enumeration {
 
   val CatAllSize: AnimalSize.Value = Value("1.5+") // 15
 }
+
+case class PendingPet(
+  pet: Pet,
+  thirtyDaySupplement: Box[Product],
+  subscriptionBox: Box[SubscriptionBox] = Empty
+)
