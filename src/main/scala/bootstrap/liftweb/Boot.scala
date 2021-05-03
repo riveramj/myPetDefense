@@ -52,11 +52,12 @@ class Boot {
     //DataLoader.subscriptionBoxCheck()
     //DataLoader.connectCancelledUsersToSubscription()
     //DataLoader.cancelBoxesForCancelledPets()
-    DataLoader.createResetPasswordEmailTemplate
+    //DataLoader.createResetPasswordEmailTemplate
 
-    DataLoader.updateChewCounts()
-    DataLoader.createProducts
+    //DataLoader.updateChewCounts()
+    //DataLoader.createProducts
     //DataLoader.migrateTo30DaySupply()
+    DataLoader.createMissingProbiotic
 
     //DataLoader.createCancelledSubForUser
 
