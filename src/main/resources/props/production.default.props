@@ -4,13 +4,13 @@ db.url=jdbc:postgresql://restore-db-mpd.cega431oqn39.us-west-2.rds.amazonaws.com
 db.user=mypetdefense
 db.password=sVO8&rZakm
 
-[Postmark]
-mail.smtp.host=smtp.postmarkapp.com
+[Mandrill]
+mail.smtp.host=smtp.mandrillapp.com
 mail.smtp.port=587
 mail.smtp.auth=true
 mail.smtp.starttls.enable=true
-mail.user=2d15c3ab-bb9d-4671-80f6-2ada65be0cc4
-mail.password=2d15c3ab-bb9d-4671-80f6-2ada65be0cc4
+mail.user=My Pet Defense
+mail.password=xjJVQlWblCVJ4j1_c5AEgA
 
 [Stripe]
 secret.key=sk_live_vQ8HuvXBo7v4r1aBFbPGQqsD

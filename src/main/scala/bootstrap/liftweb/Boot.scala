@@ -42,15 +42,21 @@ class Boot {
     //DataLoader.createEmailReports()
     //DataLoader.markSupplements
     //DataLoader.addMonthlyTPPAgentReport()
+
     //DataLoader.checkUpgradesAgainstBoxes
 
+    //DataLoader.createEmailReports()
+    //DataLoader.markSupplements
     //DataLoader.upgradeSubscriptionBoxDetails()
     //DataLoader.rebuildSubscriptionUpgrades()
     //DataLoader.subscriptionBoxCheck()
-
     //DataLoader.connectCancelledUsersToSubscription()
-
     //DataLoader.cancelBoxesForCancelledPets()
+    DataLoader.createResetPasswordEmailTemplate
+
+    DataLoader.updateChewCounts()
+    DataLoader.createProducts
+    //DataLoader.migrateTo30DaySupply()
 
     //DataLoader.createCancelledSubForUser
 

@@ -52,6 +52,7 @@ class Parents extends Loggable {
   val dogProducts: List[FleaTick] =
     FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog)).filter(_.isZoGuard_?)
   val catProducts: List[FleaTick] = FleaTick.zoGuardCat.toList
+  val monthlyDogSupplements = Product.supplementsByAmount(30, AnimalType.Dog)
 
   val stripeBaseUrl: String =
     Props.get("stripe.base.url") openOr "https://dashboard.stripe.com/test"
@@ -65,6 +66,7 @@ class Parents extends Loggable {
 
   var parentDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var currentParent: Box[User]                       = Empty
+  var chosenNewPetSupplement: Box[Product]           = Empty
 
   def searchParents: JsCmd = {
     searchTerm match {
@@ -158,6 +160,20 @@ class Parents extends Loggable {
     )
   }
 
+  def supplementDropdown(parent: Box[User]) = {
+    val subscription = parent.flatMap(_.subscription.obj)
+
+    val firstSupplementDropDown = SHtml.ajaxSelectObj(
+      (Empty, "Choose Supplement") +: monthlyDogSupplements.map(product => (Full(product), product.nameAndQuantity)),
+      Full(chosenNewPetSupplement),
+      (possibleProduct: Box[Product]) =>
+        chosenNewPetSupplement = possibleProduct
+    )
+
+    "^" #> ClearNodesIf(petType != AnimalType.Dog && subscription.map(_.isUpgraded.get).openOr(false)) &
+      ".supplement-container .supplement-select" #> firstSupplementDropDown
+  }
+
   def addCoupon(parent: Box[User], updatedCoupon: Box[Coupon]): Nothing = {
     parent.map(_.coupon(updatedCoupon).saveMe)
 
@@ -197,7 +213,8 @@ class Parents extends Loggable {
           isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
           breed = petBreed,
           birthday = petBirthday,
-          actionLog = Right(actionReport)
+          actionLog = Right(actionReport),
+          chosenMonthlySupplement = chosenNewPetSupplement
         )
       }).flatMap(identity) match {
         case Full(pet) =>
@@ -566,8 +583,12 @@ class Parents extends Loggable {
         petProductsRender = Full(renderer)
 
         val box = selectedPet.flatMap(_.box.obj)
+        val petType = selectedPet.map(_.animalType.get)
         val availableFleaTick = SubscriptionService.getAvailableFleaTick(selectedPet)
-        val availableSupplements = Product.supplements
+        val monthSupply = box.map(_.monthSupply.get).openOr(false)
+
+        val supplementCount = if (monthSupply) 30 else 10
+        val availableSupplements = petType.toList.flatMap(pt => Product.supplementsByAmount(supplementCount, pt))
         val currentSupplements = SubscriptionService.getCurrentSupplements(box)
 
         var currentFleaTick = box.flatMap(_.fleaTick.obj)
@@ -589,7 +610,7 @@ class Parents extends Loggable {
         )
 
         val firstSupplementDropDown = SHtml.ajaxSelectObj(
-          availableSupplements.map(product => (product, product.name.get)),
+          availableSupplements.map(product => (product, product.nameAndQuantity)),
           firstSupplement,
           (possibleProduct: Product) =>
             firstSupplement = {
@@ -598,7 +619,7 @@ class Parents extends Loggable {
         )
 
         val secondSupplementDropDown = SHtml.ajaxSelectObj(
-          availableSupplements.map(product => (product, product.name.get)),
+          availableSupplements.map(product => (product, product.nameAndQuantity)),
           secondSupplement,
           (possibleProduct: Product) =>
             secondSupplement = {
@@ -607,7 +628,7 @@ class Parents extends Loggable {
         )
 
         val thirdSupplementDropDown = SHtml.ajaxSelectObj(
-          availableSupplements.map(product => (product, product.name.get)),
+          availableSupplements.map(product => (product, product.nameAndQuantity)),
           thirdSupplement,
           (possibleProduct: Product) =>
             thirdSupplement = {
@@ -619,6 +640,8 @@ class Parents extends Loggable {
         ".modal-header .parent" #> ClearNodes &
         ".modal-header .admin .parent-name" #> parent.map(_.name) &
         ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
+        ".second-choice" #> ClearNodesIf(monthSupply) andThen
+        ".third-choice" #> ClearNodesIf(monthSupply) andThen
         "#flea-tick" #> currentProductDropdown &
         "#first-supplement" #> firstSupplementDropDown &
         "#second-supplement" #> secondSupplementDropDown &
@@ -645,22 +668,23 @@ class Parents extends Loggable {
     ".parent-pets" #> idMemoize { renderer =>
       petsRenderer = Full(renderer)
       ".create" #> {
-          ".new-pet-name" #> ajaxText(petName, petName = _) &
-          ".new-pet-breed" #> ajaxText(petBreed, petBreed = _) &
-          ".new-pet-birthday" #> ajaxText(petBirthday, petBirthday = _) &
-          ".pet-type-select" #> petTypeRadio(renderer) &
-          ".product-container .product-select" #> productDropdown &
-          ".create-item-container .create-item" #> SHtml.ajaxSubmit(
-            "Add Pet",
-            () => addPet(parent, renderer)
-          )
-        } &
+        ".new-pet-name" #> ajaxText(petName, petName = _) &
+        ".new-pet-breed" #> ajaxText(petBreed, petBreed = _) &
+        ".new-pet-birthday" #> ajaxText(petBirthday, petBirthday = _) &
+        ".pet-type-select" #> petTypeRadio(renderer) &
+        ".product-container .product-select" #> productDropdown &
+        ".supplement-container" #> supplementDropdown(parent) &
+        ".create-item-container .create-item" #> SHtml.ajaxSubmit(
+          "Add Pet",
+          () => addPet(parent, renderer)
+        )
+      } &
       ".add-coupon" #> {
         ".coupon-container .coupon-select" #> couponDropdown &
-          ".create-coupon-container .create-coupon" #> SHtml.ajaxSubmit(
-            "Change Coupon",
-            () => addCoupon(parent, chosenCoupon)
-          )
+        ".create-coupon-container .create-coupon" #> SHtml.ajaxSubmit(
+          "Change Coupon",
+          () => addCoupon(parent, chosenCoupon)
+        )
       } &
       {
         val pets = Pet.findAll(

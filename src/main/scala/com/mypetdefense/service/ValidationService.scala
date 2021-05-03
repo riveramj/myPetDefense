@@ -1,15 +1,15 @@
 package com.mypetdefense.service
 
-import java.text.SimpleDateFormat
-import java.util.Date
-
 import com.mypetdefense.model._
 import com.mypetdefense.snippet._
+import net.liftweb.common.Box.box2Iterable
 import net.liftweb.common._
 import net.liftweb.http.S
 import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 
+import java.text.SimpleDateFormat
+import java.util.Date
 import scala.util.matching.Regex
 
 object ValidationService extends Loggable {
@@ -20,6 +20,14 @@ object ValidationService extends Loggable {
   }
 
   def checkEmpty(fieldValue: String, fieldId: String): Box[ValidationError] = {
+    if (fieldValue.nonEmpty) {
+      Empty
+    } else {
+      Full(ValidationError(fieldId, "Required."))
+    }
+  }
+
+  def checkEmpty(fieldValue: Box[Any], fieldId: String): Box[ValidationError] = {
     if (fieldValue.nonEmpty) {
       Empty
     } else {
@@ -119,7 +127,7 @@ object ValidationService extends Loggable {
   }
 
   def validNumber(number: String, errorId: String): Box[ValidationError] = {
-    tryo(number.toInt) match {
+    tryo(number.toDouble) match {
       case Full(_) => Empty
       case _       => Full(ValidationError(errorId, "Not a valid number."))
     }
