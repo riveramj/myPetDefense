@@ -49,10 +49,10 @@ class SubscriptionBoxProductsUpdateJob extends ManagedJob {
     val scheduleItems     = schedule.scheduledItems.toList
     val newProducts       = scheduleItems.flatMap(_.product.toList)
     val unmodifiedBoxes   = SubscriptionBox.getAllUnmodifiedDogHealthWellness
-    val dentalPowder      = Product.dentalPowder
+    val dentalPowder      = Product.dentalPowderForDogs
     val smallSizes        = List(AnimalSize.DogSmallAdv, AnimalSize.DogSmallShld, AnimalSize.DogSmallZo)
-    val dentalPowderSmall = Product.dentalPowderSmall
-    val dentalPowderLarge = Product.dentalPowderLarge
+    val dentalPowderSmall = Product.dentalPowderSmallForDogs
+    val dentalPowderLarge = Product.dentalPowderLargeForDogs
 
     val boxesToUpdate =
       if (onlyForYesterdayUsers)

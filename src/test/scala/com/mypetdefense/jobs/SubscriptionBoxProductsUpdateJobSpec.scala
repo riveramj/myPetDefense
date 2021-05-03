@@ -11,6 +11,7 @@ import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
 
 class SubscriptionBoxProductsUpdateJobSpec extends DBTest {
   it should "do regular schedule job properly" in {
+    val prices = Price.findAll()
     val mpdAndPld                      = createPetlandAndMPDAgencies()
     val someGeneratedProduct           = product()
     val someOldInsertedProduct         = createNewProduct(someGeneratedProduct)

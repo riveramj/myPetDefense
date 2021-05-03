@@ -4,8 +4,10 @@ db.url=jdbc:postgresql:mypetdefense
 db.user=mypetdefense
 db.password=mypetdefense
 
-[Postmark]
+[Mandrill]
 mail.smtp.host=localhost
+mail.auth.key=NkyyAu_hpLiZzCAcPIIZxQ
+mail.test.auth.key=MagByJ-S9IT6C7vUa2aYeQ
 
 [Stripe]
 secret.key=sk_test_vvw6ZOLkVyQWYNEwVocSs27V

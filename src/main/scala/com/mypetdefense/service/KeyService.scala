@@ -1,13 +1,11 @@
 package com.mypetdefense.service
 
-import java.security.SecureRandom
-
 import com.mypetdefense.model.User
 import net.liftweb.common._
 import net.liftweb.mapper._
 import net.liftweb.util.StringHelpers
-import org.joda.time.DateTime
 
+import java.security.SecureRandom
 import scala.util.Random
 
 object KeyService extends Loggable {
@@ -23,8 +21,12 @@ object KeyService extends Loggable {
 
   def createResetKey(user: User): User = {
     val key     = StringHelpers.randomString(16)
-    val curTime = new DateTime()
     user.resetPasswordKey(key).saveMe
+  }
+
+  def generateNewPreBillingKey(user: User): User = {
+    val key     = StringHelpers.randomString(16)
+    user.preBillingKey(key).saveMe
   }
 
   def verifyKey(userId: Long, key: String, keyType: String): Boolean = {
@@ -51,6 +53,12 @@ object KeyService extends Loggable {
               case _                                 => false
             }
 
+          case "preBillingKey" =>
+            user.preBillingKey.get match {
+              case possibleKey if possibleKey == key => true
+              case _   => false
+            }
+
           case _ => false
         }
 
@@ -60,16 +68,19 @@ object KeyService extends Loggable {
     }
   }
 
-  def removeKey(user: User, keyType: String): Serializable = {
+  def removeKey(user: User, keyType: String): Box[User] = {
     keyType match {
       case "accessKey" =>
-        user.accessKey("").saveMe
+        Full(user.accessKey("").saveMe)
 
       case "productSalesKey" =>
-        user.productSalesKey("").saveMe
+        Full(user.productSalesKey("").saveMe)
 
       case "resetPasswordKey" =>
-        user.resetPasswordKey("").saveMe
+        Full(user.resetPasswordKey("").saveMe)
+
+      case "preBillingKey" =>
+        Full(user.preBillingKey("").saveMe())
 
       case _ => Empty
     }
@@ -85,6 +96,9 @@ object KeyService extends Loggable {
 
       case "resetPasswordKey" =>
         User.find(By(User.resetPasswordKey, key))
+
+      case "preBillingKey" =>
+        User.find(By(User.preBillingKey, key))
 
       case _ => Empty
     }

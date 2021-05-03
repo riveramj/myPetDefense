@@ -75,7 +75,8 @@ object BootUtil {
     WoofTraxOrder,
     EmailReport,
     EmailReportRecord,
-    StatisticsSnapshot
+    StatisticsSnapshot,
+    MandrillTemplate
   )
 
 }

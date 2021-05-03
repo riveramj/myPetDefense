@@ -195,6 +195,14 @@ object Generator extends ScalaCheckHelper {
       size <- generateDogOfSupportedSize
     } yield Pet.create.name(name).size(size)
 
+  def generatePendingPet: Gen[PendingPet] =
+    for {
+      pet <- generateSimplePet
+      supplement <- Gen.oneOf(Product.supplementsByAmount(30, AnimalType.Dog))
+    } yield {
+      PendingPet(pet, Full(supplement))
+    }
+
   def genPetData: Gen[PetData] =
     for {
       petName <- genNonEmptyAlphaStr
@@ -273,8 +281,9 @@ object Generator extends ScalaCheckHelper {
     for {
       productName <- genAlphaStr
       sku         <- genAlphaStr
+      quantity    <- genNonNegInt
       isSupplement <- genBool
-    } yield ProductGeneratedData(productName, sku, isSupplement)
+    } yield ProductGeneratedData(productName, sku, quantity, isSupplement)
 
   def genProductsSchedule(
       productsSize: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
@@ -316,6 +325,9 @@ object Generator extends ScalaCheckHelper {
   def listOfNSimplePetsGen(length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES): Gen[List[Pet]] =
     Gen.listOfN(length, generateSimplePet)
 
+  def listOfNPendingPetsGen(length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES): Gen[List[PendingPet]] =
+    Gen.listOfN(length, generatePendingPet)
+
   def listOfNInsertDataGen(
       length: Int = MAX_LENGTH_OF_GENERATED_TRAVERSABLES
   ): Gen[List[InsertGenData]] =
@@ -332,8 +344,8 @@ object Generator extends ScalaCheckHelper {
   def newUserData(seed: Long = 42L): NewUserData =
     generateNewUserData.pureApply(Gen.Parameters.default, rng.Seed(seed))
 
-  def simplePetsNonEmptyList(seed: Long = 42L): List[Pet] =
-    listOfNSimplePetsGen().pureApply(Gen.Parameters.default, rng.Seed(seed))
+  def pendingPetsNonEmptyList(seed: Long = 42L): List[PendingPet] =
+    listOfNPendingPetsGen().pureApply(Gen.Parameters.default, rng.Seed(seed))
 
   def subscription(seed: Long = 42L): SubscriptionCreateGeneratedData =
     genSubscriptionToCreate.pureApply(Gen.Parameters.default, rng.Seed(seed))

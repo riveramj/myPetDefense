@@ -84,6 +84,14 @@ fieldset.add-pet, fieldset.add-coupon {
   font-size: em(16px);
 }
 
+.product-container, .supplement-container {
+  display: inline-block;
+}
+
+.product-container {
+  margin-right: 20px;
+}
+
 .parent-nav {
   li {
     display: inline-block;
