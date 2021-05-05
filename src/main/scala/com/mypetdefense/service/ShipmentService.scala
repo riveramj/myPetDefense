@@ -6,8 +6,6 @@ import net.liftweb.common.Box.tryo
 import net.liftweb.common._
 import net.liftweb.mapper._
 
-import java.util.Date
-
 object ShipmentService extends Loggable {
   def getCurrentPastDueShipments: List[Shipment] = {
     Shipment.findAll(
@@ -49,22 +47,9 @@ object ShipmentService extends Loggable {
   ): Box[Shipment] = {
     for {
       subscription <- user.subscription
-      shipmentCount = subscription.shipments.toList.size
       pets          = subscription.getPets
-      dogs          = pets.filter(_.animalType.get == AnimalType.Dog)
     } yield {
-      val sendFreeUpgradeShipment =
-        shouldSendFreeUpgradeShipment(subscription, shipmentCount, dogs)
-
-      if (sendFreeUpgradeShipment)
-        subscription.freeUpgradeSampleDate(new Date).saveMe()
-
-      val inserts = Insert.productBrochure.toList ++ {
-        if (sendFreeUpgradeShipment)
-          Insert.tryUpgrade.toList
-        else
-          Nil
-      }
+      val inserts = Insert.productBrochure.toList
 
       Shipment.createShipment(
         user,
@@ -75,7 +60,7 @@ object ShipmentService extends Loggable {
         tax,
         inserts,
         ShipmentStatus.Paid,
-        sendFreeUpgradeShipment
+        false
       )
     }
   }
