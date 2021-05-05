@@ -840,27 +840,18 @@ object DataLoader extends Loggable {
   def dentalProductCleanup = {
     val smallDogDental = Product.dentalPowderSmallForDogs
     val largeDogDental = Product.dentalPowderLargeForDogs
-    val smallLargeDental = List(largeDogDental, smallDogDental)
+    val smallLargeDental = List(largeDogDental.toList, smallDogDental.toList).flatten.map(_.productId.get)
     val smallSizes = List(AnimalSize.DogSmallZo, AnimalSize.DogSmallShld, AnimalSize.DogSmallAdv)
 
     for {
       box <- SubscriptionBox.findAll(By(SubscriptionBox.status, Status.Active))
       items = box.subscriptionItems.toList
-        if items.size <= 4
-      fleaTick <- box.fleaTick.obj
-      largeDental <- largeDogDental
-      smallDental <- smallDogDental
+        if items.size <= 5
     } yield {
-      items.filter(_.product.obj == Product.dentalPowderForDogs).map(_.delete_!)
-      val missingDental = items.intersect(smallLargeDental).isEmpty
+      val dental = items.filter( p => smallLargeDental.contains(p.product.get))
 
-      if (missingDental) {
-        val smallDog = smallSizes.contains(fleaTick.size.get)
-        if (smallDog)
-          SubscriptionItem.createSubscriptionItem(smallDental, box)
-        else
-          SubscriptionItem.createSubscriptionItem(largeDental, box)
-      }
+      if (dental.size > 1)
+        dental.tail.map(_.delete_!)
     }
   }
 }
