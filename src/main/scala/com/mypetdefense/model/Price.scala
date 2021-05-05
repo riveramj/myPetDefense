@@ -1,11 +1,11 @@
 package com.mypetdefense.model
 
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
-
-import java.util.Date
 import net.liftweb.common.Box
 import net.liftweb.mapper._
 import net.liftweb.util.Props
+
+import java.util.Date
 
 class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price] {
   def getSingleton: KeyedMetaMapper[Long, Price] = Price
@@ -58,6 +58,13 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
                        boxType: BoxType.Value = BoxType.basic,
                        active: Boolean = true
                      ): Box[Price] = {
+    println("prices")
+    println(fleaTick)
+    println(code)
+    println(boxType)
+    println(active)
+    println("prices")
+
     Price.find(
       By(Price.fleaTick, fleaTick),
       By(Price.code, code),
