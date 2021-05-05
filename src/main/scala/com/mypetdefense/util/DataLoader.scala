@@ -846,12 +846,9 @@ object DataLoader extends Loggable {
     for {
       box <- SubscriptionBox.findAll(By(SubscriptionBox.status, Status.Active))
       items = box.subscriptionItems.toList
-        if items.size <= 5
+        if items.size > 4
     } yield {
-      val dental = items.filter( p => smallLargeDental.contains(p.product.obj))
-
-      if (dental.size > 1)
-        dental.tail.map(_.delete_!)
+      items.filter(_.product.obj == Product.dentalPowderForDogs).map(_.delete_!)
     }
   }
 }
