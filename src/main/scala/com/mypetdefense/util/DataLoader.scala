@@ -836,4 +836,31 @@ object DataLoader extends Loggable {
       user.cancel
     }
   }
+
+  def dentalProductCleanup = {
+    val smallDogDental = Product.dentalPowderSmallForDogs
+    val largeDogDental = Product.dentalPowderLargeForDogs
+    val smallLargeDental = List(largeDogDental, smallDogDental)
+    val smallSizes = List(AnimalSize.DogSmallZo, AnimalSize.DogSmallShld, AnimalSize.DogSmallAdv)
+
+    for {
+      box <- SubscriptionBox.findAll(By(SubscriptionBox.status, Status.Active))
+      items = box.subscriptionItems.toList
+        if items.size <= 4
+      fleaTick <- box.fleaTick.obj
+      largeDental <- largeDogDental
+      smallDental <- smallDogDental
+    } yield {
+      items.filter(_.product.obj == Product.dentalPowderForDogs).map(_.delete_!)
+      val missingDental = items.intersect(smallLargeDental).isEmpty
+
+      if (missingDental) {
+        val smallDog = smallSizes.contains(fleaTick.size.get)
+        if (smallDog)
+          SubscriptionItem.createSubscriptionItem(smallDental, box)
+        else
+          SubscriptionItem.createSubscriptionItem(largeDental, box)
+      }
+    }
+  }
 }

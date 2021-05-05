@@ -57,7 +57,8 @@ class Boot {
     //DataLoader.updateChewCounts()
     //DataLoader.createProducts
     //DataLoader.migrateTo30DaySupply()
-    DataLoader.createMissingProbiotic
+    //DataLoader.createMissingProbiotic
+    DataLoader.dentalProductCleanup
 
     //DataLoader.createCancelledSubForUser
 
