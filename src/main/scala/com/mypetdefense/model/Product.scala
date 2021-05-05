@@ -88,7 +88,7 @@ object Product extends Product with LongKeyedMetaMapper[Product] {
 
   def dentalPowderForDogs: Box[Product]      =
     Product.find(
-      By(Product.name, "Dental Powder For Dogs"),
+      By(Product.name, "Dental Powder"),
       By(Product.animalType, AnimalType.Dog)
     )
 
