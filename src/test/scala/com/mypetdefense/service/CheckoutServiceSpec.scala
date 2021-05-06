@@ -5,6 +5,7 @@ import com.mypetdefense.generator.Generator
 import com.mypetdefense.helpers.DBTest
 import com.mypetdefense.model._
 import com.mypetdefense.snippet.signup.NewUserAddress
+import com.mypetdefense.util.DataLoader
 import net.liftweb.common.{Box, Empty}
 import org.scalatest.Assertion
 import org.scalatest.matchers.should.Matchers.convertToAnyShouldWrapper
@@ -24,9 +25,11 @@ class CheckoutServiceSpec extends DBTest {
 
   it should "create user, subscription, address and pet on setting up new user" in {
     val user: Box[User]   = Empty
-    val petsToCreate      = Generator.simplePetsNonEmptyList()
+    val petsToCreate      = Generator.pendingPetsNonEmptyList()
     val generatedUserData = Generator.newUserData()
     val stripeCustomer    = Generator.stripeCustomer()
+
+
 
     val maybeCreatedUser = CheckoutService.newUserSetup(
       user,

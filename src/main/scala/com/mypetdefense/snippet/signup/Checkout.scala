@@ -67,17 +67,18 @@ class Checkout extends Loggable {
       code
   }
 
-  val pets: mutable.LinkedHashMap[Long, Pet] = completedPets.is
-  val petCount: Int                          = pets.size
-  val petSizes: Map[AnimalSize.Value, Int]   = countOccurrencesByKey(pets.values)(_.size.get)
-
   val subtotal: BigDecimal =
     (petSizes(AnimalSize.DogSmallZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.Small.monthlyCharge
       + petSizes(AnimalSize.DogMediumZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.Medium.monthlyCharge
       + petSizes(AnimalSize.DogLargeZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.Large.monthlyCharge
       + petSizes(AnimalSize.DogXLargeZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.XLarge.monthlyCharge)
 
-  val smallDogCount: Int = pets.values.count {_.size.get == AnimalSize.DogSmallZo}
+  val petSizes: Map[AnimalSize.Value, Int]   = countOccurrencesByKey(pets.values.map(_.pet))(_.size.get)
+
+  val pets: mutable.LinkedHashMap[Long, PendingPet] = completedPets.is
+  val petCount: Int = pets.size
+
+  val smallDogCount: Int = pets.values.map(_.pet).count(_.size.get == AnimalSize.DogSmallZo)
   val nonSmallDogCount: Int = petCount - smallDogCount
 
   var promotionAmount: BigDecimal = findPromotionAmount()

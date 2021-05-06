@@ -1,7 +1,8 @@
 package com.mypetdefense.model
 
-import java.util.Date
+import com.mypetdefense.util.RandomIdGenerator.generateLongId
 
+import java.util.Date
 import net.liftweb.common.Box
 import net.liftweb.mapper._
 import net.liftweb.util.Props
@@ -18,6 +19,8 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
   object stripeName extends MappedString(this, 200)
   object stripePriceId   extends MappedString(this, 200)
   object stripeProductId extends MappedString(this, 200)
+  object petSize extends MappedEnum(this, AnimalSize)
+  object boxType extends MappedEnum(this, BoxType)
   object createdAt extends MappedDateTime(this) {
     override def defaultValue = new Date()
   }
@@ -31,13 +34,14 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
   final val currentPetlandMonthlyCode = Props.get("petland.1month.payment").openOr(defaultPriceCode)
 
   def createPrice(
-      priceId: Long,
+      priceId: Long = generateLongId,
       price: Double,
       code: String,
       fleaTick: FleaTick,
       stripeName: String,
       stripePriceId: String = "",
-      stripeProductId: String = ""
+      stripeProductId: String = "",
+      boxType: Box[BoxType.Value]
   ): Price = {
     Price.create
       .priceId(priceId)
@@ -48,14 +52,36 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
       .stripeProductId(stripeProductId)
       .active(true)
       .stripeName(stripeName)
+      .petSize(fleaTick.size.get)
+      .boxType(boxType.openOrThrowException("Couldn't find box type"))
       .saveMe
   }
 
-  def getPricesByCode(fleaTick: FleaTick, code: String, active: Boolean = true): Box[Price] = {
+  def getPricesByCode(
+                       fleaTick: FleaTick,
+                       code: String,
+                       boxType: BoxType.Value = BoxType.basic,
+                       active: Boolean = true
+                     ): Box[Price] = {
     Price.find(
       By(Price.fleaTick, fleaTick),
       By(Price.code, code),
-      By(Price.active, active)
+      By(Price.active, active),
+      By(Price.boxType, boxType)
+    )
+  }
+
+  def getPricesByCodeBySize(
+                       code: String,
+                       petSize: AnimalSize.Value,
+                       boxType: BoxType.Value,
+                       active: Boolean = true
+                     ): Box[Price] = {
+    Price.find(
+      By(Price.code, code),
+      By(Price.active, active),
+      By(Price.boxType, boxType),
+      By(Price.petSize, petSize)
     )
   }
 

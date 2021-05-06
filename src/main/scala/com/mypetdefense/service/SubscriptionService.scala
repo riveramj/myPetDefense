@@ -43,7 +43,7 @@ object SubscriptionService {
 
     val updatedBoxes = boxes.map(_.reload)
 
-    val cost = updatedBoxes.map(SubscriptionBox.possiblePrice(_, true)).sum
+    val cost = updatedBoxes.map(SubscriptionBox.findBoxPrice).sum
 
     updateStripeSubscriptionQuantity(
       updatedSubscription.map(_.stripeSubscriptionId.get).openOr(""),
@@ -88,7 +88,7 @@ object SubscriptionService {
       FleaTick.zoGuardCat.toList
   }
 
-  def getFirstSecondThirdSupplements(supplements: List[Product]) = {
+  def getFirstSecondThirdSupplements(supplements: List[Product]): (Box[Product], Box[Product], Box[Product]) = {
     val firstSupplement = supplements.headOption
     val secondSupplement =
       if (supplements.size > 1) supplements.tail.headOption else None
@@ -120,9 +120,9 @@ object SubscriptionService {
       filteredItems = allItems.filter(supplement =>
         supplement.product.obj.map(_.isSupplement.get).openOr(false)
       )
-      index    <- filteredItems.indices
     } yield {
-      filteredItems(index).product(supplements(index)).saveMe()
+      filteredItems.map(_.delete_!)
+      supplements.map(SubscriptionItem.createSubscriptionItem(_, box))
     }
   }
 }

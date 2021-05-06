@@ -1,23 +1,17 @@
 package com.mypetdefense.service
 
-import java.text.SimpleDateFormat
-import java.time.{LocalDate, ZoneId}
-import java.util.Date
-
 import com.mypetdefense.model._
-import com.mypetdefense.shipstation.{
-  Address => ShipStationAddress,
-  Shipment => ShipStationShipment,
-  _
-}
+import com.mypetdefense.shipstation.{Address => ShipStationAddress, Shipment => ShipStationShipment, _}
 import com.mypetdefense.util.CalculationHelper
 import com.mypetdefense.util.ModelSyntax.ListOfShipmentLineItemsSyntax
 import dispatch.Defaults._
 import dispatch._
-import net.liftweb.common.Box.tryo
 import net.liftweb.common._
 import net.liftweb.util.Props
 
+import java.text.SimpleDateFormat
+import java.time.{LocalDate, ZoneId}
+import java.util.Date
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.language.postfixOps
@@ -220,7 +214,7 @@ trait ShipStationServiceTrait extends Loggable {
     val shipmentLineItems        = shipment.actualShipmentLineItems
     val shipmentLineItemsInserts = shipmentLineItems.distinctInserts
 
-    val allInserts = insertsToShipStation(subscription, shipment, shipmentLineItemsInserts)
+    val allInserts = shipmentLineItemsInserts
 
     val refreshedShipment      = shipment.reload
     val shipmentLineItemsByPet = refreshedShipment.shipmentLineItemsByPets
@@ -293,20 +287,6 @@ trait ShipStationServiceTrait extends Loggable {
     }
   }
 
-  private def insertsToShipStation(
-      subscription: Subscription,
-      shipment: Shipment,
-      shipmentLineItemsInserts: List[Insert]
-  ): Iterable[Insert] = {
-    if (subscription.shipments.toList.size >= 2 &&
-        tryo(subscription.freeUpgradeSampleDate.get) == Full(null)) {
-      insertsWithFreeUpgrade(subscription, shipment, shipmentLineItemsInserts)
-    } else if (shipment.freeUpgradeSample.get)
-      Insert.tryUpgrade ++ shipmentLineItemsInserts
-    else
-      shipmentLineItemsInserts
-  }
-
   private def insertsWithFreeUpgrade(
       subscription: Subscription,
       shipment: Shipment,
@@ -336,7 +316,7 @@ trait ShipStationServiceTrait extends Loggable {
       lineItemKey = Some(s"${index + 1} - ${productIndex + 1}"),
       quantity = 1,
       sku = product.sku.get,
-      name = s"${index + 1} - ${product.name.get} for Dogs"
+      name = s"${index + 1} - ${product.nameAndQuantity}"
     )
 
   private def petFleaTickAndProductsToOrderItems(
