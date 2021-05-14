@@ -200,8 +200,7 @@ object DataLoader extends Loggable {
         Price.createPrice(
           price = tppPrice,
           code = code,
-          fleaTick = Full(fleaTick),
-          stripeName = "",
+          fleaTick = fleaTick,
           boxType = Full(BoxType.basic)
         )
       }
@@ -213,8 +212,7 @@ object DataLoader extends Loggable {
         Price.createPrice(
           price = smallHwBox,
           code = code,
-          fleaTick = Full(fleaTick),
-          stripeName = "",
+          fleaTick = fleaTick,
           boxType = Full(BoxType.healthAndWellness)
         )
       }
@@ -226,8 +224,7 @@ object DataLoader extends Loggable {
         Price.createPrice(
           price = mdXLHwBox,
           code = code,
-          fleaTick = Full(fleaTick),
-          stripeName = "",
+          fleaTick = fleaTick,
           boxType = Full(BoxType.healthAndWellness)
         )
       }
@@ -855,6 +852,49 @@ object DataLoader extends Loggable {
           SubscriptionItem.createSubscriptionItem(largeDental, box)
       else if (items.size == 1)
         items.map(_.delete_!)
+    }
+  }
+
+  def createStripeProductsPrices = {
+    val upgradedBoxes = Price.findAll(
+      NullRef(Price.stripePriceId),
+      By(Price.boxType, BoxType.healthAndWellness)
+    )
+
+    val basicBoxes = Price.findAll(
+      NullRef(Price.stripePriceId),
+      By(Price.boxType, BoxType.basic)
+    ).partition(price => Pet.catSizes.contains(price.petSize.get))
+
+    val (basicCatBoxes, basicDogBoxes) = (basicBoxes._1, basicBoxes._2)
+
+    val groupedDogUpgraded = upgradedBoxes.groupBy(_.fleaTick.obj.map(_.sizeName.get))
+    val groupedDogBasic= basicDogBoxes.groupBy(_.fleaTick.obj.map(_.sizeName.get))
+
+    for {
+      stripeProduct <- StripeFacade.Product.create("Cat Flea & Tick Only All Sizes").toList
+      (code, codeGroupedPrices) <- basicCatBoxes.groupBy(_.code.get)
+      sampleCodePrice <- codeGroupedPrices.headOption
+      cost = (sampleCodePrice.price.get * 100).toLong
+      stripePrice <- StripeFacade.Price.create(stripeProduct.id, cost, code)
+    } yield {
+      codeGroupedPrices.map(_.stripePriceId(stripePrice.id).stripeProductId(stripeProduct.id).saveMe())
+    }
+
+    for {
+      group <- List(groupedDogUpgraded, groupedDogBasic)
+      (possibleSizeName, prices) <- group
+      sizeName <- possibleSizeName.toList
+      samplePrice <- prices.headOption.toList
+      fleaTick <- samplePrice.fleaTick.obj.toList
+      productName = s"${fleaTick.animalType.get} ${samplePrice.boxType.get.toString} ${sizeName}"
+      stripeProduct <- StripeFacade.Product.create(productName).toList
+      (code, codeGroupedPrices) <- prices.groupBy(_.code.get)
+      sampleCodePrice <- codeGroupedPrices
+      cost = (sampleCodePrice.price.get * 100).toLong
+      stripePrice <- StripeFacade.Price.create(stripeProduct.id, cost, code)
+    } yield {
+      codeGroupedPrices.map(_.stripePriceId(stripePrice.id).stripeProductId(stripeProduct.id).saveMe())
     }
   }
 }

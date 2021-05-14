@@ -1,7 +1,5 @@
 package com.mypetdefense.snippet.signup
 
-import com.mypetdefense.constants.StripeProductsPrices
-import com.mypetdefense.constants.StripeProductsPrices.Dog.HealthAndWellnessBox._
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerSignedUp}
 import com.mypetdefense.service.PetFlowChoices._
@@ -9,7 +7,6 @@ import com.mypetdefense.service.StripeFacade.Customer
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
-import com.mypetdefense.util.AggregationHelper.combineSimilarItems
 import com.mypetdefense.util.CalculationHelper.countOccurrencesByKey
 import com.mypetdefense.util.{ClearNodesIf, DateHelper, SecurityContext}
 import net.liftweb.common.Box.box2Iterable
@@ -67,16 +64,12 @@ class Checkout extends Loggable {
       code
   }
 
-  val subtotal: BigDecimal =
-    (petSizes(AnimalSize.DogSmallZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.Small.monthlyCharge
-      + petSizes(AnimalSize.DogMediumZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.Medium.monthlyCharge
-      + petSizes(AnimalSize.DogLargeZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.Large.monthlyCharge
-      + petSizes(AnimalSize.DogXLargeZo) * StripeProductsPrices.Dog.HealthAndWellnessBox.XLarge.monthlyCharge)
-
-  val petSizes: Map[AnimalSize.Value, Int]   = countOccurrencesByKey(pets.values.map(_.pet))(_.size.get)
-
   val pets: mutable.LinkedHashMap[Long, PendingPet] = completedPets.is
+  val petSizes: Map[AnimalSize.Value, Int]   = countOccurrencesByKey(pets.values.map(_.pet))(_.size.get)
   val petCount: Int = pets.size
+
+  val petPrices: List[Price] = pets.map(_._2.pet.size.get).flatMap(Price.getDefaultProductPrice(_)).toList
+  val subtotal: BigDecimal = petPrices.map(_.price.get).sum
 
   val smallDogCount: Int = pets.values.map(_.pet).count(_.size.get == AnimalSize.DogSmallZo)
   val nonSmallDogCount: Int = petCount - smallDogCount
@@ -91,7 +84,6 @@ class Checkout extends Loggable {
   }
 
   private def updateSessionVars() = {
-
     PetFlowChoices.petCount(Full(petCount))
     PetFlowChoices.completedPets(mutable.LinkedHashMap.empty)
     PetFlowChoices.monthlyTotal(Full(monthlyTotal))
@@ -177,18 +169,9 @@ class Checkout extends Loggable {
   }
 
   private def tryToCreateUser = {
-    val subscriptionItems =
-      (combineSimilarItems(
-        List(
-          StripeFacade.Subscription.Item(Small.priceId, petSizes(AnimalSize.DogSmallZo)),
-          StripeFacade.Subscription.Item(Medium.priceId, petSizes(AnimalSize.DogMediumZo)),
-          StripeFacade.Subscription.Item(Large.priceId, petSizes(AnimalSize.DogLargeZo)),
-          StripeFacade.Subscription.Item(XLarge.priceId, petSizes(AnimalSize.DogXLargeZo))
-        )
-      )(
-        similarity = _.priceId,
-        combine = (i1, i2) => StripeFacade.Subscription.Item(i1.priceId, i1.quantity + i2.quantity)
-      )).filter(_.quantity == 0)
+    val subscriptionItems = petPrices.groupBy(_.stripePriceId.get).map { case (stripePriceId, prices) =>
+      StripeFacade.Subscription.Item(stripePriceId, prices.size)
+    }
 
     val stripeCustomer = {
       Customer.createWithSubscription(
@@ -196,7 +179,7 @@ class Checkout extends Loggable {
         stripeToken,
         taxRate,
         coupon,
-        subscriptionItems
+        subscriptionItems.toList
       )
     }
 

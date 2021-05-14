@@ -1,8 +1,6 @@
 package com.mypetdefense.service
 
 import com.mypetdefense.actor._
-import com.mypetdefense.constants.StripeProductsPrices
-import com.mypetdefense.model.SubscriptionBox.findBoxPrice
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.action.Action
 import com.mypetdefense.model.domain.action.CustomerAction.CustomerAddedPet
@@ -338,7 +336,7 @@ object ParentService extends LoggableBoxLogging {
       newPet.box(box).saveMe()
     }
 
-    val updatedSubscription = updateStripeSubscriptionTotal(oldUser, updatedPet, Full(AddPet))
+    val updatedSubscription = updateStripeSubscriptionTotal(oldUser, updatedPet)
 
     updatedSubscription match {
       case Full(_) =>
@@ -350,30 +348,38 @@ object ParentService extends LoggableBoxLogging {
 
   def updateStripeSubscriptionTotal(
     oldUser: User,
-    petToUpdate: Box[Pet] = Empty,
-    action: Box[PetAction] = Empty
-): Box[Stripe.Subscription] = {
+    petToUpdate: Box[Pet] = Empty
+  ): Box[Stripe.Subscription] = {
     val updatedUser       = oldUser.reload
     val maybeSubscription = updatedUser.subscription.obj
 
-    val productToUpdate = petToUpdate.map(_.size.get) match {
-      case Full(AnimalSize.DogSmallZo)  =>
-        StripeProductsPrices.Dog.HealthAndWellnessBox.Small.productId
-      case Full(AnimalSize.DogMediumZo) =>
-        StripeProductsPrices.Dog.HealthAndWellnessBox.Medium.productId
-      case Full(AnimalSize.DogLargeZo)  =>
-        StripeProductsPrices.Dog.HealthAndWellnessBox.Large.productId
-      case Full(AnimalSize.DogXLargeZo) =>
-        StripeProductsPrices.Dog.HealthAndWellnessBox.XLarge.productId
+    val priceDetails = (for {
+      subscription <- maybeSubscription
+      pet <- petToUpdate
+      box <- pet.box.obj
+      product <- box.fleaTick.obj
+      petSize = product.size.get
+      priceCode = subscription.priceCode.get
+      isUpgraded = subscription.isUpgraded.get
+    } yield {
+      val boxType = if (isUpgraded) BoxType.healthAndWellness else BoxType.basic
 
-    }
+      Price.getPricesByCodeBySize(priceCode, petSize, boxType)
+    }).flatten
 
-    //findBoxPrice(box)
+    val sizedBoxes = for {
+      subscription <- maybeSubscription.toList
+      pet <- petToUpdate.toList
+      box <- subscription.subscriptionBoxes.toList
+        if box.status.get == Status.Active
+      fleaTick <- box.fleaTick.obj.toList
+        if fleaTick.size.get == pet.size.get
+    } yield box
 
     updateStripeSubscriptionQuantity(
       maybeSubscription.map(_.stripeSubscriptionId.get).openOr(""),
-      productToUpdate,
-      2
+      priceDetails.map(_.stripeProductId.get).openOr(""),
+      sizedBoxes.size
     ).logEmptyBox("update stripe subscription total failed")
   }
 
@@ -398,7 +404,7 @@ object ParentService extends LoggableBoxLogging {
       box.status(Status.Cancelled).saveMe
     }
 
-    val updatedSubscription = updateStripeSubscriptionTotal(oldUser, Full(oldPet), Full(RemovePet))
+    val updatedSubscription = updateStripeSubscriptionTotal(oldUser, Full(oldPet))
 
     val updatedUser = oldUser.reload
 

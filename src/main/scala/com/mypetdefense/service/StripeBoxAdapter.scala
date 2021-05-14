@@ -110,6 +110,19 @@ object StripeBoxAdapter {
   object Price {
     def retrieve(price: String): Box[Price] =
       Box.tryo { StripeModel.Price.retrieve(price) }.map(Price(_))
+    def create(params: PriceCreateParams): Box[Price] =
+      Box.tryo { StripeModel.Price.create(params) }.map(Price(_))
+  }
+
+  final case class Product(underlying: StripeModel.Product) {
+    def id: String = underlying.getId
+  }
+
+  object Product {
+    def retrieve(product: String): Box[Product] =
+      Box.tryo { StripeModel.Product.retrieve(product) }.map(Product(_))
+    def create(params: ProductCreateParams): Box[Product] =
+      Box.tryo { StripeModel.Product.create(params) }.map(Product(_))
   }
 
   final case class Refund(underlying: StripeModel.Refund)

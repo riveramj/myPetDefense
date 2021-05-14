@@ -197,4 +197,36 @@ object StripeFacade {
     }
   }
 
+  object Product {
+    def create(name: String): Box[StripeBoxAdapter.Product] ={
+      Stripe.Product.create(
+        ProductCreateParams.builder()
+          .setName(name)
+          .build
+      )
+    }
+  }
+
+  object Price {
+    def create(
+      productId: String,
+      cost: Long,
+      name: String
+    ): Box[StripeBoxAdapter.Price] = {
+      val recurringDetails = PriceCreateParams.Recurring.builder()
+        .setInterval(PriceCreateParams.Recurring.Interval.MONTH)
+        .build
+
+      Stripe.Price.create(
+        PriceCreateParams.builder()
+          .setProduct(productId)
+          .setCurrency("usd")
+          .setUnitAmount(cost)
+          .setRecurring(recurringDetails)
+          .setNickname(name)
+          .build
+      )
+    }
+  }
+
 }

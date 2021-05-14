@@ -16,7 +16,6 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
   object code       extends MappedString(this, 100)
   object fleaTick   extends MappedLongForeignKey(this, FleaTick)
   object active     extends MappedBoolean(this)
-  object stripeName extends MappedString(this, 200)
   object stripePriceId   extends MappedString(this, 200)
   object stripeProductId extends MappedString(this, 200)
   object petSize extends MappedEnum(this, AnimalSize)
@@ -38,7 +37,6 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
       price: Double,
       code: String,
       fleaTick: FleaTick,
-      stripeName: String,
       stripePriceId: String = "",
       stripeProductId: String = "",
       boxType: Box[BoxType.Value]
@@ -51,7 +49,6 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
       .stripePriceId(stripePriceId)
       .stripeProductId(stripeProductId)
       .active(true)
-      .stripeName(stripeName)
       .petSize(fleaTick.size.get)
       .boxType(boxType.openOrThrowException("Couldn't find box type"))
       .saveMe
@@ -64,7 +61,7 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
                        active: Boolean = true
                      ): Box[Price] = {
     Price.find(
-      By(Price.fleaTick, fleaTick),
+      By(Price.petSize, fleaTick.size.get),
       By(Price.code, code),
       By(Price.active, active),
       By(Price.boxType, boxType)
@@ -85,9 +82,9 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
     )
   }
 
-  def getDefaultProductPrice(fleaTick: FleaTick, active: Boolean = true): Box[Price] = {
+  def getDefaultProductPrice(size: AnimalSize.Value, active: Boolean = true): Box[Price] = {
     Price.find(
-      By(Price.fleaTick, fleaTick),
+      By(Price.petSize, size),
       By(Price.code, Price.defaultPriceCode),
       By(Price.active, active)
     )

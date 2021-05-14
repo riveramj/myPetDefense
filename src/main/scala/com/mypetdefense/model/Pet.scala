@@ -78,8 +78,11 @@ object Pet extends Pet with LongKeyedMetaMapper[Pet] {
   def createNewPet(pet: Pet, user: User): Pet = {
     pet.user(user).saveMe
   }
+
   def notCancelledWithoutBox: List[Pet] =
     Pet.findAll(NotBy(Pet.status, Status.Cancelled), NullRef(Pet.box))
+
+  def catSizes = List(AnimalSize.CatSmall, AnimalSize.CatMedium, AnimalSize.CatLarge, AnimalSize.CatAllSize)
 }
 
 object AnimalType extends Enumeration {

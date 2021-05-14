@@ -65,7 +65,9 @@ class Prices extends Loggable {
       val name      = s"$productName ($code $date)"
       val price = tryo(rawPrice.trim().toDouble).getOrElse(0d)
 
-      Price.createPrice(priceDbId, price, code, chosenProduct, name, chosenBoxType)
+      chosenProduct.map { fleaTick =>
+        Price.createPrice(priceDbId, price, code, fleaTick, name, boxType = chosenBoxType)
+      }
 
       S.redirectTo(Prices.menu.loc.calcDefaultHref)
     } else {
