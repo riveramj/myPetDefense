@@ -58,7 +58,7 @@ class Boot {
     //DataLoader.createProducts
     //DataLoader.migrateTo30DaySupply()
     //DataLoader.createMissingProbiotic
-    DataLoader.dentalProductCleanup
+    //DataLoader.dentalProductCleanup
 
     //DataLoader.createCancelledSubForUser
 
