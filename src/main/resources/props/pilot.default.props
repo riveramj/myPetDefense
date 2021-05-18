@@ -25,14 +25,12 @@ taxjar.api.key=41169ab583e69469e0612dee1586ce79
 
 [Price]
 default.price.code=2.0-launch
+five.dollar.price.code=first-box-five
+mpd.flea.tick.price.code=mpd-FleaTick-apr-2021
 tpp.price.code=tpp-apr-01-2018
 petland.6month.payment=petland-6month-prepay-12-01-2018
 petland.5month.coupon=petland-5month-prepaid
 petland.1month.payment=petland-monthly-12-01-2018
-stripe.prices.boxes.cat.basic.id=price_1I9ZtCFZy50KlP8Qnc5kj2ml
-stripe.prices.boxes.dog.basic.id=price_1I9aScFZy50KlP8QcmIohiWC
-stripe.prices.boxes.dog.hw.small.id=price_1I9aNBFZy50KlP8Qq5edyINa
-stripe.prices.boxes.dog.hw.med.xl.id=price_1I9aNBFZy50KlP8QFsQmMIW2
 
 [ShipStation]
 shipstation.url=http://ssapi.shipstation.com

@@ -2,7 +2,6 @@ package com.mypetdefense.snippet
 
 import java.util.Date
 import com.mypetdefense.actor._
-import com.mypetdefense.constants.StripeProductsPrices
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.action.SystemAction.SystemCanceledAccount
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe, _}
@@ -168,15 +167,24 @@ object TPPApi extends RestHelper with Loggable {
       )
     }.getOrElse((0d, 0d))
 
-    val subscriptionItems = {
-      import StripeFacade._
-      import StripeProductsPrices._
+    val tppPriceCode = com.mypetdefense.model.Price.currentTppPriceCode
 
-      List(
-        Subscription.Item(Cat.BasicBox.priceId, catsCount),
-        Subscription.Item(Dog.BasicBox.priceId, dogsCount)
-      )
-    }
+    val subscriptionItems = ({
+      import StripeFacade._
+
+      pets.groupBy(_.size.get).map { case (size, pets) =>
+
+        val price = com.mypetdefense.model.Price.getPricesByCodeBySize(
+          tppPriceCode,
+          size,
+          BoxType.basic
+        )
+
+        val priceId = price.map(_.stripePriceId.get).getOrElse("")
+
+        Subscription.Item(priceId, pets.size)
+      }
+    }).toList
 
     val stripeCustomer =
       Stripe.Customer.create(

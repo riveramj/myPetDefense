@@ -28,22 +28,6 @@ petland.6month.payment=petland-6month-prepay-12-01-2018
 petland.5month.coupon=petland-5month-prepaid
 petland.1month.payment=petland-monthly-12-01-2018
 
-stripe.prices.boxes.cat.basic.id=price_1Hysyb2r9wsOBpY0ORw2vJo3
-stripe.prices.boxes.dog.basic.id=price_1HysuJ2r9wsOBpY0oq9I5pPq
-
-stripe.product.box.dog.hw.small.id=prod_JMY5DsTGBaQuJl
-stripe.price.box.dog.hw.small.id=price_1IjozI2r9wsOBpY0PEnsIHVX
-
-stripe.product.box.dog.hw.medium.id=prod_JMY5NoDWcc4FGR
-stripe.price.box.dog.hw.medium.id=price_1Ijoza2r9wsOBpY0g8VFpyjk
-
-stripe.product.box.dog.hw.large.id=prod_JMY58IpXBROCLN
-stripe.price.box.dog.hw.large.id=price_1Ijozi2r9wsOBpY0CCdFxJCV
-
-stripe.product.box.dog.hw.xlarge.id=prod_JMY6bBRZf4w11A
-stripe.price.box.dog.hw.xlarge.id=price_1Ijozu2r9wsOBpY0JKzH5BEo
-
-
 [ShipStation]
 shipstation.url=http://ssapi.shipstation.com
 shipstation.key=bf894cddafcd4b8baafb442f393d360f
