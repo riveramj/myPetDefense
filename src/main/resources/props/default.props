@@ -21,6 +21,7 @@ taxjar.api.key=41169ab583e69469e0612dee1586ce79
 
 [StripeProductsPrices]
 default.price.code=2.0-launch
+five.dollar.price.code=first-box-five
 mpd.flea.tick.price.code=mpd-FleaTick-apr-2021
 tpp.price.code=tpp-apr-01-2018
 petland.6month.payment=petland-6month-prepay-12-01-2018

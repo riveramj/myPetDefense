@@ -31,18 +31,36 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
   final val currentPetland6MonthPaymentCode =
     Props.get("petland.6month.payment").openOr(defaultPriceCode)
   final val currentPetlandMonthlyCode = Props.get("petland.1month.payment").openOr(defaultPriceCode)
+  final val fiveDollarBox = Props.get("five.dollar.price.code").openOr("")
+
+  def getFiveDollarPriceCode(animalSize: AnimalSize.Value) = {
+    Price.find(
+      By(Price.petSize, animalSize),
+      By(Price.code, fiveDollarBox)
+    )
+  }
+
+  def getChangeProduct() = Price.find(By(Price.code, "change"))
+
+  def getStripeProductId(petSize: AnimalSize.Value, boxType: BoxType.Value): Box[String] =
+    Price.find(
+      By(Price.petSize, petSize),
+      By(Price.active, true),
+      By(Price.boxType, boxType)
+    )
+      .map(_.stripeProductId.get)
 
   def createPrice(
-      priceId: Long = generateLongId,
       price: Double,
       code: String,
       fleaTick: FleaTick,
       stripePriceId: String = "",
-      stripeProductId: String = "",
       boxType: Box[BoxType.Value]
   ): Price = {
+    val stripeProductId = boxType.flatMap(getStripeProductId(fleaTick.size.get, _)).openOr("")
+
     Price.create
-      .priceId(priceId)
+      .priceId(generateLongId)
       .price(price)
       .code(code)
       .fleaTick(fleaTick)

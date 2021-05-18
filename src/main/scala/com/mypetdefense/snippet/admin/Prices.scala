@@ -2,8 +2,8 @@ package com.mypetdefense.snippet
 package admin
 
 import com.mypetdefense.model.{BoxType, _}
+import com.mypetdefense.service.StripeFacade
 import com.mypetdefense.service.ValidationService._
-import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -54,22 +54,25 @@ class Prices extends Loggable {
     val validateFields = List(
       checkEmpty(code, "#code"),
       checkNumber(rawPrice, "#price"),
-      checkEmpty(chosenProduct, "#box-type-select"),
+      checkEmpty(chosenBoxType, "#box-type-select"),
       checkEmpty(chosenProduct, "#product-select"),
     ).flatten
 
     if (validateFields.isEmpty) {
-      val priceDbId = generateLongId
-      val date      = LocalDate.now
-      val productName = chosenProduct.map(ft => s"${ft.name.get} ${ft.size.get}")
-      val name      = s"$productName ($code $date)"
-      val price = tryo(rawPrice.trim().toDouble).getOrElse(0d)
+      (for {
+        fleaTick <- chosenProduct
+        date       = LocalDate.now
+        codeName   = s"$code $date"
+        price <- tryo(rawPrice.trim().toDouble)
+      } yield {
+        val newPrice = Price.createPrice(price, codeName, fleaTick, "", boxType = chosenBoxType)
+        val cost = (price * 100).toLong
 
-      chosenProduct.map { fleaTick =>
-        Price.createPrice(priceDbId, price, code, fleaTick, name, boxType = chosenBoxType)
-      }
+        val stripePrice = StripeFacade.Price.create(newPrice.stripeProductId.get, cost, code)
+        stripePrice.map(p => newPrice.stripePriceId(p.id).saveMe())
 
-      S.redirectTo(Prices.menu.loc.calcDefaultHref)
+        S.redirectTo(Prices.menu.loc.calcDefaultHref)
+      }).openOrThrowException("Failed to create price")
     } else {
       validateFields.foldLeft(Noop)(_ & _)
     }
@@ -86,10 +89,10 @@ class Prices extends Loggable {
     ".prices [class+]" #> "current" &
     ".create" #> idMemoize { renderer =>
       "#code" #> ajaxText(code, code = _) &
-        "#price" #> ajaxText(rawPrice, rawPrice = _) &
-        "#product-container #product-select" #> productDropdown &
-        "#box-type-container #box-type-select" #> boxTypeDropdown &
-        "#create-item" #> SHtml.ajaxSubmit("Create Price", () => createPrice)
+      "#price" #> ajaxText(rawPrice, rawPrice = _) &
+      "#product-container #product-select" #> productDropdown &
+      "#box-type-container #box-type-select" #> boxTypeDropdown &
+      "#create-item" #> SHtml.ajaxSubmit("Create Price", () => createPrice)
     } &
     ".price-entry" #> allPrices.sortWith(_.code.get < _.code.get).map { price =>
       ".code *" #> price.code.get &

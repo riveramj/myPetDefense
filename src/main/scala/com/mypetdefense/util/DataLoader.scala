@@ -2,7 +2,9 @@ package com.mypetdefense.util
 
 import com.mypetdefense.model.Agency.getHQFor
 import com.mypetdefense.model._
+import com.mypetdefense.service.ParentService.updateStripeSubscriptionTotal
 import com.mypetdefense.service._
+import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.Box.tryo
 import net.liftweb.common._
 import net.liftweb.mapper._
@@ -895,6 +897,40 @@ object DataLoader extends Loggable {
       stripePrice <- StripeFacade.Price.create(stripeProduct.id, cost, code)
     } yield {
       codeGroupedPrices.map(_.stripePriceId(stripePrice.id).stripeProductId(stripeProduct.id).saveMe())
+    }
+  }
+
+  def migrateToStripeProducts =
+    User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
+      .foreach(updateStripeSubscriptionTotal)
+
+  def createFiveDollarPrices = {
+    if (Price.findAll(By(Price.code, Price.fiveDollarBox)).isEmpty) {
+      FleaTick.findAll().filter { ft =>
+        ft.isZoGuard_? && ft.animalType.get == AnimalType.Dog
+      }.foreach { fleaTick =>
+        val newPrice = Price.createPrice(5D, Price.fiveDollarBox, fleaTick, "", Full(BoxType.healthAndWellness))
+        val cost = (5 * 100).toLong
+
+        val stripePrice = StripeFacade.Price.create(newPrice.stripeProductId.get, cost, Price.fiveDollarBox)
+        stripePrice.map(p => newPrice.stripePriceId(p.id).saveMe())
+      }
+    }
+  }
+
+  def createChangeProduct = {
+    if (Price.getChangeProduct().isEmpty) {
+      val changeProduct = StripeFacade.Product.create("Change")
+      val changePrice = StripeFacade.Price.create(changeProduct.map(_.id).openOr(""), 0, "change")
+
+      Price.create
+        .priceId(generateLongId)
+        .price(0)
+        .code("change")
+        .stripePriceId(changePrice.map(_.id).openOr(""))
+        .stripeProductId(changeProduct.map(_.id).openOr(""))
+        .active(true)
+        .saveMe
     }
   }
 }

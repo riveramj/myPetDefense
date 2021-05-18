@@ -7,7 +7,6 @@ import com.mypetdefense.service.StripeFacade.Customer
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
-import com.mypetdefense.util.CalculationHelper.countOccurrencesByKey
 import com.mypetdefense.util.{ClearNodesIf, DateHelper, SecurityContext}
 import net.liftweb.common.Box.box2Iterable
 import net.liftweb.common._
@@ -64,8 +63,7 @@ class Checkout extends Loggable {
       code
   }
 
-  val pets: mutable.LinkedHashMap[Long, PendingPet] = completedPets.is
-  val petSizes: Map[AnimalSize.Value, Int]   = countOccurrencesByKey(pets.values.map(_.pet))(_.size.get)
+  val pets: Map[Long,PendingPet] = completedPets.is.toMap
   val petCount: Int = pets.size
 
   val petPrices: List[Price] = pets.map(_._2.pet.size.get).flatMap(Price.getDefaultProductPrice(_)).toList
@@ -169,50 +167,31 @@ class Checkout extends Loggable {
   }
 
   private def tryToCreateUser = {
+    val fiveDollarPromo = List("20off", "80off").contains(couponCode)
     val subscriptionItems = petPrices.groupBy(_.stripePriceId.get).map { case (stripePriceId, prices) =>
-      StripeFacade.Subscription.Item(stripePriceId, prices.size)
+      if (fiveDollarPromo) {
+        val samplePriceSize = prices.headOption.map(_.petSize.get)
+        val fiveDollarPriceId = samplePriceSize
+          .flatMap(Price.getFiveDollarPriceCode)
+          .map(_.stripePriceId.get)
+          .getOrElse("")
+
+        StripeFacade.Subscription.Item(fiveDollarPriceId, prices.size)
+      } else
+        StripeFacade.Subscription.Item(stripePriceId, prices.size)
     }
+
+    val promoCoupon = if (fiveDollarPromo) Empty else coupon
 
     val stripeCustomer = {
       Customer.createWithSubscription(
         email,
         stripeToken,
         taxRate,
-        coupon,
+        promoCoupon,
         subscriptionItems.toList
       )
     }
-
-      /*
-    val promoPennyCount = {
-      if (List("20off", "80off").contains(couponCode)) {
-        if (nonSmallDogCount >= 3)
-          (smallDogCount * 2499) + ((nonSmallDogCount - 3) * 2799) + 1500
-        else if ((smallDogCount + nonSmallDogCount) >= 3)
-          ((smallDogCount - (3 - nonSmallDogCount)) * 2499) + 1500
-        else (smallDogCount + nonSmallDogCount) * 500
-      } else
-        pennyCount
-    }
-
-    val promoPennyCoupon = {
-      if (List("20off", "80off").contains(couponCode))
-        Empty
-      else
-        coupon
-    }
-
-    val stripeCustomer =
-      StripeFacade.Customer.createWithSubscription(
-        email,
-        stripeToken,
-        priceId = "pennyProduct",
-        promoPennyCount,
-        taxRate,
-        promoPennyCoupon
-      )
-    }
-    */
 
     stripeCustomer match {
       case Full(customer) => setupNewUserAndRedirect(customer)

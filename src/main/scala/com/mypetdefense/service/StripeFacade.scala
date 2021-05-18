@@ -136,19 +136,48 @@ object StripeFacade {
               )
       } yield sub
 
-    def updateSubscriptionItem(
-      subscriptionId: String,
-      params: SubscriptionItemUpdateParams,
-      productId: String
-    ): Box[Stripe.Subscription] = {
+    def updateSubscriptionItem(subscriptionId: String, pets: Map[String, Int]): Box[Stripe.Subscription] = {
+      val changePrice = com.mypetdefense.model.Price.getChangeProduct()
+      val stripePriceId = changePrice.map(_.stripePriceId.get).openOr("")
+      val stripePriceItem = SubscriptionUpdateParams.Item.builder().setPrice(stripePriceId).setQuantity(1).build()
+
+      val addChangeProduct = SubscriptionUpdateParams
+        .builder()
+        .addItem(stripePriceItem)
+        .build()
+
+      val updateParams = for {
+        (priceId, count) <- pets
+      } yield {
+        SubscriptionUpdateParams.Item.builder()
+          .setPrice(priceId)
+          .setQuantity(count)
+          .build()
+      }
+
       (for {
         subscription <- Stripe.Subscription.retrieve(subscriptionId).toList
-        items   <- subscription.items.toList
-        item    <- items.data
-          if item.underlying.getPrice.getProduct == productId
-        _       <- item.update(params)
-        updated <- Stripe.Subscription.retrieve(subscription.id)
-      } yield updated).headOption
+        _ = println(subscriptionId)
+          if !subscription.status.contains("incomplete_expired")
+        updatedSubscription <- subscription.update(addChangeProduct).toList
+        items <- updatedSubscription.items.toList
+      } yield {
+        val (currentItems, changeItem) = items.data.partition { item =>
+          item.underlying.getPrice.getId != stripePriceId
+        }
+
+        currentItems.map(_.underlying.delete())
+
+        val updatedSubscription = subscription.update(
+          SubscriptionUpdateParams.builder()
+            .addAllItem(updateParams.toList.asJava)
+            .build()
+        )
+
+        changeItem.map(_.underlying.delete())
+
+        updatedSubscription
+      }).flatten.headOption
     }
 
     def updateFirstItem(
