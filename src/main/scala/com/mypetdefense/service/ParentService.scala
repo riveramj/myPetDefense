@@ -53,8 +53,9 @@ object ParentService extends LoggableBoxLogging {
     }).toMap
 
     if (pets.isEmpty) {
-      val subscriptionId = oldSubscription.map(_.stripeSubscriptionId.get).openOr("")
-      logger.warn(s"no pets for $subscriptionId")
+      val stripeSubscriptionId = oldSubscription.map(_.stripeSubscriptionId.get).openOr("")
+      val subscriptionId = oldSubscription.map(_.subscriptionId.get).openOr("")
+      logger.warn(s"no pets for $stripeSubscriptionId with MPD id: $subscriptionId")
       Empty
     } else
       StripeFacade.Subscription

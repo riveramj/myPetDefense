@@ -3,6 +3,7 @@ package com.mypetdefense.service
 import com.mypetdefense.model.Coupon
 import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.util.StripeHelper._
+import com.stripe.param.SubscriptionUpdateParams.ProrationBehavior
 import com.stripe.param._
 import net.liftweb.common.{Box, Empty}
 
@@ -171,6 +172,7 @@ object StripeFacade {
         val updatedSubscription = subscription.update(
           SubscriptionUpdateParams.builder()
             .addAllItem(updateParams.toList.asJava)
+            .setProrationBehavior(ProrationBehavior.NONE)
             .build()
         )
 
