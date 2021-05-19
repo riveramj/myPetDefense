@@ -6,10 +6,13 @@ sealed trait BootJobMessage
 case object MigrateStripeProducts extends BootJobMessage
 
 trait MigrateStripeHandling extends HandlerChain {
-  DataLoader.createStripeProductsPrices
-  DataLoader.createFiveDollarPrices
-  DataLoader.createChangeProduct
-  DataLoader.migrateToStripeProducts  
+  addHandler {
+    case MigrateStripeProducts =>
+      DataLoader.createStripeProductsPrices
+      DataLoader.createFiveDollarPrices
+      DataLoader.createChangeProduct
+      DataLoader.migrateToStripeProducts
+  }
 }
 
 object BootJobActor extends BootJobActor
