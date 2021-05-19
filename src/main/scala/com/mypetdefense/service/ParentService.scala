@@ -52,9 +52,14 @@ object ParentService extends LoggableBoxLogging {
       price.stripePriceId.get -> pets.size
     }).toMap
 
-    StripeFacade.Subscription
-      .updateSubscriptionItem(subscriptionId, pets)
-      .logFailure("update subscription failed with stripe error")
+    if (pets.isEmpty) {
+      val subscriptionId = oldSubscription.map(_.stripeSubscriptionId.get).openOr("")
+      logger.warn(s"no pets for $subscriptionId")
+      Empty
+    } else
+      StripeFacade.Subscription
+        .updateSubscriptionItem(subscriptionId, pets)
+        .logFailure("update subscription failed with stripe error")
   }
 
   def updateCoupon(customerId: String, couponCode: Box[String]): Box[Stripe.Customer] = {
