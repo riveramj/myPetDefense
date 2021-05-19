@@ -6,6 +6,8 @@ import com.mypetdefense.util.StripeHelper._
 import com.stripe.param._
 import net.liftweb.common.{Box, Empty}
 
+import scala.collection.JavaConverters._
+
 object StripeFacade {
 
   final case class CustomerWithSources(value: Stripe.Customer)       extends AnyVal
@@ -46,14 +48,13 @@ object StripeFacade {
     def createWithSubscription(
         email: String,
         stripeToken: String,
-        priceId: String,
-        quantity: Int,
         taxRate: BigDecimal,
-        coupon: Box[Coupon] = Empty
+        coupon: Box[Coupon],
+        items: List[Subscription.Item]
     ): Box[CustomerWithSubscriptions] =
       for {
         customer <- Customer.create(email, stripeToken, coupon)
-        _        <- Subscription.createWithTaxRate(customer, taxRate, priceId, quantity)
+        _        <- Subscription.createWithTaxRate(customer, taxRate, Empty, items)
         updated  <- Customer.retrieveWithSubscriptions(customer.id)
       } yield updated
 
@@ -80,37 +81,42 @@ object StripeFacade {
   }
 
   object Subscription {
+    final case class Item(priceId: String, quantity: Int = 1)
+
     def create(
         customer: Stripe.Customer,
         taxRate: Stripe.TaxRate,
-        priceId: String,
-        quantity: Int,
-        coupon: Box[String] = Empty
-    ): Box[Stripe.Subscription] =
+        coupon: Box[String],
+        items: List[Item]
+    ): Box[Stripe.Subscription] = {
+      val stripeItems =
+        items.map {
+          case Item(priceId, quantity) =>
+            SubscriptionCreateParams.Item.builder
+              .setPrice(priceId)
+              .setQuantity(quantity)
+              .build
+        }.asJava
+
       Stripe.Subscription.create(
         SubscriptionCreateParams.builder
           .setCustomer(customer.id)
           .whenDefined(coupon)(_.setCoupon)
           .addDefaultTaxRate(taxRate.id)
-          .addItem(
-            SubscriptionCreateParams.Item.builder
-              .setPrice(priceId)
-              .setQuantity(quantity)
-              .build
-          )
+          .addAllItem(stripeItems)
           .build
       )
+    }
 
     def createWithTaxRate(
         customer: Stripe.Customer,
         taxRate: BigDecimal,
-        priceId: String,
-        quantity: Int,
-        coupon: Box[String] = Empty
+        coupon: Box[String],
+        items: List[Item]
     ): Box[Stripe.Subscription] =
       for {
         txr <- TaxRate.retrieveOrCreate(taxRate)
-        sub <- Subscription.create(customer, txr, priceId, quantity, coupon)
+        sub <- Subscription.create(customer, txr, coupon, items)
       } yield sub
 
     def update(subscriptionId: String, params: SubscriptionUpdateParams): Box[Stripe.Subscription] =
@@ -129,6 +135,50 @@ object StripeFacade {
                   .build
               )
       } yield sub
+
+    def updateSubscriptionItem(subscriptionId: String, pets: Map[String, Int]): Box[Stripe.Subscription] = {
+      val changePrice = com.mypetdefense.model.Price.getChangeProduct()
+      val stripePriceId = changePrice.map(_.stripePriceId.get).openOr("")
+      val stripePriceItem = SubscriptionUpdateParams.Item.builder().setPrice(stripePriceId).setQuantity(1).build()
+
+      val addChangeProduct = SubscriptionUpdateParams
+        .builder()
+        .addItem(stripePriceItem)
+        .build()
+
+      val updateParams = for {
+        (priceId, count) <- pets
+      } yield {
+        SubscriptionUpdateParams.Item.builder()
+          .setPrice(priceId)
+          .setQuantity(count)
+          .build()
+      }
+
+      (for {
+        subscription <- Stripe.Subscription.retrieve(subscriptionId).toList
+        _ = println(subscriptionId)
+          if !subscription.status.contains("incomplete_expired")
+        updatedSubscription <- subscription.update(addChangeProduct).toList
+        items <- updatedSubscription.items.toList
+      } yield {
+        val (currentItems, changeItem) = items.data.partition { item =>
+          item.underlying.getPrice.getId != stripePriceId
+        }
+
+        currentItems.map(_.underlying.delete())
+
+        val updatedSubscription = subscription.update(
+          SubscriptionUpdateParams.builder()
+            .addAllItem(updateParams.toList.asJava)
+            .build()
+        )
+
+        changeItem.map(_.underlying.delete())
+
+        updatedSubscription
+      }).flatten.headOption
+    }
 
     def updateFirstItem(
         subscription: Stripe.Subscription,
@@ -173,6 +223,38 @@ object StripeFacade {
         )
 
       maybeTaxRate or createTaxRate
+    }
+  }
+
+  object Product {
+    def create(name: String): Box[StripeBoxAdapter.Product] ={
+      Stripe.Product.create(
+        ProductCreateParams.builder()
+          .setName(name)
+          .build
+      )
+    }
+  }
+
+  object Price {
+    def create(
+      productId: String,
+      cost: Long,
+      name: String
+    ): Box[StripeBoxAdapter.Price] = {
+      val recurringDetails = PriceCreateParams.Recurring.builder()
+        .setInterval(PriceCreateParams.Recurring.Interval.MONTH)
+        .build
+
+      Stripe.Price.create(
+        PriceCreateParams.builder()
+          .setProduct(productId)
+          .setCurrency("usd")
+          .setUnitAmount(cost)
+          .setRecurring(recurringDetails)
+          .setNickname(name)
+          .build
+      )
     }
   }
 

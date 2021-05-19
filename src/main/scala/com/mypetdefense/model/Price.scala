@@ -15,9 +15,9 @@ class Price extends LongKeyedMapper[Price] with IdPK with OneToMany[Long, Price]
   object price      extends MappedDouble(this)
   object code       extends MappedString(this, 100)
   object fleaTick   extends MappedLongForeignKey(this, FleaTick)
-
   object active     extends MappedBoolean(this)
-  object stripeName extends MappedString(this, 200)
+  object stripePriceId   extends MappedString(this, 200)
+  object stripeProductId extends MappedString(this, 200)
   object petSize extends MappedEnum(this, AnimalSize)
   object boxType extends MappedEnum(this, BoxType)
   object createdAt extends MappedDateTime(this) {
@@ -31,23 +31,43 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
   final val currentPetland6MonthPaymentCode =
     Props.get("petland.6month.payment").openOr(defaultPriceCode)
   final val currentPetlandMonthlyCode = Props.get("petland.1month.payment").openOr(defaultPriceCode)
+  final val fiveDollarBox = Props.get("five.dollar.price.code").openOr("")
+
+  def getFiveDollarPriceCode(animalSize: AnimalSize.Value) = {
+    Price.find(
+      By(Price.petSize, animalSize),
+      By(Price.code, fiveDollarBox)
+    )
+  }
+
+  def getChangeProduct() = Price.find(By(Price.code, "change"))
+
+  def getStripeProductId(petSize: AnimalSize.Value, boxType: BoxType.Value): Box[String] =
+    Price.find(
+      By(Price.petSize, petSize),
+      By(Price.active, true),
+      By(Price.boxType, boxType)
+    )
+      .map(_.stripeProductId.get)
 
   def createPrice(
-      priceId: Long = generateLongId,
       price: Double,
       code: String,
-      fleaTick: Box[FleaTick],
-      stripeName: String,
+      fleaTick: FleaTick,
+      stripePriceId: String = "",
       boxType: Box[BoxType.Value]
   ): Price = {
+    val stripeProductId = boxType.flatMap(getStripeProductId(fleaTick.size.get, _)).openOr("")
+
     Price.create
-      .priceId(priceId)
+      .priceId(generateLongId)
       .price(price)
       .code(code)
       .fleaTick(fleaTick)
+      .stripePriceId(stripePriceId)
+      .stripeProductId(stripeProductId)
       .active(true)
-      .stripeName(stripeName)
-      .petSize(fleaTick.map(_.size.get).openOrThrowException("Couldn't find pet size"))
+      .petSize(fleaTick.size.get)
       .boxType(boxType.openOrThrowException("Couldn't find box type"))
       .saveMe
   }
@@ -59,7 +79,7 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
                        active: Boolean = true
                      ): Box[Price] = {
     Price.find(
-      By(Price.fleaTick, fleaTick),
+      By(Price.petSize, fleaTick.size.get),
       By(Price.code, code),
       By(Price.active, active),
       By(Price.boxType, boxType)
@@ -80,9 +100,9 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
     )
   }
 
-  def getDefaultProductPrice(fleaTick: FleaTick, active: Boolean = true): Box[Price] = {
+  def getDefaultProductPrice(size: AnimalSize.Value, active: Boolean = true): Box[Price] = {
     Price.find(
-      By(Price.fleaTick, fleaTick),
+      By(Price.petSize, size),
       By(Price.code, Price.defaultPriceCode),
       By(Price.active, active)
     )

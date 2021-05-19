@@ -2,7 +2,9 @@ package com.mypetdefense.util
 
 import com.mypetdefense.model.Agency.getHQFor
 import com.mypetdefense.model._
+import com.mypetdefense.service.ParentService.updateStripeSubscriptionTotal
 import com.mypetdefense.service._
+import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.Box.tryo
 import net.liftweb.common._
 import net.liftweb.mapper._
@@ -200,8 +202,7 @@ object DataLoader extends Loggable {
         Price.createPrice(
           price = tppPrice,
           code = code,
-          fleaTick = Full(fleaTick),
-          stripeName = "",
+          fleaTick = fleaTick,
           boxType = Full(BoxType.basic)
         )
       }
@@ -213,8 +214,7 @@ object DataLoader extends Loggable {
         Price.createPrice(
           price = smallHwBox,
           code = code,
-          fleaTick = Full(fleaTick),
-          stripeName = "",
+          fleaTick = fleaTick,
           boxType = Full(BoxType.healthAndWellness)
         )
       }
@@ -226,8 +226,7 @@ object DataLoader extends Loggable {
         Price.createPrice(
           price = mdXLHwBox,
           code = code,
-          fleaTick = Full(fleaTick),
-          stripeName = "",
+          fleaTick = fleaTick,
           boxType = Full(BoxType.healthAndWellness)
         )
       }
@@ -855,6 +854,88 @@ object DataLoader extends Loggable {
           SubscriptionItem.createSubscriptionItem(largeDental, box)
       else if (items.size == 1)
         items.map(_.delete_!)
+    }
+  }
+
+  def createStripeProductsPrices = {
+    val upgradedBoxes = Price.findAll(
+      NullRef(Price.stripePriceId),
+      By(Price.boxType, BoxType.healthAndWellness)
+    )
+
+    val basicBoxes = Price.findAll(
+      NullRef(Price.stripePriceId),
+      By(Price.boxType, BoxType.basic)
+    ).partition(price => Pet.catSizes.contains(price.petSize.get))
+
+    val (basicCatBoxes, basicDogBoxes) = (basicBoxes._1, basicBoxes._2)
+
+    val groupedDogUpgraded = upgradedBoxes.groupBy(_.fleaTick.obj.map(_.sizeName.get))
+    val groupedDogBasic = basicDogBoxes.groupBy(_.fleaTick.obj.map(_.sizeName.get))
+
+    for {
+      stripeProduct <- StripeFacade.Product.create("Cat Flea & Tick").toList
+      (code, codeGroupedPrices) <- basicCatBoxes.groupBy(_.code.get)
+      sampleCodePrice <- codeGroupedPrices.headOption
+      cost = (sampleCodePrice.price.get * 100).toLong
+      stripePrice <- StripeFacade.Price.create(stripeProduct.id, cost, code)
+    } yield {
+      codeGroupedPrices.map(_.stripePriceId(stripePrice.id).stripeProductId(stripeProduct.id).saveMe())
+    }
+
+    val dogFTOnly = StripeFacade.Product.create("Dog Flea and Tick")
+    val dogHW = StripeFacade.Product.create("Dog Health and Wellness")
+
+    val dogBasicWithStripeProduct = Map((dogFTOnly, groupedDogBasic))
+    val dogUpgradedWithStripeProduct = Map((dogHW, groupedDogUpgraded))
+
+
+    for {
+      group <- List(dogUpgradedWithStripeProduct, dogBasicWithStripeProduct)
+      (possibleStripeProduct, sizedGroups) <- group
+      (possibleSize, prices) <- sizedGroups
+      size <- possibleSize.toList
+      stripeProduct <- possibleStripeProduct.toList
+      (code, codeGroupedPrices) <- prices.groupBy(_.code.get)
+      sampleCodePrice <- codeGroupedPrices
+      cost = (sampleCodePrice.price.get * 100).toLong
+      stripePrice <- StripeFacade.Price.create(stripeProduct.id, cost, s"$size-$code")
+    } yield {
+      codeGroupedPrices.map(_.stripePriceId(stripePrice.id).stripeProductId(stripeProduct.id).saveMe())
+    }
+  }
+
+  def migrateToStripeProducts =
+    User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
+      .foreach(updateStripeSubscriptionTotal)
+
+  def createFiveDollarPrices = {
+    if (Price.findAll(By(Price.code, Price.fiveDollarBox)).isEmpty) {
+      FleaTick.findAll().filter { ft =>
+        ft.isZoGuard_? && ft.animalType.get == AnimalType.Dog
+      }.foreach { fleaTick =>
+        val newPrice = Price.createPrice(5D, Price.fiveDollarBox, fleaTick, "", Full(BoxType.healthAndWellness))
+        val cost = (5 * 100).toLong
+
+        val stripePrice = StripeFacade.Price.create(newPrice.stripeProductId.get, cost, s"${fleaTick.sizeName.get}-${Price.fiveDollarBox}")
+        stripePrice.map(p => newPrice.stripePriceId(p.id).saveMe())
+      }
+    }
+  }
+
+  def createChangeProduct = {
+    if (Price.getChangeProduct().isEmpty) {
+      val changeProduct = StripeFacade.Product.create("Change")
+      val changePrice = StripeFacade.Price.create(changeProduct.map(_.id).openOr(""), 0, "change")
+
+      Price.create
+        .priceId(generateLongId)
+        .price(0)
+        .code("change")
+        .stripePriceId(changePrice.map(_.id).openOr(""))
+        .stripeProductId(changeProduct.map(_.id).openOr(""))
+        .active(true)
+        .saveMe
     }
   }
 }
