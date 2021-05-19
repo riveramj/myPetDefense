@@ -871,10 +871,10 @@ object DataLoader extends Loggable {
     val (basicCatBoxes, basicDogBoxes) = (basicBoxes._1, basicBoxes._2)
 
     val groupedDogUpgraded = upgradedBoxes.groupBy(_.fleaTick.obj.map(_.sizeName.get))
-    val groupedDogBasic= basicDogBoxes.groupBy(_.fleaTick.obj.map(_.sizeName.get))
+    val groupedDogBasic = basicDogBoxes.groupBy(_.fleaTick.obj.map(_.sizeName.get))
 
     for {
-      stripeProduct <- StripeFacade.Product.create("Cat Flea & Tick Only All Sizes").toList
+      stripeProduct <- StripeFacade.Product.create("Cat Flea & Tick").toList
       (code, codeGroupedPrices) <- basicCatBoxes.groupBy(_.code.get)
       sampleCodePrice <- codeGroupedPrices.headOption
       cost = (sampleCodePrice.price.get * 100).toLong
@@ -883,18 +883,23 @@ object DataLoader extends Loggable {
       codeGroupedPrices.map(_.stripePriceId(stripePrice.id).stripeProductId(stripeProduct.id).saveMe())
     }
 
+    val dogFTOnly = StripeFacade.Product.create("Dog Flea and Tick")
+    val dogHW = StripeFacade.Product.create("Dog Health and Wellness")
+
+    val dogBasicWithStripeProduct = Map((dogFTOnly, groupedDogBasic))
+    val dogUpgradedWithStripeProduct = Map((dogHW, groupedDogUpgraded))
+
+
     for {
-      group <- List(groupedDogUpgraded, groupedDogBasic)
-      (possibleSizeName, prices) <- group
-      sizeName <- possibleSizeName.toList
-      samplePrice <- prices.headOption.toList
-      fleaTick <- samplePrice.fleaTick.obj.toList
-      productName = s"${fleaTick.animalType.get} ${samplePrice.boxType.get.toString} ${sizeName}"
-      stripeProduct <- StripeFacade.Product.create(productName).toList
+      group <- List(dogUpgradedWithStripeProduct, dogBasicWithStripeProduct)
+      (possibleStripeProduct, sizedGroups) <- group
+      (possibleSize, prices) <- sizedGroups
+      size <- possibleSize.toList
+      stripeProduct <- possibleStripeProduct.toList
       (code, codeGroupedPrices) <- prices.groupBy(_.code.get)
       sampleCodePrice <- codeGroupedPrices
       cost = (sampleCodePrice.price.get * 100).toLong
-      stripePrice <- StripeFacade.Price.create(stripeProduct.id, cost, code)
+      stripePrice <- StripeFacade.Price.create(stripeProduct.id, cost, s"$size-$code")
     } yield {
       codeGroupedPrices.map(_.stripePriceId(stripePrice.id).stripeProductId(stripeProduct.id).saveMe())
     }
@@ -912,7 +917,7 @@ object DataLoader extends Loggable {
         val newPrice = Price.createPrice(5D, Price.fiveDollarBox, fleaTick, "", Full(BoxType.healthAndWellness))
         val cost = (5 * 100).toLong
 
-        val stripePrice = StripeFacade.Price.create(newPrice.stripeProductId.get, cost, Price.fiveDollarBox)
+        val stripePrice = StripeFacade.Price.create(newPrice.stripeProductId.get, cost, s"${fleaTick.sizeName.get}-${Price.fiveDollarBox}")
         stripePrice.map(p => newPrice.stripePriceId(p.id).saveMe())
       }
     }
