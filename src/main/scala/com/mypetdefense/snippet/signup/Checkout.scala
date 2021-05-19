@@ -3,6 +3,7 @@ package com.mypetdefense.snippet.signup
 import com.mypetdefense.model._
 import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerSignedUp}
 import com.mypetdefense.service.PetFlowChoices._
+import com.mypetdefense.service.StripeFacade.Customer
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
@@ -62,17 +63,16 @@ class Checkout extends Loggable {
       code
   }
 
-  val pets: mutable.LinkedHashMap[Long, PendingPet] = completedPets.is
+  val pets: Map[Long,PendingPet] = completedPets.is.toMap
   val petCount: Int = pets.size
+
+  val petPrices: List[Price] = pets.map(_._2.pet.size.get).flatMap(Price.getDefaultProductPrice(_)).toList
+  val subtotal: BigDecimal = petPrices.map(_.price.get).sum
 
   val smallDogCount: Int = pets.values.map(_.pet).count(_.size.get == AnimalSize.DogSmallZo)
   val nonSmallDogCount: Int = petCount - smallDogCount
 
-  val subtotal: BigDecimal = (smallDogCount * BigDecimal(24.99)) + (nonSmallDogCount * BigDecimal(27.99))
-
   var promotionAmount: BigDecimal = findPromotionAmount()
-
-  val pennyCount: Int = (subtotal * 100).toInt
 
   private def handleStripeFailureOnSignUp(
       stripeFailure: Box[StripeFacade.CustomerWithSubscriptions]
@@ -82,7 +82,6 @@ class Checkout extends Loggable {
   }
 
   private def updateSessionVars() = {
-
     PetFlowChoices.petCount(Full(petCount))
     PetFlowChoices.completedPets(mutable.LinkedHashMap.empty)
     PetFlowChoices.monthlyTotal(Full(monthlyTotal))
@@ -168,39 +167,38 @@ class Checkout extends Loggable {
   }
 
   private def tryToCreateUser = {
-    val promoPennyCount = {
-      if (List("20off", "80off").contains(couponCode)) {
-        if (nonSmallDogCount >= 3)
-          (smallDogCount * 2499) + ((nonSmallDogCount - 3) * 2799) + 1500
-        else if ((smallDogCount + nonSmallDogCount) >= 3)
-          ((smallDogCount - (3 - nonSmallDogCount)) * 2499) + 1500
-        else (smallDogCount + nonSmallDogCount) * 500
+    val fiveDollarPromo = List("20off", "80off").contains(couponCode)
+    val subscriptionItems = petPrices.groupBy(_.stripePriceId.get).map { case (stripePriceId, prices) =>
+      if (fiveDollarPromo) {
+        val samplePriceSize = prices.headOption.map(_.petSize.get)
+        val fiveDollarPriceId = samplePriceSize
+          .flatMap(Price.getFiveDollarPriceCode)
+          .map(_.stripePriceId.get)
+          .getOrElse("")
+
+        StripeFacade.Subscription.Item(fiveDollarPriceId, prices.size)
       } else
-        pennyCount
+        StripeFacade.Subscription.Item(stripePriceId, prices.size)
     }
 
-    val promoPennyCoupon = {
-      if (List("20off", "80off").contains(couponCode))
-        Empty
-      else
-        coupon
-    }
+    val promoCoupon = if (fiveDollarPromo) Empty else coupon
 
-    val stripeCustomer =
-      StripeFacade.Customer.createWithSubscription(
+    val stripeCustomer = {
+      Customer.createWithSubscription(
         email,
         stripeToken,
-        priceId = "pennyProduct",
-        promoPennyCount,
         taxRate,
-        promoPennyCoupon
+        promoCoupon,
+        subscriptionItems.toList
       )
+    }
 
     stripeCustomer match {
       case Full(customer) => setupNewUserAndRedirect(customer)
       case stripeFailure  => handleStripeFailureOnSignUp(stripeFailure)
     }
   }
+
 
   private def validateFields: (List[MyPetDefenseEvent], Boolean) = {
     val passwordError = checkEmpty(password, "#password")
