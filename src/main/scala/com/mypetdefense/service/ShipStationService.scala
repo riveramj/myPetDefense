@@ -230,6 +230,20 @@ trait ShipStationServiceTrait extends Loggable {
 
     val serviceCode = findServiceCode(normalizedWeight.toDouble)
 
+    println("order ==")
+    println(s"${refreshedShipment.shipmentId.get}")
+    println(dateFormat.format(new Date()))
+    println("awaiting_shipment")
+    println(billShipTo)
+    println(billShipTo)
+    println(Some(shipStationItems.sortBy(_.lineItemKey)))
+    println(Some(Weight(normalizedWeight.toDouble, "ounces")))
+    println(Some("stamps_com"))
+    println(Some(serviceCode))
+    println(Some("package"))
+    println(Some(user.email.get))
+    println("order == ")
+
     Order.create(
       orderNumber = s"${refreshedShipment.shipmentId.get}",
       orderDate = dateFormat.format(new Date()),
