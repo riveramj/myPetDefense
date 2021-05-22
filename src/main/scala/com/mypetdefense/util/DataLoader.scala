@@ -927,7 +927,7 @@ object DataLoader extends Loggable {
   def createChangeProduct = {
     if (Price.getChangeProduct().isEmpty) {
       val changeProduct = StripeFacade.Product.create("Change")
-      val changePrice = StripeFacade.Price.create(changeProduct.map(_.id).openOr(""), 0, "change")
+      val changePrice = StripeFacade.Price.create(changeProduct.map(_.id).openOr(""), 1, "change")
 
       Price.create
         .priceId(generateLongId)
