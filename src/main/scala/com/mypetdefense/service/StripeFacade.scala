@@ -145,6 +145,7 @@ object StripeFacade {
       val addChangeProduct = SubscriptionUpdateParams
         .builder()
         .addItem(stripePriceItem)
+        .setProrationBehavior(SubscriptionUpdateParams.ProrationBehavior.NONE)
         .build()
 
       val updateParams = for {
