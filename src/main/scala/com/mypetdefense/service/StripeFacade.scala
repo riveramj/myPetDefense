@@ -5,11 +5,11 @@ import com.mypetdefense.service.{StripeBoxAdapter => Stripe}
 import com.mypetdefense.util.StripeHelper._
 import com.stripe.param.SubscriptionUpdateParams.ProrationBehavior
 import com.stripe.param._
-import net.liftweb.common.{Box, Empty}
+import net.liftweb.common.{Box, Empty, Loggable}
 
 import scala.collection.JavaConverters._
 
-object StripeFacade {
+object StripeFacade extends Loggable {
 
   final case class CustomerWithSources(value: Stripe.Customer)       extends AnyVal
   final case class CustomerWithSubscriptions(value: Stripe.Customer) extends AnyVal
@@ -159,7 +159,7 @@ object StripeFacade {
 
       (for {
         subscription <- Stripe.Subscription.retrieve(subscriptionId).toList
-        _ = println(subscriptionId)
+        _ = logger.info(s"updating: $subscriptionId")
           if !subscription.status.contains("incomplete_expired")
         updatedSubscription <- subscription.update(addChangeProduct).toList
         items <- updatedSubscription.items.toList
