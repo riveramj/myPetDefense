@@ -167,7 +167,13 @@ object StripeFacade {
           item.underlying.getPrice.getId != stripePriceId
         }
 
-        currentItems.map(_.underlying.delete())
+        currentItems.map { item =>
+          val updateItems = SubscriptionItemDeleteParams.builder()
+            .setProrationBehavior(SubscriptionItemDeleteParams.ProrationBehavior.NONE)
+            .build()
+
+          item.underlying.delete(updateItems)
+        }
 
         val updatedSubscription = subscription.update(
           SubscriptionUpdateParams.builder()
