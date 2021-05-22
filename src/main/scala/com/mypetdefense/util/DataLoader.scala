@@ -907,7 +907,7 @@ object DataLoader extends Loggable {
   }
 
   def migrateToStripeProducts =
-    User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
+    User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active)).take(10)
       .foreach(updateStripeSubscriptionTotal)
 
   def createFiveDollarPrices = {
