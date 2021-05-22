@@ -930,7 +930,7 @@ object DataLoader extends Loggable {
 
       Price.create
         .priceId(generateLongId)
-        .price(0)
+        .price(1)
         .code("change")
         .stripePriceId(changePrice.map(_.id).openOr(""))
         .stripeProductId(changeProduct.map(_.id).openOr(""))
