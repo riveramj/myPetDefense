@@ -181,7 +181,7 @@ class PetsAndProducts extends Loggable {
   ) = {
     SubscriptionService.saveNewPetProducts(updatedFleaTick, subscriptionBox, supplements)
 
-    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal)
+    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal(_))
 
     updatedSubscription match {
       case Full(_) =>

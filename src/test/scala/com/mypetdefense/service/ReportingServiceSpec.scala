@@ -63,7 +63,7 @@ class ReportingServiceSpec extends DBTest {
       }
     }
     CalculationHelper
-      .calculateOccurrences[String, String](agenciesNames, identity)
+      .countOccurrences(agenciesNames)
       .map(CountedByAgency.tupled)
   }
 
@@ -71,17 +71,14 @@ class ReportingServiceSpec extends DBTest {
       input: List[InsertedPetsUserSubAndShipment]
   ): Iterable[CancelledUpgradedSubscriptionsByCount] =
     CalculationHelper
-      .calculateOccurrences[Int, InsertedPetsUserSubAndShipment](input, _.shipments.size)
+      .countOccurrencesByKey(input)(_.shipments.size)
       .map(CancelledUpgradedSubscriptionsByCount.tupled)
 
   private def calculateOccurrencesPetsByCount(
       input: List[InsertedPetsUserSubAndShipment]
   ): Iterable[CancelledUpgradedSubscriptionsByCount] =
     CalculationHelper
-      .calculateOccurrences[Int, Int](
-        input.map(_.pets.size),
-        identity
-      )
+      .countOccurrences(input.map(_.pets.size))
       .map(CancelledUpgradedSubscriptionsByCount.tupled)
 
   private def calculateOccurrencesPetsByProduct(
@@ -89,7 +86,7 @@ class ReportingServiceSpec extends DBTest {
   ): Iterable[PetsByProduct] = {
     val fleaTick = input.flatMap(_.subscription.subscriptionBoxes).flatMap(_.fleaTick.toList)
     CalculationHelper
-      .calculateOccurrences[String, FleaTick](fleaTick, _.getNameAndSize)
+      .countOccurrencesByKey(fleaTick)(_.getNameAndSize)
       .map(PetsByProduct.tupled)
   }
 
