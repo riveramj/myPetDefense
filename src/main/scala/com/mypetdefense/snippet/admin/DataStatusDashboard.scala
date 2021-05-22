@@ -1,6 +1,5 @@
 package com.mypetdefense.snippet.admin
 
-
 import com.mypetdefense.model._
 import net.liftweb.common._
 import net.liftweb.mapper._

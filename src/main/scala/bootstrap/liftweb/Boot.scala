@@ -1,7 +1,6 @@
 package bootstrap.liftweb
 
-import java.util.{Locale, TimeZone}
-
+import com.mypetdefense.actor.{BootJobActor, MigrateStripeProducts}
 import com.mypetdefense.jobs.JobManager
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
@@ -10,6 +9,8 @@ import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.mapper._
 import net.liftweb.util.Props
+
+import java.util.{Locale, TimeZone}
 
 /**
   * A class that's instantiated early and run.  It allows the application
@@ -59,7 +60,6 @@ class Boot {
     //DataLoader.migrateTo30DaySupply()
     //DataLoader.createMissingProbiotic
     //DataLoader.dentalProductCleanup
-
     //DataLoader.createCancelledSubForUser
 
     // where to search snippet
@@ -87,6 +87,8 @@ class Boot {
 
     LiftRules.statelessDispatch.append(StripeHook)
     LiftRules.statelessDispatch.append(TPPApi)
+
+    BootJobActor ! MigrateStripeProducts
   }
 
   //Bundles

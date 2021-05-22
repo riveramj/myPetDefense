@@ -566,7 +566,7 @@ class Parents extends Loggable {
 
       SubscriptionService.saveNewPetProducts(updatedFleaTick, subscriptionBox, supplements)
 
-      val updatedSubscription = parent.map(ParentService.updateStripeSubscriptionTotal)
+      val updatedSubscription = parent.map(ParentService.updateStripeSubscriptionTotal(_))
 
       updatedSubscription match {
         case Full(_) =>

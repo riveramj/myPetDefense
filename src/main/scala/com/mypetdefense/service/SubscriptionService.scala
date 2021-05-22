@@ -7,7 +7,6 @@ import com.mypetdefense.util.SecurityContext
 import net.liftweb.common.Box
 import net.liftweb.http.js.JsCmds.Alert
 import net.liftweb.mapper.By
-import net.liftweb.util.Helpers.tryo
 import net.liftweb.util.Props
 
 import java.time.Month
@@ -45,10 +44,7 @@ object SubscriptionService {
 
     val cost = updatedBoxes.map(SubscriptionBox.findBoxPrice).sum
 
-    updateStripeSubscriptionQuantity(
-      updatedSubscription.map(_.stripeSubscriptionId.get).openOr(""),
-      tryo((cost * 100).toInt).openOr(0)
-    )
+    updateStripeSubscriptionQuantity(updatedSubscription)
 
     if (Props.mode == Props.RunModes.Production) {
       EmailActor ! UpgradeSubscriptionEmail(SecurityContext.currentUser, updatedBoxes.size)
@@ -105,10 +101,10 @@ object SubscriptionService {
   }
 
   def saveNewPetProducts(
-                          fleaTick: Box[FleaTick],
-                          subscriptionBox: Box[SubscriptionBox],
-                          supplements: List[Product]
-                        ) = {
+    fleaTick: Box[FleaTick],
+    subscriptionBox: Box[SubscriptionBox],
+    supplements: List[Product]
+  ) = {
     for {
       fleaTick <- fleaTick.toList
       box      <- subscriptionBox.toList
