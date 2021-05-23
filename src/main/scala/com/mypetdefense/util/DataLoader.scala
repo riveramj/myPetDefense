@@ -906,6 +906,15 @@ object DataLoader extends Loggable {
     }
   }
 
+  def addPetSizeToPrice = {
+    for {
+      price <- Price.findAll(NullRef(Price.petSize))
+      fleaTick <- price.fleaTick.obj
+    } yield {
+      price.petSize(fleaTick.size.get).saveMe()
+    }
+  }
+
   def migrateToStripeProducts =
     User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
       .foreach(updateStripeSubscriptionTotal)
