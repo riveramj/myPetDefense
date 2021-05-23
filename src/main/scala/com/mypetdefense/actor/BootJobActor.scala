@@ -8,7 +8,7 @@ case object MigrateStripeProducts extends BootJobMessage
 trait MigrateStripeHandling extends HandlerChain {
   addHandler {
     case MigrateStripeProducts =>
-      //DataLoader.createStripeProductsPrices
+      DataLoader.createStripeProductsPrices
       //DataLoader.createFiveDollarPrices
       //DataLoader.createChangeProduct
       DataLoader.addPetSizeToPrice
