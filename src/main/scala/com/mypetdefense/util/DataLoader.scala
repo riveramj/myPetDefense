@@ -911,7 +911,7 @@ object DataLoader extends Loggable {
       price <- Price.findAll(NullRef(Price.petSize))
       fleaTick <- price.fleaTick.obj
     } yield {
-      price.petSize(fleaTick.size.get).saveMe()
+      price.petSize(AnimalSize.DogXLargeShld).petSize(fleaTick.size.get).saveMe()
     }
   }
 
