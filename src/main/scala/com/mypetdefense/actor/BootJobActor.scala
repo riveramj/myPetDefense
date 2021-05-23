@@ -11,6 +11,7 @@ trait MigrateStripeHandling extends HandlerChain {
       //DataLoader.createStripeProductsPrices
       //DataLoader.createFiveDollarPrices
       //DataLoader.createChangeProduct
+      DataLoader.addPetSizeToPrice
       DataLoader.migrateToStripeProducts
   }
 }
