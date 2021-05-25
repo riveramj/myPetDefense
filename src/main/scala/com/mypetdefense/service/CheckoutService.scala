@@ -16,7 +16,7 @@ object CheckoutService {
       usr <- user.toList
       pet <- pets
     } yield {
-      PendingPet(Pet.createNewPet(pet.pet, usr), pet.thirtyDaySupplement)
+      PendingPet(Pet.createNewPet(pet.pet, usr), pet.boxType, pet.thirtyDaySupplement)
     }
   }
 
@@ -105,10 +105,10 @@ object CheckoutService {
   }
 
   private def createNewBox(mpdSubscription: Subscription, pet: PendingPet) = {
-    val box = SubscriptionBox.createNewBox(mpdSubscription, pet.pet, true, true)
+    val box = SubscriptionBox.createNewBox(mpdSubscription, pet.pet, pet.boxType)
     val updatedPet = pet.pet.box(box).saveMe()
 
-    PendingPet(updatedPet, pet.thirtyDaySupplement, Full(box))
+    PendingPet(updatedPet, pet.boxType, pet.thirtyDaySupplement, Full(box))
   }
 
   def newUserSetup(

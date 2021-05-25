@@ -303,16 +303,15 @@ object ParentService extends LoggableBoxLogging {
   }
 
   def addNewPet(
-                 oldUser: User,
-                 name: String,
-                 animalType: AnimalType.Value,
-                 size: AnimalSize.Value,
-                 product: FleaTick,
-                 isUpgraded: Boolean,
-                 actionLog: Either[CustomerAddedPet,SupportAddedPet],
-                 breed: String = "",
-                 birthday: String = "",
-                 chosenMonthlySupplement: Box[Product] = Empty
+    oldUser: User,
+    name: String,
+    animalType: AnimalType.Value,
+    size: AnimalSize.Value,
+    actionLog: Either[CustomerAddedPet,SupportAddedPet],
+    breed: String = "",
+    birthday: String = "",
+    chosenMonthlySupplement: Box[Product] = Empty,
+    boxType: BoxType.Value
   ): Box[Pet] = {
 
     val possibleBirthday = parseWhelpDate(birthday)
@@ -333,12 +332,12 @@ object ParentService extends LoggableBoxLogging {
     }
 
     val updatedPet = oldUser.subscription.obj.map { subscription =>
-      val box = SubscriptionBox.createNewBox(subscription, newPet, isUpgraded, chosenMonthlySupplement.isDefined)
+      val box = SubscriptionBox.createNewBox(subscription, newPet, boxType)
 
       if (newPet.animalType.get == AnimalType.Dog && chosenMonthlySupplement.isEmpty)
         SubscriptionItem.createFirstBox(box, false)
       else if (newPet.animalType.get == AnimalType.Dog && chosenMonthlySupplement.isDefined)
-        SubscriptionItem.createNewBox(PendingPet(newPet, chosenMonthlySupplement, Full(box)))
+        SubscriptionItem.createNewBox(PendingPet(newPet, boxType, chosenMonthlySupplement, Full(box)))
 
       newPet.box(box).saveMe()
     }

@@ -42,6 +42,7 @@ class Parents extends Loggable {
 
   var petType: Box[AnimalType.Value] = Empty
   var chosenProduct: Box[FleaTick]   = Empty
+  var chosenBoxType: Box[BoxType.Value]   = Empty
   var petName                        = ""
   var petBreed                       = ""
   var petBirthday                    = ""
@@ -192,6 +193,7 @@ class Parents extends Loggable {
       (for {
         pet     <- petType
         product <- chosenProduct
+        boxType <- chosenBoxType
         parent  <- possibleParent
         size = product.size.get
       } yield {
@@ -207,12 +209,11 @@ class Parents extends Loggable {
           name = petName,
           animalType = pet,
           size = size,
-          product = product,
-          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
           breed = petBreed,
           birthday = petBirthday,
           actionLog = Right(actionReport),
-          chosenMonthlySupplement = chosenNewPetSupplement
+          chosenMonthlySupplement = chosenNewPetSupplement,
+          boxType = boxType
         )
       }).flatMap(identity) match {
         case Full(pet) =>

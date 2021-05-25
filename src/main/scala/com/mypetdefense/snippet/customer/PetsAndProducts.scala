@@ -51,6 +51,7 @@ class PetsAndProducts extends Loggable {
 
   var newPetType: Box[AnimalType.Value]  = Empty
   var newPetChosenProduct: Box[FleaTick] = Empty
+  var newPetBoxType: Box[BoxType.Value] = Empty
   var newPetName                         = ""
 
   var petProductsRender: Box[IdMemoizeTransform] = Empty
@@ -114,6 +115,7 @@ class PetsAndProducts extends Loggable {
         parent  <- user
         pet     <- newPetType
         product <- newPetChosenProduct
+        boxType <- newPetBoxType
         size = product.size.get
       } yield {
         val actionLog = CustomerAddedPet(
@@ -128,10 +130,9 @@ class PetsAndProducts extends Loggable {
           name = newPetName,
           animalType = pet,
           size = size,
-          product = product,
-          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
           actionLog = Left(actionLog),
-          chosenMonthlySupplement = chosenNewPetSupplement
+          chosenMonthlySupplement = chosenNewPetSupplement,
+          boxType = boxType
         )
       }).flatMap(identity) match {
         case Full(pet) =>

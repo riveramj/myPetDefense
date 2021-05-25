@@ -79,6 +79,7 @@ class DogDetails extends Loggable {
       for {
         newPetId   <- PetFlowChoices.petId.is
         animalType <- PetFlowChoices.petChoice.is
+        boxType <- PetFlowChoices.petBoxType.is
       } yield {
         val birthday = yearMonthFormatter.parse(s"$petMonth-$petYear")
 
@@ -89,7 +90,7 @@ class DogDetails extends Loggable {
           .birthday(birthday)
           .size(petSize.openOr(null))
 
-        currentPets(newPetId) = PendingPet(newPet, chosenSupplement)
+        currentPets(newPetId) = PendingPet(newPet, boxType, chosenSupplement)
         completedPets(currentPets)
       }
 
