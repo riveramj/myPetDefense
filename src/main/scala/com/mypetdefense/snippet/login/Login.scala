@@ -1,6 +1,8 @@
 package com.mypetdefense.snippet.login
 
 import com.mypetdefense.service._
+import com.mypetdefense.snippet.admin.Parents
+import com.mypetdefense.util.SecurityContext
 import net.liftweb.common._
 import net.liftweb.http._
 import net.liftweb.util.Helpers._
@@ -19,8 +21,12 @@ object Login extends Loggable {
     EarlyResponse(logout _)
 
   def logout(): Full[RedirectResponse] = {
-    S.session.foreach(_.destroySession())
-    Full(RedirectResponse(menu.loc.calcDefaultHref))
+    if(SecurityContext.logCurrentUserOut()){
+      S.session.foreach(_.destroySession())
+      Full(RedirectResponse(menu.loc.calcDefaultHref))
+    } else {
+      Full(RedirectResponse(Parents.menu.loc.calcDefaultHref))
+    }
   }
 }
 

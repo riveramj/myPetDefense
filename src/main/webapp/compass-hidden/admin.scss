@@ -105,6 +105,11 @@ input#create-item, input.create-item, button.create-item {
   color: #ffffff;
   font-size: em(16px);
   cursor: pointer;
+
+  &.processing {
+    cursor: not-allowed;
+    background-color: #cccccc;
+  }
 }
 
 thead {

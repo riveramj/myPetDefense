@@ -1,6 +1,5 @@
 package bootstrap.liftweb
 
-import com.mypetdefense.actor.{BootJobActor, MigrateStripeProducts}
 import com.mypetdefense.jobs.JobManager
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
@@ -88,7 +87,7 @@ class Boot {
     LiftRules.statelessDispatch.append(StripeHook)
     LiftRules.statelessDispatch.append(TPPApi)
 
-    BootJobActor ! MigrateStripeProducts
+    //BootJobActor ! MigrateStripeProducts
   }
 
   //Bundles

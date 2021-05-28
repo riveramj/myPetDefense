@@ -63,10 +63,13 @@ class Checkout extends Loggable {
       code
   }
 
-  val pets: Map[Long,PendingPet] = completedPets.is.toMap
+  val pets: Map[Long, PendingPet] = completedPets.is.toMap
   val petCount: Int = pets.size
 
-  val petPrices: List[Price] = pets.map(_._2.pet.size.get).flatMap(Price.getDefaultProductPrice(_)).toList
+  val petPrices: List[Price] = pets.flatMap { case (_, pendingPet) =>
+    Price.getDefaultProductPrice(pendingPet.pet.size.get, pendingPet.boxType)
+  }.toList
+
   val subtotal: BigDecimal = petPrices.map(_.price.get).sum
 
   val smallDogCount: Int = pets.values.map(_.pet).count(_.size.get == AnimalSize.DogSmallZo)
