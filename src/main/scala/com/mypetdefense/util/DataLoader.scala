@@ -392,19 +392,6 @@ object DataLoader extends Loggable {
     }
   }
 
-  def createBasicExistingBoxes: Any = {
-    if(SubscriptionBox.findAll().isEmpty) {
-      for {
-        user <- User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
-        subscription <- Subscription.find(By(Subscription.user, user)).toList
-        pet <- subscription.getPets
-      } yield {
-        val box = SubscriptionBox.createNewBox(subscription, pet)
-        pet.box(box).saveMe()
-        user.subscription(subscription).saveMe()
-      }
-    }
-  }
 
   def connectCancelledUsersToSubscription() {
     for {
@@ -533,32 +520,6 @@ object DataLoader extends Loggable {
     }
   }
 
-  def createMissingCatBoxes(): Unit = {
-    for {
-      cat <- Pet.findAll(By(Pet.animalType, AnimalType.Cat), NullRef(Pet.box))
-      user <- cat.user.obj.toList
-      subscription <- user.subscription.obj.toList
-      catFleaTick <- FleaTick.zoGuardCat.toList
-    } {
-      val updatedCat = cat.size(catFleaTick.size.get).saveMe
-      val box = SubscriptionBox.createNewBox(subscription, updatedCat, false)
-      updatedCat.box(box).saveMe()
-    }
-  }
-
-  def createMissingDogBoxes(): Unit =
-    for {
-      dog <- Pet.findAll(By(Pet.animalType, AnimalType.Dog), NullRef(Pet.box))
-      user <- dog.user.obj.toList
-      subscription <- user.subscription.obj.toList
-    } {
-      val box = SubscriptionBox.createNewBox(subscription, dog)
-      dog.box(box).saveMe()
-
-      if(subscription.isUpgraded.get) {
-        SubscriptionItem.createFirstBox(box)
-      }
-    }
 
   def cancellationDataSync(): Unit = {
     def cancelPets(pets: List[Pet]): Unit = {

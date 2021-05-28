@@ -114,6 +114,7 @@ object AnimalSize extends Enumeration {
 
 case class PendingPet(
   pet: Pet,
+  boxType: BoxType.Value,
   thirtyDaySupplement: Box[Product],
   subscriptionBox: Box[SubscriptionBox] = Empty
 )
