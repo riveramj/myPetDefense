@@ -99,7 +99,7 @@ class PetsAndProducts extends Loggable {
         chosenNewPetSupplement = possibleProduct
     )
 
-    "^" #> ClearNodesIf(newPetType != AnimalType.Dog && subscription.map(_.isUpgraded.get).openOr(false)) &
+    "^" #> ClearNodesIf(newPetType != AnimalType.Dog || !newPetBoxType.contains(BoxType.healthAndWellness)) &
     "#choose-supplement #new-pet-choose-supplement" #> firstSupplementDropDown
   }
 
@@ -201,9 +201,13 @@ class PetsAndProducts extends Loggable {
       updatedFleaTick: Box[FleaTick],
       supplements: List[Product]
   ) = {
+    println("updatedBoxType")
+    println(updatedBoxType)
+    println("updatedBoxType")
+
     SubscriptionService.saveNewPetProducts(updatedFleaTick, subscriptionBox, updatedBoxType, supplements)
 
-    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal(_))
+    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal)
 
     updatedSubscription match {
       case Full(_) =>

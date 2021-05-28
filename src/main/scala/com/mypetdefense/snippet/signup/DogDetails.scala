@@ -79,7 +79,7 @@ class DogDetails extends Loggable {
       for {
         newPetId   <- PetFlowChoices.petId.is
         animalType <- PetFlowChoices.petChoice.is
-        boxType <- PetFlowChoices.petBoxType.is
+        boxType    <- Full(BoxType.healthAndWellness)
       } yield {
         val birthday = yearMonthFormatter.parse(s"$petMonth-$petYear")
 

@@ -88,6 +88,11 @@ button.modal-action, input.modal-action {
 
   &.save {
     background-color: #45ADA9;
+
+    &.processing {
+      cursor: not-allowed;
+      background-color: #cccccc;
+    }
   }
 
   @media (min-width: $bp-medium) {

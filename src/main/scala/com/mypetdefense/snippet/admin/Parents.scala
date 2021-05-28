@@ -6,7 +6,8 @@ import com.mypetdefense.model._
 import com.mypetdefense.model.domain.action.SupportAction.{SupportAddedPet, SupportCanceledAccount, SupportRemovedPet}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.{ClearNodesIf, SecurityContext, SplitTitleCase}
+import com.mypetdefense.snippet.customer.AccountOverview
+import com.mypetdefense.util.{ClearNodesIf, Paths, SecurityContext, SplitTitleCase}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -470,6 +471,11 @@ class Parents extends Loggable {
       }
     }
 
+    def impersonateUser(user: Box[User]): JsCmd = {
+      SecurityContext.impersonate(user)
+      S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
+    }
+
     {
       if (isCancelled_?(parent)) {
         ".parent-information" #> ClearNodes &
@@ -515,10 +521,11 @@ class Parents extends Loggable {
         val currentEmail = parent.map(_.email.get).openOr("")
 
         ".reset-password [onclick]" #> SHtml.ajaxInvoke(() => sendResetPasswordEmail(parent)) &
-          ".change-email" #> {
-            ".parent-email" #> SHtml.ajaxText(currentEmail, email = _) &
-              ".update-email [onclick]" #> SHtml.ajaxInvoke(() => changeEmail(parent, email))
-          }
+        ".impersonate-user [onclick]" #> SHtml.ajaxInvoke(() => impersonateUser(parent)) &
+        ".change-email" #> {
+          ".parent-email" #> SHtml.ajaxText(currentEmail, email = _) &
+          ".update-email [onclick]" #> SHtml.ajaxInvoke(() => changeEmail(parent, email))
+        }
       } &
       ".parent-information .agent-name-container .agent *" #> agent
   }

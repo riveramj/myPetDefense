@@ -51,3 +51,10 @@ $(document).ready ->
         !target.hasClass('subtract-one') &&
         !target.hasClass('expand-row')
       target.parent('.item-entry').find('.expand-row').click()
+
+  $("body").on "click", '.create-item, .modal-action.save', (event) ->
+    $(event.target).prop('value', 'Please Wait').prop("disabled", true).addClass("processing")
+    $(event.target).submit()
+
+$(document).on "form-validation-error", (event) ->
+  $(".create-item").prop('value', 'Place Order').prop("disabled", false).removeClass("processing")

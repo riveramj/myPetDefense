@@ -100,10 +100,14 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
     )
   }
 
-  def getDefaultProductPrice(size: AnimalSize.Value, active: Boolean = true): Box[Price] = {
+  def getDefaultProductPrice(
+    size: AnimalSize.Value,
+    boxType: BoxType.Value,
+    active: Boolean = true): Box[Price] = {
     Price.find(
       By(Price.petSize, size),
       By(Price.code, Price.defaultPriceCode),
+      By(Price.boxType, boxType),
       By(Price.active, active)
     )
   }

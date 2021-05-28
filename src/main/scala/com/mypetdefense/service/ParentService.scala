@@ -42,14 +42,15 @@ object ParentService extends LoggableBoxLogging {
   def updateStripeSubscriptionQuantity(oldSubscription: Box[Subscription]): Box[Stripe.Subscription] = {
     val subscriptionId = oldSubscription.map(_.stripeSubscriptionId.get).openOr("")
     val pets: Map[String, Int] = (for {
-      subscription <- oldSubscription.toList
-      (petSize, pets) <- subscription.reload.getPets.groupBy(_.size.get)
+      subscription <- oldSubscription.map(_.reload).toList
+      allBoxes = subscription.subscriptionBoxes
+      (boxType, boxes) <- allBoxes.groupBy(_.boxType.get)
+      (rawPetSize, sizedBoxes) <- boxes.groupBy(_.pet.obj.map(_.size.get))
+      petSize <- rawPetSize
       priceCode = subscription.priceCode.get
-      isUpgraded = subscription.isUpgraded.get
-      boxType = if (isUpgraded) BoxType.healthAndWellness else BoxType.basic
       price <- Price.getPricesByCodeBySize(priceCode, petSize, boxType)
     } yield {
-      price.stripePriceId.get -> pets.size
+      price.stripePriceId.get -> sizedBoxes.size
     }).toMap
 
     if (pets.isEmpty) {
