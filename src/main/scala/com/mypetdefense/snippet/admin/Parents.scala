@@ -6,7 +6,8 @@ import com.mypetdefense.model._
 import com.mypetdefense.model.domain.action.SupportAction.{SupportAddedPet, SupportCanceledAccount, SupportRemovedPet}
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.{ClearNodesIf, SecurityContext, SplitTitleCase}
+import com.mypetdefense.snippet.customer.AccountOverview
+import com.mypetdefense.util.{ClearNodesIf, Paths, SecurityContext, SplitTitleCase}
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -42,6 +43,7 @@ class Parents extends Loggable {
 
   var petType: Box[AnimalType.Value] = Empty
   var chosenProduct: Box[FleaTick]   = Empty
+  var chosenBoxType: Box[BoxType.Value]   = Empty
   var petName                        = ""
   var petBreed                       = ""
   var petBirthday                    = ""
@@ -143,6 +145,24 @@ class Parents extends Loggable {
     ).toForm
   }
 
+  def boxTypeDropdown(renderer: IdMemoizeTransform): Elem = {
+    val boxTypes = petType.map { animal =>
+      if (animal == AnimalType.Dog)
+        BoxType.dogBoxTypes
+      else
+        BoxType.catBoxTypes
+    }.openOr(Nil)
+
+    SHtml.ajaxSelectObj(
+      (Empty, "Choose Box Type") +: boxTypes.map(box => (Full(box), box.toString)),
+      Full(chosenBoxType),
+      (possibleBoxType: Box[BoxType.Value]) => {
+        chosenBoxType = possibleBoxType
+        renderer.setHtml
+      }
+    )
+  }
+
   def productDropdown: Elem = {
     val products = petType.map { animal =>
       if (animal == AnimalType.Dog)
@@ -159,8 +179,6 @@ class Parents extends Loggable {
   }
 
   def supplementDropdown(parent: Box[User]) = {
-    val subscription = parent.flatMap(_.subscription.obj)
-
     val firstSupplementDropDown = SHtml.ajaxSelectObj(
       (Empty, "Choose Supplement") +: monthlyDogSupplements.map(product => (Full(product), product.nameAndQuantity)),
       Full(chosenNewPetSupplement),
@@ -168,7 +186,7 @@ class Parents extends Loggable {
         chosenNewPetSupplement = possibleProduct
     )
 
-    "^" #> ClearNodesIf(petType != AnimalType.Dog && subscription.map(_.isUpgraded.get).openOr(false)) &
+    "^" #> ClearNodesIf(petType != AnimalType.Dog || (!chosenBoxType.contains(BoxType.healthAndWellness))) &
       ".supplement-container .supplement-select" #> firstSupplementDropDown
   }
 
@@ -192,6 +210,7 @@ class Parents extends Loggable {
       (for {
         pet     <- petType
         product <- chosenProduct
+        boxType <- chosenBoxType
         parent  <- possibleParent
         size = product.size.get
       } yield {
@@ -207,12 +226,11 @@ class Parents extends Loggable {
           name = petName,
           animalType = pet,
           size = size,
-          product = product,
-          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
           breed = petBreed,
           birthday = petBirthday,
           actionLog = Right(actionReport),
-          chosenMonthlySupplement = chosenNewPetSupplement
+          chosenMonthlySupplement = chosenNewPetSupplement,
+          boxType = boxType
         )
       }).flatMap(identity) match {
         case Full(pet) =>
@@ -453,6 +471,11 @@ class Parents extends Loggable {
       }
     }
 
+    def impersonateUser(user: Box[User]): JsCmd = {
+      SecurityContext.impersonate(user)
+      S.redirectTo(AccountOverview.menu.loc.calcDefaultHref)
+    }
+
     {
       if (isCancelled_?(parent)) {
         ".parent-information" #> ClearNodes &
@@ -498,10 +521,11 @@ class Parents extends Loggable {
         val currentEmail = parent.map(_.email.get).openOr("")
 
         ".reset-password [onclick]" #> SHtml.ajaxInvoke(() => sendResetPasswordEmail(parent)) &
-          ".change-email" #> {
-            ".parent-email" #> SHtml.ajaxText(currentEmail, email = _) &
-              ".update-email [onclick]" #> SHtml.ajaxInvoke(() => changeEmail(parent, email))
-          }
+        ".impersonate-user [onclick]" #> SHtml.ajaxInvoke(() => impersonateUser(parent)) &
+        ".change-email" #> {
+          ".parent-email" #> SHtml.ajaxText(currentEmail, email = _) &
+          ".update-email [onclick]" #> SHtml.ajaxInvoke(() => changeEmail(parent, email))
+        }
       } &
       ".parent-information .agent-name-container .agent *" #> agent
   }
@@ -557,12 +581,13 @@ class Parents extends Loggable {
     }
 
     def savePet(
-                 subscriptionBox: Box[SubscriptionBox],
-                 updatedFleaTick: Box[FleaTick],
-                 supplements: List[Product]
-               ) = {
+      subscriptionBox: Box[SubscriptionBox],
+      updatedFleaTick: Box[FleaTick],
+      updatedBoxType: Box[BoxType.Value],
+      supplements: List[Product]
+    ) = {
 
-      SubscriptionService.saveNewPetProducts(updatedFleaTick, subscriptionBox, supplements)
+      SubscriptionService.saveNewPetProducts(updatedFleaTick, subscriptionBox, updatedBoxType, supplements)
 
       val updatedSubscription = parent.map(ParentService.updateStripeSubscriptionTotal(_))
 
@@ -579,17 +604,19 @@ class Parents extends Loggable {
     def petProductsBindings = {
       "#product-picker-modal" #> idMemoize { renderer =>
         petProductsRender = Full(renderer)
+        var productPickerRenderer: Box[IdMemoizeTransform] = Empty
 
         val box = selectedPet.flatMap(_.box.obj)
         val petType = selectedPet.map(_.animalType.get)
         val availableFleaTick = SubscriptionService.getAvailableFleaTick(selectedPet)
         val monthSupply = box.map(_.monthSupply.get).openOr(false)
 
-        val supplementCount = if (monthSupply) 30 else 10
+        val supplementCount = if(monthSupply) 30 else 10
         val availableSupplements = petType.toList.flatMap(pt => Product.supplementsByAmount(supplementCount, pt))
         val currentSupplements = SubscriptionService.getCurrentSupplements(box)
 
         var currentFleaTick = box.flatMap(_.fleaTick.obj)
+        var currentBoxType = box.map(_.boxType.get)
         var (firstSupplement, secondSupplement, thirdSupplement) =
           SubscriptionService.getFirstSecondThirdSupplements(currentSupplements)
 
@@ -598,7 +625,21 @@ class Parents extends Loggable {
           availableFleaTick
         )
 
-        val currentProductDropdown = SHtml.ajaxSelectObj(
+        val boxTypes = if(petType.contains(AnimalType.Dog))
+          BoxType.dogBoxTypes
+        else
+          BoxType.catBoxTypes
+
+        def currentBoxTypeDropdown(renderer: IdMemoizeTransform): Elem = SHtml.ajaxSelectObj(
+          boxTypes.map(boxType => (boxType, boxType.toString)),
+          currentBoxType,
+          (possibleBoxType: BoxType.Value) => {
+            currentBoxType = Full(possibleBoxType)
+            renderer.setHtml()
+          }
+        )
+
+        val currentFleaTickDropdown = SHtml.ajaxSelectObj(
           zoGuardProducts.map(product => (product, product.getNameAndSize)),
           currentFleaTick,
           (possibleProduct: FleaTick) =>
@@ -634,29 +675,37 @@ class Parents extends Loggable {
             }
         )
 
-        "^ [class+]" #> (if (!selectedPet.isEmpty) "active" else "") &
-        ".modal-header .parent" #> ClearNodes &
-        ".modal-header .admin .parent-name" #> parent.map(_.name) &
-        ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
-        ".second-choice" #> ClearNodesIf(monthSupply) andThen
-        ".third-choice" #> ClearNodesIf(monthSupply) andThen
-        "#flea-tick" #> currentProductDropdown &
-        "#first-supplement" #> firstSupplementDropDown &
-        "#second-supplement" #> secondSupplementDropDown &
-        "#third-supplement" #> thirdSupplementDropDown &
-        ".save" #> ajaxSubmit(
-          "Save",
-          () =>
-            savePet(
-              box,
-              currentFleaTick,
-              List(firstSupplement, secondSupplement, thirdSupplement).flatten
-            )
-        ) &
-        ".cancel" #> ajaxSubmit("Cancel", () => {
-          selectedPet = Empty
-          petProductsRender.map(_.setHtml()).openOr(Noop)
-        })
+        "^ [class+]" #> (if(!selectedPet.isEmpty) "active" else "") &
+          ".modal-header .parent" #> ClearNodes &
+          ".modal" #> idMemoize { renderer =>
+            productPickerRenderer = Full(renderer)
+
+            ".modal-header .admin .dog-name" #> selectedPet.map(_.name.get) &
+            ".supplement" #> ClearNodesIf(currentSupplements.isEmpty || !currentBoxType.contains(BoxType.healthAndWellness)) andThen
+            ".second-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.healthAndWellness)) andThen
+            ".third-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.healthAndWellness)) andThen
+            "#box-type" #> currentBoxTypeDropdown(renderer) &
+            "#flea-tick" #> currentFleaTickDropdown &
+            "#first-supplement" #> firstSupplementDropDown &
+            "#second-supplement" #> secondSupplementDropDown &
+            "#third-supplement" #> thirdSupplementDropDown &
+            ".save" #> ajaxSubmit(
+              "Save",
+              () =>
+                  savePet(
+                    box,
+                    currentFleaTick,
+                    currentBoxType,
+                    List(firstSupplement, secondSupplement, thirdSupplement).flatten
+                  )
+              ) &
+              ".cancel" #> ajaxSubmit(
+                "Cancel", () => {
+                  selectedPet = Empty
+                  petProductsRender.map(_.setHtml()).openOr(Noop)
+                }
+              )
+          }
       }
     }
 
@@ -669,7 +718,8 @@ class Parents extends Loggable {
         ".new-pet-name" #> ajaxText(petName, petName = _) &
         ".new-pet-breed" #> ajaxText(petBreed, petBreed = _) &
         ".new-pet-birthday" #> ajaxText(petBirthday, petBirthday = _) &
-        ".pet-type-select" #> petTypeRadio(renderer) &
+        ".pet-type-select" #> petTypeRadio(renderer) andThen
+        ".box-type-container .box-type-select" #> boxTypeDropdown(renderer) andThen
         ".product-container .product-select" #> productDropdown &
         ".supplement-container" #> supplementDropdown(parent) &
         ".create-item-container .create-item" #> SHtml.ajaxSubmit(

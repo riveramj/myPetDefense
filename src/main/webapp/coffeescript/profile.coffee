@@ -5,9 +5,10 @@ $(document).ready ->
   $(".go-back").on "click", (event) ->
     window.history.back()
 
-  $("body").on "click", '.cancel', (event) ->
-    $(".cancel").prop('value', 'Please Wait').prop("disabled", true).addClass("processing")
-    $(".cancel").submit()
+  $("body").on "click", '.cancel, .save-changes, .modal-action.save, #add-pet', (event) ->
+    $(event.target).html('<i class="fas fa-spinner fa-pulse"></i>')
+    $(event.target).prop('value', 'Please Wait').prop("disabled", true).addClass("processing")
+    $(event.target).submit()
 
   $(".account-block").on "click", ".resume-account, .pause-account, .cancel-account", (event) ->
     accountAction = $(this)
@@ -28,3 +29,6 @@ $(document).ready ->
 
   $(".modal-action.cancel").on "click", (event) ->
       window.location.href = "/account-overview"
+
+$(document).on "form-validation-error", (event) ->
+  $("#add-pet").prop('value', 'Add Pet').prop("disabled", false).removeClass("processing")

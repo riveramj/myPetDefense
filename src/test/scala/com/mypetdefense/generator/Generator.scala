@@ -200,7 +200,7 @@ object Generator extends ScalaCheckHelper {
       pet <- generateSimplePet
       supplement <- Gen.oneOf(Product.supplementsByAmount(30, AnimalType.Dog))
     } yield {
-      PendingPet(pet, Full(supplement))
+      PendingPet(pet, BoxType.healthAndWellness, Full(supplement))
     }
 
   def genPetData: Gen[PetData] =

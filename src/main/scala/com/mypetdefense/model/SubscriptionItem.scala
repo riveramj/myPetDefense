@@ -1,6 +1,7 @@
 package com.mypetdefense.model
 
 import com.mypetdefense.util.RandomIdGenerator._
+import net.liftweb.common.{Box, Full}
 import net.liftweb.mapper._
 
 import java.util.Date
@@ -58,15 +59,26 @@ object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[Subscr
     val subscriptionBox = pendingPet.subscriptionBox
     val isSmallDog = pendingPet.pet.size.get == AnimalSize.DogSmallZo
 
-    val newItem = SubscriptionItem.create
-      .subscriptionBox(subscriptionBox)
-      .product(pendingPet.thirtyDaySupplement)
-      .saveMe()
+    subscriptionBox.map(_.boxType.get) match {
+      case Full(BoxType.healthAndWellness) =>
+        val supplement = SubscriptionItem.create
+          .subscriptionBox(subscriptionBox)
+          .product(pendingPet.thirtyDaySupplement)
+          .saveMe()
 
+        List(supplement) ++ addDentalPowder(subscriptionBox, isSmallDog).toList
+      case Full(BoxType.everydayWellness) =>
+        addDentalPowder(subscriptionBox, isSmallDog).toList
+
+      case _ => Nil
+    }
+  }
+
+  def addDentalPowder(subscriptionBox: Box[SubscriptionBox], isSmallDog: Boolean) = {
     val dentalPowder = SubscriptionItem.create.subscriptionBox(subscriptionBox)
     if (isSmallDog)
-      List(newItem) ++ Product.dentalPowderSmallForDogs.map(dentalPowder.product(_).saveMe())
+      Product.dentalPowderSmallForDogs.map(dentalPowder.product(_).saveMe())
     else
-      List(newItem) ++ Product.dentalPowderLargeForDogs.map(dentalPowder.product(_).saveMe())
+      Product.dentalPowderLargeForDogs.map(dentalPowder.product(_).saveMe())
   }
 }

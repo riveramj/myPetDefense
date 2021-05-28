@@ -51,11 +51,14 @@ class PetsAndProducts extends Loggable {
 
   var newPetType: Box[AnimalType.Value]  = Empty
   var newPetChosenProduct: Box[FleaTick] = Empty
+  var newPetBoxType: Box[BoxType.Value] = Empty
   var newPetName                         = ""
 
   var petProductsRender: Box[IdMemoizeTransform] = Empty
 
   var selectedPet: Box[Pet] = Empty
+  var selectedPetBox = selectedPet.flatMap(_.box.obj)
+  var currentBoxType = selectedPetBox.map(_.boxType.get)
 
   def petTypeDropdown(renderer: IdMemoizeTransform): Elem = {
     SHtml.ajaxSelectObj(
@@ -72,6 +75,22 @@ class PetsAndProducts extends Loggable {
     )
   }
 
+  def boxTypeDropdown(renderer: IdMemoizeTransform): Elem = {
+    val boxTypes = if (newPetType.contains(AnimalType.Dog))
+      BoxType.dogBoxTypes
+    else
+      BoxType.catBoxTypes
+
+    SHtml.ajaxSelectObj(
+      (Empty, "Choose Box Type") +: boxTypes.map(b => (Full(b), b.toString)),
+      Full(newPetBoxType),
+      (possibleBoxType: Box[BoxType.Value]) => {
+        newPetBoxType = possibleBoxType
+        renderer.setHtml
+      }
+    )
+  }
+
   def newPetSupplementDropdown() = {
     val firstSupplementDropDown = SHtml.ajaxSelectObj(
       (Empty, "Choose Supplement") +: monthlyDogSupplements.map(product => (Full(product), product.nameAndQuantity)),
@@ -80,7 +99,7 @@ class PetsAndProducts extends Loggable {
         chosenNewPetSupplement = possibleProduct
     )
 
-    "^" #> ClearNodesIf(newPetType != AnimalType.Dog && subscription.map(_.isUpgraded.get).openOr(false)) &
+    "^" #> ClearNodesIf(newPetType != AnimalType.Dog || !newPetBoxType.contains(BoxType.healthAndWellness)) &
     "#choose-supplement #new-pet-choose-supplement" #> firstSupplementDropDown
   }
 
@@ -114,6 +133,7 @@ class PetsAndProducts extends Loggable {
         parent  <- user
         pet     <- newPetType
         product <- newPetChosenProduct
+        boxType <- newPetBoxType
         size = product.size.get
       } yield {
         val actionLog = CustomerAddedPet(
@@ -128,10 +148,9 @@ class PetsAndProducts extends Loggable {
           name = newPetName,
           animalType = pet,
           size = size,
-          product = product,
-          isUpgraded = parent.subscription.obj.map(_.isUpgraded.get).openOr(false),
           actionLog = Left(actionLog),
-          chosenMonthlySupplement = chosenNewPetSupplement
+          chosenMonthlySupplement = chosenNewPetSupplement,
+          boxType = boxType
         )
       }).flatMap(identity) match {
         case Full(pet) =>
@@ -170,18 +189,25 @@ class PetsAndProducts extends Loggable {
 
   def showProducts(pet: Box[Pet])(): JsCmd = {
     selectedPet = pet.map(_.reload)
+    selectedPetBox = pet.flatMap(_.box.obj)
+    currentBoxType = selectedPetBox.map(_.boxType.get)
 
     petProductsRender.map(_.setHtml()).openOr(Noop)
   }
 
   def savePet(
       subscriptionBox: Box[SubscriptionBox],
+      updatedBoxType: Box[BoxType.Value],
       updatedFleaTick: Box[FleaTick],
       supplements: List[Product]
   ) = {
-    SubscriptionService.saveNewPetProducts(updatedFleaTick, subscriptionBox, supplements)
+    println("updatedBoxType")
+    println(updatedBoxType)
+    println("updatedBoxType")
 
-    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal(_))
+    SubscriptionService.saveNewPetProducts(updatedFleaTick, subscriptionBox, updatedBoxType, supplements)
+
+    val updatedSubscription = currentUser.flatMap(ParentService.updateStripeSubscriptionTotal)
 
     updatedSubscription match {
       case Full(_) =>
@@ -203,16 +229,15 @@ class PetsAndProducts extends Loggable {
     "#product-picker-modal" #> idMemoize { renderer =>
       petProductsRender = Full(renderer)
 
-      val box = selectedPet.flatMap(_.box.obj)
       val availableFleaTick = SubscriptionService.getAvailableFleaTick(selectedPet)
       val petType = selectedPet.map(_.animalType.get)
-      val monthSupply = box.map(_.monthSupply.get).openOr(false)
+      val monthSupply = selectedPetBox.map(_.monthSupply.get).openOr(false)
       val supplementCount = if (monthSupply) 30 else 10
 
       val availableSupplements = petType.toList.flatMap(pt => Product.supplementsByAmount(supplementCount, pt))
-      val currentSupplements = SubscriptionService.getCurrentSupplements(box)
+      val currentSupplements = SubscriptionService.getCurrentSupplements(selectedPetBox)
 
-      var currentFleaTick = box.flatMap(_.fleaTick.obj)
+      var currentFleaTick = selectedPetBox.flatMap(_.fleaTick.obj)
       var (firstSupplement, secondSupplement, thirdSupplement) =
         SubscriptionService.getFirstSecondThirdSupplements(currentSupplements)
 
@@ -228,6 +253,20 @@ class PetsAndProducts extends Loggable {
           currentFleaTick = {
             Full(possibleProduct)
           }
+      )
+
+      val boxTypes = if(petType.contains(AnimalType.Dog))
+        BoxType.dogBoxTypes
+      else
+        BoxType.catBoxTypes
+
+      def currentBoxTypeDropdown(renderer: IdMemoizeTransform): Elem = SHtml.ajaxSelectObj(
+        boxTypes.map(boxType => (boxType, boxType.toString)),
+        currentBoxType,
+        (possibleBoxType: BoxType.Value) => {
+          currentBoxType = Full(possibleBoxType)
+          renderer.setHtml()
+        }
       )
 
       val firstSupplementDropDown = SHtml.ajaxSelectObj(
@@ -253,9 +292,10 @@ class PetsAndProducts extends Loggable {
 
       "^ [class+]" #> (if (!selectedPet.isEmpty) "active" else "") &
       ".modal-header .admin" #> ClearNodes &
-      ".supplement" #> ClearNodesIf(currentSupplements.isEmpty) andThen
-      ".second-choice" #> ClearNodesIf(monthSupply) andThen
-      ".third-choice" #> ClearNodesIf(monthSupply) andThen
+      ".supplement" #> ClearNodesIf(!currentBoxType.contains(BoxType.healthAndWellness)) andThen
+      ".second-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.healthAndWellness)) andThen
+      ".third-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.healthAndWellness)) andThen
+      "#box-type" #> currentBoxTypeDropdown(renderer) andThen
       "#flea-tick" #> currentProductDropdown &
       "#first-supplement" #> firstSupplementDropDown &
       "#second-supplement" #> secondSupplementDropDown &
@@ -264,7 +304,8 @@ class PetsAndProducts extends Loggable {
         "Save",
         () =>
           savePet(
-            box,
+            selectedPetBox,
+            currentBoxType,
             currentFleaTick,
             List(firstSupplement, secondSupplement, thirdSupplement).flatten
           )
@@ -288,6 +329,7 @@ class PetsAndProducts extends Loggable {
     "#new-pet" #> idMemoize { renderer =>
       "#new-pet-name" #> ajaxText(newPetName, newPetName = _) &
       "#pet-type-select" #> petTypeDropdown(renderer) &
+      "#box-type-select" #> boxTypeDropdown(renderer) &
       "#new-pet-product-select" #> productDropdown() &
       "#choose-supplement" #> newPetSupplementDropdown() &
       "#add-pet" #> SHtml.ajaxSubmit("Add Pet", () => addPet)
