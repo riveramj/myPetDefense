@@ -103,21 +103,29 @@ object SubscriptionService {
   def saveNewPetProducts(
     fleaTick: Box[FleaTick],
     subscriptionBox: Box[SubscriptionBox],
+    boxType: Box[BoxType.Value],
     supplements: List[Product]
   ) = {
     for {
       fleaTick <- fleaTick.toList
+      updatedBoxType <- boxType.toList
       box      <- subscriptionBox.toList
       pet      <- box.pet.obj.toList
-      _        = box.fleaTick(fleaTick).saveMe
+      _        = box.fleaTick(fleaTick).boxType(updatedBoxType).saveMe
       _        = pet.size(fleaTick.size.get).saveMe
       allItems = box.subscriptionItems.toList
       filteredItems = allItems.filter(supplement =>
         supplement.product.obj.map(_.isSupplement.get).openOr(false)
       )
     } yield {
-      filteredItems.map(_.delete_!)
-      supplements.map(SubscriptionItem.createSubscriptionItem(_, box))
+      if (updatedBoxType == BoxType.basic)
+        allItems.map(_.delete_!)
+      else if (updatedBoxType == BoxType.everydayWellness)
+        filteredItems.map(_.delete_!)
+      else if (updatedBoxType == BoxType.healthAndWellness) {
+        filteredItems.map(_.delete_!)
+        supplements.map(SubscriptionItem.createSubscriptionItem(_, box))
+      }
     }
   }
 }

@@ -118,7 +118,10 @@ object GeneralDbUtils {
     val updatedUser = u.subscription(su).saveMe().reload
     val pets = in.pets.map { pData =>
       val createdPet = createPet(u, pData)
-      SubscriptionBox.createNewBox(su, createdPet, upgraded)
+      if (upgraded)
+        SubscriptionBox.createNewBox(su, createdPet, BoxType.healthAndWellness)
+      else
+        SubscriptionBox.createNewBox(su, createdPet, BoxType.basic)
       createdPet
     }
     val uSubscription = su.reload
