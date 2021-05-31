@@ -46,7 +46,7 @@ li.complete {
 }
 
 .field-label {
-  color: #4F4E4E;
+  color: #323232;
   font-weight: $semibold;
   font-size: rem(14px);
   display: inline-block;
@@ -139,8 +139,8 @@ fieldset label {
   width: 260px;
   padding: rem(14px) 0;
   text-decoration: none;
-  border: 1px solid #57B8B4;
-  color: $green;
+  border: 1px solid $purple;
+  color: text-color;
 
   background-color: initial;
 
@@ -161,7 +161,7 @@ fieldset label {
 
 #checkout {
   font-size: rem(17px);
-  color: #F7F7F7;
+  color: #ffffff;
   width: 260px;
 
   padding: rem(15px) 0;
@@ -283,7 +283,7 @@ ul.pet {
     background-color: #ffffff;
 
     &.selected {
-      border-color: #259490;
+      border-color: $purple;
     }
 
     @media (min-width: $bp-medium) {

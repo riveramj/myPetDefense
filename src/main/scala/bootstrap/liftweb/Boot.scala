@@ -139,7 +139,6 @@ class Boot {
           ),
           styleSources = List(
             ContentSourceRestriction.Self,
-            ContentSourceRestriction.UnsafeInline,
             ContentSourceRestriction.Host("https://fonts.googleapis.com"),
             ContentSourceRestriction.Host("https://cdn.jsdelivr.net"),
           ),
@@ -155,12 +154,11 @@ class Boot {
           ),
           connectSources = List(
             ContentSourceRestriction.Host("https://facebook.com"),
-            ContentSourceRestriction.UnsafeInline,
             ContentSourceRestriction.Self,
-            ContentSourceRestriction.All
           ),
         )
       )
     )
   }
+  LiftRules.extractInlineJavaScript = true
 }

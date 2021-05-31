@@ -30,13 +30,14 @@ $regular: 400;
 $semibold: 700;
 $bold: 900;
 
-$text-font: 'Lato', Helvetica, Arial, sans-serif;
-$text-color: #454343;
+$text-font: 'Roboto', Helvetica, Arial, sans-serif;
+$text-color: #323232;
 $base-font-size: 16px;
 
 /// Colors
 // General
 $green: #259490;
+$purple: #A64280;
 $gray: #949494;
 $signup-button-background: #259490;
 $hero-background: #4F4E4E;
@@ -57,6 +58,10 @@ $max-allowed-width: 1442px;
 // The focus halo that some browsers like Chrome put on all inputs.
 *:focus {
   outline: 0;
+}
+
+html, body {
+  height: 100%;
 }
 
 html {

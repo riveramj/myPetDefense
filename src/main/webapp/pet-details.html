@@ -1,0 +1,133 @@
+<div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <div data-lift="signup.PetDetails.render">
+    <div class="pet-selection">
+      <div class="introduction">
+        <h2>Introduce Us to Your Pet!</h2>
+        <h3>Have more than one pet? We'll meet them next.</h3>
+      </div>
+      <div class="dog-choice pet-choice">
+        <img src="images/dog-animated.gif">
+        <button class="select-choice" id="dog">Meet My Dog</button>
+        <div class="selected-choice">Tell us more about your dog!</div>
+      </div>
+      <div class="cat-choice pet-choice">
+        <img src="images/cat-animated.gif">
+        <button class="select-choice" id="cat">Meet My Cat</button>
+        <div class="selected-choice">Tell us more about your cat!</div>
+      </div>
+    </div>
+    <div class="pet-details">
+      <fieldset class="account-info pet">
+        <ul class="pet">
+          <li>
+            <label>
+              <div><span class="field-label">
+                <span class="pet-type">Dog</span> Name</span>
+              </div>
+              <input id="pet-name" type="text">
+            </label>
+          </li>
+          <li id="month-container">
+            <label>
+              <span class="field-label">
+                <span class="pet-type">Dog</span> Birthday Month</span>
+              <select id="pet-month">
+                <option value="jan">jan</option>
+              </select>
+            </label>
+          </li>
+          <li id="year-container">
+            <label>
+              <span class="field-label">
+                <span class="pet-type">Dog</span> Birthday Year</span>
+              <select id="pet-year">
+                <option value="1970">1970</option>
+              </select>
+            </label>
+          </li>
+          <li class="dog-sizes-container">
+            <h3>Choose a size</h3>
+            <ul class="dog-sizes">
+              <li class="dg-small">
+                <picture>
+                  <source
+                      media="(min-width: 46.8em)"
+                      srcset="images/pet-sizes/small-bone.png, images/pet-sizes/small-bone@2x.png 2x">
+                  <img class="size-choice dog small" src="images/pet-sizes/small-bone-small.png" srcset="images/pet-sizes/small-bone-small.png, images/pet-sizes/small-bone-small@2x.png 2x">
+                  </source>
+                </picture>
+
+                <label class="pet-size small-dog">
+                  <span class="weight-number">sm</span>
+                  <input type="radio" id="small-dog" name="pet-size" value="small">
+                </label>
+              </li>
+              <li class="dg-medium">
+                <picture>
+                  <source
+                      media="(min-width: 46.8em)"
+                      srcset="images/pet-sizes/medium-bone.png, images/pet-sizes/medium-bone@2x.png 2x">
+                  <img class="size-choice dog medium" src="images/pet-sizes/medium-bone-small.png" srcset="images/pet-sizes/medium-bone-small.png, images/pet-sizes/medium-bone-small@2x.png 2x">
+                  </source>
+                </picture>
+                <label class="pet-size medium-dog">
+                  <span class="weight-number">md</span>
+                  <input type="radio" id="medium-dog" name="pet-size" value="medium">
+                </label>
+              </li>
+              <li class="dg-large">
+                <picture>
+                  <source
+                      media="(min-width: 46.8em)"
+                      srcset="images/pet-sizes/large-bone.png, images/pet-sizes/large-bone@2x.png 2x">
+                  <img class="size-choice dog large" src="images/pet-sizes/larg-bone-small.png" srcset="images/pet-sizes/large-bone-small.png, images/pet-sizes/large-bone-small@2x.png 2x">
+                  </source>
+                </picture>
+                <label class="pet-size large-dog">
+                  <span class="weight-number">lg</span>
+                  <input type="radio" id="large-dog" name="pet-size" value="large">
+                </label>
+              </li>
+              <li class="dg-xlarge">
+                <picture>
+                  <source
+                      media="(min-width: 46.8em)"
+                      srcset="images/pet-sizes/xlarge-bone.png, images/pet-sizes/xlarge-bone@2x.png 2x">
+                  <img class="size-choice dog xlarge" src="images/pet-sizes/xlarge-bone-small.png" srcset="images/pet-sizes/xlarge-bone-small.png, images/pet-sizes/xlarge-bone-small@2x.png 2x">
+                  </source>
+                </picture>
+
+                <label class="pet-size xlarge-dog">
+                  <span class="weight-number">xl</span>
+                  <input type="radio" id="xlarge-dog" name="pet-size" value="x-large">
+                </label>
+              </li>
+            </ul>
+          </li>
+          <li id="supplement-container">
+            <label>
+              <span class="field-label">Choose a Supplment</span>
+              <select id="pet-supplement">
+                <option value="tasty">Tasty treat</option>
+              </select>
+            </label>
+          </li>
+          <li id="dental-container">
+            <div>
+              <span class="field-label">Dental Protection</span>
+              <div>30-day supply of fresh breath and cleaner teeth</div>
+            </div>
+          </li>
+        </ul>
+      </fieldset>
+    </div>
+  </div>
+  
+  <head_merge>
+   <link rel="stylesheet" data-lift="style-bundle?name=choose-pet">
+  </head_merge>
+
+  <tail>
+    <script type="text/javascript" data-lift="script-bundle?name=pet-details"></script>
+  </tail>
+</div>

@@ -4,6 +4,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
+import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -16,13 +17,13 @@ import java.text.SimpleDateFormat
 import scala.collection.mutable
 import scala.xml.{Elem, NodeSeq}
 
-object DogDetails extends Loggable {
+object CatDetails extends Loggable {
   import net.liftweb.sitemap._
 
-  val menu: Menu.Menuable = Menu.i("Dog Details") / "dog-details"
+  val menu: Menu.Menuable = Menu.i("Cat Details") / "cat-details"
 }
 
-class DogDetails extends Loggable {
+class CatDetails extends Loggable {
   val formatter          = new SimpleDateFormat("MM/yy")
   val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 
