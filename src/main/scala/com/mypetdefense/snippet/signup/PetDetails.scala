@@ -4,6 +4,7 @@ import com.mypetdefense.model.{AnimalSize, AnimalType, BoxType, Coupon, FleaTick
 import com.mypetdefense.service.PetFlowChoices.{completedPets, petChoice, petId}
 import com.mypetdefense.service.ValidationService.checkEmpty
 import com.mypetdefense.service._
+import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
 import net.liftweb.http.SHtml.{ajaxInvoke, ajaxSubmit, ajaxText}
@@ -168,6 +169,8 @@ class PetDetails extends Loggable {
   }
 
   def render = {
+    petChoice(Empty)
+
     def setPetFlow(animalType: AnimalType.Value) = {
       petChoice(Full(animalType))
 
@@ -184,6 +187,7 @@ class PetDetails extends Loggable {
     ".pet-details" #> SHtml.idMemoize { renderer =>
       petDetailsRenderer = Full(renderer)
 
+      "^" #> ClearNodesIf(petChoice.is.isEmpty) &
       ".pet-type *" #> petChoice.map(_.toString) &
       "#pet-name" #> ajaxText(petName, petName = _) &
       "#month-container #pet-month" #> monthDropdown &
