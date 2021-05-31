@@ -5,6 +5,10 @@
 $dog-blue: #174567;
 $cat-yellow: #FCE99B;
 
+#content-container.choosing-plan {
+  background-color: #ffffff;
+}
+
 .introduction {
   color: $text-color;
   padding: 20px 0 20px;
@@ -29,7 +33,7 @@ $cat-yellow: #FCE99B;
   -moz-transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
   transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
 
-  &.selected {
+  &.selected, &.details-complete {
     height: 60px;
 
     img {
@@ -40,12 +44,22 @@ $cat-yellow: #FCE99B;
       display: none;
     }
 
-    .selected-choice {
+    .selected-choice, .details-entered {
       display: block;
       font-size: 18px;
       color: #ffffff;
       text-align: center;
       padding: 21px;
+    }
+  }
+
+  &.details-complete {
+    .selected-choice {
+      display: none;
+    }
+
+    .details-entered {
+      display: block;
     }
   }
 
@@ -55,6 +69,10 @@ $cat-yellow: #FCE99B;
 
   img {
     width: 100%;
+  }
+
+  &.selected .details-entered {
+    display: none;
   }
 }
 
@@ -92,4 +110,105 @@ $cat-yellow: #FCE99B;
 
 .hide {
   display: none;
+}
+
+.field-label {
+  font-weight: $semibold;
+}
+
+.pet-details {
+  height: 490px;
+  -webkit-transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
+  -moz-transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
+  transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
+
+  &.choosing-plan .account-info {
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .care-question {
+    display: none;
+  }
+
+  &.choosing-plan {
+    height: 60px;
+    display: block;
+    font-size: 18px;
+    color: $text-color;
+    text-align: center;
+    padding: 21px;
+    background-color: #D3A1C5;
+
+    .care-question {
+      display: block;
+    }
+  }
+}
+
+.pet {
+  padding: 20px;
+
+  #pet-name, #pet-month, #pet-year {
+    border-radius: 3px;
+    border: solid 1px #cccccc;
+    padding: 4px 10px;
+    margin: 3px 0 10px;
+    font-size: 19px;
+    display: block;
+    background-color: #ffffff;
+    width: 100%;
+  }
+
+  .dog-sizes li {
+    display: inline-block;
+    width: 150px;
+    text-align: center;
+    border: 1px solid;
+    vertical-align: top;
+    padding: 15px;
+    margin: 7px;
+    border-radius: 3px;
+    background-color: #ffffff;
+
+    &.dg-small {
+      padding-top: 26px;
+    }
+
+    &.dg-large {
+      padding-top: 29px;
+    }
+
+    &.dg-small, &.dg-medium {
+      height: 91px;
+    }
+
+    &.dg-large, &.dg-xlarge {
+      height: 128px;
+    }
+
+    picture {
+      display: block;
+    }
+
+    input {
+      display: none;
+    }
+  }
+
+  li.selected {
+    border: solid 2px $purple;
+    background-color: #D3A1C5;
+  }
+
+  #choose-care {
+    border: none;
+    background-color: $purple;
+    color: #ffffff;
+    border-radius: 3px;
+    padding: 10px 15px;
+    font-size: 18px;
+    display: block;
+    margin: 15px auto 0;
+  }
 }
