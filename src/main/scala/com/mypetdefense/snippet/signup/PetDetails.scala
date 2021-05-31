@@ -1,31 +1,33 @@
 package com.mypetdefense.snippet.signup
 
-import com.mypetdefense.model._
-import com.mypetdefense.service.PetFlowChoices._
-import com.mypetdefense.service.ValidationService._
+import com.mypetdefense.model.{AnimalSize, AnimalType, BoxType, Coupon, FleaTick, PendingPet, Pet, Product}
+import com.mypetdefense.service.PetFlowChoices.{completedPets, petChoice, petId}
+import com.mypetdefense.service.ValidationService.checkEmpty
 import com.mypetdefense.service._
+import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
-import net.liftweb.http.SHtml._
+import net.liftweb.http.SHtml.{ajaxInvoke, ajaxSubmit, ajaxText}
 import net.liftweb.http._
-import net.liftweb.http.js.JsCmds._
-import net.liftweb.http.js._
+import net.liftweb.http.js.JsCmd
+import net.liftweb.http.js.JsCmds.Noop
 import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 
 import java.text.SimpleDateFormat
 import scala.collection.mutable
-import scala.xml.{Elem, NodeSeq}
+import scala.xml.Elem
 
-object DogDetails extends Loggable {
+object PetDetails extends Loggable {
   import net.liftweb.sitemap._
 
-  val menu: Menu.Menuable = Menu.i("Dog Details") / "dog-details"
+  val menu = Menu.i("Pet Details") / "pet-details"
 }
 
-class DogDetails extends Loggable {
+class PetDetails extends Loggable {
   val formatter          = new SimpleDateFormat("MM/yy")
   val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 
+  var petDetailsRenderer: Box[IdMemoizeTransform] = Empty
   var currentPets: mutable.LinkedHashMap[Long, PendingPet] = completedPets.is
   var petName                                       = ""
   var petMonth                                      = ""
@@ -43,6 +45,15 @@ class DogDetails extends Loggable {
 
   val supplements = Product.supplementsByAmount(30, AnimalType.Dog)
 
+  val woofTraxOfferCode = S.param("oc")
+  PetFlowChoices.woofTraxOfferCode(woofTraxOfferCode)
+  PetFlowChoices.woofTraxUserId(S.param("ui"))
+
+  if (woofTraxOfferCode.isDefined) {
+    val coupon = Coupon.find(By(Coupon.couponCode, "80off"))
+    PetFlowChoices.coupon(coupon)
+  }
+
   def getSizeNumber(size: AnimalSize.Value): Option[AnimalSize.Value] = {
     products.find(_.size.get == size).map(_.size.get)
   }
@@ -54,7 +65,7 @@ class DogDetails extends Loggable {
         checkEmpty(petYear, "#pet-year") ::
         checkEmpty(petSize.map(_.toString), ".pet-size") ::
         Nil
-    ).flatten.distinct
+      ).flatten.distinct
   }
 
   def validateAndNavigate(url: String): JsCmd = {
@@ -156,21 +167,38 @@ class DogDetails extends Loggable {
     )
   }
 
-  def render: NodeSeq => NodeSeq = {
-    SHtml.makeFormsAjax andThen
+  def render = {
+    def setPetFlow(animalType: AnimalType.Value) = {
+      petChoice(Full(animalType))
+
+      if (petId.is.isEmpty)
+        petId(Full(generateLongId))
+
+      petDetailsRenderer.map(_.setHtml()).openOr(Noop)
+    }
+
+    ".pet-selection" #> {
+      "#dog [onclick]" #> SHtml.ajaxInvoke(() => setPetFlow(AnimalType.Dog)) &
+      "#cat [onclick]" #> SHtml.ajaxInvoke(() => setPetFlow(AnimalType.Cat))
+    } &
+    ".pet-details" #> SHtml.idMemoize { renderer =>
+      petDetailsRenderer = Full(renderer)
+
+      ".pet-type *" #> petChoice.map(_.toString) &
       "#pet-name" #> ajaxText(petName, petName = _) &
-        "#month-container #pet-month" #> monthDropdown &
-        "#year-container #pet-year" #> yearDropdown &
-        "#supplement-container #pet-supplement" #> productDropdown &
-        ".small-dog .weight-number *" #> smallDog.map(_.toString + " lb") &
-        ".small-dog #small-dog [onclick]" #> ajaxInvoke(() => chooseSize(smallDog)) &
-        ".medium-dog .weight-number *" #> mediumDog.map(_.toString + " lb") &
-        ".medium-dog #medium-dog [onclick]" #> ajaxInvoke(() => chooseSize(mediumDog)) &
-        ".large-dog .weight-number *" #> largeDog.map(_.toString + " lb") &
-        ".large-dog #large-dog [onclick]" #> ajaxInvoke(() => chooseSize(largeDog)) &
-        ".xlarge-dog .weight-number *" #> xlargeDog.map(_.toString + " lb") &
-        ".xlarge-dog #xlarge-dog [onclick]" #> ajaxInvoke(() => chooseSize(xlargeDog)) &
-        "#add-pet" #> ajaxSubmit("Add Another Dog", addNewPet _) &
-        "#checkout" #> ajaxSubmit("Add & Checkout", goToCheckout _)
+      "#month-container #pet-month" #> monthDropdown &
+      "#year-container #pet-year" #> yearDropdown &
+      "#supplement-container #pet-supplement" #> productDropdown &
+      ".small-dog .weight-number *" #> smallDog.map(_.toString + " lb") &
+      ".small-dog #small-dog [onclick]" #> ajaxInvoke(() => chooseSize(smallDog)) &
+      ".medium-dog .weight-number *" #> mediumDog.map(_.toString + " lb") &
+      ".medium-dog #medium-dog [onclick]" #> ajaxInvoke(() => chooseSize(mediumDog)) &
+      ".large-dog .weight-number *" #> largeDog.map(_.toString + " lb") &
+      ".large-dog #large-dog [onclick]" #> ajaxInvoke(() => chooseSize(largeDog)) &
+      ".xlarge-dog .weight-number *" #> xlargeDog.map(_.toString + " lb") &
+      ".xlarge-dog #xlarge-dog [onclick]" #> ajaxInvoke(() => chooseSize(xlargeDog)) &
+      "#add-pet" #> ajaxSubmit("Add Another Dog", addNewPet _) &
+      "#checkout" #> ajaxSubmit("Add & Checkout", goToCheckout _)
+    }
   }
 }

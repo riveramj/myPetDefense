@@ -67,11 +67,11 @@ object Paths {
   )
   val petChosen: If = If(
     () => !petChoice.is.isEmpty,
-    RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
+    RedirectResponse(PetDetails.menu.loc.calcDefaultHref)
   )
   val completedPet: If = If(
     () => completedPets.nonEmpty,
-    () => RedirectResponse(PetChoice.menu.loc.calcDefaultHref)
+    () => RedirectResponse(PetDetails.menu.loc.calcDefaultHref)
   )
   val createdAccount: If = If(
     () => SecurityContext.loggedIn_?,
@@ -208,8 +208,9 @@ object Paths {
     TreatCheckout.menu,
     AddOnCheckout.menu,
     petland.NewOrder.menu,
-    PetChoice.menu,
-    DogDetails.menu
+    PetDetails.menu,
+    DogDetails.menu,
+    CatDetails.menu
   )
 
   object intendedPath extends SessionVar[Box[String]](Empty)
