@@ -9,6 +9,7 @@
         <img src="images/dog-animated.gif">
         <button class="select-choice" id="dog">Meet My Dog</button>
         <div class="selected-choice">Tell us more about your dog!</div>
+        <div class="details-entered"><span class="given-pet-name">d.o.g.</span>'s Info</div>
       </div>
       <div class="cat-choice pet-choice">
         <img src="images/cat-animated.gif">
@@ -17,7 +18,7 @@
       </div>
     </div>
     <div class="pet-details">
-      <fieldset class="account-info pet">
+      <fieldset class="account-info">
         <ul class="pet">
           <li>
             <label>
@@ -46,7 +47,7 @@
             </label>
           </li>
           <li class="dog-sizes-container">
-            <h3>Choose a size</h3>
+            <h3 class="field-label">Choose a size</h3>
             <ul class="dog-sizes">
               <li class="dg-small">
                 <picture>
@@ -104,22 +105,16 @@
               </li>
             </ul>
           </li>
-          <li id="supplement-container">
-            <label>
-              <span class="field-label">Choose a Supplment</span>
-              <select id="pet-supplement">
-                <option value="tasty">Tasty treat</option>
-              </select>
-            </label>
-          </li>
-          <li id="dental-container">
-            <div>
-              <span class="field-label">Dental Protection</span>
-              <div>30-day supply of fresh breath and cleaner teeth</div>
-            </div>
+          <li class="chose-care-container">
+            <button id="choose-care">Choose <span class="given-pet-name">fido</span>'s care</button>
           </li>
         </ul>
       </fieldset>
+      <h2 class="care-question">How would you like to care for <span class="given-pet-name">fido</span>?</h2>
+    </div>
+    <div class="pet-plans">
+
+
     </div>
   </div>
   

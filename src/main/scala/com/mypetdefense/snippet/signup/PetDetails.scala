@@ -29,6 +29,10 @@ class PetDetails extends Loggable {
   val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 
   var petDetailsRenderer: Box[IdMemoizeTransform] = Empty
+  var petPlansRenderer: Box[IdMemoizeTransform] = Empty
+  var chooseCareRenderer: Box[IdMemoizeTransform] = Empty
+  var careQuestionRenderer: Box[IdMemoizeTransform] = Empty
+  var detailsEnteredRenderer: Box[IdMemoizeTransform] = Empty
   var currentPets: mutable.LinkedHashMap[Long, PendingPet] = completedPets.is
   var petName                                       = ""
   var petMonth                                      = ""
@@ -36,6 +40,7 @@ class PetDetails extends Loggable {
   var petSize: Box[AnimalSize.Value]                = Empty
   var nameErrors: List[String]                      = Nil
   var chosenSupplement: Box[Product]                = Product.multiVitaminForDogs(30)
+  var availableBoxTypes: List[BoxType.Value]        = Nil
 
   val products: List[FleaTick] = FleaTick.findAll(By(FleaTick.name, "ZoGuard Plus for Dogs"))
 
@@ -106,8 +111,17 @@ class PetDetails extends Loggable {
   def addNewPet(): JsCmd =
     validateAndNavigate(PetDetails.menu.loc.calcDefaultHref)
 
-  def chooseSize(animalSize: Option[AnimalSize.Value]): Unit = {
+  def chooseSize(animalSize: Option[AnimalSize.Value]) = {
     petSize = animalSize
+  }
+
+  def showPlans = {
+    availableBoxTypes = if (petChoice.is.contains(AnimalType.Dog))
+      BoxType.dogBoxTypes
+    else
+      BoxType.catBoxTypes
+
+    petPlansRenderer.map(_.setHtml()).openOr(Noop)
   }
 
   def monthDropdown: Elem = {
@@ -168,6 +182,13 @@ class PetDetails extends Loggable {
     )
   }
 
+  def getPetNameOrType = {
+    if(petName.isEmpty)
+      s"your ${petChoice.is.map(_.toString.toLowerCase).openOr("pet")}"
+    else
+      petName
+  }
+
   def render = {
     petChoice(Empty)
 
@@ -182,17 +203,30 @@ class PetDetails extends Loggable {
 
     ".pet-selection" #> {
       "#dog [onclick]" #> SHtml.ajaxInvoke(() => setPetFlow(AnimalType.Dog)) &
-      "#cat [onclick]" #> SHtml.ajaxInvoke(() => setPetFlow(AnimalType.Cat))
+      "#cat [onclick]" #> SHtml.ajaxInvoke(() => setPetFlow(AnimalType.Cat)) &
+      ".details-entered" #> SHtml.idMemoize { renderer =>
+        detailsEnteredRenderer = Full(renderer)
+
+        ".given-pet-name *" #> getPetNameOrType
+      }
     } &
     ".pet-details" #> SHtml.idMemoize { renderer =>
       petDetailsRenderer = Full(renderer)
 
-      "^" #> ClearNodesIf(petChoice.is.isEmpty) &
+      "^" #> ClearNodesIf(petChoice.is.isEmpty) andThen
+      ".pet [class+]" #> petChoice.map(_.toString.toLowerCase) &
       ".pet-type *" #> petChoice.map(_.toString) &
-      "#pet-name" #> ajaxText(petName, petName = _) &
+      "#pet-name" #> ajaxText(petName, possibleName => {
+        petName = possibleName
+
+        (
+          chooseCareRenderer.map(_.setHtml()).openOr(Noop) &
+          detailsEnteredRenderer.map(_.setHtml()).openOr(Noop) &
+          careQuestionRenderer.map(_.setHtml()).openOr(Noop)
+        )
+      }) &
       "#month-container #pet-month" #> monthDropdown &
       "#year-container #pet-year" #> yearDropdown &
-      "#supplement-container #pet-supplement" #> productDropdown &
       ".small-dog .weight-number *" #> smallDog.map(_.toString + " lb") &
       ".small-dog #small-dog [onclick]" #> ajaxInvoke(() => chooseSize(smallDog)) &
       ".medium-dog .weight-number *" #> mediumDog.map(_.toString + " lb") &
@@ -201,8 +235,25 @@ class PetDetails extends Loggable {
       ".large-dog #large-dog [onclick]" #> ajaxInvoke(() => chooseSize(largeDog)) &
       ".xlarge-dog .weight-number *" #> xlargeDog.map(_.toString + " lb") &
       ".xlarge-dog #xlarge-dog [onclick]" #> ajaxInvoke(() => chooseSize(xlargeDog)) &
-      "#add-pet" #> ajaxSubmit("Add Another Dog", addNewPet _) &
-      "#checkout" #> ajaxSubmit("Add & Checkout", goToCheckout _)
-    }
+      ".chose-care-container" #> SHtml.idMemoize { renderer =>
+        chooseCareRenderer = Full(renderer)
+
+        ".given-pet-name *" #> getPetNameOrType &
+        "#choose-care [onclick]" #> ajaxInvoke(() => showPlans)
+      } &
+      ".care-question" #> SHtml.idMemoize { renderer =>
+        careQuestionRenderer = Full(renderer)
+
+        ".given-pet-name *" #> getPetNameOrType
+      }
+    } &
+    ".pet-plans" #> SHtml.idMemoize { renderer =>
+      petPlansRenderer = Full(renderer)
+
+      "^" #> ClearNodesIf(petSize.isEmpty) andThen
+      ".given-pet-name *" #> getPetNameOrType
+    } &
+    "#add-pet" #> ajaxSubmit("Add Another Dog", addNewPet _) &
+    "#checkout" #> ajaxSubmit("Add & Checkout", goToCheckout _)
   }
 }
