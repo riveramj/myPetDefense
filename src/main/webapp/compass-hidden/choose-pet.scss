@@ -117,10 +117,14 @@ $cat-yellow: #FCE99B;
 }
 
 .pet-details {
-  height: 490px;
+  height: 545px;
   -webkit-transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
   -moz-transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
   transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
+
+  &.pet-missing {
+    display: none;
+  }
 
   &.choosing-plan .account-info {
     height: 1px;
