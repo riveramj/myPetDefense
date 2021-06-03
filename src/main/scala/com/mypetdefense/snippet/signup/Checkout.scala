@@ -63,7 +63,7 @@ class Checkout extends Loggable {
       code
   }
 
-  val pets: Map[Long, PendingPet] = completedPets.is.toMap
+  val pets: Map[Long, PendingPet] = shoppingCart.is.toMap
   val petCount: Int = pets.size
 
   val petPrices: List[Price] = pets.flatMap { case (_, pendingPet) =>
@@ -86,7 +86,7 @@ class Checkout extends Loggable {
 
   private def updateSessionVars() = {
     PetFlowChoices.petCount(Full(petCount))
-    PetFlowChoices.completedPets(mutable.LinkedHashMap.empty)
+    PetFlowChoices.shoppingCart(mutable.LinkedHashMap.empty)
     PetFlowChoices.monthlyTotal(Full(monthlyTotal))
     PetFlowChoices.todayTotal(Full(todayTotal))
   }

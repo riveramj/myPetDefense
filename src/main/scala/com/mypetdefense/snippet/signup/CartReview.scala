@@ -7,7 +7,7 @@ import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
-import net.liftweb.http.SHtml.{ajaxInvoke, ajaxText}
+import net.liftweb.http.SHtml.{ajaxInvoke, ajaxSubmit, ajaxText}
 import net.liftweb.http._
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds.Noop
@@ -18,13 +18,13 @@ import java.text.SimpleDateFormat
 import scala.collection.mutable
 import scala.xml.Elem
 
-object PetDetails extends Loggable {
+object CartReview extends Loggable {
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Pet Details") / "pet-details"
+  val menu = Menu.i("Cart Review") / "cart-review"
 }
 
-class PetDetails extends Loggable {
+class CartReview extends Loggable {
   val formatter          = new SimpleDateFormat("MM/yy")
   val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 
@@ -97,7 +97,7 @@ class PetDetails extends Loggable {
     petYear = ""
   }
 
-  def addToCart: JsCmd = {
+  def addToCart(): JsCmd = {
     for {
       animalType <- chosenPetType
       boxType    <- chosenPlanType
@@ -117,7 +117,7 @@ class PetDetails extends Loggable {
 
     resetFields
 
-    S.redirectTo(CartReview.menu.loc.calcDefaultHref)
+    S.redirectTo(Checkout.menu.loc.calcDefaultHref)
   }
 
   def addNewPet(): JsCmd =
@@ -163,7 +163,7 @@ class PetDetails extends Loggable {
   }
 
   def monthDropdown: Elem = {
-    SHtml.ajaxSelect(
+    SHtml.select(
       ("", "") +: List(
         "January",
         "February",
@@ -185,7 +185,7 @@ class PetDetails extends Loggable {
   }
 
   def yearDropdown: Elem = {
-    SHtml.ajaxSelect(
+    SHtml.select(
       ("", "") +: List(
         "2021",
         "2020",
@@ -213,7 +213,7 @@ class PetDetails extends Loggable {
   }
 
   def productDropdown = {
-    SHtml.ajaxSelectObj(
+    SHtml.selectObj(
       supplements.map(supplement => (Full(supplement), supplement.nameAndQuantity)),
       Full(chosenSupplement),
       (possibleSupplement: Box[Product]) => chosenSupplement = possibleSupplement
@@ -307,7 +307,7 @@ class PetDetails extends Loggable {
         ".price span *" #> chosenPlanPrice.map(_.price.get.toString) &
         ".tag-line *" #> chosenPlanType.map(_ + " tagline")
       } &
-      "#choose-plan [onclick]" #> ajaxInvoke(addToCart _)
+      "#choose-plan" #> ajaxSubmit("Choose Plan", addToCart _)
     }
   }
 }
