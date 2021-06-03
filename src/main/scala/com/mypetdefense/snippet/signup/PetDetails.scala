@@ -111,7 +111,7 @@ class PetDetails extends Loggable {
   def addNewPet(): JsCmd =
     validateAndNavigate(PetDetails.menu.loc.calcDefaultHref)
 
-  def chooseSize(animalSize: Option[AnimalSize.Value]) = {
+  def chooseSize(animalSize: Box[AnimalSize.Value]) = {
     petSize = animalSize
   }
 
@@ -240,7 +240,7 @@ class PetDetails extends Loggable {
           chooseCareRenderer = Full(renderer)
 
           ".given-pet-name *" #> getPetNameOrType &
-            "#choose-care [onclick]" #> ajaxInvoke(() => showPlans)
+          "#choose-care [onclick]" #> ajaxInvoke(() => showPlans)
         } &
         ".care-question" #> SHtml.idMemoize { renderer =>
           careQuestionRenderer = Full(renderer)
@@ -251,6 +251,9 @@ class PetDetails extends Loggable {
     } &
     ".pet-plans" #> SHtml.idMemoize { renderer =>
       petPlansRenderer = Full(renderer)
+      println("petSize")
+      println(petSize)
+      println("petSize")
 
       "^" #> ClearNodesIf(petSize.isEmpty) andThen
       ".given-pet-name *" #> getPetNameOrType

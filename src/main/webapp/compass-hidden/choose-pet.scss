@@ -118,9 +118,9 @@ $cat-yellow: #FCE99B;
 
 .pet-details {
   height: 545px;
-  -webkit-transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
-  -moz-transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
-  transition: height 0.5s cubic-bezier(.47, 1.64, .41, .8);
+  -webkit-transition: height 0.7s cubic-bezier(.47, 1.64, .41, .8);
+  -moz-transition: height 0.7s cubic-bezier(.47, 1.64, .41, .8);
+  transition: height 0.7s cubic-bezier(.47, 1.64, .41, .8);
 
   &.pet-missing {
     display: none;
@@ -142,7 +142,6 @@ $cat-yellow: #FCE99B;
     color: $text-color;
     text-align: center;
     padding: 21px;
-    background-color: #D3A1C5;
 
     .care-question {
       display: block;
@@ -214,5 +213,123 @@ $cat-yellow: #FCE99B;
     font-size: 18px;
     display: block;
     margin: 15px auto 0;
+  }
+}
+
+.pet-plans {
+  padding: 0 10px;
+
+  .plans {
+    width: 100%;
+
+    thead {
+      background-color: $dog-blue;
+
+      th {
+        padding: 15px 0;
+        color: #ffffff;
+        font-size: 15px;
+      }
+
+      .features {
+        width: 40%;
+      }
+    }
+
+    tbody {
+      background-color: #eeeeee;
+
+      td {
+        padding: 10px 0;
+      }
+    }
+
+    th:last-child, td:last-child {
+      padding-right: 8px;
+    }
+
+    th:first-child, td:first-child {
+      padding-left: 8px;
+    }
+
+    .fa-check {
+      color: green;
+    }
+
+    .fa-times {
+      color: red;
+    }
+
+    .plan-feature, .plan-name {
+      text-align: center;
+    }
+
+    .complete-plan {
+      color: gold;
+    }
+
+    .everyday-plan {
+      color: darkturquoise;
+    }
+  }
+
+  .plan-prices {
+    margin: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 15px;
+
+    .plan-price {
+      display: inline-block;
+      border: 2px solid #A64280;
+      padding: 13px 0;
+      margin-left: -5px;
+      width: 100px;
+
+      &:first-child {
+        border-top-left-radius: 15px;
+        border-bottom-left-radius: 15px;
+      }
+
+      &:last-child {
+       border-top-right-radius: 15px;
+       border-bottom-right-radius: 15px;
+      }
+    }
+
+    .selected {
+      background-color: $purple;
+      color: #ffffff;
+    }
+  }
+
+  .selected-plan-info {
+    text-align: center;
+
+    .price {
+      font-size: 33px;
+      font-weight: 600;
+      margin-bottom: 9px;
+    }
+
+    .tag-line {
+      font-size: 19px;
+      color: #888888;
+    }
+  }
+
+  .choose-plan-container {
+    text-align: center;
+    margin-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  #choose-plan {
+    background-color: #A64280;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 50px;
+    font-size: 20px;
+    color: #ffffff;
   }
 }
