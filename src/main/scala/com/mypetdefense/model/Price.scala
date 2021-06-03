@@ -55,9 +55,13 @@ object Price extends Price with LongKeyedMetaMapper[Price] {
       code: String,
       fleaTick: FleaTick,
       stripePriceId: String = "",
-      boxType: Box[BoxType.Value]
+      boxType: Box[BoxType.Value],
+      possibleStripeProductId: String = "",
   ): Price = {
-    val stripeProductId = boxType.flatMap(getStripeProductId(fleaTick.size.get, _)).openOr("")
+    val stripeProductId = if(possibleStripeProductId.isEmpty)
+      boxType.flatMap(getStripeProductId(fleaTick.size.get, _)).openOr("")
+    else
+      possibleStripeProductId
 
     Price.create
       .priceId(generateLongId)

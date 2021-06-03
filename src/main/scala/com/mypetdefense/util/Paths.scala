@@ -70,7 +70,7 @@ object Paths {
     RedirectResponse(PetDetails.menu.loc.calcDefaultHref)
   )
   val completedPet: If = If(
-    () => completedPets.nonEmpty,
+    () => shoppingCart.nonEmpty,
     () => RedirectResponse(PetDetails.menu.loc.calcDefaultHref)
   )
   val createdAccount: If = If(
@@ -209,6 +209,7 @@ object Paths {
     AddOnCheckout.menu,
     petland.NewOrder.menu,
     PetDetails.menu,
+    CartReview.menu,
     DogDetails.menu,
     CatDetails.menu
   )

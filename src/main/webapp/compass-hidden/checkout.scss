@@ -1,8 +1,6 @@
 @import "base";
 @import "nav-bar";
-@import "shopping-bar";
-@import "flow";
-@import "footer";
+@import "signup-flow";
 
 .pet-count {
   @media (min-width: $bp-medium) {
@@ -342,80 +340,8 @@ fieldset label {
   background-color: #cccccc;
 }
 
-.promotion-info {
-  #promo-success {
-    color: #259490;
-    font-size: rem(12px);
-    display: none;
-    font-weight: $semibold;
-
-    &:before {
-      @extend %icon;
-      content: fa-content($fa-var-check);
-      font-size: rem(15px);
-      color: #259490;
-      margin-right: 2px;
-    }
-  }
-
-  &.promo-error {
-    #promo-code {
-      border: 1px solid #FF9295;
-    }
-
-    #promo-error {
-      display: inline-block;
-    }
-  }
-
-  &.promo-success {
-    #promo-success {
-      display: inline-block;
-    }
-
-    .apply-promo {
-      background-color: #5BB8B3;
-    }
-  }
-}
-
 .hidden {
   display: none;
-}
-
-.apply-promo-container {
-  display: flex;
-}
-
-.apply-promo {
-  padding: rem(9px) rem(15px);
-  font-size: rem(14px);
-  border: none;
-  background-color: #818080;
-  color: #ffffff;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-
-  border-radius: 5px;
-
-  cursor: pointer;
-
-  margin-left: 8px;
-  white-space: nowrap;
-
-  &.desktop {
-    display: none;
-  }
-
-  @media (min-width: $bp-medium) {
-    &.mobile {
-      display: none;
-    }
-   
-    &.desktop {
-      display: block;
-    }
-  }
 }
 
 .facebook-option {

@@ -1,5 +1,6 @@
 package bootstrap.liftweb
 
+import com.mypetdefense.actor.{BootJobActor, CreateEverydayBox}
 import com.mypetdefense.jobs.JobManager
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
@@ -61,6 +62,9 @@ class Boot {
     //DataLoader.dentalProductCleanup
     //DataLoader.createCancelledSubForUser
 
+    //BootJobActor ! MigrateStripeProducts
+    BootJobActor ! CreateEverydayBox
+
     // where to search snippet
     LiftRules.addToPackages("com.mypetdefense")
 
@@ -86,8 +90,6 @@ class Boot {
 
     LiftRules.statelessDispatch.append(StripeHook)
     LiftRules.statelessDispatch.append(TPPApi)
-
-    //BootJobActor ! MigrateStripeProducts
   }
 
   //Bundles

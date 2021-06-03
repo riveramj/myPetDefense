@@ -908,4 +908,41 @@ object DataLoader extends Loggable {
         .saveMe
     }
   }
+
+  def createEverydayStripeProductsPrices = {
+    for {
+      stripeProduct <- StripeFacade.Product.create("Cat Everyday Wellness").toList
+      cost = (14 * 100).toLong
+      (code, _) <- Price.findAll().groupBy(_.code.get)
+      stripePrice <- StripeFacade.Price.create(stripeProduct.id, cost, code).toList
+      catFleaTick <- FleaTick.findAll(By(FleaTick.animalType, AnimalType.Cat))
+    } yield {
+      Price.createPrice(
+        14D,
+        code,
+        catFleaTick,
+        stripePrice.id,
+        Full(BoxType.everydayWellness),
+        stripeProduct.id
+      )
+    }
+
+    for {
+      stripeProduct <- StripeFacade.Product.create("Dog Everyday Wellness").toList
+      cost = (14 * 100).toLong
+      (code, _) <- Price.findAll().groupBy(_.code.get)
+      dogFleaTick <- FleaTick.findAll(By(FleaTick.animalType, AnimalType.Dog))
+      size = dogFleaTick.size.get
+      stripePrice <- StripeFacade.Price.create(stripeProduct.id, cost, s"$size-$code").toList
+    } yield {
+      Price.createPrice(
+        14D,
+        code,
+        dogFleaTick,
+        stripePrice.id,
+        Full(BoxType.everydayWellness),
+        stripeProduct.id
+      )
+    }
+  }
 }
