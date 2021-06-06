@@ -99,7 +99,7 @@ class PetsAndProducts extends Loggable {
         chosenNewPetSupplement = possibleProduct
     )
 
-    "^" #> ClearNodesIf(newPetType != AnimalType.Dog || !newPetBoxType.contains(BoxType.healthAndWellness)) &
+    "^" #> ClearNodesIf(newPetType != AnimalType.Dog || !newPetBoxType.contains(BoxType.complete)) &
     "#choose-supplement #new-pet-choose-supplement" #> firstSupplementDropDown
   }
 
@@ -292,9 +292,9 @@ class PetsAndProducts extends Loggable {
 
       "^ [class+]" #> (if (!selectedPet.isEmpty) "active" else "") &
       ".modal-header .admin" #> ClearNodes &
-      ".supplement" #> ClearNodesIf(!currentBoxType.contains(BoxType.healthAndWellness)) andThen
-      ".second-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.healthAndWellness)) andThen
-      ".third-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.healthAndWellness)) andThen
+      ".supplement" #> ClearNodesIf(!currentBoxType.contains(BoxType.complete)) andThen
+      ".second-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.complete)) andThen
+      ".third-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.complete)) andThen
       "#box-type" #> currentBoxTypeDropdown(renderer) andThen
       "#flea-tick" #> currentProductDropdown &
       "#first-supplement" #> firstSupplementDropDown &

@@ -690,7 +690,7 @@ class ReportingServiceSpec extends DBTest {
         insertPetAndShipmentsChainAtAgency(basicPets, myPetDefenseAgency, subUpgraded = false)
       val basicPetCount = basicMpdPets.pets.size
 
-      val expectedUpgradedBoxStatistics = BoxStatistics(BoxType.healthAndWellness, upgradedPetCount, 1)
+      val expectedUpgradedBoxStatistics = BoxStatistics(BoxType.complete, upgradedPetCount, 1)
       val expectedBasicBoxStatistics = BoxStatistics(BoxType.basic, basicPetCount, 1)
 
       val expectedResult = List(

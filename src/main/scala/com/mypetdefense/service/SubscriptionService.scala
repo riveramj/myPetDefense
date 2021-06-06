@@ -36,7 +36,7 @@ object SubscriptionService {
       box <- boxes
       if box.animalType.get == AnimalType.Dog
     } yield {
-      box.boxType(BoxType.healthAndWellness).saveMe()
+      box.boxType(BoxType.complete).saveMe()
       SubscriptionItem.createFirstBox(box)
     }
 
@@ -120,9 +120,9 @@ object SubscriptionService {
     } yield {
       if (updatedBoxType == BoxType.basic)
         allItems.map(_.delete_!)
-      else if (updatedBoxType == BoxType.everydayWellness)
+      else if (updatedBoxType == BoxType.everyday)
         filteredItems.map(_.delete_!)
-      else if (updatedBoxType == BoxType.healthAndWellness) {
+      else if (updatedBoxType == BoxType.complete) {
         filteredItems.map(_.delete_!)
         supplements.map(SubscriptionItem.createSubscriptionItem(_, box))
       }

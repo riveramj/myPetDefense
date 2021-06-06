@@ -1,7 +1,7 @@
 package com.mypetdefense.snippet.signup
 
 import com.mypetdefense.model._
-import com.mypetdefense.service.PetFlowChoices.shoppingCart
+import com.mypetdefense.service.PetFlowChoices.cart
 import com.mypetdefense.service.ValidationService.checkEmpty
 import com.mypetdefense.service._
 import com.mypetdefense.util.ClearNodesIf
@@ -33,7 +33,7 @@ class PetDetails extends Loggable {
   var chooseCareRenderer: Box[IdMemoizeTransform]          = Empty
   var careQuestionRenderer: Box[IdMemoizeTransform]        = Empty
   var detailsEnteredRenderer: Box[IdMemoizeTransform]      = Empty
-  var currentPets: mutable.LinkedHashMap[Long, PendingPet] = shoppingCart.is
+  var currentPets: mutable.LinkedHashMap[Long, CheckoutPet] = cart.is
   var petName                        = ""
   var petMonth                       = ""
   var petYear                        = ""
@@ -101,6 +101,7 @@ class PetDetails extends Loggable {
     for {
       animalType <- chosenPetType
       boxType    <- chosenPlanType
+      price <- chosenPlanPrice
     } yield {
       val birthday = yearMonthFormatter.parse(s"$petMonth-$petYear")
 
@@ -111,8 +112,8 @@ class PetDetails extends Loggable {
         .birthday(birthday)
         .size(petSize.openOr(null))
 
-      currentPets(newPet.petId.get) = PendingPet(newPet, boxType, chosenSupplement)
-      shoppingCart(currentPets)
+      currentPets(newPet.petId.get) = CheckoutPet(PendingPet(newPet, boxType, chosenSupplement), price)
+      cart(currentPets)
     }
 
     resetFields
@@ -227,6 +228,9 @@ class PetDetails extends Loggable {
       petName
   }
 
+  def clearIfUnavailable(boxType: BoxType.Value) =
+    ClearNodesIf(!availableBoxTypes.contains(boxType))
+
   def render = {
     resetFields
 
@@ -288,6 +292,8 @@ class PetDetails extends Loggable {
       petPlansRenderer = Full(renderer)
 
       "^" #> ClearNodesIf(petSize.isEmpty) andThen
+      ".everyday-plan" #> clearIfUnavailable(BoxType.everyday) andThen
+      ".complete-plan" #> clearIfUnavailable(BoxType.complete) andThen
       ".given-pet-name *" #> getPetNameOrType &
       ".plan-prices" #> {
         "#choose-basic-plan" #> {
@@ -295,12 +301,12 @@ class PetDetails extends Loggable {
           "^ [class+]" #> addSelectedClass(BoxType.basic)
         } &
         "#choose-everyday-plan" #> {
-          "^ [onclick]" #> ajaxInvoke(choosePlan(BoxType.everydayWellness)) &
-          "^ [class+]" #> addSelectedClass(BoxType.everydayWellness)
+          "^ [onclick]" #> ajaxInvoke(choosePlan(BoxType.everyday)) &
+          "^ [class+]" #> addSelectedClass(BoxType.everyday)
         } &
         "#choose-complete-plan" #> {
-          "^ [onclick]" #> ajaxInvoke(choosePlan(BoxType.healthAndWellness)) &
-          "^ [class+]" #> addSelectedClass(BoxType.healthAndWellness)
+          "^ [onclick]" #> ajaxInvoke(choosePlan(BoxType.complete)) &
+          "^ [class+]" #> addSelectedClass(BoxType.complete)
         }
       } &
       ".selected-plan-info" #> {

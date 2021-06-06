@@ -26,7 +26,7 @@ class DogDetails extends Loggable {
   val formatter          = new SimpleDateFormat("MM/yy")
   val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 
-  var currentPets: mutable.LinkedHashMap[Long, PendingPet] = shoppingCart.is
+  var currentPets: mutable.LinkedHashMap[Long, CheckoutPet] = cart.is
   var petName                                       = ""
   var petMonth                                      = ""
   var petYear                                       = ""
@@ -64,7 +64,7 @@ class DogDetails extends Loggable {
       for {
         newPetId   <- PetFlowChoices.petId.is
         animalType <- PetFlowChoices.petChoice.is
-        boxType    <- Full(BoxType.healthAndWellness)
+        boxType    <- Full(BoxType.complete)
       } yield {
         val birthday = yearMonthFormatter.parse(s"$petMonth-$petYear")
 
@@ -75,8 +75,8 @@ class DogDetails extends Loggable {
           .birthday(birthday)
           .size(petSize.openOr(null))
 
-        currentPets(newPetId) = PendingPet(newPet, boxType, chosenSupplement)
-        shoppingCart(currentPets)
+        currentPets(newPetId) = CheckoutPet(PendingPet(newPet, boxType, chosenSupplement), Price.create)
+        cart(currentPets)
       }
 
       petChoice(Empty)

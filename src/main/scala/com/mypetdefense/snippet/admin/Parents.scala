@@ -186,7 +186,7 @@ class Parents extends Loggable {
         chosenNewPetSupplement = possibleProduct
     )
 
-    "^" #> ClearNodesIf(petType != AnimalType.Dog || (!chosenBoxType.contains(BoxType.healthAndWellness))) &
+    "^" #> ClearNodesIf(petType != AnimalType.Dog || (!chosenBoxType.contains(BoxType.complete))) &
       ".supplement-container .supplement-select" #> firstSupplementDropDown
   }
 
@@ -681,9 +681,9 @@ class Parents extends Loggable {
             productPickerRenderer = Full(renderer)
 
             ".modal-header .admin .dog-name" #> selectedPet.map(_.name.get) &
-            ".supplement" #> ClearNodesIf(currentSupplements.isEmpty || !currentBoxType.contains(BoxType.healthAndWellness)) andThen
-            ".second-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.healthAndWellness)) andThen
-            ".third-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.healthAndWellness)) andThen
+            ".supplement" #> ClearNodesIf(currentSupplements.isEmpty || !currentBoxType.contains(BoxType.complete)) andThen
+            ".second-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.complete)) andThen
+            ".third-choice" #> ClearNodesIf(monthSupply || !currentBoxType.contains(BoxType.complete)) andThen
             "#box-type" #> currentBoxTypeDropdown(renderer) &
             "#flea-tick" #> currentFleaTickDropdown &
             "#first-supplement" #> firstSupplementDropDown &

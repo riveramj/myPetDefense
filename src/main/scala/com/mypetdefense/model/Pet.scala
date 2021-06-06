@@ -110,6 +110,20 @@ object AnimalSize extends Enumeration {
   val DogXLargeShld: AnimalSize.Value = Value("66+")   // 14
 
   val CatAllSize: AnimalSize.Value = Value("1.5+") // 15
+
+  def sizeToCategory(size: AnimalSize.Value) = {
+    size match {
+      case DogSmallAdv | DogSmallZo | DogSmallShld =>
+        "Small"
+      case DogMediumAdv | DogMediumZo | DogMediumShld =>
+        "Medium"
+      case DogLargeAdv | DogLargeZo | DogLargeShld =>
+        "Large"
+      case DogXLargeAdv | DogXLargeZo | DogXLargeShld =>
+        "X-Large"
+      case _ => "All Size"
+    }
+  }
 }
 
 case class PendingPet(

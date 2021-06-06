@@ -44,7 +44,7 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
     SubscriptionBox.findAll(
       By(SubscriptionBox.userModified, false),
       By(SubscriptionBox.animalType, AnimalType.Dog),
-      By(SubscriptionBox.boxType, BoxType.healthAndWellness)
+      By(SubscriptionBox.boxType, BoxType.complete)
     )
   }
 
@@ -79,10 +79,10 @@ object SubscriptionBox extends SubscriptionBox with LongKeyedMetaMapper[Subscrip
 }
 
 object BoxType extends Enumeration {
-  val basic: BoxType.Value = Value("Flea & Tick Only")  // 0
-  val healthAndWellness: BoxType.Value = Value("Health and Wellness") // 1
-  val everydayWellness: BoxType.Value = Value("Everyday Wellness") // 2
+  val basic: BoxType.Value = Value("Basic")  // 0
+  val complete: BoxType.Value = Value("Complete") // 1
+  val everyday: BoxType.Value = Value("Everyday") // 2
 
-  def dogBoxTypes = List(basic, healthAndWellness)
-  def catBoxTypes = List(basic)
+  def dogBoxTypes = List(basic, complete)
+  def catBoxTypes = List(basic, everyday)
 }
