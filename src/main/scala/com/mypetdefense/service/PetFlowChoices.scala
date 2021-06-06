@@ -4,7 +4,12 @@ import com.mypetdefense.model._
 import net.liftweb.common._
 import net.liftweb.http._
 
-import scala.collection.mutable.LinkedHashMap
+import scala.collection.mutable
+
+case class CheckoutPet (
+  pendingPet: PendingPet,
+  price: Price
+)
 
 object PetFlowChoices extends Loggable {
   object freeMonths    extends SessionVar[Box[Int]](Empty)
@@ -22,8 +27,8 @@ object PetFlowChoices extends Loggable {
   object petId         extends SessionVar[Box[Long]](Empty)
 
 
-  object shoppingCart extends SessionVar[LinkedHashMap[Long, PendingPet]](LinkedHashMap.empty)
-  object petCount      extends SessionVar[Box[Int]](Empty)
+  object cart     extends SessionVar[mutable.LinkedHashMap[Long, CheckoutPet]](mutable.LinkedHashMap.empty)
+  object petCount extends SessionVar[Box[Int]](Empty)
 
   object woofTraxOfferCode  extends SessionVar[Box[String]](Empty)
   object woofTraxUserId     extends SessionVar[Box[String]](Empty)

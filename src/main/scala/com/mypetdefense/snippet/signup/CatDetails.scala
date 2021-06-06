@@ -4,7 +4,6 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
-import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
 import net.liftweb.http._
@@ -27,7 +26,7 @@ class CatDetails extends Loggable {
   val formatter          = new SimpleDateFormat("MM/yy")
   val yearMonthFormatter = new SimpleDateFormat("MMM-yyyy")
 
-  var currentPets: mutable.LinkedHashMap[Long, PendingPet] = shoppingCart.is
+  var currentPets: mutable.LinkedHashMap[Long, CheckoutPet] = cart.is
   var petName                                       = ""
   var petMonth                                      = ""
   var petYear                                       = ""
@@ -65,7 +64,7 @@ class CatDetails extends Loggable {
       for {
         newPetId   <- PetFlowChoices.petId.is
         animalType <- PetFlowChoices.petChoice.is
-        boxType    <- Full(BoxType.healthAndWellness)
+        boxType    <- Full(BoxType.complete)
       } yield {
         val birthday = yearMonthFormatter.parse(s"$petMonth-$petYear")
 
@@ -76,8 +75,8 @@ class CatDetails extends Loggable {
           .birthday(birthday)
           .size(petSize.openOr(null))
 
-        currentPets(newPetId) = PendingPet(newPet, boxType, chosenSupplement)
-        shoppingCart(currentPets)
+        currentPets(newPetId) = CheckoutPet(PendingPet(newPet, boxType, chosenSupplement), Price.create)
+        cart(currentPets)
       }
 
       petChoice(Empty)

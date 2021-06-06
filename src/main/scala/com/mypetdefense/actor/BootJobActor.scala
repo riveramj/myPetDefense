@@ -22,7 +22,7 @@ trait MigrateStripeHandling extends HandlerChain {
 trait CreateEverydayBoxHandling extends HandlerChain {
   addHandler {
     case CreateEverydayBox =>
-      if (Price.findAll(By(Price.boxType, BoxType.everydayWellness)).isEmpty)
+      if (Price.findAll(By(Price.boxType, BoxType.everyday)).isEmpty)
         DataLoader.createEverydayStripeProductsPrices
   }
 }

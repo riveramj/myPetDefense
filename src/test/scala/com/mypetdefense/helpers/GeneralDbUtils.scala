@@ -119,7 +119,7 @@ object GeneralDbUtils {
     val pets = in.pets.map { pData =>
       val createdPet = createPet(u, pData)
       if (upgraded)
-        SubscriptionBox.createNewBox(su, createdPet, BoxType.healthAndWellness)
+        SubscriptionBox.createNewBox(su, createdPet, BoxType.complete)
       else
         SubscriptionBox.createNewBox(su, createdPet, BoxType.basic)
       createdPet

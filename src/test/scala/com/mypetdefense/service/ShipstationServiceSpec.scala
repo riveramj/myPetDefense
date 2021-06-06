@@ -55,7 +55,7 @@ class ShipstationServiceSpec extends DBTest with RestHelper {
         b.boxType.get match {
           case BoxType.basic if !shipment.freeUpgradeSample.get => BigDecimal(5)
           case BoxType.basic             => BigDecimal(15)
-          case BoxType.healthAndWellness => BigDecimal(15)
+          case BoxType.`complete` => BigDecimal(15)
           case _                         => BigDecimal(0)
         }
       )

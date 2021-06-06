@@ -215,7 +215,7 @@ object DataLoader extends Loggable {
           price = smallHwBox,
           code = code,
           fleaTick = fleaTick,
-          boxType = Full(BoxType.healthAndWellness)
+          boxType = Full(BoxType.complete)
         )
       }
 
@@ -227,7 +227,7 @@ object DataLoader extends Loggable {
           price = mdXLHwBox,
           code = code,
           fleaTick = fleaTick,
-          boxType = Full(BoxType.healthAndWellness)
+          boxType = Full(BoxType.complete)
         )
       }
     }
@@ -565,7 +565,7 @@ object DataLoader extends Loggable {
       box <- SubscriptionBox.findAll(
         By(SubscriptionBox.userModified, true),
         By(SubscriptionBox.animalType, AnimalType.Dog),
-        By(SubscriptionBox.boxType, BoxType.healthAndWellness)
+        By(SubscriptionBox.boxType, BoxType.complete)
       )
       subscriptionItems = box.subscriptionItems.toList.flatMap(_.product.obj)
     } yield {
@@ -584,13 +584,13 @@ object DataLoader extends Loggable {
         box
           .animalType(AnimalType.Cat)
           .animalType(pet.animalType.get)
-          .boxType(BoxType.healthAndWellness)
+          .boxType(BoxType.complete)
           .saveMe()
       else
         box
           .animalType(AnimalType.Cat)
           .animalType(pet.animalType.get)
-          .boxType(BoxType.healthAndWellness)
+          .boxType(BoxType.complete)
           .boxType(BoxType.basic)
           .userModified(false)
           .saveMe()
@@ -760,7 +760,7 @@ object DataLoader extends Loggable {
         By(Subscription.status, Status.Cancelled),
       )
       boxes = subscription.subscriptionBoxes
-        .filter(_.boxType == BoxType.healthAndWellness)
+        .filter(_.boxType == BoxType.complete)
     } yield {
       if (boxes.nonEmpty)
         subscription.isUpgraded(true).saveMe()
@@ -821,7 +821,7 @@ object DataLoader extends Loggable {
   def createStripeProductsPrices = {
     val upgradedBoxes = Price.findAll(
       NullRef(Price.stripePriceId),
-      By(Price.boxType, BoxType.healthAndWellness)
+      By(Price.boxType, BoxType.complete)
     )
 
     val basicBoxes = Price.findAll(
@@ -884,7 +884,7 @@ object DataLoader extends Loggable {
       FleaTick.findAll().filter { ft =>
         ft.isZoGuard_? && ft.animalType.get == AnimalType.Dog
       }.foreach { fleaTick =>
-        val newPrice = Price.createPrice(5D, Price.fiveDollarBox, fleaTick, "", Full(BoxType.healthAndWellness))
+        val newPrice = Price.createPrice(5D, Price.fiveDollarBox, fleaTick, "", Full(BoxType.complete))
         val cost = (5 * 100).toLong
 
         val stripePrice = StripeFacade.Price.create(newPrice.stripeProductId.get, cost, s"${fleaTick.sizeName.get}-${Price.fiveDollarBox}")
@@ -922,7 +922,7 @@ object DataLoader extends Loggable {
         code,
         catFleaTick,
         stripePrice.id,
-        Full(BoxType.everydayWellness),
+        Full(BoxType.everyday),
         stripeProduct.id
       )
     }
@@ -940,7 +940,7 @@ object DataLoader extends Loggable {
         code,
         dogFleaTick,
         stripePrice.id,
-        Full(BoxType.everydayWellness),
+        Full(BoxType.everyday),
         stripeProduct.id
       )
     }

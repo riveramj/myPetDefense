@@ -60,14 +60,14 @@ object SubscriptionItem extends SubscriptionItem with LongKeyedMetaMapper[Subscr
     val isSmallDog = pendingPet.pet.size.get == AnimalSize.DogSmallZo
 
     subscriptionBox.map(_.boxType.get) match {
-      case Full(BoxType.healthAndWellness) =>
+      case Full(BoxType.`complete`) =>
         val supplement = SubscriptionItem.create
           .subscriptionBox(subscriptionBox)
           .product(pendingPet.thirtyDaySupplement)
           .saveMe()
 
         List(supplement) ++ addDentalPowder(subscriptionBox, isSmallDog).toList
-      case Full(BoxType.everydayWellness) =>
+      case Full(BoxType.`everyday`) =>
         addDentalPowder(subscriptionBox, isSmallDog).toList
 
       case _ => Nil
