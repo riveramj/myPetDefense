@@ -163,4 +163,8 @@ class Boot {
     )
   }
   LiftRules.extractInlineJavaScript = true
+
+  LiftRules.liftRequest.append {
+    case Req(".well-known" :: "apple-developer-merchantid-domain-association" :: Nil, "", GetRequest) => false
+  }
 }
