@@ -1,7 +1,7 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
   <div id="shopping-cart" data-lift="signup.CartReview.render">
     <h2>Shopping Cart</h2>
-
+    <div class="foo"></div>
     <ul class="pets">
       <li class="pet">
         <ul>
@@ -50,13 +50,19 @@
 
     <div class="next-actions">
       <button id="add-pet">Add Another Pet</button>
+      <div id="payment-request-button">
+        <!-- A Stripe Element will be inserted here. -->
+      </div>
       <button id="checkout">Proceed to Checkout</button>
     </div>
+
+    <script type="text/javascript" class="update-billing-amount"></script>
   </div>
   <tail>
     <script type="text/javascript" data-lift="script-bundle?name=cart-review"></script>
   </tail>
   <head_merge>
+    <script src="https://js.stripe.com/v3/"></script>
     <link rel="stylesheet" data-lift="style-bundle?name=cart-review">
   </head_merge>
 </div>

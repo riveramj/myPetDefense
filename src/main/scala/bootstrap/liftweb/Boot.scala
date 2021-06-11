@@ -138,6 +138,7 @@ class Boot {
             ContentSourceRestriction.Host("https://ajax.googleapis.com"),
             ContentSourceRestriction.Host("https://connect.facebook.net"),
             ContentSourceRestriction.Host("https://facebook.com"),
+            ContentSourceRestriction.Host("https://js.stripe.com")
           ),
           styleSources = List(
             ContentSourceRestriction.Self,
@@ -152,7 +153,8 @@ class Boot {
           ),
           frameSources = List(
             ContentSourceRestriction.Host("https://www.youtube.com"),
-            ContentSourceRestriction.Host("https://www.facebook.com")
+            ContentSourceRestriction.Host("https://www.facebook.com"),
+            ContentSourceRestriction.Host("https://js.stripe.com")
           ),
           connectSources = List(
             ContentSourceRestriction.Host("https://facebook.com"),

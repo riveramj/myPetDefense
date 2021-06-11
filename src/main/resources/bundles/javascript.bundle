@@ -57,6 +57,7 @@ base.js
 cart-review
 promo-code.js
 base.js
+stripe.js
 
 reviews
 admin

@@ -9,15 +9,101 @@ card = elements.create('card',{
   }
 })
 
-newCard = false
+cartItems = []
+total = {
+  label: 'Due Today',
+  amount: 0
+}
 
-if !$('.form-row').hasClass('hide-card')
-  card.mount '#card-element'
-  newCard = true
+newCard = false
+updating = false
+timeout = 10000
+
+if window.location.pathname == "/checkout"
+  if !$('.form-row').hasClass('hide-card')
+    card.mount '#card-element'
+    newCard = true
+
+paymentRequest = stripe.paymentRequest({
+  country: 'US',
+  currency: 'usd',
+  displayItems: cartItems,
+  total: total,
+  requestPayerName: true,
+  requestPayerEmail: true,
+  requestPayerPhone: true,
+  requestShipping: true,
+  shippingOptions: [
+    {
+      id: 'free-shipping',
+      label: 'Free shipping',
+      detail: 'Arrives in 4 to 6 days',
+      amount: 0,
+    },
+  ],
+})
+
+elements = stripe.elements()
+prButton = elements.create('paymentRequestButton', {
+  paymentRequest: paymentRequest,
+})
+
+paymentRequest.on('shippingaddresschange', (ev) ->
+  if (ev.shippingAddress.country != 'US')
+    ev.updateWith({status: 'invalid_shipping_address'})
+  else
+    updating = true
+    updateBillingAmount(JSON.stringify ev.shippingAddress)
+
+    listenForServerUpdate(timeout).then(->
+      console.log "promise resolved"
+      updating = false
+
+      ev.updateWith({
+        status: 'success',
+        displayItems: cartItems,
+        total: total
+      })
+    )
+)
+
+paymentRequest.canMakePayment().then((result) ->
+  if (result)
+    prButton.mount('#payment-request-button')
+  else
+    document.getElementById('payment-request-button').style.display = 'none'
+)
   
 stripeCallback = (token) ->
   $("#stripe-token").val(token.id)
   $(".checkout, .update-billing, #create-customer").submit()
+
+prButton. on "click", (event) ->
+  paymentRequest.update({
+    total: total,
+    displayItems: cartItems,
+  })
+
+listenForServerUpdate = (timeout) ->
+  console.log "start promise"
+  start = Date.now()
+
+  return new Promise (resolve, reject) ->
+    console.log "top level"
+    
+    checkingServerUpdate = (resolve, reject) ->
+      console.log "checking promise"
+
+      if (updating)
+        console.log "promise good"
+        resolve "it worked"
+      else if (timeout && (Date.now() - start) >= timeout)
+        console.log "promise fail"
+        reject  Error "timeout"
+      else
+        console.log "promise waiting"
+        setTimeout(checkingServerUpdate.bind(this, resolve, reject), 2)
+
 
 $(document).ready ->
   $("body").on "click", '.checkout, .update-billing, #create-customer', (event) ->
@@ -28,6 +114,15 @@ $(document).ready ->
     myPetDefenseSite.event("validate-stripe-form",
       stripeCallback: stripeCallback
     )
+
+$(document).on "update-cart-items", (event) ->
+  console.log("in event")
+  console.log(event)
+  console.log("in event")
+
+  updating = true
+  cartItems = event.items
+  total = event.total
 
 $(document).on "use-new-card", (event) ->
   $('.form-row').removeClass('hide-card')
