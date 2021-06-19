@@ -32,7 +32,8 @@ object StripeFacade extends Loggable {
 
     def create(
         email: String,
-        stripeToken: String,
+        stripeToken: Box[String],
+        stripePaymentMethod: Box[String],
         coupon: Box[Coupon] = Empty
     ): Box[Stripe.Customer] = {
       val couponId = coupon.map(_.couponCode.get)
@@ -40,21 +41,23 @@ object StripeFacade extends Loggable {
       Stripe.Customer.create(
         CustomerCreateParams.builder
           .setEmail(email)
-          .setSource(stripeToken)
           .whenDefined(couponId)(_.setCoupon)
+          .whenDefined(stripePaymentMethod)(_.setPaymentMethod)
+          .whenDefined(stripeToken)(_.setSource)
           .build
       )
     }
 
     def createWithSubscription(
         email: String,
-        stripeToken: String,
+        stripeToken: Box[String],
+        stripePaymentMethod: Box[String],
         taxRate: BigDecimal,
         coupon: Box[Coupon],
         items: List[Subscription.Item]
     ): Box[CustomerWithSubscriptions] =
       for {
-        customer <- Customer.create(email, stripeToken, coupon)
+        customer <- Customer.create(email, stripeToken, stripePaymentMethod, coupon)
         _        <- Subscription.createWithTaxRate(customer, taxRate, Empty, items)
         updated  <- Customer.retrieveWithSubscriptions(customer.id)
       } yield updated

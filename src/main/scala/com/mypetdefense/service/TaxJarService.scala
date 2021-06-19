@@ -1,6 +1,6 @@
 package com.mypetdefense.service
 
-import com.mypetdefense.snippet.signup.PartialAddress
+import com.mypetdefense.snippet.signup.StripePartialAddress
 
 import java.util.Date
 import dispatch.Defaults._
@@ -33,7 +33,7 @@ object TaxJarService extends Loggable {
     findTaxAmountAndRate(city, state, zip, 0d)._2
   }
 
-  def findTaxAmountAndRate(partialAddress: PartialAddress, amountDue: BigDecimal): (Double, Double) = {
+  def findTaxAmountAndRate(partialAddress: StripePartialAddress, amountDue: BigDecimal): (Double, Double) = {
     findTaxAmountAndRate(partialAddress.city, partialAddress.region, partialAddress.postalCode, amountDue)
   }
 

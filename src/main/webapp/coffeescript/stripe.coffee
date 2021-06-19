@@ -16,8 +16,10 @@ total = {
 }
 
 newCard = false
-updating = false
-timeout = 10000
+updated = true
+paymentStatus = ""
+successUrl = ""
+timeout = 20000
 
 if window.location.pathname == "/checkout"
   if !$('.form-row').hasClass('hide-card')
@@ -43,6 +45,23 @@ paymentRequest = stripe.paymentRequest({
   ],
 })
 
+paymentRequest.on('token', (event) ->
+  console.log event
+  console.log "1"
+
+  attachPaymentMethod(
+    event.token.id,
+    JSON.stringify(event.payerEmail),
+    JSON.stringify(event.shippingAddress)
+  )
+
+  listenForServerUpdate(timeout).then(->
+    event.complete(paymentStatus)
+
+    window.location.replace(successUrl)
+  )
+)
+
 elements = stripe.elements()
 prButton = elements.create('paymentRequestButton', {
   paymentRequest: paymentRequest,
@@ -52,13 +71,10 @@ paymentRequest.on('shippingaddresschange', (ev) ->
   if (ev.shippingAddress.country != 'US')
     ev.updateWith({status: 'invalid_shipping_address'})
   else
-    updating = true
+    updated = false
     updateBillingAmount(JSON.stringify ev.shippingAddress)
 
     listenForServerUpdate(timeout).then(->
-      console.log "promise resolved"
-      updating = false
-
       ev.updateWith({
         status: 'success',
         displayItems: cartItems,
@@ -85,25 +101,19 @@ prButton. on "click", (event) ->
   })
 
 listenForServerUpdate = (timeout) ->
-  console.log "start promise"
   start = Date.now()
 
   return new Promise (resolve, reject) ->
-    console.log "top level"
-    
-    checkingServerUpdate = (resolve, reject) ->
-      console.log "checking promise"
-
-      if (updating)
-        console.log "promise good"
+    checkingServerUpdate = ->
+      if (updated)
+        updated = false
         resolve "it worked"
       else if (timeout && (Date.now() - start) >= timeout)
-        console.log "promise fail"
         reject  Error "timeout"
       else
-        console.log "promise waiting"
-        setTimeout(checkingServerUpdate.bind(this, resolve, reject), 2)
+        setTimeout(checkingServerUpdate.bind(this), 250)
 
+    checkingServerUpdate ->
 
 $(document).ready ->
   $("body").on "click", '.checkout, .update-billing, #create-customer', (event) ->
@@ -116,13 +126,18 @@ $(document).ready ->
     )
 
 $(document).on "update-cart-items", (event) ->
-  console.log("in event")
-  console.log(event)
-  console.log("in event")
-
-  updating = true
   cartItems = event.items
   total = event.total
+  updated = true
+
+$(document).on "stripe-payment-status", (event) ->
+  console.log "in payment status"
+  console.log event
+  console.log "in payment status"
+
+  paymentStatus = event.status
+  successUrl = event.successUrl
+  updated = true
 
 $(document).on "use-new-card", (event) ->
   $('.form-row').removeClass('hide-card')
