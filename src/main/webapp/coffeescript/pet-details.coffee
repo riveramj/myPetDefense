@@ -10,7 +10,11 @@ $(document).ready ->
     $('.cat-choice').addClass('selected')
 
   $("body").on "click", '#choose-care', (event) ->
-    $('.dog-choice').addClass('details-complete').removeClass('selected')
-    $('.cat-choice').addClass('details-complete').removeClass('selected')
-    $('#content-container').addClass('choosing-plan')
-    $('.pet-details').addClass('choosing-plan')
+    $(".validation-error").remove()
+    $(".error").removeClass("error")
+
+$(document).on "show-plans", (event) ->
+  $('.dog-choice').addClass('details-complete').removeClass('selected')
+  $('.cat-choice').addClass('details-complete').removeClass('selected')
+  $('#content-container').addClass('choosing-plan')
+  $('.pet-details').addClass('choosing-plan')

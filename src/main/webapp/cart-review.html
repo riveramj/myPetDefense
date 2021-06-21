@@ -1,4 +1,5 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <input type="hidden" id="ip-address">
   <div id="shopping-cart" data-lift="signup.CartReview.render">
     <h2>Shopping Cart</h2>
     <div class="foo"></div>
@@ -24,16 +25,14 @@
     <fieldset class="promo-container promotion-info">
       <legend>Promotion Code</legend>
       <div>
-        <label>
-          <div class="apply-promo-container">
-            <input id="promo-code" size="20" type="text" placeholder="Enter Code">
-            <button class="apply-promo" type="button">Apply</button>
-          </div>
-          <div>
-            <span class="hidden" id="promo-error">Invalid. Please try another code.</span>
-            <span class="hidden" id="promo-success">Promotion applied.</span>
-          </div>
-        </label>
+        <div class="apply-promo-container">
+          <input class="promo-code" size="20" type="text" placeholder="Enter Code">
+          <button class="apply-promo" type="button">Apply</button>
+        </div>
+        <div>
+          <span class="hidden" id="promo-error">Invalid. Please try another code.</span>
+          <span class="hidden" id="promo-success">Promotion applied.</span>
+        </div>
       </div>
     </fieldset>
 

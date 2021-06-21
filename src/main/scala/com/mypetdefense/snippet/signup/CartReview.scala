@@ -1,15 +1,20 @@
 package com.mypetdefense.snippet.signup
 
 import com.mypetdefense.model.AnimalSize.sizeToCategory
+import com.mypetdefense.model.Coupon
 import com.mypetdefense.service.CheckoutService.{setupNewUser, tryToCreateUser, updateSessionVars}
 import com.mypetdefense.service.PetFlowChoices.cart
-import com.mypetdefense.service.{StripeFacade, TaxJarService}
+import com.mypetdefense.service.ValidationService.checkDuplicateIpAddress
+import com.mypetdefense.service.{PetFlowChoices, StripeFacade, TaxJarService}
 import com.mypetdefense.snippet.{CallableFunction, MyPetDefenseEvent}
+import com.mypetdefense.util.Paths.completedPet
 import net.liftweb.common._
+import net.liftweb.http.SHtml.{ajaxText, hidden}
 import net.liftweb.http.js.JsCmd
 import net.liftweb.http.js.JsCmds.Noop
 import net.liftweb.http.{IdMemoizeTransform, S, SHtml}
 import net.liftweb.json.{DefaultFormats, JValue, Serialization}
+import net.liftweb.mapper.By
 import net.liftweb.sitemap.Menu
 import net.liftweb.util.Helpers._
 
@@ -17,7 +22,8 @@ import net.liftweb.util.Helpers._
 object CartReview extends Loggable {
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Cart Review") / "cart-review"
+  val menu = Menu.i("Cart Review") / "cart-review" >>
+    completedPet
 }
 
 case class CartItem(label: String, amount: Int)
@@ -38,6 +44,16 @@ class CartReview extends Loggable {
   var subtotal: BigDecimal = 0
   var todayAmount: Int = 0
   var monthlyAmount: Int = 0
+  var ipAddress = ""
+  var coupon: Box[Coupon] = PetFlowChoices.coupon.is
+  var couponCode: String  = {
+    val code = coupon.map(_.couponCode.get.toLowerCase()).getOrElse("")
+
+    if (code == "100off")
+      ""
+    else
+      code
+  }
 
   def navTo(destination: Menu.Menuable) =
     SHtml.ajaxInvoke(() => S.redirectTo(destination.loc.calcDefaultHref))
@@ -165,12 +181,39 @@ class CartReview extends Loggable {
     UpdateCartItems(items, total)
   }
 
+  def validateCouponCode(): JsCmd = {
+    val possibleCoupon = Coupon.find(By(Coupon.couponCode, couponCode.toLowerCase()))
+    val possibleCode = possibleCoupon.map(_.couponCode.get).openOr("")
+    val duplicateIpAddress = if (coupon.isDefined) checkDuplicateIpAddress(ipAddress, "#ip-address-error") else Empty
+
+    if (possibleCoupon.isEmpty || possibleCode == "100off") {
+      PromoCodeMessage("error")
+    } else if (duplicateIpAddress.isDefined) {
+      PromoCodeMessage("error") &
+      duplicateIpAddress.toList.foldLeft(Noop)(_ & _)
+    } else {
+      coupon = possibleCoupon
+      PetFlowChoices.coupon(coupon)
+
+      PromoCodeMessage("success") &
+      shoppingCartRenderer.map(_.setHtml).openOr(Noop)
+    }
+  }
+
 
   def render = {
+    "#ip-address" #> hidden(ipAddress = _, ipAddress) &
     "#shopping-cart" #> SHtml.idMemoize { renderer =>
       shoppingCartRenderer = Full(renderer)
 
       val subtotal = shoppingCart.values.map(_.price.price.get).sum
+
+      val successCoupon = {
+        if (!coupon.isEmpty)
+          "promo-success"
+        else
+          ""
+      }
 
       S.appendJs(updateCartItems)
 
@@ -187,6 +230,13 @@ class CartReview extends Loggable {
           ".plan-size *" #> s"for ${sizeToCategory(pet.size.get)} ${pet.animalType.get}s"
         } &
         ".pet-price .price *" #> f"${price.price.get}%.2f"
+      } &
+      ".promo-container" #> {
+        ".apply-promo-container" #> {
+          ".promo-code" #> ajaxText(couponCode, couponCode = _) &
+          ".apply-promo [onClick]" #> SHtml.ajaxInvoke(() => validateCouponCode())
+        } &
+        ".promotion-info [class+]" #> successCoupon
       } &
       ".totals" #> {
         "#subtotal .amount *" #> f"$subtotal%.2f"

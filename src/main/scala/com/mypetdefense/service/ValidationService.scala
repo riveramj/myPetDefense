@@ -20,7 +20,7 @@ object ValidationService extends Loggable {
   }
 
   def checkEmpty(fieldValue: String, fieldId: String): Box[ValidationError] = {
-    if (fieldValue.nonEmpty) {
+    if (fieldValue.trim.nonEmpty) {
       Empty
     } else {
       Full(ValidationError(fieldId, "Required."))

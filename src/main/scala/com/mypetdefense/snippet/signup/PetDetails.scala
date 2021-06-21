@@ -4,6 +4,7 @@ import com.mypetdefense.model._
 import com.mypetdefense.service.PetFlowChoices.cart
 import com.mypetdefense.service.ValidationService.checkEmpty
 import com.mypetdefense.service._
+import com.mypetdefense.snippet.MyPetDefenseEvent
 import com.mypetdefense.util.ClearNodesIf
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
@@ -17,6 +18,8 @@ import net.liftweb.util.Helpers._
 import java.text.SimpleDateFormat
 import scala.collection.mutable
 import scala.xml.Elem
+
+case object ShowPlans extends MyPetDefenseEvent("show-plans")
 
 object PetDetails extends Loggable {
   import net.liftweb.sitemap._
@@ -153,14 +156,23 @@ class PetDetails extends Loggable {
   }
 
   def showPlans = {
-    availableBoxTypes = if (chosenPetType.contains(AnimalType.Dog))
-      BoxType.dogBoxTypes
-    else
-      BoxType.catBoxTypes
+    val validateFields = validateNameBirthday
 
-    findBoxPrice()
+    if (validateFields.isEmpty) {
+      availableBoxTypes = if (chosenPetType.contains(AnimalType.Dog))
+        BoxType.dogBoxTypes
+      else
+        BoxType.catBoxTypes
 
-    petPlansRenderer.map(_.setHtml()).openOr(Noop)
+      findBoxPrice()
+
+      (
+        petPlansRenderer.map(_.setHtml()).openOr(Noop) &
+        ShowPlans
+      )
+
+    } else
+      validateFields.foldLeft(Noop)(_ & _)
   }
 
   def monthDropdown: Elem = {
