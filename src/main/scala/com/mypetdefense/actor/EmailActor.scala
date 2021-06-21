@@ -356,9 +356,8 @@ trait SendNewUserEmailHandling extends EmailHandlerChain {
 
 trait ResetPasswordHandling extends EmailHandlerChain {
   val resetSubject = "Reset your My Pet Defense password"
-  val templateName = MandrillTemplate.find(
-    By(MandrillTemplate.emailType, EmailType.PasswordReset)
-  ).map(_.mandrillTemplateName.get).openOrThrowException("Missing Mandrill Template Record")
+  val resetPasswordTemplate: NodeSeq =
+    Templates("emails-hidden" :: "reset-password-email" :: Nil) openOr NodeSeq.Empty
 
   addHandler {
     case SendPasswordResetEmail(userWithKey) =>
@@ -366,9 +365,7 @@ trait ResetPasswordHandling extends EmailHandlerChain {
       val transform =
         "#reset-link [href]" #> passwordResetLink
 
-      val emailVars = Map(("name", "Mike"))
-
-      sendTemplateEmail(resetSubject, userWithKey.email.get, templateName, emailVars)
+      sendEmail(resetSubject, userWithKey.email.get, transform(resetPasswordTemplate))
   }
 }
 
