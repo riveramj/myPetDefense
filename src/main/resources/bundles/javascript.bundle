@@ -55,6 +55,7 @@ product-detail.js
 base.js
 
 cart-review
+cart-review.js
 promo-code.js
 base.js
 stripe.js

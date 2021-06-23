@@ -162,6 +162,40 @@ object CheckoutService {
     PetFlowChoices.todayTotal(Full(todayTotal))
   }
 
+  def findPromotionAmount(coupon: Box[Coupon], couponCode: String, subtotal: BigDecimal, pendingPets: List[PendingPet]): BigDecimal = {
+    (coupon.map(_.percentOff.get), coupon.map(_.dollarOff.get)) match {
+      case (Full(percent), _) if percent > 0 =>
+        (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
+
+      case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount < subtotal =>
+        if (List("20off", "80off").contains(couponCode)) {
+          val pets = pendingPets.filter(_.boxType == BoxType.complete).map(_.pet)
+
+          val smallDogCount: Int = pets.count(_.size.get == AnimalSize.DogSmallZo)
+          val nonSmallDogCount: Int = pets.size - smallDogCount
+
+          val smallDogPromo = smallDogCount * BigDecimal(19.99)
+          val nonSmallDogPromo = nonSmallDogCount * BigDecimal(22.99)
+
+          val totalPromoAmount = {
+            if (nonSmallDogCount >= 3)
+              3 * BigDecimal(22.99)
+            else if ((smallDogCount + nonSmallDogCount) >= 3)
+              nonSmallDogPromo + ((3 - nonSmallDogCount) * BigDecimal(19.99))
+            else
+              smallDogPromo + nonSmallDogPromo
+          }
+
+          totalPromoAmount
+        } else dollarAmount
+
+      case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount > subtotal =>
+        subtotal
+
+      case (_,_) => 0
+    }
+  }
+
   def setupNewUser(
     customer: StripeFacade.CustomerWithSubscriptions,
     petsToCreate: List[PendingPet],

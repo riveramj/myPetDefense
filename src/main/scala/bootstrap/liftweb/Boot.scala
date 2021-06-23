@@ -142,6 +142,7 @@ class Boot {
           ),
           styleSources = List(
             ContentSourceRestriction.Self,
+            ContentSourceRestriction.UnsafeInline,
             ContentSourceRestriction.Host("https://fonts.googleapis.com"),
             ContentSourceRestriction.Host("https://cdn.jsdelivr.net"),
           ),
@@ -157,8 +158,9 @@ class Boot {
             ContentSourceRestriction.Host("https://js.stripe.com")
           ),
           connectSources = List(
-            ContentSourceRestriction.Host("https://facebook.com"),
-            ContentSourceRestriction.Self,
+            ContentSourceRestriction.Host("https://www.facebook.com"),
+            ContentSourceRestriction.Host("https://api.ipify.org"),
+            ContentSourceRestriction.Self
           ),
         )
       )

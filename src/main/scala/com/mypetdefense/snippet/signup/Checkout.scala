@@ -1,7 +1,7 @@
 package com.mypetdefense.snippet.signup
 
 import com.mypetdefense.model._
-import com.mypetdefense.service.CheckoutService.{setupNewUser, tryToCreateUser, updateSessionVars}
+import com.mypetdefense.service.CheckoutService.{findPromotionAmount, setupNewUser, tryToCreateUser, updateSessionVars}
 import com.mypetdefense.service.PetFlowChoices._
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
@@ -71,10 +71,9 @@ class Checkout extends Loggable {
 
   val subtotal: BigDecimal = petPrices.map(_.price.get).sum
 
-  val smallDogCount: Int = pets.values.map(_.pet).count(_.size.get == AnimalSize.DogSmallZo)
-  val nonSmallDogCount: Int = petCount - smallDogCount
-
-  var promotionAmount: BigDecimal = findPromotionAmount()
+  var promotionAmount: BigDecimal = findPromotionAmount(
+    coupon, couponCode, subtotal, pets.values.toList
+  )
 
   private def handleStripeFailureOnSignUp(
       stripeFailure: Box[StripeFacade.CustomerWithSubscriptions]
@@ -83,35 +82,7 @@ class Checkout extends Loggable {
     Alert(s"""An error has occurred $stripeFailure. Please Try again.""")
   }
 
-  private def findPromotionAmount(): BigDecimal = {
-    (coupon.map(_.percentOff.get), coupon.map(_.dollarOff.get)) match {
-      case (Full(percent), _) if percent > 0 =>
-        (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
 
-      case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount < subtotal =>
-        if (List("20off", "80off").contains(couponCode)) {
-
-          val smallDogPromo = smallDogCount * BigDecimal(19.99)
-          val nonSmallDogPromo = nonSmallDogCount * BigDecimal(22.99)
-
-          val totalPromoAmount = {
-            if (nonSmallDogCount >= 3)
-              3 * BigDecimal(22.99)
-            else if ((smallDogCount + nonSmallDogCount) >= 3)
-              nonSmallDogPromo + ((3 - nonSmallDogCount) * BigDecimal(19.99))
-            else
-              smallDogPromo + nonSmallDogPromo
-          }
-
-          totalPromoAmount
-        } else dollarAmount
-
-      case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount > subtotal =>
-        subtotal
-
-      case (_,_) => 0
-    }
-  }
 
   private def validateFields: (List[MyPetDefenseEvent], Boolean) = {
     val passwordError = checkEmpty(password, "#password")
@@ -224,7 +195,9 @@ class Checkout extends Loggable {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
 
-        promotionAmount = findPromotionAmount()
+        promotionAmount = findPromotionAmount(
+          coupon, couponCode, subtotal, pets.values.toList
+        )
 
         monthlyTotal = subtotal + taxDue
         todayTotal   = if (subtotal > promotionAmount)
@@ -235,7 +208,6 @@ class Checkout extends Loggable {
         "#subtotal span *" #> f"$$$subtotal%2.2f" &
         "#promotion" #> ClearNodesIf(promotionAmount == 0) &
         "#promotion span *" #> f"-$$$promotionAmount%2.2f" &
-        "#tax" #> ClearNodesIf(taxDue == 0d) &
         "#tax span *" #> f"$$$taxDue%2.2f" &
         "#monthly-total span *" #> f"$$$monthlyTotal%2.2f" & {
           if (coupon.isEmpty || subtotal - promotionAmount > 0) {
