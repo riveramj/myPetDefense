@@ -1,15 +1,5 @@
-<div id="main" data-lift="surround?with=default-template;at=content">
-  <div id="top-bar">
-    <div id="logo-name">
-      <a href="/">
-        <picture>
-          <source srcset="images/logo/mpd-full-logo-bw.png">
-        <img srcset="images/logo/mpd-full-logo-bw.png" src="images/logo/mpd-full-logo-bw.png" height="34" width="235">
-        </picture>
-      </a>
-    </div>
-  </div>
-  <form class="current-step" data-lift="signup.Checkout.render">
+<div id="step-container" data-lift="surround?with=flow-template;at=content">
+  <form class="current-step checkout-container" data-lift="signup.Checkout.render">
     <h1 class="step-header">Checkout</h1>
     <h2 class="step-question">
       Please take a moment to fill out the following information.
@@ -91,20 +81,14 @@
         </div>
         <ul id="order-details">
           <li id="ip-address-error"></li>
-          <li id="subtotal">Subtotal <span>$1.99</span></li>
-          <li id="promotion">FIrst Month Promotion <span>$1.98</span></li>
-          <li id="tax">GA Sales Tax <span>$0.04</span></li>
-          <li id="monthly-total">Monthly Total <span>$11.99</span></li>
+          <li id="subtotal">Today Subtotal <span>$1.99</span></li>
+          <li id="tax">Sales Tax <span>$0.00</span></li>
         </ul>
         <div id="order">Order Total <span>$1.71</span></div>
       </div>
 
       <div class="signup-container">
         <button class="checkout submit select-choice" type="submit">Place Order</button>
-        <div id="agreement">
-          By clicking "Place Order" you agree to pay the full monthly amount shown above after promotions have
-          completed.
-        </div>
       </div>
     </div>
   </form>

@@ -1,13 +1,12 @@
 package com.mypetdefense.snippet.signup
 
 import com.mypetdefense.model._
-import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerSignedUp}
+import com.mypetdefense.service.CheckoutService.{findPromotionAmount, setupNewUser, tryToCreateUser, updateSessionVars}
 import com.mypetdefense.service.PetFlowChoices._
-import com.mypetdefense.service.StripeFacade.Customer
 import com.mypetdefense.service.ValidationService._
 import com.mypetdefense.service._
 import com.mypetdefense.snippet.MyPetDefenseEvent
-import com.mypetdefense.util.{ClearNodesIf, DateHelper, SecurityContext}
+import com.mypetdefense.util.{ClearNodesIf, SecurityContext}
 import net.liftweb.common.Box.box2Iterable
 import net.liftweb.common._
 import net.liftweb.http.SHtml._
@@ -18,7 +17,6 @@ import net.liftweb.mapper.By
 import net.liftweb.util.Helpers._
 import net.liftweb.util._
 
-import scala.collection.mutable
 import scala.xml.NodeSeq
 
 object Checkout extends Loggable {
@@ -73,10 +71,9 @@ class Checkout extends Loggable {
 
   val subtotal: BigDecimal = petPrices.map(_.price.get).sum
 
-  val smallDogCount: Int = pets.values.map(_.pet).count(_.size.get == AnimalSize.DogSmallZo)
-  val nonSmallDogCount: Int = petCount - smallDogCount
-
-  var promotionAmount: BigDecimal = findPromotionAmount()
+  var promotionAmount: BigDecimal = findPromotionAmount(
+    coupon, couponCode, subtotal, pets.values.toList
+  )
 
   private def handleStripeFailureOnSignUp(
       stripeFailure: Box[StripeFacade.CustomerWithSubscriptions]
@@ -85,123 +82,6 @@ class Checkout extends Loggable {
     Alert(s"""An error has occurred $stripeFailure. Please Try again.""")
   }
 
-  private def updateSessionVars() = {
-    PetFlowChoices.petCount(Full(petCount))
-    PetFlowChoices.cart(mutable.LinkedHashMap.empty)
-    PetFlowChoices.monthlyTotal(Full(monthlyTotal))
-    PetFlowChoices.todayTotal(Full(todayTotal))
-  }
-
-  private def findPromotionAmount(): BigDecimal = {
-    (coupon.map(_.percentOff.get), coupon.map(_.dollarOff.get)) match {
-      case (Full(percent), _) if percent > 0 =>
-        (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
-
-      case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount < subtotal =>
-        if (List("20off", "80off").contains(couponCode)) {
-
-          val smallDogPromo = smallDogCount * BigDecimal(19.99)
-          val nonSmallDogPromo = nonSmallDogCount * BigDecimal(22.99)
-
-          val totalPromoAmount = {
-            if (nonSmallDogCount >= 3)
-              3 * BigDecimal(22.99)
-            else if ((smallDogCount + nonSmallDogCount) >= 3)
-              nonSmallDogPromo + ((3 - nonSmallDogCount) * BigDecimal(19.99))
-            else
-              smallDogPromo + nonSmallDogPromo
-          }
-
-          totalPromoAmount
-        } else dollarAmount
-
-      case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount > subtotal =>
-        subtotal
-
-      case (_,_) => 0
-    }
-  }
-
-  private def setupNewUserAndRedirect(customer: StripeFacade.CustomerWithSubscriptions): Nothing = {
-    val newUserAddress          = NewUserAddress(street1, street2, city, state, zip)
-    val newUserData             = NewUserData(email, firstName, lastName, password, newUserAddress, coupon, ipAddress)
-    val petsToCreate            = pets.values.toList
-    val priceCodeOfSubscription = priceCode.is.openOr(Price.defaultPriceCode)
-    val userWithSubscription = CheckoutService.newUserSetup(
-      currentUser,
-      petsToCreate,
-      priceCodeOfSubscription,
-      newUserData,
-      customer
-    )
-    val updatedUserWithSubscription = userWithSubscription.map(_.reload)
-    updatedUserWithSubscription.map(SecurityContext.logIn)
-
-    for {
-      offerCode <- PetFlowChoices.woofTraxOfferCode.is
-      userId <- PetFlowChoices.woofTraxUserId.is
-      user <- updatedUserWithSubscription
-    } yield {
-      WoofTraxOrder.createWoofTraxOrder(offerCode, userId, user)
-    }
-
-    val todayDateTime = DateHelper.now.toString
-    val signUpActionLog = CustomerSignedUp(
-      SecurityContext.currentUserId,
-      None,
-      todayDateTime,
-      coupon.map(_.couponCode.get)
-    )
-    val petActionLog = updatedUserWithSubscription.toList
-      .flatMap(_.pets.toList)
-      .map { pet =>
-        CustomerAddedPet(
-          SecurityContext.currentUserId,
-          None,
-          pet.petId.get,
-          pet.name.get
-        )
-      }
-
-    ActionLogService.logAction(signUpActionLog)
-    petActionLog.foreach(ActionLogService.logAction)
-
-    updateSessionVars()
-    S.redirectTo(Success.menu.loc.calcDefaultHref)
-  }
-
-  private def tryToCreateUser = {
-    val fiveDollarPromo = List("20off", "80off").contains(couponCode)
-    val subscriptionItems = petPrices.groupBy(_.stripePriceId.get).map { case (stripePriceId, prices) =>
-      if (fiveDollarPromo) {
-        val samplePriceSize = prices.headOption.map(_.petSize.get)
-        val fiveDollarPriceId = samplePriceSize
-          .flatMap(Price.getFiveDollarPriceCode)
-          .map(_.stripePriceId.get)
-          .getOrElse("")
-
-        StripeFacade.Subscription.Item(fiveDollarPriceId, prices.size)
-      } else
-        StripeFacade.Subscription.Item(stripePriceId, prices.size)
-    }
-
-    val promoCoupon = if (fiveDollarPromo) Empty else coupon
-
-    val stripeCustomer = {
-      Customer.createWithSubscription(
-        email,
-        stripeToken,
-        taxRate,
-        promoCoupon,
-        subscriptionItems.toList
-      )
-    }
-
-    stripeCustomer match {
-      case Full(customer) => setupNewUserAndRedirect(customer)
-      case stripeFailure  => handleStripeFailureOnSignUp(stripeFailure)
-    }
-  }
 
 
   private def validateFields: (List[MyPetDefenseEvent], Boolean) = {
@@ -289,7 +169,18 @@ class Checkout extends Loggable {
 
   def signup(): JsCmd = {
     val (validationErrors, duplicateIpAddress) = validateFields
-    if (validationErrors.isEmpty) tryToCreateUser
+    if (validationErrors.isEmpty)
+      tryToCreateUser(couponCode, petPrices, coupon, stripeToken, email, taxRate) match {
+        case Full(customer) =>
+          val address = NewUserAddress(street1, street2, city, state, zip)
+          val userData = NewUserData(email, firstName, lastName, password, address, coupon, ipAddress, "")
+          setupNewUser(customer, pets.values.toList, userData, coupon.map(_.couponCode.get))
+
+          updateSessionVars(petCount, monthlyTotal, todayTotal, false)
+          S.redirectTo(Success.menu.loc.calcDefaultHref)
+        case stripeFailure  => handleStripeFailureOnSignUp(stripeFailure)
+      }
+
     else if (duplicateIpAddress)
       priceAdditionsRenderer.map(_.setHtml).openOr(Noop) &
       PromoCodeMessage("error") &
@@ -304,7 +195,9 @@ class Checkout extends Loggable {
       "#order-summary" #> SHtml.idMemoize { renderer =>
         priceAdditionsRenderer = Full(renderer)
 
-        promotionAmount = findPromotionAmount()
+        promotionAmount = findPromotionAmount(
+          coupon, couponCode, subtotal, pets.values.toList
+        )
 
         monthlyTotal = subtotal + taxDue
         todayTotal   = if (subtotal > promotionAmount)
@@ -315,7 +208,6 @@ class Checkout extends Loggable {
         "#subtotal span *" #> f"$$$subtotal%2.2f" &
         "#promotion" #> ClearNodesIf(promotionAmount == 0) &
         "#promotion span *" #> f"-$$$promotionAmount%2.2f" &
-        "#tax" #> ClearNodesIf(taxDue == 0d) &
         "#tax span *" #> f"$$$taxDue%2.2f" &
         "#monthly-total span *" #> f"$$$monthlyTotal%2.2f" & {
           if (coupon.isEmpty || subtotal - promotionAmount > 0) {

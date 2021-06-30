@@ -20,6 +20,7 @@ object PetFlowChoices extends Loggable {
   object monthlyTotal  extends SessionVar[Box[BigDecimal]](Empty)
   object todayTotal    extends SessionVar[Box[BigDecimal]](Empty)
   object purchased     extends SessionVar[Box[Boolean]](Empty)
+  object needAccountSetup extends SessionVar[Box[Boolean]](Empty)
 
 
   object petChoice     extends SessionVar[Box[AnimalType.Value]](Empty)

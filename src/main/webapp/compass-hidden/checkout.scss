@@ -2,6 +2,16 @@
 @import "nav-bar";
 @import "signup-flow";
 
+h1 {
+  font-size: 25px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.checkout-container {
+  margin: 0px 15px;
+}
+
 .pet-count {
   @media (min-width: $bp-medium) {
     left: 9px;
@@ -29,20 +39,20 @@
 }
 
 #left-column {
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     @include span-columns(6);
   }
 }
 
 #right-column {
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     @include span-columns(6);
     @include omega;
   }
 }
 
 .account-info {
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     margin-bottom: 0;
   }
 }
@@ -50,7 +60,7 @@
 .step-question {
   padding-bottom: rem(25px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     padding-bottom: rem(33px);
   }
 }
@@ -61,7 +71,7 @@ legend {
   line-height: rem(28px);
   padding-bottom: rem(6px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     padding-bottom: rem(10px);
   }
 }
@@ -73,7 +83,7 @@ legend {
   display: inline-block;
   padding-bottom: rem(2px);
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     padding-bottom: rem(3px);
   }
 }
@@ -121,7 +131,7 @@ fieldset label {
 }
 
 .short-field {
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     padding-bottom: 0;
 
     &.city {
@@ -299,7 +309,7 @@ fieldset label {
 
   margin-right: 0;
 
-  @media (min-width: $bp-med) {
+  @media (min-width: $bp-medium) {
     @include span-columns(8);
     @include shift(2);
   }
@@ -309,7 +319,18 @@ fieldset label {
   width: 100%;
   margin-bottom: rem(8px);
 
-  @media (min-width: $bp-med) {
+  cursor: pointer;
+  padding: 13px 0 12px;
+  text-decoration: none;
+  border: none;
+  color: #ffffff;
+  font-weight: $semibold;
+  font-size: 20px;
+  border-radius: 5px;
+  background-color: $purple;
+  text-transform: uppercase;
+
+  @media (min-width: $bp-medium) {
     font-size: rem(22px);
     letter-spacing: 0.4px;
   }
@@ -326,7 +347,9 @@ fieldset label {
 }
 
 #step-container {
-  @media (min-width: $bp-med) {
+  background-color: #ffffff;
+
+  @media (min-width: $bp-medium) {
     margin-bottom: rem(113px);
   }
 }
@@ -356,4 +379,8 @@ fieldset label {
   color: #ff0000;
   font-size: 16px;
   padding-bottom: 10px
+}
+
+#need-help {
+  clear: both;
 }

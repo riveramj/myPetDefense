@@ -1,13 +1,18 @@
 package com.mypetdefense.service
 
-import java.util.Date
-
 import com.mypetdefense.actor.{EmailActor, NewSaleEmail, SendWelcomeEmail}
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.CustomerAction.{CustomerAddedPet, CustomerSignedUp}
+import com.mypetdefense.service.PetFlowChoices.priceCode
+import com.mypetdefense.service.StripeFacade.Customer
 import com.mypetdefense.snippet.signup.{NewUserAddress, NewUserData}
 import com.mypetdefense.util.DateHelper.tomorrowStart
-import net.liftweb.common.{Box, Full}
+import com.mypetdefense.util.{DateHelper, SecurityContext}
+import net.liftweb.common.{Box, Empty, Full}
 import net.liftweb.util.Props
+
+import java.util.Date
+import scala.collection.mutable
 
 object CheckoutService {
 
@@ -46,7 +51,7 @@ object CheckoutService {
           stripeId,
           newUserData.email,
           newUserData.password,
-          "",
+          newUserData.phone,
           coupon,
           coupon.flatMap(_.agency.obj),
           None,
@@ -61,6 +66,7 @@ object CheckoutService {
           .lastName(newUserData.lastName)
           .stripeId(stripeId)
           .email(newUserData.email)
+          .phone(newUserData.phone)
           .coupon(coupon)
           .referer(coupon.flatMap(_.agency.obj))
           .saveMe
@@ -109,6 +115,130 @@ object CheckoutService {
     val updatedPet = pet.pet.box(box).saveMe()
 
     PendingPet(updatedPet, pet.boxType, pet.thirtyDaySupplement, Full(box))
+  }
+
+  def tryToCreateUser(
+    couponCode: String,
+    petPrices: List[Price],
+    coupon: Box[Coupon],
+    stripeToken: String,
+    email: String,
+    taxRate: Double
+  ) = {
+    val fiveDollarPromo = List("20off", "80off").contains(couponCode)
+    val subscriptionItems = petPrices.groupBy(_.stripePriceId.get).map { case (stripePriceId, prices) =>
+      if (fiveDollarPromo) {
+        val samplePriceSize = prices.headOption.map(_.petSize.get)
+        val fiveDollarPriceId = samplePriceSize
+          .flatMap(Price.getFiveDollarPriceCode)
+          .map(_.stripePriceId.get)
+          .getOrElse("")
+
+        StripeFacade.Subscription.Item(fiveDollarPriceId, prices.size)
+      } else
+        StripeFacade.Subscription.Item(stripePriceId, prices.size)
+    }
+
+    val promoCoupon = if (fiveDollarPromo) Empty else coupon
+
+    Customer.createWithSubscription(
+      email,
+      stripeToken,
+      taxRate,
+      promoCoupon,
+      subscriptionItems.toList
+    )
+  }
+
+  def updateSessionVars(petCount: Int, monthlyTotal: BigDecimal, todayTotal: BigDecimal, needAccountSetup: Boolean) = {
+    PetFlowChoices.petCount(Full(petCount))
+    PetFlowChoices.cart(mutable.LinkedHashMap.empty)
+    PetFlowChoices.monthlyTotal(Full(monthlyTotal))
+    PetFlowChoices.todayTotal(Full(todayTotal))
+    PetFlowChoices.needAccountSetup(Full(needAccountSetup))
+  }
+
+  def findPromotionAmount(coupon: Box[Coupon], couponCode: String, subtotal: BigDecimal, pendingPets: List[PendingPet]): BigDecimal = {
+    (coupon.map(_.percentOff.get), coupon.map(_.dollarOff.get)) match {
+      case (Full(percent), _) if percent > 0 =>
+        (coupon.map(_.percentOff.get).openOr(0) / 100d) * subtotal
+
+      case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount < subtotal =>
+        if (List("20off", "80off").contains(couponCode)) {
+          val pets = pendingPets.filter(_.boxType == BoxType.complete).map(_.pet)
+
+          val smallDogCount: Int = pets.count(_.size.get == AnimalSize.DogSmallZo)
+          val nonSmallDogCount: Int = pets.size - smallDogCount
+
+          val smallDogPromo = smallDogCount * BigDecimal(19.99)
+          val nonSmallDogPromo = nonSmallDogCount * BigDecimal(22.99)
+
+          val totalPromoAmount = {
+            if (nonSmallDogCount >= 3)
+              3 * BigDecimal(22.99)
+            else if ((smallDogCount + nonSmallDogCount) >= 3)
+              nonSmallDogPromo + ((3 - nonSmallDogCount) * BigDecimal(19.99))
+            else
+              smallDogPromo + nonSmallDogPromo
+          }
+
+          totalPromoAmount
+        } else dollarAmount
+
+      case (_, Full(dollarAmount)) if dollarAmount > 0 && dollarAmount > subtotal =>
+        subtotal
+
+      case (_,_) => 0
+    }
+  }
+
+  def setupNewUser(
+    customer: StripeFacade.CustomerWithSubscriptions,
+    petsToCreate: List[PendingPet],
+    newUserData: NewUserData,
+    couponCode: Box[String]
+  ) = {
+    val priceCodeOfSubscription = priceCode.is.openOr(Price.defaultPriceCode)
+    val userWithSubscription = newUserSetup(
+      Empty,
+      petsToCreate,
+      priceCodeOfSubscription,
+      newUserData,
+      customer
+    )
+    val updatedUserWithSubscription = userWithSubscription.map(_.reload)
+    updatedUserWithSubscription.map(SecurityContext.logIn)
+
+    for {
+      offerCode <- PetFlowChoices.woofTraxOfferCode.is
+      userId <- PetFlowChoices.woofTraxUserId.is
+      user <- updatedUserWithSubscription
+    } yield {
+      WoofTraxOrder.createWoofTraxOrder(offerCode, userId, user)
+    }
+
+    val todayDateTime = DateHelper.now.toString
+    val signUpActionLog = CustomerSignedUp(
+      SecurityContext.currentUserId,
+      None,
+      todayDateTime,
+      couponCode
+    )
+    val petActionLog = updatedUserWithSubscription.toList
+      .flatMap(_.pets.toList)
+      .map { pet =>
+        CustomerAddedPet(
+          SecurityContext.currentUserId,
+          None,
+          pet.petId.get,
+          pet.name.get
+        )
+      }
+
+    ActionLogService.logAction(signUpActionLog)
+    petActionLog.foreach(ActionLogService.logAction)
+
+    updatedUserWithSubscription
   }
 
   def newUserSetup(

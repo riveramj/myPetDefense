@@ -1,70 +1,27 @@
-<div id="main" data-lift="surround?with=default-template;at=content"> 
-  <div id="top-bar">
-    <div id="logo-name">
-      <a href="/"><picture>
-        <source 
-          media="(min-width: 46.8em)" 
-          srcset="/images/logo/logo-name-white.png, /images/logo/logo-name-white@2x.png 2x">
-        <img src="/images/logo/logo-name-white-small.png" srcset="/images/logo/logo-name-white-small.png, /images/logo/logo-name-white-small@2x.png 2x">
-      </picture></a>
+<div id="page-container" data-lift="surround?with=login-template;at=content">
+  <form id="signup-container" data-lift="login.signup.render">
+    <h2>Hey there!</h2>
+    <h3>Sign in to view your account.</h3>
+    <label>
+      <div><span class="field-label">First Name</span></div>
+      <input id="first-name" type="text">
+    </label>
+    <label>
+      <div><span class="field-label">Last Name</span></div>
+      <input id="last-name" type="text">
+    </label>
+    <label>
+      <div><span class="field-label">Email</span></div>
+      <input id="email" type="text" disabled>
+    </label>
+    <label>
+      <div><span class="field-label">Password</span></div>
+      <input id="password" type="password">
+    </label>
+    <div id="signup-button-container">
+      <button id="signup">signup</button>
     </div>
-    <nav>
-      <ul id="menu-entries">
-      </ul>
-    </nav>
-  </div>
-  <div id="page-container">
-    <form id="signup-container" data-lift="login.signup.render">
-      <h2>Hey there!</h2>
-      <h3>Sign in to view your account.</h3>
-      <label>
-        <div><span class="field-label">First Name</span></div>
-        <input id="first-name" type="text">
-      </label>
-      <label>
-        <div><span class="field-label">Last Name</span></div>
-        <input id="last-name" type="text">
-      </label>
-      <label>
-        <div><span class="field-label">Email</span></div>
-        <input id="email" type="text" disabled>
-      </label>
-      <label>
-        <div><span class="field-label">Password</span></div>
-        <input id="password" type="password">
-      </label>
-      <div id="signup-button-container">
-        <button id="signup">signup</button>
-      </div>
-    </form>
-  </div>
-  <div class="incognito-dog">
-    <picture>
-    <source 
-       media="(min-width: 46.8em)" 
-       srcset="/images/dog-incognito.jpg, /images/dog-incognito@2x.jpg 2x">
-    <img class="incognito-dog" src="/images/dog-incognito-small.jpg" srcset="/images/dog-incognito-small.jpg, /images/dog-incognito-small@2x.jpg 2x">
-    </picture> 
-  </div>
-
-  <div id="footer">
-    <div class="footer-section">
-      <h4>Menu</h4>
-      <ul>
-        <li><a href="./pet-choice">Sign Up</a></li>
-      </ul>
-    </div>
-    <div class="footer-section">
-      <h4>Follow</h4>
-      <ul>
-        <li><a href="https://twitter.com/mypetdefense">Twitter</a></li>
-        <li><a href="https://www.facebook.com/mypetdefense/">Facebook</a></li>
-        <li><a href="https://www.instagram.com/mypetdefense/">Instagram</a></li>
-      </ul>
-    </div>
-  </div>
-  <div id="need-help">Need help? Email us at <a href="mailto:help@mypetdefense.com?Subject=Help">help@mypetdefense.com</a></div>
-  <div class="legal">&copy;2020 My Pet Defense. All rights reserved.</div>
+  </form>
 
   <head_merge>
     <link rel="stylesheet" data-lift="style-bundle?name=signup">

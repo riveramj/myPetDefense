@@ -1,62 +1,77 @@
 <div id="step-container" data-lift="surround?with=flow-template;at=content">
-  <div id="shopping-cart" data-lift="signup.CartReview.render">
-    <h2>Shopping Cart</h2>
+  <div data-lift="signup.CartReview.render">
+    <div id="shopping-cart">
+      <h2>Shopping Cart</h2>
+      <ul class="pets">
+        <li class="pet">
+          <ul>
+            <li class="pet-name-actions">
+              <div class="name">spot</div>
+              <div class="actions">
+                <button class="remove-pet"><i class="fa fa-times" aria-hidden="true"></i></button>
+              </div>
+            </li>
+            <li class="pet-plan">
+              <span class="plan">basic</span> <span class="plan-size">for med dogs</span>
+            </li>
+            <li  class="pet-price">
+              <span>$<span class="price">1</span> monthly</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
 
-    <ul class="pets">
-      <li class="pet">
-        <ul>
-          <li class="pet-name-actions">
-            <div class="name">spot</div>
-            <div class="actions">
-              <button class="remove-pet"><i class="fa fa-times" aria-hidden="true"></i></button>
-            </div>
-          </li>
-          <li class="pet-plan">
-            <span class="plan">basic</span> <span class="plan-size">for med dogs</span>
-          </li>
-          <li  class="pet-price">
-            <span>$<span class="price">1</span> monthly</span>
-          </li>
-        </ul>
-      </li>
-    </ul>
-
-    <fieldset class="promo-container promotion-info">
-      <legend>Promotion Code</legend>
-      <div>
-        <label>
+      <fieldset class="promo-container promotion-info">
+        <legend>Promotion Code</legend>
+        <div>
           <div class="apply-promo-container">
-            <input id="promo-code" size="20" type="text" placeholder="Enter Code">
+            <input class="promo-code" size="20" type="text" placeholder="Enter Code">
             <button class="apply-promo" type="button">Apply</button>
           </div>
           <div>
             <span class="hidden" id="promo-error">Invalid. Please try another code.</span>
             <span class="hidden" id="promo-success">Promotion applied.</span>
           </div>
-        </label>
+        </div>
+      </fieldset>
+
+      <ul class="totals">
+        <li>
+          <div>Shipping</div>
+          <div>Free!</div>
+        </li>
+        <li>
+          <div>Monthly Subtotal</div>
+          <div id="monthly-subtotal">$<span class="amount">16.99</span></div>
+        </li>
+        <li>
+          <div>Due Today</div>
+          <div id="today-total">$<span class="amount">16.99</span></div>
+        </li>
+      </ul>
+
+      <div>
+        <div class="payment-errors hidden">An error has occurred. Please try again.</div>
       </div>
-    </fieldset>
 
-    <ul class="totals">
-      <li>
-        <div>Shipping</div>
-        <div>Free!</div>
-      </li>
-      <li>
-        <div>Subtotal</div>
-        <div id="subtotal">$<span class="amount">16.99</span></div>
-      </li>
-    </ul>
+      <div class="next-actions">
+        <button id="add-pet">Add Another Pet</button>
+        <div id="payment-request-button">
+          <!-- A Stripe Element will be inserted here. -->
+        </div>
+        <button id="checkout">Proceed to Checkout</button>
+      </div>
 
-    <div class="next-actions">
-      <button id="add-pet">Add Another Pet</button>
-      <button id="checkout">Proceed to Checkout</button>
+      <script type="text/javascript" class="update-billing-amount"></script>
+      <script type="text/javascript" class="attach-payment-method"></script>
     </div>
+    <input class="hidden ip-address">
   </div>
   <tail>
     <script type="text/javascript" data-lift="script-bundle?name=cart-review"></script>
   </tail>
   <head_merge>
+    <script src="https://js.stripe.com/v3/"></script>
     <link rel="stylesheet" data-lift="style-bundle?name=cart-review">
   </head_merge>
 </div>

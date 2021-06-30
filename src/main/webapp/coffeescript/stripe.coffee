@@ -14,7 +14,7 @@ newCard = false
 if !$('.form-row').hasClass('hide-card')
   card.mount '#card-element'
   newCard = true
-  
+
 stripeCallback = (token) ->
   $("#stripe-token").val(token.id)
   $(".checkout, .update-billing, #create-customer").submit()

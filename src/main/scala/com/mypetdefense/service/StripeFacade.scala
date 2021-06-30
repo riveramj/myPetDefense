@@ -40,8 +40,8 @@ object StripeFacade extends Loggable {
       Stripe.Customer.create(
         CustomerCreateParams.builder
           .setEmail(email)
-          .setSource(stripeToken)
           .whenDefined(couponId)(_.setCoupon)
+          .setSource(stripeToken)
           .build
       )
     }

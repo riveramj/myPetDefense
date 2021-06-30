@@ -83,6 +83,6 @@ object BoxType extends Enumeration {
   val complete: BoxType.Value = Value("Complete") // 1
   val everyday: BoxType.Value = Value("Everyday") // 2
 
-  def dogBoxTypes = List(basic, complete)
+  def dogBoxTypes = List(basic, everyday, complete)
   def catBoxTypes = List(basic, everyday)
 }

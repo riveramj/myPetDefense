@@ -345,9 +345,9 @@ trait SendNewUserEmailHandling extends EmailHandlerChain {
 
       val transform = {
         ".admin" #> ClearNodes &
-          ".agent" #> ClearNodes &
-          "#first-name" #> user.firstName.get &
-          "#signup [href]" #> signupLink
+        ".agent" #> ClearNodes &
+        "#first-name" #> user.firstName.get &
+        "#signup [href]" #> signupLink
       }
 
       sendEmail(subject, user.email.get, transform(template))

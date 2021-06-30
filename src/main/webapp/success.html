@@ -1,33 +1,16 @@
-<div id="step-container" data-lift="surround?with=default-template;at=content">
-  <div id="top-bar">
-    <div id="logo-name">
-      <a href="/">
-        <picture>
-          <source srcset="images/logo/logo-name-white.png, images/logo/logo-name-white@2x.png 2x" media="(min-width: 46.8em)">
-          <img srcset="images/logo/logo-name-white-small.png, images/logo/logo-name-white-small@2x.png 2x" src="images/logo/logo-name-white-small.png">
-        </picture>
-      </a>
-    </div>
-    <nav>
-      <ul id="menu-entries">
-        <li class="login"><a href="./account-overview">Go to My Account</a></li>
-      </ul>
-    </nav>
-  </div>
+<div id="step-container" data-lift="surround?with=flow-template;at=content">
   <div class="current-step" data-lift="signup.Success.render">
-    <h1 class="step-header">Your order is placed!</h1>
-    <h2 class="step-question desktop">
-      We'll send you an email soon with your order details. In the meantime, enjoy this GIF of the happiest dog on Earth.
-    </h2>
+    <h1 class="order-placed">Your order is placed!</h1>
 
-    <h2 class="step-question mobile">
-      We'll send you an email soon with your order details.
-    </h2>
+    <div class="next-steps">
+      <div>You'll receive an email with your order details.</div>
 
-    <div id="happy-dog">
-      <video preload="auto" autoplay="autoplay" loop="loop">
-        <source src="//i.imgur.com/J2K4Jkt.webm" type="video/webm"></source>
-      </video>
+      <div class="account-container">
+        <span class="finish-setup">Finish your account setup below</span>
+        <span class="view-account">To make changes and see your profile</span>
+
+        <a class="go-to-account" href="./account-overview">Go to My Account</a>
+      </div>
     </div>
 
     <div id="order-summary">
@@ -37,10 +20,14 @@
         <li id="monthly-total">Monthly Total <span>$11.99</span></li>
       </ul>
       <div id="order-total">
-        <h3>Total Charge</h3>
+        <h3>Billed Today</h3>
         <div id="checkout-total"><span id="amount">$0.99</span><span class="per-month"> / A Month</span></div>
       </div>
     </div>
+
+
+
+
   </div>
       
   <head_merge>
