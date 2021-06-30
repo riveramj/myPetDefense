@@ -129,8 +129,7 @@ class NewOrder extends Loggable {
       val customer =
         StripeFacade.Customer.createWithSubscription(
           email,
-          Full(stripeToken),
-          Empty,
+          stripeToken,
           taxRate,
           Empty,
           List(StripeFacade.Subscription.Item(petlandPriceId, pets.size))

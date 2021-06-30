@@ -36,9 +36,6 @@ object ValidationService extends Loggable {
   }
 
   def checkDuplicateIpAddress(ipAddress: String, fieldId: String): Box[ErrorMessage] = {
-    println("ip address")
-    println(ipAddress)
-    println("ip address")
     if(ipAddress.nonEmpty)
       User.find(By(User.ipAddress, ipAddress)) match {
         case Full(_) => Full(ErrorMessage(fieldId, S ? "Coupon already applied for this address. Coupon has been removed."))
@@ -52,7 +49,7 @@ object ValidationService extends Loggable {
     if(boxTypes.contains(allowedBoxType))
       Empty
     else
-      Full(ErrorMessage("#promo-error", S ? "Coupon not valid for selected program types."))
+      Full(ErrorMessage("#promo-error", S ? "Coupon not valid for selected box types."))
   }
 
   private def checkDuplicateEmail(email: String, errorId: String): Box[ValidationError] = {

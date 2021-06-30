@@ -65,7 +65,7 @@ class Signup extends Loggable {
           "#last-name" #> SHtml.text(lastName, lastName = _) &
           "#email [value]" #> email &
           "#password" #> SHtml.password(password, password = _) &
-          "#signup" #> SHtml.ajaxSubmit("Sign Up", () => signup)
+          "#signup" #> SHtml.ajaxSubmit("Sign In", () => signup)
       }
   }
 }

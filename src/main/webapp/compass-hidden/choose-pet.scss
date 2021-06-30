@@ -9,6 +9,13 @@ $cat-yellow: #FCE99B;
   background-color: #ffffff;
 }
 
+.pet-details-container, .pet-plans {
+  @media (min-width: $bp-medium) {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
 .introduction {
   color: $text-color;
   padding: 20px 0 20px;
@@ -35,6 +42,7 @@ $cat-yellow: #FCE99B;
 
   &.selected, &.details-complete {
     height: 60px;
+    max-width: none;
 
     img {
       display: none;
@@ -71,7 +79,7 @@ $cat-yellow: #FCE99B;
     width: 100%;
   }
 
-  &.selected .details-entered {
+  .details-entered, &.selected .details-entered {
     display: none;
   }
 }
@@ -103,20 +111,36 @@ $cat-yellow: #FCE99B;
 
   @include span-columns(9 of 11);
   @include shift(1);
+}
 
-  @media (min-width: $bp-med) {
-    @include shift(2);
-    @include span-columns(8);
-    top: rem(-73px);
+.pet-choices {
+  margin-top: 20px;
+
+  @media (min-width: $bp-medium) {
+    text-align: center;
+
+    .pet-choice {
+      display: inline-block;
+      vertical-align: top;
+      max-width: 350px;
+    }
+
+    .dog-choice {
+      margin-right: 20px;
+    }
+
+    .selected, .details-complete {
+      margin-right: 0;
+      max-width: none;
+      width: 100%;
+    }
   }
 }
 
 .cat-choice, .dog-choice {
   clear: both;
-
-  @media (min-width: $bp-med) {
-    @include span-columns(6 of 12);
-  }
+  max-width: 400px;
+  margin: 0 auto;
 }
 
 .hide {
@@ -172,6 +196,15 @@ $cat-yellow: #FCE99B;
     display: block;
     background-color: #ffffff;
     width: 100%;
+  }
+
+  .dog-sizes {
+    text-align: center;
+
+    @media (min-width: $bp-medium) {
+      max-width: 400px;
+      margin: 0 auto;
+    }
   }
 
   .dog-sizes li {

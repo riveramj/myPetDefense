@@ -1,12 +1,14 @@
 package com.mypetdefense.snippet.signup
 
+import com.mypetdefense.actor.{EmailActor, SendNewUserEmail}
 import com.mypetdefense.model.AnimalSize.sizeToCategory
 import com.mypetdefense.model.{BoxType, Coupon}
 import com.mypetdefense.service.CheckoutService._
 import com.mypetdefense.service.PetFlowChoices.cart
-import com.mypetdefense.service.ValidationService.{checkBoxTypes, checkDuplicateIpAddress}
+import com.mypetdefense.service.ValidationService.{checkBoxTypes, checkDuplicateIpAddress, checkEmail}
 import com.mypetdefense.service.{PetFlowChoices, StripeFacade, TaxJarService}
 import com.mypetdefense.snippet.{CallableFunction, MyPetDefenseEvent}
+import com.mypetdefense.util.Paths.completedPet
 import net.liftweb.common._
 import net.liftweb.http.SHtml.ajaxText
 import net.liftweb.http.js.JsCmd
@@ -21,12 +23,14 @@ import net.liftweb.util.Helpers._
 object CartReview extends Loggable {
   import net.liftweb.sitemap._
 
-  val menu = Menu.i("Cart Review") / "cart-review"
+  val menu = Menu.i("Cart Review") / "cart-review" >>
+    completedPet
+
 }
 
 case class CartItem(label: String, amount: Int)
 case class UpdateCartItems(items: List[CartItem], total: CartItem) extends MyPetDefenseEvent("update-cart-items")
-case class StripePaymentStatus(status: String, successUrl: String) extends MyPetDefenseEvent("stripe-payment-status")
+case class StripePaymentStatus(status: String, successUrl: String, errorMessage: String) extends MyPetDefenseEvent("stripe-payment-status")
 case class StripePartialAddress(city: String, region: String, postalCode: String)
 case class StripeShippingAddress(recipient: String, addressLine: Array[String], city: String, region: String, postalCode: String, phone: String)
 case class StripeBillingDetails(city: String, region: String, postalCode: String)
@@ -111,38 +115,43 @@ class CartReview extends Loggable {
   ) = {
     logger.error("create customer failed with: " + stripeFailure)
 
-    StripePaymentStatus("fail", "")
+    stripeFailure.map(_.value)
+
+    StripePaymentStatus("fail", "", "Error processing payment. Please try again.")
   }
 
   def payAndCreateAccount(arguments: String): JsCmd = {
     arguments.split("\\|", 3).toList match {
-      case paymentMethodId :: rawEmail :: shippingAddress :: Nil =>
+      case cardToken :: email :: shippingAddress :: Nil =>
         (for {
           shippingJson <- tryo(Serialization.read[JValue](shippingAddress))
           stripeShippingAddress <- tryo(shippingJson.extract[StripeShippingAddress])
         } yield {
           val petPrices = shoppingCart.values.map(_.price).toList
-          val email = "testemail8@gmail.com"
 
-          tryToCreateUser("couponCode", petPrices, Empty, Full(paymentMethodId), Empty, email, taxRate.toDouble) match {
-            case Full(customer) =>
-              val address = convertStripeShippingAddess(stripeShippingAddress)
-              val (firstName, lastName) = nameSplit(stripeShippingAddress.recipient)
-              val userData = NewUserData(email, firstName, lastName, "", address, Empty, "")
+          val duplicateEmail = checkEmail(email, "#email", signup = true)
 
-              setupNewUser(customer, cart.values.map(_.pendingPet).toList, userData, Empty)
+          if (duplicateEmail.isEmpty)
+            tryToCreateUser(couponCode, petPrices, Empty, cardToken, email, taxRate.toDouble) match {
+              case Full(customer) =>
+                val address = convertStripeShippingAddess(stripeShippingAddress)
+                val (firstName, lastName) = nameSplit(stripeShippingAddress.recipient)
+                val userData = NewUserData(email, firstName, lastName, "", address, Empty, "", "")
 
-              updateSessionVars(cart.values.size, monthlyTotal, todayTotal)
+                val newUser = setupNewUser(customer, cart.values.map(_.pendingPet).toList, userData, Empty)
 
-              StripePaymentStatus("success", Success.menu.loc.calcDefaultHref)
-            case stripeFailure => handleStripeFailureOnSignUp(stripeFailure)
-          }
+                newUser.map(user => EmailActor ! SendNewUserEmail(user))
+
+                updateSessionVars(cart.values.size, monthlyTotal, todayTotal, true)
+
+                StripePaymentStatus("success", Success.menu.loc.calcDefaultHref, "")
+              case stripeFailure => handleStripeFailureOnSignUp(stripeFailure)
+            }
+          else
+            StripePaymentStatus("fail", "", "Email already exists. Please select a different email and try again.")
         }).openOr(Noop)
       case _ =>
-        println("wrong number of arguments")
-        println(arguments)
-        println("wrong number of arguments")
-        StripePaymentStatus("fail", "")
+        StripePaymentStatus("fail", "", "System error. Please try again.")
     }
   }
 

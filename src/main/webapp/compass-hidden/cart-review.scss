@@ -8,8 +8,20 @@ h2 {
   padding: 20px 20px 10px;
 }
 
+#shopping-cart {
+  @media (min-width: $bp-medium) {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
 .pets {
   margin-bottom: 20px;
+
+  @media (min-width: $bp-medium) {
+    max-width: 500px;
+    margin: 0 auto;
+  }
 }
 
 .pet {
@@ -69,6 +81,8 @@ h2 {
 }
 
 .promotion-info {
+  margin-top: 40px;
+
   legend {
     text-align: center;
     font-size: 17px
@@ -142,6 +156,12 @@ h2 {
     margin-left: 8px;
     white-space: nowrap;
   }
+}
+
+.payment-errors {
+  margin: 10px 20px;
+  color: red;
+  line-height: 17px;
 }
 
 .totals {

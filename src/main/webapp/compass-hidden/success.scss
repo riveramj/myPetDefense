@@ -3,63 +3,31 @@
 @import "signup-flow";
 
 .current-step {
-  @include span-columns(11);
-  @include shift(0.5);
+  margin: 10px 20px;
+}
 
-  padding-bottom: rem(50px);
+.order-placed {
+  text-align: center;
+  margin: 20px 0;
+  font-size: 22px;
+}
 
-  @media (min-width: $bp-large) {
-    @include span-columns(8);
-    @include shift(2);
-    padding-top: rem(52px);
+.next-steps {
+  margin-bottom: 30px;
 
-    padding-bottom: rem(100px);
+  .account-container {
+    margin-top: 20px;
   }
-}
 
-.step-info {
-  width: 100%;
-}
-
-#happy-dog {
-  display: none;
-
-  @media (min-width: $bp-med) {
-    @include span-columns(5);
-    @include shift(1);
-    @include omega;
+  .go-to-account {
     display: block;
-  }
-
-  video {
-    width: 100%;
-  }
-}
-
-.step-header {
-  text-align: left;
-  @media (min-width: $bp-med) {
-    @include span-columns(6);
-  }
-}
-
-.step-question {
-  text-align: left;
-  &.desktop {
-    display: none;
-  }
-
-  @media (min-width: $bp-med) {
-    @include span-columns(6);
-    padding-bottom: rem(40px);
-
-    &.mobile {
-    display: none;
-   }
-
-   &.desktop {
-    display: block;
-  }
+    color: #ffffff;
+    padding: 15px 24px;
+    text-decoration: none;
+    background-color: $purple;
+    width: max-content;
+    margin: 20px auto 10px;
+    border-radius: 3px;
   }
 }
 
@@ -161,30 +129,4 @@
     color: #ffffff;
     font-weight: $regular;
   }
-}
-
-.flow-step .step-info:before {
-  @extend %icon;
-  content: fa-content($fa-var-check);
-  position: absolute;
-  left: 18px;
-  color: #1C8884;
-  font-size: 25px;
-}
-
-.flow-progress-bar {
-  padding-bottom: 8px;
-}
-
-li.complete:before {
-  display: inline-block;
-  position: initial;
-}
-.flow-progress-bar  .step-container {
-  float: none;
-  display: inline-block;
-}
-
-.treat-count {
-  margin-left: 0;
 }

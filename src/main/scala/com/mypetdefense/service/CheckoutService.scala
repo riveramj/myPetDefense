@@ -51,7 +51,7 @@ object CheckoutService {
           stripeId,
           newUserData.email,
           newUserData.password,
-          "",
+          newUserData.phone,
           coupon,
           coupon.flatMap(_.agency.obj),
           None,
@@ -66,6 +66,7 @@ object CheckoutService {
           .lastName(newUserData.lastName)
           .stripeId(stripeId)
           .email(newUserData.email)
+          .phone(newUserData.phone)
           .coupon(coupon)
           .referer(coupon.flatMap(_.agency.obj))
           .saveMe
@@ -120,8 +121,7 @@ object CheckoutService {
     couponCode: String,
     petPrices: List[Price],
     coupon: Box[Coupon],
-    stripeToken: Box[String],
-    stripePaymentMethod: Box[String],
+    stripeToken: String,
     email: String,
     taxRate: Double
   ) = {
@@ -141,25 +141,21 @@ object CheckoutService {
 
     val promoCoupon = if (fiveDollarPromo) Empty else coupon
 
-    val stripeCustomer = {
-      Customer.createWithSubscription(
-        email,
-        stripeToken,
-        stripePaymentMethod,
-        taxRate,
-        promoCoupon,
-        subscriptionItems.toList
-      )
-    }
-
-    stripeCustomer
+    Customer.createWithSubscription(
+      email,
+      stripeToken,
+      taxRate,
+      promoCoupon,
+      subscriptionItems.toList
+    )
   }
 
-  def updateSessionVars(petCount: Int, monthlyTotal: BigDecimal, todayTotal: BigDecimal) = {
+  def updateSessionVars(petCount: Int, monthlyTotal: BigDecimal, todayTotal: BigDecimal, needAccountSetup: Boolean) = {
     PetFlowChoices.petCount(Full(petCount))
     PetFlowChoices.cart(mutable.LinkedHashMap.empty)
     PetFlowChoices.monthlyTotal(Full(monthlyTotal))
     PetFlowChoices.todayTotal(Full(todayTotal))
+    PetFlowChoices.needAccountSetup(Full(needAccountSetup))
   }
 
   def findPromotionAmount(coupon: Box[Coupon], couponCode: String, subtotal: BigDecimal, pendingPets: List[PendingPet]): BigDecimal = {
@@ -241,6 +237,8 @@ object CheckoutService {
 
     ActionLogService.logAction(signUpActionLog)
     petActionLog.foreach(ActionLogService.logAction)
+
+    updatedUserWithSubscription
   }
 
   def newUserSetup(

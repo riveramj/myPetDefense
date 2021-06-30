@@ -170,13 +170,13 @@ class Checkout extends Loggable {
   def signup(): JsCmd = {
     val (validationErrors, duplicateIpAddress) = validateFields
     if (validationErrors.isEmpty)
-      tryToCreateUser(couponCode, petPrices, coupon, Full(stripeToken), Empty, email, taxRate) match {
+      tryToCreateUser(couponCode, petPrices, coupon, stripeToken, email, taxRate) match {
         case Full(customer) =>
           val address = NewUserAddress(street1, street2, city, state, zip)
-          val userData = NewUserData(email, firstName, lastName, password, address, coupon, ipAddress)
+          val userData = NewUserData(email, firstName, lastName, password, address, coupon, ipAddress, "")
           setupNewUser(customer, pets.values.toList, userData, coupon.map(_.couponCode.get))
 
-          updateSessionVars(petCount, monthlyTotal, todayTotal)
+          updateSessionVars(petCount, monthlyTotal, todayTotal, false)
           S.redirectTo(Success.menu.loc.calcDefaultHref)
         case stripeFailure  => handleStripeFailureOnSignUp(stripeFailure)
       }
