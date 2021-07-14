@@ -71,7 +71,7 @@ class PetDetails extends Loggable {
     products.find(_.size.get == size).map(_.size.get)
   }
 
-  def validateNameBirthday: List[ValidationError] = {
+  def validateNameBirthdaySize: List[ValidationError] = {
     (
       checkEmpty(petName, "#pet-name") ::
         checkEmpty(petMonth, "#pet-month") ::
@@ -82,7 +82,7 @@ class PetDetails extends Loggable {
   }
 
   def validateAndNavigate(url: String): JsCmd = {
-    val validateFields = validateNameBirthday
+    val validateFields = validateNameBirthdaySize
 
     if (validateFields.isEmpty) {
 
@@ -156,7 +156,7 @@ class PetDetails extends Loggable {
   }
 
   def showPlans = {
-    val validateFields = validateNameBirthday
+    val validateFields = validateNameBirthdaySize
 
     if (validateFields.isEmpty) {
       availableBoxTypes = if (chosenPetType.contains(AnimalType.Dog))
@@ -249,6 +249,9 @@ class PetDetails extends Loggable {
     def setPetFlow(animalType: AnimalType.Value) = {
       chosenPetType = Full(animalType)
 
+      if (animalType == AnimalType.Cat)
+        petSize = Full(AnimalSize.CatAllSize)
+
       petDetailsRenderer.map(_.setHtml()).openOr(Noop)
     }
 
@@ -267,18 +270,22 @@ class PetDetails extends Loggable {
 
       ".pet-details [class+]" #> (if (petMissing) "pet-missing" else "") andThen
       ".pet [class+]" #> chosenPetType.map(_.toString.toLowerCase) &
-        ".pet-type *" #> chosenPetType.map(_.toString) &
-        "#pet-name" #> ajaxText(petName, possibleName => {
-          petName = possibleName
+      ".pet .pet-type *" #> chosenPetType.map(_.toString) &
+      ".pet" #> {
+        "#pet-name" #> ajaxText(
+          petName, possibleName => {
+            petName = possibleName
 
-          (
-            chooseCareRenderer.map(_.setHtml()).openOr(Noop) &
-              detailsEnteredRenderer.map(_.setHtml()).openOr(Noop) &
-              careQuestionRenderer.map(_.setHtml()).openOr(Noop)
-            )
-        }) &
+            (
+              chooseCareRenderer.map(_.setHtml()).openOr(Noop) &
+                detailsEnteredRenderer.map(_.setHtml()).openOr(Noop) &
+                careQuestionRenderer.map(_.setHtml()).openOr(Noop)
+              )
+          }
+        ) &
         "#month-container #pet-month" #> monthDropdown &
         "#year-container #pet-year" #> yearDropdown &
+        ".dog-sizes-container" #> ClearNodesIf(chosenPetType.contains(AnimalType.Cat)) andThen
         ".small-dog .weight-number *" #> smallDog.map(_.toString + " lb") &
         ".small-dog #small-dog [onclick]" #> ajaxInvoke(() => chooseSize(smallDog)) &
         ".medium-dog .weight-number *" #> mediumDog.map(_.toString + " lb") &
@@ -292,13 +299,13 @@ class PetDetails extends Loggable {
 
           ".given-pet-name *" #> getPetNameOrType &
           "#choose-care [onclick]" #> ajaxInvoke(() => showPlans)
-        } &
-        ".care-question" #> SHtml.idMemoize { renderer =>
-          careQuestionRenderer = Full(renderer)
-
-          ".given-pet-name *" #> getPetNameOrType
         }
+      } &
+      ".care-question" #> SHtml.idMemoize { renderer =>
+        careQuestionRenderer = Full(renderer)
 
+        ".given-pet-name *" #> getPetNameOrType
+      }
     } &
     ".pet-plans" #> SHtml.idMemoize { renderer =>
       petPlansRenderer = Full(renderer)
@@ -322,7 +329,8 @@ class PetDetails extends Loggable {
         }
       } &
       ".selected-plan-info" #> {
-        ".price span *" #> chosenPlanPrice.map(_.price.get.toString) &
+        val chosenPlanPrice = chosenPlanPrice.map(_.price.get).openOr(0D)
+        ".price span *" #> "$chosenPlanPrice%.2f" &
         ".tag-line *" #> chosenPlanType.map(_ + " tagline")
       } &
       "#choose-plan [onclick]" #> ajaxInvoke(addToCart _)
