@@ -1,6 +1,5 @@
 package com.mypetdefense.model
 
-import com.mypetdefense.service.ReportingService.petlandName
 import com.mypetdefense.util.DateHelper.currentDate
 import com.mypetdefense.util.RandomIdGenerator._
 import net.liftweb.common._
@@ -105,16 +104,7 @@ object Agency extends Agency with LongKeyedMetaMapper[Agency] {
 
   //TODO clean up this
   def getTotalUsers(agencyName: String): List[User] =
-    if (agencyName != "TPP")
-      Agency.find(By(Agency.name, agencyName)).map(_.customers.toList).getOrElse(Nil)
-    else {
-      val puppySpot =
-        Agency.find(By(Agency.name, "PuppySpot")).map(_.customers.toList).getOrElse(Nil)
-      val petland =
-        Agency.find(By(Agency.name, petlandName)).map(Agency.getAllChildrenCustomers).getOrElse(Nil)
-
-      puppySpot ++ petland
-    }
+    Agency.find(By(Agency.name, agencyName)).map(getAllChildrenCustomers).openOr(Nil)
 }
 
 object AgencyType extends Enumeration {
