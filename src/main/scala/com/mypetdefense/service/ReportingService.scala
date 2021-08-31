@@ -103,8 +103,9 @@ object ReportingService extends Loggable {
 
     shipments.filter { shipment =>
       val processDate = shipment.getProcessDateOfShipment
+      val amountPaid = getShipmentAmountPaid(shipment) > 0.0
 
-      (processDate.getYear == year) && (processDate.getMonth == date.getMonth)
+      (processDate.getYear == year) && (processDate.getMonth == date.getMonth) && (amountPaid)
     }
   }
 
@@ -743,12 +744,11 @@ object ReportingService extends Loggable {
 
     val allSubscriptions = totalUsers.getSubscriptions
 
-    val allPaidShipments          = findPaidShipments(allSubscriptions)
-    val paidMonthShipments        = findCurrentMonthProcessedShipments(allPaidShipments, month, year)
+    val shipments = allSubscriptions.flatMap(_.shipments.toList)
+    val paidMonthShipments        = findCurrentMonthProcessedShipments(shipments, month, year)
     val paidMonthPetsShippedCount = getPetCount(paidMonthShipments)
     val paidMonthGrossSales       = totalSalesForShipments(paidMonthShipments)
     val paidMonthCommission       = totalCommissionForSales(paidMonthGrossSales)
-    val discountCount             = (paidMonthPetsShippedCount * BigDecimal(12.99)) - paidMonthGrossSales
 
     AgencyMonthSalesReport(
       year,
@@ -757,7 +757,6 @@ object ReportingService extends Loggable {
       totalCancelledSubscriptions.size,
       paidMonthShipments.size,
       paidMonthPetsShippedCount,
-      discountCount,
       paidMonthGrossSales,
       paidMonthCommission
     )
