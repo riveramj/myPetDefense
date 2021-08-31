@@ -58,7 +58,7 @@ object ReportingService extends Loggable {
     val date = getDateRange(month, year)
 
     val firstDay = Date.from(date.withDayOfMonth(1).atZone(zoneId).toInstant)
-    val lastDay = Date.from(date.withDayOfMonth(1).plusMonths(1).minusDays(1).atZone(zoneId).toInstant)
+    val lastDay = Date.from(date.withDayOfMonth(1).plusMonths(1).atZone(zoneId).toInstant)
 
     Shipment.findAll(
       By_>=(Shipment.dateProcessed, firstDay),
