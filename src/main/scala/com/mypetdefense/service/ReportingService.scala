@@ -54,6 +54,18 @@ object ReportingService extends Loggable {
     filterMailedShipments(shipments)
   }
 
+  def findShipmentsForMonth(month: String, year: Int): List[Shipment] = {
+    val date = getDateRange(month, year)
+
+    val firstDay = Date.from(date.withDayOfMonth(1).atZone(zoneId).toInstant)
+    val lastDay = Date.from(date.withDayOfMonth(1).plusMonths(1).minusDays(1).atZone(zoneId).toInstant)
+
+    Shipment.findAll(
+      By_>=(Shipment.dateProcessed, firstDay),
+      By_<(Shipment.dateProcessed, lastDay)
+    )
+  }
+
   def getPetCount(shipments: List[Shipment]): Int = {
     val lineItems = shipments.flatMap(_.shipmentLineItems)
 
@@ -742,10 +754,8 @@ object ReportingService extends Loggable {
     val newUsersMonth    = findNewCustomersMonth(totalUsers, month, year)
     val netNewUsersMonth = newUsersMonth.filter(_.status.get != Status.Cancelled)
 
-    val allSubscriptions = totalUsers.getSubscriptions
-
-    val shipments = allSubscriptions.flatMap(_.shipments.toList)
-    val paidMonthShipments        = findCurrentMonthProcessedShipments(shipments, month, year)
+    val shipments                 = findShipmentsForMonth(month, year)
+    val paidMonthShipments        = shipments.filter(getShipmentAmountPaid(_) > 0.0)
     val paidMonthPetsShippedCount = getPetCount(paidMonthShipments)
     val paidMonthGrossSales       = totalSalesForShipments(paidMonthShipments)
     val paidMonthCommission       = totalCommissionForSales(paidMonthGrossSales)
