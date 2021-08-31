@@ -104,7 +104,8 @@ object Agency extends Agency with LongKeyedMetaMapper[Agency] {
 
   //TODO clean up this
   def getTotalUsers(agencyName: String): List[User] =
-    Agency.find(By(Agency.name, agencyName)).map(getAllChildrenCustomers).openOr(Nil)
+    //Agency.find(By(Agency.name, agencyName)).map(getAllChildrenCustomers).openOr(Nil)
+    Agency.find(By(Agency.agencyType, AgencyType.Headquarters)).map(getAllChildrenCustomers).openOr(Nil)
 }
 
 object AgencyType extends Enumeration {
