@@ -740,11 +740,10 @@ object ReportingService extends Loggable {
 
     val newUsersMonth    = findNewCustomersMonth(totalUsers, month, year)
     val netNewUsersMonth = newUsersMonth.filter(_.status.get != Status.Cancelled)
-    val payingUsers      = findPayingUsers(totalUsers, month, year)
 
-    val allPayingSubscriptions = payingUsers.getSubscriptions
+    val allSubscriptions = totalUsers.getSubscriptions
 
-    val allPaidShipments          = findPaidShipments(allPayingSubscriptions)
+    val allPaidShipments          = findPaidShipments(allSubscriptions)
     val paidMonthShipments        = findCurrentMonthProcessedShipments(allPaidShipments, month, year)
     val paidMonthPetsShippedCount = getPetCount(paidMonthShipments)
     val paidMonthGrossSales       = totalSalesForShipments(paidMonthShipments)
