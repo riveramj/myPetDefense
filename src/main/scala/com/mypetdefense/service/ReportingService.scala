@@ -759,6 +759,8 @@ object ReportingService extends Loggable {
       shipments.filter { shipment =>
         shipment.subscription.obj.map(_.priceCode.get).contains(Price.currentTppPriceCode)
       }
+    } else if (name == "All") {
+      shipments
     } else {
       shipments.filter { shipment =>
         !shipment.subscription.obj.map(_.priceCode.get).contains(Price.currentTppPriceCode)
