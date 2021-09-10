@@ -77,6 +77,25 @@ object ReportingService extends Loggable {
     }).size
   }
 
+  def totalSalesForShipmentsForCommisionReport(shipments: List[Shipment]): BigDecimal = {
+    val shipmentsByType = shipments.groupBy { shipment =>
+      val shipmentItems = shipment.shipmentLineItems.toList
+      if (shipmentItems.intersect(Product.allDentalPowderForDogs).nonEmpty)
+        "HW"
+      else
+        "FT"
+    }
+    (shipmentsByType.map { case (typeName, typedShipments) =>
+      if(typeName == "FT")
+        typedShipments.map { shipment => getShipmentAmountPaid(shipment) }.foldLeft(BigDecimal(0d))(_ + _)
+      else
+        typedShipments.map { shipment =>
+          val fleaTick = shipment.shipmentLineItems.toList.flatMap(_.fleaTick.obj)
+          fleaTick.size * BigDecimal(12.99)
+        }.sum
+    }).sum
+  }
+
   def totalSalesForShipments(shipments: List[Shipment]): BigDecimal = {
     shipments.map { shipment => getShipmentAmountPaid(shipment) }.foldLeft(BigDecimal(0d))(_ + _)
   }
@@ -768,7 +787,7 @@ object ReportingService extends Loggable {
     }
     val paidMonthShipments        = agencyShipments.filter(getShipmentAmountPaid(_) > 0.0)
     val paidMonthPetsShippedCount = getPetCount(paidMonthShipments)
-    val paidMonthGrossSales       = totalSalesForShipments(paidMonthShipments)
+    val paidMonthGrossSales       = totalSalesForShipmentsForCommisionReport(paidMonthShipments)
     val paidMonthCommission       = totalCommissionForSales(paidMonthGrossSales)
 
     AgencyMonthSalesReport(
