@@ -25,7 +25,11 @@ object LegacyAgencyOverview extends Loggable {
       val tokens = monthYearAgency.split(" ")
       val month = tokens(0)
       val year  = tokens(1)
-      val agency = tokens(2)
+      val agency = if (tokens.size == 2)
+        "TPP"
+      else
+        tokens(2)
+
       ReportingService.exportAgencyMonthSales(agency, month, year)
     }
   }
@@ -112,10 +116,9 @@ class LegacyAgencyOverview extends Loggable {
       ".april-2021 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("April 2021") &
       ".may-2021 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("May 2021") &
       ".june-2021 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("June 2021") &
-      ".july-2021-tpp [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("July 2021 TPP") &
-      ".july-2021-mpd [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("July 2021 MPD") &
-      ".july-2021-all [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("July 2021 All") &
+      ".july-2021 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("July 2021") &
       ".august-2021 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("August 2021") &
+      ".september-2021 [href]" #> LegacyAgencyOverview.exportTPPMontSalesMenu.calcHref("September 2021") &
       ".month-to-date-export [href]" #> LegacyAgencyOverview.agencyMtdYtdExportMenu.calcHref(
         agencyName
       )
