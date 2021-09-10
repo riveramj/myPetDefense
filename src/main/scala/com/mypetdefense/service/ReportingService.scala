@@ -78,11 +78,10 @@ object ReportingService extends Loggable {
   }
 
   def totalSalesForShipmentsForCommissionReport(shipments: List[Shipment]): BigDecimal = {
-    val dentalProduts = Product.allDentalPowderForDogs
+    val dentalProducts = Product.allDentalPowderForDogs
     val shipmentsByType = shipments.groupBy { shipment =>
-      val shipmentItems = shipment.shipmentLineItems.toList
-      if (shipmentItems.intersect(dentalProduts).nonEmpty) {
-        println("HW")
+      val shipmentItems = shipment.shipmentLineItems.toList.flatMap(_.product.obj)
+      if (shipmentItems.intersect(dentalProducts).nonEmpty) {
         "HW"
       } else
         "FT"
