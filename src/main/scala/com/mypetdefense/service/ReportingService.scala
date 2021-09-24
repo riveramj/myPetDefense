@@ -679,7 +679,7 @@ object ReportingService extends Loggable {
 
   def subscriptionRetentionReport(
       lastPeriod: RetentionPeriod = RetentionPeriod.current(),
-      periodsCount: Int = 12
+      periodsCount: Int = 36
   ): SubscriptionRetentionReport = {
     val firstPeriod     = lastPeriod - (periodsCount - 1)
     val afterLastPeriod = lastPeriod.next
