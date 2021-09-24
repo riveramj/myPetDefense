@@ -656,7 +656,7 @@ object ReportingService extends Loggable {
 
   def subscriptionRetentionCsv(
       lastPeriod: RetentionPeriod = RetentionPeriod.current(),
-      periodsCount: Int = 12
+      periodsCount: Int = 36
   ): Box[InMemoryResponse] = {
     val data     = subscriptionRetentionReport(lastPeriod, periodsCount)
     val fileName = s"subscription-retention-${LocalDate.now()}.csv"
