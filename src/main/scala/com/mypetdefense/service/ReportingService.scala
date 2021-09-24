@@ -683,12 +683,12 @@ object ReportingService extends Loggable {
   ): SubscriptionRetentionReport = {
     val firstPeriod     = lastPeriod - (periodsCount - 1)
     val afterLastPeriod = lastPeriod.next
-    val hwPriceCode = Props.get("default.price.code").openOr("")
+    val ftPriceCode = Props.get("tpp.price.code").openOr("")
 
     val subs = Subscription.findAll(
       By_>=(Subscription.startDate, firstPeriod.startDate),
       By_<(Subscription.startDate, afterLastPeriod.startDate),
-      By(Subscription.priceCode, hwPriceCode)
+      By(Subscription.priceCode, ftPriceCode)
     )
 
     val periods        = (0 until periodsCount).reverse.map(lastPeriod - _).toList
