@@ -35,6 +35,7 @@ case class PetRemovedEmail(user: User, pet: Pet)                    extends Emai
 case class BillingUpdatedEmail(user: User)                          extends EmailActorMessage
 case class AccountCancelledEmail(user: User)                        extends EmailActorMessage
 case class ParentCancelledAccountEmail(user: User)                  extends EmailActorMessage
+case class ActiveParentShutdownEmail(user: User)                    extends EmailActorMessage
 case class ParentPauseSubscriptionEmail(user: User, subscription: Subscription)
     extends EmailActorMessage
 case class ParentResumeSubscriptionEmail(user: User, subscription: Subscription)
@@ -234,6 +235,21 @@ trait ParentCancelledAccountHandling extends EmailHandlerChain {
       val transform = {
         ".name *" #> user.firstName.get &
           "#email *" #> user.email.get
+      }
+
+      sendEmail(subject, user.email.get, transform(template))
+  }
+}
+
+trait ActiveParentShutdownEmailHandling extends EmailHandlerChain {
+  addHandler {
+    case ActiveParentShutdownEmail(user) =>
+      val subject = "It's time to say goodbye :-("
+      val template =
+        Templates("emails-hidden" :: "shutdown-email" :: Nil) openOr NodeSeq.Empty
+
+      val transform = {
+        "#email *" #> user.email.get
       }
 
       sendEmail(subject, user.email.get, transform(template))
@@ -1059,6 +1075,7 @@ trait EmailActor
     with BillingUpdatedHandling
     with AccountCancelledHandling
     with ParentCancelledAccountHandling
+    with ActiveParentShutdownEmailHandling
     with ParentPauseSubscriptionHandling
     with ParentResumeSubscriptionHandling
     with SendNewAdminEmailHandling

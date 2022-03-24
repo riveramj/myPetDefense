@@ -1,5 +1,6 @@
 package bootstrap.liftweb
 
+import com.mypetdefense.actor.{BootJobActor, EmailCustomersShutdownCancel}
 import com.mypetdefense.jobs.JobManager
 import com.mypetdefense.snippet._
 import com.mypetdefense.util._
@@ -88,6 +89,8 @@ class Boot {
     LiftRules.statelessDispatch.append(TPPApi)
 
     //BootJobActor ! MigrateStripeProducts
+
+    BootJobActor ! EmailCustomersShutdownCancel
   }
 
   //Bundles
