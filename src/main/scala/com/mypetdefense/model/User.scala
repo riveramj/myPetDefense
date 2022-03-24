@@ -89,7 +89,7 @@ class User extends LongKeyedMapper[User] with IdPK with OneToMany[Long, User] {
       this.lastName.get,
       this.email.get,
       address,
-      this.userId.get
+      this.userId.get.toString.takeRight(99).toLong
     )
 
     this
