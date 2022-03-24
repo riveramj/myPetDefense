@@ -89,13 +89,9 @@ object ParentService extends LoggableBoxLogging {
     val stripeCustomerId = user.stripeId.get
 
     val subscription = user.subscription.obj
-    val paidOpenShipments = subscription
-      .map(_.shipments.toList)
-      .openOr(Nil)
-      .filter(_.shipmentStatus.get == ShipmentStatus.Paid)
     val addresses = user.addresses.toList
 
-    cancelOpenOrders(oldUser)
+    //cancelOpenOrders(oldUser)
 
     val deletedCustomer =
       StripeFacade.Customer
@@ -119,7 +115,7 @@ object ParentService extends LoggableBoxLogging {
           }
         } else {
           user.cancel
-          paidOpenShipments.map(shipment => refundShipment(shipment, Full(user)))
+          //paidOpenShipments.map(shipment => refundShipment(shipment, Full(user)))
           addresses.map(_.cancel)
           ActionLogService.logAction(actionLog)
 
@@ -129,7 +125,7 @@ object ParentService extends LoggableBoxLogging {
 
       case _ =>
         user.cancel
-        paidOpenShipments.map(shipment => refundShipment(shipment, Full(user)))
+        //paidOpenShipments.map(shipment => refundShipment(shipment, Full(user)))
         addresses.map(_.cancel)
         subscription.map(_.cancel)
 
