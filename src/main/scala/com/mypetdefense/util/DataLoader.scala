@@ -899,7 +899,9 @@ object DataLoader extends Loggable {
       ParentService.removeParent(parent, actionLog = actionLog) match {
         case Full(_) =>
           EmailActor ! ParentCancelledAccountEmail(parent)
+          println("cancelled: " + parent.email.get)
         case _ =>
+          println("failed to cancel: " + parent.email.get)
           Alert("An error has occured. Please try again.")
       }
     }
