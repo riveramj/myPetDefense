@@ -887,6 +887,7 @@ object DataLoader extends Loggable {
     for {
       subscription <- Subscription.allNonCancelledUsers
       parent <- subscription.user.obj
+      _ = println(s"reading: ${parent.email.get} - ${parent.id.get} - ${subscription.id.get}")
     } yield {
       EmailActor ! ActiveParentShutdownEmail(parent)
 
