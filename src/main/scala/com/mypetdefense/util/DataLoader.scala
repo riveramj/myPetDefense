@@ -1,12 +1,15 @@
 package com.mypetdefense.util
 
+import com.mypetdefense.actor.{ActiveParentShutdownEmail, EmailActor, ParentCancelledAccountEmail}
 import com.mypetdefense.model.Agency.getHQFor
 import com.mypetdefense.model._
+import com.mypetdefense.model.domain.action.SystemAction.SystemCanceledAccount
 import com.mypetdefense.service.ParentService.updateStripeSubscriptionTotal
 import com.mypetdefense.service._
 import com.mypetdefense.util.RandomIdGenerator.generateLongId
 import net.liftweb.common.Box.tryo
 import net.liftweb.common._
+import net.liftweb.http.js.JsCmds.Alert
 import net.liftweb.mapper._
 
 import java.text.SimpleDateFormat
@@ -878,6 +881,30 @@ object DataLoader extends Loggable {
   def migrateToStripeProducts =
     User.findAll(By(User.userType, UserType.Parent), By(User.status, Status.Active))
       .foreach(updateStripeSubscriptionTotal)
+
+  def EmailUsersShutdownCancel = {
+    for {
+      subscription <- Subscription.activeSubscriptions
+      parent <- subscription.user.obj
+    } yield {
+      EmailActor ! ActiveParentShutdownEmail(parent)
+
+      val actionLog = SystemCanceledAccount(
+        parent.userId.get,
+        None,
+        parent.subscription.obj.map(_.subscriptionId.get).openOr(0L)
+      )
+
+      ParentService.removeParent(parent, actionLog = actionLog) match {
+        case Full(_) =>
+          EmailActor ! ParentCancelledAccountEmail(parent)
+        case _ =>
+          Alert("An error has occured. Please try again.")
+      }
+    }
+
+
+  }
 
   def createFiveDollarPrices = {
     if (Price.findAll(By(Price.code, Price.fiveDollarBox)).isEmpty) {
