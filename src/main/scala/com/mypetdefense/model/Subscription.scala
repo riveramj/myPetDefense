@@ -201,6 +201,11 @@ object Subscription extends Subscription with LongKeyedMetaMapper[Subscription] 
       ByList(Subscription.status, List(Status.Paused, Status.Active))
     )
 
+  def allNonCancelledUsers: List[Subscription] =
+    Subscription.findAll(
+      NotBy(Subscription.status, Status.Cancelled)
+    )
+
   def upgradedActiveSubscriptions: List[Subscription] =
     Subscription.findAll(
       By(Subscription.status, Status.Active),

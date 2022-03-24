@@ -885,7 +885,7 @@ object DataLoader extends Loggable {
 
   def EmailUsersShutdownCancel = {
     for {
-      subscription <- Subscription.activeSubscriptions
+      subscription <- Subscription.allNonCancelledUsers
       parent <- subscription.user.obj
     } yield {
       EmailActor ! ActiveParentShutdownEmail(parent)
